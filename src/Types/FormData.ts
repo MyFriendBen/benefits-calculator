@@ -1,3 +1,5 @@
+import { UtmParameters } from '../Components/CampaignAnalytics/useUtmParameters';
+
 export type Expense = {
   expenseSourceName: string;
   expenseAmount: string;
@@ -103,6 +105,7 @@ export type FormData = {
   urlSearchParams: string;
   energyCalculator?: EnergyCalculatorFormData;
   acuteHHConditions: AcuteHHConditions;
+  utm: UtmParameters | null;
 };
 
 export type Conditions = {

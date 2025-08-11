@@ -15,6 +15,7 @@ import { useContext } from 'react';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { useParams } from 'react-router-dom';
 import { useUpdateFormData } from './updateFormData';
+import { getCampaign } from '../Components/CampaignAnalytics/campaign';
 
 const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: string) => {
   const householdMembers = getHouseholdMembersBodies(formData);
@@ -98,6 +99,12 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     needs_dental_care: formData.acuteHHConditions.dentalCare ?? null,
     needs_legal_services: formData.acuteHHConditions.legalServices ?? null,
     needs_veteran_services: formData.acuteHHConditions.veteranServices ?? null,
+    utm_id: formData.utm?.id ?? null,
+    utm_source: formData.utm?.source ?? null,
+    utm_medium: formData.utm?.medium ?? null,
+    utm_campaign: formData.utm?.campaign ?? null,
+    utm_content: formData.utm?.content ?? null,
+    utm_term: formData.utm?.term ?? null,
   };
 
   return screenBody;
@@ -232,7 +239,11 @@ export default function useScreenApi() {
       updateFormData(updatedFormData);
     },
     createScreen: async (formData: FormData) => {
-      const newFormData = await postScreen(getScreensBody(formData, locale, whiteLabel));
+      const extendedFormData = {
+        ...formData,
+        utm: getCampaign(),
+      };
+      const newFormData = await postScreen(getScreensBody(extendedFormData, locale, whiteLabel));
       updateFormData(newFormData);
       return newFormData;
     },
