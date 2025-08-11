@@ -191,12 +191,10 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   useEffect(() => {
     if (!referrerData) return;
-    const defaultLang = getReferrer('defaultLanguage', 'en-us');
-    const theme = getReferrer('theme', 'default');
-
-    const isCobrand = theme !== 'default';
-    if (isCobrand && defaultLang !== 'en-us') {
-      setLocale(defaultLang as Language);
+    const defaultLanguage = getReferrer('defaultLanguage', 'en-us');
+    
+    if (defaultLanguage !== 'en-us') {
+      setLocale(defaultLanguage as Language);
     }
   }, [referrerData]);
 
