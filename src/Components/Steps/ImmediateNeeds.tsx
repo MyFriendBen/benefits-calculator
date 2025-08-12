@@ -56,7 +56,7 @@ function ImmediateNeeds() {
       </QuestionHeader>
       <QuestionQuestion>
         <FormattedMessage
-          id="acuteHHConditions"
+          id="questions.acuteHHConditions"
           defaultMessage="Do you want / need information on any of the following resources?"
         />
       </QuestionQuestion>
