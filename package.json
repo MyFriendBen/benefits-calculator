@@ -57,6 +57,7 @@
     "test:e2e:report": "playwright show-report",
     "test:e2e:visual": "playwright test --project=debug --ui",
     "test:readability": "playwright test -c playwright.readability.config.ts tests/screen-data-readability.spec.ts --project=chromium",
+    "test:readability:all": "playwright test -c playwright.readability.config.ts --project=chromium",
     "test:readability:report": "playwright show-report"
   },
   "eslintConfig": {

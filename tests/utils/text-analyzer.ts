@@ -1,4 +1,3 @@
-import textReadability from 'text-readability';
 
 export function getWordCount(texts: string[] | string): number {
   if (Array.isArray(texts)) {
@@ -123,49 +122,54 @@ export function fleschKincaidReadingEase(texts: string[] | string): number {
          84.6 * (syllables / words.length);
 }
 
+// Approximate Dale–Chall using a heuristic for "difficult" words without the full word list
 export function daleChallReadabilityScore(text: string): number {
-  if (isShortText(text)) return 1; // Default to easy
-  try {
-    return textReadability.daleChallReadabilityScore(text);
-  } catch {
-    return 0;
-  }
+  if (isShortText(text)) return 1;
+  const words = text.split(/\s+/).filter(Boolean);
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length || 1;
+  const difficult = words.filter(w => countSyllables(w) >= 3 || w.replace(/[^a-zA-Z]/g, '').length >= 8).length;
+  const difficultPct = (difficult / words.length) * 100;
+  let score = 0.1579 * difficultPct + 0.0496 * (words.length / sentences);
+  if (difficultPct > 5) score += 3.6365;
+  return Number.isFinite(score) ? score : 0;
 }
 
 export function automatedReadabilityIndex(text: string): number {
   if (isShortText(text)) return 1;
-  try {
-    return textReadability.automatedReadabilityIndex(text);
-  } catch {
-    return 0;
-  }
+  const words = text.split(/\s+/).filter(Boolean).length || 1;
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length || 1;
+  const characters = text.replace(/\s+/g, '').length;
+  const score = 4.71 * (characters / words) + 0.5 * (words / sentences) - 21.43;
+  return Number.isFinite(score) ? score : 0;
 }
 
 export function colemanLiauIndex(text: string): number {
   if (isShortText(text)) return 1;
-  try {
-    return textReadability.colemanLiauIndex(text);
-  } catch {
-    return 0;
-  }
+  const letters = (text.match(/[A-Za-z]/g) || []).length;
+  const words = text.split(/\s+/).filter(Boolean).length || 1;
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length || 1;
+  const L = (letters / words) * 100; // average letters per 100 words
+  const S = (sentences / words) * 100; // average sentences per 100 words
+  const score = 0.0588 * L - 0.296 * S - 15.8;
+  return Number.isFinite(score) ? score : 0;
 }
 
 export function gunningFog(text: string): number {
   if (isShortText(text)) return 1;
-  try {
-    return textReadability.gunningFog(text);
-  } catch {
-    return 0;
-  }
+  const wordsArr = text.split(/\s+/).filter(Boolean);
+  const words = wordsArr.length || 1;
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length || 1;
+  const complex = wordsArr.filter(w => countSyllables(w) >= 3).length;
+  const score = 0.4 * ((words / sentences) + (100 * (complex / words)));
+  return Number.isFinite(score) ? score : 0;
 }
 
 export function smogIndex(text: string): number {
   if (isShortText(text)) return 1;
-  try {
-    return textReadability.smogIndex(text);
-  } catch {
-    return 0;
-  }
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length || 1;
+  const polysyllabic = text.split(/\s+/).filter(Boolean).filter(w => countSyllables(w) >= 3).length;
+  const score = 1.0430 * Math.sqrt((polysyllabic * (30 / sentences))) + 3.1291;
+  return Number.isFinite(score) ? score : 0;
 }
 
 // Add Spanish syllable counter
