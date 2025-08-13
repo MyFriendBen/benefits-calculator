@@ -7,7 +7,7 @@ import { z } from 'zod';
 import InformationalText from '../../Common/InformationalText/InformationalText';
 import { FormData } from '../../../Types/FormData';
 import { FormattedMessageType } from '../../../Types/Questions';
-import { useConfig } from '../../Config/configHook';
+import { useConfig, useLocalizedLink } from '../../Config/configHook';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
@@ -29,6 +29,8 @@ function SignUp() {
   const { formatMessage } = useIntl();
   const backNavigationFunction = useDefaultBackNavigationFunction('signUpInfo');
   const signUpOptions = useConfig<{ [key: string]: FormattedMessageType }>('sign_up_options');
+  const privacyPolicyLink = useLocalizedLink('privacy_policy');
+  const consentToContactLink = useLocalizedLink('consent_to_contact');
 
   const contactInfoSchema = z
     .object({
@@ -395,7 +397,19 @@ function SignUp() {
                         <div className="sign-up-text">
                           <FormattedMessage
                             id="signUp.displayDisclosureSection.tcpa"
-                            defaultMessage="I consent to MyFriendBen and its affiliates contacting me via text message to offer additional programs or opportunities that may be of interest to me and my family, for marketing purposes, updates and alerts, and to solicit feedback. I understand that the frequency of these text messages may vary, and that standard message and data costs may apply. I understand that I may opt-out of receiving these text messages at any time by replying “STOP” to unsubscribe."
+                            defaultMessage="I consent to MyFriendBen and its affiliates contacting me via text message to offer additional programs or opportunities that may be of interest to me and my family, for marketing purposes, updates and alerts, and to solicit feedback. I understand that the frequency of these text messages may vary, and that standard message and data costs may apply. Reply HELP for help and STOP to end. View our <tos>Terms of Service</tos> and <privacy>Privacy Policy</privacy>."
+                            values={{
+                              tos: (chunks: any) => (
+                                <a href={consentToContactLink} target="_blank" rel="noopener noreferrer"  className="link-color">
+                                  {chunks}
+                                </a>
+                              ),
+                              privacy: (chunks: any) => (
+                                <a href={privacyPolicyLink} target="_blank" rel="noopener noreferrer" className="link-color">
+                                  {chunks}
+                                </a>
+                              ),
+                            }}
                           />
                         </div>
                       }
