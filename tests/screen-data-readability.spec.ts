@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import { collectPageTexts } from './utils/page-text-collector';
+import { collectPageTexts } from './helpers/utils/page-text-collector';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
@@ -30,7 +30,7 @@ import {
   getWordCount,
   getLongestSentence,
   getPassiveVoice
-} from './utils/text-analyzer';
+} from './helpers/utils/text-analyzer';
 
 interface ReadabilityMetrics {
   pageName: string;

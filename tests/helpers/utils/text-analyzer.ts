@@ -100,8 +100,7 @@ export function fleschKincaidGrade(texts: string[] | string, language: 'en' | 'e
   const sentences = text.split(/[.!?]+/).filter(sent => sent.trim().length > 0);
   const syllables = words.reduce((count, word) => count + countSyllables(word), 0);
   
-  if (words.length === 0 || sentences.length === 0) return 0;
-  
+  if (words.length === 0 || sentences.length === 0) return 0;  
   // Flesch-Kincaid Grade Level formula
   return 0.39 * (words.length / sentences.length) + 
          11.8 * (syllables / words.length) - 15.59;

@@ -77,7 +77,6 @@ export async function collectAllPageTexts(page: Page, steps: { url: string | Reg
       await action(page);
     }
   }
-
   return pageTexts;
 }
 
