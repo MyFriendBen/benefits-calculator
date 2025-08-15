@@ -15,9 +15,25 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['html'], ['json', { outputFile: 'results.json' }], ['list']],
+
+  /* Global test configuration */
+  timeout: 60000, // 1 minute default timeout
+  expect: {
+    timeout: 15000, // 15 seconds for assertions
+  },
+
   // See https://playwright.dev/docs/api/class-testoptions
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
+
+    /* Default viewport - desktop size for consistent testing */
+    viewport: { width: 1440, height: 900 },
+
+    /* Navigation timeout */
+    navigationTimeout: 30000,
+
+    /* Action timeout */
+    actionTimeout: 15000,
     headless: !!process.env.CI,
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',

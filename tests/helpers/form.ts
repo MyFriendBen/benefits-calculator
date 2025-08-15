@@ -84,8 +84,14 @@ export async function selectDate(page: Page, month: string, year: string): Promi
           console.log(`[FORM] ${context} selection attempt ${attempt}/${maxRetries}`);
         }
 
-        // Click the dropdown button
-        const button = page.getByRole('button', { name: buttonName });
+        // Click the dropdown button with more specific targeting to avoid conflicts
+        let button;
+        if (buttonName === 'Open') {
+          // For birth year dropdown, be more specific to avoid hamburger menu conflict
+          button = page.locator('.age-input-container').getByRole('button', { name: 'Open' }).first();
+        } else {
+          button = page.getByRole('button', { name: buttonName });
+        }
         await button.waitFor({ state: 'visible', timeout: renderTimeout });
         await button.click();
 

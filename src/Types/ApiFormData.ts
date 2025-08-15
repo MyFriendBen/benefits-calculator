@@ -216,4 +216,10 @@ export type ApiFormData = {
   needs_dental_care: boolean | null;
   needs_legal_services: boolean | null;
   needs_veteran_services: boolean | null;
+  utm_id: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_content: string | null;
+  utm_term: string | null;
 };

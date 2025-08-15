@@ -64,3 +64,27 @@ export async function verifyCurrentUrl(
 export async function saveResults(page: Page): Promise<void> {
   await page.getByRole(BUTTONS.SAVE_RESULTS.role, { name: BUTTONS.SAVE_RESULTS.name }).click();
 }
+
+/**
+ * NC 211 specific navigation helpers
+ */
+
+/**
+ * Navigates to the NC 211 workflow with referrer parameter
+ * @param page - Playwright page instance
+ * @param referrer - Referrer parameter (e.g., '211nc')
+ */
+export async function navigateToNC211Workflow(page: Page, referrer: string = '211nc'): Promise<void> {
+  await page.goto(`/nc/step-1?referrer=${referrer}`);
+}
+
+/**
+ * Verifies that the current URL contains the referrer parameter
+ * @param page - Playwright page instance
+ * @param referrer - Expected referrer parameter
+ * @param timeoutMs - Optional timeout in milliseconds (defaults to 15000ms)
+ */
+export async function verifyReferrerUrl(page: Page, referrer: string, timeoutMs: number = 15000): Promise<void> {
+  const urlPattern = new RegExp(`[?&]referrer=${referrer}`);
+  await expect(page).toHaveURL(urlPattern, { timeout: timeoutMs });
+}

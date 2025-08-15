@@ -19,7 +19,7 @@ const ResultsTabs = () => {
   return (
     <Grid container className="results-tab-container">
       <Grid item xs={6} className="results-tab">
-        <NavLink to={benefitsLink} className={({ isActive }) => (isActive ? 'active' : '')}>
+        <NavLink to={benefitsLink} className={({ isActive }) => (isActive ? 'active' : '')} data-testid="long-term-benefits-tab">
           <h1 style={{ fontSize: '1rem' }}>
             <FormattedMessage id="resultsOptions.longTermBenefits" defaultMessage="Long-Term Benefits " />(
             {translateNumber(programs.length)})
@@ -27,7 +27,7 @@ const ResultsTabs = () => {
         </NavLink>
       </Grid>
       <Grid item xs={6} className="results-tab">
-        <NavLink to={needsLink} className={({ isActive }) => (isActive ? 'active' : '')}>
+        <NavLink to={needsLink} className={({ isActive }) => (isActive ? 'active' : '')} data-testid="near-term-benefits-tab">
           <h1 style={{ fontSize: '1rem' }}>
             <FormattedMessage id="resultsOptions.nearTermBenefits" defaultMessage="Additional Resources " />(
             {translateNumber(needs.length)})

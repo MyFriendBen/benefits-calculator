@@ -2,32 +2,26 @@
  * Index - Export all helpers
  *
  * This file exports all helper functions and utilities to allow for
- * cleaner imports in test files.
+ * cleaner imports in test files. Organized by category for better maintainability.
  */
 
-// Export navigation helpers
+// Core helpers (used across all tests)
 export * from './navigation';
-
-// Export form interaction helpers
 export * from './form';
-
-// Export selector constants
 export * from './selectors';
-
-// Export assertion helpers
 export * from './assertions';
+export * from './results';
+export * from './navigation-menu';
 
-// Export utility constants
+// Utility constants and test data
 export * from './utils/constants';
-
-// Export test data
 export * from './utils/test-data';
+export * from './utils/test-config';
 
-// Export flow types
+// Flow helpers for complex user journeys
 export * from './flows/types';
-
-// Export common flow helpers
 export * from './flows/common';
-
-// Export white-label specific helpers
 export * from './flows/nc';
+export * from './flows/nc-211';
+
+

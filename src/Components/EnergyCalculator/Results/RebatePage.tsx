@@ -3,7 +3,7 @@ import { FormattedMessage } from 'react-intl';
 import BackAndSaveButtons from '../../Results/BackAndSaveButtons/BackAndSaveButtons';
 import { useResultsLink } from '../../Results/Results';
 import { EnergyCalculatorRebateCalculator, EnergyCalculatorRebateCardTitle, rebateTypes } from './RebatePageMappings';
-import { ReactComponent as Housing } from '../../../Assets/icons/Programs/CategoryHeading/housing.svg';
+import { ReactComponent as Housing } from '../../../Assets/icons/General/residence.svg';
 import { renderCategoryDescription } from './rebateTypes';
 import './RebatePage.css';
 import { useMemo } from 'react';

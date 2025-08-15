@@ -6,7 +6,7 @@ import { ReactComponent as Household } from '../../Assets/icons/General/househol
 import { ReactComponent as Expense } from '../../Assets/icons/General/expenses.svg';
 import { ReactComponent as Resources } from '../../Assets/icons/General/resources.svg';
 import { ReactComponent as Benefits } from '../../Assets/icons/General/benefits.svg';
-import { ReactComponent as Immediate } from '../../Assets/icons/General/immediate.svg';
+import { ReactComponent as Immediate } from '../../Assets/icons/General/alert.svg';
 import { ReactComponent as Referral } from '../../Assets/icons/General/referral.svg';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useTranslateNumber } from '../../Assets/languageOptions';

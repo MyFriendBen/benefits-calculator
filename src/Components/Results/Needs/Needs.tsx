@@ -20,7 +20,7 @@ const Needs = () => {
   const immediateNeedsLink = useResultsLink('step-9');
 
   return (
-    <>
+    <div data-testid="needs-section">
       <ResultsMessageForNeeds />
       <InformationalText>
         <FormattedMessage
@@ -38,7 +38,7 @@ const Needs = () => {
       {needsSortedByCategory.map((need, index) => {
         return <NeedCard need={need} key={index} />;
       })}
-    </>
+    </div>
   );
 };
 

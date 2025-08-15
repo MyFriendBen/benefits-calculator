@@ -13,7 +13,7 @@ import { ReactComponent as Chp } from '../../Assets/icons/General/OptionCard/Hea
 import { ReactComponent as Dont_know } from '../../Assets/icons/General/OptionCard/HealthInsurance/dont_know.svg';
 import { ReactComponent as Emergency_medicaid } from '../../Assets/icons/General/OptionCard/HealthInsurance/emergency_medicaid.svg';
 import { ReactComponent as Employer } from '../../Assets/icons/General/OptionCard/HealthInsurance/employer.svg';
-import { ReactComponent as Family_planning } from '../../Assets/icons/General/OptionCard/HealthInsurance/family_planning.svg';
+import { ReactComponent as Family_planning } from '../../Assets/icons/UrgentNeeds/AcuteConditions/family_planning.svg';
 import { ReactComponent as Medicaid } from '../../Assets/icons/General/OptionCard/HealthInsurance/medicaid.svg';
 import { ReactComponent as Medicare } from '../../Assets/icons/General/OptionCard/HealthInsurance/medicare.svg';
 import { ReactComponent as None } from '../../Assets/icons/General/OptionCard/HealthInsurance/none.svg';
