@@ -189,13 +189,13 @@ const renderSharedHeatPumpContent = () => {
     <>
       <p className="energy-calculator-p-spacing">
         <FormattedMessage
-          id="co.energy.heat_pump_common_p1"
+          id="co.energy.heat_pump_other_p1"
           defaultMessage="You may qualify for savings on the cost of a heat pump for your home heating, ventilation, and/or cooling system. Heat pumps reduce your carbon footprint, allow you to remove a furnace that burns gas inside your home, and increase comfort, among other benefits. There are numerous combinations or 'stacking' possibilities for heat pump rebates. A trusted contractor can help you maximize your rebate possibilities."
         />
       </p>
       <p className="energy-calculator-p-spacing">
         <FormattedMessage
-          id="co.energy.heat_pump_common_p2"
+          id="co.energy.heat_pump_other_p2"
           defaultMessage="Learn more about heat pumps, including upfront costs, ongoing costs, average life span, and how to initiate a project in this {heatPumpGuide}, from our partners at {rewiringAmerica}."
           values={{
             heatPumpGuide: (
