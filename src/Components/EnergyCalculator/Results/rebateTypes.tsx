@@ -1,7 +1,9 @@
 // NOTE: source: https://github.com/rewiringamerica/embed.rewiringamerica.org/blob/main/src/api/calculator-types-v1.ts
 import { FormattedMessage } from 'react-intl';
+import { FormData } from '../../../Types/FormData';
 import { FormattedMessageType } from '../../../Types/Questions';
 import TrackedOutboundLink from '../../Common/TrackedOutboundLink/TrackedOutboundLink';
+import { EFFICIENCY_WORKS_PROVIDERS, XCEL_PROVIDER } from '../providers';
 
 export type EnergyCalculatorIncentiveType =
   | 'tax_credit'
@@ -162,7 +164,166 @@ export type EnergyCalculatorRebateCategory = {
   rebates: EnergyCalculatorRebate[];
 };
 
-export const renderCategoryDescription = (rebateType: EnergyCalculatorRebateCategoryType) => {
+// Helper function to determine provider type for heat pump content
+const getHeatPumpProviderType = (formData: FormData | undefined): 'xcel' | 'efficiency_works' | 'other' => {
+  const electricProvider = formData?.energyCalculator?.electricProvider;
+
+  if (!electricProvider) {
+    return 'other';
+  }
+
+  if (electricProvider === XCEL_PROVIDER) {
+    return 'xcel';
+  }
+
+  if (EFFICIENCY_WORKS_PROVIDERS.includes(electricProvider)) {
+    return 'efficiency_works';
+  }
+
+  return 'other';
+};
+
+// Common heat pump content shared across all providers
+const renderSharedHeatPumpContent = () => {
+  return (
+    <>
+      <p className="energy-calculator-p-spacing">
+        <FormattedMessage
+          id="co.energy.heat_pump_other_p1"
+          defaultMessage="You may qualify for savings on the cost of a heat pump for your home heating, ventilation, and/or cooling system. Heat pumps reduce your carbon footprint, allow you to remove a furnace that burns gas inside your home, and increase comfort, among other benefits. There are numerous combinations or 'stacking' possibilities for heat pump rebates. A trusted contractor can help you maximize your rebate possibilities."
+        />
+      </p>
+      <p className="energy-calculator-p-spacing">
+        <FormattedMessage
+          id="co.energy.heat_pump_other_p2"
+          defaultMessage="Learn more about heat pumps, including upfront costs, ongoing costs, average life span, and how to initiate a project in this {heatPumpGuide}, from our partners at {rewiringAmerica}."
+          values={{
+            heatPumpGuide: (
+              <TrackedOutboundLink
+                href="https://homes.rewiringamerica.org/projects/heating-and-cooling-homeowner"
+                className="link-color"
+                action="heat_pump_guide_click"
+                label="Heat Pump Guide"
+                category="energy_rebate"
+              >
+                <FormattedMessage id="co.energy.heat_pump_guide_link" defaultMessage="Heat Pump Guide" />
+              </TrackedOutboundLink>
+            ),
+            rewiringAmerica: (
+              <TrackedOutboundLink
+                href="https://www.rewiringamerica.org"
+                className="link-color"
+                action="rewiring_america_click"
+                label="Rewiring America"
+                category="energy_rebate"
+              >
+                <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
+              </TrackedOutboundLink>
+            ),
+          }}
+        />
+      </p>
+    </>
+  );
+};
+
+export const renderCategoryDescription = (rebateType: EnergyCalculatorRebateCategoryType, formData?: FormData) => {
+  // Special handling for HVAC category with provider-specific content
+  if (rebateType === 'hvac' && formData) {
+    const providerType = getHeatPumpProviderType(formData);
+
+    // Provider-specific content for heat pumps
+    if (providerType === 'xcel') {
+      return (
+        <article className="category-description-article">
+          {renderSharedHeatPumpContent()}
+          <p className="energy-calculator-p-spacing">
+            <FormattedMessage
+              id="co.energy.heat_pump_xcel_p3"
+              defaultMessage="Consult with an {contractorLink} to determine your heat pump unit size and potential rebate."
+              values={{
+                contractorLink: (
+                  <TrackedOutboundLink
+                    href="https://hvacree.net/xcel-co/public_search.cfm"
+                    className="link-color"
+                    action="xcel_contractor_click"
+                    label="Xcel Energy Registered Contractor"
+                    category="energy_rebate"
+                  >
+                    <FormattedMessage
+                      id="co.energy.heat_pump_contractor_link_xcel"
+                      defaultMessage="Xcel Energy Registered Contractor"
+                    />
+                  </TrackedOutboundLink>
+                ),
+              }}
+            />
+          </p>
+        </article>
+      );
+    }
+
+    if (providerType === 'efficiency_works') {
+      return (
+        <article className="category-description-article">
+          {renderSharedHeatPumpContent()}
+          <p className="energy-calculator-p-spacing">
+            <FormattedMessage
+              id="co.energy.heat_pump_efficiency_works_p3"
+              defaultMessage="Consult with an {contractorLink} to determine your heat pump unit size and potential rebate."
+              values={{
+                contractorLink: (
+                  <TrackedOutboundLink
+                    href="https://efficiencyworks.my.site.com/tradeally/s/findtradeally"
+                    className="link-color"
+                    action="efficiency_works_contractor_click"
+                    label="Efficiency Works service provider"
+                    category="energy_rebate"
+                  >
+                    <FormattedMessage
+                      id="co.energy.heat_pump_contractor_link_efficiency_works"
+                      defaultMessage="Efficiency Works service provider"
+                    />
+                  </TrackedOutboundLink>
+                ),
+              }}
+            />
+          </p>
+        </article>
+      );
+    }
+
+    // Default/Other providers
+    return (
+      <article className="category-description-article">
+        {renderSharedHeatPumpContent()}
+        <p className="energy-calculator-p-spacing">
+          <FormattedMessage
+            id="co.energy.heat_pump_other_p3"
+            defaultMessage="Check if your electric utility has a preferred HVAC contractor list or begin your {contractorLink}."
+            values={{
+              contractorLink: (
+                <TrackedOutboundLink
+                  href="https://homes.rewiringamerica.org/contractor-networks"
+                  className="link-color"
+                  action="generic_contractor_click"
+                  label="contractor search here"
+                  category="energy_rebate"
+                >
+                  <FormattedMessage
+                    id="co.energy.heat_pump_contractor_link_other"
+                    defaultMessage="contractor search here"
+                  />
+                </TrackedOutboundLink>
+              ),
+            }}
+          />
+        </p>
+      </article>
+    );
+  }
+
+  // Default content for other categories
   const categoryDescriptionMap = {
     hvac: {
       formattedMessage: (
