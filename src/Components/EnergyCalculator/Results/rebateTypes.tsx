@@ -1,9 +1,9 @@
 // NOTE: source: https://github.com/rewiringamerica/embed.rewiringamerica.org/blob/main/src/api/calculator-types-v1.ts
 import { FormattedMessage } from 'react-intl';
+import { FormData } from '../../../Types/FormData';
 import { FormattedMessageType } from '../../../Types/Questions';
 import TrackedOutboundLink from '../../Common/TrackedOutboundLink/TrackedOutboundLink';
-import { XCEL_PROVIDER, EFFICIENCY_WORKS_PROVIDERS } from '../providers';
-import { FormData } from '../../../Types/FormData';
+import { EFFICIENCY_WORKS_PROVIDERS, XCEL_PROVIDER } from '../providers';
 
 export type EnergyCalculatorIncentiveType =
   | 'tax_credit'
@@ -231,14 +231,6 @@ export const renderCategoryDescription = (rebateType: EnergyCalculatorRebateCate
   // Special handling for HVAC category with provider-specific content
   if (rebateType === 'hvac' && formData) {
     const providerType = getHeatPumpProviderType(formData);
-
-    // Debug logging (remove in production)
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      console.log('Electric Provider from formData:', formData?.energyCalculator?.electricProvider);
-      console.log('Detected Provider Type:', providerType);
-      console.log('XCEL_PROVIDER constant:', XCEL_PROVIDER);
-      console.log('EFFICIENCY_WORKS_PROVIDERS:', EFFICIENCY_WORKS_PROVIDERS);
-    }
 
     // Provider-specific content for heat pumps
     if (providerType === 'xcel') {
