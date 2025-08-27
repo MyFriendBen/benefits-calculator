@@ -6,7 +6,7 @@ import { useConfig } from '../Components/Config/configHook';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { FormattedMessageType } from '../Types/Questions';
 
-export type Language = 'en-us' | 'es' | 'vi' | 'fr' | 'am' | 'so' | 'ru' | 'ne' | 'my' | 'zh' | 'ar' | 'sw';
+export type Language = 'en-us' | 'es' | 'vi' | 'fr' | 'am' | 'so' | 'ru' | 'ne' | 'my' | 'zh' | 'ar' | 'sw' | 'pl' | 'tl' | 'ko' | 'ur';
 export const LANGUAGE_OPTIONS: Record<Language, string> = {
   'en-us': 'English',
   es: 'Español',
@@ -20,9 +20,13 @@ export const LANGUAGE_OPTIONS: Record<Language, string> = {
   zh: '中文',
   ar: 'عربي',
   sw: 'Kiswahili',
+  pl: 'Polski',
+  tl: 'Tagalog',
+  ko: '한국어',
+  ur: 'اردو',
 };
 
-export const rightToLeftLanguages = ['ar'];
+export const rightToLeftLanguages = ['ar', 'ur'];
 
 // Reorder a list of elements based on the selected locale. A key might need to be added to the FormattedMessage.
 export function useReorderLanguage(text: ReactNode[], order: { [key in Language]?: number[] }) {
