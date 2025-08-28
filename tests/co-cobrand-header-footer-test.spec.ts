@@ -20,7 +20,6 @@ test.describe('CO cobrand, header and footer links Test', () => {
           { text: 'LOGIN', url: 'https://search.211colorado.org/users/sign_in?_gl=1*bsbeov*_ga*MTIxNDcxNjc3OS4xNjg2MjQ1MDA3*_ga_2SYE2QY2YJ*MTY4OTAxODY0Ni43LjEuMTY4OTAxODkwMC42MC4wLjA' }
         ];
         
-
         // Footer links
         const footerLinks = [
           { text: 'Click to live chat with a 2-1-1 Navigator', url: 'https://www.211colorado.org/chat/#english' },
