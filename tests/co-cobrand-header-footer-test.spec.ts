@@ -99,9 +99,9 @@ test.describe('CO cobrand, header and footer links Test', () => {
         await expect(smsLink).toHaveAttribute('href', 'sms:898211');
         
         // Test logo link (navigates back to step-1)
-        const logoLink = page.locator('a[href="/step-1?referrer=211co"]');
+        const logoLink = page.locator('a[href="/co/step-1?referrer=211co"]');
         await expect(logoLink).toBeVisible();
-        await expect(logoLink).toHaveAttribute('href', '/step-1?referrer=211co');
+        await expect(logoLink).toHaveAttribute('href', '/co/step-1?referrer=211co');
     });
   
   });
