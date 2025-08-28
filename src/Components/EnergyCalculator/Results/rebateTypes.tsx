@@ -27,8 +27,8 @@ export const ENERGY_CALCULATOR_ITEMS = [
   'central_air_conditioner',
   'ducted_heat_pump',
   'ductless_heat_pump',
-  'geothermal_heating_installation',
   'other_heat_pump',
+  'geothermal_heating_installation',  
   // water heater
   'heat_pump_water_heater',
   'non_heat_pump_water_heater',
