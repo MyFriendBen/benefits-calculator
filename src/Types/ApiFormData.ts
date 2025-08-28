@@ -156,9 +156,11 @@ export type ApiFormData = {
   has_lifeline: boolean | null;
   has_acp: boolean | null;
   has_eitc: boolean | null;
+  has_il_eitc: boolean | null;
   has_coeitc: boolean | null;
   has_nslp: boolean | null;
   has_ctc: boolean | null;
+  has_il_ctc: boolean | null;
   has_medicaid?: boolean | null;
   has_rtdlive: boolean | null;
   has_cccap: boolean | null;
