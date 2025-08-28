@@ -12,6 +12,7 @@ export default function filterProgramsGenerator(
   formData: FormData,
   filtersChecked: Record<CitizenLabels, boolean>,
   isAdminView: boolean,
+  allPrograms: Program[],
 ) {
   function updateMemberEligibility(program: Program) {
     // Check if one of the non calculated filters is checked
@@ -69,27 +70,61 @@ export default function filterProgramsGenerator(
     return program;
   }
 
-  function showProgram(program: Program) {
-    // show all programs in the admin view
+  // Build a map of which programs would be shown (memoized)
+  const programVisibility = new Map<number, boolean>();
+
+  function isProgramVisible(program: Program): boolean {
+    // Check cache first
+    if (programVisibility.has(program.program_id)) {
+      return programVisibility.get(program.program_id)!;
+    }
+
+    // Admin view shows everything
     if (isAdminView) {
+      programVisibility.set(program.program_id, true);
       return true;
     }
 
     const filtersCheckedStrArr = Object.entries(filtersChecked)
-      .filter((filterKeyValPair) => {
-        return filterKeyValPair[1];
-      })
+      .filter((filterKeyValPair) => filterKeyValPair[1])
       .map((filteredKeyValPair) => filteredKeyValPair[0]);
 
-    const meetsLegalStatus = program.legal_status_required.some((status) => filtersCheckedStrArr.includes(status));
+    // Basic visibility checks
+    const meetsLegalStatus = program.legal_status_required.some((status) =>
+      filtersCheckedStrArr.includes(status)
+    );
     const isEligible = program.eligible;
     const hasValue = programValue(program) > 0;
     const doesNotHave = !program.already_has;
 
-    return meetsLegalStatus && isEligible && hasValue && doesNotHave;
+    const basicVisible = meetsLegalStatus && isEligible && hasValue && doesNotHave;
+
+    if (!basicVisible) {
+      programVisibility.set(program.program_id, false);
+      return false;
+    }
+
+    // Check if excluded by another visible program
+    for (const otherProgram of allPrograms) {
+      if (otherProgram.excludes_programs?.includes(program.program_id)) {
+        // Recursively check if the excluding program is visible
+        // (this will use the cache if already computed)
+        if (isProgramVisible(otherProgram)) {
+          programVisibility.set(program.program_id, false);
+          return false;
+        }
+      }
+    }
+
+    programVisibility.set(program.program_id, true);
+    return true;
   }
 
   return (programs: Program[]) => {
-    return structuredClone(programs).map(updateMemberEligibility).filter(showProgram);
+    // Update member eligibility first
+    const updatedPrograms = structuredClone(programs).map(updateMemberEligibility);
+
+    // Filter using the memoized visibility check
+    return updatedPrograms.filter(isProgramVisible);
   };
 }
