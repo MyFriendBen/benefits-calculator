@@ -36,6 +36,8 @@ export function useUpdateFormData() {
         denverpresc: response.has_dpp ?? false,
         ede: response.has_ede ?? false,
         eitc: response.has_eitc ?? false,
+        il_eitc: response.has_il_eitc ?? false,
+        il_ctc: response.has_il_ctc ?? false,
         lifeline: response.has_lifeline ?? false,
         leap: response.has_leap ?? false,
         nc_lieap: response.has_nc_lieap ?? false,

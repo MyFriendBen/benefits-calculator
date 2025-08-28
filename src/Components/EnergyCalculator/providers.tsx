@@ -3,6 +3,15 @@ import { FormattedMessage } from 'react-intl';
 import { FormattedMessageType } from '../../Types/Questions';
 import { Context } from '../Wrapper/Wrapper';
 
+// Provider constants for heat pump rebate logic
+export const XCEL_PROVIDER = 'co-xcel-energy';
+export const EFFICIENCY_WORKS_PROVIDERS = [
+  'co-fort-collins-utilities',
+  'co-loveland-water-and-power',
+  'co-longmont-power-and-communications',
+  'co-estes-park-power-and-communications',
+];
+
 export const OTHER_ELECTRIC_PROVIDERS: { [key: string]: FormattedMessageType } = {
   other: <FormattedMessage id="energyCalculator.electricityProvider.other" defaultMessage="Other" />,
   none: <FormattedMessage id="energyCalculator.electricityProvider.none" defaultMessage="None / Don't Pay" />,
