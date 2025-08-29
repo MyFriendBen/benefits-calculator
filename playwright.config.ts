@@ -9,6 +9,10 @@ dotenv.config({ path: path.resolve(__dirname, '.env.test') });
  */
 export default defineConfig({
   testDir: './tests',
+  // Exclude periodic readability tests from default runs
+  testIgnore: [
+    'tests/screen-data-readability.spec.ts',    
+  ],
   fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
