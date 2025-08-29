@@ -122,7 +122,53 @@ async function getRebates(formData: FormData, lang: Language) {
       category.rebates.push(rebate);
     }
   }
+  console.log("Recate categories data :", rebateCategories)
+  // Sort rebates within HVAC category by: 1) authority_type, 2) authority, 3) amount.number
+  rebateCategories.forEach(category => {
+    if (category.type === 'hvac') {
+      category.rebates.sort((a, b) => {
+        // First priority: authority_type (state comes before other)
+        const authorityTypeA = a.authority_type || '';
+        const authorityTypeB = b.authority_type || '';
+        
+        // Define priority order for authority types
+        const getAuthorityTypePriority = (type: string) => {
+          switch (type) {
+            case 'state': return 1;
+            case 'federal': return 2;
+            case 'utility': return 3;
+            case 'other': return 4;
+            case 'gas_utility': return 5;
+            case 'county': return 6;
+            case 'city': return 7;
+            default: return 8;
+          }
+        };
+        
 
+        const priorityA = getAuthorityTypePriority(authorityTypeA);
+        const priorityB = getAuthorityTypePriority(authorityTypeB);
+        
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB; // Sort by authority type priority
+        }
+        
+        // Second priority: authority name (alphabetical)
+        const authorityA = a.authority_name || '';
+        const authorityB = b.authority_name || '';
+        const authorityComparison = authorityA.localeCompare(authorityB);
+        
+        if (authorityComparison !== 0) {
+          return authorityComparison; // Sort alphabetically by authority
+        }
+        
+        // Third priority: amount.number (ascending - lowest first)
+        const amountA = a.amount?.number || 0;
+        const amountB = b.amount?.number || 0;
+        return amountA - amountB; // Sort ascending by amount
+      });
+    }
+  });
   return rebateCategories;
 }
 
