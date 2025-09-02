@@ -157,10 +157,10 @@ async function getRebates(formData: FormData, lang: Language) {
         // Define priority order for HVAC item categories
         const getHvacCategoryPriority = (category: string): number => {
           switch (category) {
-            case 'air_source': return 1;        // Air source heat pumps first
-            case 'ground_source': return 2;     // Ground/geothermal second
-            case 'other_heat_pump': return 3;   // Other heat pumps third
-            case 'central_air': return 4;       // Central air last
+            case 'air_source': return 1;        
+            case 'ground_source': return 2;     
+            case 'other_heat_pump': return 3;  
+            case 'central_air': return 4;      
             default: return 5;
           }
         };
@@ -169,7 +169,7 @@ async function getRebates(formData: FormData, lang: Language) {
         const priorityB = getHvacCategoryPriority(categoryB);
         
         if (priorityA !== priorityB) {
-          return priorityA - priorityB; // Sort by heat pump type priority
+          return priorityA - priorityB; 
         }
       } else {
         // For non-HVAC categories, sort by first item alphabetically
@@ -178,14 +178,14 @@ async function getRebates(formData: FormData, lang: Language) {
         const itemComparison = firstItemA.localeCompare(firstItemB);
         
         if (itemComparison !== 0) {
-          return itemComparison; // Sort alphabetically by first item
+          return itemComparison; 
         }
       }
       
       // Second priority: amount.number (descending - highest first)
       const amountA = a.amount?.number || 0;
       const amountB = b.amount?.number || 0;
-      return amountB - amountA; // Sort descending by amount
+      return amountB - amountA; 
     });
   });
   return rebateCategories;
