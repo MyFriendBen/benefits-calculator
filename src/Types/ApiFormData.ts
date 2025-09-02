@@ -161,6 +161,7 @@ export type ApiFormData = {
   has_nslp: boolean | null;
   has_ctc: boolean | null;
   has_il_ctc: boolean | null;
+  has_il_transit_reduced_fare: boolean | null;
   has_medicaid?: boolean | null;
   has_rtdlive: boolean | null;
   has_cccap: boolean | null;
