@@ -122,8 +122,7 @@ async function getRebates(formData: FormData, lang: Language) {
       category.rebates.push(rebate);
     }
   }
-  console.log("Recate categories data :", rebateCategories)
-  
+    
   // Helper function to determine heat pump type category from items array
   const getHeatPumpTypeCategory = (items: string[]): string => {
     // Air source heat pumps (should come first)
