@@ -123,51 +123,70 @@ async function getRebates(formData: FormData, lang: Language) {
     }
   }
   console.log("Recate categories data :", rebateCategories)
-  // Sort rebates within HVAC category by: 1) authority_type, 2) authority, 3) amount.number
+  
+  // Helper function to determine heat pump type category from items array
+  const getHeatPumpTypeCategory = (items: string[]): string => {
+    // Air source heat pumps (should come first)
+    if (items.some(item => ['ducted_heat_pump', 'ductless_heat_pump', 'air_to_water_heat_pump'].includes(item))) {
+      return 'air_source';
+    }
+    // Ground/geothermal source heat pumps (should come second)
+    if (items.some(item => ['geothermal_heating_installation'].includes(item))) {
+      return 'ground_source';
+    }
+    // Other heat pumps
+    if (items.some(item => ['other_heat_pump'].includes(item))) {
+      return 'other_heat_pump';
+    }
+    // Central air conditioner
+    if (items.some(item => ['central_air_conditioner'].includes(item))) {
+      return 'central_air';
+    }
+    // For non-HVAC categories, return the first item or 'other'
+    return items[0] || 'other';
+  };
+
+  // Sort rebates within all categories by: 1) item type category, 2) amount.number
   rebateCategories.forEach(category => {
-    if (category.type === 'hvac') {
-      category.rebates.sort((a, b) => {
-        // First priority: authority_type (state comes before other)
-        const authorityTypeA = a.authority_type || '';
-        const authorityTypeB = b.authority_type || '';
+    category.rebates.sort((a, b) => {
+      // First priority: item type category (for HVAC: air source first, then ground source)
+      if (category.type === 'hvac') {
+        const categoryA = getHeatPumpTypeCategory(a.items || []);
+        const categoryB = getHeatPumpTypeCategory(b.items || []);
         
-        // Define priority order for authority types
-        const getAuthorityTypePriority = (type: string) => {
-          switch (type) {
-            case 'state': return 1;
-            case 'federal': return 2;
-            case 'utility': return 3;
-            case 'other': return 4;
-            case 'gas_utility': return 5;
-            case 'county': return 6;
-            case 'city': return 7;
-            default: return 8;
+        // Define priority order for HVAC item categories
+        const getHvacCategoryPriority = (category: string): number => {
+          switch (category) {
+            case 'air_source': return 1;        // Air source heat pumps first
+            case 'ground_source': return 2;     // Ground/geothermal second
+            case 'other_heat_pump': return 3;   // Other heat pumps third
+            case 'central_air': return 4;       // Central air last
+            default: return 5;
           }
         };
         
-
-        const priorityA = getAuthorityTypePriority(authorityTypeA);
-        const priorityB = getAuthorityTypePriority(authorityTypeB);
+        const priorityA = getHvacCategoryPriority(categoryA);
+        const priorityB = getHvacCategoryPriority(categoryB);
         
         if (priorityA !== priorityB) {
-          return priorityA - priorityB; // Sort by authority type priority
+          return priorityA - priorityB; // Sort by heat pump type priority
         }
+      } else {
+        // For non-HVAC categories, sort by first item alphabetically
+        const firstItemA = (a.items && a.items[0]) || '';
+        const firstItemB = (b.items && b.items[0]) || '';
+        const itemComparison = firstItemA.localeCompare(firstItemB);
         
-        // Second priority: authority name (alphabetical)
-        const authorityA = a.authority_name || '';
-        const authorityB = b.authority_name || '';
-        const authorityComparison = authorityA.localeCompare(authorityB);
-        
-        if (authorityComparison !== 0) {
-          return authorityComparison; // Sort alphabetically by authority
+        if (itemComparison !== 0) {
+          return itemComparison; // Sort alphabetically by first item
         }
-        
-        // Third priority: amount.number (ascending - lowest first)
-        const amountA = a.amount?.number || 0;
-        const amountB = b.amount?.number || 0;
-        return amountA - amountB; // Sort ascending by amount
-      });
-    }
+      }
+      
+      // Second priority: amount.number (descending - highest first)
+      const amountA = a.amount?.number || 0;
+      const amountB = b.amount?.number || 0;
+      return amountB - amountA; // Sort descending by amount
+    });
   });
   return rebateCategories;
 }
