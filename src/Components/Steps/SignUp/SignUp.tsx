@@ -44,8 +44,8 @@ function SignUp() {
             };
           },
         })
-        .min(1)
-        .trim(),
+        .trim()
+        .min(1),
       lastName: z
         .string({
           errorMap: () => {
@@ -57,22 +57,30 @@ function SignUp() {
             };
           },
         })
-        .min(1)
-        .trim(),
-      email: z
-        .string({
-          errorMap: () => {
-            return {
-              message: formatMessage({
-                id: 'validation-helperText.email',
-                defaultMessage: 'Please enter a valid email address',
-              }),
-            };
-          },
-        })
-        .email()
         .trim()
-        .or(z.literal('')),
+        .min(1),
+      email: z.preprocess(
+        (val) => {
+          if (typeof val === 'string') {
+            const trimmed = val.trim();
+            return trimmed === '' ? '' : trimmed;
+          }
+          return val;
+        },
+        z
+          .string({
+            errorMap: () => {
+              return {
+                message: formatMessage({
+                  id: 'validation-helperText.email',
+                  defaultMessage: 'Please enter a valid email address',
+                }),
+              };
+            },
+          })
+          .email()
+          .or(z.literal(''))
+      ),
       cell: z
         .string({
           errorMap: () => {

@@ -26,8 +26,8 @@ const createContactInfoSchema = () => {
             };
           },
         })
-        .min(1)
-        .trim(),
+        .trim()
+        .min(1),
       lastName: z
         .string({
           errorMap: () => {
@@ -39,22 +39,30 @@ const createContactInfoSchema = () => {
             };
           },
         })
-        .min(1)
-        .trim(),
-      email: z
-        .string({
-          errorMap: () => {
-            return {
-              message: formatMessage({
-                id: 'validation-helperText.email',
-                defaultMessage: 'Please enter a valid email address',
-              }),
-            };
-          },
-        })
-        .email()
         .trim()
-        .or(z.literal('')),
+        .min(1),
+      email: z.preprocess(
+        (val) => {
+          if (typeof val === 'string') {
+            const trimmed = val.trim();
+            return trimmed === '' ? '' : trimmed;
+          }
+          return val;
+        },
+        z
+          .string({
+            errorMap: () => {
+              return {
+                message: formatMessage({
+                  id: 'validation-helperText.email',
+                  defaultMessage: 'Please enter a valid email address',
+                }),
+              };
+            },
+          })
+          .email()
+          .or(z.literal(''))
+      ),
       cell: z
         .string({
           errorMap: () => {
@@ -361,6 +369,62 @@ describe('SignUp Form Validation', () => {
           }),
         ])
       );
+    });
+
+    it('should reject whitespace-only first name', () => {
+      const data = {
+        firstName: '   ',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        cell: '',
+        tcpa: false,
+      };
+
+      const result = schema.safeParse(data);
+      expect(result.success).toBe(false);
+      expect(result.error?.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ['firstName'],
+          }),
+        ])
+      );
+    });
+
+    it('should reject whitespace-only last name', () => {
+      const data = {
+        firstName: 'John',
+        lastName: '   ',
+        email: 'john@example.com',
+        cell: '',
+        tcpa: false,
+      };
+
+      const result = schema.safeParse(data);
+      expect(result.success).toBe(false);
+      expect(result.error?.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ['lastName'],
+          }),
+        ])
+      );
+    });
+
+    it('should treat whitespace-only email as empty (valid)', () => {
+      const data = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: '   ',
+        cell: '1234567890',
+        tcpa: true,
+      };
+
+      const result = schema.safeParse(data);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.email).toBe('');
+      }
     });
   });
 });
