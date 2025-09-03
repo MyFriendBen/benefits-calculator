@@ -30,3 +30,6 @@ jobs:
         with:
           eslint: true
           prettier: true
+
+      - name: Run unit tests
+        run: npm test -- --coverage --watchAll=false --passWithNoTests
