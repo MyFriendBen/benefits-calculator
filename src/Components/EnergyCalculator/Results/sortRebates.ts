@@ -6,14 +6,14 @@ export const getHeatPumpTypeCategory = (items: string[]): string => {
   if (items.some(item => ['ducted_heat_pump', 'ductless_heat_pump', 'air_to_water_heat_pump'].includes(item))) {
     return 'air_source';
   }
-  // Ground/geothermal source heat pumps (should come second)
-  if (items.some(item => ['geothermal_heating_installation'].includes(item))) {
-    return 'ground_source';
-  }
   // Other heat pumps
   if (items.some(item => ['other_heat_pump'].includes(item))) {
     return 'other_heat_pump';
   }
+  // Ground/geothermal source heat pumps (should come second)
+  if (items.some(item => ['geothermal_heating_installation'].includes(item))) {
+    return 'ground_source';
+  }  
   // Central air conditioner
   if (items.some(item => ['central_air_conditioner'].includes(item))) {
     return 'central_air';
@@ -26,6 +26,7 @@ export const getHeatPumpTypeCategory = (items: string[]): string => {
 export const sortRebateCategories = (rebateCategories: EnergyCalculatorRebateCategory[]): void => {
   rebateCategories.forEach(category => {
     category.rebates.sort((a, b) => {
+      
       // First priority: authority_type (federal first)
       const authorityTypeA = a.authority_type || '';
       const authorityTypeB = b.authority_type || '';
@@ -60,8 +61,8 @@ export const sortRebateCategories = (rebateCategories: EnergyCalculatorRebateCat
         const getHvacCategoryPriority = (category: string): number => {
           switch (category) {
             case 'air_source': return 1;        
-            case 'ground_source': return 2;     
-            case 'other_heat_pump': return 3;  
+            case 'other_heat_pump': return 2;     
+            case 'ground_source': return 3;  
             case 'central_air': return 4;      
             default: return 5;
           }
