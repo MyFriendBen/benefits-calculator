@@ -148,7 +148,32 @@ async function getRebates(formData: FormData, lang: Language) {
   // Sort rebates within all categories by: 1) item type category, 2) amount.number
   rebateCategories.forEach(category => {
     category.rebates.sort((a, b) => {
-      // First priority: item type category (for HVAC: air source first, then ground source)
+      // First priority: authority_type (state comes before other)
+      const authorityTypeA = a.authority_type || '';
+      const authorityTypeB = b.authority_type || '';
+      
+      // First priority:  priority order for authority types 'federal' first
+      const getAuthorityTypePriority = (type: string) => {
+        switch (type) {
+          case 'federal': return 1;
+          case 'state':
+          case 'utility':
+          case 'other':
+          case 'gas_utility':
+          case 'county':
+          case 'city':
+            return 2;
+          default: return 3;
+        }
+      };
+      const priorityA = getAuthorityTypePriority(authorityTypeA);
+      const priorityB = getAuthorityTypePriority(authorityTypeB);
+      
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB; // Sort by authority type priority
+      }
+
+      // Second priority: item type category (for HVAC: air source first, then ground source)
       if (category.type === 'hvac') {
         const categoryA = getHeatPumpTypeCategory(a.items || []);
         const categoryB = getHeatPumpTypeCategory(b.items || []);
@@ -170,23 +195,15 @@ async function getRebates(formData: FormData, lang: Language) {
         if (priorityA !== priorityB) {
           return priorityA - priorityB; 
         }
-      } else {
-        // For non-HVAC categories, sort by first item alphabetically
-        const firstItemA = (a.items && a.items[0]) || '';
-        const firstItemB = (b.items && b.items[0]) || '';
-        const itemComparison = firstItemA.localeCompare(firstItemB);
-        
-        if (itemComparison !== 0) {
-          return itemComparison; 
-        }
-      }
+      }      
       
-      // Second priority: amount.number (descending - highest first)
+      // third priority: amount.number (descending - highest first)
       const amountA = a.amount?.number || 0;
       const amountB = b.amount?.number || 0;
       return amountB - amountA; 
     });
   });
+  console.log("rebate category programs:", rebateCategories)
   return rebateCategories;
 }
 
