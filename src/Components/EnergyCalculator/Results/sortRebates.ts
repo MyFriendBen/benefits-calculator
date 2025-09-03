@@ -34,15 +34,8 @@ export const sortRebateCategories = (rebateCategories: EnergyCalculatorRebateCat
       // First priority: priority order for authority types 'federal' first
       const getAuthorityTypePriority = (type: string) => {
         switch (type) {
-          case 'federal': return 1;
-          case 'state':
-          case 'utility':
-          case 'other':
-          case 'gas_utility':
-          case 'county':
-          case 'city':
-            return 2;
-          default: return 3;
+          case 'federal': return 1;          
+          default: return 2;
         }
       };
       const priorityA = getAuthorityTypePriority(authorityTypeA);
@@ -63,8 +56,7 @@ export const sortRebateCategories = (rebateCategories: EnergyCalculatorRebateCat
             case 'air_source': return 1;        
             case 'other_heat_pump': return 2;     
             case 'ground_source': return 3;  
-            case 'central_air': return 4;      
-            default: return 5;
+            default: return 4;
           }
         };
         
