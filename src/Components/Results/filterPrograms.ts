@@ -70,61 +70,96 @@ export default function filterProgramsGenerator(
     return program;
   }
 
-  // Build a map of which programs would be shown (memoized)
-  const programVisibility = new Map<number, boolean>();
+  return (programs: Program[]) => {
+    // Update member eligibility first
+    const updatedPrograms = structuredClone(programs).map(updateMemberEligibility);
 
-  function isProgramVisible(program: Program): boolean {
-    // Check cache first
-    if (programVisibility.has(program.program_id)) {
-      return programVisibility.get(program.program_id)!;
+    // Build a reverse exclusion map: programId -> list of program ids that exclude it
+    const reverseExcludes = new Map<number, number[]>();
+    for (const program of updatedPrograms) {
+      if (program.excludes_programs) {
+        for (const excludedId of program.excludes_programs) {
+          const excluders = reverseExcludes.get(excludedId) || [];
+          excluders.push(program.program_id);
+          reverseExcludes.set(excludedId, excluders);
+        }
+      }
     }
 
-    // Admin view shows everything
-    if (isAdminView) {
-      programVisibility.set(program.program_id, true);
-      return true;
+    // Build a map from program id to program for quick lookups
+    const programById = new Map<number, Program>();
+    for (const program of updatedPrograms) {
+      programById.set(program.program_id, program);
     }
+
+    // Cached visibility results
+    const programVisibility = new Map<number, boolean>();
+    // Track in-progress calculations to detect cycles
+    const inProgress = new Set<number>();
 
     const filtersCheckedStrArr = Object.entries(filtersChecked)
       .filter((filterKeyValPair) => filterKeyValPair[1])
       .map((filteredKeyValPair) => filteredKeyValPair[0]);
 
-    // Basic visibility checks
-    const meetsLegalStatus = program.legal_status_required.some((status) =>
-      filtersCheckedStrArr.includes(status)
-    );
-    const isEligible = program.eligible;
-    const hasValue = programValue(program) > 0;
-    const doesNotHave = !program.already_has;
+    function isProgramVisibleById(programId: number): boolean {
+      // Check cache first
+      if (programVisibility.has(programId)) {
+        return programVisibility.get(programId)!;
+      }
 
-    const basicVisible = meetsLegalStatus && isEligible && hasValue && doesNotHave;
+      // Detect cycles - if we're already computing this program's visibility, 
+      // break the cycle by returning false
+      if (inProgress.has(programId)) {
+        return false;
+      }
 
-    if (!basicVisible) {
-      programVisibility.set(program.program_id, false);
-      return false;
-    }
+      const program = programById.get(programId);
+      if (!program) {
+        return false;
+      }
 
-    // Check if excluded by another visible program
-    for (const otherProgram of allPrograms) {
-      if (otherProgram.excludes_programs?.includes(program.program_id)) {
-        // Recursively check if the excluding program is visible
-        // (this will use the cache if already computed)
-        if (isProgramVisible(otherProgram)) {
-          programVisibility.set(program.program_id, false);
+      // Mark as in progress to detect cycles
+      inProgress.add(programId);
+
+      // Admin view shows everything
+      if (isAdminView) {
+        programVisibility.set(programId, true);
+        inProgress.delete(programId);
+        return true;
+      }
+
+      // Basic visibility checks
+      const meetsLegalStatus = program.legal_status_required.some((status) =>
+        filtersCheckedStrArr.includes(status)
+      );
+      const isEligible = program.eligible;
+      const hasValue = programValue(program) > 0;
+      const doesNotHave = !program.already_has;
+
+      const basicVisible = meetsLegalStatus && isEligible && hasValue && doesNotHave;
+
+      if (!basicVisible) {
+        programVisibility.set(programId, false);
+        inProgress.delete(programId);
+        return false;
+      }
+
+      // Check if excluded by another visible program
+      const excluders = reverseExcludes.get(programId) || [];
+      for (const excluderId of excluders) {
+        if (isProgramVisibleById(excluderId)) {
+          programVisibility.set(programId, false);
+          inProgress.delete(programId);
           return false;
         }
       }
+
+      programVisibility.set(programId, true);
+      inProgress.delete(programId);
+      return true;
     }
 
-    programVisibility.set(program.program_id, true);
-    return true;
-  }
-
-  return (programs: Program[]) => {
-    // Update member eligibility first
-    const updatedPrograms = structuredClone(programs).map(updateMemberEligibility);
-
-    // Filter using the memoized visibility check
-    return updatedPrograms.filter(isProgramVisible);
+    // Filter using the id-based visibility check
+    return updatedPrograms.filter(program => isProgramVisibleById(program.program_id));
   };
 }

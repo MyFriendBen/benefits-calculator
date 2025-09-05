@@ -67,7 +67,7 @@ export type Program = {
   documents: ProgramDocument[];
   warning_messages: WarningMsg[];
   required_programs: number[];
-  excludes_programs: number[];
+  excludes_programs?: number[] | null;
   value_format: string | null;
 };
 
