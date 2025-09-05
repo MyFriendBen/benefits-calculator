@@ -218,6 +218,20 @@ const ECHouseholdMemberForm = () => {
       return 'true';
     }
 
+     // Check if the person is 16 years or older
+    const birthYear = householdMemberFormData?.birthYear;
+    const birthMonth = householdMemberFormData?.birthMonth;
+    
+    if (birthYear && birthMonth) {
+      const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
+      const age = CURRENT_YEAR - birthYear;
+      const is16OrOlder = age > 16 || (age === 16 && birthMonth <= CURRENT_MONTH);
+      
+      if (is16OrOlder) {
+        return 'true';
+      }
+    }
+
     return 'false';
   };
 
@@ -269,7 +283,28 @@ const ECHouseholdMemberForm = () => {
     if (!hasTruthyIncome) {
       replace([]);
     }
-  }, [watchHasIncome]);
+  }, [watchHasIncome, append, replace, getValues, hasTruthyIncome]);
+
+    // Check if user is 16+ when birth month/year changes and set hasIncome to 'true' if so
+  const watchBirthMonth = watch('birthMonth');
+  const watchBirthYear = watch('birthYear');
+  
+  useEffect(() => {
+    if (watchBirthMonth && watchBirthYear) {
+      const birthMonth = Number(watchBirthMonth);
+      const birthYear = Number(watchBirthYear);
+      
+      if (birthMonth > 0 && birthYear > 0) {
+        const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
+        const age = CURRENT_YEAR - birthYear;
+        const is16OrOlder = age > 16 || (age === 16 && birthMonth <= CURRENT_MONTH);
+        
+        if (is16OrOlder) {
+          setValue('hasIncome', 'true');
+        }
+      }
+    }
+  }, [watchBirthMonth, watchBirthYear]);
 
   useEffect(() => {
     const notDisabled = getValues('conditions.disabled') === false;
