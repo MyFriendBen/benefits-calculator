@@ -7,7 +7,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { YearlyValueLabel, programValue, useFormatYearlyValue } from '../FormattedValue';
 import './ProgramPage.css';
 import WarningMessage from '../../WarningComponent/WarningMessage';
-import { useContext, useMemo } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { Context } from '../../Wrapper/Wrapper';
 import { findProgramById, findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
 import { deleteValidation, postValidation } from '../../../apiCalls';
@@ -15,6 +15,8 @@ import { Language } from '../../../Assets/languageOptions';
 import { allNavigatorLanguages } from './NavigatorLanguages';
 import { formatPhoneNumber } from '../helpers';
 import useScreenApi from '../../../Assets/updateScreen';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import JsonView from '@uiw/react-json-view';
 
 type ProgramPageProps = {
   program: Program;
@@ -30,6 +32,27 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   const { isAdminView, validations, setValidations, programCategories, filtersChecked } = useResultsContext();
   const intl = useIntl();
   const { fetchScreen } = useScreenApi();
+  const [openPEmodal, setOpenPEModal] = useState(false);
+  const { policyEngineData } = useResultsContext();
+
+  const openPolicyEngineRequest = () => setOpenPEModal(true);
+  const closePolicyEngineRequest = () => setOpenPEModal(false);
+
+  const downloadPolicyEngineRequest = () => {
+    if (!policyEngineData) return;
+  
+    const dataStr = JSON.stringify(policyEngineData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+  
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "policy-engine-data.json";
+    link.click();
+  
+    URL.revokeObjectURL(url);
+  };
+  
 
   const IconRenderer: React.FC<IconRendererProps> = ({ headingType }) => {
     const IconComponent = headingOptionsMappings[headingType];
@@ -216,6 +239,36 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
             )}
           </a>
         )}
+        <>
+          {isAdminView && (
+            <button className="apply-online-button" onClick={openPolicyEngineRequest}>
+              <FormattedMessage id="policy_engine_request_button" defaultMessage="Policy Engine Data" />
+            </button>
+          )}
+
+          <Dialog open={openPEmodal} onClose={closePolicyEngineRequest} maxWidth="md" fullWidth disableScrollLock >
+            <DialogTitle>
+              <FormattedMessage id="policy_engine_modal_title" defaultMessage="Policy Engine Data" />
+            </DialogTitle>
+            <DialogContent dividers>
+              {/* Show request/response nicely */}
+              <Typography component="pre" style={{ whiteSpace: "pre-wrap" }}>
+                {/* {JSON.stringify(policyEngineData, null, 2)} */}
+                <JsonView value={policyEngineData} collapsed={3} />
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <div className="apply-button-container">
+                <button className="apply-online-button" onClick={downloadPolicyEngineRequest}>
+                  <FormattedMessage id="close_button" defaultMessage="Download" />
+                </button>
+                <button className="apply-online-button" onClick={closePolicyEngineRequest}>
+                  <FormattedMessage id="close_button" defaultMessage="Close" />
+                </button>
+              </div>
+            </DialogActions>
+          </Dialog>
+        </>
         {isAdminView && staffToken !== undefined && formData.isTestData && (
           <button className="apply-online-button" onClick={toggleValidation}>
             {currentValidation === undefined ? (

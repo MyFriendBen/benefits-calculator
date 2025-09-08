@@ -4,6 +4,7 @@ import Loading from './Loading/Loading';
 import {
   EligibilityResults,
   MemberEligibility,
+  PolicyEngineData,
   Program,
   ProgramCategory,
   UrgentNeed,
@@ -43,6 +44,7 @@ type WrapperResultsContext = {
   validations: Validation[];
   setValidations: (validations: Validation[]) => void;
   energyCalculatorRebateCategories: EnergyCalculatorRebateCategory[]; // NOTE: will be empty if not using the energy calculator
+  policyEngineData: PolicyEngineData | undefined; 
 };
 
 type ResultsProps = {
@@ -171,6 +173,7 @@ const Results = ({ type }: ResultsProps) => {
   const [missingPrograms, setMissingPrograms] = useState(false);
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
+  const [policyEngineData, setPolicyEngineData] = useState<PolicyEngineData>();
 
   const filterPrograms = filterProgramsGenerator(formData, filtersChecked, isAdminView);
 
@@ -181,6 +184,7 @@ const Results = ({ type }: ResultsProps) => {
       setProgramCategories([]);
       setMissingPrograms(false);
       setValidations([]);
+      setPolicyEngineData(undefined);
       return;
     }
 
@@ -197,6 +201,7 @@ const Results = ({ type }: ResultsProps) => {
     setMissingPrograms(apiResults.missing_programs);
     setValidations(apiResults.validations);
     setLoading(false);
+    setPolicyEngineData(apiResults.pe_data);
   }, [filtersChecked, apiResults, isAdminView]);
 
   const ResultsContextProvider = ({ children }: PropsWithChildren) => {
@@ -213,6 +218,7 @@ const Results = ({ type }: ResultsProps) => {
           validations,
           setValidations,
           energyCalculatorRebateCategories,
+          policyEngineData
         }}
       >
         {children}

@@ -114,4 +114,112 @@ export type EligibilityResults = {
   missing_programs: boolean;
   validations: Validation[];
   created_date: string;
+  pe_data: PolicyEngineData;
 };
+
+export interface PolicyEngineData {
+  request: PolicyEngineRequest;
+  response: PolicyEngineResponse;
+}
+
+export interface PolicyEngineRequest {
+  household: {
+    people: Record<string, PersonData>;
+    tax_units: Record<string, TaxUnitData>;
+    families: Record<string, FamilyData>;
+    households: Record<string, HouseholdData>;
+    spm_units: Record<string, SpmUnitData>;
+    marital_units: Record<string, unknown>;
+  };
+}
+
+export interface PolicyEngineResponse {
+  status: string;
+  message: string | null;
+  result: {
+    people: Record<string, PersonData>;
+    tax_units: Record<string, TaxUnitData>;
+    families: Record<string, FamilyData>;
+    households: Record<string, HouseholdData>;
+    spm_units: Record<string, SpmUnitData>;
+    marital_units: Record<string, unknown>;
+  };
+}
+
+export interface PersonData {
+  ssi_countable_resources?: Record<string, number>;
+  ssi_reported?: Record<string, number>;
+  is_blind?: Record<string, boolean>;
+  is_disabled?: Record<string, boolean>;
+  ssi_earned_income?: Record<string, number>;
+  ssi_unearned_income?: Record<string, number>;
+  age?: Record<string, number>;
+  is_tax_unit_spouse?: Record<string, boolean>;
+  is_tax_unit_head?: Record<string, boolean>;
+  is_tax_unit_dependent?: Record<string, boolean>;
+  ssi?: Record<string, number>;
+  is_pregnant?: Record<string, boolean>;
+  employment_income?: Record<string, number>;
+  self_employment_income?: Record<string, number>;
+  rental_income?: Record<string, number>;
+  taxable_pension_income?: Record<string, number>;
+  social_security?: Record<string, number>;
+  medicaid?: Record<string, number | null>;
+  medicaid_category?: Record<string, string | null>;
+  is_optional_senior_or_disabled_for_medicaid?: Record<string, boolean | null>;
+  current_pregnancies?: Record<string, number>;
+  wic?: Record<string, number | null>;
+  wic_category?: Record<string, string | null>;
+  child_support_expense?: Record<string, number>;
+  real_estate_taxes?: Record<string, number>;
+  medical_out_of_pocket_expenses?: Record<string, number>;
+  is_snap_ineligible_student?: Record<string, boolean>;
+  is_full_time_college_student?: Record<string, boolean>;
+}
+
+export interface TaxUnitData {
+  members: string[];
+  aca_ptc?: Record<string, number | null>;
+  eitc?: Record<string, number | null>;
+  ctc_value?: Record<string, number | null>;
+}
+
+export interface FamilyData {
+  members: string[];
+}
+
+export interface HouseholdData {
+  members: string[];
+  state_code?: Record<string, string>;
+  zip_code?: Record<string, string>;
+  county_str?: Record<string, string>;
+}
+
+export interface SpmUnitData {
+  members: string[];
+  school_meal_countable_income?: Record<string, number>;
+  broadband_cost?: Record<string, number>;
+  lifeline?: Record<string, number | null>;
+  school_meal_daily_subsidy?: Record<string, number | null>;
+  school_meal_tier?: Record<string, string | null>;
+  snap_unearned_income?: Record<string, number>;
+  snap_earned_income?: Record<string, number>;
+  snap_assets?: Record<string, number>;
+  snap_emergency_allotment?: Record<string, number>;
+  housing_cost?: Record<string, number>;
+  has_phone_expense?: Record<string, boolean>;
+  has_heating_cooling_expense?: Record<string, boolean>;
+  heating_cooling_expense?: Record<string, number>;
+  childcare_expenses?: Record<string, number>;
+  water_expense?: Record<string, number>;
+  phone_expense?: Record<string, number>;
+  homeowners_association_fees?: Record<string, number>;
+  homeowners_insurance?: Record<string, number>;
+  snap?: Record<string, number | null>;
+  nc_tanf_countable_earned_income?: Record<string, number>;
+  nc_tanf_countable_gross_unearned_income?: Record<string, number>;
+  nc_tanf?: Record<string, number | null>;
+  nc_scca_countable_income?: Record<string, number>;
+  nc_scca?: Record<string, number | null>;
+}
+
