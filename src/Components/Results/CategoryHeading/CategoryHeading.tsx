@@ -50,7 +50,7 @@ export const headingOptionsMappings: { [key: string]: React.ComponentType } = {
   job_resources: Job_resources,
   dental_care: Dental_care,
   legal_services: Legal_services,
-  veteran_services: Military, 
+  veteran_services: Military,
 };
 
 type CategoryHeadingProps = {

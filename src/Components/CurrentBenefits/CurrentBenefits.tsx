@@ -14,7 +14,7 @@ import { headingOptionsMappings } from '../Results/CategoryHeading/CategoryHeadi
 import { ReactComponent as CashAssistance } from '../../Assets/icons/Programs/CategoryHeading/cashAssistant.svg';
 
 export const iconCategoryMap: { [key: string]: React.ComponentType } = {
-  default: CashAssistance,  
+  default: CashAssistance,
   ...headingOptionsMappings,
 };
 

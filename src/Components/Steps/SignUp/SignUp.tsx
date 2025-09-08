@@ -400,12 +400,22 @@ function SignUp() {
                             defaultMessage="I consent to MyFriendBen and its affiliates contacting me via text message to offer additional programs or opportunities that may be of interest to me and my family, for marketing purposes, updates and alerts, and to solicit feedback. I understand that the frequency of these text messages may vary, and that standard message and data costs may apply. Reply HELP for help and STOP to end. View our <tos>Terms of Service</tos> and <privacy>Privacy Policy</privacy>."
                             values={{
                               tos: (chunks: any) => (
-                                <a href={consentToContactLink} target="_blank" rel="noopener noreferrer"  className="link-color">
+                                <a
+                                  href={consentToContactLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="link-color"
+                                >
                                   {chunks}
                                 </a>
                               ),
                               privacy: (chunks: any) => (
-                                <a href={privacyPolicyLink} target="_blank" rel="noopener noreferrer" className="link-color">
+                                <a
+                                  href={privacyPolicyLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="link-color"
+                                >
                                   {chunks}
                                 </a>
                               ),

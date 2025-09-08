@@ -3,7 +3,7 @@
  *
  * This file contains helper functions specific to the NC 211 referrer workflow,
  * composing common flow helpers into higher-level flows for this specific referrer.
- * 
+ *
  * Key Features:
  * - Reuses all common flow helpers from ./common.ts
  * - Maintains referrer parameter persistence throughout workflow
@@ -39,7 +39,7 @@ export async function setupNC211Session(page: Page): Promise<FlowResult> {
   try {
     // Navigate to NC 211 workflow with referrer parameter
     await navigateToNC211Workflow(page, REFERRERS.NC_211);
-    
+
     // Verify we're on the correct landing page with referrer parameter
     await verifyCurrentUrl(page, URL_PATTERNS.LANDING_PAGE);
     await verifyReferrerUrl(page, REFERRERS.NC_211);
