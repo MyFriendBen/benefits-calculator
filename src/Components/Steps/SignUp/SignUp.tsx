@@ -3,23 +3,22 @@ import { Checkbox, FormControlLabel, TextField } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
+import { useParams } from 'react-router-dom';
 import { z } from 'zod';
-import InformationalText from '../../Common/InformationalText/InformationalText';
+import { handleNumbersOnly, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
+import useScreenApi from '../../../Assets/updateScreen';
 import { FormData } from '../../../Types/FormData';
 import { FormattedMessageType } from '../../../Types/Questions';
 import { useConfig, useLocalizedLink } from '../../Config/configHook';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
-import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import QuestionDescription from '../../QuestionComponents/QuestionDescription';
+import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import { useDefaultBackNavigationFunction } from '../../QuestionComponents/questionHooks';
 import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
 import { Context } from '../../Wrapper/Wrapper';
-import { useParams } from 'react-router-dom';
-import { handleNumbersOnly, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
-import useScreenApi from '../../../Assets/updateScreen';
-import './SignUp.css';
 import useStepForm from '../stepForm';
+import './SignUp.css';
 
 function SignUp() {
   const { formData, setFormData } = useContext(Context);
@@ -45,8 +44,8 @@ function SignUp() {
             };
           },
         })
-        .min(1)
-        .trim(),
+        .trim()
+        .min(1),
       lastName: z
         .string({
           errorMap: () => {
@@ -58,22 +57,30 @@ function SignUp() {
             };
           },
         })
-        .min(1)
-        .trim(),
-      email: z
-        .string({
-          errorMap: () => {
-            return {
-              message: formatMessage({
-                id: 'validation-helperText.email',
-                defaultMessage: 'Please enter a valid email address',
-              }),
-            };
-          },
-        })
-        .email()
         .trim()
-        .or(z.literal('')),
+        .min(1),
+      email: z.preprocess(
+        (val) => {
+          if (typeof val === 'string') {
+            const trimmed = val.trim();
+            return trimmed === '' ? '' : trimmed;
+          }
+          return val;
+        },
+        z
+          .string({
+            errorMap: () => {
+              return {
+                message: formatMessage({
+                  id: 'validation-helperText.email',
+                  defaultMessage: 'Please enter a valid email address',
+                }),
+              };
+            },
+          })
+          .email()
+          .or(z.literal(''))
+      ),
       cell: z
         .string({
           errorMap: () => {
@@ -105,7 +112,7 @@ function SignUp() {
         }),
       tcpa: z.boolean(),
     })
-    .refine(({ tcpa, cell }) => tcpa || cell === '', {
+    .refine(({ tcpa, cell }) => cell === '' || tcpa, {
       path: ['tcpa'],
       message: formatMessage({ id: 'signUp.checkbox.error', defaultMessage: 'Please check the box to continue.' }),
     })
@@ -121,11 +128,6 @@ function SignUp() {
           code: z.ZodIssueCode.custom,
           message: message,
           path: ['email'],
-        });
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: message,
-          path: ['cell'],
         });
         return false;
       }

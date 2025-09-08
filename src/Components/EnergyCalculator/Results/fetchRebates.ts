@@ -13,6 +13,7 @@ import {
   ENERGY_CALCULATOR_CATEGORY_TITLE_MAP,
   ENERGY_CALCULATOR_ITEMS,
 } from './rebateTypes';
+import { sortRebateCategories } from './sortRebates';
 
 const API_KEY = `Bearer ${process.env.REACT_APP_ENERGY_CALCULATOR_REWIRING_AMERICA_API_KEY}`;
 
@@ -122,7 +123,10 @@ async function getRebates(formData: FormData, lang: Language) {
       category.rebates.push(rebate);
     }
   }
-
+    
+  // Sort rebates within all categories using the sorting function
+  sortRebateCategories(rebateCategories);  
+  
   return rebateCategories;
 }
 

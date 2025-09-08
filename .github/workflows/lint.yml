@@ -2,10 +2,11 @@ name: Lint
 
 on:
   # Trigger the workflow on pull request,
-  # but only for the main branch
+  # for both main and dev branches
   pull_request:
     branches:
       - main
+      - dev
 
 jobs:
   run-linters:
@@ -30,3 +31,6 @@ jobs:
         with:
           eslint: true
           prettier: true
+
+      - name: Run unit tests
+        run: npm test -- --coverage --watchAll=false --passWithNoTests
