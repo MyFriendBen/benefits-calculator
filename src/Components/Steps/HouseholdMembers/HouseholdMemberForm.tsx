@@ -676,7 +676,7 @@ const HouseholdMemberForm = () => {
                   <QuestionDescription>
                     <FormattedMessage 
                       id="householdDataBlock.createIncomeRadioQuestion-noIncomeDisclaimer" 
-                      defaultMessage="Your household income helps determine which benefits you qualify for and how much support you can receive." 
+                      defaultMessage="Income affects benefits! We can be more accurate if you tell us significant household income." 
                     />
                   </QuestionDescription>
                 )}
