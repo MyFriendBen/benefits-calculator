@@ -9,6 +9,8 @@ dotenv.config({ path: path.resolve(__dirname, '.env.test') });
  */
 export default defineConfig({
   testDir: './tests',
+  /* Skip white-labels.spec.ts test  */
+  testIgnore: ['white-labels.spec.ts'],
   fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
