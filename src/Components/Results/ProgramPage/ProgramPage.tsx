@@ -40,19 +40,18 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
 
   const downloadPolicyEngineRequest = () => {
     if (!policyEngineData) return;
-  
+
     const dataStr = JSON.stringify(policyEngineData, null, 2);
-    const blob = new Blob([dataStr], { type: "application/json" });
+    const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-  
-    const link = document.createElement("a");
+
+    const link = document.createElement('a');
     link.href = url;
-    link.download = "policy-engine-data.json";
+    link.download = 'policy-engine-data.json';
     link.click();
-  
+
     URL.revokeObjectURL(url);
   };
-  
 
   const IconRenderer: React.FC<IconRendererProps> = ({ headingType }) => {
     const IconComponent = headingOptionsMappings[headingType];
@@ -246,13 +245,13 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
             </button>
           )}
 
-          <Dialog open={openPEmodal} onClose={closePolicyEngineRequest} maxWidth="md" fullWidth disableScrollLock >
+          <Dialog open={openPEmodal} onClose={closePolicyEngineRequest} maxWidth="md" fullWidth disableScrollLock>
             <DialogTitle>
               <FormattedMessage id="policy_engine_modal_title" defaultMessage="Policy Engine Data" />
             </DialogTitle>
             <DialogContent dividers>
               {/* Show request/response nicely */}
-              <Typography component="pre" style={{ whiteSpace: "pre-wrap" }}>
+              <Typography component="pre" style={{ whiteSpace: 'pre-wrap' }}>
                 {/* {JSON.stringify(policyEngineData, null, 2)} */}
                 <JsonView value={policyEngineData} collapsed={3} />
               </Typography>

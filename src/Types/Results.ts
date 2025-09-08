@@ -222,4 +222,3 @@ export interface SpmUnitData {
   nc_scca_countable_income?: Record<string, number>;
   nc_scca?: Record<string, number | null>;
 }
-

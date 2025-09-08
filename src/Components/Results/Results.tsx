@@ -44,7 +44,7 @@ type WrapperResultsContext = {
   validations: Validation[];
   setValidations: (validations: Validation[]) => void;
   energyCalculatorRebateCategories: EnergyCalculatorRebateCategory[]; // NOTE: will be empty if not using the energy calculator
-  policyEngineData: PolicyEngineData | undefined; 
+  policyEngineData: PolicyEngineData | undefined;
 };
 
 type ResultsProps = {
@@ -218,7 +218,7 @@ const Results = ({ type }: ResultsProps) => {
           validations,
           setValidations,
           energyCalculatorRebateCategories,
-          policyEngineData
+          policyEngineData,
         }}
       >
         {children}
