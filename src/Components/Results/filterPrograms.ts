@@ -9,6 +9,12 @@ import { programValue } from './FormattedValue';
 import { findMemberEligibilityMember } from './Results';
 
 /**
+ * Safe clone helper that falls back to JSON clone when structuredClone is not available
+ */
+const clone = <T>(obj: T): T =>
+  typeof structuredClone === 'function' ? structuredClone(obj) : JSON.parse(JSON.stringify(obj));
+
+/**
  * Gets the names of filters that are currently checked
  */
 function getCheckedFilterNames(filtersChecked: Record<CitizenLabels, boolean>): string[] {
@@ -43,7 +49,7 @@ function updateMemberEligibilities(
 ): Program[] {
   const checkedNonCalculatedFilters = getCheckedNonCalculatedFilterNames(filtersChecked);
   
-  return structuredClone(programs).map(program => {
+  return clone(programs).map(program => {
     // If program meets legal status with non-calculated filters, no need to check members
     const meetsBasicLegalStatus = program.legal_status_required.some(status => 
       checkedNonCalculatedFilters.includes(status)
