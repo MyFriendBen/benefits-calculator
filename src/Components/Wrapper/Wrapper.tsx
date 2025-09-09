@@ -65,6 +65,7 @@ const initialFormData: FormData = {
     hasUser: false,
     sendOffers: false,
     sendUpdates: false,
+    emailConsent: false,
     commConsent: false,
   },
   urlSearchParams: '',
