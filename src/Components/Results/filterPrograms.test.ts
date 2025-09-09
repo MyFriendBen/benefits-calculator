@@ -135,10 +135,9 @@ describe('filterProgramsGenerator', () => {
       const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
       const filtered = filterPrograms(programs);
 
-      // With mutual exclusions, the first program evaluated wins
-      // Program 2 is evaluated first due to being excluded by 1, finds 1 not yet evaluated, so is visible
+      // With mutual exclusions, the first program in the array wins
       expect(filtered).toHaveLength(1);
-      expect(filtered[0].program_id).toBe(2);
+      expect(filtered[0].program_id).toBe(1);
     });
 
     it('should handle transitive exclusions', () => {
@@ -183,9 +182,10 @@ describe('filterProgramsGenerator', () => {
       const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
       const filtered = filterPrograms(programs);
 
-      // In a circular dependency, the evaluation order matters
-      // Programs get evaluated based on reverse exclusion checking
-      expect(filtered).toHaveLength(2);
+      // In circular dependencies: A excludes B, B excludes C, C excludes A
+      // First program (A) excludes B, then C excludes A, leaving only C
+      expect(filtered).toHaveLength(1);
+      expect(filtered[0].program_id).toBe(3);
     });
 
     it('should not apply exclusions in admin view', () => {
