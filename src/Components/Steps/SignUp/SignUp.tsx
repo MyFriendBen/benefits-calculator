@@ -79,7 +79,7 @@ function SignUp() {
             },
           })
           .email()
-          .or(z.literal(''))
+          .or(z.literal('')),
       ),
       cell: z
         .string({
@@ -110,7 +110,12 @@ function SignUp() {
             defaultMessage: 'Please enter a 10 digit phone number',
           }),
         }),
+      emailConsent: z.boolean(),
       tcpa: z.boolean(),
+    })
+    .refine(({ emailConsent, email }) => email === '' || emailConsent, {
+      path: ['emailConsent'],
+      message: formatMessage({ id: 'signUp.checkbox.error', defaultMessage: 'Please check the box to continue.' }),
     })
     .refine(({ tcpa, cell }) => cell === '' || tcpa, {
       path: ['tcpa'],
@@ -184,7 +189,7 @@ function SignUp() {
 
   useEffect(() => {
     if (someContactType(contactType) && !formData.signUpInfo.hasUser) {
-      setValue('contactInfo', { firstName: '', lastName: '', email: '', cell: '', tcpa: false });
+      setValue('contactInfo', { firstName: '', lastName: '', email: '', cell: '', emailConsent: false, tcpa: false });
       if (isSubmitted) {
         trigger('contactInfo');
         setHasServerError(false);
@@ -222,6 +227,7 @@ function SignUp() {
       signUpInfo.lastName = updatedSignUpInfo.lastName;
       signUpInfo.email = updatedSignUpInfo.email;
       signUpInfo.phone = updatedSignUpInfo.cell;
+      signUpInfo.emailConsent = updatedSignUpInfo.emailConsent;
       signUpInfo.commConsent = updatedSignUpInfo.tcpa;
     }
 
@@ -325,7 +331,7 @@ function SignUp() {
                     onChange={(...args) => {
                       field.onChange(...args);
                       if (isSubmitted) {
-                        trigger(['contactInfo.cell', 'contactInfo.email']);
+                        trigger(['contactInfo.cell', 'contactInfo.email', 'contactInfo.emailConsent']);
                       }
                     }}
                     label={<FormattedMessage id="signUp.createEmailTextfield-label" defaultMessage="Email" />}
@@ -367,9 +373,50 @@ function SignUp() {
             <p className="sign-up-disclaimer-text">
               <FormattedMessage
                 id="signUp.displayDisclosureSection-consentText"
-                defaultMessage="A copy of your MyFriendBen results will automatically be sent to the email/phone number you provided."
+                defaultMessage="A copy of your MyFriendBen results will be sent to the email/phone number you provided."
               />
             </p>
+            <div>
+              <Controller
+                name="contactInfo.emailConsent"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          {...field}
+                          checked={getValues('contactInfo.emailConsent')}
+                          sx={
+                            errors.contactInfo?.emailConsent !== undefined
+                              ? { color: '#c6252b', alignSelf: 'flex-start' }
+                              : { alignSelf: 'flex-start' }
+                          }
+                          onChange={(...args) => {
+                            field.onChange(...args);
+                            if (isSubmitted) {
+                              trigger(['contactInfo.email', 'contactInfo.emailConsent']);
+                            }
+                          }}
+                        />
+                      }
+                      label={
+                        <div className="sign-up-text">
+                          <strong>Email: </strong>
+                          <FormattedMessage
+                            id="signUp.emailConsent"
+                            defaultMessage="I agree to receive promotional and transactional emails from MyFriendBen"
+                          />
+                        </div>
+                      }
+                    />
+                    {errors.contactInfo?.emailConsent && (
+                      <ErrorMessageWrapper fontSize="1rem">{errors.contactInfo.emailConsent.message}</ErrorMessageWrapper>
+                    )}
+                  </>
+                )}
+              />
+            </div>
             <div>
               <Controller
                 name="contactInfo.tcpa"
@@ -397,6 +444,7 @@ function SignUp() {
                       }
                       label={
                         <div className="sign-up-text">
+                          <strong>SMS: </strong>
                           <FormattedMessage
                             id="signUp.displayDisclosureSection.tcpa"
                             defaultMessage="I consent to MyFriendBen and its affiliates contacting me via text message to offer additional programs or opportunities that may be of interest to me and my family, for marketing purposes, updates and alerts, and to solicit feedback. I understand that the frequency of these text messages may vary, and that standard message and data costs may apply. Reply HELP for help and STOP to end. View our <tos>Terms of Service</tos> and <privacy>Privacy Policy</privacy>."

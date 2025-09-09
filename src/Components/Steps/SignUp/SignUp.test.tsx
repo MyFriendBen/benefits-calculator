@@ -92,7 +92,12 @@ const createContactInfoSchema = () => {
             defaultMessage: 'Please enter a 10 digit phone number',
           }),
         }),
+      emailConsent: z.boolean(),
       tcpa: z.boolean(),
+    })
+    .refine(({ emailConsent, email }) => email === '' || emailConsent, {
+      path: ['emailConsent'],
+      message: formatMessage({ id: 'signUp.checkbox.error', defaultMessage: 'Please check the box to continue.' }),
     })
     .refine(({ tcpa, cell }) => cell === '' || tcpa, {
       path: ['tcpa'],
@@ -127,12 +132,34 @@ describe('SignUp Form Validation', () => {
   });
 
   describe('Email-only validation', () => {
-    it('should pass validation with email only (no TCPA required)', () => {
+    it('should fail validation with email only when email consent not checked', () => {
       const data = {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
         cell: '',
+        emailConsent: false,
+        tcpa: false,
+      };
+
+      const result = schema.safeParse(data);
+      expect(result.success).toBe(false);
+      expect(result.error?.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ['emailConsent'],
+          }),
+        ])
+      );
+    });
+
+    it('should pass validation with email when email consent is checked', () => {
+      const data = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        cell: '',
+        emailConsent: true,
         tcpa: false,
       };
 
@@ -140,12 +167,13 @@ describe('SignUp Form Validation', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should pass validation with email and TCPA checked', () => {
+    it('should pass validation with no email and email consent unchecked', () => {
       const data = {
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@example.com',
-        cell: '',
+        email: '',
+        cell: '1234567890',
+        emailConsent: false,
         tcpa: true,
       };
 
@@ -161,6 +189,7 @@ describe('SignUp Form Validation', () => {
         lastName: 'Doe',
         email: '',
         cell: '1234567890',
+        emailConsent: false,
         tcpa: false,
       };
 
@@ -181,6 +210,7 @@ describe('SignUp Form Validation', () => {
         lastName: 'Doe',
         email: '',
         cell: '1234567890',
+        emailConsent: false,
         tcpa: true,
       };
 
@@ -190,12 +220,13 @@ describe('SignUp Form Validation', () => {
   });
 
   describe('Both email and phone validation', () => {
-    it('should fail validation with both email and phone when TCPA not checked', () => {
+    it('should fail validation with both email and phone when neither consent checked', () => {
       const data = {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
         cell: '1234567890',
+        emailConsent: false,
         tcpa: false,
       };
 
@@ -204,18 +235,22 @@ describe('SignUp Form Validation', () => {
       expect(result.error?.issues).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
+            path: ['emailConsent'],
+          }),
+          expect.objectContaining({
             path: ['tcpa'],
           }),
         ])
       );
     });
 
-    it('should pass validation with both email and phone when TCPA is checked', () => {
+    it('should pass validation with both email and phone when both consents checked', () => {
       const data = {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
         cell: '1234567890',
+        emailConsent: true,
         tcpa: true,
       };
 
@@ -231,6 +266,7 @@ describe('SignUp Form Validation', () => {
         lastName: 'Doe',
         email: '',
         cell: '',
+        emailConsent: false,
         tcpa: false,
       };
 
@@ -251,6 +287,7 @@ describe('SignUp Form Validation', () => {
         lastName: 'Doe',
         email: '',
         cell: '',
+        emailConsent: false,
         tcpa: false,
       };
 
@@ -270,6 +307,7 @@ describe('SignUp Form Validation', () => {
         lastName: 'Doe',
         email: '',
         cell: '1234567890',
+        emailConsent: false,
         tcpa: false,
       };
 
@@ -284,10 +322,42 @@ describe('SignUp Form Validation', () => {
         lastName: 'Doe',
         email: 'john@example.com',
         cell: '',
+        emailConsent: true,
         tcpa: false,
       };
 
       const result = schema.safeParse(dataWithoutPhone);
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('Email consent validation logic', () => {
+    it('should require email consent when email is provided', () => {
+      const dataWithEmail = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        cell: '',
+        emailConsent: false,
+        tcpa: false,
+      };
+
+      const result = schema.safeParse(dataWithEmail);
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(issue => issue.path.includes('emailConsent'))).toBe(true);
+    });
+
+    it('should not require email consent when no email is provided', () => {
+      const dataWithoutEmail = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: '',
+        cell: '1234567890',
+        emailConsent: false,
+        tcpa: true,
+      };
+
+      const result = schema.safeParse(dataWithoutEmail);
       expect(result.success).toBe(true);
     });
   });
@@ -299,6 +369,7 @@ describe('SignUp Form Validation', () => {
         lastName: 'Doe',
         email: '',
         cell: '(123) 456-7890',
+        emailConsent: false,
         tcpa: true,
       };
 
@@ -315,6 +386,7 @@ describe('SignUp Form Validation', () => {
         lastName: 'Doe',
         email: '',
         cell: '123456789', // 9 digits, should be 10
+        emailConsent: false,
         tcpa: true,
       };
 
@@ -337,6 +409,7 @@ describe('SignUp Form Validation', () => {
         lastName: 'Doe',
         email: 'john@example.com',
         cell: '',
+        emailConsent: true,
         tcpa: false,
       };
 
@@ -357,6 +430,7 @@ describe('SignUp Form Validation', () => {
         lastName: '',
         email: 'john@example.com',
         cell: '',
+        emailConsent: true,
         tcpa: false,
       };
 
@@ -377,6 +451,7 @@ describe('SignUp Form Validation', () => {
         lastName: 'Doe',
         email: 'john@example.com',
         cell: '',
+        emailConsent: true,
         tcpa: false,
       };
 
@@ -397,6 +472,7 @@ describe('SignUp Form Validation', () => {
         lastName: '   ',
         email: 'john@example.com',
         cell: '',
+        emailConsent: true,
         tcpa: false,
       };
 
@@ -417,6 +493,7 @@ describe('SignUp Form Validation', () => {
         lastName: 'Doe',
         email: '   ',
         cell: '1234567890',
+        emailConsent: false,
         tcpa: true,
       };
 
