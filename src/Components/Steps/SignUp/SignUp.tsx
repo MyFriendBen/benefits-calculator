@@ -447,10 +447,10 @@ function SignUp() {
                       control={
                         <Checkbox
                           {...field}
-                          checked={getValues('contactInfo.emailConsent')}
+                          checked={field.value}
                           sx={
                             errors.contactInfo?.emailConsent !== undefined
-                              ? { color: '#c6252b', alignSelf: 'flex-start' }
+                              ? { color: 'error.main', alignSelf: 'flex-start' }
                               : { alignSelf: 'flex-start' }
                           }
                           onChange={(...args) => {
@@ -491,10 +491,10 @@ function SignUp() {
                       control={
                         <Checkbox
                           {...field}
-                          checked={getValues('contactInfo.tcpa')}
+                          checked={field.value}
                           sx={
                             errors.contactInfo?.tcpa !== undefined
-                              ? { color: '#c6252b', alignSelf: 'flex-start' }
+                              ? { color: 'error.main', alignSelf: 'flex-start' }
                               : { alignSelf: 'flex-start' }
                           }
                           onChange={(...args) => {
