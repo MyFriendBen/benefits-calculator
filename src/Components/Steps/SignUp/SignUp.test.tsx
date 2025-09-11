@@ -1,6 +1,7 @@
 import { z } from 'zod';
+import { buildContactInfoSchema } from './SignUp';
 
-// Mock useIntl hook  
+// Mock useIntl hook
 const mockFormatMessage = jest.fn((params) => {
   // Handle the specific message IDs we use in our validation
   const messageMap: { [key: string]: string } = {
@@ -11,18 +12,17 @@ const mockFormatMessage = jest.fn((params) => {
     'validation-helperText.email-required': 'Please enter an email',
     'validation-helperText.phone-required': 'Please enter a phone number',
     'validation-helperText.noEmailOrPhoneNumber': 'Please enter an email or phone number',
-    'signUp.checkbox.error': 'Please check the box to continue.'
+    'signUp.checkbox.error': 'Please check the box to continue.',
   };
-  
-  
+
   if (params && params.id && messageMap[params.id]) {
     return messageMap[params.id];
   }
-  
+
   if (params && params.defaultMessage) {
     return params.defaultMessage;
   }
-  
+
   return 'Invalid input';
 });
 
@@ -32,175 +32,8 @@ jest.mock('react-intl', () => ({
   }),
 }));
 
-// Extract the validation schema from SignUp component for testing
-const createContactInfoSchema = () => {
-  const formatMessage = mockFormatMessage;
-  
-  return z
-    .object({
-      firstName: z
-        .string({
-          errorMap: () => {
-            return {
-              message: formatMessage({
-                id: 'validation-helperText.firstName',
-                defaultMessage: 'Please enter your first name',
-              }),
-            };
-          },
-        })
-        .trim()
-        .min(1),
-      lastName: z
-        .string({
-          errorMap: () => {
-            return {
-              message: formatMessage({
-                id: 'validation-helperText.lastName',
-                defaultMessage: 'Please enter your last name',
-              }),
-            };
-          },
-        })
-        .trim()
-        .min(1),
-      email: z.preprocess(
-        (val) => {
-          if (typeof val === 'string') {
-            const trimmed = val.trim();
-            return trimmed === '' ? '' : trimmed;
-          }
-          return val;
-        },
-        z
-          .string({
-            errorMap: () => {
-              return {
-                message: formatMessage({
-                  id: 'validation-helperText.email',
-                  defaultMessage: 'Please enter a valid email address',
-                }),
-              };
-            },
-          })
-          .email()
-          .or(z.literal(''))
-      ),
-      cell: z
-        .string({
-          errorMap: () => {
-            return {
-              message: formatMessage({
-                id: 'validation-helperText.phoneNumber',
-                defaultMessage: 'Please enter a 10 digit phone number',
-              }),
-            };
-          },
-        })
-        .trim()
-        .transform((value) => {
-          let newString = '';
-
-          for (const char of value) {
-            if (/\d/.test(char)) {
-              newString += char;
-            }
-          }
-
-          return newString;
-        })
-        .refine((value) => value.length === 0 || value.length === 10, {
-          message: formatMessage({
-            id: 'validation-helperText.phoneNumber',
-            defaultMessage: 'Please enter a 10 digit phone number',
-          }),
-        }),
-      emailConsent: z.boolean(),
-      tcpa: z.boolean(),
-    })
-    .refine(({ emailConsent, email }) => email === '' || emailConsent, {
-      path: ['emailConsent'],
-      message: formatMessage({ id: 'signUp.checkbox.error', defaultMessage: 'Please check the box to continue.' }),
-    })
-    .refine(({ tcpa, cell }) => cell === '' || tcpa, {
-      path: ['tcpa'],
-      message: formatMessage({ id: 'signUp.checkbox.error', defaultMessage: 'Please check the box to continue.' }),
-    })
-    .superRefine(({ email, cell, emailConsent, tcpa }, ctx) => {
-      const noEmail = email.length === 0;
-      const noCell = cell.length === 0;
-      
-      // Case 1: Both consents checked - require both fields
-      if (emailConsent && tcpa) {
-        if (noEmail) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: formatMessage({
-              id: 'validation-helperText.email-required',
-              defaultMessage: 'Please enter an email',
-            }),
-            path: ['email'],
-          });
-        }
-        if (noCell) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: formatMessage({
-              id: 'validation-helperText.phone-required',
-              defaultMessage: 'Please enter a phone number',
-            }),
-            path: ['cell'],
-          });
-        }
-      }
-      // Case 2: Only email consent checked - require email only
-      else if (emailConsent && !tcpa) {
-        if (noEmail) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: formatMessage({
-              id: 'validation-helperText.email-required',
-              defaultMessage: 'Please enter an email',
-            }),
-            path: ['email'],
-          });
-        }
-      }
-      // Case 3: Only SMS consent checked - require phone only
-      else if (!emailConsent && tcpa) {
-        if (noCell) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: formatMessage({
-              id: 'validation-helperText.phone-required',
-              defaultMessage: 'Please enter a phone number',
-            }),
-            path: ['cell'],
-          });
-        }
-      }
-      // Case 4: Neither consent checked - require at least one contact method
-      else if (!emailConsent && !tcpa) {
-        if (noEmail && noCell) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: formatMessage({
-              id: 'validation-helperText.noEmailOrPhoneNumber',
-              defaultMessage: 'Please enter an email or phone number',
-            }),
-            path: ['email'],
-          });
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: '', // Empty message to just highlight the field
-            path: ['cell'],
-          });
-        }
-      }
-
-      return true;
-    });
-};
+// Use the schema builder from SignUp component for testing
+const createContactInfoSchema = () => buildContactInfoSchema(mockFormatMessage);
 
 describe('SignUp Form Validation', () => {
   let schema: z.ZodType<any>;
@@ -228,7 +61,7 @@ describe('SignUp Form Validation', () => {
           expect.objectContaining({
             path: ['emailConsent'],
           }),
-        ])
+        ]),
       );
     });
 
@@ -279,7 +112,7 @@ describe('SignUp Form Validation', () => {
           expect.objectContaining({
             path: ['tcpa'],
           }),
-        ])
+        ]),
       );
     });
 
@@ -319,7 +152,7 @@ describe('SignUp Form Validation', () => {
           expect.objectContaining({
             path: ['tcpa'],
           }),
-        ])
+        ]),
       );
     });
 
@@ -356,7 +189,7 @@ describe('SignUp Form Validation', () => {
           expect.objectContaining({
             path: ['email'],
           }),
-        ])
+        ]),
       );
     });
 
@@ -372,13 +205,13 @@ describe('SignUp Form Validation', () => {
 
       const result = schema.safeParse(data);
       expect(result.success).toBe(false);
-      
+
       // Should have error on email field
-      const emailErrors = result.error?.issues.filter(issue => issue.path.includes('email'));
+      const emailErrors = result.error?.issues.filter((issue) => issue.path.includes('email'));
       expect(emailErrors).toHaveLength(1);
-      
+
       // Should have error on cell field but with empty message
-      const cellErrors = result.error?.issues.filter(issue => issue.path.includes('cell'));
+      const cellErrors = result.error?.issues.filter((issue) => issue.path.includes('cell'));
       expect(cellErrors).toHaveLength(1);
       expect(cellErrors[0].message).toBe('');
     });
@@ -398,11 +231,11 @@ describe('SignUp Form Validation', () => {
 
         const result = schema.safeParse(data);
         expect(result.success).toBe(false);
-        
-        const emailErrors = result.error?.issues.filter(issue => issue.path.includes('email'));
+
+        const emailErrors = result.error?.issues.filter((issue) => issue.path.includes('email'));
         expect(emailErrors).toHaveLength(1);
-        
-        const cellErrors = result.error?.issues.filter(issue => issue.path.includes('cell'));
+
+        const cellErrors = result.error?.issues.filter((issue) => issue.path.includes('cell'));
         expect(cellErrors).toHaveLength(1);
       });
 
@@ -434,13 +267,13 @@ describe('SignUp Form Validation', () => {
 
         const result = schema.safeParse(data);
         expect(result.success).toBe(false);
-        
-        const emailErrors = result.error?.issues.filter(issue => issue.path.includes('email'));
+
+        const emailErrors = result.error?.issues.filter((issue) => issue.path.includes('email'));
         expect(emailErrors).toHaveLength(1);
-        
+
         // Should not require phone (only consent-related errors allowed)
-        const cellErrors = result.error?.issues.filter(issue => 
-          issue.path.includes('cell') && !issue.message.includes('check the box')
+        const cellErrors = result.error?.issues.filter(
+          (issue) => issue.path.includes('cell') && !issue.message.includes('check the box'),
         );
         expect(cellErrors).toHaveLength(0);
       });
@@ -473,13 +306,13 @@ describe('SignUp Form Validation', () => {
 
         const result = schema.safeParse(data);
         expect(result.success).toBe(false);
-        
-        const cellErrors = result.error?.issues.filter(issue => issue.path.includes('cell'));
+
+        const cellErrors = result.error?.issues.filter((issue) => issue.path.includes('cell'));
         expect(cellErrors).toHaveLength(1);
-        
+
         // Should not require email (only consent-related errors allowed)
-        const emailErrors = result.error?.issues.filter(issue => 
-          issue.path.includes('email') && !issue.message.includes('check the box')
+        const emailErrors = result.error?.issues.filter(
+          (issue) => issue.path.includes('email') && !issue.message.includes('check the box'),
         );
         expect(emailErrors).toHaveLength(0);
       });
@@ -512,16 +345,16 @@ describe('SignUp Form Validation', () => {
 
         const result = schema.safeParse(data);
         expect(result.success).toBe(false);
-        
-        const emailErrors = result.error?.issues.filter(issue => issue.path.includes('email'));
+
+        const emailErrors = result.error?.issues.filter((issue) => issue.path.includes('email'));
         expect(emailErrors).toHaveLength(1);
-        
-        const cellErrors = result.error?.issues.filter(issue => issue.path.includes('cell'));
+
+        const cellErrors = result.error?.issues.filter((issue) => issue.path.includes('cell'));
         expect(cellErrors).toHaveLength(1);
         expect(cellErrors[0].message).toBe('');
       });
 
-      it('should pass when email provided with neither consent', () => {
+      it('should fail when email provided with neither consent', () => {
         const data = {
           firstName: 'John',
           lastName: 'Doe',
@@ -535,7 +368,7 @@ describe('SignUp Form Validation', () => {
         expect(result.success).toBe(false); // Should fail because email consent is required if email is provided
       });
 
-      it('should pass when phone provided with neither consent', () => {
+      it('should fail when phone provided with neither consent', () => {
         const data = {
           firstName: 'John',
           lastName: 'Doe',
@@ -564,7 +397,7 @@ describe('SignUp Form Validation', () => {
 
       const result = schema.safeParse(dataWithPhone);
       expect(result.success).toBe(false);
-      expect(result.error?.issues.some(issue => issue.path.includes('tcpa'))).toBe(true);
+      expect(result.error?.issues.some((issue) => issue.path.includes('tcpa'))).toBe(true);
     });
 
     it('should not require TCPA when no phone number is provided', () => {
@@ -595,7 +428,7 @@ describe('SignUp Form Validation', () => {
 
       const result = schema.safeParse(dataWithEmail);
       expect(result.success).toBe(false);
-      expect(result.error?.issues.some(issue => issue.path.includes('emailConsent'))).toBe(true);
+      expect(result.error?.issues.some((issue) => issue.path.includes('emailConsent'))).toBe(true);
     });
 
     it('should not require email consent when no email is provided', () => {
@@ -648,7 +481,7 @@ describe('SignUp Form Validation', () => {
           expect.objectContaining({
             path: ['cell'],
           }),
-        ])
+        ]),
       );
     });
   });
@@ -671,7 +504,7 @@ describe('SignUp Form Validation', () => {
           expect.objectContaining({
             path: ['firstName'],
           }),
-        ])
+        ]),
       );
     });
 
@@ -692,7 +525,7 @@ describe('SignUp Form Validation', () => {
           expect.objectContaining({
             path: ['lastName'],
           }),
-        ])
+        ]),
       );
     });
 
@@ -713,7 +546,7 @@ describe('SignUp Form Validation', () => {
           expect.objectContaining({
             path: ['firstName'],
           }),
-        ])
+        ]),
       );
     });
 
@@ -734,7 +567,7 @@ describe('SignUp Form Validation', () => {
           expect.objectContaining({
             path: ['lastName'],
           }),
-        ])
+        ]),
       );
     });
 

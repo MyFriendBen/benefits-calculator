@@ -20,18 +20,9 @@ import { Context } from '../../Wrapper/Wrapper';
 import useStepForm from '../stepForm';
 import './SignUp.css';
 
-function SignUp() {
-  const { formData, setFormData } = useContext(Context);
-  const { uuid } = useParams();
-  const [hasServerError, setHasServerError] = useState(false);
-  const { updateUser } = useScreenApi();
-  const { formatMessage } = useIntl();
-  const backNavigationFunction = useDefaultBackNavigationFunction('signUpInfo');
-  const signUpOptions = useConfig<{ [key: string]: FormattedMessageType }>('sign_up_options');
-  const privacyPolicyLink = useLocalizedLink('privacy_policy');
-  const consentToContactLink = useLocalizedLink('consent_to_contact');
-
-  const contactInfoSchema = z
+// Pure schema builder function for testability
+export const buildContactInfoSchema = (formatMessage: any) => {
+  return z
     .object({
       firstName: z
         .string({
@@ -124,7 +115,7 @@ function SignUp() {
     .superRefine(({ email, cell, emailConsent, tcpa }, ctx) => {
       const noEmail = email.length === 0;
       const noCell = cell.length === 0;
-      
+
       // Case 1: Both consents checked - require both fields
       if (emailConsent && tcpa) {
         if (noEmail) {
@@ -195,6 +186,20 @@ function SignUp() {
 
       return true;
     });
+};
+
+function SignUp() {
+  const { formData, setFormData } = useContext(Context);
+  const { uuid } = useParams();
+  const [hasServerError, setHasServerError] = useState(false);
+  const { updateUser } = useScreenApi();
+  const { formatMessage } = useIntl();
+  const backNavigationFunction = useDefaultBackNavigationFunction('signUpInfo');
+  const signUpOptions = useConfig<{ [key: string]: FormattedMessageType }>('sign_up_options');
+  const privacyPolicyLink = useLocalizedLink('privacy_policy');
+  const consentToContactLink = useLocalizedLink('consent_to_contact');
+
+  const contactInfoSchema = buildContactInfoSchema(formatMessage);
 
   const someContactType = (contactType: { [key: string]: boolean }) => {
     return Object.values(contactType).some((value) => value);
@@ -467,7 +472,9 @@ function SignUp() {
                       }
                     />
                     {errors.contactInfo?.emailConsent && (
-                      <ErrorMessageWrapper fontSize="1rem">{errors.contactInfo.emailConsent.message}</ErrorMessageWrapper>
+                      <ErrorMessageWrapper fontSize="1rem">
+                        {errors.contactInfo.emailConsent.message}
+                      </ErrorMessageWrapper>
                     )}
                   </>
                 )}
