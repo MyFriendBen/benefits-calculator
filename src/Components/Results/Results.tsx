@@ -175,7 +175,10 @@ const Results = ({ type }: ResultsProps) => {
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
   const [policyEngineData, setPolicyEngineData] = useState<PolicyEngineData>();
 
-  const filterPrograms = filterProgramsGenerator(formData, filtersChecked, isAdminView);
+  const filterPrograms = useMemo(
+    () => filterProgramsGenerator(formData, filtersChecked, isAdminView, apiResults?.programs || []),
+    [formData, filtersChecked, isAdminView, apiResults?.programs]
+  );
 
   useEffect(() => {
     if (apiResults === undefined) {
@@ -202,7 +205,7 @@ const Results = ({ type }: ResultsProps) => {
     setValidations(apiResults.validations);
     setLoading(false);
     setPolicyEngineData(apiResults.pe_data);
-  }, [filtersChecked, apiResults, isAdminView]);
+  }, [filterPrograms, apiResults]);
 
   const ResultsContextProvider = ({ children }: PropsWithChildren) => {
     return (
