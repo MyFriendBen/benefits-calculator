@@ -109,12 +109,16 @@ const putScreen = async (partialFormData: ApiFormData, uuid: string) => {
   });
 };
 
-const getEligibility = async (uuid: string) => {
+const getEligibility = async (uuid: string, isAdminView?: boolean) => {
   const headerWithLocale = {
     ...header,
   };
+  let params = '';
+  if (isAdminView) {
+    params = '?admin=true';
+  }
 
-  return fetch(eligibilityEndpoint + uuid, {
+  return fetch(eligibilityEndpoint + uuid + params, {
     method: 'GET',
     headers: headerWithLocale,
   }).then((response) => {

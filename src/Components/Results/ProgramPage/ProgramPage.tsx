@@ -15,8 +15,9 @@ import { Language } from '../../../Assets/languageOptions';
 import { allNavigatorLanguages } from './NavigatorLanguages';
 import { formatPhoneNumber } from '../helpers';
 import useScreenApi from '../../../Assets/updateScreen';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import JsonView from '@uiw/react-json-view';
+import { redactPolicyEngineData } from '../../../Assets/policyEngineRedaction';
 
 type ProgramPageProps = {
   program: Program;
@@ -37,11 +38,12 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
 
   const openPolicyEngineRequest = () => setOpenPEModal(true);
   const closePolicyEngineRequest = () => setOpenPEModal(false);
+  const [collapsed, setCollapsed] = useState<boolean | number>(3);
+  const redacted = redactPolicyEngineData(policyEngineData!);
 
   const downloadPolicyEngineRequest = () => {
     if (!policyEngineData) return;
-
-    const dataStr = JSON.stringify(policyEngineData, null, 2);
+    const dataStr = JSON.stringify(redacted, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 
@@ -239,43 +241,89 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
           </a>
         )}
         <>
-          {isAdminView && (
-            <button className="apply-online-button" onClick={openPolicyEngineRequest}>
-              <FormattedMessage id="policy_engine_request_button" defaultMessage="Policy Engine Data" />
-            </button>
+          {isAdminView && !!staffToken && (
+            <a
+              role="button"
+              className="pe-request-button"
+              onClick={openPolicyEngineRequest}
+              data-testid="pe-data-button"
+            >
+              <FormattedMessage id="policy_engine_request_button" defaultMessage="Policy Engine API" />
+            </a>
           )}
 
-          <Dialog open={openPEmodal} onClose={closePolicyEngineRequest} maxWidth="md" fullWidth disableScrollLock>
+          <Dialog
+            open={openPEmodal}
+            onClose={closePolicyEngineRequest}
+            maxWidth="md"
+            fullWidth
+            disableScrollLock
+            data-testid="pe-data-dialog"
+            PaperProps={{
+              sx: {
+                height: '75vh',
+                display: 'flex',
+                flexDirection: 'column',
+              },
+            }}
+          >
             <DialogTitle>
-              <FormattedMessage id="policy_engine_modal_title" defaultMessage="Policy Engine Data" />
+              <FormattedMessage id="policy_engine_modal_title" defaultMessage="Policy Engine API Data" />
             </DialogTitle>
-            <DialogContent dividers>
-              {/* Show request/response nicely */}
+            <DialogContent
+              dividers
+              sx={{
+                flex: 1,
+                overflowY: 'auto',
+                p: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  marginBottom: 2,
+                }}
+              >
+                <ButtonGroup variant="text" color="primary" size="small">
+                  <Button onClick={() => setCollapsed(false)}>Expand All</Button>
+                  <Button onClick={() => setCollapsed(3)}>By Default</Button>
+                </ButtonGroup>
+              </Box>
               <Typography component="pre" style={{ whiteSpace: 'pre-wrap' }}>
-                {/* {JSON.stringify(policyEngineData, null, 2)} */}
-                <JsonView value={policyEngineData} collapsed={3} />
+                <JsonView value={redacted} collapsed={collapsed} />
               </Typography>
             </DialogContent>
             <DialogActions>
-              <div className="apply-button-container">
-                <button className="apply-online-button" onClick={downloadPolicyEngineRequest}>
-                  <FormattedMessage id="close_button" defaultMessage="Download" />
-                </button>
-                <button className="apply-online-button" onClick={closePolicyEngineRequest}>
+              <div className="pe-modal-button-container">
+                <a
+                  role="button"
+                  className="pe-request-button"
+                  onClick={downloadPolicyEngineRequest}
+                  data-testid="pe-data-download-button"
+                >
+                  <FormattedMessage id="policy_engine_download_button" defaultMessage="Download" />
+                </a>
+                <a
+                  role="button"
+                  className="pe-request-button"
+                  onClick={closePolicyEngineRequest}
+                  data-testid="pe-data-close-button"
+                >
                   <FormattedMessage id="close_button" defaultMessage="Close" />
-                </button>
+                </a>
               </div>
             </DialogActions>
           </Dialog>
         </>
         {isAdminView && staffToken !== undefined && formData.isTestData && (
-          <button className="apply-online-button" onClick={toggleValidation}>
+          <a role="button" className="apply-online-button" onClick={toggleValidation}>
             {currentValidation === undefined ? (
               <FormattedMessage id="results.validations.button.add" defaultMessage="Create Validation" />
             ) : (
               <FormattedMessage id="results.validations.button.remove" defaultMessage="Remove Validation" />
             )}
-          </button>
+          </a>
         )}
       </div>
       <div className="content-width">

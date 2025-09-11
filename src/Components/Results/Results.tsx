@@ -121,7 +121,7 @@ const Results = ({ type }: ResultsProps) => {
       if (uuid === undefined) {
         throw new Error('can not find uuid');
       }
-      const rawEligibilityResponse = await getEligibility(uuid);
+      const rawEligibilityResponse = await getEligibility(uuid, isAdminView);
 
       // replace the program id in the categories with the program
       for (const category of rawEligibilityResponse.program_categories) {
