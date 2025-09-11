@@ -121,20 +121,76 @@ function SignUp() {
       path: ['tcpa'],
       message: formatMessage({ id: 'signUp.checkbox.error', defaultMessage: 'Please check the box to continue.' }),
     })
-    .superRefine(({ email, cell }, ctx) => {
-      const noEmailAndCell = email.length === 0 && cell.length === 0;
-      const message = formatMessage({
-        id: 'validation-helperText.noEmailOrPhoneNumber',
-        defaultMessage: 'Please enter an email or phone number',
-      });
-
-      if (noEmailAndCell) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: message,
-          path: ['email'],
-        });
-        return false;
+    .superRefine(({ email, cell, emailConsent, tcpa }, ctx) => {
+      const noEmail = email.length === 0;
+      const noCell = cell.length === 0;
+      
+      // Case 1: Both consents checked - require both fields
+      if (emailConsent && tcpa) {
+        if (noEmail) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.email-required',
+              defaultMessage: 'Please enter an email',
+            }),
+            path: ['email'],
+          });
+        }
+        if (noCell) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.phone-required',
+              defaultMessage: 'Please enter a phone number',
+            }),
+            path: ['cell'],
+          });
+        }
+      }
+      // Case 2: Only email consent checked - require email only
+      else if (emailConsent && !tcpa) {
+        if (noEmail) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.email-required',
+              defaultMessage: 'Please enter an email',
+            }),
+            path: ['email'],
+          });
+        }
+      }
+      // Case 3: Only SMS consent checked - require phone only
+      else if (!emailConsent && tcpa) {
+        if (noCell) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.phone-required',
+              defaultMessage: 'Please enter a phone number',
+            }),
+            path: ['cell'],
+          });
+        }
+      }
+      // Case 4: Neither consent checked - require at least one contact method
+      else if (!emailConsent && !tcpa) {
+        if (noEmail && noCell) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.noEmailOrPhoneNumber',
+              defaultMessage: 'Please enter an email or phone number',
+            }),
+            path: ['email'],
+          });
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '', // Empty message to just highlight the field
+            path: ['cell'],
+          });
+        }
       }
 
       return true;
@@ -395,7 +451,7 @@ function SignUp() {
                           onChange={(...args) => {
                             field.onChange(...args);
                             if (isSubmitted) {
-                              trigger(['contactInfo.email', 'contactInfo.emailConsent']);
+                              trigger(['contactInfo.email', 'contactInfo.cell', 'contactInfo.emailConsent']);
                             }
                           }}
                         />
@@ -437,7 +493,7 @@ function SignUp() {
                           onChange={(...args) => {
                             field.onChange(...args);
                             if (isSubmitted) {
-                              trigger(['contactInfo.cell', 'contactInfo.tcpa']);
+                              trigger(['contactInfo.email', 'contactInfo.cell', 'contactInfo.tcpa']);
                             }
                           }}
                         />

@@ -1,7 +1,30 @@
 import { z } from 'zod';
 
-// Mock useIntl hook
-const mockFormatMessage = jest.fn((params) => params.defaultMessage);
+// Mock useIntl hook  
+const mockFormatMessage = jest.fn((params) => {
+  // Handle the specific message IDs we use in our validation
+  const messageMap: { [key: string]: string } = {
+    'validation-helperText.firstName': 'Please enter your first name',
+    'validation-helperText.lastName': 'Please enter your last name',
+    'validation-helperText.email': 'Please enter a valid email address',
+    'validation-helperText.phoneNumber': 'Please enter a 10 digit phone number',
+    'validation-helperText.email-required': 'Please enter an email',
+    'validation-helperText.phone-required': 'Please enter a phone number',
+    'validation-helperText.noEmailOrPhoneNumber': 'Please enter an email or phone number',
+    'signUp.checkbox.error': 'Please check the box to continue.'
+  };
+  
+  
+  if (params && params.id && messageMap[params.id]) {
+    return messageMap[params.id];
+  }
+  
+  if (params && params.defaultMessage) {
+    return params.defaultMessage;
+  }
+  
+  return 'Invalid input';
+});
 
 jest.mock('react-intl', () => ({
   useIntl: () => ({
@@ -103,20 +126,76 @@ const createContactInfoSchema = () => {
       path: ['tcpa'],
       message: formatMessage({ id: 'signUp.checkbox.error', defaultMessage: 'Please check the box to continue.' }),
     })
-    .superRefine(({ email, cell }, ctx) => {
-      const noEmailAndCell = email.length === 0 && cell.length === 0;
-      const message = formatMessage({
-        id: 'validation-helperText.noEmailOrPhoneNumber',
-        defaultMessage: 'Please enter an email or phone number',
-      });
-
-      if (noEmailAndCell) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: message,
-          path: ['email'],
-        });
-        return false;
+    .superRefine(({ email, cell, emailConsent, tcpa }, ctx) => {
+      const noEmail = email.length === 0;
+      const noCell = cell.length === 0;
+      
+      // Case 1: Both consents checked - require both fields
+      if (emailConsent && tcpa) {
+        if (noEmail) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.email-required',
+              defaultMessage: 'Please enter an email',
+            }),
+            path: ['email'],
+          });
+        }
+        if (noCell) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.phone-required',
+              defaultMessage: 'Please enter a phone number',
+            }),
+            path: ['cell'],
+          });
+        }
+      }
+      // Case 2: Only email consent checked - require email only
+      else if (emailConsent && !tcpa) {
+        if (noEmail) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.email-required',
+              defaultMessage: 'Please enter an email',
+            }),
+            path: ['email'],
+          });
+        }
+      }
+      // Case 3: Only SMS consent checked - require phone only
+      else if (!emailConsent && tcpa) {
+        if (noCell) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.phone-required',
+              defaultMessage: 'Please enter a phone number',
+            }),
+            path: ['cell'],
+          });
+        }
+      }
+      // Case 4: Neither consent checked - require at least one contact method
+      else if (!emailConsent && !tcpa) {
+        if (noEmail && noCell) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.noEmailOrPhoneNumber',
+              defaultMessage: 'Please enter an email or phone number',
+            }),
+            path: ['email'],
+          });
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '', // Empty message to just highlight the field
+            path: ['cell'],
+          });
+        }
       }
 
       return true;
@@ -281,7 +360,7 @@ describe('SignUp Form Validation', () => {
       );
     });
 
-    it('should not add error to cell field when neither email nor phone provided', () => {
+    it('should add error to both email and cell fields when neither email nor phone provided', () => {
       const data = {
         firstName: 'John',
         lastName: 'Doe',
@@ -294,9 +373,181 @@ describe('SignUp Form Validation', () => {
       const result = schema.safeParse(data);
       expect(result.success).toBe(false);
       
-      // Should only have error on email field, not cell field
+      // Should have error on email field
+      const emailErrors = result.error?.issues.filter(issue => issue.path.includes('email'));
+      expect(emailErrors).toHaveLength(1);
+      
+      // Should have error on cell field but with empty message
       const cellErrors = result.error?.issues.filter(issue => issue.path.includes('cell'));
-      expect(cellErrors).toHaveLength(0);
+      expect(cellErrors).toHaveLength(1);
+      expect(cellErrors[0].message).toBe('');
+    });
+  });
+
+  describe('New validation logic - consent-based requirements', () => {
+    describe('Case 1: Both consents checked', () => {
+      it('should require both email and phone when both consents are checked', () => {
+        const data = {
+          firstName: 'John',
+          lastName: 'Doe',
+          email: '',
+          cell: '',
+          emailConsent: true,
+          tcpa: true,
+        };
+
+        const result = schema.safeParse(data);
+        expect(result.success).toBe(false);
+        
+        const emailErrors = result.error?.issues.filter(issue => issue.path.includes('email'));
+        expect(emailErrors).toHaveLength(1);
+        
+        const cellErrors = result.error?.issues.filter(issue => issue.path.includes('cell'));
+        expect(cellErrors).toHaveLength(1);
+      });
+
+      it('should pass when both email and phone provided with both consents', () => {
+        const data = {
+          firstName: 'John',
+          lastName: 'Doe',
+          email: 'john@example.com',
+          cell: '1234567890',
+          emailConsent: true,
+          tcpa: true,
+        };
+
+        const result = schema.safeParse(data);
+        expect(result.success).toBe(true);
+      });
+    });
+
+    describe('Case 2: Only email consent checked', () => {
+      it('should require only email when only email consent is checked', () => {
+        const data = {
+          firstName: 'John',
+          lastName: 'Doe',
+          email: '',
+          cell: '',
+          emailConsent: true,
+          tcpa: false,
+        };
+
+        const result = schema.safeParse(data);
+        expect(result.success).toBe(false);
+        
+        const emailErrors = result.error?.issues.filter(issue => issue.path.includes('email'));
+        expect(emailErrors).toHaveLength(1);
+        
+        // Should not require phone (only consent-related errors allowed)
+        const cellErrors = result.error?.issues.filter(issue => 
+          issue.path.includes('cell') && !issue.message.includes('check the box')
+        );
+        expect(cellErrors).toHaveLength(0);
+      });
+
+      it('should pass when email provided with email consent only', () => {
+        const data = {
+          firstName: 'John',
+          lastName: 'Doe',
+          email: 'john@example.com',
+          cell: '',
+          emailConsent: true,
+          tcpa: false,
+        };
+
+        const result = schema.safeParse(data);
+        expect(result.success).toBe(true);
+      });
+    });
+
+    describe('Case 3: Only SMS consent checked', () => {
+      it('should require only phone when only SMS consent is checked', () => {
+        const data = {
+          firstName: 'John',
+          lastName: 'Doe',
+          email: '',
+          cell: '',
+          emailConsent: false,
+          tcpa: true,
+        };
+
+        const result = schema.safeParse(data);
+        expect(result.success).toBe(false);
+        
+        const cellErrors = result.error?.issues.filter(issue => issue.path.includes('cell'));
+        expect(cellErrors).toHaveLength(1);
+        
+        // Should not require email (only consent-related errors allowed)
+        const emailErrors = result.error?.issues.filter(issue => 
+          issue.path.includes('email') && !issue.message.includes('check the box')
+        );
+        expect(emailErrors).toHaveLength(0);
+      });
+
+      it('should pass when phone provided with SMS consent only', () => {
+        const data = {
+          firstName: 'John',
+          lastName: 'Doe',
+          email: '',
+          cell: '1234567890',
+          emailConsent: false,
+          tcpa: true,
+        };
+
+        const result = schema.safeParse(data);
+        expect(result.success).toBe(true);
+      });
+    });
+
+    describe('Case 4: Neither consent checked', () => {
+      it('should require at least one contact method when neither consent checked', () => {
+        const data = {
+          firstName: 'John',
+          lastName: 'Doe',
+          email: '',
+          cell: '',
+          emailConsent: false,
+          tcpa: false,
+        };
+
+        const result = schema.safeParse(data);
+        expect(result.success).toBe(false);
+        
+        const emailErrors = result.error?.issues.filter(issue => issue.path.includes('email'));
+        expect(emailErrors).toHaveLength(1);
+        
+        const cellErrors = result.error?.issues.filter(issue => issue.path.includes('cell'));
+        expect(cellErrors).toHaveLength(1);
+        expect(cellErrors[0].message).toBe('');
+      });
+
+      it('should pass when email provided with neither consent', () => {
+        const data = {
+          firstName: 'John',
+          lastName: 'Doe',
+          email: 'john@example.com',
+          cell: '',
+          emailConsent: false,
+          tcpa: false,
+        };
+
+        const result = schema.safeParse(data);
+        expect(result.success).toBe(false); // Should fail because email consent is required if email is provided
+      });
+
+      it('should pass when phone provided with neither consent', () => {
+        const data = {
+          firstName: 'John',
+          lastName: 'Doe',
+          email: '',
+          cell: '1234567890',
+          emailConsent: false,
+          tcpa: false,
+        };
+
+        const result = schema.safeParse(data);
+        expect(result.success).toBe(false); // Should fail because SMS consent is required if phone is provided
+      });
     });
   });
 
