@@ -617,7 +617,7 @@ const ECHouseholdMemberForm = () => {
                   value={'true'}
                   control={<Radio />}
                   label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
-                />                
+                />        
                 <FormControlLabel
                     value={'false'}
                     control={<Radio />}

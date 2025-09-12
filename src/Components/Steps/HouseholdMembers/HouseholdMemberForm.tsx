@@ -700,8 +700,7 @@ const HouseholdMemberForm = () => {
                     </Box>
                   }
                 />
-              </RadioGroup>
-               
+              </RadioGroup>               
               </>
             )}
           />
