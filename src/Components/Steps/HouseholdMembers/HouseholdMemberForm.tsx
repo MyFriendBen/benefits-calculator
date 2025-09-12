@@ -322,6 +322,7 @@ const HouseholdMemberForm = () => {
   });
   const watchHasIncome = watch('hasIncome');
   const hasTruthyIncome = watchHasIncome === 'true';
+  
   const { fields, append, remove, replace } = useFieldArray({
     control,
     name: 'incomeStreams',
@@ -634,6 +635,22 @@ const HouseholdMemberForm = () => {
         ? 'Do you have an income?'
         : 'Does this individual in your household have significant income you have not already included?';
 
+        // Calculate if the person is 16 or older based on current form values
+      const currentBirthMonth = watch('birthMonth');
+      const currentBirthYear = watch('birthYear');
+      
+      let isUnder16 = false;
+      if (currentBirthMonth && currentBirthYear) {
+        const birthMonth = Number(currentBirthMonth);
+        const birthYear = Number(currentBirthYear);
+        
+        if (birthMonth > 0 && birthYear > 0) {
+          const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
+          const age = CURRENT_YEAR - birthYear;
+          const is16OrOlder = age > 16 || (age === 16 && birthMonth <= CURRENT_MONTH);
+          isUnder16 = !is16OrOlder;          
+        }
+      }
     return (
       <Box className="section-container" sx={{ paddingTop: '3rem' }}>
         <div className="section">
@@ -660,26 +677,31 @@ const HouseholdMemberForm = () => {
             rules={{ required: true }}
             render={({ field }) => (
               <>
-                <RadioGroup {...field} aria-label={translatedAriaLabel} sx={{ marginBottom: '1rem' }}>
-                  <FormControlLabel
-                    value={'true'}
-                    control={<Radio />}
-                    label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
-                  />
-                  <FormControlLabel
-                    value={'false'}
-                    control={<Radio />}
-                    label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
-                  />
-                </RadioGroup>
-                {watchHasIncome === 'false' && (
-                  <QuestionDescription>
-                    <FormattedMessage 
-                      id="householdDataBlock.createIncomeRadioQuestion-noIncomeDisclaimer" 
-                      defaultMessage="Income affects benefits! We can be more accurate if you tell us significant household income." 
-                    />
-                  </QuestionDescription>
-                )}
+              <RadioGroup {...field} aria-label={translatedAriaLabel} sx={{ marginBottom: '1rem' }}>
+                <FormControlLabel
+                  value={'true'}
+                  control={<Radio />}
+                  label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
+                />
+                <FormControlLabel
+                  value={'false'}
+                  control={<Radio />}
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <FormattedMessage id="radiofield.label-no" defaultMessage="No" />
+                      {watchHasIncome === 'false' && !isUnder16 && (
+                        <Box component="span" sx={{ fontSize: '0.875rem', color: 'text.secondary',  ml: 1 }}>
+                          <FormattedMessage 
+                            id="householdDataBlock.createIncomeRadioQuestion-noIncomeDisclaimer" 
+                            defaultMessage="Income affects benefits. We can be more accurate if you tell us significant household income." 
+                          />
+                        </Box>
+                      )}                      
+                    </Box>
+                  }
+                />
+              </RadioGroup>
+               
               </>
             )}
           />
