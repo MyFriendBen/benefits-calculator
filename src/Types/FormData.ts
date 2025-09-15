@@ -75,6 +75,7 @@ export type SignUpInfo = {
   hasUser: boolean;
   sendOffers: boolean;
   sendUpdates: boolean;
+  emailConsent: boolean;
   commConsent: boolean;
   serverError?: boolean;
 };

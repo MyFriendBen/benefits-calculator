@@ -101,6 +101,7 @@ export function useUpdateFormData() {
         hasUser: Boolean(response.user),
         sendOffers: response.user?.send_offers ?? false,
         sendUpdates: response.user?.send_updates ?? false,
+        emailConsent: false,
         commConsent: false,
       },
     };

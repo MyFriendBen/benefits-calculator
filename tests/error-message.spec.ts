@@ -194,6 +194,7 @@ test.describe('Error Messages Test', () => {
       'Please enter your first name',
       'Please enter your last name',
       'Please enter an email or phone number',
+      '',
     ]);
 
     await UncheckCheckbox(page, FORM_INPUTS.SIGNUP_CHECKBOX_1.name);

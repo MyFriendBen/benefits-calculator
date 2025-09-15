@@ -172,7 +172,10 @@ const Results = ({ type }: ResultsProps) => {
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
 
-  const filterPrograms = filterProgramsGenerator(formData, filtersChecked, isAdminView);
+  const filterPrograms = useMemo(
+    () => filterProgramsGenerator(formData, filtersChecked, isAdminView, apiResults?.programs || []),
+    [formData, filtersChecked, isAdminView, apiResults?.programs]
+  );
 
   useEffect(() => {
     if (apiResults === undefined) {
@@ -197,7 +200,7 @@ const Results = ({ type }: ResultsProps) => {
     setMissingPrograms(apiResults.missing_programs);
     setValidations(apiResults.validations);
     setLoading(false);
-  }, [filtersChecked, apiResults, isAdminView]);
+  }, [filterPrograms, apiResults]);
 
   const ResultsContextProvider = ({ children }: PropsWithChildren) => {
     return (
