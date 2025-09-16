@@ -27,6 +27,7 @@ import { ReactComponent as Job_resources } from '../../Assets/icons/UrgentNeeds/
 import { ReactComponent as Legal_services } from '../../Assets/icons/UrgentNeeds/AcuteConditions/legal_services.svg';
 import { ReactComponent as Support } from '../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
 import { ReactComponent as Military } from '../../Assets/icons/UrgentNeeds/AcuteConditions/military.svg';
+import { ReactComponent as Resources } from '../../Assets/icons/General/resources.svg';
 import { ReactComponent as SurvivingSpouse } from '../../Assets/icons/General/head.svg';
 import { ReactComponent as Dialysis } from '../../Assets/icons/General/OptionCard/Conditions/dialysis.svg';
 import { Language } from '../../Assets/languageOptions';
@@ -74,6 +75,9 @@ function transformItemIcon(item: unknown): any {
       break;
     case 'Military':
       iconComponent = <Military className={icon._classname} />;
+      break;
+    case 'Savings':
+      iconComponent = <Resources className={icon._classname} />;
       break;
     // Conditions
     case 'BlindOrVisuallyImpaired':
