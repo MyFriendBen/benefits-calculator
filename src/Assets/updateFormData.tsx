@@ -91,6 +91,7 @@ export function useUpdateFormData() {
         jobResources: response.needs_job_resources ?? false,
         dentalCare: response.needs_dental_care ?? false,
         legalServices: response.needs_legal_services ?? false,
+        savings: response.needs_savings ?? false,
         veteranServices: response.needs_veteran_services ?? false,
       },
       signUpInfo: {

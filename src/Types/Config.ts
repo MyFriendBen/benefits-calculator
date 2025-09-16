@@ -63,6 +63,7 @@ export type ApiAcuteHHConditions = {
   jobResources: string;
   dentalCare: string;
   legalServices: string;
+  savings: string;
 };
 
 export type ApiSignupInfo = {
