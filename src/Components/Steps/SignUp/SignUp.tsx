@@ -101,33 +101,18 @@ export const buildContactInfoSchema = (formatMessage: any) => {
             defaultMessage: 'Please enter a 10 digit phone number',
           }),
         }),
-      emailConsent: z.boolean(),
       tcpa: z.boolean(),
-    })
-    .refine(({ emailConsent, email }) => email === '' || emailConsent, {
-      path: ['emailConsent'],
-      message: formatMessage({ id: 'signUp.checkbox.error', defaultMessage: 'Please check the box to continue.' }),
     })
     .refine(({ tcpa, cell }) => cell === '' || tcpa, {
       path: ['tcpa'],
       message: formatMessage({ id: 'signUp.checkbox.error', defaultMessage: 'Please check the box to continue.' }),
     })
-    .superRefine(({ email, cell, emailConsent, tcpa }, ctx) => {
+    .superRefine(({ email, cell, tcpa }, ctx) => {
       const noEmail = email.length === 0;
       const noCell = cell.length === 0;
 
-      // Case 1: Both consents checked - require both fields
-      if (emailConsent && tcpa) {
-        if (noEmail) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: formatMessage({
-              id: 'validation-helperText.email-required',
-              defaultMessage: 'Please enter an email',
-            }),
-            path: ['email'],
-          });
-        }
+      // Case 1: SMS consent checked - require phone only
+      if (tcpa) {
         if (noCell) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -139,34 +124,8 @@ export const buildContactInfoSchema = (formatMessage: any) => {
           });
         }
       }
-      // Case 2: Only email consent checked - require email only
-      else if (emailConsent && !tcpa) {
-        if (noEmail) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: formatMessage({
-              id: 'validation-helperText.email-required',
-              defaultMessage: 'Please enter an email',
-            }),
-            path: ['email'],
-          });
-        }
-      }
-      // Case 3: Only SMS consent checked - require phone only
-      else if (!emailConsent && tcpa) {
-        if (noCell) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: formatMessage({
-              id: 'validation-helperText.phone-required',
-              defaultMessage: 'Please enter a phone number',
-            }),
-            path: ['cell'],
-          });
-        }
-      }
-      // Case 4: Neither consent checked - require at least one contact method
-      else if (!emailConsent && !tcpa) {
+      // Case 2: No SMS consent - require at least one contact method
+      else {
         if (noEmail && noCell) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -250,7 +209,7 @@ function SignUp() {
 
   useEffect(() => {
     if (someContactType(contactType) && !formData.signUpInfo.hasUser) {
-      setValue('contactInfo', { firstName: '', lastName: '', email: '', cell: '', emailConsent: false, tcpa: false });
+      setValue('contactInfo', { firstName: '', lastName: '', email: '', cell: '', tcpa: false });
       if (isSubmitted) {
         trigger('contactInfo');
         setHasServerError(false);
@@ -288,7 +247,6 @@ function SignUp() {
       signUpInfo.lastName = updatedSignUpInfo.lastName;
       signUpInfo.email = updatedSignUpInfo.email;
       signUpInfo.phone = updatedSignUpInfo.cell;
-      signUpInfo.emailConsent = updatedSignUpInfo.emailConsent;
       signUpInfo.commConsent = updatedSignUpInfo.tcpa;
     }
 
@@ -392,7 +350,7 @@ function SignUp() {
                     onChange={(...args) => {
                       field.onChange(...args);
                       if (isSubmitted) {
-                        trigger(['contactInfo.cell', 'contactInfo.email', 'contactInfo.emailConsent']);
+                        trigger(['contactInfo.cell', 'contactInfo.email']);
                       }
                     }}
                     label={<FormattedMessage id="signUp.createEmailTextfield-label" defaultMessage="Email" />}
@@ -437,49 +395,6 @@ function SignUp() {
                 defaultMessage="A copy of your MyFriendBen results will be sent to the email/phone number you provided."
               />
             </p>
-            <div>
-              <Controller
-                name="contactInfo.emailConsent"
-                control={control}
-                render={({ field }) => (
-                  <>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          {...field}
-                          checked={field.value}
-                          sx={
-                            errors.contactInfo?.emailConsent !== undefined
-                              ? { color: 'error.main', alignSelf: 'flex-start' }
-                              : { alignSelf: 'flex-start' }
-                          }
-                          onChange={(...args) => {
-                            field.onChange(...args);
-                            if (isSubmitted) {
-                              trigger(['contactInfo.email', 'contactInfo.cell', 'contactInfo.emailConsent']);
-                            }
-                          }}
-                        />
-                      }
-                      label={
-                        <div className="sign-up-text">
-                          <strong>Email: </strong>
-                          <FormattedMessage
-                            id="signUp.emailConsent"
-                            defaultMessage="I agree to receive promotional and transactional emails from MyFriendBen"
-                          />
-                        </div>
-                      }
-                    />
-                    {errors.contactInfo?.emailConsent && (
-                      <ErrorMessageWrapper fontSize="1rem">
-                        {errors.contactInfo.emailConsent.message}
-                      </ErrorMessageWrapper>
-                    )}
-                  </>
-                )}
-              />
-            </div>
             <div>
               <Controller
                 name="contactInfo.tcpa"
