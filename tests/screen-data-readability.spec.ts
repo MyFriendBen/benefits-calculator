@@ -819,7 +819,6 @@ test.describe('Screen Text Collection and Readability Analysis', () => {
     );
   });
 });
-
 const getReadingLevel = (fleschScore: number): string => {
       if (fleschScore >= 90) return 'Very Easy';
       if (fleschScore >= 80) return 'Easy';
