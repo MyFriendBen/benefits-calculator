@@ -411,12 +411,12 @@ test.describe('Screen Text Collection and Readability Analysis', () => {
     ].join('\n');
 
     const getReadingLevel = (fleschScore: number): string => {
-      if (fleschScore >= 90) return 'Very Easy - Grade 5';
-      if (fleschScore >= 80) return 'Easy - Grade 6';
-      if (fleschScore >= 70) return 'Fairly Easy - Grade 7';
-      if (fleschScore >= 60) return 'Plain - Grade 8-9';
-      if (fleschScore >= 50) return 'Fairly Hard -Grade 10-12';
-      if (fleschScore >= 30) return 'Hard - College';
+      if (fleschScore >= 90) return 'Very Easy';
+      if (fleschScore >= 80) return 'Easy';
+      if (fleschScore >= 70) return 'Fairly Easy';
+      if (fleschScore >= 60) return 'Plain';
+      if (fleschScore >= 50) return 'Fairly Hard';
+      if (fleschScore >= 30) return 'Hard';
       return 'Very Hard - Graduate';
     };
 
