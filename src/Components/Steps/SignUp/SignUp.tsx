@@ -20,18 +20,9 @@ import { Context } from '../../Wrapper/Wrapper';
 import useStepForm from '../stepForm';
 import './SignUp.css';
 
-function SignUp() {
-  const { formData, setFormData } = useContext(Context);
-  const { uuid } = useParams();
-  const [hasServerError, setHasServerError] = useState(false);
-  const { updateUser } = useScreenApi();
-  const { formatMessage } = useIntl();
-  const backNavigationFunction = useDefaultBackNavigationFunction('signUpInfo');
-  const signUpOptions = useConfig<{ [key: string]: FormattedMessageType }>('sign_up_options');
-  const privacyPolicyLink = useLocalizedLink('privacy_policy');
-  const consentToContactLink = useLocalizedLink('consent_to_contact');
-
-  const contactInfoSchema = z
+// Pure schema builder function for testability
+export const buildContactInfoSchema = (formatMessage: any) => {
+  return z
     .object({
       firstName: z
         .string({
@@ -79,7 +70,7 @@ function SignUp() {
             },
           })
           .email()
-          .or(z.literal(''))
+          .or(z.literal('')),
       ),
       cell: z
         .string({
@@ -110,30 +101,105 @@ function SignUp() {
             defaultMessage: 'Please enter a 10 digit phone number',
           }),
         }),
+      emailConsent: z.boolean(),
       tcpa: z.boolean(),
+    })
+    .refine(({ emailConsent, email }) => email === '' || emailConsent, {
+      path: ['emailConsent'],
+      message: formatMessage({ id: 'signUp.checkbox.error', defaultMessage: 'Please check the box to continue.' }),
     })
     .refine(({ tcpa, cell }) => cell === '' || tcpa, {
       path: ['tcpa'],
       message: formatMessage({ id: 'signUp.checkbox.error', defaultMessage: 'Please check the box to continue.' }),
     })
-    .superRefine(({ email, cell }, ctx) => {
-      const noEmailAndCell = email.length === 0 && cell.length === 0;
-      const message = formatMessage({
-        id: 'validation-helperText.noEmailOrPhoneNumber',
-        defaultMessage: 'Please enter an email or phone number',
-      });
+    .superRefine(({ email, cell, emailConsent, tcpa }, ctx) => {
+      const noEmail = email.length === 0;
+      const noCell = cell.length === 0;
 
-      if (noEmailAndCell) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: message,
-          path: ['email'],
-        });
-        return false;
+      // Case 1: Both consents checked - require both fields
+      if (emailConsent && tcpa) {
+        if (noEmail) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.email-required',
+              defaultMessage: 'Please enter an email',
+            }),
+            path: ['email'],
+          });
+        }
+        if (noCell) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.phone-required',
+              defaultMessage: 'Please enter a phone number',
+            }),
+            path: ['cell'],
+          });
+        }
+      }
+      // Case 2: Only email consent checked - require email only
+      else if (emailConsent && !tcpa) {
+        if (noEmail) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.email-required',
+              defaultMessage: 'Please enter an email',
+            }),
+            path: ['email'],
+          });
+        }
+      }
+      // Case 3: Only SMS consent checked - require phone only
+      else if (!emailConsent && tcpa) {
+        if (noCell) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.phone-required',
+              defaultMessage: 'Please enter a phone number',
+            }),
+            path: ['cell'],
+          });
+        }
+      }
+      // Case 4: Neither consent checked - require at least one contact method
+      else if (!emailConsent && !tcpa) {
+        if (noEmail && noCell) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: formatMessage({
+              id: 'validation-helperText.noEmailOrPhoneNumber',
+              defaultMessage: 'Please enter an email or phone number',
+            }),
+            path: ['email'],
+          });
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '', // Empty message to just highlight the field
+            path: ['cell'],
+          });
+        }
       }
 
       return true;
     });
+};
+
+function SignUp() {
+  const { formData, setFormData } = useContext(Context);
+  const { uuid } = useParams();
+  const [hasServerError, setHasServerError] = useState(false);
+  const { updateUser } = useScreenApi();
+  const { formatMessage } = useIntl();
+  const backNavigationFunction = useDefaultBackNavigationFunction('signUpInfo');
+  const signUpOptions = useConfig<{ [key: string]: FormattedMessageType }>('sign_up_options');
+  const privacyPolicyLink = useLocalizedLink('privacy_policy');
+  const consentToContactLink = useLocalizedLink('consent_to_contact');
+
+  const contactInfoSchema = buildContactInfoSchema(formatMessage);
 
   const someContactType = (contactType: { [key: string]: boolean }) => {
     return Object.values(contactType).some((value) => value);
@@ -184,7 +250,7 @@ function SignUp() {
 
   useEffect(() => {
     if (someContactType(contactType) && !formData.signUpInfo.hasUser) {
-      setValue('contactInfo', { firstName: '', lastName: '', email: '', cell: '', tcpa: false });
+      setValue('contactInfo', { firstName: '', lastName: '', email: '', cell: '', emailConsent: false, tcpa: false });
       if (isSubmitted) {
         trigger('contactInfo');
         setHasServerError(false);
@@ -222,6 +288,7 @@ function SignUp() {
       signUpInfo.lastName = updatedSignUpInfo.lastName;
       signUpInfo.email = updatedSignUpInfo.email;
       signUpInfo.phone = updatedSignUpInfo.cell;
+      signUpInfo.emailConsent = updatedSignUpInfo.emailConsent;
       signUpInfo.commConsent = updatedSignUpInfo.tcpa;
     }
 
@@ -325,7 +392,7 @@ function SignUp() {
                     onChange={(...args) => {
                       field.onChange(...args);
                       if (isSubmitted) {
-                        trigger(['contactInfo.cell', 'contactInfo.email']);
+                        trigger(['contactInfo.cell', 'contactInfo.email', 'contactInfo.emailConsent']);
                       }
                     }}
                     label={<FormattedMessage id="signUp.createEmailTextfield-label" defaultMessage="Email" />}
@@ -367,9 +434,52 @@ function SignUp() {
             <p className="sign-up-disclaimer-text">
               <FormattedMessage
                 id="signUp.displayDisclosureSection-consentText"
-                defaultMessage="A copy of your MyFriendBen results will automatically be sent to the email/phone number you provided."
+                defaultMessage="A copy of your MyFriendBen results will be sent to the email/phone number you provided."
               />
             </p>
+            <div>
+              <Controller
+                name="contactInfo.emailConsent"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          {...field}
+                          checked={field.value}
+                          sx={
+                            errors.contactInfo?.emailConsent !== undefined
+                              ? { color: 'error.main', alignSelf: 'flex-start' }
+                              : { alignSelf: 'flex-start' }
+                          }
+                          onChange={(...args) => {
+                            field.onChange(...args);
+                            if (isSubmitted) {
+                              trigger(['contactInfo.email', 'contactInfo.cell', 'contactInfo.emailConsent']);
+                            }
+                          }}
+                        />
+                      }
+                      label={
+                        <div className="sign-up-text">
+                          <strong>Email: </strong>
+                          <FormattedMessage
+                            id="signUp.emailConsent"
+                            defaultMessage="I agree to receive promotional and transactional emails from MyFriendBen"
+                          />
+                        </div>
+                      }
+                    />
+                    {errors.contactInfo?.emailConsent && (
+                      <ErrorMessageWrapper fontSize="1rem">
+                        {errors.contactInfo.emailConsent.message}
+                      </ErrorMessageWrapper>
+                    )}
+                  </>
+                )}
+              />
+            </div>
             <div>
               <Controller
                 name="contactInfo.tcpa"
@@ -381,22 +491,23 @@ function SignUp() {
                       control={
                         <Checkbox
                           {...field}
-                          checked={getValues('contactInfo.tcpa')}
+                          checked={field.value}
                           sx={
                             errors.contactInfo?.tcpa !== undefined
-                              ? { color: '#c6252b', alignSelf: 'flex-start' }
+                              ? { color: 'error.main', alignSelf: 'flex-start' }
                               : { alignSelf: 'flex-start' }
                           }
                           onChange={(...args) => {
                             field.onChange(...args);
                             if (isSubmitted) {
-                              trigger(['contactInfo.cell', 'contactInfo.tcpa']);
+                              trigger(['contactInfo.email', 'contactInfo.cell', 'contactInfo.tcpa']);
                             }
                           }}
                         />
                       }
                       label={
                         <div className="sign-up-text">
+                          <strong>SMS: </strong>
                           <FormattedMessage
                             id="signUp.displayDisclosureSection.tcpa"
                             defaultMessage="I consent to MyFriendBen and its affiliates contacting me via text message to offer additional programs or opportunities that may be of interest to me and my family, for marketing purposes, updates and alerts, and to solicit feedback. I understand that the frequency of these text messages may vary, and that standard message and data costs may apply. Reply HELP for help and STOP to end. View our <tos>Terms of Service</tos> and <privacy>Privacy Policy</privacy>."

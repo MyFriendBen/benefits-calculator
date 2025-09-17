@@ -96,6 +96,7 @@ export type UrgentNeed = {
   warning: Translation;
   phone_number: string;
   icon: string;
+  notification_message: Translation | null;
 };
 
 export type Validation = {
