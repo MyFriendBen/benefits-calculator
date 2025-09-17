@@ -70,6 +70,36 @@ export const testUsers = {
     referralSource: 'Test / Prospective Partner',
   },
 
+  // NC 211 referrer - same data as NC white label since information collected is identical
+  [REFERRERS.NC_211]: {
+    zipCode: '27704',
+    county: 'Durham County',
+    householdSize: '2',
+    primaryUser: {
+      birthMonth: 'March',
+      birthYear: '1990',
+      hasIncome: true,
+      income: {
+        type: 'Wages, salaries, tips',
+        frequency: 'every month',
+        amount: '2200',
+      },
+    },
+    householdMember: {
+      birthMonth: 'February',
+      birthYear: '2020',
+      relationship: 'Child',
+    },
+    expenses: {
+      hasExpenses: true,
+      type: 'Rent',
+      amount: '2500',
+    },
+    assets: '1000',
+    needs: ['Food or groceries', "Concern about your child's", 'Free or low-cost help with'],
+    referralSource: 'Test / Prospective Partner',
+  },
+
   // Templates for other white labels/referrers, to be expanded as needed
   [REFERRERS.JEFFERSON_COUNTY]: {
     zipCode: '80401',

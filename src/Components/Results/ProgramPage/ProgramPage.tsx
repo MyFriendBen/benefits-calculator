@@ -349,7 +349,7 @@ function RequiredProgram({ programId }: RequiredProgramProps) {
       <p>
         <ResultsTranslate translation={program.description} />
       </p>
-      <div className="result-program-more-info-button">
+      <div className="result-program-learn-more-button">
         <Link to={programLink}>
           <FormattedMessage id="programPage.requiredPrograms.link" defaultMessage="Learn More" />
         </Link>

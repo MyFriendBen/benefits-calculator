@@ -61,7 +61,7 @@ const REBATE_CATEGORY_HEADING: ProgramCategory = {
   description: {
     label: 'energyCalculator.results.rebates.description',
     default_message:
-      'You may qualify for savings on the cost of electric appliances. Check your results below for rebates, tax credits, and discounts.',
+      "You may qualify for rebates that reduce the cost of making your home more energy efficient. Inspections or work done on a rented home may require a landlord's consent.",
   },
   caps: [],
   programs: [],

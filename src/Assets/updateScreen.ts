@@ -15,6 +15,7 @@ import { useContext } from 'react';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { useParams } from 'react-router-dom';
 import { useUpdateFormData } from './updateFormData';
+import { getCampaign } from '../Components/CampaignAnalytics/campaign';
 
 const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: string) => {
   const householdMembers = getHouseholdMembersBodies(formData);
@@ -47,6 +48,10 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     has_dpp: formData.benefits.denverpresc ?? null,
     has_ede: formData.benefits.ede ?? null,
     has_eitc: formData.benefits.eitc ?? null,
+    has_il_eitc: formData.benefits.il_eitc ?? null,
+    has_il_ctc: formData.benefits.il_ctc ?? null,
+    has_il_transit_reduced_fare: formData.benefits.il_transit_reduced_fare ?? null,
+    has_il_bap: formData.benefits.il_bap ?? null,
     has_erc: null,
     has_lifeline: formData.benefits.lifeline ?? null,
     has_leap: formData.benefits.leap ?? null,
@@ -97,7 +102,14 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     needs_job_resources: formData.acuteHHConditions.jobResources ?? null,
     needs_dental_care: formData.acuteHHConditions.dentalCare ?? null,
     needs_legal_services: formData.acuteHHConditions.legalServices ?? null,
+    needs_savings: formData.acuteHHConditions.savings ?? null,
     needs_veteran_services: formData.acuteHHConditions.veteranServices ?? null,
+    utm_id: formData.utm?.id ?? null,
+    utm_source: formData.utm?.source ?? null,
+    utm_medium: formData.utm?.medium ?? null,
+    utm_campaign: formData.utm?.campaign ?? null,
+    utm_content: formData.utm?.content ?? null,
+    utm_term: formData.utm?.term ?? null,
   };
 
   return screenBody;
@@ -232,7 +244,11 @@ export default function useScreenApi() {
       updateFormData(updatedFormData);
     },
     createScreen: async (formData: FormData) => {
-      const newFormData = await postScreen(getScreensBody(formData, locale, whiteLabel));
+      const extendedFormData = {
+        ...formData,
+        utm: getCampaign(),
+      };
+      const newFormData = await postScreen(getScreensBody(extendedFormData, locale, whiteLabel));
       updateFormData(newFormData);
       return newFormData;
     },

@@ -15,6 +15,7 @@ import PoweredByFooter from '../Footer/PoweredByFooter';
 import EnergyCalculatorFooter from '../EnergyCalculator/Footer/Footer';
 import LancHeader from '../LancComponents/LancHeader/LancHeader';
 import LancFooter from '../LancComponents/LancFooter/LancFooter';
+import NCHispanicFederationFooter from '../NCHispanicFederation/NCHispanicFederationFooter/NCHispanicFederationFooter';
 
 export const BrandedHeader = () => {
   const { getReferrer } = useContext(Context);
@@ -39,24 +40,19 @@ export const BrandedFooter = () => {
   const { getReferrer } = useContext(Context);
   const featureFlags = getReferrer('featureFlags');
 
-  if (featureFlags.includes('211co')) {
-    return <TwoOneOneFooterCO />;
-  }
+  const footerMap = [
+    { flag: '211co', component: TwoOneOneFooterCO },
+    { flag: '211nc', component: TwoOneOneFooterNC },
+    { flag: 'lanc', component: LancFooter },
+    { flag: 'hfed', component: NCHispanicFederationFooter },
+    { flag: 'energy_calculator', component: EnergyCalculatorFooter },
+    { flag: 'powered_by_mfb_footer', component: PoweredByFooter },
+  ];
 
-  if (featureFlags.includes('211nc')) {
-    return <TwoOneOneFooterNC />;
-  }
-
-  if (featureFlags.includes('lanc')) {
-    return <LancFooter />;
-  }
-
-  if (featureFlags.includes('energy_calculator')) {
-    return <EnergyCalculatorFooter />;
-  }
-
-  if (featureFlags.includes('powered_by_mfb_footer')) {
-    return <PoweredByFooter />;
+  for (const { flag, component: Component } of footerMap) {
+    if (featureFlags.includes(flag)) {
+      return <Component />;
+    }
   }
 
   return <Footer />;

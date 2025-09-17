@@ -26,6 +26,10 @@ import PoweredByLogo from '../../Assets/Logos/powered_by_mfb.png';
 import RewiringAmericaLogo from '../../Assets/States/CO/Logos/rewiring_america_logo.png';
 import Broomfield_MFBLogo from '../../Assets/States/CO/WhiteLabels/Broomfield/Broomfield_MFBLogo.png';
 import TheActionCenter_MFBLogo from '../../Assets/States/CO/WhiteLabels/TheActionCenter/TheActionCenter_MFBLogo.png';
+import CESN_Logo_English from '../../Assets/States/CO/WhiteLabels/co_energy_calculator/CESN_logo_English.png';
+import CESN_Logo_Spanish from '../../Assets/States/CO/WhiteLabels/co_energy_calculator/CESN_logo_Spanish.png';
+import HispanicFederation_MFBLogo from '../../Assets/States/NC/WhiteLabels/HispanicFederation/HispanicFederation_MFBLogo.png';
+import { useIntl } from 'react-intl';
 
 const logoMap: { [key: string]: string | undefined } = {
   MFB_COLogo: MFBCOLogo,
@@ -56,9 +60,28 @@ const logoMap: { [key: string]: string | undefined } = {
   RewiringAmericaLogo: RewiringAmericaLogo,
   Broomfield_MFBLogo: Broomfield_MFBLogo,
   TheActionCenter_MFBLogo: TheActionCenter_MFBLogo,
+  CESN_Logo_English: CESN_Logo_English,
+  CESN_Logo_Spanish: CESN_Logo_Spanish,
+  HispanicFederation_MFBLogo: HispanicFederation_MFBLogo,
 };
 
 export const renderLogoSource = (sourceLabel: string, logoAlt: string, logoClass: string) => {
-  const logoSrc = logoMap[sourceLabel] ?? MFBDEFAULT;
+  const intl = useIntl();
+  const currentLanguage = intl.locale;
+
+  let logoSrc = logoMap[sourceLabel] ?? MFBDEFAULT;
+
+  // Handle language-aware CESN logo selection
+  if (sourceLabel.startsWith('CESN_')) {
+    const isSpanish = currentLanguage === 'es';
+
+    // Map base CESN labels to language-specific variants
+    if (sourceLabel === 'CESN_Logo') {
+      logoSrc = isSpanish
+        ? logoMap['CESN_Logo_Spanish'] ?? logoMap['CESN_Logo_English'] ?? MFBDEFAULT
+        : logoMap['CESN_Logo_English'] ?? MFBDEFAULT;
+    }
+  }
+
   return <img src={logoSrc} alt={logoAlt} className={logoClass} />;
 };

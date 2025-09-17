@@ -9,7 +9,7 @@ import {
   navigateHomePage,
   selectCounty,
   selectInsurance,
-  selectNearTernNeeds,
+  selectNearTermNeeds,
   selectReferralSource,
   selectState,
 } from './helpers/steps';
@@ -34,7 +34,7 @@ const whiteLabels = {
     dobMonth: 'February',
     dobYear: '1989',
     insurance: "I don't have or know if I have health insurance",
-    nearTernNeeds: ['Food or groceries'],
+    nearTermNeeds: ['Food or groceries'],
     referralSource: 'Test / Prospective Partner',
     expectedResult: {
       programsCount: '3Programs Found',
@@ -50,7 +50,7 @@ const whiteLabels = {
     dobMonth: 'February',
     dobYear: '1989',
     insurance: "I don't have or know if I have health insurance",
-    nearTernNeeds: ['Food or groceries'],
+    nearTermNeeds: ['Food or groceries'],
     referralSource: 'Test / Prospective Partner',
     expectedResult: {
       programsCount: '5Programs Found',
@@ -66,7 +66,7 @@ const whiteLabels = {
     dobMonth: 'February',
     dobYear: '1989',
     insurance: "I don't have or know if I have health insurance",
-    nearTernNeeds: ['Food or groceries'],
+    nearTermNeeds: ['Food or groceries'],
     referralSource: 'Test / Prospective Partner',
     expectedResult: {
       programsCount: '5Programs Found',
@@ -91,7 +91,7 @@ const energyCalculators = {
     householdInfo: 'You have a past-due electric',
     noBenefit: true,
     expectedResult: {
-      programsCount: '7Programs Found',
+      programsCount: '7Programs Found8Rebates Found',
     },
   },
 };
@@ -138,7 +138,7 @@ test.describe('Basic e2e tests for each white label', () => {
       await clickContinueButton(page);
       await verifyCurrentUrl(page, URL_PATTERNS.NEEDS);
 
-      await selectNearTernNeeds(page, config.nearTernNeeds);
+      await selectNearTermNeeds(page, config.nearTermNeeds);
       await clickContinueButton(page);
       await verifyCurrentUrl(page, URL_PATTERNS.REFERRAL_SOURCE);
 

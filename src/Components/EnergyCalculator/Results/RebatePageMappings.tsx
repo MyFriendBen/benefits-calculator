@@ -190,6 +190,55 @@ function ItemName({ rebate }: RebateComponentProps) {
       return (
         <FormattedMessage id="energyCalculator.rebatePage.title.itemName.otherHeatPump" defaultMessage="a heat pump" />
       );
+    case 'rooftop_solar_installation':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.rooftopSolarInstallation"
+          defaultMessage="rooftop solar installation"
+        />
+      );
+    case 'battery_storage_installation':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.batteryStorageInstallation"
+          defaultMessage="battery storage installation"
+        />
+      );
+    case 'electric_wiring':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.electricWiring"
+          defaultMessage="electric wiring"
+        />
+      );
+    case 'electric_panel':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.electricPanel"
+          defaultMessage="electric panel upgrade"
+        />
+      );
+    case 'smart_thermostat':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.smartThermostat"
+          defaultMessage="a smart thermostat"
+        />
+      );
+    case 'electric_outdoor_equipment':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.electricOutdoorEquipment"
+          defaultMessage="electric outdoor equipment"
+        />
+      );
+    case 'energy_audit':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.energyAudit"
+          defaultMessage="an energy audit"
+        />
+      );
     default: {
       // This will be a type error if the above if-else is not exhaustive
       const unknownItem: never = item;
@@ -372,7 +421,7 @@ export function EnergyCalculatorRebateCalculator({ rebate }: RebateComponentProp
       <QuestionDescription>
         <FormattedMessage
           id="energyCalculator.rebatePage.calculator.description"
-          defaultMessage="Please enter the dollar value of the appliance you are looking to purchase to see what your estimated rebates savings could be."
+          defaultMessage="Enter the estimated cost of the equipment or service to determine the rebate value."
         />
       </QuestionDescription>
       <div>

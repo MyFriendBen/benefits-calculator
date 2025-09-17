@@ -3,11 +3,12 @@ import { FormattedMessage } from 'react-intl';
 import BackAndSaveButtons from '../../Results/BackAndSaveButtons/BackAndSaveButtons';
 import { useResultsLink } from '../../Results/Results';
 import { EnergyCalculatorRebateCalculator, EnergyCalculatorRebateCardTitle, rebateTypes } from './RebatePageMappings';
-import { ReactComponent as Housing } from '../../../Assets/icons/Programs/CategoryHeading/housing.svg';
+import { ReactComponent as Housing } from '../../../Assets/icons/General/residence.svg';
 import { renderCategoryDescription } from './rebateTypes';
 import './RebatePage.css';
-import { useMemo } from 'react';
+import { useMemo, useContext } from 'react';
 import { TrackedOutboundLink } from '../../Common/TrackedOutboundLink';
+import { Context } from '../../Wrapper/Wrapper';
 
 type RebatePageProps = {
   rebateCategory: EnergyCalculatorRebateCategory;
@@ -15,6 +16,7 @@ type RebatePageProps = {
 
 export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePageProps) {
   const backLink = useResultsLink(`results/benefits`);
+  const { formData } = useContext(Context);
 
   return (
     <main>
@@ -29,7 +31,7 @@ export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePag
           <Housing />
           <span>{rebateCategory.name}</span>
         </h1>
-        {renderCategoryDescription(rebateCategory.type)}
+        {renderCategoryDescription(rebateCategory.type, formData)}
         <section>
           {rebateCategory.rebates.map((rebate, i) => {
             return <RebateCard rebate={rebate} rebateCategory={rebateCategory} key={i} />;

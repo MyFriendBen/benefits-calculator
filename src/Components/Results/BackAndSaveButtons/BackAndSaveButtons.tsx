@@ -39,6 +39,7 @@ const BackAndSaveButtons = ({ navigateToLink, BackToThisPageText }: BackAndSaveB
   return (
     <div className="results-back-save-btn-container">
       <button
+        data-testid="back-to-results-button"
         className="results-back-save-buttons"
         onClick={() => {
           navigate(navigateToLink);

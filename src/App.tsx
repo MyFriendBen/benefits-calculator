@@ -27,7 +27,9 @@ import HouseholdMemberForm from './Components/Steps/HouseholdMembers/HouseholdMe
 import EnergyCalculatorLandingPage from './Components/EnergyCalculator/LandingPage/LandingPage';
 import WhiteLabelRouter from './Components/RouterUtil/WhiteLabelRouter';
 import ValidateUuid from './Components/RouterUtil/ValidateUuid';
+import FaviconManager from './Components/FaviconManager/FaviconManager';
 import './App.css';
+import useCampaign from './Components/CampaignAnalytics/useCampaign';
 
 const App = () => {
   const location = useLocation();
@@ -47,6 +49,7 @@ const App = () => {
   const themeName = getReferrer('theme', 'default');
   const householdMemberStepNumber = useStepNumber('householdData', false);
   const ecHouseholdMemberStepNumber = useStepNumber('energyCalculatorHouseholdData', false);
+  useCampaign();
 
   useEffect(() => {
     changeTheme(themeName as 'default' | 'twoOneOne' | 'twoOneOneNC' | 'nc_lanc');
@@ -144,6 +147,7 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <div className="app">
         <CssBaseline />
+        <FaviconManager />
         <BrandedHeader />
         <Box className="main-max-width">
           <Routes>

@@ -36,6 +36,10 @@ export function useUpdateFormData() {
         denverpresc: response.has_dpp ?? false,
         ede: response.has_ede ?? false,
         eitc: response.has_eitc ?? false,
+        il_eitc: response.has_il_eitc ?? false,
+        il_ctc: response.has_il_ctc ?? false,
+        il_transit_reduced_fare: response.has_il_transit_reduced_fare ?? false,
+        il_bap: response.has_il_bap ?? false,
         lifeline: response.has_lifeline ?? false,
         leap: response.has_leap ?? false,
         nc_lieap: response.has_nc_lieap ?? false,
@@ -87,6 +91,7 @@ export function useUpdateFormData() {
         jobResources: response.needs_job_resources ?? false,
         dentalCare: response.needs_dental_care ?? false,
         legalServices: response.needs_legal_services ?? false,
+        savings: response.needs_savings ?? false,
         veteranServices: response.needs_veteran_services ?? false,
       },
       signUpInfo: {
@@ -97,6 +102,7 @@ export function useUpdateFormData() {
         hasUser: Boolean(response.user),
         sendOffers: response.user?.send_offers ?? false,
         sendUpdates: response.user?.send_updates ?? false,
+        emailConsent: false,
         commConsent: false,
       },
     };

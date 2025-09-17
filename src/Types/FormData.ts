@@ -1,3 +1,5 @@
+import { UtmParameters } from '../Components/CampaignAnalytics/useUtmParameters';
+
 export type Expense = {
   expenseSourceName: string;
   expenseAmount: string;
@@ -73,6 +75,7 @@ export type SignUpInfo = {
   hasUser: boolean;
   sendOffers: boolean;
   sendUpdates: boolean;
+  emailConsent: boolean;
   commConsent: boolean;
   serverError?: boolean;
 };
@@ -103,6 +106,7 @@ export type FormData = {
   urlSearchParams: string;
   energyCalculator?: EnergyCalculatorFormData;
   acuteHHConditions: AcuteHHConditions;
+  utm: UtmParameters | null;
 };
 
 export type Conditions = {

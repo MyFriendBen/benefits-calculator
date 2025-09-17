@@ -11,12 +11,10 @@ import { useParams } from 'react-router-dom';
 import { useConfig } from '../Config/configHook';
 import { FormattedMessageType } from '../../Types/Questions';
 import { headingOptionsMappings } from '../Results/CategoryHeading/CategoryHeading';
-import { acuteConditionResultMapping } from '../../Assets/acuteConditionOptions';
 import { ReactComponent as CashAssistance } from '../../Assets/icons/Programs/CategoryHeading/cashAssistant.svg';
 
 export const iconCategoryMap: { [key: string]: React.ComponentType } = {
-  default: CashAssistance,
-  ...acuteConditionResultMapping,
+  default: CashAssistance,  
   ...headingOptionsMappings,
 };
 

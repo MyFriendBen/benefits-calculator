@@ -58,7 +58,8 @@
   color: inherit;
 }
 
-.result-program-more-info-button a {
+.result-program-more-info-button a,
+.result-program-learn-more-button a {
   color: white;
   text-decoration: none;
   font-size: 0.8rem;
@@ -214,7 +215,8 @@ h1.header-text-bottom {
     transform: translateY(-50%);
   }
 
-  .result-program-more-info-button a {
+  .result-program-more-info-button a,
+  .result-program-learn-more-button a {
     padding: 0.5rem 1rem;
   }
 

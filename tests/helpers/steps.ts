@@ -90,7 +90,7 @@ export async function selectCurrentBenefits(page: Page, answer: string, benefits
   }
 }
 
-export async function selectNearTernNeeds(page: Page, needs: string[]) {
+export async function selectNearTermNeeds(page: Page, needs: string[]) {
   for (const need of needs) {
     await page.getByRole('button', { name: need }).click();
   }

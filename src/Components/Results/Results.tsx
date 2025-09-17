@@ -23,6 +23,7 @@ import dataLayerPush from '../../Assets/analytics';
 import HelpButton from './211Button/211Button';
 import MoreHelp from '../MoreHelp/MoreHelp';
 import BackAndSaveButtons from './BackAndSaveButtons/BackAndSaveButtons';
+import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
 import { FormattedMessage } from 'react-intl';
 import './Results.css';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
@@ -172,7 +173,10 @@ const Results = ({ type }: ResultsProps) => {
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
 
-  const filterPrograms = filterProgramsGenerator(formData, filtersChecked, isAdminView);
+  const filterPrograms = useMemo(
+    () => filterProgramsGenerator(formData, filtersChecked, isAdminView, apiResults?.programs || []),
+    [formData, filtersChecked, isAdminView, apiResults?.programs]
+  );
 
   useEffect(() => {
     if (apiResults === undefined) {
@@ -197,7 +201,7 @@ const Results = ({ type }: ResultsProps) => {
     setMissingPrograms(apiResults.missing_programs);
     setValidations(apiResults.validations);
     setLoading(false);
-  }, [filtersChecked, apiResults, isAdminView]);
+  }, [filterPrograms, apiResults]);
 
   const ResultsContextProvider = ({ children }: PropsWithChildren) => {
     return (
@@ -252,6 +256,7 @@ const Results = ({ type }: ResultsProps) => {
         <ResultsContextProvider>
           <ResultsHeader type={type} />
           <ResultsTabs />
+          {type === 'program' && <UrgentNeedBanner />}
           <Grid container sx={{ p: '1rem', mt: '2rem' }}>
             <Grid item xs={12}>
               {type === 'need' ? <Needs /> : <Programs />}

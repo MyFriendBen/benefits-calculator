@@ -11,6 +11,7 @@ export type StepDirectory = QuestionName[] | { default: QuestionName[]; [key: st
 export type ReferrerData = {
   theme: ReferrerOptions<string>;
   logoSource: ReferrerOptions<string>;
+  faviconSource: ReferrerOptions<string>;
   logoAlt: ReferrerOptions<{ id: string; defaultMessage: string }>;
   logoFooterSource: ReferrerOptions<string>;
   logoFooterAlt: ReferrerOptions<{ id: string; defaultMessage: string }>;
@@ -20,15 +21,18 @@ export type ReferrerData = {
   featureFlags: ReferrerOptions<string[]>;
   stepDirectory: ReferrerOptions<StepDirectory>;
   noResultMessage: ReferrerOptions<FormattedMessageType>;
+  defaultLanguage: ReferrerOptions<string>;
 };
 
 export type ReferrerDataValue<T extends keyof ReferrerData> = T extends
   | 'theme'
   | 'logoSource'
+  | 'faviconSource'
   | 'logoFooterSource'
   | 'footerLogoClass'
   | 'logoClass'
   | 'shareLink'
+  | 'defaultLanguage'
   ? string
   : T extends 'logoAlt' | 'logoFooterAlt'
   ? { id: string; defaultMessage: string }

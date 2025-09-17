@@ -156,9 +156,13 @@ export type ApiFormData = {
   has_lifeline: boolean | null;
   has_acp: boolean | null;
   has_eitc: boolean | null;
+  has_il_eitc: boolean | null;
   has_coeitc: boolean | null;
   has_nslp: boolean | null;
   has_ctc: boolean | null;
+  has_il_ctc: boolean | null;
+  has_il_transit_reduced_fare: boolean | null;
+  has_il_bap: boolean | null;
   has_medicaid?: boolean | null;
   has_rtdlive: boolean | null;
   has_cccap: boolean | null;
@@ -215,5 +219,12 @@ export type ApiFormData = {
   needs_job_resources: boolean | null;
   needs_dental_care: boolean | null;
   needs_legal_services: boolean | null;
+  needs_savings: boolean | null;
   needs_veteran_services: boolean | null;
+  utm_id: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_content: string | null;
+  utm_term: string | null;
 };

@@ -91,7 +91,7 @@ export function ResultsCard({ name, detail1, detail2, link, flags = [], containe
           </div>
           {isMobile && (
             <div className="result-program-more-info-button">
-              <Link to={link}>
+              <Link to={link} data-testid="more-info-link">
                 <FormattedMessage id="more-info" defaultMessage="More Info" />
               </Link>
             </div>
@@ -105,7 +105,7 @@ export function ResultsCard({ name, detail1, detail2, link, flags = [], containe
       </div>
       {!isMobile && (
         <div className="result-program-more-info-button">
-          <Link to={link}>
+          <Link to={link} data-testid="more-info-link">
             <FormattedMessage id="more-info" defaultMessage="More Info" />
           </Link>
         </div>
