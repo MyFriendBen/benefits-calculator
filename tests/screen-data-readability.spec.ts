@@ -410,16 +410,7 @@ test.describe('Screen Text Collection and Readability Analysis', () => {
       )
     ].join('\n');
 
-    const getReadingLevel = (fleschScore: number): string => {
-      if (fleschScore >= 90) return 'Very Easy';
-      if (fleschScore >= 80) return 'Easy';
-      if (fleschScore >= 70) return 'Fairly Easy';
-      if (fleschScore >= 60) return 'Plain';
-      if (fleschScore >= 50) return 'Fairly Hard';
-      if (fleschScore >= 30) return 'Hard';
-      return 'Very Hard - Graduate';
-    };
-
+    
     // Generate detailed JSON report with enhanced metrics
     const detailedReport = {
       summary: {
@@ -829,6 +820,15 @@ test.describe('Screen Text Collection and Readability Analysis', () => {
   });
 });
   
+const getReadingLevel = (fleschScore: number): string => {
+      if (fleschScore >= 90) return 'Very Easy';
+      if (fleschScore >= 80) return 'Easy';
+      if (fleschScore >= 70) return 'Fairly Easy';
+      if (fleschScore >= 60) return 'Plain';
+      if (fleschScore >= 50) return 'Fairly Hard';
+      if (fleschScore >= 30) return 'Hard';
+      return 'Very Hard - Graduate';
+};
 
 // Helper function
 function average(numbers: number[]): number {
