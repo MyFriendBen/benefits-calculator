@@ -87,7 +87,7 @@ export async function verifyPrivacyPolicySection(page: Page): Promise<void> {
   const privacySelectors = [
     'a:has-text("Privacy Policy")',
     'a:has-text("privacy policy")',
-    'text=/privacy\\s+policy/i',
+    'text=/privacy\s+policy/i',
     '[data-testid="privacy-policy"]',
     '.privacy-policy',
   ];
