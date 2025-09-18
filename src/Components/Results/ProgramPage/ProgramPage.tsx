@@ -286,8 +286,8 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                 }}
               >
                 <ButtonGroup variant="text" color="primary" size="small">
-                  <Button onClick={() => setCollapsed(false)}>Expand All</Button>
-                  <Button onClick={() => setCollapsed(3)}>By Default</Button>
+                  <Button id='policy_engine_expand_all_button' onClick={() => setCollapsed(false)}>Expand All</Button>
+                  <Button id='policy_engine_collapse_button' onClick={() => setCollapsed(3)}>By Default</Button>
                 </ButtonGroup>
               </Box>
               <Typography component="pre" style={{ whiteSpace: 'pre-wrap' }}>
@@ -310,7 +310,7 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                   onClick={closePolicyEngineRequest}
                   data-testid="pe-data-close-button"
                 >
-                  <FormattedMessage id="close_button" defaultMessage="Close" />
+                  <FormattedMessage id="policy_engine_close_button" defaultMessage="Close" />
                 </a>
               </div>
             </DialogActions>
