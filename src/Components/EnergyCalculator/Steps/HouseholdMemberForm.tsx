@@ -51,6 +51,8 @@ import { DOLLARS, handleNumbersOnly, numberInputProps, NUM_PAD_PROPS } from '../
 import useScreenApi from '../../../Assets/updateScreen';
 import { QUESTION_TITLES } from '../../../Assets/pageTitleTags';
 import { getCurrentMonthYear, YEARS, MAX_AGE } from '../../../Assets/age';
+import { useAgeCalculation } from '../../AgeCalculation/useAgeCalculation';
+import { determineDefaultIncomeByAge } from '../../AgeCalculation/AgeCalculation';
 import '../../../Components/Steps/HouseholdMembers/PersonIncomeBlock.css';
 import { useShouldRedirectToConfirmation } from '../../QuestionComponents/questionHooks';
 import useStepForm from '../../Steps/stepForm';
@@ -208,31 +210,9 @@ const ECHouseholdMemberForm = () => {
       return '';
     }
   };
-
+  
   const determineDefaultHasIncome = () => {
-    if (householdMemberFormData === undefined) {
-      return 'false';
-    }
-
-    if (householdMemberFormData.incomeStreams.length > 0) {
-      return 'true';
-    }
-
-     // Check if the person is 16 years or older
-    const birthYear = householdMemberFormData?.birthYear;
-    const birthMonth = householdMemberFormData?.birthMonth;
-    
-    if (birthYear && birthMonth) {
-      const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
-      const age = CURRENT_YEAR - birthYear;
-      const is16OrOlder = age > 16 || (age === 16 && birthMonth <= CURRENT_MONTH);
-      
-      if (is16OrOlder) {
-        return 'true';
-      }
-    }
-
-    return 'false';
+    return determineDefaultIncomeByAge(householdMemberFormData);    
   };
 
   const {
@@ -288,23 +268,14 @@ const ECHouseholdMemberForm = () => {
     // Check if user is 16+ when birth month/year changes and set hasIncome to 'true' if so
   const watchBirthMonth = watch('birthMonth');
   const watchBirthYear = watch('birthYear');
-  
+  const { calculateCurrentAgeStatus } = useAgeCalculation(watch);
   useEffect(() => {
-    if (watchBirthMonth && watchBirthYear) {
-      const birthMonth = Number(watchBirthMonth);
-      const birthYear = Number(watchBirthYear);
-      
-      if (birthMonth > 0 && birthYear > 0) {
-        const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
-        const age = CURRENT_YEAR - birthYear;
-        const is16OrOlder = age > 16 || (age === 16 && birthMonth <= CURRENT_MONTH);
-        
-        if (is16OrOlder) {
-          setValue('hasIncome', 'true');
-        }
-      }
-    }
-  }, [watchBirthMonth, watchBirthYear]);
+  const { is16OrOlder } = calculateCurrentAgeStatus();
+  
+  if (is16OrOlder) {
+    setValue('hasIncome', 'true');
+  }
+}, [watchBirthMonth, watchBirthYear, setValue, calculateCurrentAgeStatus]);
 
   useEffect(() => {
     const notDisabled = getValues('conditions.disabled') === false;
@@ -568,25 +539,10 @@ const ECHouseholdMemberForm = () => {
     const formattedMsgDefaultMsg =
       pageNumber === 1
         ? 'Do you have an income?'
-        : 'Does this individual in your household have significant income you have not already included?';
-
-        // Calculate if the person is 16 or older based on current form values
-        const currentBirthMonth = watch('birthMonth');
-        const currentBirthYear = watch('birthYear');
+        : 'Does this individual in your household have significant income you have not already included?';               
         
-        let isUnder16 = false;
-        if (currentBirthMonth && currentBirthYear) {
-          const birthMonth = Number(currentBirthMonth);
-          const birthYear = Number(currentBirthYear);
-          
-          if (birthMonth > 0 && birthYear > 0) {
-            const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
-            const age = CURRENT_YEAR - birthYear;
-            const is16OrOlder = age > 16 || (age === 16 && birthMonth <= CURRENT_MONTH);
-            isUnder16 = !is16OrOlder;          
-          }
-        }
-
+    // Get age status to conditionally show income disclaimer for 16+ users
+    const { isUnder16 } = calculateCurrentAgeStatus();
     return (
       <Box className="section-container" sx={{ padding: '3rem 0' }}>
         <div>
