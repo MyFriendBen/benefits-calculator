@@ -19,6 +19,7 @@ import { ReactComponent as Job_resources } from '../../../Assets/icons/UrgentNee
 import { ReactComponent as Legal_services } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/legal_services.svg';
 import { ReactComponent as Support } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
 import { ReactComponent as Military } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/military.svg';
+import { ReactComponent as Resources } from '../../../Assets/icons/General/resources.svg';
 import { calculateTotalValue, formatToUSD } from '../FormattedValue';
 import { FormattedMessage, useIntl } from 'react-intl';
 import ResultsTranslate from '../Translate/Translate';
@@ -51,6 +52,7 @@ export const headingOptionsMappings: { [key: string]: React.ComponentType } = {
   dental_care: Dental_care,
   legal_services: Legal_services,
   veteran_services: Military,
+  savings: Resources,
 };
 
 type CategoryHeadingProps = {
