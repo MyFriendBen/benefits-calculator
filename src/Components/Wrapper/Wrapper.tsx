@@ -65,6 +65,7 @@ const initialFormData: FormData = {
     hasUser: false,
     sendOffers: false,
     sendUpdates: false,
+    emailConsent: false,
     commConsent: false,
   },
   urlSearchParams: '',
@@ -78,6 +79,7 @@ const initialFormData: FormData = {
     jobResources: false,
     dentalCare: false,
     legalServices: false,
+    savings: false,
   },
 };
 
@@ -192,7 +194,7 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
   useEffect(() => {
     if (!referrerData) return;
     const defaultLanguage = getReferrer('defaultLanguage', 'en-us');
-    
+
     if (defaultLanguage !== 'en-us') {
       setLocale(defaultLanguage as Language);
     }

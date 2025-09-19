@@ -3,7 +3,7 @@
  *
  * This module provides reusable helper functions for testing results page interactions,
  * including navigation flows, loading state handling, and content validation.
- * 
+ *
  * Key Features:
  * - Handles async loading spinner after step 12 submission
  * - Provides navigation flow testing (More Info → Details → Back to Results)
@@ -26,13 +26,13 @@ export async function waitForResultsPageLoad(page: Page, timeoutMs: number = 600
   try {
     // Wait for loading spinner to disappear (indicates backend processing is complete)
     await expect(page.locator('.loading-image')).not.toBeVisible({ timeout: timeoutMs });
-    
+
     // Verify main results content is now visible
     await expect(page.locator('main')).toBeVisible();
-    
+
     // Wait for results header to be present (indicates page is fully rendered)
     await expect(page.locator('[data-testid="results-header"], .results-header')).toBeVisible();
-    
+
     console.log('[Results] Results page loaded successfully');
   } catch (error) {
     console.error('[Results] Failed to load results page:', error);
@@ -52,7 +52,7 @@ export async function verifyEstimatedSavings(page: Page): Promise<void> {
       '.estimated-savings',
       '.savings-display',
       'text=/estimated.*savings/i',
-      'text=/monthly.*annual/i'
+      'text=/monthly.*annual/i',
     ];
 
     let savingsFound = false;
@@ -141,29 +141,29 @@ export async function clickResultsTab(
 export async function testMoreInfoNavigationFlow(page: Page): Promise<FlowResult> {
   try {
     console.log('[Results] Starting More Info navigation flow test');
-    
+
     // Ensure we're on results page and it's fully loaded
     await waitForResultsPageLoad(page);
     await expect(page).toHaveURL(URL_PATTERNS.RESULTS);
-    
+
     // Verify estimated savings are displayed
     await verifyEstimatedSavings(page);
-    
+
     // Click More Info link to go to program details
     await clickMoreInfoLink(page);
-    
+
     // Verify we're on program details page
     await expect(page).toHaveURL(/\/results\/benefits\/\d+/);
-    
+
     // Verify Apply Online button is displayed on details page
     await expect(page.locator('button:has-text("Apply Online"), a:has-text("Apply Online")')).toBeVisible();
-    
+
     // Click Back to Results button
     await clickBackToResults(page);
-    
+
     // Verify we're back on main results page
     await expect(page).toHaveURL(URL_PATTERNS.RESULTS);
-    
+
     console.log('[Results] More Info navigation flow completed successfully');
     return { success: true, step: 'more-info-navigation' };
   } catch (error) {
@@ -225,16 +225,16 @@ export async function testNearTermLongTermNavigation(page: Page): Promise<FlowRe
 export async function verifyResultsPageContent(page: Page): Promise<FlowResult> {
   try {
     console.log('[Results] Starting comprehensive results page content validation');
-    
+
     // STEP 1: Ensure results page is fully loaded
     await waitForResultsPageLoad(page);
-    
+
     // STEP 2: Verify estimated savings display (if present)
     await verifyEstimatedSavings(page);
-    
+
     // STEP 3: Verify essential results page elements
     await verifyResultsPageElements(page);
-    
+
     console.log('[Results] Results page content validation completed successfully');
     return { success: true, step: 'results-page-content-validation' };
   } catch (error) {
@@ -255,7 +255,7 @@ export async function verifyResultsPageContent(page: Page): Promise<FlowResult> 
 export async function verifyResultsPageElements(page: Page): Promise<void> {
   try {
     console.log('[Results] Verifying essential results page elements');
-    
+
     // Verify results header/title is present
     const headerSelectors = [
       '[data-testid="results-header"]',
@@ -263,9 +263,9 @@ export async function verifyResultsPageElements(page: Page): Promise<void> {
       'h1:has-text("Results")',
       'h1:has-text("Benefits")',
       'text=/your.*results/i',
-      'text=/benefits.*you.*may.*qualify/i'
+      'text=/benefits.*you.*may.*qualify/i',
     ];
-    
+
     let headerFound = false;
     for (const selector of headerSelectors) {
       try {
@@ -277,11 +277,11 @@ export async function verifyResultsPageElements(page: Page): Promise<void> {
         continue;
       }
     }
-    
+
     if (!headerFound) {
       console.warn('[Results] Could not locate results header with common selectors');
     }
-    
+
     // Verify program cards/benefits list is present
     const programSelectors = [
       '[data-testid="program-card"]',
@@ -289,9 +289,9 @@ export async function verifyResultsPageElements(page: Page): Promise<void> {
       '.benefit-card',
       '[data-testid="benefits-list"]',
       '.benefits-list',
-      'text=/more info/i'
+      'text=/more info/i',
     ];
-    
+
     let programsFound = false;
     for (const selector of programSelectors) {
       try {
@@ -303,14 +303,14 @@ export async function verifyResultsPageElements(page: Page): Promise<void> {
         continue;
       }
     }
-    
+
     if (!programsFound) {
       console.warn('[Results] Could not locate program cards with common selectors');
     }
-    
+
     // Verify main content area is visible
     await expect(page.locator('main')).toBeVisible();
-    
+
     console.log('[Results] Essential results page elements verification completed');
   } catch (error) {
     console.error('[Results] Error verifying results page elements:', error);
@@ -326,19 +326,19 @@ export async function verifyResultsPageElements(page: Page): Promise<void> {
 export async function testCompleteResultsNavigation(page: Page): Promise<FlowResult> {
   try {
     console.log('[Results] Starting complete results navigation test');
-    
+
     // Test More Info navigation flow
     const moreInfoResult = await testMoreInfoNavigationFlow(page);
     if (!moreInfoResult.success) {
       return moreInfoResult;
     }
-    
+
     // Test Near-Term/Long-Term navigation flow
     const nearTermResult = await testNearTermLongTermNavigation(page);
     if (!nearTermResult.success) {
       return nearTermResult;
     }
-    
+
     console.log('[Results] Complete results navigation test passed');
     return { success: true, step: 'complete-results-navigation' };
   } catch (error) {

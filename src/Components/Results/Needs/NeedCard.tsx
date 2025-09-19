@@ -1,9 +1,10 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { UrgentNeed } from '../../../Types/Results';
 import ResultsTranslate from '../Translate/Translate';
 import { iconCategoryMap } from '../../CurrentBenefits/CurrentBenefits';
-import { formatPhoneNumber } from '../helpers';
+import { formatPhoneNumber, generateNeedId } from '../helpers';
 import './NeedCard.css';
 
 type NeedsCardProps = {
@@ -22,7 +23,26 @@ const getIcon = (messageType: string) => {
 
 const NeedCard = ({ need }: NeedsCardProps) => {
   const intl = useIntl();
+  const location = useLocation();
   const [infoIsOpen, setInfoIsOpen] = useState(false);
+
+  // Check if this need should be expanded based on URL hash
+  useEffect(() => {
+    const hash = location.hash;
+    if (hash) {
+      const targetNeedId = generateNeedId(need.name.default_message);
+      if (hash === `#${targetNeedId}`) {
+        setInfoIsOpen(true);
+        // Scroll to this element after a short delay to ensure it's rendered
+        setTimeout(() => {
+          const element = document.getElementById(targetNeedId);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      }
+    }
+  }, [location.hash, need.name.default_message]);
 
   let translatedLink = '';
   if (need.link.default_message !== '') {
@@ -36,8 +56,10 @@ const NeedCard = ({ need }: NeedsCardProps) => {
     defaultMessage: need.description.default_message,
   });
 
+  const needId = generateNeedId(need.name.default_message);
+
   return (
-    <div className="need-card-container">
+    <div id={needId} className="need-card-container">
       <div className="header-and-button-divider">
         <div className="result-resource-more-info">
           {icon}

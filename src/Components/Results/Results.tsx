@@ -4,6 +4,7 @@ import Loading from './Loading/Loading';
 import {
   EligibilityResults,
   MemberEligibility,
+  PolicyEngineData,
   Program,
   ProgramCategory,
   UrgentNeed,
@@ -23,6 +24,7 @@ import dataLayerPush from '../../Assets/analytics';
 import HelpButton from './211Button/211Button';
 import MoreHelp from '../MoreHelp/MoreHelp';
 import BackAndSaveButtons from './BackAndSaveButtons/BackAndSaveButtons';
+import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
 import { FormattedMessage } from 'react-intl';
 import './Results.css';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
@@ -43,6 +45,7 @@ type WrapperResultsContext = {
   validations: Validation[];
   setValidations: (validations: Validation[]) => void;
   energyCalculatorRebateCategories: EnergyCalculatorRebateCategory[]; // NOTE: will be empty if not using the energy calculator
+  policyEngineData: PolicyEngineData | undefined;
 };
 
 type ResultsProps = {
@@ -119,7 +122,7 @@ const Results = ({ type }: ResultsProps) => {
       if (uuid === undefined) {
         throw new Error('can not find uuid');
       }
-      const rawEligibilityResponse = await getEligibility(uuid);
+      const rawEligibilityResponse = await getEligibility(uuid, isAdminView);
 
       // replace the program id in the categories with the program
       for (const category of rawEligibilityResponse.program_categories) {
@@ -171,8 +174,12 @@ const Results = ({ type }: ResultsProps) => {
   const [missingPrograms, setMissingPrograms] = useState(false);
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
+  const [policyEngineData, setPolicyEngineData] = useState<PolicyEngineData>();
 
-  const filterPrograms = filterProgramsGenerator(formData, filtersChecked, isAdminView);
+  const filterPrograms = useMemo(
+    () => filterProgramsGenerator(formData, filtersChecked, isAdminView, apiResults?.programs || []),
+    [formData, filtersChecked, isAdminView, apiResults?.programs]
+  );
 
   useEffect(() => {
     if (apiResults === undefined) {
@@ -181,6 +188,7 @@ const Results = ({ type }: ResultsProps) => {
       setProgramCategories([]);
       setMissingPrograms(false);
       setValidations([]);
+      setPolicyEngineData(undefined);
       return;
     }
 
@@ -197,7 +205,8 @@ const Results = ({ type }: ResultsProps) => {
     setMissingPrograms(apiResults.missing_programs);
     setValidations(apiResults.validations);
     setLoading(false);
-  }, [filtersChecked, apiResults, isAdminView]);
+    setPolicyEngineData(apiResults.pe_data);
+  }, [filterPrograms, apiResults]);
 
   const ResultsContextProvider = ({ children }: PropsWithChildren) => {
     return (
@@ -213,6 +222,7 @@ const Results = ({ type }: ResultsProps) => {
           validations,
           setValidations,
           energyCalculatorRebateCategories,
+          policyEngineData,
         }}
       >
         {children}
@@ -252,6 +262,7 @@ const Results = ({ type }: ResultsProps) => {
         <ResultsContextProvider>
           <ResultsHeader type={type} />
           <ResultsTabs />
+          {type === 'program' && <UrgentNeedBanner />}
           <Grid container sx={{ p: '1rem', mt: '2rem' }}>
             <Grid item xs={12}>
               {type === 'need' ? <Needs /> : <Programs />}
