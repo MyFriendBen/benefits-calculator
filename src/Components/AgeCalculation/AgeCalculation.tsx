@@ -45,7 +45,7 @@ export function calculateAgeStatus(
       isUnder16: !is16OrOlder,
       age
     };
-  } catch (error) {    
+  } catch (error) {
     return {
       is16OrOlder: false,
       isUnder16: true,
