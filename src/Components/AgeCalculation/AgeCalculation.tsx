@@ -45,8 +45,7 @@ export function calculateAgeStatus(
       isUnder16: !is16OrOlder,
       age
     };
-  } catch (error) {
-    // Fallback if getCurrentMonthYear fails
+  } catch (error) {    
     return {
       is16OrOlder: false,
       isUnder16: true,
