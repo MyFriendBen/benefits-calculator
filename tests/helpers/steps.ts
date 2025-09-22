@@ -45,63 +45,11 @@ export async function fillHouseholdSize(page: Page, size: number) {
   await page.getByRole('textbox', { name: 'Household Size' }).fill(size.toString());
 }
 
-// export async function fillDateOfBirth(page: Page, month: string, year: string) {
-//   await page.getByRole('button', { name: 'Birth Month' }).click();
-//   await page.getByRole('option', { name: month }).click();
-//   await page.getByRole('button', { name: 'Open' }).click();
-//   await page.getByRole('option', { name: year }).click();
-// }
-
-export async function fillDateOfBirth(page: Page, month: string, year: string, skipIncomeIfRequired: boolean = true): Promise<void> {
-  // Fill birth month
-  await page.getByLabel('Birth Month').click();
+export async function fillDateOfBirth(page: Page, month: string, year: string) {
+  await page.getByRole('button', { name: 'Birth Month' }).click();
   await page.getByRole('option', { name: month }).click();
-  
-  // Fill birth year
-  await page.getByLabel('Birth Year').click();
-  await page.getByLabel('Birth Year').fill(year);
+  await page.getByRole('button', { name: 'Open' }).click();
   await page.getByRole('option', { name: year }).click();
-  
-  // Check if person is 16 or older
-  const currentYear = new Date().getFullYear();
-  const birthYear = parseInt(year);
-  const age = currentYear - birthYear;
-  
-  if (age >= 16 && skipIncomeIfRequired) {
-    // Wait for the form to auto-set hasIncome to 'true'
-    await page.waitForTimeout(500);
-    
-    // Check if income fields are required and visible
-    const incomeTypeLabel = page.getByLabel('Income Type');
-    if (await incomeTypeLabel.isVisible()) {
-      await fillMinimalIncomeInformation(page);
-    }
-  }
-}
-
-async function fillMinimalIncomeInformation(page: Page): Promise<void> {
-  try {
-    // Select income type (first available option)
-    await page.getByLabel('Income Type').click();
-    const firstOption = page.getByRole('option').first();
-    await firstOption.click();
-    
-    // Select frequency (first available option)
-    await page.getByLabel('Frequency').click();
-    const firstFreqOption = page.getByRole('option').first();
-    await firstFreqOption.click();
-    
-    // Fill minimal amount
-    await page.getByLabel('Amount').fill('1000');
-    
-    // If hourly rate, fill hours too
-    const hoursField = page.getByLabel('Hours');
-    if (await hoursField.isVisible()) {
-      await hoursField.fill('20');
-    }
-  } catch (error) {
-    console.warn('Could not fill income information:', error);
-  }
 }
 
 export async function selectInsurance(page: Page, insuranceType: string) {
