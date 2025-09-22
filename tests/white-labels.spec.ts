@@ -69,7 +69,7 @@ const whiteLabels = {
     nearTermNeeds: ['Food or groceries'],
     referralSource: 'Test / Prospective Partner',
     expectedResult: {
-      programsCount: '5Programs Found',
+      programsCount: '6Programs Found',
       estimatedMonthlySavings: '$672Estimated Monthly Savings',
       annualTaxCredit: '$177Annual Tax Credit',
     },
