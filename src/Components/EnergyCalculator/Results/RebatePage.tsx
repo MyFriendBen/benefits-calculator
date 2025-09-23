@@ -4,11 +4,23 @@ import BackAndSaveButtons from '../../Results/BackAndSaveButtons/BackAndSaveButt
 import { useResultsLink } from '../../Results/Results';
 import { EnergyCalculatorRebateCalculator, EnergyCalculatorRebateCardTitle, rebateTypes } from './RebatePageMappings';
 import { ReactComponent as Housing } from '../../../Assets/icons/General/residence.svg';
+import { ReactComponent as WarningIcon } from '../../../Assets/icons/General/warning.svg';
 import { renderCategoryDescription } from './rebateTypes';
 import './RebatePage.css';
 import { useMemo, useContext } from 'react';
 import { TrackedOutboundLink } from '../../Common/TrackedOutboundLink';
 import { Context } from '../../Wrapper/Wrapper';
+
+// Format expiration date from ISO string to readable format
+const formatExpirationDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  };
+  return date.toLocaleDateString('en-US', options);
+};
 
 type RebatePageProps = {
   rebateCategory: EnergyCalculatorRebateCategory;
@@ -72,6 +84,16 @@ function RebateCard({ rebate, rebateCategory }: RebateProps) {
           {rebateTypes(rebate).map((type, index) => {
             return <span key={index}>{type}</span>;
           })}
+          {rebate.authority_type === 'federal' && rebate.payment_methods.includes('tax_credit') && rebate.end_date && (
+            <div className="energy-calculator-expiration-badge">
+              <WarningIcon className="energy-calculator-expiration-icon" />
+              <FormattedMessage
+                id="energyCalculator.rebatePage.expiration.ending"
+                defaultMessage="Ending on {date}"
+                values={{ date: formatExpirationDate(rebate.end_date) }}
+              />
+            </div>
+          )}
         </div>
       </div>
       <p>{rebate.short_description}</p>
