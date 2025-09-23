@@ -13,13 +13,24 @@ import { Context } from '../../Wrapper/Wrapper';
 
 // Format expiration date from ISO string to readable format
 const formatExpirationDate = (dateString: string): string => {
-  const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    timeZone: 'UTC',
   };
-  return date.toLocaleDateString('en-US', options);
+
+  // Parse YYYY-MM-DD format to avoid timezone issues
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateString);
+  if (match) {
+    const [, year, month, day] = match;
+    const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+    return date.toLocaleDateString('en-US', options);
+  }
+
+  // Fallback for other date formats
+  const date = new Date(dateString);
+  return Number.isNaN(date.getTime()) ? dateString : date.toLocaleDateString('en-US', options);
 };
 
 type RebatePageProps = {
