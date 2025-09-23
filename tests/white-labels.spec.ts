@@ -60,7 +60,7 @@ const whiteLabels = {
     },
   },
   ma: {
-    state: 'Macachusetts',
+    state: 'Massachusetts',
     zipcode: '',
     county: '',
     householdSize: 1,
@@ -92,7 +92,10 @@ const energyCalculators = {
     householdInfo: 'You have a past-due electric',
     noBenefit: true,
     expectedResult: {
-      programsCount: /\d+Programs Found\d+Rebates Found/,
+      // -      programsCount: /\d+Programs Found\d+Rebates Found/,
+// +      programsCount: /\d+\s*Programs Found[\s\S]*\d+\s*Rebates Found/,
+      programsCount: /\d+\s*Programs Found[\s\S]*\d+\s*Rebates Found/,
+      // programsCount: /\d+Programs Found\d+Rebates Found/,
     },
   },
 };

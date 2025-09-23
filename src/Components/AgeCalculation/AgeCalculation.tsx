@@ -27,7 +27,7 @@ export function calculateAgeStatus(
   const month = Number(birthMonth);
   const year = Number(birthYear);
 
-  if (month <= 0 || year <= 0) {
+  if (!Number.isFinite(month) || !Number.isFinite(year) || month < 1 || month > 12) {
     return {
       is16OrOlder: false,
       isUnder16: true,
@@ -36,8 +36,14 @@ export function calculateAgeStatus(
   }
 
   try {
-    const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
+    const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();    
+    if (year > CURRENT_YEAR) {
+      return { is16OrOlder: false, isUnder16: true, age: null };
+    }
     const age = CURRENT_YEAR - year;
+    if (age < 0) {
+      return { is16OrOlder: false, isUnder16: true, age: null };
+    }
     const is16OrOlder = age > 16 || (age === 16 && month <= CURRENT_MONTH);
 
     return {

@@ -249,8 +249,8 @@ const ECHouseholdMemberForm = () => {
   });
   const watchIsDisabled = watch('conditions.disabled');
 
-  useEffect(() => {
-    const noIncomeStreamsAreListed = Number(getValues('incomeStreams').length === 0);
+  useEffect(() => {    
+    const noIncomeStreamsAreListed = getValues('incomeStreams').length === 0;
     if (hasTruthyIncome && noIncomeStreamsAreListed) {
       append({
         incomeStreamName: '',
@@ -265,17 +265,20 @@ const ECHouseholdMemberForm = () => {
     }
   }, [watchHasIncome, append, replace, getValues, hasTruthyIncome]);
 
-    // Check if user is 16+ when birth month/year changes and set hasIncome to 'true' if so
+  // Check if user is 16+ when birth month/year changes and set hasIncome to 'true' if so
   const watchBirthMonth = watch('birthMonth');
   const watchBirthYear = watch('birthYear');
   const { calculateCurrentAgeStatus } = useAgeCalculation(watch);
   useEffect(() => {
-  const { is16OrOlder } = calculateCurrentAgeStatus();
-  
-  if (is16OrOlder) {
-    setValue('hasIncome', 'true');
-  }
-}, [watchBirthMonth, watchBirthYear, setValue, calculateCurrentAgeStatus]);
+    const { is16OrOlder } = calculateCurrentAgeStatus();
+    const hasStreams = getValues('incomeStreams').length > 0;
+    if (is16OrOlder) {
+      setValue('hasIncome', 'true', { shouldDirty: true });
+    } else if (!hasStreams) {
+      setValue('hasIncome', 'false', { shouldDirty: true });
+    }
+}, [watchBirthMonth, watchBirthYear, setValue, calculateCurrentAgeStatus, getValues]);
+
 
   useEffect(() => {
     const notDisabled = getValues('conditions.disabled') === false;

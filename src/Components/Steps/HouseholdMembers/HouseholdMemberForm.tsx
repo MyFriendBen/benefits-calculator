@@ -338,12 +338,14 @@ const HouseholdMemberForm = () => {
   const watchBirthYear = watch('birthYear');
   
    useEffect(() => {
-    const { is16OrOlder } = calculateCurrentAgeStatus();
-    
+    const { is16OrOlder } = calculateCurrentAgeStatus();  
+    const hasStreams = getValues('incomeStreams').length > 0;
     if (is16OrOlder) {
-      setValue('hasIncome', 'true');
+      setValue('hasIncome', 'true', { shouldDirty: true });
+    } else if (!hasStreams) {
+      setValue('hasIncome', 'false', { shouldDirty: true });
     }
-  }, [watchBirthMonth, watchBirthYear, setValue, calculateCurrentAgeStatus]);
+  }, [watchBirthMonth, watchBirthYear, setValue, calculateCurrentAgeStatus, getValues]);
 
 
   const formSubmitHandler: SubmitHandler<FormSchema> = async (memberData) => {
