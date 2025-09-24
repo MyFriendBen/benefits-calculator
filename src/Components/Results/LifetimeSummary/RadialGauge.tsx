@@ -3,6 +3,12 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { formatToUSD } from '../FormattedValue';
 import { useTranslateNumber } from '../../../Assets/languageOptions';
 
+// Type fixes for Recharts compatibility
+const ResponsiveContainerFixed = ResponsiveContainer as any;
+const PieChartFixed = PieChart as any;
+const PieFixed = Pie as any;
+const CellFixed = Cell as any;
+
 interface RadialGaugeProps {
   estimatedValue: number;
   lowerValue: number;
@@ -60,10 +66,10 @@ const RadialGauge: React.FC<RadialGaugeProps> = ({
       ).toLowerCase()} confidence level`}
     >
       <div className="gauge-container">
-        <ResponsiveContainer width="100%" height={200}>
-          <PieChart>
+        <ResponsiveContainerFixed width="100%" height={200}>
+          <PieChartFixed>
             {/* Main gauge arc */}
-            <Pie
+            <PieFixed
               data={gaugeData}
               cx="50%"
               cy="80%"
@@ -76,12 +82,12 @@ const RadialGauge: React.FC<RadialGaugeProps> = ({
               aria-hidden="true"
             >
               {gaugeData.map((entry, index) => (
-                <Cell key={`gauge-${index}`} fill={entry.color} />
+                <CellFixed key={`gauge-${index}`} fill={entry.color} />
               ))}
-            </Pie>
+            </PieFixed>
 
             {/* Indicator needle */}
-            <Pie
+            <PieFixed
               data={indicatorData}
               cx="50%"
               cy="80%"
@@ -94,18 +100,18 @@ const RadialGauge: React.FC<RadialGaugeProps> = ({
               aria-hidden="true"
             >
               {indicatorData.map((entry, index) => (
-                <Cell key={`indicator-${index}`} fill={entry.color} />
+                <CellFixed key={`indicator-${index}`} fill={entry.color} />
               ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
+            </PieFixed>
+          </PieChartFixed>
+        </ResponsiveContainerFixed>
 
         {/* Center value display */}
         <div className="gauge-center" role="status" aria-live="polite">
           <div className="gauge-value" aria-label={`Primary estimated value: ${formattedValue}`}>
             {formattedValue}
           </div>
-          <div className="gauge-label">Estimated Value</div>
+          <div className="gauge-label">Estimated Lifetime Value</div>
         </div>
 
         {/* Range labels */}
@@ -135,9 +141,9 @@ const RadialGauge: React.FC<RadialGaugeProps> = ({
         {/* Screen reader-only detailed description */}
         <div className="sr-only">
           This gauge chart shows your estimated lifetime benefit value of {formattedValue}
-          on a scale from {formattedMin} to {formattedMax}. The green section represents the confidence range from {formattedLower} to {formattedUpper}. The estimated value is positioned at{' '}
-          {estimatedPosition.toFixed(0)}% through the full scale. This projection has a{' '}
-          {getRiskText(riskLevel).toLowerCase()} confidence level.
+          on a scale from {formattedMin} to {formattedMax}. The green section represents the confidence range from{' '}
+          {formattedLower} to {formattedUpper}. The estimated value is positioned at {estimatedPosition.toFixed(0)}%
+          through the full scale. This projection has a {getRiskText(riskLevel).toLowerCase()} confidence level.
         </div>
       </div>
     </div>
