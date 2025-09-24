@@ -20,36 +20,42 @@ const RadialGauge: React.FC<RadialGaugeProps> = ({
 }) => {
   const translateNumber = useTranslateNumber();
 
-  // Calculate the position of the estimated value within the range (0-100)
-  const range = upperValue - lowerValue;
-  const position = range > 0 ? ((estimatedValue - lowerValue) / range) * 100 : 50;
+  // Calculate max value dynamically: if high end is at 66%, then max = upperValue / 0.66
+  const maxValue = upperValue / 0.66;
 
-  // Ensure position is within bounds
-  const normalizedPosition = Math.max(0, Math.min(100, position));
+  // Calculate positions on the new scale (0 to maxValue)
+  const lowerPosition = (lowerValue / maxValue) * 100; // Should be ~33%
+  const upperPosition = (upperValue / maxValue) * 100; // Should be ~66%
+  const estimatedPosition = (estimatedValue / maxValue) * 100;
 
-  // Create gauge segments
-  // The gauge will be a semicircle (180 degrees) divided into segments
+  // Create gauge segments with the range colored green and rest light gray
   const gaugeData = [
-    { name: 'filled', value: normalizedPosition, color: getGaugeColor(normalizedPosition) },
-    { name: 'empty', value: 100 - normalizedPosition, color: '#e9ecef' },
+    // Light gray from start to lower range
+    { name: 'before-range', value: lowerPosition, color: '#e9ecef' },
+    // Green for the confidence range
+    { name: 'range', value: upperPosition - lowerPosition, color: '#28a745' },
+    // Light gray from upper range to end
+    { name: 'after-range', value: 100 - upperPosition, color: '#e9ecef' },
   ];
 
   // Add a small indicator segment at the estimated value position
   const indicatorData = [
-    { name: 'before', value: normalizedPosition, color: 'transparent' },
+    { name: 'before', value: estimatedPosition, color: 'transparent' },
     { name: 'indicator', value: 2, color: '#2c3e50' }, // Small indicator
-    { name: 'after', value: 98 - normalizedPosition, color: 'transparent' },
+    { name: 'after', value: 98 - estimatedPosition, color: 'transparent' },
   ];
 
   const formattedValue = translateNumber(formatToUSD(estimatedValue));
   const formattedLower = translateNumber(formatToUSD(lowerValue));
   const formattedUpper = translateNumber(formatToUSD(upperValue));
+  const formattedMin = translateNumber(formatToUSD(0));
+  const formattedMax = translateNumber(formatToUSD(maxValue));
 
   return (
     <div
       className={`radial-gauge ${className}`}
       role="img"
-      aria-label={`Lifetime benefit value gauge showing ${formattedValue} estimated value within range of ${formattedLower} to ${formattedUpper}, with ${getRiskText(
+      aria-label={`Lifetime benefit value gauge showing ${formattedValue} estimated value on a scale from ${formattedMin} to ${formattedMax}, with confidence range ${formattedLower} to ${formattedUpper} shown in green, and ${getRiskText(
         riskLevel,
       ).toLowerCase()} confidence level`}
     >
@@ -106,13 +112,13 @@ const RadialGauge: React.FC<RadialGaugeProps> = ({
         <div
           className="gauge-range-labels"
           role="note"
-          aria-label={`Value range from ${formattedLower} minimum to ${formattedUpper} maximum`}
+          aria-label={`Gauge scale from ${formattedMin} to ${formattedMax}, with confidence range from ${formattedLower} to ${formattedUpper}`}
         >
-          <span className="range-min" aria-label={`Minimum value: ${formattedLower}`}>
-            {formattedLower}
+          <span className="range-min" aria-label={`Scale minimum: ${formattedMin}`}>
+            {formattedMin}
           </span>
-          <span className="range-max" aria-label={`Maximum value: ${formattedUpper}`}>
-            {formattedUpper}
+          <span className="range-max" aria-label={`Scale maximum: ${formattedMax}`}>
+            {formattedMax}
           </span>
         </div>
 
@@ -129,25 +135,14 @@ const RadialGauge: React.FC<RadialGaugeProps> = ({
         {/* Screen reader-only detailed description */}
         <div className="sr-only">
           This gauge chart shows your estimated lifetime benefit value of {formattedValue}
-          positioned within a confidence range from {formattedLower} to {formattedUpper}. The estimated value represents{' '}
-          {normalizedPosition.toFixed(0)}% through the confidence range. This projection has a{' '}
+          on a scale from {formattedMin} to {formattedMax}. The green section represents the confidence range from {formattedLower} to {formattedUpper}. The estimated value is positioned at{' '}
+          {estimatedPosition.toFixed(0)}% through the full scale. This projection has a{' '}
           {getRiskText(riskLevel).toLowerCase()} confidence level.
         </div>
       </div>
     </div>
   );
 };
-
-// Helper function to get gauge color based on position
-function getGaugeColor(position: number): string {
-  if (position <= 33) {
-    return '#dc3545'; // Red for lower third
-  } else if (position <= 66) {
-    return '#ffc107'; // Yellow for middle third
-  } else {
-    return '#28a745'; // Green for upper third
-  }
-}
 
 // Helper function to get risk level text
 function getRiskText(riskLevel: 'low' | 'moderate' | 'high'): string {

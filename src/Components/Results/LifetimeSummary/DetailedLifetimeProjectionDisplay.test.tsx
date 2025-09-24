@@ -4,6 +4,15 @@ import { IntlProvider } from 'react-intl';
 import DetailedLifetimeProjectionDisplay from './DetailedLifetimeProjectionDisplay';
 import { LifetimeProjection } from '../../../Types/Results';
 
+// Mock ResizeObserver for Recharts
+class ResizeObserverMock {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+global.ResizeObserver = ResizeObserverMock;
+
 const mockProjection: LifetimeProjection = {
   program_id: '123',
   prediction_id: 'pred-456',
@@ -67,7 +76,7 @@ describe('DetailedLifetimeProjectionDisplay', () => {
     renderWithIntl(<DetailedLifetimeProjectionDisplay projection={mockProjection} />);
 
     expect(screen.getByText('Long-term Value Projection')).toBeInTheDocument();
-    expect(screen.getByText('$50,000')).toBeInTheDocument();
+    expect(screen.getAllByText('$50,000')).toHaveLength(2); // Once in text section, once in gauge center
     expect(screen.getByText(/Range: \$40,000 - \$60,000/)).toBeInTheDocument();
     expect(screen.getByText(/Estimated duration: 24 months/)).toBeInTheDocument();
   });
