@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { setCampaign } from './campaign';
 import useUtmParameters from './useUtmParameters';
 
-// Pulls the utm parameters, saves, and removes from the URL
+// Reads UTM parameters from URL and saves to session storage
 export default function useCampaign() {
   const utmParameters = useUtmParameters();
   useEffect(() => {
