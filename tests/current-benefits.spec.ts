@@ -9,6 +9,7 @@ const whiteLabels = [
   { name: 'Colorado', path: 'co' },
   { name: 'Massachusetts', path: 'ma' },
   { name: 'Colorado Energy Calculators', path: 'co_energy_calculator' },
+  { name: 'Illinois', path: 'il' },
 ];
 
 test.describe('Current Benefits Pages Test', () => {
