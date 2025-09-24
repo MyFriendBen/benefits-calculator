@@ -334,3 +334,162 @@
   outline: none;
   box-shadow: 0 0 0 3px rgba(133, 100, 4, 0.3);
 }
+
+/* Accessibility - Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Radial Gauge Styles */
+.radial-gauge {
+  margin: 1.5rem 0;
+}
+
+.gauge-container {
+  position: relative;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.gauge-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -20%);
+  text-align: center;
+  z-index: 10;
+}
+
+.gauge-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.gauge-label {
+  font-size: 0.75rem;
+  color: #6c757d;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gauge-range-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2rem;
+  margin-top: -1rem;
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.gauge-risk-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.risk-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.gauge-risk-indicator.risk-low .risk-dot {
+  background-color: #ffc107;
+}
+
+.gauge-risk-indicator.risk-low .risk-text {
+  color: #856404;
+}
+
+.gauge-risk-indicator.risk-moderate .risk-dot {
+  background-color: #17a2b8;
+}
+
+.gauge-risk-indicator.risk-moderate .risk-text {
+  color: #0c5460;
+}
+
+.gauge-risk-indicator.risk-high .risk-dot {
+  background-color: #28a745;
+}
+
+.gauge-risk-indicator.risk-high .risk-text {
+  color: #155724;
+}
+
+.lifetime-summary-with-gauge {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: start;
+}
+
+.lifetime-values-section {
+  min-width: 0; /* Prevents text overflow in grid */
+}
+
+.gauge-section {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Mobile responsiveness for gauge */
+@media (max-width: 768px) {
+  .lifetime-summary-with-gauge {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .gauge-section {
+    order: -1; /* Show gauge before text on mobile */
+  }
+
+  .gauge-container {
+    max-width: 300px;
+  }
+
+  .gauge-value {
+    font-size: 1.25rem;
+  }
+
+  .gauge-range-labels {
+    padding: 0 1rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .gauge-container {
+    max-width: 250px;
+  }
+
+  .gauge-value {
+    font-size: 1.125rem;
+  }
+
+  .gauge-label {
+    font-size: 0.625rem;
+  }
+
+  .gauge-range-labels {
+    padding: 0 0.5rem;
+  }
+}
