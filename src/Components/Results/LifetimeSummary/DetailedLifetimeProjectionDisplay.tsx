@@ -3,6 +3,7 @@ import { LifetimeProjection } from '../../../Types/Results';
 import { formatToUSD } from '../FormattedValue';
 import { useTranslateNumber } from '../../../Assets/languageOptions';
 import { FormattedMessage } from 'react-intl';
+import RadialGauge from './RadialGauge';
 import './LifetimeBenefitSummary.css';
 
 interface DetailedLifetimeProjectionDisplayProps {
@@ -12,7 +13,7 @@ interface DetailedLifetimeProjectionDisplayProps {
 
 const DetailedLifetimeProjectionDisplay: React.FC<DetailedLifetimeProjectionDisplayProps> = ({
   projection,
-  className = ''
+  className = '',
 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const translateNumber = useTranslateNumber();
@@ -50,35 +51,46 @@ const DetailedLifetimeProjectionDisplay: React.FC<DetailedLifetimeProjectionDisp
           </div>
         </div>
 
-        <div className="lifetime-summary-values">
-          <div className="total-lifetime-value">
-            <span className="lifetime-value-amount">{formattedLifetimeValue}</span>
-            <span className="lifetime-value-label">
+        <div className="lifetime-summary-with-gauge">
+          <div className="lifetime-values-section">
+            <div className="total-lifetime-value">
+              <span className="lifetime-value-amount">{formattedLifetimeValue}</span>
+              <span className="lifetime-value-label">
+                <FormattedMessage
+                  id="detailed-lifetime-projection.total-value-label"
+                  defaultMessage="Estimated total lifetime value"
+                />
+              </span>
+            </div>
+
+            <div className="confidence-range">
               <FormattedMessage
-                id="detailed-lifetime-projection.total-value-label"
-                defaultMessage="Estimated total lifetime value"
+                id="detailed-lifetime-projection.range"
+                defaultMessage="Range: {lowerValue} - {upperValue}"
+                values={{
+                  lowerValue: formattedLowerValue,
+                  upperValue: formattedUpperValue,
+                }}
               />
-            </span>
+            </div>
+
+            <div className="duration-info">
+              <FormattedMessage
+                id="detailed-lifetime-projection.duration"
+                defaultMessage="Estimated duration: {duration} months"
+                values={{
+                  duration: formattedDuration,
+                }}
+              />
+            </div>
           </div>
 
-          <div className="confidence-range">
-            <FormattedMessage
-              id="detailed-lifetime-projection.range"
-              defaultMessage="Range: {lowerValue} - {upperValue}"
-              values={{
-                lowerValue: formattedLowerValue,
-                upperValue: formattedUpperValue,
-              }}
-            />
-          </div>
-
-          <div className="duration-info">
-            <FormattedMessage
-              id="detailed-lifetime-projection.duration"
-              defaultMessage="Estimated duration: {duration} months"
-              values={{
-                duration: formattedDuration,
-              }}
+          <div className="gauge-section">
+            <RadialGauge
+              estimatedValue={projection.estimated_lifetime_value}
+              lowerValue={projection.lifetime_value_range.lower_value}
+              upperValue={projection.lifetime_value_range.upper_value}
+              riskLevel={projection.risk_assessment.risk_level}
             />
           </div>
         </div>
@@ -182,10 +194,7 @@ const DetailedLifetimeProjectionDisplay: React.FC<DetailedLifetimeProjectionDisp
             {projection.research_validation && (
               <div className="research-validation">
                 <h4>
-                  <FormattedMessage
-                    id="detailed-lifetime-projection.research.title"
-                    defaultMessage="Research Basis"
-                  />
+                  <FormattedMessage id="detailed-lifetime-projection.research.title" defaultMessage="Research Basis" />
                 </h4>
                 <p>{projection.research_validation.confidence_validation}</p>
                 <p className="data-source">
@@ -193,7 +202,7 @@ const DetailedLifetimeProjectionDisplay: React.FC<DetailedLifetimeProjectionDisp
                     id="detailed-lifetime-projection.data-source"
                     defaultMessage="Primary source: {source}"
                     values={{
-                      source: projection.research_validation.primary_source
+                      source: projection.research_validation.primary_source,
                     }}
                   />
                 </p>
