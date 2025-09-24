@@ -436,7 +436,7 @@
 
 .gauge-range-annotations {
   position: absolute;
-  top: 15%;
+  top: 20%;
   width: 100%;
   height: 0;
   pointer-events: none;
