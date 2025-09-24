@@ -52,16 +52,14 @@ const RadialGauge: React.FC<RadialGaugeProps> = ({
   ];
 
   const formattedValue = translateNumber(formatToUSD(estimatedValue));
-  const formattedLower = translateNumber(formatToUSD(lowerValue));
-  const formattedUpper = translateNumber(formatToUSD(upperValue));
-  const formattedMin = translateNumber(formatToUSD(0));
-  const formattedMax = translateNumber(formatToUSD(maxValue));
+  const formattedLower = `Low: ${translateNumber(formatToUSD(lowerValue))}`;
+  const formattedUpper = `High: ${translateNumber(formatToUSD(upperValue))}`;
 
   return (
     <div
       className={`radial-gauge ${className}`}
       role="img"
-      aria-label={`Lifetime benefit value gauge showing ${formattedValue} estimated value on a scale from ${formattedMin} to ${formattedMax}, with confidence range ${formattedLower} to ${formattedUpper} shown in green, and ${getRiskText(
+      aria-label={`Lifetime benefit value gauge showing ${formattedValue} estimated value, with confidence range ${formattedLower} to ${formattedUpper} shown in green, and ${getRiskText(
         riskLevel,
       ).toLowerCase()} confidence level`}
     >
@@ -114,18 +112,24 @@ const RadialGauge: React.FC<RadialGaugeProps> = ({
           <div className="gauge-label">Estimated Lifetime Value</div>
         </div>
 
-        {/* Range labels */}
-        <div
-          className="gauge-range-labels"
-          role="note"
-          aria-label={`Gauge scale from ${formattedMin} to ${formattedMax}, with confidence range from ${formattedLower} to ${formattedUpper}`}
-        >
-          <span className="range-min" aria-label={`Scale minimum: ${formattedMin}`}>
-            {formattedMin}
-          </span>
-          <span className="range-max" aria-label={`Scale maximum: ${formattedMax}`}>
-            {formattedMax}
-          </span>
+        {/* Range annotations on the gauge */}
+        <div className="gauge-range-annotations">
+          <div
+            className="range-annotation range-low"
+            style={{ left: `${0 + 33 * 0.5}%` }}
+            aria-label={`Confidence range minimum: ${formattedLower}`}
+          >
+            <div className="range-label">{formattedLower}</div>
+            <div className="range-marker"></div>
+          </div>
+          <div
+            className="range-annotation range-high"
+            style={{ left: `${50 + 66 * 0.5}%` }}
+            aria-label={`Confidence range maximum: ${formattedUpper}`}
+          >
+            <div className="range-label">{formattedUpper}</div>
+            <div className="range-marker"></div>
+          </div>
         </div>
 
         {/* Risk level indicator */}
@@ -140,10 +144,10 @@ const RadialGauge: React.FC<RadialGaugeProps> = ({
 
         {/* Screen reader-only detailed description */}
         <div className="sr-only">
-          This gauge chart shows your estimated lifetime benefit value of {formattedValue}
-          on a scale from {formattedMin} to {formattedMax}. The green section represents the confidence range from{' '}
-          {formattedLower} to {formattedUpper}. The estimated value is positioned at {estimatedPosition.toFixed(0)}%
-          through the full scale. This projection has a {getRiskText(riskLevel).toLowerCase()} confidence level.
+          This gauge chart shows your estimated lifetime benefit value of {formattedValue}. The green section represents
+          the confidence range from {formattedLower} to {formattedUpper}, with range markers showing these values. The
+          estimated value is positioned within this confidence range. This projection has a{' '}
+          {getRiskText(riskLevel).toLowerCase()} confidence level.
         </div>
       </div>
     </div>

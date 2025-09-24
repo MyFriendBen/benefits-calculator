@@ -53,16 +53,6 @@ const DetailedLifetimeProjectionDisplay: React.FC<DetailedLifetimeProjectionDisp
 
         <div className="lifetime-summary-with-gauge">
           <div className="lifetime-values-section">
-            <div className="total-lifetime-value">
-              <span className="lifetime-value-amount">{formattedLifetimeValue}</span>
-              <span className="lifetime-value-label">
-                <FormattedMessage
-                  id="detailed-lifetime-projection.total-value-label"
-                  defaultMessage="Estimated total lifetime value"
-                />
-              </span>
-            </div>
-
             <div className="confidence-range">
               <FormattedMessage
                 id="detailed-lifetime-projection.range"
