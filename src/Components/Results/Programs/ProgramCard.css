@@ -283,3 +283,114 @@ h1.header-text-bottom {
     margin-left: 0;
   }
 }
+
+/* Lifetime Preview Section Styles */
+.lifetime-preview-section {
+  margin-top: 0.5rem;
+}
+
+.lifetime-preview-divider {
+  background-color: #e9ecef;
+  height: 1px;
+  border: none;
+  margin: 0.75rem 0 0.5rem 0;
+  width: 98%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lifetime-preview-content {
+  padding: 0.75rem 1rem;
+  background-color: rgba(39, 174, 96, 0.05);
+  border-left: 3px solid #27ae60;
+  margin: 0 1rem;
+  border-radius: 0 4px 4px 0;
+}
+
+.lifetime-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lifetime-preview-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.confidence-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.confidence-badge.confidence-low {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.confidence-badge.confidence-moderate {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+.confidence-badge.confidence-high {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.lifetime-preview-values {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.lifetime-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #27ae60;
+}
+
+.duration-hint {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Mobile responsiveness for lifetime preview */
+@media (max-width: 774px) {
+  .lifetime-preview-content {
+    margin: 0 0.5rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .lifetime-preview-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .lifetime-preview-values {
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: flex-start;
+  }
+
+  .lifetime-value {
+    font-size: 1rem;
+  }
+
+  .duration-hint {
+    font-size: 0.75rem;
+  }
+}
