@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
-import { Program } from '../../../Types/Results';
+import { Program, LifetimeProjection } from '../../../Types/Results';
 import { FormattedMessage } from 'react-intl';
-import { useFormatDisplayValue } from '../FormattedValue';
+import { useFormatDisplayValue, formatToUSD } from '../FormattedValue';
 import ResultsTranslate from '../Translate/Translate';
 import { useEffect, useMemo, useState } from 'react';
 import './ProgramCard.css';
 import { findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
 import { FormattedMessageType } from '../../../Types/Questions';
+import { useTranslateNumber } from '../../../Assets/languageOptions';
 
 type ResultsCardDetail = {
   title: FormattedMessageType;
@@ -24,9 +25,53 @@ function ResultsCardDetail({ title, value }: ResultsCardDetail) {
   );
 }
 
+function LifetimePreviewSection({ lifetimeValue, duration, confidenceLevel }: LifetimePreviewData) {
+  const translateNumber = useTranslateNumber();
+  const formattedValue = translateNumber(formatToUSD(lifetimeValue));
+  const formattedDuration = translateNumber(Math.round(duration).toString());
+
+  return (
+    <div className="lifetime-preview-section">
+      <hr className="lifetime-preview-divider" />
+      <div className="lifetime-preview-content">
+        <div className="lifetime-preview-header">
+          <span className="lifetime-preview-label">
+            <FormattedMessage
+              id="program-card.lifetime-preview.label"
+              defaultMessage="Long-term value:"
+            />
+          </span>
+          <span className={`confidence-badge confidence-${confidenceLevel}`}>
+            <FormattedMessage
+              id={`program-card.confidence.${confidenceLevel}`}
+              defaultMessage={confidenceLevel}
+            />
+          </span>
+        </div>
+        <div className="lifetime-preview-values">
+          <span className="lifetime-value">{formattedValue}</span>
+          <span className="duration-hint">
+            <FormattedMessage
+              id="program-card.lifetime-preview.duration"
+              defaultMessage="(typically {duration} months)"
+              values={{ duration: formattedDuration }}
+            />
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type ResultsCardFlag = {
   text: FormattedMessageType;
   className: string;
+};
+
+type LifetimePreviewData = {
+  lifetimeValue: number;
+  duration: number;
+  confidenceLevel: 'low' | 'moderate' | 'high';
 };
 
 type ResultsCardProps = {
@@ -36,9 +81,10 @@ type ResultsCardProps = {
   link: string;
   flags?: ResultsCardFlag[];
   containerClassNames?: string[];
+  lifetimePreview?: LifetimePreviewData;
 };
 
-export function ResultsCard({ name, detail1, detail2, link, flags = [], containerClassNames = [] }: ResultsCardProps) {
+export function ResultsCard({ name, detail1, detail2, link, flags = [], containerClassNames = [], lifetimePreview }: ResultsCardProps) {
   const windowWidth = window.innerWidth;
   const [size, setSize] = useState(windowWidth);
 
@@ -103,6 +149,7 @@ export function ResultsCard({ name, detail1, detail2, link, flags = [], containe
         <ResultsCardDetail {...detail1} />
         {detail2 !== undefined && <ResultsCardDetail {...detail2} />}
       </div>
+      {lifetimePreview && <LifetimePreviewSection {...lifetimePreview} />}
       {!isMobile && (
         <div className="result-program-more-info-button">
           <Link to={link} data-testid="more-info-link">
@@ -116,9 +163,10 @@ export function ResultsCard({ name, detail1, detail2, link, flags = [], containe
 
 type ProgramCardProps = {
   program: Program;
+  lifetimeData?: LifetimeProjection;
 };
 
-const ProgramCard = ({ program }: ProgramCardProps) => {
+const ProgramCard = ({ program, lifetimeData }: ProgramCardProps) => {
   const estimatedAppTime = program.estimated_application_time;
   const programName = program.name;
   const programId = program.program_id;
@@ -166,6 +214,17 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
   const programPageLink = useResultsLink(`results/benefits/${programId}`);
   const value = useFormatDisplayValue(program);
 
+  // Create lifetime preview data if available
+  const lifetimePreview = useMemo(() => {
+    if (!lifetimeData) return undefined;
+
+    return {
+      lifetimeValue: lifetimeData.estimated_lifetime_value,
+      duration: lifetimeData.estimated_duration_months,
+      confidenceLevel: lifetimeData.risk_assessment.risk_level,
+    };
+  }, [lifetimeData]);
+
   return (
     <ResultsCard
       name={<ResultsTranslate translation={programName} />}
@@ -180,6 +239,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
       flags={flags}
       link={programPageLink}
       containerClassNames={containerClass}
+      lifetimePreview={lifetimePreview}
     />
   );
 };

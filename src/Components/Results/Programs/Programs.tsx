@@ -10,6 +10,7 @@ import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorRebateCategoryList, {
   useEnergyCalculatorNeedsRebates,
 } from '../../EnergyCalculator/Results/RebateCategories';
+import { useLifetimeDataForProgram } from '../hooks/useLifetimeProjections';
 
 function sortProgramsIntoCategories(categories: ProgramCategory[]): ProgramCategory[] {
   // sort categories by total category value in decending order
@@ -35,7 +36,7 @@ function sortProgramsIntoCategories(categories: ProgramCategory[]): ProgramCateg
 }
 
 const ValidationCategory = () => {
-  const { programs, isAdminView, validations } = useResultsContext();
+  const { programs, isAdminView, validations, lifetimeProjections } = useResultsContext();
 
   const validationPrograms = useMemo(
     () => programs.filter((program) => findValidationForProgram(validations, program) !== undefined),
@@ -63,14 +64,15 @@ const ValidationCategory = () => {
     <>
       <CategoryHeading category={validationCategory} />
       {validationPrograms.map((program, index) => {
-        return <ProgramCard program={program} key={index} />;
+        const lifetimeData = useLifetimeDataForProgram(program.program_id, lifetimeProjections);
+        return <ProgramCard program={program} lifetimeData={lifetimeData} key={index} />;
       })}
     </>
   );
 };
 
 const Programs = () => {
-  const { programCategories } = useResultsContext();
+  const { programCategories, lifetimeProjections } = useResultsContext();
 
   const categories = useMemo(() => sortProgramsIntoCategories(programCategories), [programCategories]);
 
@@ -88,7 +90,8 @@ const Programs = () => {
           <div key={category.name.default_message}>
             <CategoryHeading category={category} />
             {category.programs.map((program, index) => {
-              return <ProgramCard program={program} key={index} />;
+              const lifetimeData = useLifetimeDataForProgram(program.program_id, lifetimeProjections);
+              return <ProgramCard program={program} lifetimeData={lifetimeData} key={index} />;
             })}
           </div>
         );

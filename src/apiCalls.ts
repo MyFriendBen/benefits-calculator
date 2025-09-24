@@ -10,7 +10,7 @@ import {
   ValidationRequestData,
 } from './Types/ApiCalls';
 import { ApiFormData, ApiFormDataReadOnly } from './Types/ApiFormData';
-import { EligibilityResults } from './Types/Results';
+import { EligibilityResults, EnhancedEligibilityResults } from './Types/Results';
 
 const apiKey = 'Token ' + process.env.REACT_APP_API_KEY;
 const domain = process.env.REACT_APP_DOMAIN_URL;
@@ -109,14 +109,21 @@ const putScreen = async (partialFormData: ApiFormData, uuid: string) => {
   });
 };
 
-const getEligibility = async (uuid: string, isAdminView?: boolean) => {
+const getEligibility = async (uuid: string, isAdminView?: boolean, includeLifetimeProjections?: boolean) => {
   const headerWithLocale = {
     ...header,
   };
-  let params = '';
+
+  const searchParams = new URLSearchParams();
   if (isAdminView) {
-    params = '?admin=true';
+    searchParams.append('admin', 'true');
   }
+  if (includeLifetimeProjections) {
+    searchParams.append('include_lifetime_projections', 'true');
+    searchParams.append('language', 'en'); // Phase 1: English only
+  }
+
+  const params = searchParams.toString() ? `?${searchParams.toString()}` : '';
 
   return fetch(eligibilityEndpoint + uuid + params, {
     method: 'GET',
@@ -125,7 +132,43 @@ const getEligibility = async (uuid: string, isAdminView?: boolean) => {
     if (!response.ok) {
       throw new Error(`${response.status} ${response.statusText}`);
     }
+    // Return enhanced results if lifetime projections are requested
+    if (includeLifetimeProjections) {
+      return response.json() as Promise<EnhancedEligibilityResults>;
+    }
     return response.json() as Promise<EligibilityResults>;
+  });
+};
+
+// Get program-specific results with lifetime projections
+const getProgramEligibility = async (
+  uuid: string,
+  programId: string,
+  isAdminView?: boolean,
+  includeLifetimeProjections?: boolean
+) => {
+  const headerWithLocale = {
+    ...header,
+  };
+  const searchParams = new URLSearchParams();
+  if (isAdminView) {
+    searchParams.append('admin', 'true');
+  }
+  if (includeLifetimeProjections) {
+    searchParams.append('include_lifetime_projections', 'true');
+    searchParams.append('language', 'en'); // Phase 1: English only
+  }
+  const params = searchParams.toString() ? `?${searchParams.toString()}` : '';
+
+  // Use the program-specific endpoint: /api/screens/{screen_id}/results/benefits/{program_id}/
+  return fetch(`${domain}/api/screens/${uuid}/results/benefits/${programId}/${params}`, {
+    method: 'GET',
+    headers: headerWithLocale,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json() as Promise<EnhancedEligibilityResults>;
   });
 };
 
@@ -244,6 +287,7 @@ export {
   putUser,
   postMessage,
   getEligibility,
+  getProgramEligibility,
   getAllLongTermPrograms,
   getAllNearTermPrograms,
   postValidation,
