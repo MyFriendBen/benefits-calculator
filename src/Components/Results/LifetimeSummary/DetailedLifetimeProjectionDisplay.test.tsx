@@ -76,7 +76,7 @@ describe('DetailedLifetimeProjectionDisplay', () => {
     renderWithIntl(<DetailedLifetimeProjectionDisplay projection={mockProjection} />);
 
     expect(screen.getByText('Long-term Value Projection')).toBeInTheDocument();
-    expect(screen.getAllByText('$50,000')).toHaveLength(2); // Once in text section, once in gauge center
+    expect(screen.getByText('$50,000')).toBeInTheDocument(); // Only in gauge center now
     expect(screen.getByText(/Range: \$40,000 - \$60,000/)).toBeInTheDocument();
     expect(screen.getByText(/Estimated duration: 24 months/)).toBeInTheDocument();
   });
