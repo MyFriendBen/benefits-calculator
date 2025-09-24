@@ -910,7 +910,7 @@ const HouseholdMemberForm = () => {
                 variant="outlined"
                 inputProps={NUM_PAD_PROPS}
                 onChange={handleNumbersOnly(field.onChange, DOLLARS)}
-                sx={{ backgroundColor: '#201a1aff' }}
+                sx={{ backgroundColor: '#fff' }}
                 error={errors.incomeStreams?.[index]?.incomeAmount !== undefined}
                 InputProps={{
                   startAdornment: <InputAdornment position="start">$</InputAdornment>,
