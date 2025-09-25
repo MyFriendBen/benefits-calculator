@@ -1,4 +1,4 @@
-import { Language } from '@mui/icons-material';
+// import { Language } from '@mui/icons-material';
 import { englishToNepaliNumber } from 'nepali-number';
 import { ReactNode, useContext, useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
@@ -6,7 +6,7 @@ import { useConfig } from '../Components/Config/configHook';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { FormattedMessageType } from '../Types/Questions';
 
-export type Language = 'en-us' | 'es' | 'vi' | 'fr' | 'am' | 'so' | 'ru' | 'ne' | 'my' | 'zh' | 'ar' | 'sw' | 'pl' | 'tl' | 'ko' | 'ur' | 'pt' | 'ht';
+export type Language = 'en-us' | 'es' | 'vi' | 'fr' | 'am' | 'so' | 'ru' | 'ne' | 'my' | 'zh' | 'ar' | 'sw' | 'pl' | 'tl' | 'ko' | 'ur' | 'pt-br' | 'ht';
 export const LANGUAGE_OPTIONS: Record<Language, string> = {
   'en-us': 'English',
   es: 'Español',
@@ -24,7 +24,7 @@ export const LANGUAGE_OPTIONS: Record<Language, string> = {
   tl: 'Tagalog',
   ko: '한국어',
   ur: 'اردو',
-  pt: 'português',
+  'pt-br': 'Português Brasileiro',
   ht: 'Kreyòl',
 };
 
