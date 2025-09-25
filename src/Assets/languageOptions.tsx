@@ -6,7 +6,7 @@ import { useConfig } from '../Components/Config/configHook';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { FormattedMessageType } from '../Types/Questions';
 
-export type Language = 'en-us' | 'es' | 'vi' | 'fr' | 'am' | 'so' | 'ru' | 'ne' | 'my' | 'zh' | 'ar' | 'sw' | 'pl' | 'tl' | 'ko' | 'ur' | 'pt-br' | 'ht';
+export type Language = 'en-us' | 'es' | 'vi' | 'fr' | 'am' | 'so' | 'ru' | 'ne' | 'my' | 'zh' | 'ar' | 'sw' | 'pl' | 'tl' | 'ko' | 'ur' | 'pt-BR' | 'ht';
 export const LANGUAGE_OPTIONS: Record<Language, string> = {
   'en-us': 'English',
   es: 'Español',
@@ -24,7 +24,7 @@ export const LANGUAGE_OPTIONS: Record<Language, string> = {
   tl: 'Tagalog',
   ko: '한국어',
   ur: 'اردو',
-  'pt-br': 'Português Brasileiro',
+  'pt-BR': 'Português Brasileiro',
   ht: 'Kreyòl',
 };
 
