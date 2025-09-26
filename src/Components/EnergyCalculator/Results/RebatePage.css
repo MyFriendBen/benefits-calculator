@@ -103,7 +103,7 @@
 
 .energy-calculator-expiration-badge {
   background-color: var(--warning-background-color);
-  color: var(--primary-color);
+  color: #000000;
   padding: 0.3rem 0.5rem;
   font-size: 0.75rem;
   display: inline-flex;
@@ -120,5 +120,5 @@
 }
 
 .energy-calculator-expiration-badge .energy-calculator-expiration-icon path {
-  fill: var(--primary-color);
+  fill: #000000;
 }
