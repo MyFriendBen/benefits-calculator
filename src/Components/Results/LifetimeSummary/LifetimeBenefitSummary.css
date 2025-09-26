@@ -4,13 +4,13 @@
 }
 
 .lifetime-summary-card {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border: 2px solid #dee2e6;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 800px;
+  border: 0.07rem solid var(--primary-color);
+  background-color: var(--secondary-background-color);
+  padding: 1rem;
   margin: 0 auto;
+  color: var(--primary-color);
+  font-weight: 400;
+  text-align: center;
 }
 
 .lifetime-summary-header {
@@ -23,9 +23,8 @@
 }
 
 .lifetime-summary-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #2c3e50;
+  font-size: 1.25rem;
+  color: var(--secondary-color);
   margin: 0;
   line-height: 1.3;
 }
@@ -87,9 +86,20 @@
 }
 
 .confidence-range {
-  font-size: 1.125rem;
-  color: #495057;
-  font-weight: 500;
+  font-size: 1rem;
+  color: var(--primary-color);
+  font-weight: 400;
+  font-family: 'Open Sans', sans-serif;
+  text-align: left;
+}
+
+.duration-info {
+  font-size: 1rem;
+  color: var(--primary-color);
+  font-weight: 400;
+  font-family: 'Open Sans', sans-serif;
+  text-align: left;
+  margin-top: 0.5rem;
 }
 
 .lifetime-summary-description {
@@ -97,11 +107,13 @@
 }
 
 .primary-summary {
-  font-size: 1.125rem;
+  font-size: 1rem;
   line-height: 1.6;
-  color: #495057;
+  color: var(--primary-color);
   text-align: center;
   margin: 0;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 400;
 }
 
 .methodology-toggle {
@@ -481,8 +493,9 @@
 .lifetime-summary-with-gauge {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 2rem;
-  align-items: start;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
 .lifetime-values-section {
@@ -504,6 +517,11 @@
 
   .gauge-section {
     order: -1; /* Show gauge before text on mobile */
+    justify-self: center;
+  }
+
+  .lifetime-values-section {
+    text-align: center;
   }
 
   .gauge-container {
