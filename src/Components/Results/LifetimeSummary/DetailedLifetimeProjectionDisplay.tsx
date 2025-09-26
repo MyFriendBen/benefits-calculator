@@ -41,14 +41,6 @@ const DetailedLifetimeProjectionDisplay: React.FC<DetailedLifetimeProjectionDisp
               />
             )}
           </h2>
-          <div className="lifetime-summary-confidence">
-            <span className={`confidence-indicator confidence-${projection.risk_assessment.risk_level}`}>
-              <FormattedMessage
-                id={`detailed-lifetime-projection.risk.${projection.risk_assessment.risk_level}`}
-                defaultMessage={projection.risk_assessment.risk_level}
-              />
-            </span>
-          </div>
         </div>
 
         <div className="lifetime-summary-with-gauge">
