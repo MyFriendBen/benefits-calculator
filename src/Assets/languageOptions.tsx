@@ -1,4 +1,4 @@
-// import { Language } from '@mui/icons-material';
+import { Language } from '@mui/icons-material';
 import { englishToNepaliNumber } from 'nepali-number';
 import { ReactNode, useContext, useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
