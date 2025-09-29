@@ -54,6 +54,8 @@ import { DOLLARS, handleNumbersOnly, numberInputProps, NUM_PAD_PROPS } from '../
 import useScreenApi from '../../../Assets/updateScreen';
 import { QUESTION_TITLES } from '../../../Assets/pageTitleTags';
 import { getCurrentMonthYear, YEARS, MAX_AGE } from '../../../Assets/age';
+import { useAgeCalculation } from '../../AgeCalculation/useAgeCalculation';
+import { determineDefaultIncomeByAge } from '../../AgeCalculation/AgeCalculation';
 import './PersonIncomeBlock.css';
 import { useShouldRedirectToConfirmation } from '../../QuestionComponents/questionHooks';
 import useStepForm from '../stepForm';
@@ -260,8 +262,7 @@ const HouseholdMemberForm = () => {
     if (householdMemberFormData.incomeStreams.length > 0) {
       return 'true';
     }
-
-    return 'false';
+    return determineDefaultIncomeByAge(householdMemberFormData);    
   };
 
   const {
@@ -308,6 +309,7 @@ const HouseholdMemberForm = () => {
   });
   const watchHasIncome = watch('hasIncome');
   const hasTruthyIncome = watchHasIncome === 'true';
+  
   const { fields, append, remove, replace } = useFieldArray({
     control,
     name: 'incomeStreams',
@@ -327,7 +329,24 @@ const HouseholdMemberForm = () => {
     if (!hasTruthyIncome) {
       replace([]);
     }
-  }, [watchHasIncome]);
+  }, [watchHasIncome, append, replace, getValues, hasTruthyIncome]);
+  
+  const { calculateCurrentAgeStatus } = useAgeCalculation(watch);
+  
+  // Check if user is 16+ when birth month/year changes and set hasIncome to 'true' if so
+  const watchBirthMonth = watch('birthMonth');
+  const watchBirthYear = watch('birthYear');
+  
+   useEffect(() => {
+    const { is16OrOlder } = calculateCurrentAgeStatus();  
+    const hasStreams = getValues('incomeStreams').length > 0;
+    if (is16OrOlder) {
+      setValue('hasIncome', 'true', { shouldDirty: true });
+    } else if (!hasStreams) {
+      setValue('hasIncome', 'false', { shouldDirty: true });
+    }
+  }, [watchBirthMonth, watchBirthYear, setValue, calculateCurrentAgeStatus, getValues]);
+
 
   const formSubmitHandler: SubmitHandler<FormSchema> = async (memberData) => {
     if (uuid === undefined) {
@@ -599,6 +618,9 @@ const HouseholdMemberForm = () => {
         ? 'Do you have an income?'
         : 'Does this individual in your household have significant income you have not already included?';
 
+    // Get age status to conditionally show income disclaimer for 16+ users
+    const { isUnder16 } = calculateCurrentAgeStatus();
+    
     return (
       <Box className="section-container" sx={{ paddingTop: '3rem' }}>
         <div className="section">
@@ -624,6 +646,7 @@ const HouseholdMemberForm = () => {
             control={control}
             rules={{ required: true }}
             render={({ field }) => (
+              <>
               <RadioGroup {...field} aria-label={translatedAriaLabel} sx={{ marginBottom: '1rem' }}>
                 <FormControlLabel
                   value={'true'}
@@ -633,9 +656,22 @@ const HouseholdMemberForm = () => {
                 <FormControlLabel
                   value={'false'}
                   control={<Radio />}
-                  label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <FormattedMessage id="radiofield.label-no" defaultMessage="No" />
+                      {watchHasIncome === 'false' && !isUnder16 && (
+                        <Box component="span" sx={{ fontSize: '0.875rem', color: 'text.secondary',  ml: 1 }}>
+                          <FormattedMessage 
+                            id="householdDataBlock.createIncomeRadioQuestion-noIncomeDisclaimer" 
+                            defaultMessage="Income affects benefits. We can be more accurate if you tell us significant household income." 
+                          />
+                        </Box>
+                      )}                      
+                    </Box>
+                  }
                 />
-              </RadioGroup>
+              </RadioGroup>               
+              </>
             )}
           />
         </div>

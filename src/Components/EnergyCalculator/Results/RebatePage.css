@@ -100,3 +100,25 @@
   padding: 0 1rem;
   font-family: 'Roboto Slab', serif;
 }
+
+.energy-calculator-expiration-badge {
+  background-color: var(--warning-background-color);
+  color: #000000;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.energy-calculator-expiration-badge .energy-calculator-expiration-icon {
+  min-width: 1rem;
+  min-height: 1rem;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.energy-calculator-expiration-badge .energy-calculator-expiration-icon path {
+  fill: #000000;
+}
