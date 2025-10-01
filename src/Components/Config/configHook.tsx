@@ -20,6 +20,7 @@ import { ReactComponent as None } from '../../Assets/icons/General/OptionCard/He
 import { ReactComponent as PrivateInsurance } from '../../Assets/icons/General/OptionCard/HealthInsurance/privateInsurance.svg';
 import { ReactComponent as Baby_supplies } from '../../Assets/icons/UrgentNeeds/AcuteConditions/baby_supplies.svg';
 import { ReactComponent as Child_development } from '../../Assets/icons/UrgentNeeds/AcuteConditions/child_development.svg';
+import { ReactComponent as Child_development_ma } from '../../Assets/icons/UrgentNeeds/AcuteConditions/child_development_ma.svg';
 import { ReactComponent as Dental_care } from '../../Assets/icons/UrgentNeeds/AcuteConditions/dental_care.svg';
 import { ReactComponent as Food } from '../../Assets/icons/UrgentNeeds/AcuteConditions/food.svg';
 import { ReactComponent as Housing } from '../../Assets/icons/UrgentNeeds/AcuteConditions/housing.svg';
@@ -43,7 +44,7 @@ type IconItem = {
 };
 
 // Transforms objects with icon key to return Icon ReactComponent
-function transformItemIcon(item: unknown): any {
+function transformItemIcon(item: unknown, whiteLabel?: string): any {
   const icon = item as IconItem;
 
   let iconComponent;
@@ -53,7 +54,13 @@ function transformItemIcon(item: unknown): any {
       iconComponent = <Baby_supplies className={icon._classname} />;
       break;
     case 'Child_development':
-      iconComponent = <Child_development className={icon._classname} />;
+      // Use MA-specific icon for 'ma' white label, default for others
+      if (whiteLabel === 'ma') {
+        iconComponent = <Child_development_ma className={icon._classname} />;
+      } else {
+        iconComponent = <Child_development className={icon._classname} />;
+      }
+      // iconComponent = <Child_development className={icon._classname} />;
       break;
     case 'Dental_care':
       iconComponent = <Dental_care className={icon._classname} />;
@@ -140,7 +147,7 @@ function transformItemIcon(item: unknown): any {
 
 // Recursively transform any object that has _label && _default_message as keys into a FormattedMessage
 // and convert icon object into ReactComponent
-function transformItem(item: unknown): any {
+function transformItem(item: unknown, whiteLabel?: string): any {
   if (typeof item !== 'object' || item === null) return item;
 
   if (item.hasOwnProperty('_label') && item.hasOwnProperty('_default_message')) {
@@ -149,7 +156,7 @@ function transformItem(item: unknown): any {
   }
 
   if (item.hasOwnProperty('_icon') && item.hasOwnProperty('_classname')) {
-    const iconItem = transformItemIcon(item);
+    const iconItem = transformItemIcon(item, whiteLabel);
 
     return iconItem;
   }
@@ -158,7 +165,7 @@ function transformItem(item: unknown): any {
     const array: ConfigValue[] = [];
 
     for (const value of item) {
-      array.push(transformItem(value));
+      array.push(transformItem(value, whiteLabel));
     }
 
     return array;
@@ -167,21 +174,21 @@ function transformItem(item: unknown): any {
   const config: Config = {};
   for (const key in item) {
     if (item.hasOwnProperty(key)) {
-      config[key] = transformItem((item as any)[key]);
+      config[key] = transformItem((item as any)[key], whiteLabel);
     }
   }
 
   return config;
 }
 
-function transformConfigData(configData: ConfigApiResponse[]): Config {
+function transformConfigData(configData: ConfigApiResponse[], whiteLabel: string): Config {
   const transformedConfig: Config = {};
 
   configData.forEach((item) => {
     const { name, data } = item;
     const configOptions = data;
 
-    transformedConfig[name] = transformItem(configOptions);
+    transformedConfig[name] = transformItem(configOptions, whiteLabel);
   });
 
   return transformedConfig;
@@ -218,7 +225,7 @@ export function useGetConfig(screenLoading: boolean, whiteLabel: string) {
       // get data and set loading to false
       try {
         if (value !== undefined) {
-          const transformedOutput: Config = transformConfigData(value);
+          const transformedOutput: Config = transformConfigData(value, whiteLabel);
           setConfigResponse(transformedOutput);
         }
       } catch (e) {
