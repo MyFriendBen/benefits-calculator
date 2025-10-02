@@ -53,14 +53,12 @@ function transformItemIcon(item: unknown, whiteLabel?: string): any {
     case 'Baby_supplies':
       iconComponent = <Baby_supplies className={icon._classname} />;
       break;
-    case 'Child_development':
-      // Use MA-specific icon for 'ma' white label, default for others
+    case 'Child_development':      
       if (whiteLabel === 'ma') {
         iconComponent = <Child_development_ma className={icon._classname} />;
       } else {
         iconComponent = <Child_development className={icon._classname} />;
-      }
-      // iconComponent = <Child_development className={icon._classname} />;
+      }      
       break;
     case 'Dental_care':
       iconComponent = <Dental_care className={icon._classname} />;
