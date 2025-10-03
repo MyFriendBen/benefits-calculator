@@ -1,5 +1,5 @@
-import { Link, useParams } from 'react-router-dom';
-import { Program } from '../../../Types/Results';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Program, LifetimeProjection, EnhancedEligibilityResults } from '../../../Types/Results';
 import ResultsTranslate from '../Translate/Translate';
 import { headingOptionsMappings } from '../CategoryHeading/CategoryHeading';
 import BackAndSaveButtons from '../BackAndSaveButtons/BackAndSaveButtons';
@@ -7,10 +7,10 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { YearlyValueLabel, programValue, useFormatYearlyValue } from '../FormattedValue';
 import './ProgramPage.css';
 import WarningMessage from '../../WarningComponent/WarningMessage';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useMemo, useState, useEffect } from 'react';
 import { Context } from '../../Wrapper/Wrapper';
 import { findProgramById, findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
-import { deleteValidation, postValidation } from '../../../apiCalls';
+import { deleteValidation, postValidation, getProgramEligibility } from '../../../apiCalls';
 import { Language } from '../../../Assets/languageOptions';
 import { allNavigatorLanguages } from './NavigatorLanguages';
 import { formatPhoneNumber } from '../helpers';
@@ -18,6 +18,9 @@ import useScreenApi from '../../../Assets/updateScreen';
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import JsonView from '@uiw/react-json-view';
 import { redactPolicyEngineData } from '../../../Assets/policyEngineRedaction';
+import DetailedLifetimeProjectionDisplay from '../LifetimeSummary/DetailedLifetimeProjectionDisplay';
+import LifetimeProjectionErrorBoundary from '../LifetimeSummary/LifetimeProjectionErrorBoundary';
+import { useLanguageSupportsLifetimeProjections } from '../hooks/useLifetimeProjections';
 
 type ProgramPageProps = {
   program: Program;
@@ -29,17 +32,77 @@ type IconRendererProps = {
 
 const ProgramPage = ({ program }: ProgramPageProps) => {
   const { uuid } = useParams();
-  const { formData, staffToken } = useContext(Context);
+  const [searchParams] = useSearchParams();
+  const { formData, staffToken, locale } = useContext(Context);
   const { isAdminView, validations, setValidations, programCategories, filtersChecked } = useResultsContext();
   const intl = useIntl();
   const { fetchScreen } = useScreenApi();
   const [openPEmodal, setOpenPEModal] = useState(false);
   const { policyEngineData } = useResultsContext();
 
+  // Lifetime projection state
+  const [lifetimeProjection, setLifetimeProjection] = useState<LifetimeProjection | undefined>();
+  const [lifetimeProjectionError, setLifetimeProjectionError] = useState<string | undefined>();
+  const [isLoadingLifetimeProjection, setIsLoadingLifetimeProjection] = useState(false);
+
+  // Check language support and URL parameters for lifetime projections
+  const languageSupportsLifetime = useLanguageSupportsLifetimeProjections(locale);
+  const urlRequestsLifetime = searchParams.get('include_lifetime_projections') === 'true';
+  const shouldRequestLifetimeProjections = languageSupportsLifetime || urlRequestsLifetime;
+
   const openPolicyEngineRequest = () => setOpenPEModal(true);
   const closePolicyEngineRequest = () => setOpenPEModal(false);
   const [collapsed, setCollapsed] = useState<boolean | number>(3);
   const redacted = redactPolicyEngineData(policyEngineData!);
+
+  // Fetch program-specific lifetime projection data
+  useEffect(() => {
+    console.log('useEffect triggered - Lifetime projection data fetch', {
+      shouldRequestLifetimeProjections,
+      uuid,
+      programId: program.program_id,
+      languageSupportsLifetime,
+      urlRequestsLifetime
+    });
+
+    const fetchLifetimeProjection = async () => {
+      if (!shouldRequestLifetimeProjections || !uuid) {
+        console.log('Early return from useEffect', { shouldRequestLifetimeProjections, uuid });
+        return;
+      }
+
+      setIsLoadingLifetimeProjection(true);
+      setLifetimeProjectionError(undefined);
+
+      try {
+        const enhancedResults = await getProgramEligibility(
+          uuid,
+          program.program_id.toString(),
+          isAdminView,
+          true
+        );
+
+        // Handle program-specific API response format
+        console.log('Program API response:', enhancedResults);
+        if (enhancedResults.lifetime_projection?.program_projection) {
+          console.log('Setting lifetime projection:', enhancedResults.lifetime_projection.program_projection);
+          setLifetimeProjection(enhancedResults.lifetime_projection.program_projection);
+        } else if (enhancedResults.lifetime_projection?.error) {
+          console.log('Lifetime projection error:', enhancedResults.lifetime_projection.error);
+          setLifetimeProjectionError(enhancedResults.lifetime_projection.error.message);
+        } else {
+          console.log('No lifetime projection data found in response');
+        }
+      } catch (error) {
+        console.warn('Failed to fetch lifetime projection for program:', error);
+        setLifetimeProjectionError('Failed to load lifetime projection data');
+      } finally {
+        setIsLoadingLifetimeProjection(false);
+      }
+    };
+
+    fetchLifetimeProjection();
+  }, [uuid, program.program_id, shouldRequestLifetimeProjections, isAdminView]);
 
   const downloadPolicyEngineRequest = () => {
     if (!policyEngineData) return;
@@ -412,6 +475,45 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
             {program.required_programs.map((programId) => {
               return <RequiredProgram programId={programId} key={programId} />;
             })}
+          </section>
+        )}
+
+        {/* Lifetime projection display for this program */}
+        {console.log('Render check:', { shouldRequestLifetimeProjections, lifetimeProjection, isLoadingLifetimeProjection, lifetimeProjectionError })}
+        {shouldRequestLifetimeProjections && lifetimeProjection && (
+          <LifetimeProjectionErrorBoundary>
+            <DetailedLifetimeProjectionDisplay
+              projection={lifetimeProjection}
+              className="program-page-lifetime-projection"
+            />
+          </LifetimeProjectionErrorBoundary>
+        )}
+
+        {/* Show loading state for lifetime projections */}
+        {shouldRequestLifetimeProjections && isLoadingLifetimeProjection && (
+          <section className="lifetime-summary-section">
+            <div className="lifetime-summary-card">
+              <p>
+                <FormattedMessage
+                  id="program-page.lifetime-projection.loading"
+                  defaultMessage="Loading lifetime benefit projection..."
+                />
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/* Show error state for lifetime projections */}
+        {shouldRequestLifetimeProjections && lifetimeProjectionError && (
+          <section className="lifetime-summary-section">
+            <div className="lifetime-summary-card">
+              <p className="error-message">
+                <FormattedMessage
+                  id="program-page.lifetime-projection.error"
+                  defaultMessage="Unable to load lifetime benefit projection. Please try again later."
+                />
+              </p>
+            </div>
           </section>
         )}
       </div>
