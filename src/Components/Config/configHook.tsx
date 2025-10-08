@@ -9,6 +9,7 @@ import { ReactComponent as Pregnant } from '../../Assets/icons/General/OptionCar
 import { ReactComponent as BlindOrVisuallyImpaired } from '../../Assets/icons/General/OptionCard/Conditions/blindOrVisuallyImpaired.svg';
 import { ReactComponent as Disabled } from '../../Assets/icons/General/OptionCard/Conditions/disabled.svg';
 import { ReactComponent as LongTermDisability } from '../../Assets/icons/General/OptionCard/Conditions/longTermDisability.svg';
+import { ReactComponent as HeartRate } from '../../Assets/icons/General/OptionCard/Conditions/heartRate.svg';
 import { ReactComponent as Chp } from '../../Assets/icons/General/OptionCard/HealthInsurance/chp.svg';
 import { ReactComponent as Dont_know } from '../../Assets/icons/General/OptionCard/HealthInsurance/dont_know.svg';
 import { ReactComponent as Emergency_medicaid } from '../../Assets/icons/General/OptionCard/HealthInsurance/emergency_medicaid.svg';
@@ -97,6 +98,9 @@ function transformItemIcon(item: unknown): any {
       break;
     case 'Dialysis':
       iconComponent = <Dialysis className={icon._classname} />;
+      break;
+    case 'heartRate':
+      iconComponent = <HeartRate className={icon._classname} />;
       break;
     // Health Insurance
     case 'Chp':

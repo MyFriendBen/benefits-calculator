@@ -7,9 +7,9 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { ReactComponent as WaterHeater } from '../Icons/WaterHeater.svg';
+import { ReactComponent as Shower } from '../Icons/Shower.svg';
 import { ReactComponent as Heater } from '../Icons/Heat.svg';
-import { ReactComponent as Stove } from '../Icons/Stove.svg';
+import { ReactComponent as Pot } from '../Icons/Pot.svg';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useDefaultBackNavigationFunction } from '../../QuestionComponents/questionHooks';
 import { useContext } from 'react';
@@ -20,7 +20,7 @@ import useStepForm from '../../Steps/stepForm';
 
 export const applianceStatusOptions = {
   needsWaterHeater: {
-    icon: <WaterHeater className="option-card-icon" />,
+    icon: <Shower className="option-card-icon" />,
     text: <FormattedMessage id="applianceStatusOptions.needsWaterHeater" defaultMessage="Water Heater" />,
   },
   needsHvac: {
@@ -30,7 +30,7 @@ export const applianceStatusOptions = {
     ),
   },
   needsStove: {
-    icon: <Stove className="option-card-icon" />,
+    icon: <Pot className="option-card-icon" />,
     text: <FormattedMessage id="applianceStatusOptions.needsStove" defaultMessage="Cooking stove/range" />,
   },
 };

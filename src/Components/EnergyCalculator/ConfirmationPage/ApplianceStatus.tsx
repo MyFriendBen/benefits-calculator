@@ -1,6 +1,6 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import ConfirmationBlock from '../../Confirmation/ConfirmationBlock';
-import { ReactComponent as WaterHeater } from '../Icons/WaterHeater.svg';
+import { ReactComponent as Shower } from '../Icons/Shower.svg';
 import { Context } from '../../Wrapper/Wrapper';
 import { useContext } from 'react';
 import { applianceStatusOptions } from '../Steps/Appliances';
@@ -41,7 +41,7 @@ const ApplianceStatus = () => {
 
   return (
     <ConfirmationBlock
-      icon={<WaterHeater title={formatMessage(applianceStatusIconAlt)} />}
+      icon={<Shower title={formatMessage(applianceStatusIconAlt)} />}
       title={
         <FormattedMessage
           id="energyCalculator.confirmation.applianceStatus"
