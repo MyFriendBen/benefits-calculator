@@ -51,7 +51,7 @@ const HouseholdSize = () => {
   } = useStepForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      householdSize: formData.householdSize ?? 0,
+      householdSize: formData.householdSize || undefined,
     },
     questionName: 'householdSize',
     onSubmitSuccessfulOverride: nextStep,
