@@ -8,8 +8,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { ReactComponent as Shower } from '../Icons/Shower.svg';
-import { ReactComponent as Heat } from '../Icons/Heat.svg';
-import { ReactComponent as Pot } from '../Icons/Pot.svg';
+import { ReactComponent as AirConditioner } from '../Icons/AcUnit.svg';
+import { ReactComponent as Stove } from '../Icons/Stove.svg';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useDefaultBackNavigationFunction } from '../../QuestionComponents/questionHooks';
 import { useContext } from 'react';
@@ -24,13 +24,13 @@ export const applianceStatusOptions = {
     text: <FormattedMessage id="applianceStatusOptions.needsWaterHeater" defaultMessage="Water Heater" />,
   },
   needsHvac: {
-    icon: <Heat className="option-card-icon" />,
+    icon: <AirConditioner className="option-card-icon" />,
     text: (
       <FormattedMessage id="applianceStatusOptions.needsHvac" defaultMessage="Heating, ventilation, and/or cooling" />
     ),
   },
   needsStove: {
-    icon: <Pot className="option-card-icon" />,
+    icon: <Stove className="option-card-icon" />,
     text: <FormattedMessage id="applianceStatusOptions.needsStove" defaultMessage="Cooking stove/range" />,
   },
 };
