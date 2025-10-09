@@ -120,7 +120,7 @@ const Disclaimer = () => {
             <div>
               <OverrideableTranslation
                 id="landingPage.publicCharge"
-                defaultMessage="Some benefits are available to Non-U.S. citizens. Non-U.S. citizens planning to apply for legal permanent residency or a visa should consider how applying for any benefits may affect their immigration status. For more information, please review the "
+                defaultMessage="MyFriendBen will not ask you about immigration status. You can sort results by immigration status, but we do not keep that information. You may qualify for some benefits with certain statuses. To learn more about how public benefits may affect immigration status, please visit the "
               />
               <a
                 className="link-color"
