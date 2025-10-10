@@ -184,7 +184,7 @@ const DefaultConfirmationHHData = () => {
 
     return (
       <ConfirmationBlock
-        icon={<Head title={formatMessage(householdMemberIconAlt)} />}
+        icon={<Head className="option-card-icon" title={formatMessage(householdMemberIconAlt)} />}
         title={relationship}
         editAriaLabel={editHouseholdMemberAriaLabel}
         stepName="householdData"

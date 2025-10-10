@@ -109,8 +109,9 @@ const Utilities = () => {
         <FormattedMessage id="questions.energyCalculator-utilities-q-desc" defaultMessage="Select all that apply." />
       </QuestionDescription>
       <form onSubmit={handleSubmit(formSubmitHandler)}>
-        <MultiSelectTiles
-          options={Object.entries(utilityStatusOptions).map(([key, option]) => ({
+        <div className="utilities-tiles">
+          <MultiSelectTiles
+            options={Object.entries(utilityStatusOptions).map(([key, option]) => ({
             value: key,
             text: option.text,
             icon: option.icon,
@@ -132,6 +133,7 @@ const Utilities = () => {
             setValue('energyCalculator', typedValues, { shouldValidate: true, shouldDirty: true });
           }}
         />
+        </div>
         <PrevAndContinueButtons backNavigationFunction={backNavigationFunction} />
       </form>
     </>

@@ -23,10 +23,34 @@
 .multi-select-card-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   height: 100%;
   font-size: 1rem;
+  padding: 2.5rem 1rem 1rem 1rem;
+}
+
+.icon-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.multi-select-icon {
+  height: 6rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-bottom: 0.5rem;
+}
+
+.multi-select-icon svg {
+  max-height: 4.5rem;
+  max-width: 4.5rem;
+  height: auto;
+  width: auto;
 }
 
 .selected-option-card.MuiPaper-root {

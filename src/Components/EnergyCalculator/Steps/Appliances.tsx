@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { ReactComponent as Shower } from '../Icons/Shower.svg';
+import { ReactComponent as WaterHeater } from '../Icons/WaterHeater.svg';
 import { ReactComponent as AirConditioner } from '../Icons/AcUnit.svg';
 import { ReactComponent as Stove } from '../Icons/Stove.svg';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
@@ -20,7 +20,7 @@ import useStepForm from '../../Steps/stepForm';
 
 export const applianceStatusOptions = {
   needsWaterHeater: {
-    icon: <Shower className="option-card-icon" />,
+    icon: <WaterHeater className="option-card-icon" />,
     text: <FormattedMessage id="applianceStatusOptions.needsWaterHeater" defaultMessage="Water Heater" />,
   },
   needsHvac: {

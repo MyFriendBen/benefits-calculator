@@ -29,7 +29,7 @@ import { ReactComponent as Legal_services } from '../../Assets/icons/UrgentNeeds
 import { ReactComponent as Support } from '../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
 import { ReactComponent as Military } from '../../Assets/icons/UrgentNeeds/AcuteConditions/military.svg';
 import { ReactComponent as Resources } from '../../Assets/icons/General/resources.svg';
-import { ReactComponent as SurvivingSpouse } from '../../Assets/icons/General/head.svg';
+import { ReactComponent as SurvivingSpouse } from '../../Assets/icons/General/headThicker.svg';
 import { Language } from '../../Assets/languageOptions';
 
 type Item = {
