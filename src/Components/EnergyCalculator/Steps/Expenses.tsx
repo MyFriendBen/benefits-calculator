@@ -12,7 +12,7 @@ import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import { useDefaultBackNavigationFunction } from '../../QuestionComponents/questionHooks';
 import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
 import { ReactComponent as Lightbulb } from '../Icons/Lightbulb.svg';
-import { ReactComponent as Stove } from '../Icons/Heat.svg';
+import { ReactComponent as Heat } from '../Icons/Heat.svg';
 import { ReactComponent as AcUnit } from '../Icons/AcUnit.svg';
 import { Context } from '../../Wrapper/Wrapper';
 import QuestionDescription from '../../QuestionComponents/QuestionDescription';
@@ -32,7 +32,7 @@ const EXPENSE_OPTIONS: MultiSelectTileOption<EnergyCalculatorExpenseType>[] = [
   {
     value: 'heating',
     text: ENERGY_CALCULATOR_EXPENSE_NAME_MAP.heating,
-    icon: <Stove className="option-card-icon" />,
+    icon: <Heat className="option-card-icon" />,
   },
   {
     value: 'cooling',
