@@ -44,7 +44,7 @@ type IconItem = {
 };
 
 // Transforms objects with icon key to return Icon ReactComponent
-function transformItemIcon(item: unknown, whiteLabel?: string): any {
+function transformItemIcon(item: unknown): any {
   const icon = item as IconItem;
 
   let iconComponent;
@@ -144,7 +144,7 @@ function transformItemIcon(item: unknown, whiteLabel?: string): any {
 
 // Recursively transform any object that has _label && _default_message as keys into a FormattedMessage
 // and convert icon object into ReactComponent
-function transformItem(item: unknown, whiteLabel?: string): any {
+function transformItem(item: unknown): any {
   if (typeof item !== 'object' || item === null) return item;
 
   if (item.hasOwnProperty('_label') && item.hasOwnProperty('_default_message')) {
@@ -153,7 +153,7 @@ function transformItem(item: unknown, whiteLabel?: string): any {
   }
 
   if (item.hasOwnProperty('_icon') && item.hasOwnProperty('_classname')) {
-    const iconItem = transformItemIcon(item, whiteLabel);
+    const iconItem = transformItemIcon(item);
 
     return iconItem;
   }
@@ -162,7 +162,7 @@ function transformItem(item: unknown, whiteLabel?: string): any {
     const array: ConfigValue[] = [];
 
     for (const value of item) {
-      array.push(transformItem(value, whiteLabel));
+      array.push(transformItem(value));
     }
 
     return array;
@@ -171,7 +171,7 @@ function transformItem(item: unknown, whiteLabel?: string): any {
   const config: Config = {};
   for (const key in item) {
     if (item.hasOwnProperty(key)) {
-      config[key] = transformItem((item as any)[key], whiteLabel);
+      config[key] = transformItem((item as any)[key]);
     }
   }
 
@@ -185,7 +185,7 @@ function transformConfigData(configData: ConfigApiResponse[], whiteLabel: string
     const { name, data } = item;
     const configOptions = data;
 
-    transformedConfig[name] = transformItem(configOptions, whiteLabel);
+    transformedConfig[name] = transformItem(configOptions);
   });
 
   return transformedConfig;
