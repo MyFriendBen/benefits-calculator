@@ -62,6 +62,13 @@
   stroke: var(--icon-color);
 }
 
+.selected-option-card .option-card-lucide-icon path,
+.selected-option-card .option-card-lucide-icon rect,
+.selected-option-card .option-card-lucide-icon circle {
+  fill: var(--primary-color) !important;
+  stroke: white;
+}
+
 .selected-option-card.white-icons .multi-select-icon path,
 .selected-option-card.white-icons .multi-select-icon rect {
   fill: #ffffff;
