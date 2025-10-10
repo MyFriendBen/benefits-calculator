@@ -5,7 +5,7 @@ import { ReactComponent as Transportation } from '../../../Assets/icons/Programs
 import { ReactComponent as TaxCredits } from '../../../Assets/icons/Programs/CategoryHeading/taxCredits.svg';
 import { ReactComponent as CashAssistance } from '../../../Assets/icons/Programs/CategoryHeading/cashAssistant.svg';
 import { ReactComponent as ChildCareYouthEducation } from '../../../Assets/icons/Programs/CategoryHeading/childCareYouthEducation.svg';
-import { ReactComponent as WaterHeater } from '../../EnergyCalculator/Icons/WaterHeater.svg';
+import { ReactComponent as BadgeDollar } from '../../EnergyCalculator/Icons/BadgeDollar.svg';
 import { ReactComponent as LightBulb } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/housing.svg';
 import { ReactComponent as Heat } from '../../EnergyCalculator/Icons/Heat.svg';
 import { ReactComponent as LowFuel } from '../../EnergyCalculator/Icons/LowFuel.svg';
@@ -37,7 +37,7 @@ export const headingOptionsMappings: { [key: string]: React.ComponentType } = {
   tax_credit: TaxCredits,
   cash: CashAssistance,
   child_care: ChildCareYouthEducation,
-  water_heater: WaterHeater,
+  badge_dollar: BadgeDollar,
   light_bulb: LightBulb,
   heat: Heat,
   low_fuel: LowFuel,
@@ -81,12 +81,16 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   };
   const iconTranslation = intl.formatMessage({ id: 'categoryHeading.icon', defaultMessage: 'icon' });
 
+  // Add lucide icon class for specific icons that need white fill
+  const lucideIcons = ['house_plug', 'badge_dollar'];
+  const iconClasses = `category-heading-icon category-icon-${category.icon}${lucideIcons.includes(category.icon) ? ' category-lucide-icon' : ''}`;
+
   return (
     <div>
       <div className="category-heading-container">
         <div className="category-heading-column">
           <div
-            className="category-heading-icon"
+            className={iconClasses}
             aria-label={`${intl.formatMessage(categoryImageAriaLabelProps)} ${iconTranslation}`}
             role="img"
           >

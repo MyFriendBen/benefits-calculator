@@ -73,6 +73,17 @@
   stroke: var(--icon-color);
 }
 
+.category-lucide-icon svg {
+  height: 2rem;
+}
+
+.category-lucide-icon svg path,
+.category-lucide-icon svg rect,
+.category-lucide-icon svg circle {
+  fill: white !important;
+  stroke: var(--icon-color);
+}
+
 .category-heading-column {
   min-width: 0;
   max-width: 100%;
