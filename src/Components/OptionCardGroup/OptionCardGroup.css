@@ -26,8 +26,10 @@
 }
 
 .option-card-icon path,
-.option-card-icon rect {
-  fill: var(--icon-color);
+.option-card-icon rect,
+.option-card-icon circle {
+  fill: white !important;
+  stroke: var(--icon-color);
 }
 
 .checkmark {
