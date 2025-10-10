@@ -2,7 +2,8 @@ import { useContext } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import ConfirmationBlock from '../../Confirmation/ConfirmationBlock';
 import { Context } from '../../Wrapper/Wrapper';
-import { ReactComponent as Stove } from '../Icons/Stove.svg';
+import { ReactComponent as Fire } from '../../EnergyCalculator/Icons/Fire.svg';
+
 import { FormattedMessageType } from '../../../Types/Questions';
 import { OTHER_GAS_PROVIDERS } from '../providers';
 
@@ -32,7 +33,7 @@ export default function EnergyCalculatorGasProvider() {
 
   return (
     <ConfirmationBlock
-      icon={<Stove title={formatMessage(gasProviderIconAlt)} />}
+      icon={<Fire className="option-card-lucide-icon" title={formatMessage(gasProviderIconAlt)} />}
       title={<FormattedMessage id="energyCalculator.confirmation.gasProvider" defaultMessage="Gas Utility Provider" />}
       editAriaLabel={editGasProviderAriaLabel}
       stepName="energyCalculatorGasProvider"

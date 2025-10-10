@@ -26,6 +26,9 @@
 .confirmation-icon {
   min-width: 6rem;
   margin: 0 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .confirmation-icon svg path,
