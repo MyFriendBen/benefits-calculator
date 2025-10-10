@@ -178,7 +178,7 @@ function transformItem(item: unknown): any {
   return config;
 }
 
-function transformConfigData(configData: ConfigApiResponse[], whiteLabel: string): Config {
+function transformConfigData(configData: ConfigApiResponse[]): Config {
   const transformedConfig: Config = {};
 
   configData.forEach((item) => {
@@ -222,7 +222,7 @@ export function useGetConfig(screenLoading: boolean, whiteLabel: string) {
       // get data and set loading to false
       try {
         if (value !== undefined) {
-          const transformedOutput: Config = transformConfigData(value, whiteLabel);
+          const transformedOutput: Config = transformConfigData(value);
           setConfigResponse(transformedOutput);
         }
       } catch (e) {
