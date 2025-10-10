@@ -26,11 +26,22 @@
 }
 
 .option-card-icon path,
-.option-card-icon rect,
-.option-card-icon circle {
+.option-card-icon rect {
+  fill: var(--icon-color);
+}
+
+.option-card-lucide-icon {
+  height: 4.375rem;
+  width: 4.375rem;
+}
+
+.option-card-lucide-icon path,
+.option-card-lucide-icon rect,
+.option-card-lucide-icon circle {
   fill: white !important;
   stroke: var(--icon-color);
 }
+
 
 .checkmark {
   height: 1.75rem;
