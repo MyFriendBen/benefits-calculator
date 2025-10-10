@@ -25,6 +25,8 @@ export interface ITheme {
     '--option-card-hover-font-color': string;
     '--footer-color': string;
     '--active-border-color': string;
+    '--warning-background-color'?: string;
+    '--warning-text-color'?: string;
   };
 }
 
@@ -154,6 +156,8 @@ const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--footer-color': '#373737',
       '--active-border-color': '#FFD100',
+      '--warning-background-color': '#F5E6C8',
+      '--warning-text-color': '#6b5d00',
     },
   },
 };
