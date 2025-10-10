@@ -16,7 +16,7 @@
 
 ---
 
-## 🎯 About MyFriendBen
+## About MyFriendBen
 
 **MyFriendBen** is an intuitive web application that guides families through a simple questionnaire to discover government benefits, tax credits, and nonprofit programs they qualify for. Originally incubated within [Gary Community Ventures](https://garycommunity.org/), a Denver-based nonprofit organization, MyFriendBen has emerged as an independent initiative now expanding to serve communities across multiple states.
 
@@ -26,7 +26,7 @@ We co-designed MyFriendBen with Colorado families participating in a direct cash
 
 ---
 
-## 📱 See It In Action
+## See It In Action
 
 ![MyFriendBen Demo](./assets/demo.gif)
 
@@ -61,37 +61,37 @@ And technical partnership with:
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 🎨 **White Label Multi-Tenant Platform**
+### White Label Multi-Tenant Platform
 
 Fully customizable branding and theming for different states and partner organizations
 
-### 📝 **Intuitive Multi-Step Form**
+### Intuitive Multi-Step Form
 
 - Clean, accessible user interface
 - Progressive disclosure to reduce cognitive load
 - Mobile-first responsive design
 - Clear progress indicators
 
-### 🌍 **Multi-Language Support**
+### Multi-Language Support
 
 Built-in internationalization (i18n) with dynamic content loading from the backend. Currently supporting 18 languages: English, Spanish, Vietnamese, French, Amharic, Somali, Russian, Nepali, Burmese, Chinese (Simplified), Arabic, Swahili, Polish, Tagalog, Korean, Urdu, Brazilian Portuguese, and Haitian Creole.
 
-### ♿ **Accessibility First**
+### Accessibility First
 
 - WCAG 2.1 AA compliant
 - Keyboard navigation
 - Screen reader optimized
 - High contrast support
 
-### 🔒 **Privacy Focused**
+### Privacy Focused
 
 - No personal data stored without consent
 - Anonymous screening option
 - Secure data transmission
 
-### 🎯 **Smart Results**
+### Smart Results
 
 - Estimated benefit values
 - Application difficulty indicators
@@ -100,7 +100,7 @@ Built-in internationalization (i18n) with dynamic content loading from the backe
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 This repository contains the **React/TypeScript frontend** that provides the user interface for the benefits screening platform.
 
@@ -143,18 +143,18 @@ This repository contains the **React/TypeScript frontend** that provides the use
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
 - Node.js 18+ and npm
-- Backend API running (see [benefits-api](https://github.com/Gary-Community-Ventures/benefits-api))
+- Backend API running (see [benefits-api](https://github.com/MyFriendBen/benefits-api))
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/Gary-Community-Ventures/benefits-calculator.git
+git clone https://github.com/MyFriendBen/benefits-calculator.git
 cd benefits-calculator
 
 # Install dependencies
@@ -204,7 +204,7 @@ npm run type-check
 
 ---
 
-## 🎨 White Label Configuration
+## White Label Configuration
 
 Each state/organization can have custom:
 
@@ -218,7 +218,7 @@ Configuration is managed through the backend API's WhiteLabel model.
 
 ---
 
-## 🧪 Testing
+## Testing
 
 **Unit Tests:** Jest + React Testing Library
 
@@ -241,7 +241,7 @@ npm run test:coverage
 
 ---
 
-## 🚢 Production Deployment
+## Production Deployment
 
 **Build for production:**
 
@@ -257,22 +257,16 @@ npm run build
 - Environment-based configuration
 - Source maps for debugging
 
-**Hosting:**
-
-- Currently deployed on [hosting platform]
-- Auto-deployment from `main` branch
-- Staging environment available
-
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Whether you're fixing bugs, adding features, or improving accessibility.
 
 **Getting Started:**
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+2. Create a feature branch based off the `dev` branch (`git checkout -b feature/amazing-feature`)
 3. Follow our React/TypeScript best practices (see [CLAUDE.md](CLAUDE.md))
 4. Write tests for new components
 5. Run linter and type checker
@@ -289,33 +283,29 @@ We welcome contributions! Whether you're fixing bugs, adding features, or improv
 
 ---
 
-## 📄 License
+## License
 
-<!-- TODO: Add license type -->
-
-This project is licensed under the [LICENSE_TYPE] License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Mozilla Public License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🔗 Related Repositories
+## Related Repositories
 
-- **[Backend API](https://github.com/Gary-Community-Ventures/benefits-api)** - Django REST API for eligibility calculations
-- **[Documentation](https://github.com/Gary-Community-Ventures/benefits-api/wiki)** - Comprehensive guides and setup instructions
+- **[Backend API](https://github.com/MyFriendBen/benefits-api)** - Django REST API for eligibility calculations
+- **[Documentation](https://github.com/MyFriendBen/benefits-api/wiki)** - Comprehensive guides and setup instructions
 
 ---
 
-## 💬 Contact & Support
+## Contact & Support
 
 - **Website:** [myfriendben.org](https://myfriendben.org)
-- **Organization:** [Gary Community Ventures](https://garycommunity.org/)
 - **Issues:** [GitHub Issues](https://github.com/Gary-Community-Ventures/benefits-calculator/issues)
-<!-- TODO: Add contact email or support links -->
 
 ---
 
 <div align="center">
 
-**Built with ❤️ by Gary Community Ventures in partnership with Colorado families**
+**Built with care by MyFriendBen and friends**
 
 _Inspired by [AccessNYC](https://github.com/CityOfNewYork/ACCESS-NYC) and powered by [PolicyEngine](https://github.com/PolicyEngine/policyengine-us)_
 
