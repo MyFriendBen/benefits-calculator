@@ -20,6 +20,7 @@ import { ReactComponent as None } from '../../Assets/icons/General/OptionCard/He
 import { ReactComponent as PrivateInsurance } from '../../Assets/icons/General/OptionCard/HealthInsurance/privateInsurance.svg';
 import { ReactComponent as Baby_supplies } from '../../Assets/icons/UrgentNeeds/AcuteConditions/baby_supplies.svg';
 import { ReactComponent as Child_development } from '../../Assets/icons/UrgentNeeds/AcuteConditions/child_development.svg';
+import { ReactComponent as Youth_development } from '../../Assets/icons/UrgentNeeds/AcuteConditions/Youth_development.svg';
 import { ReactComponent as Dental_care } from '../../Assets/icons/UrgentNeeds/AcuteConditions/dental_care.svg';
 import { ReactComponent as Food } from '../../Assets/icons/UrgentNeeds/AcuteConditions/food.svg';
 import { ReactComponent as Housing } from '../../Assets/icons/UrgentNeeds/AcuteConditions/housing.svg';
@@ -31,6 +32,7 @@ import { ReactComponent as Resources } from '../../Assets/icons/General/resource
 import { ReactComponent as SurvivingSpouse } from '../../Assets/icons/General/head.svg';
 import { ReactComponent as Dialysis } from '../../Assets/icons/General/OptionCard/Conditions/dialysis.svg';
 import { Language } from '../../Assets/languageOptions';
+
 
 type Item = {
   _label: string;
@@ -52,9 +54,12 @@ function transformItemIcon(item: unknown): any {
     case 'Baby_supplies':
       iconComponent = <Baby_supplies className={icon._classname} />;
       break;
-    case 'Child_development':
-      iconComponent = <Child_development className={icon._classname} />;
+    case 'Youth_development':
+      iconComponent = <Youth_development className={icon._classname} />;
       break;
+    case 'Child_development':      
+       iconComponent = <Child_development className={icon._classname} />;      
+       break;    
     case 'Dental_care':
       iconComponent = <Dental_care className={icon._classname} />;
       break;
