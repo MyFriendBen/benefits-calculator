@@ -28,7 +28,7 @@ import { ReactComponent as Legal_services } from '../../Assets/icons/UrgentNeeds
 import { ReactComponent as Support } from '../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
 import { ReactComponent as Military } from '../../Assets/icons/UrgentNeeds/AcuteConditions/military.svg';
 import { ReactComponent as Resources } from '../../Assets/icons/General/resources.svg';
-import { ReactComponent as SurvivingSpouse } from '../EnergyCalculator/Icons/Widow.svg';
+import { ReactComponent as SurvivingSpouse } from '../EnergyCalculator/Icons/Person.svg';
 import { ReactComponent as Wheelchair } from '../EnergyCalculator/Icons/Wheelchair.svg';
 import { ReactComponent as HeartRate } from '../EnergyCalculator/Icons/HeartRate.svg';
 import { Language } from '../../Assets/languageOptions';
