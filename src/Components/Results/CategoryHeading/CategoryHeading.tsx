@@ -6,10 +6,13 @@ import { ReactComponent as TaxCredits } from '../../../Assets/icons/Programs/Cat
 import { ReactComponent as CashAssistance } from '../../../Assets/icons/Programs/CategoryHeading/cashAssistant.svg';
 import { ReactComponent as ChildCareYouthEducation } from '../../../Assets/icons/Programs/CategoryHeading/childCareYouthEducation.svg';
 import { ReactComponent as BadgeDollar } from '../../EnergyCalculator/Icons/BadgeDollar.svg';
-import { ReactComponent as LightBulb } from '../../EnergyCalculator/Icons/Lightbulb.svg';
+import { ReactComponent as Lightbulb } from '../../EnergyCalculator/Icons/Lightbulb.svg';
+import { ReactComponent as AirVent } from '../../EnergyCalculator/Icons/AcUnit.svg';
 import { ReactComponent as Heat } from '../../EnergyCalculator/Icons/Heat.svg';
 import { ReactComponent as LowFuel } from '../../EnergyCalculator/Icons/LowFuel.svg';
-import { ReactComponent as Talk } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
+import { ReactComponent as Talk } from '../../EnergyCalculator/Icons/MessageCircle.svg';
+import { ReactComponent as HandCoins } from '../../EnergyCalculator/Icons/HandCoins.svg';
+import { ReactComponent as Bill } from '../../EnergyCalculator/Icons/Bill.svg';
 import { ReactComponent as Baby_supplies } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/baby_supplies.svg';
 import { ReactComponent as Child_development } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/child_development.svg';
 import { ReactComponent as Dental_care } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/dental_care.svg';
@@ -37,9 +40,11 @@ export const headingOptionsMappings: { [key: string]: React.ComponentType } = {
   tax_credit: TaxCredits,
   cash: CashAssistance,
   child_care: ChildCareYouthEducation,
-  badge_dollar: BadgeDollar,
-  light_bulb: LightBulb,
+  light_bulb: Lightbulb,
   heat: Heat,
+  bill: Bill,
+  hand_coins: HandCoins,
+  air_vent: AirVent,
   low_fuel: LowFuel,
   talk: Talk,
   food_groceries: Food,
@@ -82,7 +87,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const iconTranslation = intl.formatMessage({ id: 'categoryHeading.icon', defaultMessage: 'icon' });
 
   // Add lucide icon class for specific icons that need white fill
-  const lucideIcons = ['house_plug', 'badge_dollar', 'light_bulb'];
+  const lucideIcons = ['house_plug', 'hand_coins', 'light_bulb', 'talk', 'air_vent', 'bill'];
   const iconClasses = `category-heading-icon category-icon-${category.icon}${lucideIcons.includes(category.icon) ? ' category-lucide-icon' : ''}`;
 
   return (
