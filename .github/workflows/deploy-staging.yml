@@ -24,6 +24,7 @@ jobs:
 
       - name: Get commit info
         id: commit_info
+        if: always()
         run: |
           echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "message=$(git log -1 --pretty=%B | head -n 1)" >> $GITHUB_OUTPUT
