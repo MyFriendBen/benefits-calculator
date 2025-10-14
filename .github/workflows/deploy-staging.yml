@@ -29,6 +29,7 @@ jobs:
           echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "message=$(git log -1 --pretty=%B | head -n 1)" >> $GITHUB_OUTPUT
           echo "author=$(git log -1 --pretty=%an)" >> $GITHUB_OUTPUT
+          echo "timestamp=$(git log -1 --format=%ct)" >> $GITHUB_OUTPUT
 
       - name: Send Slack notification on success
         if: success()
@@ -42,7 +43,7 @@ jobs:
             --arg author "${{ steps.commit_info.outputs.author }}" \
             --arg message "${{ steps.commit_info.outputs.message }}" \
             --arg app "${{ secrets.HEROKU_APP_NAME }}" \
-            --arg timestamp "${{ github.event.head_commit.timestamp }}" \
+            --arg timestamp "${{ steps.commit_info.outputs.timestamp }}" \
             '{
               text: "✅ Frontend Staging Deployment Successful",
               blocks: [
