@@ -259,7 +259,7 @@ export const Filter = () => {
         <Typography variant="body2" color="text.secondary" sx={{ margin: '0.5rem 0 1rem 0', fontSize: '0.9rem', fontFamily: 'Roboto, Arial, sans-serif', fontWeight: 400 }}>
           <FormattedMessage
             id="filterSection.citizenHelpText"
-            defaultMessage="Household members may have mixed immigration status. This means that some people in your home may qualify for benefits even if others do not. Use this filter to see how a person's status affects their ability to qualify. If you sign up for a public benefit or file a tax return, your family’s information may be shared with immigration officials. If you sign up for a public benefit or file a tax return, your family’s information may be shared with immigration officials."
+            defaultMessage="Household members may have mixed immigration status. This means that some people in your home may qualify for benefits even if others do not. Use this filter to see how a person's status affects their ability to qualify. If you sign up for a public benefit or file a tax return, your family’s information may be shared with immigration officials."
           />
         </Typography>
       </div>
