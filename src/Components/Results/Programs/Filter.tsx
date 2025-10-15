@@ -15,7 +15,6 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
 import './Filter.css';
-import HelpButton from '../../HelpBubbleIcon/HelpButton';
 import { Context } from '../../Wrapper/Wrapper';
 
 export const Filter = () => {
