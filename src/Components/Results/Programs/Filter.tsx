@@ -1,7 +1,7 @@
 import { ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useResultsContext } from '../Results';
-import { Button, Popover, Checkbox } from '@mui/material';
+import { Button, Popover, Checkbox, Typography } from '@mui/material';
 import {
   CalculatedCitizenLabel,
   calculatedCitizenshipFilters,
@@ -254,13 +254,15 @@ export const Filter = () => {
     <div className="filter-section-container">
       <h2 className="results-section-header">
         <FormattedMessage id="filterSection.header" defaultMessage="Filter Results by Citizenship" />
-        <HelpButton>
+      </h2>
+      <div className="filter-description">
+        <Typography variant="body2" color="text.secondary" sx={{ margin: '0.5rem 0 1rem 0', fontSize: '0.9rem', fontFamily: 'Roboto, Arial, sans-serif', fontWeight: 400 }}>
           <FormattedMessage
             id="filterSection.citizenHelpText"
-            defaultMessage="Household members may have mixed immigration status. This means that some people in your home may qualify for benefits even if others do not. Use this filter to see how a person's status affects their ability to qualify."
+            defaultMessage="Household members may have mixed immigration status. This means that some people in your home may qualify for benefits even if others do not. Use this filter to see how a person's status affects their ability to qualify. If you sign up for a public benefit or file a tax return, your family’s information may be shared with immigration officials. If you sign up for a public benefit or file a tax return, your family’s information may be shared with immigration officials."
           />
-        </HelpButton>
-      </h2>
+        </Typography>
+      </div>
       <div className="flex-direction-row">
         {displayCitizenshipButton()}
         {displayResetFiltersButton()}
