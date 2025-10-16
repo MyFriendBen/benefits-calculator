@@ -10,7 +10,6 @@ import { ReactComponent as Talk } from '../../EnergyCalculator/Icons/Messages.sv
 import { ReactComponent as TriangleAlert } from '../../EnergyCalculator/Icons/TriangleAlert.svg';
 import { ReactComponent as Lightning } from '../../EnergyCalculator/Icons/Lightning.svg';
 import { ReactComponent as HeartHand } from '../../EnergyCalculator/Icons/HeartHand.svg';
-import { ReactComponent as Coin } from '../../EnergyCalculator/Icons/Coin.svg';
 import { ReactComponent as Baby_supplies } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/baby_supplies.svg';
 import { ReactComponent as Child_development } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/child_development.svg';
 import { ReactComponent as Dental_care } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/dental_care.svg';
@@ -36,11 +35,11 @@ export const headingOptionsMappings: { [key: string]: React.ComponentType } = {
   cash: CashAssistance,
   child_care: ChildCareYouthEducation,
   child_development: Child_development,
-  coin: Coin,
   dental_care: Dental_care,
   family_planning: Family_planning,
   food: Food,
   food_groceries: Food,
+  heat: HeartHand, //TODO: Delete once PR#1947 deployed
   health_care: HealthCare,
   heart_hand: HeartHand,
   housing: Residence,
@@ -48,6 +47,7 @@ export const headingOptionsMappings: { [key: string]: React.ComponentType } = {
   legal_services: Legal_services,
   light_bulb: LightBulb,
   lightning: Lightning,
+  low_fuel: TriangleAlert, //TODO: Delete once PR#1947 deployed
   managing_housing: Housing,
   savings: Resources,
   talk: Talk,
