@@ -44,6 +44,15 @@
   stroke-width: 1.07;
 }
 
+.option-card-lucide-icon.shower-icon-scaled {
+  transform: scale(1.3);
+}
+
+.option-card-lucide-icon.shower-icon-scaled path,
+.option-card-lucide-icon.shower-icon-scaled circle {
+  stroke-width: 1.07;
+}
+
 .option-card-lucide-icon path,
 .option-card-lucide-icon rect,
 .option-card-lucide-icon circle {

@@ -20,7 +20,7 @@ import useStepForm from '../../Steps/stepForm';
 
 export const applianceStatusOptions = {
   needsWaterHeater: {
-    icon: <Shower className="option-card-lucide-icon" />,
+    icon: <Shower className="option-card-lucide-icon shower-icon-scaled" />,
     text: <FormattedMessage id="applianceStatusOptions.needsWaterHeater" defaultMessage="Water Heater" />,
   },
   needsHvac: {
