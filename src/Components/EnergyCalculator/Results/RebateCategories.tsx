@@ -56,7 +56,7 @@ export function useEnergyCalculatorNeedsRebates() {
 
 const REBATE_CATEGORY_HEADING: ProgramCategory = {
   external_name: 'energy_calculator_rebate_category',
-  icon: 'bill',
+  icon: 'coin',
   name: { label: 'energyCalculator.results.rebates.header', default_message: 'Rebates' },
   description: {
     label: 'energyCalculator.results.rebates.description',
