@@ -5,6 +5,7 @@ import { ReactComponent as Transportation } from '../../../Assets/icons/Programs
 import { ReactComponent as TaxCredits } from '../../../Assets/icons/Programs/CategoryHeading/taxCredits.svg';
 import { ReactComponent as CashAssistance } from '../../../Assets/icons/Programs/CategoryHeading/cashAssistant.svg';
 import { ReactComponent as ChildCareYouthEducation } from '../../../Assets/icons/Programs/CategoryHeading/childCareYouthEducation.svg';
+import { ReactComponent as Coin } from '../../EnergyCalculator/Icons/Coin.svg';
 import { ReactComponent as LightBulb } from '../../EnergyCalculator/Icons/Lightbulb.svg';
 import { ReactComponent as Talk } from '../../EnergyCalculator/Icons/Messages.svg';
 import { ReactComponent as TriangleAlert } from '../../EnergyCalculator/Icons/TriangleAlert.svg';
@@ -33,6 +34,7 @@ export const headingOptionsMappings: { [key: string]: React.ComponentType } = {
   baby_supplies: Baby_supplies,
   behavioral_health: Support,
   cash: CashAssistance,
+  coin: Coin,
   child_care: ChildCareYouthEducation,
   child_development: Child_development,
   dental_care: Dental_care,
