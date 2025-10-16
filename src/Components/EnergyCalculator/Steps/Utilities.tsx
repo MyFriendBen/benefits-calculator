@@ -7,8 +7,8 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { ReactComponent as Plug } from '../Icons/Plug.svg';
-import { ReactComponent as LowFuel } from '../Icons/LowFuel.svg';
+import { ReactComponent as LightbulbOff } from '../Icons/LightbulbOff.svg';
+import { ReactComponent as FileWarning } from '../Icons/FileWarning.svg';
 import { ReactComponent as Car } from '../Icons/Car.svg';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useDefaultBackNavigationFunction } from '../../QuestionComponents/questionHooks';
@@ -27,7 +27,7 @@ const Utilities = () => {
 
   const utilityStatusOptions = {
     electricityIsDisconnected: {
-      icon: <Plug className="option-card-icon" />,
+      icon: <LightbulbOff className="option-card-lucide-icon" />,
       text: (
         <FormattedMessage
           id="utilityStatusOptions.electricityIsDisconnected"
@@ -36,7 +36,7 @@ const Utilities = () => {
       ),
     },
     hasPastDueEnergyBills: {
-      icon: <LowFuel className="option-card-icon" />,
+      icon: <FileWarning className="option-card-lucide-icon" />,
       text: (
         <FormattedMessage
           id="utilityStatusOptions.hasPastDueEnergyBills"
@@ -45,7 +45,7 @@ const Utilities = () => {
       ),
     },
     hasOldCar: {
-      icon: <Car className="option-card-icon" />,
+      icon: <Car className="option-card-lucide-icon car-icon-scaled" />,
       text: (
         <FormattedMessage
           id="utilityStatusOptions.oldCar"
