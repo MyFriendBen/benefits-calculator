@@ -15,6 +15,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
 import './Filter.css';
+import '../../QuestionComponentContainer/QuestionComponentContainer.css';
 import { Context } from '../../Wrapper/Wrapper';
 
 export const Filter = () => {
@@ -255,13 +256,7 @@ export const Filter = () => {
         <FormattedMessage id="filterSection.header" defaultMessage="Filter Results by Citizenship" />
       </h2>
       <div className="filter-description">
-        <Typography variant="body2" color="text.secondary" sx={{
-          fontFamily: "'Open Sans', serif",
-          fontSize: '1rem',
-          fontWeight: 200,
-          color: 'black',
-          marginBottom: '1rem',
-        }}>
+        <Typography variant="body2" color="text.secondary" className="help-text">
           <FormattedMessage
             id="filterSection.citizenHelpText"
             defaultMessage="Household members may have mixed immigration status. This means that some people in your home may qualify for benefits even if others do not. Use this filter to see how a person's status affects their ability to qualify. If you sign up for a public benefit or file a tax return, your family’s information may be shared with immigration officials."
