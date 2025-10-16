@@ -45,7 +45,7 @@ const Utilities = () => {
       ),
     },
     hasOldCar: {
-      icon: <Car className="option-card-lucide-icon" />,
+      icon: <Car className="option-card-lucide-icon car-icon-scaled" />,
       text: (
         <FormattedMessage
           id="utilityStatusOptions.oldCar"

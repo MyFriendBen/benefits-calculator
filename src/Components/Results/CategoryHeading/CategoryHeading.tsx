@@ -43,7 +43,6 @@ export const headingOptionsMappings: { [key: string]: React.ComponentType } = {
   light_bulb: Lightbulb,
   heat: Heat,
   bill: Bill,
-  hand_coins: HandCoins,
   air_vent: AirVent,
   low_fuel: LowFuel,
   talk: Talk,
@@ -87,7 +86,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const iconTranslation = intl.formatMessage({ id: 'categoryHeading.icon', defaultMessage: 'icon' });
 
   // Add lucide icon class for specific icons that need white fill
-  const lucideIcons = ['house_plug', 'hand_coins', 'light_bulb', 'talk', 'air_vent', 'bill'];
+  const lucideIcons = ['house_plug', 'light_bulb', 'talk', 'air_vent', 'bill'];
   const iconClasses = `category-heading-icon category-icon-${category.icon}${lucideIcons.includes(category.icon) ? ' category-lucide-icon' : ''}`;
 
   return (

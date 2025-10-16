@@ -6,20 +6,6 @@
   max-width: 50rem;
 }
 
-.option-card.MuiPaper-root {
-  display: flex;
-  flex-direction: column;
-  border: 0.05px solid #6d6e71;
-  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-  height: 15rem;
-  background-color: #ffffff;
-}
-
-.option-card:hover {
-  background-color: var(--hover-color);
-  color: var(--option-card-hover-font-color);
-}
-
 .multi-select-card-container {
   display: flex;
   flex-direction: column;
@@ -36,31 +22,6 @@
   margin-bottom: 0.5rem;
 }
 
-.selected-option-card.MuiPaper-root {
-  background-color: var(--primary-color);
-}
-
-.option-card-text {
-  color: #ffffff;
-}
-
-.checkmark {
-  height: 1.75rem;
-  width: 1.75rem;
-  margin: -2.25rem 0.5rem 0.5rem 0;
-}
-
-.option-card-lucide-icon {
-  height: 4.375rem;
-  width: 4.375rem;
-}
-
-.option-card-lucide-icon path,
-.option-card-lucide-icon rect,
-.option-card-lucide-icon circle {
-  fill: white !important;
-  stroke: var(--icon-color);
-}
 
 .selected-option-card .option-card-lucide-icon path,
 .selected-option-card .option-card-lucide-icon rect,
@@ -75,10 +36,6 @@
   stroke: #ffffff;
 }
 
-.cls-checkmark-fill {
-  fill: var(--icon-color);
-}
-
 .white-icons .cls-checkmark-fill {
   fill: #ffffff;
 }
@@ -90,23 +47,5 @@
 @media (max-width: 38.125rem) {
   .multiselect-tiles-container {
     padding: 0;
-  }
-
-  .card-action-area.MuiButtonBase-root,
-  .option-card.MuiPaper-root,
-  .selected-option-card.MuiPaper-root {
-    width: 100%;
-    height: 10rem;
-  }
-
-  .option-card-image {
-    height: 3.5rem;
-    width: 3.5rem;
-  }
-
-  .checkmark {
-    height: 1.5rem;
-    width: 1.5rem;
-    margin: -2rem 0.5rem 0.5rem 0;
   }
 }

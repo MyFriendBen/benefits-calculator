@@ -35,13 +35,21 @@
   width: 4.375rem;
 }
 
+.option-card-lucide-icon.car-icon-scaled {
+  transform: scale(1.5);
+}
+
+.option-card-lucide-icon.car-icon-scaled path,
+.option-card-lucide-icon.car-icon-scaled circle {
+  stroke-width: 1.07;
+}
+
 .option-card-lucide-icon path,
 .option-card-lucide-icon rect,
 .option-card-lucide-icon circle {
   fill: white !important;
   stroke: var(--icon-color);
 }
-
 
 .checkmark {
   height: 1.75rem;
