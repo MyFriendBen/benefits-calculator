@@ -23,9 +23,7 @@
 }
 
 
-.selected-option-card .option-card-lucide-icon path,
-.selected-option-card .option-card-lucide-icon rect,
-.selected-option-card .option-card-lucide-icon circle {
+.selected-option-card .option-card-lucide-icon * {
   fill: var(--primary-color) !important;
   stroke: white;
 }

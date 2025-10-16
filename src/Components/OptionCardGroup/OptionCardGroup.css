@@ -53,9 +53,7 @@
   stroke-width: 1.07;
 }
 
-.option-card-lucide-icon path,
-.option-card-lucide-icon rect,
-.option-card-lucide-icon circle {
+.option-card-lucide-icon * {
   fill: white !important;
   stroke: var(--icon-color);
 }

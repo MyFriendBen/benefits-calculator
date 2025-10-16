@@ -77,9 +77,7 @@
   height: 2rem;
 }
 
-.category-lucide-icon svg path,
-.category-lucide-icon svg rect,
-.category-lucide-icon svg circle {
+.category-lucide-icon svg * {
   fill: white !important;
   stroke: var(--icon-color);
 }
