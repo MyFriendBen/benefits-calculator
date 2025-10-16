@@ -54,12 +54,12 @@ function transformItemIcon(item: unknown): any {
     case 'Baby_supplies':
       iconComponent = <Baby_supplies className={icon._classname} />;
       break;
+    case 'Child_development':
+      iconComponent = <Child_development className={icon._classname} />;
+      break;
     case 'Youth_development':
       iconComponent = <Youth_development className={icon._classname} />;
-      break;
-    case 'Child_development':      
-       iconComponent = <Child_development className={icon._classname} />;      
-       break;    
+      break;    
     case 'Dental_care':
       iconComponent = <Dental_care className={icon._classname} />;
       break;
