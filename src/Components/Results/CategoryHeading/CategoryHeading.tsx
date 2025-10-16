@@ -39,7 +39,6 @@ export const headingOptionsMappings: { [key: string]: React.ComponentType } = {
   family_planning: Family_planning,
   food: Food,
   food_groceries: Food,
-  heat: HeartHand, //TODO: Delete once PR#1947 deployed
   health_care: HealthCare,
   heart_hand: HeartHand,
   housing: Residence,
@@ -47,7 +46,6 @@ export const headingOptionsMappings: { [key: string]: React.ComponentType } = {
   legal_services: Legal_services,
   light_bulb: LightBulb,
   lightning: Lightning,
-  low_fuel: TriangleAlert, //TODO: Delete once PR#1947 deployed
   managing_housing: Housing,
   savings: Resources,
   talk: Talk,
