@@ -12,8 +12,8 @@ import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import { useDefaultBackNavigationFunction } from '../../QuestionComponents/questionHooks';
 import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
 import { ReactComponent as Lightbulb } from '../Icons/Lightbulb.svg';
-import { ReactComponent as Heat } from '../Icons/Heat.svg';
-import { ReactComponent as AcUnit } from '../Icons/AcUnit.svg';
+import { ReactComponent as Fire } from '../Icons/Fire.svg';
+import { ReactComponent as AirVent } from '../Icons/AirVent.svg';
 import { Context } from '../../Wrapper/Wrapper';
 import QuestionDescription from '../../QuestionComponents/QuestionDescription';
 import { FormattedMessageType } from '../../../Types/Questions';
@@ -32,12 +32,12 @@ const EXPENSE_OPTIONS: MultiSelectTileOption<EnergyCalculatorExpenseType>[] = [
   {
     value: 'heating',
     text: ENERGY_CALCULATOR_EXPENSE_NAME_MAP.heating,
-    icon: <Heat className="option-card-icon" />,
+    icon: <Fire className="option-card-lucide-icon" />,
   },
   {
     value: 'cooling',
     text: ENERGY_CALCULATOR_EXPENSE_NAME_MAP.cooling,
-    icon: <AcUnit className="option-card-lucide-icon" />,
+    icon: <AirVent className="option-card-lucide-icon" />,
   },
   {
     value: 'electricity',

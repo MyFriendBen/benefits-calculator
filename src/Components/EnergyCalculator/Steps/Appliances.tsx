@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { ReactComponent as Shower } from '../Icons/Shower.svg';
-import { ReactComponent as Heater } from '../Icons/AcUnit.svg';
+import { ReactComponent as AirVent } from '../Icons/AirVent.svg';
 import { ReactComponent as Pot } from '../Icons/Pot.svg';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useDefaultBackNavigationFunction } from '../../QuestionComponents/questionHooks';
@@ -24,7 +24,7 @@ export const applianceStatusOptions = {
     text: <FormattedMessage id="applianceStatusOptions.needsWaterHeater" defaultMessage="Water Heater" />,
   },
   needsHvac: {
-    icon: <Heater className="option-card-lucide-icon" />,
+    icon: <AirVent className="option-card-lucide-icon" />,
     text: (
       <FormattedMessage id="applianceStatusOptions.needsHvac" defaultMessage="Heating, ventilation, and/or cooling" />
     ),
