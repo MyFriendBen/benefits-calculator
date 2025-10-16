@@ -5,11 +5,12 @@ import { ReactComponent as Transportation } from '../../../Assets/icons/Programs
 import { ReactComponent as TaxCredits } from '../../../Assets/icons/Programs/CategoryHeading/taxCredits.svg';
 import { ReactComponent as CashAssistance } from '../../../Assets/icons/Programs/CategoryHeading/cashAssistant.svg';
 import { ReactComponent as ChildCareYouthEducation } from '../../../Assets/icons/Programs/CategoryHeading/childCareYouthEducation.svg';
-import { ReactComponent as WaterHeater } from '../../EnergyCalculator/Icons/WaterHeater.svg';
-import { ReactComponent as LightBulb } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/housing.svg';
-import { ReactComponent as Heat } from '../../EnergyCalculator/Icons/Heat.svg';
-import { ReactComponent as LowFuel } from '../../EnergyCalculator/Icons/LowFuel.svg';
-import { ReactComponent as Talk } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
+import { ReactComponent as Coin } from '../../EnergyCalculator/Icons/Coin.svg';
+import { ReactComponent as LightBulb } from '../../EnergyCalculator/Icons/Lightbulb.svg';
+import { ReactComponent as Talk } from '../../EnergyCalculator/Icons/Messages.svg';
+import { ReactComponent as TriangleAlert } from '../../EnergyCalculator/Icons/TriangleAlert.svg';
+import { ReactComponent as Lightning } from '../../EnergyCalculator/Icons/Lightning.svg';
+import { ReactComponent as HeartHand } from '../../EnergyCalculator/Icons/HeartHand.svg';
 import { ReactComponent as Baby_supplies } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/baby_supplies.svg';
 import { ReactComponent as Child_development } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/child_development.svg';
 import { ReactComponent as Dental_care } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/dental_care.svg';
@@ -30,29 +31,32 @@ import { Context } from '../../Wrapper/Wrapper';
 
 // NOTE: keys must be lower case
 export const headingOptionsMappings: { [key: string]: React.ComponentType } = {
-  housing: Residence,
-  food: Food,
-  health_care: HealthCare,
-  transportation: Transportation,
-  tax_credit: TaxCredits,
-  cash: CashAssistance,
-  child_care: ChildCareYouthEducation,
-  water_heater: WaterHeater,
-  light_bulb: LightBulb,
-  heat: Heat,
-  low_fuel: LowFuel,
-  talk: Talk,
-  food_groceries: Food,
   baby_supplies: Baby_supplies,
-  managing_housing: Housing,
   behavioral_health: Support,
+  cash: CashAssistance,
+  coin: Coin,
+  child_care: ChildCareYouthEducation,
   child_development: Child_development,
-  family_planning: Family_planning,
-  job_resources: Job_resources,
   dental_care: Dental_care,
+  family_planning: Family_planning,
+  food: Food,
+  food_groceries: Food,
+  heat: HeartHand, //TODO: Delete once PR#1947 deployed
+  health_care: HealthCare,
+  heart_hand: HeartHand,
+  housing: Residence,
+  job_resources: Job_resources,
   legal_services: Legal_services,
-  veteran_services: Military,
+  light_bulb: LightBulb,
+  lightning: Lightning,
+  low_fuel: TriangleAlert, //TODO: Delete once PR#1947 deployed
+  managing_housing: Housing,
   savings: Resources,
+  talk: Talk,
+  tax_credit: TaxCredits,
+  transportation: Transportation,
+  triangle_alert: TriangleAlert,
+  veteran_services: Military,
 };
 
 type CategoryHeadingProps = {
@@ -81,12 +85,16 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   };
   const iconTranslation = intl.formatMessage({ id: 'categoryHeading.icon', defaultMessage: 'icon' });
 
+  // Add lucide icon class for specific icons that need white fill
+  const lucideIcons = ['house_plug', 'light_bulb', 'talk', 'air_vent', 'coin', 'heart_hand', 'lightning', 'triangle_alert'];
+  const iconClasses = `category-heading-icon category-icon-${category.icon}${lucideIcons.includes(category.icon) ? ' category-lucide-icon' : ''}`;
+
   return (
     <div>
       <div className="category-heading-container">
         <div className="category-heading-column">
           <div
-            className="category-heading-icon"
+            className={iconClasses}
             aria-label={`${intl.formatMessage(categoryImageAriaLabelProps)} ${iconTranslation}`}
             role="img"
           >
