@@ -3,8 +3,8 @@ import { FormattedMessage } from 'react-intl';
 import BackAndSaveButtons from '../../Results/BackAndSaveButtons/BackAndSaveButtons';
 import { useResultsLink } from '../../Results/Results';
 import { EnergyCalculatorRebateCalculator, EnergyCalculatorRebateCardTitle, rebateTypes } from './RebatePageMappings';
-import { ReactComponent as Housing } from '../../../Assets/icons/General/residence.svg';
 import { ReactComponent as WarningIcon } from '../../../Assets/icons/General/warning.svg';
+import { ReactComponent as Coin } from '../Icons/Coin.svg';
 import { renderCategoryDescription } from './rebateTypes';
 import './RebatePage.css';
 import { useMemo, useContext } from 'react';
@@ -51,7 +51,9 @@ export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePag
       </section>
       <div className="energy-calculator-rebate-page-container">
         <h1>
-          <Housing />
+          <div className="energy-calculator-rebate-page-icon energy-calculator-rebate-page-icon-lucide">
+            <Coin />
+          </div>
           <span>{rebateCategory.name}</span>
         </h1>
         {renderCategoryDescription(rebateCategory.type, formData)}

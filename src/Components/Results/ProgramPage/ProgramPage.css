@@ -34,7 +34,8 @@
 }
 
 .header-icon-lucide svg {
-  height: 6rem;
+  width: 3.5rem;
+  height: 3.5rem;
 }
 
 .header-icon-lucide svg * {
