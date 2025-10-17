@@ -31,6 +31,11 @@
   align-items: center;
 }
 
+.confirmation-icon svg {
+  width: 4rem;
+  height: 4rem;
+}
+
 .confirmation-icon svg path,
 .confirmation-icon svg circle {
   stroke: var(--secondary-icon-color);
@@ -150,5 +155,10 @@ svg.edit-button polygon {
   .confirmation-icon {
     min-width: 4rem;
     margin: 0 1rem 0 0;
+  }
+
+  .confirmation-icon svg {
+    width: 3rem;
+    height: 3rem;
   }
 }
