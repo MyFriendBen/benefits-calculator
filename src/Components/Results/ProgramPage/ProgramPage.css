@@ -33,6 +33,16 @@
   stroke: var(--icon-color);
 }
 
+.header-icon-lucide svg {
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+.header-icon-lucide svg * {
+  fill: white !important;
+  stroke: var(--icon-color);
+}
+
 .header-text {
   display: flex;
   flex-direction: column;

@@ -1,26 +1,3 @@
-import { ReactComponent as Food } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/food.svg';
-import { ReactComponent as Residence } from '../../../Assets/icons/General/residence.svg';
-import { ReactComponent as HealthCare } from '../../../Assets/icons/Programs/CategoryHeading/healthcare.svg';
-import { ReactComponent as Transportation } from '../../../Assets/icons/Programs/CategoryHeading/transportation.svg';
-import { ReactComponent as TaxCredits } from '../../../Assets/icons/Programs/CategoryHeading/taxCredits.svg';
-import { ReactComponent as CashAssistance } from '../../../Assets/icons/Programs/CategoryHeading/cashAssistant.svg';
-import { ReactComponent as ChildCareYouthEducation } from '../../../Assets/icons/Programs/CategoryHeading/childCareYouthEducation.svg';
-import { ReactComponent as Coin } from '../../EnergyCalculator/Icons/Coin.svg';
-import { ReactComponent as LightBulb } from '../../EnergyCalculator/Icons/Lightbulb.svg';
-import { ReactComponent as Talk } from '../../EnergyCalculator/Icons/Messages.svg';
-import { ReactComponent as TriangleAlert } from '../../EnergyCalculator/Icons/TriangleAlert.svg';
-import { ReactComponent as Lightning } from '../../EnergyCalculator/Icons/Lightning.svg';
-import { ReactComponent as HeartHand } from '../../EnergyCalculator/Icons/HeartHand.svg';
-import { ReactComponent as Baby_supplies } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/baby_supplies.svg';
-import { ReactComponent as Child_development } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/child_development.svg';
-import { ReactComponent as Dental_care } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/dental_care.svg';
-import { ReactComponent as Family_planning } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/family_planning.svg';
-import { ReactComponent as Housing } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/housing.svg';
-import { ReactComponent as Job_resources } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/job_resources.svg';
-import { ReactComponent as Legal_services } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/legal_services.svg';
-import { ReactComponent as Support } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
-import { ReactComponent as Military } from '../../../Assets/icons/UrgentNeeds/AcuteConditions/military.svg';
-import { ReactComponent as Resources } from '../../../Assets/icons/General/resources.svg';
 import { calculateTotalValue, formatToUSD } from '../FormattedValue';
 import { FormattedMessage, useIntl } from 'react-intl';
 import ResultsTranslate from '../Translate/Translate';
@@ -28,36 +5,7 @@ import { useTranslateNumber } from '../../../Assets/languageOptions';
 import { ProgramCategory } from '../../../Types/Results';
 import { useContext } from 'react';
 import { Context } from '../../Wrapper/Wrapper';
-
-// NOTE: keys must be lower case
-export const headingOptionsMappings: { [key: string]: React.ComponentType } = {
-  baby_supplies: Baby_supplies,
-  behavioral_health: Support,
-  cash: CashAssistance,
-  coin: Coin,
-  child_care: ChildCareYouthEducation,
-  child_development: Child_development,
-  dental_care: Dental_care,
-  family_planning: Family_planning,
-  food: Food,
-  food_groceries: Food,
-  heat: HeartHand, //TODO: Delete once PR#1947 deployed
-  health_care: HealthCare,
-  heart_hand: HeartHand,
-  housing: Residence,
-  job_resources: Job_resources,
-  legal_services: Legal_services,
-  light_bulb: LightBulb,
-  lightning: Lightning,
-  low_fuel: TriangleAlert, //TODO: Delete once PR#1947 deployed
-  managing_housing: Housing,
-  savings: Resources,
-  talk: Talk,
-  tax_credit: TaxCredits,
-  transportation: Transportation,
-  triangle_alert: TriangleAlert,
-  veteran_services: Military,
-};
+import { LUCIDE_ICONS, ICON_OPTIONS_MAP } from '../helpers';
 
 type CategoryHeadingProps = {
   category: ProgramCategory;
@@ -69,12 +17,8 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const intl = useIntl();
   const translateNumber = useTranslateNumber();
 
-  let IconComponent = headingOptionsMappings[category.icon];
-
-  if (IconComponent === undefined) {
-    // if there is a category not in the list of categories use a default icon
-    IconComponent = CashAssistance;
-  }
+  const iconKey = category.icon.toLowerCase();
+  const IconComponent = ICON_OPTIONS_MAP[iconKey] ?? ICON_OPTIONS_MAP['cash'];
 
   const monthlyCategoryAmt = calculateTotalValue(category) / 12;
   const shouldShowAmount = showAmount ?? !getReferrer('featureFlags').includes('dont_show_category_values');
@@ -86,9 +30,8 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const iconTranslation = intl.formatMessage({ id: 'categoryHeading.icon', defaultMessage: 'icon' });
 
   // Add lucide icon class for specific icons that need white fill
-  const lucideIcons = ['house_plug', 'light_bulb', 'talk', 'air_vent', 'coin', 'heart_hand', 'lightning', 'triangle_alert'];
-  const iconClasses = `category-heading-icon category-icon-${category.icon}${lucideIcons.includes(category.icon) ? ' category-lucide-icon' : ''}`;
-
+  const iconClasses = `category-heading-icon category-icon-${iconKey}${LUCIDE_ICONS.includes(iconKey) ? ' category-lucide-icon' : ''}`;
+  
   return (
     <div>
       <div className="category-heading-container">
