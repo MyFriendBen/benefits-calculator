@@ -1,3 +1,4 @@
+import type { ComponentType, SVGProps } from 'react';
 import { ReactComponent as Food } from '../../Assets/icons/UrgentNeeds/AcuteConditions/food.svg';
 import { ReactComponent as Residence } from '../../Assets/icons/General/residence.svg';
 import { ReactComponent as HealthCare } from '../../Assets/icons/Programs/CategoryHeading/healthcare.svg';
@@ -33,7 +34,7 @@ export const LUCIDE_ICONS = ['house_plug', 'light_bulb', 'talk', 'air_vent', 'co
  * Used across CategoryHeading, ProgramPage, and CurrentBenefits components
  * NOTE: keys must be lower case
  */
-export const ICON_OPTIONS_MAP: { [key: string]: React.ComponentType } = {
+export const ICON_OPTIONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   baby_supplies: BabySupplies,
   behavioral_health: Support,
   cash: CashAssistance,

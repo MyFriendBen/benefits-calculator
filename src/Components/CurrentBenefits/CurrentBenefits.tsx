@@ -1,5 +1,6 @@
 import { useIntl } from 'react-intl';
 import { useState, useEffect } from 'react';
+import type { ComponentType, SVGProps } from 'react';
 import { getAllLongTermPrograms, getAllNearTermPrograms } from '../../apiCalls';
 import { Translation } from '../../Types/Results';
 import ResultsTranslate from '../Results/Translate/Translate';
@@ -12,7 +13,7 @@ import { useConfig } from '../Config/configHook';
 import { FormattedMessageType } from '../../Types/Questions';
 import { ICON_OPTIONS_MAP } from '../Results/helpers';
 
-export const iconCategoryMap: { [key: string]: React.ComponentType } = {
+export const iconCategoryMap: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   default: ICON_OPTIONS_MAP['cash'],
   ...ICON_OPTIONS_MAP,
 };

@@ -135,12 +135,13 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
 
   const displayIconAndHeader = (program: Program) => {
     // Add lucide icon class for specific icons that need white fill
-    const iconClasses = `header-icon-box${LUCIDE_ICONS.includes(category.icon) ? ' header-icon-lucide' : ''}`;
+    const iconKey = category.icon.toLowerCase();
+    const iconClasses = `header-icon-box${LUCIDE_ICONS.includes(iconKey) ? ' header-icon-lucide' : ''}`;
 
     return (
       <header className="program-icon-and-header">
         <div className={iconClasses}>
-          <IconRenderer headingType={category.icon} />
+          <IconRenderer headingType={iconKey} />
         </div>
         <div className="header-text">
           <p className="header-text-top">

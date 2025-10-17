@@ -17,7 +17,8 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const intl = useIntl();
   const translateNumber = useTranslateNumber();
 
-  let IconComponent = ICON_OPTIONS_MAP[category.icon];
+  const iconKey = category.icon.toLowerCase();
+  let IconComponent = ICON_OPTIONS_MAP[iconKey];
 
   if (IconComponent === undefined) {
     // if there is a category not in the list of categories use a default icon
@@ -34,7 +35,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const iconTranslation = intl.formatMessage({ id: 'categoryHeading.icon', defaultMessage: 'icon' });
 
   // Add lucide icon class for specific icons that need white fill
-  const iconClasses = `category-heading-icon category-icon-${category.icon}${LUCIDE_ICONS.includes(category.icon) ? ' category-lucide-icon' : ''}`;
+  const iconClasses = `category-heading-icon category-icon-${iconKey}${LUCIDE_ICONS.includes(iconKey) ? ' category-lucide-icon' : ''}`;
 
   return (
     <div>
