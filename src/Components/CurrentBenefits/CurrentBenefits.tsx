@@ -10,12 +10,11 @@ import { useTranslateNumber } from '../../Assets/languageOptions';
 import { useParams } from 'react-router-dom';
 import { useConfig } from '../Config/configHook';
 import { FormattedMessageType } from '../../Types/Questions';
-import { headingOptionsMappings } from '../Results/CategoryHeading/CategoryHeading';
-import { ReactComponent as CashAssistance } from '../../Assets/icons/Programs/CategoryHeading/cashAssistant.svg';
+import { ICON_OPTIONS_MAP } from '../Results/helpers';
 
 export const iconCategoryMap: { [key: string]: React.ComponentType } = {
-  default: CashAssistance,
-  ...headingOptionsMappings,
+  default: ICON_OPTIONS_MAP['cash'],
+  ...ICON_OPTIONS_MAP,
 };
 
 export type Program = {

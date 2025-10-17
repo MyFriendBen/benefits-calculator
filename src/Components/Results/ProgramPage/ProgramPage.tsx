@@ -1,7 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { Program } from '../../../Types/Results';
 import ResultsTranslate from '../Translate/Translate';
-import { headingOptionsMappings } from '../CategoryHeading/CategoryHeading';
 import BackAndSaveButtons from '../BackAndSaveButtons/BackAndSaveButtons';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { YearlyValueLabel, programValue, useFormatYearlyValue } from '../FormattedValue';
@@ -13,7 +12,7 @@ import { findProgramById, findValidationForProgram, useResultsContext, useResult
 import { deleteValidation, postValidation } from '../../../apiCalls';
 import { Language } from '../../../Assets/languageOptions';
 import { allNavigatorLanguages } from './NavigatorLanguages';
-import { formatPhoneNumber } from '../helpers';
+import { formatPhoneNumber, LUCIDE_ICONS, ICON_OPTIONS_MAP } from '../helpers';
 import useScreenApi from '../../../Assets/updateScreen';
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import JsonView from '@uiw/react-json-view';
@@ -56,7 +55,7 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   };
 
   const IconRenderer: React.FC<IconRendererProps> = ({ headingType }) => {
-    const IconComponent = headingOptionsMappings[headingType];
+    const IconComponent = ICON_OPTIONS_MAP[headingType];
 
     if (!IconComponent) {
       return null;
@@ -135,9 +134,12 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   }
 
   const displayIconAndHeader = (program: Program) => {
+    // Add lucide icon class for specific icons that need white fill
+    const iconClasses = `header-icon-box${LUCIDE_ICONS.includes(category.icon) ? ' header-icon-lucide' : ''}`;
+
     return (
       <header className="program-icon-and-header">
-        <div className="header-icon-box">
+        <div className={iconClasses}>
           <IconRenderer headingType={category.icon} />
         </div>
         <div className="header-text">
