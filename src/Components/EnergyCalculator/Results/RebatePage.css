@@ -13,27 +13,13 @@
   gap: 0.5rem;
 }
 
-.energy-calculator-rebate-page-icon {
-  display: inline-flex;
-}
-
-.energy-calculator-rebate-page-icon svg {
+.energy-calculator-rebate-page-container h1 svg {
   display: inline-flex;
   width: 2.5rem;
-}
-
-.energy-calculator-rebate-page-icon path,
-.energy-calculator-rebate-page-icon rect,
-.energy-calculator-rebate-page-icon circle {
-  fill: var(--icon-color);
-  stroke: var(--icon-color);
-}
-
-.energy-calculator-rebate-page-icon-lucide svg {
   height: 2rem;
 }
 
-.energy-calculator-rebate-page-icon-lucide svg * {
+.energy-calculator-rebate-page-container h1 svg * {
   fill: white !important;
   stroke: var(--icon-color);
 }

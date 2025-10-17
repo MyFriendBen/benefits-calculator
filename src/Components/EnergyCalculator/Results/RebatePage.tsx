@@ -51,9 +51,7 @@ export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePag
       </section>
       <div className="energy-calculator-rebate-page-container">
         <h1>
-          <div className="energy-calculator-rebate-page-icon energy-calculator-rebate-page-icon-lucide">
-            <Coin />
-          </div>
+          <Coin />
           <span>{rebateCategory.name}</span>
         </h1>
         {renderCategoryDescription(rebateCategory.type, formData)}
