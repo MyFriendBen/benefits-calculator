@@ -55,7 +55,7 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   };
 
   const IconRenderer: React.FC<IconRendererProps> = ({ headingType }) => {
-    const IconComponent = ICON_OPTIONS_MAP[headingType];
+    const IconComponent = ICON_OPTIONS_MAP[headingType] ?? ICON_OPTIONS_MAP['cash'];
 
     if (!IconComponent) {
       return null;

@@ -18,12 +18,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const translateNumber = useTranslateNumber();
 
   const iconKey = category.icon.toLowerCase();
-  let IconComponent = ICON_OPTIONS_MAP[iconKey];
-
-  if (IconComponent === undefined) {
-    // if there is a category not in the list of categories use a default icon
-    IconComponent = ICON_OPTIONS_MAP['cash'];
-  }
+  const IconComponent = ICON_OPTIONS_MAP[iconKey] ?? ICON_OPTIONS_MAP['cash'];
 
   const monthlyCategoryAmt = calculateTotalValue(category) / 12;
   const shouldShowAmount = showAmount ?? !getReferrer('featureFlags').includes('dont_show_category_values');
@@ -36,7 +31,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
 
   // Add lucide icon class for specific icons that need white fill
   const iconClasses = `category-heading-icon category-icon-${iconKey}${LUCIDE_ICONS.includes(iconKey) ? ' category-lucide-icon' : ''}`;
-
+  
   return (
     <div>
       <div className="category-heading-container">
