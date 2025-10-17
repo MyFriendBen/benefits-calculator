@@ -25,9 +25,9 @@
   width: 4.375rem;
 }
 
-.option-card-icon path,
-.option-card-icon rect {
-  fill: var(--icon-color);
+.option-card-icon * {
+  fill: var(--icon-color) !important;
+  stroke: var(--icon-color) !important;
 }
 
 .option-card-lucide-icon {
