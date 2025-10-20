@@ -59,6 +59,7 @@ export const ICON_OPTIONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGEleme
   transportation: Transportation,
   triangle_alert: TriangleAlert,
   veteran_services: Military,
+  default: CashAssistance,
 };
 
 export const formatPhoneNumber = (phoneNumber: string): string => {
