@@ -32,7 +32,7 @@ export default function EnergyCalculatorElectricityProvider() {
 
   return (
     <ConfirmationBlock
-      icon={<Lightbulb className="option-card-lucide-icon" title={formatMessage(electricityProviderIconAlt)} />}
+      icon={<Lightbulb className="confirmation-lucide-icon" title={formatMessage(electricityProviderIconAlt)} />}
       title={
         <FormattedMessage
           id="energyCalculator.confirmation.electricityProvider"

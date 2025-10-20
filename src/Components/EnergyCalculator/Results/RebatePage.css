@@ -17,11 +17,13 @@
   display: inline-flex;
   width: 2.5rem;
   height: 2rem;
+  color: var(--icon-color) !important;
 }
 
+.energy-calculator-rebate-page-container h1 svg,
 .energy-calculator-rebate-page-container h1 svg * {
-  fill: white !important;
-  stroke: var(--icon-color);
+  fill: none !important;
+  stroke: currentColor !important;
 }
 
 .energy-calculator-rebate-page-container section {

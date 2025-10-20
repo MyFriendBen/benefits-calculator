@@ -33,7 +33,7 @@ export default function EnergyCalculatorGasProvider() {
 
   return (
     <ConfirmationBlock
-      icon={<Fire className="option-card-lucide-icon" title={formatMessage(gasProviderIconAlt)} />}
+      icon={<Fire className="confirmation-lucide-icon" title={formatMessage(gasProviderIconAlt)} />}
       title={<FormattedMessage id="energyCalculator.confirmation.gasProvider" defaultMessage="Gas Utility Provider" />}
       editAriaLabel={editGasProviderAriaLabel}
       stepName="energyCalculatorGasProvider"
