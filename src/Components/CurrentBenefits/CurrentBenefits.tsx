@@ -13,6 +13,7 @@ import { useConfig } from '../Config/configHook';
 import { FormattedMessageType } from '../../Types/Questions';
 import { ICON_OPTIONS_MAP, LUCIDE_ICONS } from '../Results/helpers';
 
+
 export type Program = {
   name: Translation;
   description: Translation;
@@ -122,6 +123,9 @@ const CurrentBenefits = () => {
       
 
       const isLucideIcon = LUCIDE_ICONS.includes(actualIconKey);
+      const iconClassName = isLucideIcon ? 'category-heading-icon category-lucide-icon' : 'category-heading-icon';
+
+      const isLucideIcon = LUCIDE_ICONS.includes(icon.toLowerCase());
       const iconClassName = isLucideIcon ? 'category-heading-icon category-lucide-icon' : 'category-heading-icon';
 
       return (
