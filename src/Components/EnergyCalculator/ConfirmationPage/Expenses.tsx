@@ -40,7 +40,7 @@ export default function EnergyCalculatorExpenses() {
 
   return (
     <ConfirmationBlock
-      icon={<Bill className='option-card-lucide-icon' title={formatMessage(electricityProviderIconAlt)} />}
+      icon={<Bill className='confirmation-lucide-icon' title={formatMessage(electricityProviderIconAlt)} />}
       title={<FormattedMessage id="energyCalculator.confirmation.expenses" defaultMessage="Utility Bills" />}
       editAriaLabel={editElectricityProviderAriaLabel}
       stepName="energyCalculatorExpenses"

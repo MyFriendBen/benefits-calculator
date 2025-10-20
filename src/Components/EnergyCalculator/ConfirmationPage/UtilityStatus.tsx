@@ -23,7 +23,7 @@ const UtilityStatus = () => {
 
   return (
     <ConfirmationBlock
-      icon={<FileWarning className="option-card-lucide-icon" title={formatMessage(utilityStatusIconAlt)} />}
+      icon={<FileWarning className="confirmation-lucide-icon" title={formatMessage(utilityStatusIconAlt)} />}
       title={
         <FormattedMessage
           id="energyCalculator.confirmation.utilityStatus"

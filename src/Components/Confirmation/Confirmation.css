@@ -38,11 +38,24 @@
 
 .confirmation-icon svg path,
 .confirmation-icon svg circle {
+  fill: var(--secondary-icon-color);
+  stroke: var(--secondary-icon-color);
+}
+
+/* Lucide icons have the class directly on the SVG element */
+svg.confirmation-lucide-icon {
+  width: 4.75rem;
+  height: 4.75rem;
+}
+
+svg.confirmation-lucide-icon * {
+  fill: white !important;
   stroke: var(--secondary-icon-color);
 }
 
 svg.confirmation-icon path,
 svg.confirmation-icon circle {
+  fill: var(--secondary-icon-color);
   stroke: var(--secondary-icon-color);
 }
 
