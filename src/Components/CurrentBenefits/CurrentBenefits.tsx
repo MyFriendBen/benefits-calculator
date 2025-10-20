@@ -121,11 +121,7 @@ const CurrentBenefits = () => {
       const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'default';
       const CategoryIcon = ICON_OPTIONS_MAP[actualIconKey];
       
-
       const isLucideIcon = LUCIDE_ICONS.includes(actualIconKey);
-      const iconClassName = isLucideIcon ? 'category-heading-icon category-lucide-icon' : 'category-heading-icon';
-
-      const isLucideIcon = LUCIDE_ICONS.includes(icon.toLowerCase());
       const iconClassName = isLucideIcon ? 'category-heading-icon category-lucide-icon' : 'category-heading-icon';
 
       return (
