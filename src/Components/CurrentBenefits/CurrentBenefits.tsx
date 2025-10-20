@@ -121,16 +121,11 @@ const CurrentBenefits = () => {
     const categoryHeaderIconAndPrograms = Object.values(categories).map((category, index) => {
       const { name, programs, icon } = category;
 
-      let CategoryIcon = iconCategoryMap[icon.toLowerCase()];
+      const iconKey = category.icon.toLowerCase();
+      const CategoryIcon = ICON_OPTIONS_MAP[iconKey] ?? ICON_OPTIONS_MAP['cash'];
+      const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'cash';
 
-      if (CategoryIcon === undefined) {
-        // NOTE: The urgent needs are mapped by the default_message of the name of the category,
-        // if the name of the category changes, need to update the icon category map
-        console.error(`No icon exists for ${icon} in category ${name.default_message}`);
-        CategoryIcon = iconCategoryMap['default'];
-      }
-
-      const isLucideIcon = LUCIDE_ICONS.includes(icon.toLowerCase());
+      const isLucideIcon = LUCIDE_ICONS.includes(actualIconKey);
       const iconClassName = isLucideIcon ? 'category-heading-icon category-lucide-icon' : 'category-heading-icon';
 
       return (
