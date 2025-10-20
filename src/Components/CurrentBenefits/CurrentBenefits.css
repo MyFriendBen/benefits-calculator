@@ -32,6 +32,18 @@
   margin: 3rem 0;
 }
 
+/* Lucide icons - use currentColor to inherit the icon color */
+.category-heading-icon.category-lucide-icon svg {
+  height: 2rem;
+  color: var(--icon-color) !important;
+}
+
+.category-heading-icon.category-lucide-icon svg,
+.category-heading-icon.category-lucide-icon svg * {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
 @media (max-width: 700px) {
   .co-benefits-container {
     font-size: 1rem;

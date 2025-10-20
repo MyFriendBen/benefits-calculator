@@ -11,12 +11,8 @@ import { useTranslateNumber } from '../../Assets/languageOptions';
 import { useParams } from 'react-router-dom';
 import { useConfig } from '../Config/configHook';
 import { FormattedMessageType } from '../../Types/Questions';
-import { ICON_OPTIONS_MAP } from '../Results/helpers';
+import { ICON_OPTIONS_MAP, LUCIDE_ICONS } from '../Results/helpers';
 
-export const iconCategoryMap: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
-  default: ICON_OPTIONS_MAP['cash'],
-  ...ICON_OPTIONS_MAP,
-};
 
 export type Program = {
   name: Translation;
@@ -121,20 +117,18 @@ const CurrentBenefits = () => {
     const categoryHeaderIconAndPrograms = Object.values(categories).map((category, index) => {
       const { name, programs, icon } = category;
 
-      let CategoryIcon = iconCategoryMap[icon.toLowerCase()];
-
-      if (CategoryIcon === undefined) {
-        // NOTE: The urgent needs are mapped by the default_message of the name of the category,
-        // if the name of the category changes, need to update the icon category map
-        console.error(`No icon exists for ${icon} in category ${name.default_message}`);
-        CategoryIcon = iconCategoryMap['default'];
-      }
+      const iconKey = icon.toLowerCase();
+      const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'default';
+      const CategoryIcon = ICON_OPTIONS_MAP[actualIconKey];
+      
+      const isLucideIcon = LUCIDE_ICONS.includes(actualIconKey);
+      const iconClassName = isLucideIcon ? 'category-heading-icon category-lucide-icon' : 'category-heading-icon';
 
       return (
         <div key={index} className="category-section-container">
           <div className="category-heading-column">
             <div
-              className="category-heading-icon"
+              className={iconClassName}
               aria-label={intl.formatMessage({
                 id: name.label,
                 defaultMessage: name.default_message,

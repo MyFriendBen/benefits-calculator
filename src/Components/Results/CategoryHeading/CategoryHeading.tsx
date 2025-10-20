@@ -18,7 +18,8 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const translateNumber = useTranslateNumber();
 
   const iconKey = category.icon.toLowerCase();
-  const IconComponent = ICON_OPTIONS_MAP[iconKey] ?? ICON_OPTIONS_MAP['cash'];
+  const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'default';  
+  const IconComponent = ICON_OPTIONS_MAP[actualIconKey];
 
   const monthlyCategoryAmt = calculateTotalValue(category) / 12;
   const shouldShowAmount = showAmount ?? !getReferrer('featureFlags').includes('dont_show_category_values');
@@ -30,7 +31,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const iconTranslation = intl.formatMessage({ id: 'categoryHeading.icon', defaultMessage: 'icon' });
 
   // Add lucide icon class for specific icons that need white fill
-  const iconClasses = `category-heading-icon${LUCIDE_ICONS.includes(iconKey) ? ' category-lucide-icon' : ''}`;
+  const iconClasses = `category-heading-icon${LUCIDE_ICONS.includes(actualIconKey) ? ' category-lucide-icon' : ''}`;
 
   return (
     <div>
