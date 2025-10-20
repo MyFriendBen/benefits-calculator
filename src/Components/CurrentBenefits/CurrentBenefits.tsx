@@ -11,7 +11,7 @@ import { useTranslateNumber } from '../../Assets/languageOptions';
 import { useParams } from 'react-router-dom';
 import { useConfig } from '../Config/configHook';
 import { FormattedMessageType } from '../../Types/Questions';
-import { ICON_OPTIONS_MAP } from '../Results/helpers';
+import { ICON_OPTIONS_MAP, LUCIDE_ICONS } from '../Results/helpers';
 
 export const iconCategoryMap: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   default: ICON_OPTIONS_MAP['cash'],
@@ -130,11 +130,14 @@ const CurrentBenefits = () => {
         CategoryIcon = iconCategoryMap['default'];
       }
 
+      const isLucideIcon = LUCIDE_ICONS.includes(icon.toLowerCase());
+      const iconClassName = isLucideIcon ? 'category-heading-icon category-lucide-icon' : 'category-heading-icon';
+
       return (
         <div key={index} className="category-section-container">
           <div className="category-heading-column">
             <div
-              className="category-heading-icon"
+              className={iconClassName}
               aria-label={intl.formatMessage({
                 id: name.label,
                 defaultMessage: name.default_message,
