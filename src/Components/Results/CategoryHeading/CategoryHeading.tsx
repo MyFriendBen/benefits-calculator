@@ -30,7 +30,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const iconTranslation = intl.formatMessage({ id: 'categoryHeading.icon', defaultMessage: 'icon' });
 
   // Add lucide icon class for specific icons that need white fill
-  const iconClasses = `category-heading-icon category-icon-${iconKey}${LUCIDE_ICONS.includes(iconKey) ? ' category-lucide-icon' : ''}`;
+  const iconClasses = `category-heading-icon${LUCIDE_ICONS.includes(iconKey) ? ' category-lucide-icon' : ''}`;
   
   return (
     <div>

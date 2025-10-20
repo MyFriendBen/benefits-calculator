@@ -32,20 +32,31 @@
 }
 
 .confirmation-icon svg {
-  width: 4rem;
-  height: 4rem;
+  width: 6rem;
+  height: 6rem;
 }
 
 .confirmation-icon svg path,
 .confirmation-icon svg circle {
-  stroke: var(--secondary-icon-color);
   fill: var(--secondary-icon-color);
+  stroke: var(--secondary-icon-color);
+}
+
+/* Lucide icons have the class directly on the SVG element */
+svg.confirmation-lucide-icon {
+  width: 4.75rem;
+  height: 4.75rem;
+}
+
+svg.confirmation-lucide-icon * {
+  fill: white !important;
+  stroke: var(--secondary-icon-color);
 }
 
 svg.confirmation-icon path,
 svg.confirmation-icon circle {
-  stroke: var(--secondary-icon-color);
   fill: var(--secondary-icon-color);
+  stroke: var(--secondary-icon-color);
 }
 
 .MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-2.css-1o7apob-MuiGrid-root.no-padding {

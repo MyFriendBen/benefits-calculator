@@ -129,7 +129,7 @@ const EnergyCalcConfirmationHHData = () => {
 
     return (
       <ConfirmationBlock
-        icon={<Head className="option-card-lucide-icon" title={formatMessage(householdMemberIconAlt)} />}
+        icon={<Head className="confirmation-lucide-icon" title={formatMessage(householdMemberIconAlt)} />}
         title={relationship}
         editAriaLabel={editHouseholdMemberAriaLabel}
         stepName="energyCalculatorHouseholdData"

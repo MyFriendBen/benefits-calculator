@@ -27,7 +27,7 @@ import { ReactComponent as Resources } from '../../Assets/icons/General/resource
  * List of lucide-based icon names that require special styling (white fill with colored stroke)
  * Used across CategoryHeading and ProgramPage components
  */
-export const LUCIDE_ICONS = ['house_plug', 'light_bulb', 'talk', 'air_vent', 'coin', 'heart_hand', 'lightning', 'triangle_alert'];
+export const LUCIDE_ICONS = ['house_plug', 'light_bulb', 'talk', 'air_vent', 'coin', 'heart_hand', 'lightning', 'triangle_alert', 'heat', 'low_fuel'];
 
 /**
  * Mapping of icon keys (from API/backend) to their corresponding React SVG components
