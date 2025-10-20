@@ -27,7 +27,7 @@ import { ReactComponent as Resources } from '../../Assets/icons/General/resource
  * List of lucide-based icon names that require special styling (white fill with colored stroke)
  * Used across CategoryHeading and ProgramPage components
  */
-export const LUCIDE_ICONS = ['house_plug', 'light_bulb', 'talk', 'air_vent', 'coin', 'heart_hand', 'lightning', 'triangle_alert', 'heat', 'low_fuel'];
+export const LUCIDE_ICONS = ['house_plug', 'light_bulb', 'talk', 'air_vent', 'coin', 'heart_hand', 'lightning', 'triangle_alert'];
 
 /**
  * Mapping of icon keys (from API/backend) to their corresponding React SVG components
@@ -45,7 +45,6 @@ export const ICON_OPTIONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGEleme
   family_planning: FamilyPlanning,
   food: Food,
   food_groceries: Food,
-  heat: HeartHand, //TODO: Delete once PR#1947 deployed
   health_care: HealthCare,
   heart_hand: HeartHand,
   housing: Residence,
@@ -53,7 +52,6 @@ export const ICON_OPTIONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGEleme
   legal_services: LegalServices,
   light_bulb: LightBulb,
   lightning: Lightning,
-  low_fuel: TriangleAlert, //TODO: Delete once PR#1947 deployed
   managing_housing: Housing,
   savings: Resources,
   talk: Talk,
