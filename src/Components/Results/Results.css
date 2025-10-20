@@ -69,16 +69,22 @@
 .category-heading-icon svg path,
 .category-heading-icon svg rect,
 .category-heading-icon svg circle {
+  fill: var(--icon-color);
   stroke: var(--icon-color);
 }
 
-.category-lucide-icon svg {
+/* Lucide icons - both classes are on the same element */
+.category-heading-icon.category-lucide-icon svg {
   height: 2rem;
+  color: var(--icon-color) !important;
 }
 
-.category-lucide-icon svg * {
-  fill: white !important;
-  stroke: var(--icon-color);
+.category-heading-icon.category-lucide-icon svg,
+.category-heading-icon.category-lucide-icon svg *,
+.category-heading-icon.category-lucide-icon svg path,
+.category-heading-icon.category-lucide-icon svg circle {
+  fill: none !important;
+  stroke: currentColor !important;
 }
 
 .category-heading-column {

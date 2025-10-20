@@ -37,10 +37,17 @@
   stroke: var(--icon-color);
 }
 
-/* Lucide icons need white fill to prevent them from being filled with stroke color */
-.header-icon-lucide svg * {
-  fill: white !important;
-  stroke: var(--icon-color);
+/* Lucide icons - use currentColor to inherit the icon color */
+.header-icon-box.header-icon-lucide svg {
+  color: var(--icon-color) !important;
+}
+
+.header-icon-box.header-icon-lucide svg,
+.header-icon-box.header-icon-lucide svg *,
+.header-icon-box.header-icon-lucide svg path,
+.header-icon-box.header-icon-lucide svg circle {
+  fill: none !important;
+  stroke: currentColor !important;
 }
 
 .header-text {
