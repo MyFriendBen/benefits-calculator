@@ -18,8 +18,8 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const translateNumber = useTranslateNumber();
 
   const iconKey = category.icon.toLowerCase();
-  const IconComponent = ICON_OPTIONS_MAP[iconKey] ?? ICON_OPTIONS_MAP['default'];
-  const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'default';
+  const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'default';  
+  const IconComponent = ICON_OPTIONS_MAP[actualIconKey];
 
   const monthlyCategoryAmt = calculateTotalValue(category) / 12;
   const shouldShowAmount = showAmount ?? !getReferrer('featureFlags').includes('dont_show_category_values');
