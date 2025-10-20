@@ -69,7 +69,6 @@
 .category-heading-icon svg path,
 .category-heading-icon svg rect,
 .category-heading-icon svg circle {
-  fill: var(--icon-color);
   stroke: var(--icon-color);
 }
 
