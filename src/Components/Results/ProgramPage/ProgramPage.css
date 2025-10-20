@@ -43,9 +43,7 @@
 }
 
 .header-icon-box.header-icon-lucide svg,
-.header-icon-box.header-icon-lucide svg *,
-.header-icon-box.header-icon-lucide svg path,
-.header-icon-box.header-icon-lucide svg circle {
+.header-icon-box.header-icon-lucide svg * {
   fill: none !important;
   stroke: currentColor !important;
 }

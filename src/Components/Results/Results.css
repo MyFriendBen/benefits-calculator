@@ -80,9 +80,7 @@
 }
 
 .category-heading-icon.category-lucide-icon svg,
-.category-heading-icon.category-lucide-icon svg *,
-.category-heading-icon.category-lucide-icon svg path,
-.category-heading-icon.category-lucide-icon svg circle {
+.category-heading-icon.category-lucide-icon svg * {
   fill: none !important;
   stroke: currentColor !important;
 }
