@@ -13,11 +13,6 @@ import { useConfig } from '../Config/configHook';
 import { FormattedMessageType } from '../../Types/Questions';
 import { ICON_OPTIONS_MAP, LUCIDE_ICONS } from '../Results/helpers';
 
-export const iconCategoryMap: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
-  default: ICON_OPTIONS_MAP['cash'],
-  ...ICON_OPTIONS_MAP,
-};
-
 export type Program = {
   name: Translation;
   description: Translation;
@@ -121,9 +116,9 @@ const CurrentBenefits = () => {
     const categoryHeaderIconAndPrograms = Object.values(categories).map((category, index) => {
       const { name, programs, icon } = category;
 
-      const iconKey = category.icon.toLowerCase();
-      const CategoryIcon = ICON_OPTIONS_MAP[iconKey] ?? ICON_OPTIONS_MAP['cash'];
-      const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'cash';
+      const iconKey = icon.toLowerCase();
+      const CategoryIcon = ICON_OPTIONS_MAP[iconKey] ?? ICON_OPTIONS_MAP['default'];
+      const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'default';
 
       const isLucideIcon = LUCIDE_ICONS.includes(actualIconKey);
       const iconClassName = isLucideIcon ? 'category-heading-icon category-lucide-icon' : 'category-heading-icon';

@@ -55,7 +55,7 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   };
 
   const IconRenderer: React.FC<IconRendererProps> = ({ headingType }) => {
-    const IconComponent = ICON_OPTIONS_MAP[headingType] ?? ICON_OPTIONS_MAP['cash'];
+    const IconComponent = ICON_OPTIONS_MAP[headingType] ?? ICON_OPTIONS_MAP['default'];
 
     if (!IconComponent) {
       return null;
@@ -136,7 +136,7 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   const displayIconAndHeader = (program: Program) => {
     // Add lucide icon class for specific icons that need white fill
     const iconKey = category.icon.toLowerCase();
-    const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'cash';
+    const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'default';
     const iconClasses = `header-icon-box${LUCIDE_ICONS.includes(actualIconKey) ? ' header-icon-lucide' : ''}`;
 
     return (
