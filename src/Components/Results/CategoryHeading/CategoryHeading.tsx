@@ -31,7 +31,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
 
   // Add lucide icon class for specific icons that need white fill
   const iconClasses = `category-heading-icon${LUCIDE_ICONS.includes(iconKey) ? ' category-lucide-icon' : ''}`;
-  
+
   return (
     <div>
       <div className="category-heading-container">
