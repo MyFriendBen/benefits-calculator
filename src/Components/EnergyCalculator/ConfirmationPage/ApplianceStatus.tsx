@@ -41,7 +41,7 @@ const ApplianceStatus = () => {
 
   return (
     <ConfirmationBlock
-      icon={<AirVent className="confirmation-lucide-icon" title={formatMessage(applianceStatusIconAlt)} />}
+      icon={<AirVent className="option-card-lucide-icon" title={formatMessage(applianceStatusIconAlt)} />}
       title={
         <FormattedMessage
           id="energyCalculator.confirmation.applianceStatus"
