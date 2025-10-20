@@ -13,12 +13,15 @@
   gap: 0.5rem;
 }
 
-.energy-calculator-rebate-page-container svg {
-  width: 5rem;
-  height: 5rem;
+.energy-calculator-rebate-page-container h1 svg {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2rem;
 }
-.energy-calculator-rebate-page-container svg path {
-  fill: var(--icon-color);
+
+.energy-calculator-rebate-page-container h1 svg * {
+  fill: white !important;
+  stroke: var(--icon-color);
 }
 
 .energy-calculator-rebate-page-container section {

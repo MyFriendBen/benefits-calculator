@@ -151,4 +151,9 @@ svg.edit-button polygon {
     min-width: 4rem;
     margin: 0 1rem 0 0;
   }
+
+  .confirmation-icon svg {
+    width: 3rem;
+    height: 3rem;
+  }
 }

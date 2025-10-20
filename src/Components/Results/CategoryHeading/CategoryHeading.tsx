@@ -69,12 +69,8 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const intl = useIntl();
   const translateNumber = useTranslateNumber();
 
-  let IconComponent = headingOptionsMappings[category.icon];
-
-  if (IconComponent === undefined) {
-    // if there is a category not in the list of categories use a default icon
-    IconComponent = CashAssistance;
-  }
+  const iconKey = category.icon.toLowerCase();
+  const IconComponent = ICON_OPTIONS_MAP[iconKey] ?? ICON_OPTIONS_MAP['cash'];
 
   const monthlyCategoryAmt = calculateTotalValue(category) / 12;
   const shouldShowAmount = showAmount ?? !getReferrer('featureFlags').includes('dont_show_category_values');
