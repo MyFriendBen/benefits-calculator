@@ -10,22 +10,22 @@ import { ReactComponent as BlindOrVisuallyImpaired } from '../../Assets/icons/Ge
 import { ReactComponent as Disabled } from '../../Assets/icons/General/OptionCard/Conditions/disabled.svg';
 import { ReactComponent as LongTermDisability } from '../../Assets/icons/General/OptionCard/Conditions/longTermDisability.svg';
 import { ReactComponent as Chp } from '../../Assets/icons/General/OptionCard/HealthInsurance/chp.svg';
-import { ReactComponent as Dont_know } from '../../Assets/icons/General/OptionCard/HealthInsurance/dont_know.svg';
-import { ReactComponent as Emergency_medicaid } from '../../Assets/icons/General/OptionCard/HealthInsurance/emergency_medicaid.svg';
+import { ReactComponent as DontKnow } from '../../Assets/icons/General/OptionCard/HealthInsurance/dont_know.svg';
+import { ReactComponent as EmergencyMedicaid } from '../../Assets/icons/General/OptionCard/HealthInsurance/emergency_medicaid.svg';
 import { ReactComponent as Employer } from '../../Assets/icons/General/OptionCard/HealthInsurance/employer.svg';
-import { ReactComponent as Family_planning } from '../../Assets/icons/UrgentNeeds/AcuteConditions/family_planning.svg';
+import { ReactComponent as FamilyPlanning } from '../../Assets/icons/UrgentNeeds/AcuteConditions/family_planning.svg';
 import { ReactComponent as Medicaid } from '../../Assets/icons/General/OptionCard/HealthInsurance/medicaid.svg';
 import { ReactComponent as Medicare } from '../../Assets/icons/General/OptionCard/HealthInsurance/medicare.svg';
 import { ReactComponent as None } from '../../Assets/icons/General/OptionCard/HealthInsurance/none.svg';
 import { ReactComponent as PrivateInsurance } from '../../Assets/icons/General/OptionCard/HealthInsurance/privateInsurance.svg';
-import { ReactComponent as Baby_supplies } from '../../Assets/icons/UrgentNeeds/AcuteConditions/baby_supplies.svg';
-import { ReactComponent as Child_development } from '../../Assets/icons/UrgentNeeds/AcuteConditions/child_development.svg';
-import { ReactComponent as Youth_development } from '../../Assets/icons/UrgentNeeds/AcuteConditions/Youth_development.svg';
-import { ReactComponent as Dental_care } from '../../Assets/icons/UrgentNeeds/AcuteConditions/dental_care.svg';
+import { ReactComponent as BabySupplies } from '../../Assets/icons/UrgentNeeds/AcuteConditions/baby_supplies.svg';
+import { ReactComponent as ChildDevelopment } from '../../Assets/icons/UrgentNeeds/AcuteConditions/child_development.svg';
+import { ReactComponent as YouthDevelopment } from '../../Assets/icons/UrgentNeeds/AcuteConditions/Youth_development.svg';
+import { ReactComponent as DentalCare } from '../../Assets/icons/UrgentNeeds/AcuteConditions/dental_care.svg';
 import { ReactComponent as Food } from '../../Assets/icons/UrgentNeeds/AcuteConditions/food.svg';
 import { ReactComponent as Housing } from '../../Assets/icons/UrgentNeeds/AcuteConditions/housing.svg';
-import { ReactComponent as Job_resources } from '../../Assets/icons/UrgentNeeds/AcuteConditions/job_resources.svg';
-import { ReactComponent as Legal_services } from '../../Assets/icons/UrgentNeeds/AcuteConditions/legal_services.svg';
+import { ReactComponent as JobResources } from '../../Assets/icons/UrgentNeeds/AcuteConditions/job_resources.svg';
+import { ReactComponent as LegalServices } from '../../Assets/icons/UrgentNeeds/AcuteConditions/legal_services.svg';
 import { ReactComponent as Support } from '../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
 import { ReactComponent as Military } from '../../Assets/icons/UrgentNeeds/AcuteConditions/military.svg';
 import { ReactComponent as Resources } from '../../Assets/icons/General/resources.svg';
@@ -52,16 +52,17 @@ function transformItemIcon(item: unknown): any {
   switch (icon._icon) {
     // Acute Conditions
     case 'Baby_supplies':
-      iconComponent = <Baby_supplies className={icon._classname} />;
+      iconComponent = <BabySupplies className={icon._classname} />;
       break;
     case 'Child_development':
-      iconComponent = <Child_development className={icon._classname} />;
+      iconComponent = <ChildDevelopment className={icon._classname} />;
       break;
     case 'Youth_development':
-      iconComponent = <Youth_development className={icon._classname} />;
+      iconComponent = <YouthDevelopment className={icon._classname}  />;
+      // iconComponent = <Youth_development className={icon._classname} style={{ width: '5rem', height: '5rem' }}  />;
       break;    
     case 'Dental_care':
-      iconComponent = <Dental_care className={icon._classname} />;
+      iconComponent = <DentalCare className={icon._classname} />;
       break;
     case 'Food':
       iconComponent = <Food className={icon._classname} />;
@@ -70,10 +71,10 @@ function transformItemIcon(item: unknown): any {
       iconComponent = <Housing className={icon._classname} />;
       break;
     case 'Job_resources':
-      iconComponent = <Job_resources className={icon._classname} />;
+      iconComponent = <JobResources className={icon._classname} />;
       break;
     case 'Legal_services':
-      iconComponent = <Legal_services className={icon._classname} />;
+      iconComponent = <LegalServices className={icon._classname} />;
       break;
     case 'Support':
       iconComponent = <Support className={icon._classname} />;
@@ -108,16 +109,16 @@ function transformItemIcon(item: unknown): any {
       iconComponent = <Chp className={icon._classname} />;
       break;
     case 'Dont_know':
-      iconComponent = <Dont_know className={icon._classname} />;
+      iconComponent = <DontKnow className={icon._classname} />;
       break;
     case 'Emergency_medicaid':
-      iconComponent = <Emergency_medicaid className={icon._classname} />;
+      iconComponent = <EmergencyMedicaid className={icon._classname} />;
       break;
     case 'Employer':
       iconComponent = <Employer className={icon._classname} />;
       break;
     case 'Family_planning':
-      iconComponent = <Family_planning className={icon._classname} />;
+      iconComponent = <FamilyPlanning className={icon._classname} />;
       break;
     case 'Medicaid':
       iconComponent = <Medicaid className={icon._classname} />;

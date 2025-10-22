@@ -24,6 +24,15 @@
   height: 4.375rem;
   width: 4.375rem;
 }
+.option-card-icon.youth-development-icon {
+  height: 7rem;
+  width: 7rem;
+}
+.option-card-icon.youth-development-icon path,
+.option-card-icon.youth-development-icon rect {
+  fill: var(--icon-color);
+}
+
 
 .option-card-icon path,
 .option-card-icon rect {
@@ -77,6 +86,11 @@
   .option-card-image {
     height: 3.5rem;
     width: 3.5rem;
+  }
+  
+ .option-card-icon.youth-development-icon {
+    height: 6rem;
+    width: 6rem;
   }
 
   div.sub-header,
