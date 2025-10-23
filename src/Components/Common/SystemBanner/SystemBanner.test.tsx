@@ -48,16 +48,8 @@ describe('SystemBanner', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders banner with title on non-first step (collapsed)', () => {
-    renderWithContext(<SystemBanner banners={mockBanners} isFirstStep={false} />);
-
-    expect(screen.getByText('Urgent: SNAP Benefits for November 2025 are on Hold')).toBeInTheDocument();
-    expect(screen.queryByText(/Because of the federal government shutdown/)).not.toBeVisible();
-    expect(screen.getByText('More')).toBeInTheDocument();
-  });
-
-  it('renders banner collapsed by default on first step', () => {
-    renderWithContext(<SystemBanner banners={mockBanners} isFirstStep={true} />);
+  it('renders banner collapsed by default', () => {
+    renderWithContext(<SystemBanner banners={mockBanners} />);
 
     expect(screen.getByText('Urgent: SNAP Benefits for November 2025 are on Hold')).toBeInTheDocument();
     expect(screen.queryByText(/Because of the federal government shutdown/)).not.toBeVisible();
@@ -65,41 +57,41 @@ describe('SystemBanner', () => {
   });
 
   it('expands banner when More button is clicked', () => {
-    renderWithContext(<SystemBanner banners={mockBanners} isFirstStep={false} />);
+    renderWithContext(<SystemBanner banners={mockBanners} />);
 
     const moreButton = screen.getByText('More');
     fireEvent.click(moreButton);
 
     expect(screen.getByText(/Because of the federal government shutdown/)).toBeVisible();
-    expect(screen.getByText('Close')).toBeInTheDocument();
+    expect(screen.getByText('Less')).toBeInTheDocument();
   });
 
-  it('collapses banner when Close button is clicked after expanding', () => {
-    renderWithContext(<SystemBanner banners={mockBanners} isFirstStep={true} />);
+  it('collapses banner when Less button is clicked after expanding', () => {
+    renderWithContext(<SystemBanner banners={mockBanners} />);
 
     // Initially collapsed, shows More button
     expect(screen.getByText('More')).toBeInTheDocument();
-    expect(screen.queryByText('Close')).not.toBeInTheDocument();
+    expect(screen.queryByText('Less')).not.toBeInTheDocument();
 
     // Expand the banner
     const moreButton = screen.getByText('More');
     fireEvent.click(moreButton);
 
-    // After clicking More, should show Close button
-    expect(screen.getByText('Close')).toBeInTheDocument();
+    // After clicking More, should show Less button
+    expect(screen.getByText('Less')).toBeInTheDocument();
     expect(screen.queryByText('More')).not.toBeInTheDocument();
 
     // Now collapse it again
-    const closeButton = screen.getByText('Close');
-    fireEvent.click(closeButton);
+    const lessButton = screen.getByText('Less');
+    fireEvent.click(lessButton);
 
-    // After clicking Close, the More button should appear again
+    // After clicking Less, the More button should appear again
     expect(screen.getByText('More')).toBeInTheDocument();
-    expect(screen.queryByText('Close')).not.toBeInTheDocument();
+    expect(screen.queryByText('Less')).not.toBeInTheDocument();
   });
 
   it('replaces template variables in content and renders bold text and links', () => {
-    renderWithContext(<SystemBanner banners={mockBanners} isFirstStep={true} />);
+    renderWithContext(<SystemBanner banners={mockBanners} />);
 
     // Expand the banner to see the content
     const moreButton = screen.getByText('More');
@@ -137,7 +129,7 @@ describe('SystemBanner', () => {
       },
     ];
 
-    renderWithContext(<SystemBanner banners={multipleBanners} isFirstStep={false} />);
+    renderWithContext(<SystemBanner banners={multipleBanners} />);
 
     // Check that banners are rendered in priority order
     const alerts = screen.getAllByRole('alert');
@@ -152,7 +144,7 @@ describe('SystemBanner', () => {
       config: undefined,
     };
 
-    renderWithContext(<SystemBanner banners={mockBanners} isFirstStep={true} />, contextWithoutConfig);
+    renderWithContext(<SystemBanner banners={mockBanners} />, contextWithoutConfig);
 
     // Expand the banner to see the content
     const moreButton = screen.getByText('More');
@@ -174,7 +166,7 @@ describe('SystemBanner', () => {
       },
     ];
 
-    renderWithContext(<SystemBanner banners={multipleBanners} isFirstStep={false} />);
+    renderWithContext(<SystemBanner banners={multipleBanners} />);
 
     const moreButtons = screen.getAllByText('More');
 

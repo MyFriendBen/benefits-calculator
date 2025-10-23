@@ -18,14 +18,13 @@ type BannerState = {
 
 type SystemBannerProps = {
   banners: BannerMessage[];
-  isFirstStep?: boolean;
 };
 
 /**
  * SystemBanner component displays configurable system-wide notification banners
- * Supports multiple banners, collapsible content, and step-aware display
+ * Supports multiple banners with collapsible content
  */
-const SystemBanner = ({ banners, isFirstStep = false }: SystemBannerProps) => {
+const SystemBanner = ({ banners }: SystemBannerProps) => {
   const { theme, config } = useContext(Context);
 
   // Initialize banner states - all banners start collapsed
@@ -106,7 +105,7 @@ const SystemBanner = ({ banners, isFirstStep = false }: SystemBannerProps) => {
                 }}
               >
                 {isExpanded ? (
-                  <FormattedMessage id="systemBanner.close" defaultMessage="Close" />
+                  <FormattedMessage id="systemBanner.less" defaultMessage="Less" />
                 ) : (
                   <FormattedMessage id="systemBanner.more" defaultMessage="More" />
                 )}
