@@ -25,9 +25,37 @@
   width: 4.375rem;
 }
 
-.option-card-icon path,
-.option-card-icon rect {
-  fill: var(--icon-color);
+.option-card-icon * {
+  fill: var(--icon-color) !important;
+  stroke: var(--icon-color) !important;
+}
+
+.option-card-lucide-icon {
+  height: 4.375rem;
+  width: 4.375rem;
+}
+
+.option-card-lucide-icon.car-icon-scaled {
+  transform: scale(1.4);
+}
+
+.option-card-lucide-icon.car-icon-scaled path,
+.option-card-lucide-icon.car-icon-scaled circle {
+  stroke-width: 1.07;
+}
+
+.option-card-lucide-icon.shower-icon-scaled {
+  transform: scale(1.3);
+}
+
+.option-card-lucide-icon.shower-icon-scaled path,
+.option-card-lucide-icon.shower-icon-scaled circle {
+  stroke-width: 1.07;
+}
+
+.option-card-lucide-icon * {
+  fill: white !important;
+  stroke: var(--icon-color);
 }
 
 .checkmark {

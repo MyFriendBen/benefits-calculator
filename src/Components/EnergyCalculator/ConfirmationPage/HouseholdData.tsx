@@ -7,7 +7,7 @@ import { FormattedMessageType } from '../../../Types/Questions';
 import { useConfig } from '../../Config/configHook';
 import ConfirmationBlock, { formatToUSD, ConfirmationItem } from '../../Confirmation/ConfirmationBlock';
 import { Context } from '../../Wrapper/Wrapper';
-import { ReactComponent as Head } from '../../../Assets/icons/General/head.svg';
+import { ReactComponent as Head } from '../../EnergyCalculator/Icons/Person.svg';
 import { calcIncomeStreamAmount } from '../../../Assets/income';
 
 type OptionMap = { [key: string]: FormattedMessageType };
@@ -129,7 +129,7 @@ const EnergyCalcConfirmationHHData = () => {
 
     return (
       <ConfirmationBlock
-        icon={<Head title={formatMessage(householdMemberIconAlt)} />}
+        icon={<Head className="confirmation-lucide-icon" title={formatMessage(householdMemberIconAlt)} />}
         title={relationship}
         editAriaLabel={editHouseholdMemberAriaLabel}
         stepName="energyCalculatorHouseholdData"

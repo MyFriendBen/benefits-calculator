@@ -1,0 +1,98 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    name: Deploy Frontend to Heroku Staging
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+
+      - name: Deploy to Heroku
+        uses: akhileshns/heroku-deploy@v3.13.15
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_STAGING_APP_NAME }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+        id: heroku_deploy
+
+      - name: Get commit info
+        id: commit_info
+        if: always()
+        run: |
+          echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "message=$(git log -1 --pretty=%B | head -n 1)" >> $GITHUB_OUTPUT
+          echo "author=$(git log -1 --pretty=%an)" >> $GITHUB_OUTPUT
+          echo "timestamp=$(git log -1 --format=%ct)" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification on success
+        if: success()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          payload=$(jq -n \
+            --arg repo "${{ github.repository }}" \
+            --arg short_sha "${{ steps.commit_info.outputs.sha }}" \
+            --arg full_sha "${{ github.sha }}" \
+            --arg author "${{ steps.commit_info.outputs.author }}" \
+            --arg message "${{ steps.commit_info.outputs.message }}" \
+            --arg app "${{ secrets.HEROKU_STAGING_APP_NAME }}" \
+            --arg timestamp "${{ steps.commit_info.outputs.timestamp }}" \
+            '{
+              text: "✅ Frontend Staging Deployment Successful",
+              blocks: [
+                {type: "header", text: {type: "plain_text", text: "✅ Frontend Staging Deployment Successful"}},
+                {type: "section", fields: [
+                  {type: "mrkdwn", text: "*Environment:*\nStaging"},
+                  {type: "mrkdwn", text: "*Commit:*\n<https://github.com/\($repo)/commit/\($full_sha)|\($short_sha)>"},
+                  {type: "mrkdwn", text: "*Author:*\n\($author)"},
+                  {type: "mrkdwn", text: "*App:*\n<https://\($app).herokuapp.com|View App>"}
+                ]},
+                {type: "section", text: {type: "mrkdwn", text: "*Commit Message:*\n\($message)"}},
+                {type: "context", elements: [
+                  {type: "mrkdwn", text: "Deployed at <!date^\($timestamp)^{date_short_pretty} at {time}|$(date)>"}
+                ]}
+              ]
+            }')
+          curl -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "$payload"
+
+      - name: Send Slack notification on failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          payload=$(jq -n \
+            --arg repo "${{ github.repository }}" \
+            --arg short_sha "${{ steps.commit_info.outputs.sha }}" \
+            --arg full_sha "${{ github.sha }}" \
+            --arg author "${{ steps.commit_info.outputs.author }}" \
+            --arg message "${{ steps.commit_info.outputs.message }}" \
+            --arg run_id "${{ github.run_id }}" \
+            '{
+              text: "❌ Frontend Staging Deployment Failed",
+              blocks: [
+                {type: "header", text: {type: "plain_text", text: "❌ Frontend Staging Deployment Failed"}},
+                {type: "section", fields: [
+                  {type: "mrkdwn", text: "*Environment:*\nStaging"},
+                  {type: "mrkdwn", text: "*Commit:*\n<https://github.com/\($repo)/commit/\($full_sha)|\($short_sha)>"},
+                  {type: "mrkdwn", text: "*Author:*\n\($author)"},
+                  {type: "mrkdwn", text: "*Workflow:*\n<https://github.com/\($repo)/actions/runs/\($run_id)|View Logs>"}
+                ]},
+                {type: "section", text: {type: "mrkdwn", text: "*Commit Message:*\n\($message)"}}
+              ]
+            }')
+          curl -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "$payload"

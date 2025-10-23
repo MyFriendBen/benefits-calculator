@@ -23,7 +23,11 @@
   align-items: center;
   height: 6rem;
   width: 6rem;
-  fill: var(--secondary-background-color);
+}
+
+.header-icon-box svg {
+  width: 75%;
+  height: 75%;
 }
 
 .header-icon-box path,
@@ -31,6 +35,17 @@
 .header-icon-box circle {
   fill: var(--icon-color);
   stroke: var(--icon-color);
+}
+
+/* Lucide icons - use currentColor to inherit the icon color */
+.header-icon-box.header-icon-lucide svg {
+  color: var(--icon-color) !important;
+}
+
+.header-icon-box.header-icon-lucide svg,
+.header-icon-box.header-icon-lucide svg * {
+  fill: none !important;
+  stroke: currentColor !important;
 }
 
 .header-text {

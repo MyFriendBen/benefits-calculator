@@ -3,8 +3,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { UrgentNeed } from '../../../Types/Results';
 import ResultsTranslate from '../Translate/Translate';
-import { iconCategoryMap } from '../../CurrentBenefits/CurrentBenefits';
-import { formatPhoneNumber, generateNeedId } from '../helpers';
+import { formatPhoneNumber, generateNeedId, ICON_OPTIONS_MAP } from '../helpers';
 import './NeedCard.css';
 
 type NeedsCardProps = {
@@ -12,7 +11,8 @@ type NeedsCardProps = {
 };
 
 const getIcon = (messageType: string) => {
-  const Icon = iconCategoryMap[messageType];
+  const Icon = ICON_OPTIONS_MAP[messageType] ?? ICON_OPTIONS_MAP['default']
+
 
   if (Icon !== undefined) {
     return <Icon />;
