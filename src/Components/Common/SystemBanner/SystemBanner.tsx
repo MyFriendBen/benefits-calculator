@@ -1,0 +1,135 @@
+import { Alert, Stack, Typography, Collapse } from '@mui/material';
+import { FormattedMessage } from 'react-intl';
+import { useContext, useState } from 'react';
+import { Context } from '../../Wrapper/Wrapper';
+import { parseMarkdown } from '../../../utils/parseMarkdown';
+
+export type BannerMessage = {
+  id: string;
+  title: string;
+  content: string;
+  enabled: boolean;
+  priority: number;
+};
+
+type BannerState = {
+  [bannerId: string]: boolean; // true = expanded, false = collapsed
+};
+
+type SystemBannerProps = {
+  banners: BannerMessage[];
+  isFirstStep?: boolean;
+};
+
+/**
+ * SystemBanner component displays configurable system-wide notification banners
+ * Supports multiple banners, collapsible content, and step-aware display
+ */
+const SystemBanner = ({ banners, isFirstStep = false }: SystemBannerProps) => {
+  const { theme, config } = useContext(Context);
+
+  // Initialize banner states - all banners start collapsed
+  const initialState: BannerState = {};
+  banners.forEach((banner) => {
+    initialState[banner.id] = false;
+  });
+
+  const [expandedStates, setExpandedStates] = useState<BannerState>(initialState);
+
+  // Filter to only enabled banners and sort by priority
+  const enabledBanners = banners.filter((banner) => banner.enabled).sort((a, b) => a.priority - b.priority);
+
+  if (enabledBanners.length === 0) {
+    return null;
+  }
+
+  const toggleBanner = (bannerId: string) => {
+    setExpandedStates((prev) => ({
+      ...prev,
+      [bannerId]: !prev[bannerId],
+    }));
+  };
+
+  return (
+    <Stack
+      sx={{
+        width: '100%',
+        px: '1rem',
+        marginTop: '2rem',
+      }}
+      spacing={2}
+    >
+      {enabledBanners.map((banner: BannerMessage) => {
+        const isExpanded = expandedStates[banner.id];
+        const processedContent = parseMarkdown(banner.content, theme.primaryColor);
+
+        return (
+          <Alert
+            key={banner.id}
+            severity="info"
+            sx={{
+              backgroundColor: theme.secondaryBackgroundColor,
+              border: `2px solid ${theme.primaryColor}`,
+              '& .MuiAlert-icon': {
+                color: theme.primaryColor,
+              },
+              '& .MuiAlert-message': {
+                width: '100%',
+              },
+            }}
+          >
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: isExpanded ? 2 : 0 }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  fontFamily: '"Open Sans", sans-serif',
+                  lineHeight: 1.5,
+                  fontWeight: 600,
+                }}
+              >
+                {banner.title}
+              </Typography>
+
+              <Typography
+                onClick={() => toggleBanner(banner.id)}
+                component="span"
+                sx={{
+                  color: theme.primaryColor,
+                  fontSize: '0.9rem',
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                  fontFamily: '"Open Sans", sans-serif',
+                  fontWeight: 600,
+                  '&:hover': {
+                    opacity: 0.8,
+                  },
+                }}
+              >
+                {isExpanded ? (
+                  <FormattedMessage id="systemBanner.close" defaultMessage="Close" />
+                ) : (
+                  <FormattedMessage id="systemBanner.more" defaultMessage="More" />
+                )}
+              </Typography>
+            </Stack>
+
+            <Collapse in={isExpanded}>
+              <Typography
+                variant="body1"
+                component="div"
+                sx={{
+                  fontFamily: '"Open Sans", sans-serif',
+                  lineHeight: 1.5,
+                }}
+              >
+                {processedContent}
+              </Typography>
+            </Collapse>
+          </Alert>
+        );
+      })}
+    </Stack>
+  );
+};
+
+export default SystemBanner;
