@@ -139,4 +139,18 @@ describe('parseMarkdown', () => {
     const link = screen.getByRole('link');
     expect(link).toHaveStyle({ color: customColor });
   });
+
+  it('excludes trailing punctuation from URLs', () => {
+    const result = parseMarkdown('Visit https://example.com. More info at https://test.org, or https://other.com!', primaryColor);
+    render(<>{result}</>);
+
+    // All three URLs should be links without trailing punctuation
+    const link1 = screen.getByRole('link', { name: 'https://example.com' });
+    const link2 = screen.getByRole('link', { name: 'https://test.org' });
+    const link3 = screen.getByRole('link', { name: 'https://other.com' });
+
+    expect(link1).toHaveAttribute('href', 'https://example.com');
+    expect(link2).toHaveAttribute('href', 'https://test.org');
+    expect(link3).toHaveAttribute('href', 'https://other.com');
+  });
 });

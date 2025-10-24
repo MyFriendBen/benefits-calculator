@@ -21,8 +21,8 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
     // First, convert **bold** markdown to markers
     let currentText = line.replace(/\*\*(.+?)\*\*/g, '__BOLD_START__$1__BOLD_END__');
 
-    // Find all URLs
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    // Find all URLs (excluding trailing punctuation)
+    const urlRegex = /(https?:\/\/[^\s]+?)(?=[.,;:!?)\]]*(?:\s|$))/g;
     const urlMatches = [...currentText.matchAll(urlRegex)];
 
     if (urlMatches.length === 0) {

@@ -28,12 +28,13 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
   const { theme, config } = useContext(Context);
 
   // Initialize banner states - all banners start collapsed
-  const initialState: BannerState = {};
-  banners.forEach((banner) => {
-    initialState[banner.id] = false;
+  const [expandedStates, setExpandedStates] = useState<BannerState>(() => {
+    const initialState: BannerState = {};
+    banners.forEach((banner) => {
+      initialState[banner.id] = false;
+    });
+    return initialState;
   });
-
-  const [expandedStates, setExpandedStates] = useState<BannerState>(initialState);
 
   // Filter to only enabled banners and sort by priority
   const enabledBanners = banners.filter((banner) => banner.enabled).sort((a, b) => a.priority - b.priority);
