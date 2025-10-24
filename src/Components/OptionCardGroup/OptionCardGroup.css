@@ -28,11 +28,6 @@
   height: 7rem;
   width: 7rem;
 }
-.option-card-icon.youth-development-icon path,
-.option-card-icon.youth-development-icon rect {
-  fill: var(--icon-color);
-}
-
 
 .option-card-icon path,
 .option-card-icon rect {
