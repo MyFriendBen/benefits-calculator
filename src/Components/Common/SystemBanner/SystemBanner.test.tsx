@@ -177,4 +177,21 @@ describe('SystemBanner', () => {
     expect(screen.getByText(/Because of the federal government shutdown/)).toBeVisible();
     expect(screen.queryByText('Second content')).not.toBeVisible();
   });
+
+  it('has proper accessibility attributes', () => {
+    renderWithContext(<SystemBanner banners={mockBanners} />);
+
+    // More button should have aria-expanded=false initially
+    const moreButton = screen.getByText('More');
+    expect(moreButton).toHaveAttribute('aria-expanded', 'false');
+    expect(moreButton).toHaveAttribute('aria-controls', 'system-banner-content-snap_nov_2025_hold');
+
+    // Expand the banner
+    fireEvent.click(moreButton);
+
+    // Less button should have aria-expanded=true
+    const lessButton = screen.getByText('Less');
+    expect(lessButton).toHaveAttribute('aria-expanded', 'true');
+    expect(lessButton).toHaveAttribute('aria-controls', 'system-banner-content-snap_nov_2025_hold');
+  });
 });

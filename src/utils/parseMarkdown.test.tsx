@@ -153,4 +153,21 @@ describe('parseMarkdown', () => {
     expect(link2).toHaveAttribute('href', 'https://test.org');
     expect(link3).toHaveAttribute('href', 'https://other.com');
   });
+
+  it('preserves bold state across URLs', () => {
+    const result = parseMarkdown('**Visit https://example.com for more info**', primaryColor);
+    const { container } = render(<>{result}</>);
+
+    // "Visit " should be bold
+    const strongs = container.querySelectorAll('strong');
+    expect(strongs.length).toBeGreaterThanOrEqual(2);
+    expect(strongs[0].textContent).toBe('Visit ');
+
+    // " for more info" should also be bold (this was the bug - it would lose bold after URL)
+    expect(strongs[1].textContent).toBe(' for more info');
+
+    // URL should be a link
+    const link = screen.getByRole('link', { name: 'https://example.com' });
+    expect(link).toBeInTheDocument();
+  });
 });

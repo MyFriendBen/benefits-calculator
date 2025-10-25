@@ -21,56 +21,35 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
     // First, convert **bold** markdown to markers
     let currentText = line.replace(/\*\*(.+?)\*\*/g, '__BOLD_START__$1__BOLD_END__');
 
-    // Find all URLs (excluding trailing punctuation)
-    const urlRegex = /(https?:\/\/[^\s]+?)(?=[.,;:!?)\]]*(?:\s|$))/g;
-    const urlMatches = [...currentText.matchAll(urlRegex)];
-
-    if (urlMatches.length === 0) {
-      // No URLs, just handle bold markers
-      const boldSegments = currentText.split(/(__BOLD_START__|__BOLD_END__)/);
-      let inBold = false;
+    // Maintain bold state across the entire line
+    let inBold = false;
+    const pushSegments = (text: string) => {
+      const boldSegments = text.split(/(__BOLD_START__|__BOLD_END__)/);
       boldSegments.forEach((seg) => {
         if (seg === '__BOLD_START__') {
           inBold = true;
         } else if (seg === '__BOLD_END__') {
           inBold = false;
         } else if (seg) {
-          if (inBold) {
-            parts.push(<strong key={`${lineIndex}-${keyCounter++}`}>{seg}</strong>);
-          } else {
-            parts.push(<span key={`${lineIndex}-${keyCounter++}`}>{seg}</span>);
-          }
+          parts.push(inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{seg}</strong> : seg);
         }
       });
-    } else {
-      // Has URLs, need to interleave text, bold, and links
-      let lastIdx = 0;
+    };
 
+    // Find all URLs (excluding trailing punctuation including quotes)
+    const urlRegex = /(https?:\/\/[^\s]+?)(?=[.,;:!?)\]'\"]*(?:\s|$))/g;
+    const urlMatches = [...currentText.matchAll(urlRegex)];
+
+    if (urlMatches.length === 0) {
+      pushSegments(currentText);
+    } else {
+      let lastIdx = 0;
       urlMatches.forEach((match) => {
         const url = match[0];
         const startIdx = match.index!;
-
-        // Add text before URL
         if (startIdx > lastIdx) {
-          const textBefore = currentText.substring(lastIdx, startIdx);
-          const boldSegments = textBefore.split(/(__BOLD_START__|__BOLD_END__)/);
-          let inBold = false;
-          boldSegments.forEach((seg) => {
-            if (seg === '__BOLD_START__') {
-              inBold = true;
-            } else if (seg === '__BOLD_END__') {
-              inBold = false;
-            } else if (seg) {
-              if (inBold) {
-                parts.push(<strong key={`${lineIndex}-${keyCounter++}`}>{seg}</strong>);
-              } else {
-                parts.push(<span key={`${lineIndex}-${keyCounter++}`}>{seg}</span>);
-              }
-            }
-          });
+          pushSegments(currentText.substring(lastIdx, startIdx));
         }
-
-        // Add URL as link
         parts.push(
           <a
             key={`${lineIndex}-link-${keyCounter++}`}
@@ -82,28 +61,10 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
             {url}
           </a>,
         );
-
         lastIdx = startIdx + url.length;
       });
-
-      // Add remaining text after last URL
       if (lastIdx < currentText.length) {
-        const textAfter = currentText.substring(lastIdx);
-        const boldSegments = textAfter.split(/(__BOLD_START__|__BOLD_END__)/);
-        let inBold = false;
-        boldSegments.forEach((seg) => {
-          if (seg === '__BOLD_START__') {
-            inBold = true;
-          } else if (seg === '__BOLD_END__') {
-            inBold = false;
-          } else if (seg) {
-            if (inBold) {
-              parts.push(<strong key={`${lineIndex}-${keyCounter++}`}>{seg}</strong>);
-            } else {
-              parts.push(<span key={`${lineIndex}-${keyCounter++}`}>{seg}</span>);
-            }
-          }
-        });
+        pushSegments(currentText.substring(lastIdx));
       }
     }
 

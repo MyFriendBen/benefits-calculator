@@ -1,6 +1,6 @@
-import { Alert, Stack, Typography, Collapse } from '@mui/material';
+import { Alert, Stack, Typography, Collapse, Button } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { useContext, useState } from 'react';
+import { useContext, useState, useMemo } from 'react';
 import { Context } from '../../Wrapper/Wrapper';
 import { parseMarkdown } from '../../../utils/parseMarkdown';
 
@@ -37,7 +37,10 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
   });
 
   // Filter to only enabled banners and sort by priority
-  const enabledBanners = banners.filter((banner) => banner.enabled).sort((a, b) => a.priority - b.priority);
+  const enabledBanners = useMemo(
+    () => banners.filter((b) => b.enabled).sort((a, b) => a.priority - b.priority),
+    [banners],
+  );
 
   if (enabledBanners.length === 0) {
     return null;
@@ -90,30 +93,31 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
                 {banner.title}
               </Typography>
 
-              <Typography
+              <Button
                 onClick={() => toggleBanner(banner.id)}
-                component="span"
+                variant="text"
+                color="primary"
                 sx={{
-                  color: theme.primaryColor,
                   fontSize: '0.9rem',
                   textDecoration: 'underline',
-                  cursor: 'pointer',
                   fontFamily: '"Open Sans", sans-serif',
                   fontWeight: 600,
-                  '&:hover': {
-                    opacity: 0.8,
-                  },
+                  alignSelf: 'flex-start',
+                  minWidth: 'auto',
+                  padding: 0,
                 }}
+                aria-expanded={isExpanded}
+                aria-controls={`system-banner-content-${banner.id}`}
               >
                 {isExpanded ? (
                   <FormattedMessage id="systemBanner.less" defaultMessage="Less" />
                 ) : (
                   <FormattedMessage id="systemBanner.more" defaultMessage="More" />
                 )}
-              </Typography>
+              </Button>
             </Stack>
 
-            <Collapse in={isExpanded}>
+            <Collapse in={isExpanded} id={`system-banner-content-${banner.id}`}>
               <Typography
                 variant="body1"
                 component="div"
