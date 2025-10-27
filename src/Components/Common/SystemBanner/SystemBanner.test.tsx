@@ -1,7 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider, FormattedMessage } from 'react-intl';
 import SystemBanner, { BannerMessage } from './SystemBanner';
 import { Context } from '../../Wrapper/Wrapper';
+import React from 'react';
 
 const mockTheme = {
   primaryColor: '#0071BC',
@@ -193,5 +194,38 @@ describe('SystemBanner', () => {
     const lessButton = screen.getByText('Less');
     expect(lessButton).toHaveAttribute('aria-expanded', 'true');
     expect(lessButton).toHaveAttribute('aria-controls', 'system-banner-content-snap_nov_2025_hold');
+  });
+
+  it('handles FormattedMessage components for title and content', () => {
+    // Simulate what the config transformation does - creates FormattedMessage components
+    const translatedBanners: BannerMessage[] = [
+      {
+        id: 'translated_banner',
+        title: <FormattedMessage id="banner.title" defaultMessage="Translated Title" />,
+        content: <FormattedMessage id="banner.content" defaultMessage="Translated content with **bold** text" />,
+        enabled: true,
+        priority: 1,
+      },
+    ];
+
+    renderWithContext(<SystemBanner banners={translatedBanners} />);
+
+    // Title should be rendered as text
+    expect(screen.getByText('Translated Title')).toBeInTheDocument();
+
+    // Expand to see content
+    fireEvent.click(screen.getByText('More'));
+
+    // Content should be parsed and bold text should be rendered
+    expect(screen.getByText(/Translated content/)).toBeInTheDocument();
+    const { container } = render(
+      <IntlProvider locale="en">
+        <Context.Provider value={mockContext as any}>
+          <SystemBanner banners={translatedBanners} />
+        </Context.Provider>
+      </IntlProvider>,
+    );
+    const strongs = container.querySelectorAll('strong');
+    expect(strongs.length).toBeGreaterThan(0);
   });
 });

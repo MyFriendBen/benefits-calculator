@@ -1,13 +1,14 @@
 import { Alert, Stack, Typography, Collapse, Button } from '@mui/material';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { useContext, useState, useMemo } from 'react';
 import { Context } from '../../Wrapper/Wrapper';
 import { parseMarkdown } from '../../../utils/parseMarkdown';
+import React from 'react';
 
 export type BannerMessage = {
   id: string;
-  title: string;
-  content: string;
+  title: string | React.ReactNode;
+  content: string | React.ReactNode;
   enabled: boolean;
   priority: number;
 };
@@ -26,6 +27,23 @@ type SystemBannerProps = {
  */
 const SystemBanner = ({ banners }: SystemBannerProps) => {
   const { theme, config } = useContext(Context);
+  const intl = useIntl();
+
+  // Helper to extract string value from FormattedMessage or plain string
+  const getTextValue = (value: string | React.ReactNode): string => {
+    if (typeof value === 'string') {
+      return value;
+    }
+    // If it's a FormattedMessage component created by config transformation
+    if (React.isValidElement(value) && value.props?.id && value.props?.defaultMessage) {
+      return intl.formatMessage({
+        id: value.props.id,
+        defaultMessage: value.props.defaultMessage,
+      });
+    }
+    // Fallback to string conversion
+    return String(value);
+  };
 
   // Initialize banner states - all banners start collapsed
   const [expandedStates, setExpandedStates] = useState<BannerState>(() => {
@@ -64,7 +82,9 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
     >
       {enabledBanners.map((banner: BannerMessage) => {
         const isExpanded = expandedStates[banner.id];
-        const processedContent = parseMarkdown(banner.content, theme.primaryColor);
+        const titleText = getTextValue(banner.title);
+        const contentText = getTextValue(banner.content);
+        const processedContent = parseMarkdown(contentText, theme.primaryColor);
 
         return (
           <Alert
@@ -90,7 +110,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
                   fontWeight: 600,
                 }}
               >
-                {banner.title}
+                {titleText}
               </Typography>
 
               <Button
