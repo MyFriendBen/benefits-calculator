@@ -13,6 +13,9 @@ import React from 'react';
  * @returns React nodes with formatted content
  */
 export const parseMarkdown = (content: string, primaryColor: string): React.ReactNode => {
+  // Convert literal \n strings to actual newlines (handles database-stored translations)
+  const normalizedContent = content.replace(/\\n/g, '\n');
+
   // Helper function to parse a line for **bold** markdown and URLs
   const parseLine = (line: string, lineIndex: number): React.ReactNode[] => {
     const parts: React.ReactNode[] = [];
@@ -72,7 +75,7 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
   };
 
   // Split content by newlines and process each line
-  const lines = content.split('\n');
+  const lines = normalizedContent.split('\n');
   const result: React.ReactNode[] = [];
 
   lines.forEach((line, lineIndex) => {

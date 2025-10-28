@@ -170,4 +170,19 @@ describe('parseMarkdown', () => {
     const link = screen.getByRole('link', { name: 'https://example.com' });
     expect(link).toBeInTheDocument();
   });
+
+  it('converts literal \\n strings to line breaks', () => {
+    // This handles the case where translations from database contain literal "\n" strings
+    const result = parseMarkdown('First line\\nSecond line\\nThird line', primaryColor);
+    const { container } = render(<>{result}</>);
+
+    // Should have 2 <br> tags for 3 lines
+    const breaks = container.querySelectorAll('br');
+    expect(breaks).toHaveLength(2);
+
+    // Should contain all three lines of text
+    expect(container.textContent).toContain('First line');
+    expect(container.textContent).toContain('Second line');
+    expect(container.textContent).toContain('Third line');
+  });
 });
