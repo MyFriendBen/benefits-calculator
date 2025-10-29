@@ -91,11 +91,8 @@ const energyCalculators = {
     heatingSource: 'Xcel Energy',
     householdInfo: 'You have a past-due electric',
     noBenefit: true,
-    expectedResult: {
-      // -      programsCount: /\d+Programs Found\d+Rebates Found/,
-// +      programsCount: /\d+\s*Programs Found[\s\S]*\d+\s*Rebates Found/,
-      programsCount: /\d+\s*Programs Found[\s\S]*\d+\s*Rebates Found/,
-      // programsCount: /\d+Programs Found\d+Rebates Found/,
+    expectedResult: {     
+      programsCount: /\d+\s*Programs Found[\s\S]*\d+\s*Rebates Found/,      
     },
   },
 };
