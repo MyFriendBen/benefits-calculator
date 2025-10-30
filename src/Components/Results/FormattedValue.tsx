@@ -129,17 +129,12 @@ function useValueFormats(): DefaultMap<(program: Program) => string> {
     },
     lump_sum: (program: Program) => {
       return (
-        intl.formatMessage({ id: 'results.programs.values.formats.lump_sum', defaultMessage: 'One-time payment of ' }) +
         translateNumber(formatToUSD(programValue(program)))
       );
     },
     estimated_annual: (program: Program) => {
-      return (
-        intl.formatMessage({
-          id: 'results.programs.values.formats.estimated_annual',
-          defaultMessage: 'Average annual savings of ',
-        }) + translateNumber(formatToUSD(programValue(program)))
-      );
+      const perYear = intl.formatMessage({ id: 'results.programs.values.formats.per_year', defaultMessage: '/year' });
+      return translateNumber(formatToUSD(programValue(program))) + perYear;
     },
   };
 }

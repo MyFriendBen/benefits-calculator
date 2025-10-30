@@ -24,6 +24,10 @@
   height: 4.375rem;
   width: 4.375rem;
 }
+.option-card-icon.youth-development-icon {
+  height: 7rem;
+  width: 7rem;
+}
 
 .option-card-icon * {
   fill: var(--icon-color) !important;
