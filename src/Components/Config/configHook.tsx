@@ -46,7 +46,7 @@ type IconItem = {
 };
 
 // Transforms objects with icon key to return Icon ReactComponent
-function transformItemIcon(item: unknown): any {
+function transformItemIcon(item: unknown, whiteLabel?: string): any {
   const icon = item as IconItem;
 
   let iconComponent;
@@ -55,12 +55,14 @@ function transformItemIcon(item: unknown): any {
     case 'Baby_supplies':
       iconComponent = <BabySupplies className={icon._classname} />;
       break;
-    case 'Child_development':
-      iconComponent = <ChildDevelopment className={icon._classname} />;
-      break;
-    case 'Youth_development':
-      iconComponent = <YouthDevelopment className={icon._classname}  />;      
-      break;    
+     case 'Child_development':
+      // Use YouthDevelopment icon for MA white label, ChildDevelopment for all others
+      if (whiteLabel === 'ma') {
+        iconComponent = <YouthDevelopment className={icon._classname} />;
+      } else {
+        iconComponent = <ChildDevelopment className={icon._classname} />;
+      }
+      break;   
     case 'Dental_care':
       iconComponent = <DentalCare className={icon._classname} />;
       break;
@@ -149,7 +151,7 @@ function transformItemIcon(item: unknown): any {
 
 // Recursively transform any object that has _label && _default_message as keys into a FormattedMessage
 // and convert icon object into ReactComponent
-function transformItem(item: unknown): any {
+function transformItem(item: unknown, whiteLabel?: string): any {
   if (typeof item !== 'object' || item === null) return item;
 
   if (item.hasOwnProperty('_label') && item.hasOwnProperty('_default_message')) {
@@ -158,7 +160,7 @@ function transformItem(item: unknown): any {
   }
 
   if (item.hasOwnProperty('_icon') && item.hasOwnProperty('_classname')) {
-    const iconItem = transformItemIcon(item);
+    const iconItem = transformItemIcon(item, whiteLabel);
 
     return iconItem;
   }
@@ -167,7 +169,7 @@ function transformItem(item: unknown): any {
     const array: ConfigValue[] = [];
 
     for (const value of item) {
-      array.push(transformItem(value));
+      array.push(transformItem(value, whiteLabel));
     }
 
     return array;
@@ -176,21 +178,21 @@ function transformItem(item: unknown): any {
   const config: Config = {};
   for (const key in item) {
     if (item.hasOwnProperty(key)) {
-      config[key] = transformItem((item as any)[key]);
+      config[key] = transformItem((item as any)[key], whiteLabel);
     }
   }
 
   return config;
 }
 
-function transformConfigData(configData: ConfigApiResponse[]): Config {
+function transformConfigData(configData: ConfigApiResponse[], whiteLabel?: string): Config {
   const transformedConfig: Config = {};
 
   configData.forEach((item) => {
     const { name, data } = item;
     const configOptions = data;
 
-    transformedConfig[name] = transformItem(configOptions);
+    transformedConfig[name] = transformItem(configOptions, whiteLabel);
   });
 
   return transformedConfig;
@@ -227,7 +229,7 @@ export function useGetConfig(screenLoading: boolean, whiteLabel: string) {
       // get data and set loading to false
       try {
         if (value !== undefined) {
-          const transformedOutput: Config = transformConfigData(value);
+          const transformedOutput: Config = transformConfigData(value, whiteLabel);
           setConfigResponse(transformedOutput);
         }
       } catch (e) {
