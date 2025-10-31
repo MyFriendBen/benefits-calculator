@@ -224,3 +224,121 @@ export interface SpmUnitData {
   nc_scca_countable_income?: Record<string, number>;
   nc_scca?: Record<string, number | null>;
 }
+
+// Lifetime benefit value types - Phase 1 implementation
+export interface LifetimeProjectionExplanation {
+  summary: string;
+  detailed_explanation: string;
+  methodology_explanation?: string;
+  factors_affecting_duration: string[];
+  program_specific_factors?: string[];
+}
+
+export interface LifetimeProjectionRiskAssessment {
+  risk_level: 'low' | 'moderate' | 'high';
+  risk_factors: string[];
+  confidence_notes: string;
+  accuracy_indicators?: {
+    data_quality: string;
+    sample_size: number;
+    last_validation: string;
+  };
+}
+
+export interface LifetimeProjectionDisplayConfig {
+  should_display: boolean;
+  section_priority: number;
+  collapsible: boolean;
+  default_expanded: boolean;
+  show_detailed_methodology?: boolean;
+  section_title?: string;
+}
+
+export interface LifetimeProjectionResearchValidation {
+  primary_source: string;
+  supporting_sources?: string[];
+  confidence_validation: string;
+}
+
+export interface LifetimeProjection {
+  program_id: string;
+  prediction_id: string;
+  calculation_date: string;
+  estimated_duration_months: number;
+  confidence_interval: {
+    lower_months: number;
+    upper_months: number;
+    confidence_level: number;
+  };
+  estimated_lifetime_value: number;
+  lifetime_value_range: {
+    lower_value: number;
+    upper_value: number;
+  };
+  calculation_method: string;
+  multiplier_version: string;
+  data_source: string;
+  explanation: LifetimeProjectionExplanation;
+  risk_assessment: LifetimeProjectionRiskAssessment;
+  research_validation?: LifetimeProjectionResearchValidation;
+  display_config: LifetimeProjectionDisplayConfig;
+}
+
+export interface LifetimeProjectionSummary {
+  total_estimated_lifetime_value: number;
+  total_lifetime_range: {
+    lower_value: number;
+    upper_value: number;
+  };
+  average_benefit_duration_months: number;
+  total_programs_with_projections: number;
+  confidence_level: 'low' | 'moderate' | 'high';
+  display_text: {
+    primary_summary: string;
+    confidence_summary: string;
+    duration_summary: string;
+  };
+}
+
+export interface LifetimeProjectionData {
+  available: boolean;
+  language_supported: boolean;
+  summary: LifetimeProjectionSummary;
+  projections: LifetimeProjection[];
+  calculation_metadata: {
+    calculation_method: string;
+    ai_explanation_model: string;
+    prediction_cache_ttl_hours: number;
+    last_updated: string;
+  };
+}
+
+export interface LifetimeProjectionError {
+  code: string;
+  message: string;
+  details: {
+    [key: string]: any;
+  };
+}
+
+// Enhanced eligibility results with lifetime projections
+export interface EnhancedEligibilityResults extends EligibilityResults {
+  lifetime_projections?: LifetimeProjectionData;
+  lifetime_projection_error?: LifetimeProjectionError;
+  // Program-specific API response format
+  lifetime_projection?: {
+    available: boolean;
+    language_supported?: boolean;
+    program_projection?: LifetimeProjection;
+    error?: {
+      code: string;
+      message: string;
+    };
+    calculation_metadata?: {
+      calculation_method: string;
+      ai_explanation_model: string;
+      prediction_cache_ttl_hours: number;
+      last_updated: string;
+    };
+  };
+}
