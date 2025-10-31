@@ -136,6 +136,7 @@
   border: 0.07rem solid var(--primary-color);
   padding: 0.25rem 2.7rem;
   color: var(--primary-color);
+  cursor: pointer;
 }
 
 .pe-modal-button-container {
