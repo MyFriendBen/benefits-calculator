@@ -5,6 +5,7 @@ import { ReactComponent as Checkmark } from '../../Assets/icons/General/OptionCa
 import './MultiSelectTiles.css';
 import { useIntl } from 'react-intl';
 import { Context } from '../Wrapper/Wrapper';
+import dataLayerPush from '../../Assets/analytics';
 
 export type MultiSelectTileOption<T extends string | number> = {
   value: T;
@@ -71,7 +72,17 @@ function MultiSelectTiles<T extends string | number>({ options, values, onChange
       {options.map((option, index) => {
         const onClick = () => {
           let newValues: Record<T, boolean> = { ...values };
-          newValues[option.value] = !newValues[option.value];
+          const isNowSelected = !newValues[option.value];
+          newValues[option.value] = isNowSelected;
+
+          // Track tile click event
+          dataLayerPush({
+            event: 'tile_click',
+            category: 'immediate_needs',
+            action: 'select_tile',
+            label: String(option.value),
+            selected: isNowSelected,
+          });
 
           onChange(newValues);
         };
