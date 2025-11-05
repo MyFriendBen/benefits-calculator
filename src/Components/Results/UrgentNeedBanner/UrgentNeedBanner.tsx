@@ -7,6 +7,7 @@ import { useResultsContext, useResultsLink } from '../Results';
 import { UrgentNeed } from '../../../Types/Results';
 import ResultsTranslate from '../Translate/Translate';
 import { generateNeedId } from '../helpers';
+import dataLayerPush from '../../../Assets/analytics';
 
 /**
  * UrgentNeedBanner component displays notification banners for urgent needs
@@ -16,55 +17,67 @@ const UrgentNeedBanner = () => {
   const { needs } = useResultsContext();
   const { theme } = useContext(Context);
   const needsPageLink = useResultsLink('results/near-term-needs');
-  
+
   // Filter urgent needs that have notification messages
-  const urgentNeedsWithNotifications = needs.filter(need => {
+  const urgentNeedsWithNotifications = needs.filter((need) => {
     if (!need.notification_message) return false;
     const message = need.notification_message.default_message;
     return message && message.trim();
   });
-  
+
   if (urgentNeedsWithNotifications.length === 0) {
     return null;
   }
-  
+
   return (
-    <Stack sx={{ 
-      width: '100%', 
-      px: '1rem',
-      marginTop: '2rem'
-    }} spacing={2}>
+    <Stack
+      sx={{
+        width: '100%',
+        px: '1rem',
+        marginTop: '2rem',
+      }}
+      spacing={2}
+    >
       {urgentNeedsWithNotifications.map((need: UrgentNeed, index: number) => (
-        <Alert 
+        <Alert
           key={index}
-          severity="info" 
-          sx={{ 
+          severity="info"
+          sx={{
             backgroundColor: theme.secondaryBackgroundColor,
             border: `2px solid ${theme.primaryColor}`,
             '& .MuiAlert-icon': {
-              color: theme.primaryColor
+              color: theme.primaryColor,
             },
             '& .MuiAlert-message': {
-              width: '100%'
-            }
+              width: '100%',
+            },
           }}
-        > 
-          <Typography 
-            variant="body1" 
-            sx={{ 
+        >
+          <Typography
+            variant="body1"
+            sx={{
               mb: 2,
               fontFamily: '"Open Sans", sans-serif',
-              lineHeight: 1.5
+              lineHeight: 1.5,
             }}
           >
             <ResultsTranslate translation={need.notification_message!} />
           </Typography>
-          
-          <Button 
+
+          <Button
             component={NavLink}
             to={`${needsPageLink}#${generateNeedId(need.name.default_message)}`}
-            variant="contained" 
-            sx={{ 
+            variant="contained"
+            onClick={() => {
+              dataLayerPush({
+                event: 'banner_click',
+                category: 'urgent_need_notification',
+                action: 'learn_more',
+                label: need.name.default_message,
+                need_id: generateNeedId(need.name.default_message),
+              });
+            }}
+            sx={{
               backgroundColor: 'var(--primary-color)',
               color: 'white',
               fontSize: '0.8rem',
@@ -73,14 +86,11 @@ const UrgentNeedBanner = () => {
               borderRadius: '0.75rem',
               textDecoration: 'none',
               '&:hover': {
-                textDecoration: 'none'
-              }
+                textDecoration: 'none',
+              },
             }}
           >
-            <FormattedMessage 
-              id="urgentNeedBanner.learnMore" 
-              defaultMessage="Learn More" 
-            />
+            <FormattedMessage id="urgentNeedBanner.learnMore" defaultMessage="Learn More" />
           </Button>
         </Alert>
       ))}
