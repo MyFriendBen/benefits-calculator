@@ -49,19 +49,21 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
       } else if (seg === '__BOLD_END__') {
         inBold = false;
       } else if (seg) {
-        // Check if this segment contains a markdown link placeholder
-        const mdLinkMatch = seg.match(/__MDLINK_(\d+)__/);
-        if (mdLinkMatch) {
-          const linkIdx = parseInt(mdLinkMatch[1]);
-          const [, linkText, url] = linkMatches[linkIdx];
-          
-          // Split the segment to handle text before and after the placeholder
-          const segParts = seg.split(mdLinkMatch[0]);
-          
-          if (segParts[0]) {
-            parts.push(inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{segParts[0]}</strong> : segParts[0]);
+        let remaining = seg;
+        while (remaining.length > 0) {
+          const mdLinkMatch = /__MDLINK_(\d+)__/.exec(remaining);
+          if (!mdLinkMatch) {
+            parts.push(inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{remaining}</strong> : remaining);
+            break;
           }
-          
+          const [placeholder, linkIdxString] = mdLinkMatch;
+          const placeholderIndex = mdLinkMatch.index ?? 0;
+          if (placeholderIndex > 0) {
+            const textBefore = remaining.slice(0, placeholderIndex);
+            parts.push(inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{textBefore}</strong> : textBefore);
+          }
+          const linkIdx = parseInt(linkIdxString, 10);
+          const [, linkText, url] = linkMatches[linkIdx];
           parts.push(
             <a
               key={`${lineIndex}-link-${keyCounter++}`}
@@ -73,12 +75,7 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
               {linkText}
             </a>
           );
-          
-          if (segParts[1]) {
-            parts.push(inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{segParts[1]}</strong> : segParts[1]);
-          }
-        } else {
-          parts.push(inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{seg}</strong> : seg);
+          remaining = remaining.slice(placeholderIndex + placeholder.length);
         }
       }
     };

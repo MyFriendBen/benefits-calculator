@@ -199,3 +199,17 @@ describe('parseMarkdown', () => {
   });
  
 });
+
+it('handles multiple markdown links in the same segment', () => {
+    const result = parseMarkdown('Check [SNAP](https://snap.gov) and [PEBT](https://pebt.gov) for help', primaryColor);
+    render(<>{result}</>);
+
+    const snapLink = screen.getByRole('link', { name: 'SNAP' });
+    const pebtLink = screen.getByRole('link', { name: 'PEBT' });
+    
+    expect(snapLink).toHaveAttribute('href', 'https://snap.gov');
+    expect(pebtLink).toHaveAttribute('href', 'https://pebt.gov');
+    expect(screen.getByText(/Check/)).toBeInTheDocument();
+    expect(screen.getByText(/and/)).toBeInTheDocument();
+    expect(screen.getByText(/for help/)).toBeInTheDocument();
+  });
