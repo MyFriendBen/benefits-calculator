@@ -43,7 +43,7 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
     // Maintain bold state across the entire line
     let inBold = false;
 
-    const processSegment = (seg: string) => {
+    const pushSegments = (seg: string) => {
       if (seg === '__BOLD_START__') {
         inBold = true;
       } else if (seg === '__BOLD_END__') {
@@ -87,7 +87,7 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
       // No plain URLs, just process bold and markdown links
       const boldSegments = currentText.split(/(__BOLD_START__|__BOLD_END__)/);
       boldSegments.forEach((seg) => {
-        processSegment(seg);
+        pushSegments(seg);
       });
     } else {
       // Handle plain URLs
@@ -100,7 +100,7 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
           const textBefore = currentText.substring(lastIdx, startIdx);
           const boldSegments = textBefore.split(/(__BOLD_START__|__BOLD_END__)/);
           boldSegments.forEach((seg) => {
-            processSegment(seg);
+            pushSegments(seg);
           });
         }
         
@@ -122,7 +122,7 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
         const textAfter = currentText.substring(lastIdx);
         const boldSegments = textAfter.split(/(__BOLD_START__|__BOLD_END__)/);
         boldSegments.forEach((seg) => {
-          processSegment(seg);
+          pushSegments(seg);
         });
       }
     }

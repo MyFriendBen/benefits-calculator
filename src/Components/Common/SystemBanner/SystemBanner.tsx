@@ -83,8 +83,8 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
       {enabledBanners.map((banner: BannerMessage) => {
         const isExpanded = expandedStates[banner.id];
         const titleText = getTextValue(banner.title);
-        const contentText = getTextValue(banner.content);        
-        const processedContent = parseMarkdown(contentText, theme.primaryColor);        
+        const contentText = getTextValue(banner.content);
+        const processedContent = parseMarkdown(contentText, theme.primaryColor);
 
         return (
           <Alert
