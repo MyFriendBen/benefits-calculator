@@ -19,6 +19,7 @@ const Header = () => {
   const landingPageQueryString = useQueryString({ path: null });
   const intl = useIntl();
   const logoClass = getReferrer('logoClass', 'logo');
+  const stateName = getReferrer('stateName', '');
 
   const homeUrl = useMemo(() => {
     if (whiteLabel === undefined || whiteLabel === DEFAULT_WHITE_LABEL) {
@@ -84,7 +85,10 @@ const Header = () => {
       <Paper className={containerClass} square={true} elevation={0}>
         <AppBar id="nav-container" position="sticky" elevation={0}>
           <a href={homeUrl} className="home-link">
-            {useLogo('logoSource', 'logoAlt', logoClass)}
+            <div className="logo-container">
+              {useLogo('logoSource', 'logoAlt', logoClass)}
+              {stateName && <div className="state-name">{stateName}</div>}
+            </div>
           </a>
           <div className="icon-wrapper">
             <LanguageIcon />

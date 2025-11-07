@@ -203,6 +203,7 @@ export type ApiFormData = {
   has_co_andso: boolean | null;
   has_co_care: boolean | null;
   has_project_cope: boolean | null;
+  has_cesn_heap: boolean | null;
   has_cfhc: boolean | null;
   has_shitc: boolean | null;
   has_employer_hi?: boolean | null;

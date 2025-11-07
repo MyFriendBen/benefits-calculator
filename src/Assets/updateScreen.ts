@@ -90,6 +90,7 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     has_co_andso: formData.benefits.co_andso ?? null,
     has_co_care: formData.benefits.co_care ?? null,
     has_project_cope: formData.benefits.project_cope ?? null,
+    has_cesn_heap: formData.benefits.cesn_heap ?? null,
     has_cfhc: formData.benefits.cfhc ?? null,
     has_shitc: formData.benefits.shitc ?? null,
     referral_source: formData.referralSource ?? null,
