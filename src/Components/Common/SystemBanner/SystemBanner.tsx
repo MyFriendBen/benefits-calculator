@@ -83,8 +83,8 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
       {enabledBanners.map((banner: BannerMessage) => {
         const isExpanded = expandedStates[banner.id];
         const titleText = getTextValue(banner.title);
-        const contentText = getTextValue(banner.content);
-        const processedContent = parseMarkdown(contentText, theme.primaryColor);
+        const contentText = getTextValue(banner.content);        
+        const processedContent = parseMarkdown(contentText, theme.primaryColor);        
 
         return (
           <Alert
@@ -146,7 +146,12 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
                   lineHeight: 1.5,
                 }}
               >
-                {processedContent}
+                {Array.isArray(processedContent) 
+                  ? processedContent.map((element, index) => 
+                      React.isValidElement(element) ? element : <React.Fragment key={index}>{element}</React.Fragment>
+                    )
+                  : processedContent
+                }                
               </Typography>
             </Collapse>
           </Alert>

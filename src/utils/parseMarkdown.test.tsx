@@ -185,4 +185,17 @@ describe('parseMarkdown', () => {
     expect(container.textContent).toContain('Second line');
     expect(container.textContent).toContain('Third line');
   });
+
+  it('converts markdown link syntax [text](url) to clickable links', () => {
+    const result = parseMarkdown('Visit the [website](https://example.com) for info', primaryColor);
+    render(<>{result}</>);
+
+    const link = screen.getByRole('link', { name: 'website' });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'https://example.com');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(link).toHaveStyle({ color: primaryColor, textDecoration: 'underline' });
+  });
+ 
 });

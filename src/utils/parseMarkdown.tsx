@@ -5,6 +5,7 @@ import React from 'react';
  *
  * Supported features:
  * - **text** for bold
+ * - [text](url) for links
  * - Auto-detection of URLs (https://...) and converts them to clickable links
  * - Preserves line breaks
  *
@@ -16,43 +17,93 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
   // Convert literal \n strings to actual newlines (handles database-stored translations)
   const normalizedContent = content.replace(/\\n/g, '\n');
 
-  // Helper function to parse a line for **bold** markdown and URLs
+  // Helper function to parse a line for markdown
   const parseLine = (line: string, lineIndex: number): React.ReactNode[] => {
     const parts: React.ReactNode[] = [];
     let keyCounter = 0;
 
-    // First, convert **bold** markdown to markers
-    let currentText = line.replace(/\*\*(.+?)\*\*/g, '__BOLD_START__$1__BOLD_END__');
+    // Handle markdown links [text](url) first
+    const markdownLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const linkMatches = [...line.matchAll(markdownLinkRegex)];
+
+    // Replace markdown links with unique placeholders
+    let currentText = line;
+    linkMatches.forEach((match, idx) => {
+      const placeholder = `__MDLINK_${idx}__`;
+      currentText = currentText.replace(match[0], placeholder);
+    });
+
+    // Now handle **bold** markdown
+    currentText = currentText.replace(/\*\*(.+?)\*\*/g, '__BOLD_START__$1__BOLD_END__');
+
+    // Find all plain URLs (excluding trailing punctuation)
+    const urlRegex = /(https?:\/\/[^\s]+?)(?=[.,;:!?)\]'\"]*(?:\s|$))/g;
+    const plainUrlMatches = [...currentText.matchAll(urlRegex)];
 
     // Maintain bold state across the entire line
     let inBold = false;
-    const pushSegments = (text: string) => {
-      const boldSegments = text.split(/(__BOLD_START__|__BOLD_END__)/);
-      boldSegments.forEach((seg) => {
-        if (seg === '__BOLD_START__') {
-          inBold = true;
-        } else if (seg === '__BOLD_END__') {
-          inBold = false;
-        } else if (seg) {
+
+    const processSegment = (seg: string) => {
+      if (seg === '__BOLD_START__') {
+        inBold = true;
+      } else if (seg === '__BOLD_END__') {
+        inBold = false;
+      } else if (seg) {
+        // Check if this segment contains a markdown link placeholder
+        const mdLinkMatch = seg.match(/__MDLINK_(\d+)__/);
+        if (mdLinkMatch) {
+          const linkIdx = parseInt(mdLinkMatch[1]);
+          const [, linkText, url] = linkMatches[linkIdx];
+          
+          // Split the segment to handle text before and after the placeholder
+          const segParts = seg.split(mdLinkMatch[0]);
+          
+          if (segParts[0]) {
+            parts.push(inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{segParts[0]}</strong> : segParts[0]);
+          }
+          
+          parts.push(
+            <a
+              key={`${lineIndex}-link-${keyCounter++}`}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: primaryColor, textDecoration: 'underline' }}
+            >
+              {linkText}
+            </a>
+          );
+          
+          if (segParts[1]) {
+            parts.push(inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{segParts[1]}</strong> : segParts[1]);
+          }
+        } else {
           parts.push(inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{seg}</strong> : seg);
         }
-      });
+      }
     };
 
-    // Find all URLs (excluding trailing punctuation including quotes)
-    const urlRegex = /(https?:\/\/[^\s]+?)(?=[.,;:!?)\]'\"]*(?:\s|$))/g;
-    const urlMatches = [...currentText.matchAll(urlRegex)];
-
-    if (urlMatches.length === 0) {
-      pushSegments(currentText);
+    if (plainUrlMatches.length === 0) {
+      // No plain URLs, just process bold and markdown links
+      const boldSegments = currentText.split(/(__BOLD_START__|__BOLD_END__)/);
+      boldSegments.forEach((seg) => {
+        processSegment(seg);
+      });
     } else {
+      // Handle plain URLs
       let lastIdx = 0;
-      urlMatches.forEach((match) => {
+      plainUrlMatches.forEach((match) => {
         const url = match[0];
         const startIdx = match.index!;
+        
         if (startIdx > lastIdx) {
-          pushSegments(currentText.substring(lastIdx, startIdx));
+          const textBefore = currentText.substring(lastIdx, startIdx);
+          const boldSegments = textBefore.split(/(__BOLD_START__|__BOLD_END__)/);
+          boldSegments.forEach((seg) => {
+            processSegment(seg);
+          });
         }
+        
         parts.push(
           <a
             key={`${lineIndex}-link-${keyCounter++}`}
@@ -66,8 +117,13 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
         );
         lastIdx = startIdx + url.length;
       });
+      
       if (lastIdx < currentText.length) {
-        pushSegments(currentText.substring(lastIdx));
+        const textAfter = currentText.substring(lastIdx);
+        const boldSegments = textAfter.split(/(__BOLD_START__|__BOLD_END__)/);
+        boldSegments.forEach((seg) => {
+          processSegment(seg);
+        });
       }
     }
 
