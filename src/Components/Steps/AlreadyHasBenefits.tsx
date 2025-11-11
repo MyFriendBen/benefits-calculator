@@ -181,7 +181,7 @@ function AlreadyHasBenefits() {
       <QuestionQuestion>
         <OverrideableTranslation
           id="questions.hasBenefits"
-          defaultMessage="Does your household currently have any benefits?"
+          defaultMessage="Does anyone in your household currently have public assistance benefits?"
         />
         {renderHelpSection()}
       </QuestionQuestion>
