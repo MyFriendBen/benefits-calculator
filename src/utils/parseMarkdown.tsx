@@ -13,7 +13,7 @@ import React from 'react';
  * @param primaryColor - Color for links
  * @returns React nodes with formatted content
  */
-export const parseMarkdown = (content: string, primaryColor: string): React.ReactNode => {
+export const parseMarkdown = (content: string, primaryColor: string): React.ReactNode[] => {
   // Convert literal \n strings to actual newlines (handles database-stored translations)
   const normalizedContent = content.replace(/\\n/g, '\n');
 

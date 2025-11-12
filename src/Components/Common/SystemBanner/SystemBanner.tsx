@@ -146,12 +146,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
                   lineHeight: 1.5,
                 }}
               >
-                {Array.isArray(processedContent) 
-                  ? processedContent.map((element, index) => 
-                      React.isValidElement(element) ? element : <React.Fragment key={index}>{element}</React.Fragment>
-                    )
-                  : processedContent
-                }                
+                {processedContent}               
               </Typography>
             </Collapse>
           </Alert>
