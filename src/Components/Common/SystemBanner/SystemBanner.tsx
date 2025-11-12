@@ -146,7 +146,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
                   lineHeight: 1.5,
                 }}
               >
-                {processedContent}               
+                {processedContent}
               </Typography>
             </Collapse>
           </Alert>
