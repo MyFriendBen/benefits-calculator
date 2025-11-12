@@ -162,7 +162,7 @@ function AlreadyHasBenefits() {
   const renderHelpSection = () => {
     return (
       <HelpButton>
-        <FormattedMessage
+        <OverrideableTranslation
           id="questions.hasBenefits-description"
           defaultMessage="This information will help make sure we don't give you results for benefits you already have."
         />
