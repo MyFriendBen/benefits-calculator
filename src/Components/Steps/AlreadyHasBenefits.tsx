@@ -181,7 +181,7 @@ function AlreadyHasBenefits() {
       <QuestionQuestion>
         <OverrideableTranslation
           id="questions.hasBenefits"
-          defaultMessage="Does your household currently have any benefits?"
+          defaultMessage="Does anyone in your household currently have public assistance benefits?"
         />
         {renderHelpSection()}
       </QuestionQuestion>
@@ -195,7 +195,7 @@ function AlreadyHasBenefits() {
                 {...field}
                 aria-label={formatMessage({
                   id: 'questions.hasBenefits',
-                  defaultMessage: 'Does your household currently have any benefits?',
+                  defaultMessage: 'Does anyone in your household currently have public assistance benefits?',
                 })}
                 sx={{ marginBottom: '1rem' }}
               >
