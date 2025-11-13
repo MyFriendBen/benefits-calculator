@@ -3,6 +3,8 @@ import ResultsError from './ResultsError/ResultsError';
 import Loading from './Loading/Loading';
 import {
   EligibilityResults,
+  EnhancedEligibilityResults,
+  LifetimeProjectionData,
   MemberEligibility,
   PolicyEngineData,
   Program,
@@ -33,6 +35,7 @@ import filterProgramsGenerator from './filterPrograms';
 import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRebates';
 import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/rebateTypes';
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
+import { useLanguageSupportsLifetimeProjections } from './hooks/useLifetimeProjections';
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -46,6 +49,7 @@ type WrapperResultsContext = {
   setValidations: (validations: Validation[]) => void;
   energyCalculatorRebateCategories: EnergyCalculatorRebateCategory[]; // NOTE: will be empty if not using the energy calculator
   policyEngineData: PolicyEngineData | undefined;
+  lifetimeProjections: LifetimeProjectionData | undefined;
 };
 
 type ResultsProps = {
@@ -109,6 +113,16 @@ const Results = ({ type }: ResultsProps) => {
   const [apiError, setApiError] = useState(false);
   const [apiResults, setApiResults] = useState<EligibilityResults | undefined>();
 
+  // Get current language from context
+  const { locale } = useContext(Context);
+
+  // Check if user's language supports lifetime projections (English only in Phase 1)
+  const languageSupportsLifetime = useLanguageSupportsLifetimeProjections(locale);
+  // Check URL parameter for explicit lifetime projections request
+  const urlRequestsLifetime = searchParams.get('include_lifetime_projections') === 'true';
+  // Request lifetime projections if language supports it OR if explicitly requested via URL
+  const shouldRequestLifetimeProjections = languageSupportsLifetime || urlRequestsLifetime;
+
   useEffect(() => {
     dataLayerPush({ event: 'config', user_id: uuid });
   }, [uuid]);
@@ -122,7 +136,19 @@ const Results = ({ type }: ResultsProps) => {
       if (uuid === undefined) {
         throw new Error('can not find uuid');
       }
-      const rawEligibilityResponse = await getEligibility(uuid, isAdminView);
+
+      let rawEligibilityResponse: EligibilityResults;
+      try {
+        rawEligibilityResponse = await getEligibility(uuid, isAdminView, shouldRequestLifetimeProjections);
+      } catch (apiError) {
+        // If the enhanced API call fails, fall back to basic eligibility
+        console.warn('Enhanced API call failed, falling back to basic eligibility:', apiError);
+        try {
+          rawEligibilityResponse = await getEligibility(uuid, isAdminView, false);
+        } catch (fallbackError) {
+          throw fallbackError;
+        }
+      }
 
       // replace the program id in the categories with the program
       for (const category of rawEligibilityResponse.program_categories) {
@@ -140,7 +166,7 @@ const Results = ({ type }: ResultsProps) => {
 
       setApiResults(rawEligibilityResponse);
     } catch (error) {
-      console.error(error);
+      console.error('Failed to fetch eligibility results:', error);
       setApiError(true);
       setLoading(false);
     }
@@ -175,6 +201,7 @@ const Results = ({ type }: ResultsProps) => {
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
   const [policyEngineData, setPolicyEngineData] = useState<PolicyEngineData>();
+  const [lifetimeProjections, setLifetimeProjections] = useState<LifetimeProjectionData>();
 
   const filterPrograms = useMemo(
     () => filterProgramsGenerator(formData, filtersChecked, isAdminView, apiResults?.programs || []),
@@ -189,6 +216,7 @@ const Results = ({ type }: ResultsProps) => {
       setMissingPrograms(false);
       setValidations([]);
       setPolicyEngineData(undefined);
+      setLifetimeProjections(undefined);
       return;
     }
 
@@ -206,6 +234,26 @@ const Results = ({ type }: ResultsProps) => {
     setValidations(apiResults.validations);
     setLoading(false);
     setPolicyEngineData(apiResults.pe_data);
+
+    // Set lifetime projections if available (Enhanced results)
+    try {
+      if ('lifetime_projections' in apiResults) {
+        const enhancedResults = apiResults as EnhancedEligibilityResults;
+
+        // Check for lifetime projection errors
+        if (enhancedResults.lifetime_projection_error) {
+          console.warn('Lifetime projection error:', enhancedResults.lifetime_projection_error);
+          setLifetimeProjections(undefined);
+        } else {
+          setLifetimeProjections(enhancedResults.lifetime_projections);
+        }
+      } else {
+        setLifetimeProjections(undefined);
+      }
+    } catch (error) {
+      console.error('Error processing lifetime projections:', error);
+      setLifetimeProjections(undefined);
+    }
   }, [filterPrograms, apiResults]);
 
   const ResultsContextProvider = ({ children }: PropsWithChildren) => {
@@ -223,6 +271,7 @@ const Results = ({ type }: ResultsProps) => {
           setValidations,
           energyCalculatorRebateCategories,
           policyEngineData,
+          lifetimeProjections,
         }}
       >
         {children}
