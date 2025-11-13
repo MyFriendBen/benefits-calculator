@@ -2,7 +2,7 @@ import { EnergyCalculatorRebate, EnergyCalculatorRebateCategory } from './rebate
 import { FormattedMessage } from 'react-intl';
 import BackAndSaveButtons from '../../Results/BackAndSaveButtons/BackAndSaveButtons';
 import { useResultsLink } from '../../Results/Results';
-import { EnergyCalculatorRebateCalculator, EnergyCalculatorRebateCardTitle, rebateTypes } from './RebatePageMappings';
+import { EnergyCalculatorRebateCardTitle, rebateTypes } from './RebatePageMappings';
 import { ReactComponent as WarningIcon } from '../../../Assets/icons/General/warning.svg';
 import { ReactComponent as Coin } from '../Icons/Coin.svg';
 import { renderCategoryDescription } from './rebateTypes';
@@ -108,7 +108,18 @@ function RebateCard({ rebate, rebateCategory }: RebateProps) {
         </div>
       </div>
       <p>{rebate.short_description}</p>
-      <EnergyCalculatorRebateCalculator rebate={rebate} />
+      {/*
+        TEMPORARILY REMOVED: EnergyCalculatorRebateCalculator
+        Partner: CDS (Colorado Digital Service)
+
+        The interactive savings calculator component was removed at CDS partner request.
+        To reintroduce this feature, uncomment the line below:
+
+        <EnergyCalculatorRebateCalculator rebate={rebate} />
+
+        The calculator only appeared for 'percent' and 'dollar_amount' rebate types
+        (not for 'dollars_per_unit' types as noted in RebatePageMappings.tsx:405-406)
+      */}
       <div className="energy-calculator-rebate-page-more-info">
         <TrackedOutboundLink
           href={rebateUrl}
