@@ -185,4 +185,31 @@ describe('parseMarkdown', () => {
     expect(container.textContent).toContain('Second line');
     expect(container.textContent).toContain('Third line');
   });
+
+  it('converts markdown link syntax [text](url) to clickable links', () => {
+    const result = parseMarkdown('Visit the [website](https://example.com) for info', primaryColor);
+    render(<>{result}</>);
+
+    const link = screen.getByRole('link', { name: 'website' });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'https://example.com');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(link).toHaveStyle({ color: primaryColor, textDecoration: 'underline' });
+  });
+ 
 });
+
+it('handles multiple markdown links in the same segment', () => {
+    const result = parseMarkdown('Check [SNAP](https://snap.gov) and [PEBT](https://pebt.gov) for help', primaryColor);
+    render(<>{result}</>);
+
+    const snapLink = screen.getByRole('link', { name: 'SNAP' });
+    const pebtLink = screen.getByRole('link', { name: 'PEBT' });
+    
+    expect(snapLink).toHaveAttribute('href', 'https://snap.gov');
+    expect(pebtLink).toHaveAttribute('href', 'https://pebt.gov');
+    expect(screen.getByText(/Check/)).toBeInTheDocument();
+    expect(screen.getByText(/and/)).toBeInTheDocument();
+    expect(screen.getByText(/for help/)).toBeInTheDocument();
+  });

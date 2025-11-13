@@ -69,6 +69,7 @@ export function useUpdateFormData() {
         csfp: response.has_csfp ?? false,
         ccdf: response.has_ccdf ?? false,
         aca: response.has_aca ?? false,
+        nc_medicare_savings: response.has_nc_medicare_savings ?? false,
         ma_eaedc: response.has_ma_eaedc ?? false,
         ma_ssp: response.has_ma_ssp ?? false,
         ma_mbta: response.has_ma_mbta ?? false,
