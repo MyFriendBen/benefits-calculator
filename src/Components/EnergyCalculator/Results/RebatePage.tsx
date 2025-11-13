@@ -117,8 +117,7 @@ function RebateCard({ rebate, rebateCategory }: RebateProps) {
 
         <EnergyCalculatorRebateCalculator rebate={rebate} />
 
-        The calculator only appeared for 'percent' and 'dollar_amount' rebate types
-        (not for 'dollars_per_unit' types as noted in RebatePageMappings.tsx:405-406)
+        Remains in code as CDS wanted the option to reintroduce it easily
       */}
       <div className="energy-calculator-rebate-page-more-info">
         <TrackedOutboundLink

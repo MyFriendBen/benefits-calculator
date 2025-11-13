@@ -395,6 +395,7 @@ function staticAmountSavingCalculatorGenerator(amount: number, maxAmount: number
  *
  * TEMPORARILY REMOVED FROM UI (at CDS partner request)
  * Previously displayed in: src/Components/EnergyCalculator/Results/RebatePage.tsx:111
+ * Remains in code as CDS wanted the option to reintroduce it easily
  */
 export function EnergyCalculatorRebateCalculator({ rebate }: RebateComponentProps) {
   const [cost, setCost] = useState(0);
