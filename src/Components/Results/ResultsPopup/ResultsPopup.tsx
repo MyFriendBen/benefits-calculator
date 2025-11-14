@@ -15,6 +15,7 @@ type ResultsPopupProps = {
   /**
    * Condition function that determines whether to show the popup
    * @returns true to show the popup, false to hide it
+   * @note For optimal performance with delaySeconds > 0, wrap this function in useCallback
    */
   shouldShow: () => boolean;
   /**

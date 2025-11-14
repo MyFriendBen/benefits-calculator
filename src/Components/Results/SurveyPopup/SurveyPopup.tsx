@@ -27,7 +27,7 @@ import ResultsPopup from '../ResultsPopup/ResultsPopup';
  *
  * Eligibility criteria:
  * - User is in Colorado (whiteLabel is 'co') or North Carolina (whiteLabel is 'nc')
- * - User is over 18 years old (head of household age > 18)
+ * - User is 18 years old or older (head of household age >= 18)
  */
 function checkSurveyEligibility(formData: FormData, whiteLabel: string): boolean {
   // Check state from whiteLabel
@@ -38,14 +38,19 @@ function checkSurveyEligibility(formData: FormData, whiteLabel: string): boolean
     return false;
   }
 
-  // Check age (must be over 18)
-  // Find the head of household (first member)
-  const headOfHousehold = formData.householdData[0];
-  if (!headOfHousehold?.age) {
+  // Check that householdData exists and is not empty
+  if (!formData.householdData || formData.householdData.length === 0) {
     return false;
   }
 
-  if (headOfHousehold.age <= 18) {
+  // Check age (must be 18 or older)
+  // Find the head of household (first member)
+  const headOfHousehold = formData.householdData[0];
+  if (headOfHousehold.age === null || headOfHousehold.age === undefined) {
+    return false;
+  }
+
+  if (headOfHousehold.age < 18) {
     return false;
   }
 

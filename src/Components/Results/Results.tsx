@@ -100,7 +100,7 @@ export function useResultsLink(link: string) {
 
 
 const Results = ({ type }: ResultsProps) => {
-  const { formData, getReferrer, locale } = useContext(Context);
+  const { formData, getReferrer } = useContext(Context);
   const { whiteLabel, uuid, programId, energyCalculatorRebateType } = useParams();
   const noHelpButton = getReferrer('featureFlags').includes('no_results_more_help');
 
