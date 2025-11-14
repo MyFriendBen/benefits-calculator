@@ -1,3 +1,16 @@
+/* Theme-specific color classes */
+.theme-blue {
+  --popup-bg-color: var(--secondary-background-color);
+  --popup-border-color: var(--primary-color);
+  --popup-button-color: var(--primary-color);
+}
+
+.theme-orange {
+  --popup-bg-color: white;
+  --popup-border-color: var(--secondary-color);
+  --popup-button-color: var(--secondary-color);
+}
+
 /* Backdrop overlay that covers the entire screen */
 .results-popup-backdrop {
   position: fixed;
@@ -68,6 +81,8 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   padding: 1.75rem 1rem 1rem 1rem;
   position: relative !important;
+  background-color: var(--popup-bg-color);
+  border: 2px solid var(--popup-border-color);
 }
 
 /* Alert message container */
@@ -106,12 +121,14 @@
   margin-bottom: 0.5rem;
   border: 2px solid transparent !important;
   transition: all 0.2s ease;
+  background-color: var(--popup-button-color) !important;
 }
 
 .results-popup-button:hover {
   text-decoration: none;
   background-color: white !important;
-  border: 2px solid currentColor !important;
+  color: var(--popup-button-color) !important;
+  border-color: var(--popup-button-color) !important;
 }
 
 /* Responsive padding for button */
@@ -138,7 +155,7 @@
   bottom: 1rem;
   right: 1rem;
   z-index: 10002;
-  max-width: 250px;
+  max-width: 350px;
   cursor: pointer;
   transition: transform 0.2s ease;
   animation: slideInFromBottomRight 0.3s ease-out;
@@ -151,4 +168,33 @@
 .results-popup-minimized .MuiAlert-root {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   padding: 0.75rem 1rem;
+  background-color: var(--popup-bg-color);
+  border: 2px solid var(--popup-border-color);
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Reduce gap between text and action button in minimized state */
+.results-popup-minimized .MuiAlert-action {
+  padding-left: 4px !important;
+  margin-left: 0 !important;
+}
+
+/* Close button in minimized state */
+.results-popup-minimized-close-button {
+  position: relative !important;
+  z-index: 10 !important;
+  padding: 4px !important;
+  margin-top: -10px !important;
+  margin-right: -4px !important;
+}
+
+.results-popup-minimized-close-button:hover {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Typography in minimized state */
+.results-popup-minimized .MuiTypography-root {
+  font-weight: bold;
+  font-size: 0.85rem;
 }

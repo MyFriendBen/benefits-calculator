@@ -90,7 +90,7 @@ const SurveyPopup = () => {
       linkText={<FormattedMessage id="results.popup.surveyLink" defaultMessage="Take Survey" />}
       minimizedText={<FormattedMessage id="results.popup.surveyMinimized" defaultMessage="Help Us Improve - Get $10" />}
       colorTheme="orange"
-      delaySeconds={5}
+      initialState="minimized"
     />
   );
 };

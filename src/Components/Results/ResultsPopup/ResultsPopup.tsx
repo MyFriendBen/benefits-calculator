@@ -1,9 +1,7 @@
 import { Alert, IconButton, Button, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { FormattedMessage } from 'react-intl';
-import { useState, useContext, useMemo, useCallback, useEffect } from 'react';
-import { Context } from '../../Wrapper/Wrapper';
-import { ITheme } from '../../../Assets/styleController';
+import { useState, useCallback } from 'react';
 import './ResultsPopup.css';
 
 type ColorTheme = 'blue' | 'orange';
@@ -15,7 +13,6 @@ type ResultsPopupProps = {
   /**
    * Condition function that determines whether to show the popup
    * @returns true to show the popup, false to hide it
-   * @note For optimal performance with delaySeconds > 0, wrap this function in useCallback
    */
   shouldShow: () => boolean;
   /**
@@ -46,43 +43,12 @@ type ResultsPopupProps = {
    */
   colorTheme?: ColorTheme;
   /**
-   * Optional delay in seconds before showing the popup
-   * @default 0 (shows immediately)
+   * Optional initial display state of the popup
+   * - 'popup': Show as full popup initially (default)
+   * - 'minimized': Start in minimized state
+   * @default "popup"
    */
-  delaySeconds?: number;
-};
-
-type PopupColors = {
-  bg: string;
-  border: string;
-  icon: string;
-};
-
-/**
- * Gets colors for the popup based on color theme
- */
-const getPopupColors = (colorTheme: ColorTheme, theme: ITheme): PopupColors => {
-  const colorMap: Record<ColorTheme, PopupColors> = {
-    blue: {
-      bg: theme.secondaryBackgroundColor,
-      border: theme.primaryColor,
-      icon: theme.primaryColor,
-    },
-    orange: {
-      bg: 'white',
-      border: theme.secondaryColor,
-      icon: theme.secondaryColor,
-    },
-  };
-
-  return colorMap[colorTheme];
-};
-
-/**
- * Gets button color based on color theme
- */
-const getButtonColor = (colorTheme: ColorTheme, theme: ITheme): string => {
-  return colorTheme === 'blue' ? theme.primaryColor : theme.secondaryColor;
+  initialState?: 'popup' | 'minimized';
 };
 
 /**
@@ -96,6 +62,7 @@ const getButtonColor = (colorTheme: ColorTheme, theme: ITheme): string => {
  *   linkUrl="https://example.com"
  *   linkText={<FormattedMessage id="popup.linkText" defaultMessage="Click here" />}
  *   colorTheme="blue"
+ *   initialState="minimized"
  * />
  */
 const ResultsPopup = ({
@@ -105,22 +72,10 @@ const ResultsPopup = ({
   linkText = <FormattedMessage id="resultsPopup.learnMore" defaultMessage="Learn More" />,
   minimizedText = <FormattedMessage id="resultsPopup.minimized" defaultMessage="Click to learn more" />,
   colorTheme = 'orange',
-  delaySeconds = 0,
+  initialState = 'popup',
 }: ResultsPopupProps) => {
-  const { theme } = useContext(Context);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [isDelayComplete, setIsDelayComplete] = useState(delaySeconds === 0);
-
-  // Handle delay before showing popup
-  useEffect(() => {
-    if (delaySeconds > 0 && shouldShow()) {
-      const timer = setTimeout(() => {
-        setIsDelayComplete(true);
-      }, delaySeconds * 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [delaySeconds, shouldShow]);
+  const [isMinimized, setIsMinimized] = useState(initialState === 'minimized');
+  const [isDismissed, setIsDismissed] = useState(false);
 
   const handleMinimize = useCallback(() => {
     setIsMinimized(true);
@@ -130,11 +85,13 @@ const ResultsPopup = ({
     setIsMinimized(false);
   }, []);
 
-  const colors = useMemo(() => getPopupColors(colorTheme, theme), [colorTheme, theme]);
-  const buttonColor = useMemo(() => getButtonColor(colorTheme, theme), [colorTheme, theme]);
+  const handleDismiss = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent restore from triggering
+    setIsDismissed(true);
+  }, []);
 
-  // Don't render if condition not met or delay not complete
-  if (!shouldShow() || !isDelayComplete) {
+  // Don't render if condition not met or completely dismissed
+  if (!shouldShow() || isDismissed) {
     return null;
   }
 
@@ -142,7 +99,7 @@ const ResultsPopup = ({
   if (isMinimized) {
     return (
       <div
-        className="results-popup-minimized"
+        className={`results-popup-minimized ${colorTheme === 'blue' ? 'theme-blue' : 'theme-orange'}`}
         onClick={handleRestore}
         role="button"
         tabIndex={0}
@@ -157,14 +114,19 @@ const ResultsPopup = ({
         <Alert
           severity="info"
           icon={false}
-          sx={{
-            backgroundColor: colors.bg,
-            border: `2px solid ${colors.border}`,
-            cursor: 'pointer',
-            margin: 0,
-          }}
+          action={
+            <IconButton
+              aria-label="Close popup"
+              color="inherit"
+              size="small"
+              onClick={handleDismiss}
+              className="results-popup-minimized-close-button"
+            >
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
+          }
         >
-          <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>
+          <Typography variant="body2">
             {minimizedText}
           </Typography>
         </Alert>
@@ -183,14 +145,14 @@ const ResultsPopup = ({
       />
 
       {/* Popup content */}
-      <div className="results-popup-container" role="dialog" aria-label="Survey invitation">
+      <div
+        className={`results-popup-container ${colorTheme === 'blue' ? 'theme-blue' : 'theme-orange'}`}
+        role="dialog"
+        aria-label="Survey invitation"
+      >
         <Alert
           severity="info"
           icon={false}
-          sx={{
-            backgroundColor: colors.bg,
-            border: `2px solid ${colors.border}`,
-          }}
           action={
             <IconButton
               aria-label="Minimize popup"
@@ -216,15 +178,6 @@ const ResultsPopup = ({
               variant="contained"
               className="results-popup-button"
               onClick={handleMinimize}
-              sx={{
-                backgroundColor: buttonColor,
-                color: 'white',
-                '&:hover': {
-                  backgroundColor: 'white !important',
-                  color: buttonColor,
-                  borderColor: buttonColor,
-                },
-              }}
             >
               {linkText}
             </Button>
