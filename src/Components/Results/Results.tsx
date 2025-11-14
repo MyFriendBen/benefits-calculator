@@ -33,6 +33,7 @@ import filterProgramsGenerator from './filterPrograms';
 import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRebates';
 import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/rebateTypes';
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
+import SurveyPopup from './SurveyPopup/SurveyPopup';
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -96,6 +97,7 @@ export function useResultsLink(link: string) {
 
   return addAdminToLink(`/${whiteLabel}/${uuid}/${link}`, isAdminView);
 }
+
 
 const Results = ({ type }: ResultsProps) => {
   const { formData, getReferrer } = useContext(Context);
@@ -260,6 +262,7 @@ const Results = ({ type }: ResultsProps) => {
     return (
       <main>
         <ResultsContextProvider>
+          <SurveyPopup />
           <ResultsHeader type={type} />
           <ResultsTabs />
           {type === 'program' && <UrgentNeedBanner />}
