@@ -33,10 +33,15 @@ type ResultsPopupProps = {
    */
   linkText?: React.ReactNode;
   /**
+   * Optional text to display when popup is minimized
+   * @default "Click to learn more" (internationalized)
+   */
+  minimizedText?: React.ReactNode;
+  /**
    * Optional color theme for styling the popup
-   * - blue: Uses primary theme colors (default)
-   * - orange: Uses orange/error theme colors
-   * @default "blue"
+   * - blue: Uses primary theme colors
+   * - orange: Uses orange/error theme colors (default)
+   * @default "orange"
    */
   colorTheme?: ColorTheme;
   /**
@@ -97,7 +102,8 @@ const ResultsPopup = ({
   message,
   linkUrl,
   linkText = <FormattedMessage id="resultsPopup.learnMore" defaultMessage="Learn More" />,
-  colorTheme = 'blue',
+  minimizedText = <FormattedMessage id="resultsPopup.minimized" defaultMessage="Click to learn more" />,
+  colorTheme = 'orange',
   delaySeconds = 0,
 }: ResultsPopupProps) => {
   const { theme } = useContext(Context);
@@ -158,7 +164,7 @@ const ResultsPopup = ({
           }}
         >
           <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>
-            <FormattedMessage id="resultsPopup.minimized" defaultMessage="Help Us Improve - Get $10" />
+            {minimizedText}
           </Typography>
         </Alert>
       </div>

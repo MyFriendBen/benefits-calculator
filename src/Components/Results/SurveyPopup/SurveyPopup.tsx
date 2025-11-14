@@ -6,13 +6,30 @@ import { FormData } from '../../../Types/FormData';
 import ResultsPopup from '../ResultsPopup/ResultsPopup';
 
 /**
- * Checks if user is eligible to see the survey popup
+ * URBAN INSTITUTE SURVEY - November/December 2025
+ *
+ * This component displays a survey invitation for a research study conducted by the Urban Institute.
+ * The survey will run until 300 respondents complete it (expected completion: Nov/Dec 2025).
+ *
+ * Survey Details:
+ * - Compensation: $10 Amazon gift card
+ * - Duration: ~5 minutes
+ * - Target states: Colorado and North Carolina only
+ * - Target demographic: Adults over 18 years old
+ * - Languages: English and Spanish
+ *
+ * This is a specific instance/wrapper of the generic ResultsPopup component.
+ * All survey-specific logic (eligibility, messaging, URL, styling, timing) is contained here.
+ */
+
+/**
+ * Checks if user is eligible to see the Urban Institute survey popup
+ *
  * Eligibility criteria:
  * - User is in Colorado (whiteLabel is 'co') or North Carolina (whiteLabel is 'nc')
  * - User is over 18 years old (head of household age > 18)
- * - User's language is English or Spanish
  */
-function checkSurveyEligibility(formData: FormData, locale: string, whiteLabel: string): boolean {
+function checkSurveyEligibility(formData: FormData, whiteLabel: string): boolean {
   // Check state from whiteLabel
   const isColorado = whiteLabel === 'co';
   const isNorthCarolina = whiteLabel === 'nc';
@@ -32,26 +49,32 @@ function checkSurveyEligibility(formData: FormData, locale: string, whiteLabel: 
     return false;
   }
 
-  // Check language (English or Spanish)
-  const languagePrefix = locale.toLowerCase().substring(0, 2);
-  if (languagePrefix !== 'en' && languagePrefix !== 'es') {
-    return false;
-  }
-
   return true;
 }
 
 /**
- * SurveyPopup component - A specific instance of ResultsPopup configured for survey invitations
- * This component handles all survey-specific logic including eligibility checks
+ * SurveyPopup component - Urban Institute Survey (Nov/Dec 2025)
+ *
+ * A specific instance of ResultsPopup configured for the Urban Institute survey invitation.
+ * This wrapper component handles all survey-specific logic including:
+ * - Eligibility checks (CO/NC residents, age 18+)
+ * - Survey-specific messaging and compensation details ($10 gift card)
+ * - Link to the external survey platform
+ * - Orange color theme and 5-second delay timing
+ * - Survey displays in the user's selected language (English or Spanish)
+ *
+ * To remove this survey after reaching 300 respondents:
+ * Simply remove the <SurveyPopup /> line from Results.tsx (line ~265)
+ *
+ * @see ResultsPopup - The reusable popup component this wraps
  */
 const SurveyPopup = () => {
-  const { formData, locale } = useContext(Context);
+  const { formData } = useContext(Context);
   const { whiteLabel } = useParams();
 
   return (
     <ResultsPopup
-      shouldShow={() => checkSurveyEligibility(formData, locale, whiteLabel ?? '')}
+      shouldShow={() => checkSurveyEligibility(formData, whiteLabel ?? '')}
       message={
         <FormattedMessage
           id="results.popup.surveyMessage"
@@ -60,7 +83,8 @@ const SurveyPopup = () => {
       }
       linkUrl="https://your-survey-link.com"
       linkText={<FormattedMessage id="results.popup.surveyLink" defaultMessage="Take Survey" />}
-      colorTheme="blue"
+      minimizedText={<FormattedMessage id="results.popup.surveyMinimized" defaultMessage="Help Us Improve - Get $10" />}
+      colorTheme="orange"
       delaySeconds={5}
     />
   );
