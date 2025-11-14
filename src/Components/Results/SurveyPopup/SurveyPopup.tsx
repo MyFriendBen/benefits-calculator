@@ -74,8 +74,17 @@ function checkSurveyEligibility(formData: FormData, whiteLabel: string): boolean
  * @see ResultsPopup - The reusable popup component this wraps
  */
 const SurveyPopup = () => {
-  const { formData } = useContext(Context);
-  const { whiteLabel } = useParams();
+  const { formData, locale } = useContext(Context);
+  const { whiteLabel, uuid } = useParams();
+
+  // Build the survey URL based on language
+  const baseUrl = 'https://urban.co1.qualtrics.com/jfe/form/SV_9EojHuKftrhVpmC';
+  const isSpanish = locale === 'es';
+  const screenerId = uuid ?? '';
+
+  const surveyUrl = isSpanish
+    ? `${baseUrl}?Q_Language=ES&screenerid=${screenerId}`
+    : `${baseUrl}?screenerid=${screenerId}`;
 
   return (
     <ResultsPopup
@@ -86,7 +95,7 @@ const SurveyPopup = () => {
           defaultMessage="Help us improve MyFriendBen! Share your feedback in a quick 5-minute survey and receive a $10 Amazon gift card as a thank you."
         />
       }
-      linkUrl="https://your-survey-link.com"
+      linkUrl={surveyUrl}
       linkText={<FormattedMessage id="results.popup.surveyLink" defaultMessage="Take Survey" />}
       minimizedText={<FormattedMessage id="results.popup.surveyMinimized" defaultMessage="Help Us Improve - Get $10" />}
       colorTheme="orange"
