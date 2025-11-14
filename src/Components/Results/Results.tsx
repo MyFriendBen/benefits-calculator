@@ -33,7 +33,7 @@ import filterProgramsGenerator from './filterPrograms';
 import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRebates';
 import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/rebateTypes';
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
-import ResultsTopBanner from './ResultsTopBanner/ResultsTopBanner';
+import ResultsPopup from './ResultsPopup/ResultsPopup';
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -261,17 +261,17 @@ const Results = ({ type }: ResultsProps) => {
     return (
       <main>
         <ResultsContextProvider>
-          <ResultsTopBanner
+          <ResultsPopup
             shouldShow={() => true}
             message={
               <FormattedMessage
-                id="results.topBanner.surveyMessage"
+                id="results.popup.surveyMessage"
                 defaultMessage="Help us improve MyFriendBen! Share your feedback in a quick 5-minute survey and receive a $10 Amazon gift card as a thank you."
               />
             }
             linkUrl="https://your-survey-link.com"
-            linkText={<FormattedMessage id="results.topBanner.surveyLink" defaultMessage="Take Survey" />}
-            severity="error"
+            linkText={<FormattedMessage id="results.popup.surveyLink" defaultMessage="Take Survey" />}
+            colorTheme="orange"
           />
           <ResultsHeader type={type} />
           <ResultsTabs />

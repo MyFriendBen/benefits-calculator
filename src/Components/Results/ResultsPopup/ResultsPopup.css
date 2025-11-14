@@ -1,4 +1,4 @@
-.results-top-banner-container {
+.results-popup-container {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -11,38 +11,40 @@
 }
 
 /* Make the alert a true popup that sits on top */
-.results-top-banner-container .MuiAlert-root {
+.results-popup-container .MuiAlert-root {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   padding: 1.75rem 1rem 1rem 1rem;
   position: relative !important;
 }
 
 /* Alert message container */
-.results-top-banner-container .MuiAlert-message {
+.results-popup-container .MuiAlert-message {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
   padding: 0;
+  margin: 0;
 }
 
 /* Close button positioning */
-.results-top-banner-close-button {
+.results-popup-close-button {
   position: absolute !important;
   top: 0.5rem !important;
   right: 0.5rem !important;
+  padding: 0.25rem !important;
 }
 
 /* Typography styling */
-.results-top-banner-text {
+.results-popup-text {
   font-family: "Open Sans", sans-serif;
   line-height: 1.5;
   text-align: center;
 }
 
-/* Style the button inside the banner */
-.results-top-banner-button {
+/* Style the button inside the popup */
+.results-popup-button {
   color: white;
   font-size: 0.8rem;
   padding: 0.5rem 1rem;
@@ -53,7 +55,7 @@
   transition: all 0.2s ease;
 }
 
-.results-top-banner-button:hover {
+.results-popup-button:hover {
   text-decoration: none;
   background-color: white !important;
   border: 2px solid currentColor !important;
@@ -61,13 +63,13 @@
 
 /* Responsive padding for button */
 @media (min-width: 768px) {
-  .results-top-banner-button {
+  .results-popup-button {
     padding: 0.5rem 1.5rem;
   }
 }
 
 /* Minimized state - small box in bottom-right corner */
-.results-top-banner-minimized {
+.results-popup-minimized {
   position: fixed;
   bottom: 1rem;
   right: 1rem;
@@ -77,11 +79,11 @@
   transition: transform 0.2s ease;
 }
 
-.results-top-banner-minimized:hover {
+.results-popup-minimized:hover {
   transform: scale(1.05);
 }
 
-.results-top-banner-minimized .MuiAlert-root {
+.results-popup-minimized .MuiAlert-root {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   padding: 0.75rem 1rem;
 }
