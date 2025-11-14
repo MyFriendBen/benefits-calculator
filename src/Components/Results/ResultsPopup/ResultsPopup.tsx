@@ -149,54 +149,64 @@ const ResultsPopup = ({
 
   // Full popup state - centered on screen
   return (
-    <div className="results-popup-container" role="dialog" aria-label="Survey invitation">
-      <Alert
-        severity="info"
-        icon={false}
-        sx={{
-          backgroundColor: colors.bg,
-          border: `2px solid ${colors.border}`,
-        }}
-        action={
-          <IconButton
-            aria-label="Minimize popup"
-            color="inherit"
-            size="small"
-            onClick={handleMinimize}
-            className="results-popup-close-button"
-          >
-            <CloseIcon fontSize="inherit" />
-          </IconButton>
-        }
-      >
-        <Typography variant="body1" className="results-popup-text">
-          {message}
-        </Typography>
+    <>
+      {/* Backdrop overlay */}
+      <div
+        className="results-popup-backdrop"
+        onClick={handleMinimize}
+        aria-hidden="true"
+      />
 
-        {linkUrl && (
-          <Button
-            component="a"
-            href={linkUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="contained"
-            className="results-popup-button"
-            onClick={handleMinimize}
-            sx={{
-              backgroundColor: buttonColor,
-              color: 'white',
-              '&:hover': {
-                backgroundColor: 'white !important',
-                color: buttonColor,
-                borderColor: buttonColor,
-              },
-            }}
-          >
-            {linkText}
-          </Button>
-        )}
-      </Alert>
-    </div>
+      {/* Popup content */}
+      <div className="results-popup-container" role="dialog" aria-label="Survey invitation">
+        <Alert
+          severity="info"
+          icon={false}
+          sx={{
+            backgroundColor: colors.bg,
+            border: `2px solid ${colors.border}`,
+          }}
+          action={
+            <IconButton
+              aria-label="Minimize popup"
+              color="inherit"
+              size="small"
+              onClick={handleMinimize}
+              className="results-popup-close-button"
+            >
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
+          }
+        >
+          <Typography variant="body1" className="results-popup-text">
+            {message}
+          </Typography>
+
+          {linkUrl && (
+            <Button
+              component="a"
+              href={linkUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="contained"
+              className="results-popup-button"
+              onClick={handleMinimize}
+              sx={{
+                backgroundColor: buttonColor,
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'white !important',
+                  color: buttonColor,
+                  borderColor: buttonColor,
+                },
+              }}
+            >
+              {linkText}
+            </Button>
+          )}
+        </Alert>
+      </div>
+    </>
   );
 };
 

@@ -1,3 +1,55 @@
+/* Backdrop overlay that covers the entire screen */
+.results-popup-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slideInFromCenter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes slideToBottomRight {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(calc(50vw - 1rem), calc(50vh + 1rem)) scale(0.3);
+  }
+}
+
 .results-popup-container {
   position: fixed;
   top: 50%;
@@ -8,6 +60,7 @@
   width: calc(100% - 2rem);
   padding: 1rem;
   background-color: transparent;
+  animation: slideInFromCenter 0.3s ease-out;
 }
 
 /* Make the alert a true popup that sits on top */
@@ -69,6 +122,17 @@
 }
 
 /* Minimized state - small box in bottom-right corner */
+@keyframes slideInFromBottomRight {
+  from {
+    opacity: 0;
+    transform: translateY(100px) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .results-popup-minimized {
   position: fixed;
   bottom: 1rem;
@@ -77,6 +141,7 @@
   max-width: 250px;
   cursor: pointer;
   transition: transform 0.2s ease;
+  animation: slideInFromBottomRight 0.2s ease-out;
 }
 
 .results-popup-minimized:hover {
