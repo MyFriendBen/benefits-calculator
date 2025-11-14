@@ -51,15 +51,19 @@ const ResultsTopBanner = ({
   severity = 'info',
 }: ResultsTopBannerProps) => {
   const { theme } = useContext(Context);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
 
-  // Don't render if condition not met or if dismissed
-  if (!shouldShow() || isDismissed) {
+  // Don't render if condition not met
+  if (!shouldShow()) {
     return null;
   }
 
-  const handleDismiss = () => {
-    setIsDismissed(true);
+  const handleMinimize = () => {
+    setIsMinimized(true);
+  };
+
+  const handleRestore = () => {
+    setIsMinimized(false);
   };
 
   // Helper function to lighten a color (for backgrounds)
@@ -111,6 +115,29 @@ const ResultsTopBanner = ({
   // Button color logic: blue for info, orange for warning/error/success
   const buttonColor = severity === 'info' ? theme.primaryColor : theme.secondaryColor;
 
+  // Minimized state - small box in bottom-right corner
+  if (isMinimized) {
+    return (
+      <div className="results-top-banner-minimized" onClick={handleRestore}>
+        <Alert
+          severity={severity}
+          icon={false}
+          sx={{
+            backgroundColor: colors.bg,
+            border: `2px solid ${colors.border}`,
+            cursor: 'pointer',
+            margin: 0,
+          }}
+        >
+          <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>
+            <FormattedMessage id="resultsTopBanner.minimized" defaultMessage="Help Us Improve - Get $10" />
+          </Typography>
+        </Alert>
+      </div>
+    );
+  }
+
+  // Full popup state - centered on screen
   return (
     <div className="results-top-banner-container">
       <Alert
@@ -125,7 +152,7 @@ const ResultsTopBanner = ({
             aria-label="close"
             color="inherit"
             size="small"
-            onClick={handleDismiss}
+            onClick={handleMinimize}
             className="results-top-banner-close-button"
           >
             <CloseIcon fontSize="inherit" />
@@ -144,8 +171,15 @@ const ResultsTopBanner = ({
             rel="noopener noreferrer"
             variant="contained"
             className="results-top-banner-button"
+            onClick={handleMinimize}
             sx={{
               backgroundColor: buttonColor,
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'white !important',
+                color: buttonColor,
+                borderColor: buttonColor,
+              },
             }}
           >
             {linkText}

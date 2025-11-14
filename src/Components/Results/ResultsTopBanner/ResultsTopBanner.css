@@ -49,12 +49,14 @@
   border-radius: 0.75rem;
   text-decoration: none;
   margin-bottom: 0.5rem;
-  border: none !important;
+  border: 2px solid transparent !important;
+  transition: all 0.2s ease;
 }
 
 .results-top-banner-button:hover {
   text-decoration: none;
-  opacity: 0.9;
+  background-color: white !important;
+  border: 2px solid currentColor !important;
 }
 
 /* Responsive padding for button */
@@ -62,4 +64,24 @@
   .results-top-banner-button {
     padding: 0.5rem 1.5rem;
   }
+}
+
+/* Minimized state - small box in bottom-right corner */
+.results-top-banner-minimized {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  max-width: 250px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.results-top-banner-minimized:hover {
+  transform: scale(1.05);
+}
+
+.results-top-banner-minimized .MuiAlert-root {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  padding: 0.75rem 1rem;
 }
