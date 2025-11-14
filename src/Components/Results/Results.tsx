@@ -33,7 +33,7 @@ import filterProgramsGenerator from './filterPrograms';
 import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRebates';
 import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/rebateTypes';
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
-import ResultsPopup from './ResultsPopup/ResultsPopup';
+import SurveyPopup from './SurveyPopup/SurveyPopup';
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -98,8 +98,9 @@ export function useResultsLink(link: string) {
   return addAdminToLink(`/${whiteLabel}/${uuid}/${link}`, isAdminView);
 }
 
+
 const Results = ({ type }: ResultsProps) => {
-  const { formData, getReferrer } = useContext(Context);
+  const { formData, getReferrer, locale } = useContext(Context);
   const { whiteLabel, uuid, programId, energyCalculatorRebateType } = useParams();
   const noHelpButton = getReferrer('featureFlags').includes('no_results_more_help');
 
@@ -261,19 +262,7 @@ const Results = ({ type }: ResultsProps) => {
     return (
       <main>
         <ResultsContextProvider>
-          <ResultsPopup
-            shouldShow={() => true}
-            message={
-              <FormattedMessage
-                id="results.popup.surveyMessage"
-                defaultMessage="Help us improve MyFriendBen! Share your feedback in a quick 5-minute survey and receive a $10 Amazon gift card as a thank you."
-              />
-            }
-            linkUrl="https://your-survey-link.com"
-            linkText={<FormattedMessage id="results.popup.surveyLink" defaultMessage="Take Survey" />}
-            colorTheme="orange"
-            delaySeconds={5}
-          />
+          <SurveyPopup />
           <ResultsHeader type={type} />
           <ResultsTabs />
           {type === 'program' && <UrgentNeedBanner />}
