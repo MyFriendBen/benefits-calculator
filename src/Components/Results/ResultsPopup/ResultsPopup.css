@@ -7,7 +7,7 @@
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 10001;
-  animation: fadeIn 0.2s ease-in;
+  animation: fadeIn 0.3s ease-in;
 }
 
 @keyframes fadeIn {
@@ -141,7 +141,7 @@
   max-width: 250px;
   cursor: pointer;
   transition: transform 0.2s ease;
-  animation: slideInFromBottomRight 0.2s ease-out;
+  animation: slideInFromBottomRight 0.3s ease-out;
 }
 
 .results-popup-minimized:hover {
