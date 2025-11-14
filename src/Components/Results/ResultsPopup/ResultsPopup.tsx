@@ -1,7 +1,7 @@
 import { Alert, IconButton, Button, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { FormattedMessage } from 'react-intl';
-import { useState, useContext, useMemo, useCallback } from 'react';
+import { useState, useContext, useMemo, useCallback, useEffect } from 'react';
 import { Context } from '../../Wrapper/Wrapper';
 import { ITheme } from '../../../Assets/styleController';
 import './ResultsPopup.css';
@@ -39,6 +39,11 @@ type ResultsPopupProps = {
    * @default "blue"
    */
   colorTheme?: ColorTheme;
+  /**
+   * Optional delay in seconds before showing the popup
+   * @default 0 (shows immediately)
+   */
+  delaySeconds?: number;
 };
 
 type PopupColors = {
@@ -93,9 +98,22 @@ const ResultsPopup = ({
   linkUrl,
   linkText = <FormattedMessage id="resultsPopup.learnMore" defaultMessage="Learn More" />,
   colorTheme = 'blue',
+  delaySeconds = 0,
 }: ResultsPopupProps) => {
   const { theme } = useContext(Context);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isDelayComplete, setIsDelayComplete] = useState(delaySeconds === 0);
+
+  // Handle delay before showing popup
+  useEffect(() => {
+    if (delaySeconds > 0 && shouldShow()) {
+      const timer = setTimeout(() => {
+        setIsDelayComplete(true);
+      }, delaySeconds * 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [delaySeconds, shouldShow]);
 
   const handleMinimize = useCallback(() => {
     setIsMinimized(true);
@@ -108,8 +126,8 @@ const ResultsPopup = ({
   const colors = useMemo(() => getPopupColors(colorTheme, theme), [colorTheme, theme]);
   const buttonColor = useMemo(() => getButtonColor(colorTheme, theme), [colorTheme, theme]);
 
-  // Don't render if condition not met
-  if (!shouldShow()) {
+  // Don't render if condition not met or delay not complete
+  if (!shouldShow() || !isDelayComplete) {
     return null;
   }
 

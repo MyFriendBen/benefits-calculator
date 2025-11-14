@@ -272,6 +272,7 @@ const Results = ({ type }: ResultsProps) => {
             linkUrl="https://your-survey-link.com"
             linkText={<FormattedMessage id="results.popup.surveyLink" defaultMessage="Take Survey" />}
             colorTheme="orange"
+            delaySeconds={5}
           />
           <ResultsHeader type={type} />
           <ResultsTabs />
