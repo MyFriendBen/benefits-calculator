@@ -320,6 +320,13 @@ function ItemName({ rebate }: RebateComponentProps) {
           defaultMessage="other insulation"
         />
       );
+    case 'other_weatherization':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.otherWeatherization"
+          defaultMessage="other weatherization"
+        />
+      );
     case 'wall_insulation':
       return (
         <FormattedMessage

@@ -83,7 +83,6 @@ function createQueryString(formData: FormData, lang: Language) {
 async function getRebates(formData: FormData, lang: Language) {
   const queryString = createQueryString(formData, lang);
   const apiUrl = `https://api.rewiringamerica.org/api/v1/calculator${queryString}`;
-  console.log('Fetching rebates from:', apiUrl);
 
   const res = await fetch(apiUrl, {
     method: 'GET',
@@ -94,9 +93,6 @@ async function getRebates(formData: FormData, lang: Language) {
 
   const data = (await res.json()) as EnergyCalculatorAPIResponse;
 
-  console.log('API Response - Total incentives:', data.incentives.length);
-  console.log('All incentive programs:', data.incentives.map(i => i.program));
-
   const rebateCategories: EnergyCalculatorRebateCategory[] = [];
 
   for (const rebate of data.incentives) {
@@ -104,6 +100,11 @@ async function getRebates(formData: FormData, lang: Language) {
 
     for (const item of rebate.items) {
       const category = ENERGY_CALCULATOR_CATEGORY_MAP[item];
+
+      if (category === undefined) {
+        // skip if uncategorized
+        continue
+      }
 
       categories.add(category);
     }
