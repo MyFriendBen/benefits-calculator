@@ -33,7 +33,8 @@ import filterProgramsGenerator from './filterPrograms';
 import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRebates';
 import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/rebateTypes';
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
-import SurveyPopup from './SurveyPopup/SurveyPopup';
+import ResultsPopup from './ResultsPopup/ResultsPopup';
+import { getUrbanInstitute2025BaselineSurveyConfig } from './ResultsPopup/configs/urbanInstitute2025BaselineSurvey';
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -100,7 +101,7 @@ export function useResultsLink(link: string) {
 
 
 const Results = ({ type }: ResultsProps) => {
-  const { formData, getReferrer } = useContext(Context);
+  const { formData, getReferrer, locale } = useContext(Context);
   const { whiteLabel, uuid, programId, energyCalculatorRebateType } = useParams();
   const noHelpButton = getReferrer('featureFlags').includes('no_results_more_help');
 
@@ -262,7 +263,7 @@ const Results = ({ type }: ResultsProps) => {
     return (
       <main>
         <ResultsContextProvider>
-          <SurveyPopup />
+          <ResultsPopup {...getUrbanInstitute2025BaselineSurveyConfig(formData, whiteLabel ?? '', locale, uuid)} />
           <ResultsHeader type={type} />
           <ResultsTabs />
           {type === 'program' && <UrgentNeedBanner />}

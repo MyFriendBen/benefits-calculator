@@ -1,0 +1,93 @@
+import { FormattedMessage } from 'react-intl';
+import { FormData } from '../../../../Types/FormData';
+
+/**
+ * URBAN INSTITUTE 2025 BASELINE SURVEY - November/December 2025
+ *
+ * This file contains the configuration for the Urban Institute 2025 Baseline Survey popup.
+ * The survey will run until 300 respondents complete it (expected completion: ~Jan 2026).
+ *
+ * Survey Details:
+ * - Compensation: $10 Amazon gift card
+ * - Duration: ~5 minutes
+ * - Target states: Colorado and North Carolina only
+ * - Target demographic: Adults over 18 years old
+ * - Languages: English and Spanish
+ *
+ * To remove this survey after reaching 300 respondents:
+ * Simply remove the <ResultsPopup {...getUrbanInstitute2025BaselineSurveyConfig(...)} /> line from Results.tsx
+ */
+
+/**
+ * Checks if user is eligible to see the Urban Institute 2025 Baseline Survey popup
+ *
+ * Eligibility criteria:
+ * - User is in Colorado (whiteLabel is 'co') or North Carolina (whiteLabel is 'nc')
+ * - User is 18 years old or older (head of household age >= 18)
+ */
+function checkSurveyEligibility(formData: FormData, whiteLabel: string): boolean {
+  // Check state from whiteLabel
+  const isColorado = whiteLabel === 'co';
+  const isNorthCarolina = whiteLabel === 'nc';
+
+  if (!isColorado && !isNorthCarolina) {
+    return false;
+  }
+
+  // Check that householdData exists and is not empty
+  if (!formData.householdData || formData.householdData.length === 0) {
+    return false;
+  }
+
+  // Check age (must be 18 or older)
+  // Find the head of household (first member)
+  const headOfHousehold = formData.householdData[0];
+  if (headOfHousehold.age === null || headOfHousehold.age === undefined) {
+    return false;
+  }
+
+  if (headOfHousehold.age < 18) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Gets the Urban Institute 2025 Baseline Survey popup configuration
+ *
+ * @param formData - The user's form data for eligibility checking
+ * @param whiteLabel - The state code (e.g., 'co', 'nc')
+ * @param locale - The user's selected language ('en' or 'es')
+ * @param uuid - The screener ID to pass to the survey
+ * @returns Configuration object to spread into ResultsPopup component
+ */
+export function getUrbanInstitute2025BaselineSurveyConfig(
+  formData: FormData,
+  whiteLabel: string,
+  locale: string,
+  uuid?: string
+) {
+  // Build the survey URL based on language
+  const baseUrl = 'https://urban.co1.qualtrics.com/jfe/form/SV_9EojHuKftrhVpmC';
+  const isSpanish = locale === 'es';
+  const screenerId = uuid ?? '';
+
+  const surveyUrl = isSpanish
+    ? `${baseUrl}?Q_Language=ES&screenerid=${screenerId}`
+    : `${baseUrl}?screenerid=${screenerId}`;
+
+  return {
+    shouldShow: () => checkSurveyEligibility(formData, whiteLabel),
+    message: (
+      <FormattedMessage
+        id="results.popup.surveyMessage"
+        defaultMessage="Help us improve MyFriendBen! Share your feedback in a quick 5-minute survey and receive a $10 Amazon gift card as a thank you."
+      />
+    ),
+    linkUrl: surveyUrl,
+    linkText: <FormattedMessage id="results.popup.surveyLink" defaultMessage="Take Survey" />,
+    minimizedText: <FormattedMessage id="results.popup.surveyMinimized" defaultMessage="Help Us Improve - Get $10" />,
+    startMinimized: true,
+  };
+}
