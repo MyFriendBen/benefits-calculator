@@ -5,7 +5,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import './ResultsPopup.css';
 
 // Default messages to avoid creating new elements on every render
-const DEFAULT_LINK_TEXT = <FormattedMessage id="resultsPopup.learnMore" defaultMessage="Learn More" />;
+const DEFAULT_LINK_TEXT = <FormattedMessage id="resultsPopup.button" defaultMessage="Learn More" />;
 const DEFAULT_MINIMIZED_TEXT = <FormattedMessage id="resultsPopup.minimized" defaultMessage="Click to learn more" />;
 
 /**

@@ -89,13 +89,13 @@ export function getUrbanInstitute2025BaselineSurveyConfig(
     shouldShow: () => checkSurveyEligibility(formData, whiteLabel),
     message: (
       <FormattedMessage
-        id="results.popup.surveyMessage"
+        id="resultsPopup.urbanInstitute.message"
         defaultMessage="Help us improve MyFriendBen! Share your feedback in a quick 5-minute survey and receive a $10 Amazon gift card as a thank you."
       />
     ),
     linkUrl: surveyUrl,
-    linkText: <FormattedMessage id="results.popup.surveyLink" defaultMessage="Take Survey" />,
-    minimizedText: <FormattedMessage id="results.popup.surveyMinimized" defaultMessage="Help Us Improve - Get $10" />,
+    linkText: <FormattedMessage id="resultsPopup.urbanInstitute.button" defaultMessage="Take Survey" />,
+    minimizedText: <FormattedMessage id="resultsPopup.urbanInstitute.minimized" defaultMessage="Help Us Improve - Get $10" />,
     startMinimized: true,
   };
 }
