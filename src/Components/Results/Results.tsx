@@ -112,6 +112,12 @@ const Results = ({ type }: ResultsProps) => {
   const [apiError, setApiError] = useState(false);
   const [apiResults, setApiResults] = useState<EligibilityResults | undefined>();
 
+  const popupConfig = useMemo(
+    //prevent unnecessary re-renders of results popup
+    () => getUrbanInstitute2025BaselineSurveyConfig(formData, whiteLabel, locale, uuid),
+    [formData, whiteLabel, locale, uuid]
+  );
+
   useEffect(() => {
     dataLayerPush({ event: 'config', user_id: uuid });
   }, [uuid]);
@@ -263,7 +269,7 @@ const Results = ({ type }: ResultsProps) => {
     return (
       <main>
         <ResultsContextProvider>
-          <ResultsPopup {...getUrbanInstitute2025BaselineSurveyConfig(formData, whiteLabel ?? '', locale, uuid)} />
+          <ResultsPopup {...popupConfig} />
           <ResultsHeader type={type} />
           <ResultsTabs />
           {type === 'program' && <UrgentNeedBanner />}

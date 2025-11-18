@@ -1,8 +1,12 @@
 import { Alert, IconButton, Button, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { FormattedMessage } from 'react-intl';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import './ResultsPopup.css';
+
+// Default messages to avoid creating new elements on every render
+const DEFAULT_LINK_TEXT = <FormattedMessage id="resultsPopup.learnMore" defaultMessage="Learn More" />;
+const DEFAULT_MINIMIZED_TEXT = <FormattedMessage id="resultsPopup.minimized" defaultMessage="Click to learn more" />;
 
 /**
  * Props for the ResultsPopup component
@@ -48,10 +52,12 @@ const ResultsPopup = ({
   shouldShow,
   message,
   linkUrl,
-  linkText = <FormattedMessage id="resultsPopup.learnMore" defaultMessage="Learn More" />,
-  minimizedText = <FormattedMessage id="resultsPopup.minimized" defaultMessage="Click to learn more" />,
+  linkText = DEFAULT_LINK_TEXT,
+  minimizedText = DEFAULT_MINIMIZED_TEXT,
   startMinimized = false,
 }: ResultsPopupProps) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
   const [isMinimized, setIsMinimized] = useState(startMinimized);
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -68,6 +74,14 @@ const ResultsPopup = ({
     setIsDismissed(true);
   }, []);
 
+  // Focus management for accessibility
+  useEffect(() => {
+    if (!isMinimized && !isDismissed && shouldShow()) {
+      // Focus the dialog when it opens
+      dialogRef.current?.focus();
+    }
+  }, [isMinimized, isDismissed, shouldShow]);
+
   // Don't render if condition not met or completely dismissed
   if (!shouldShow() || isDismissed) {
     return null;
@@ -77,7 +91,7 @@ const ResultsPopup = ({
   if (isMinimized) {
     return (
       <div
-        className="results-popup-minimized theme-orange"
+        className="results-popup-minimized"
         onClick={handleRestore}
         role="button"
         tabIndex={0}
@@ -124,9 +138,12 @@ const ResultsPopup = ({
 
       {/* Popup content */}
       <div
-        className="results-popup-container theme-orange"
+        ref={dialogRef}
+        className="results-popup-container"
         role="dialog"
+        aria-modal="true"
         aria-label="Survey invitation"
+        tabIndex={-1}
       >
         <Alert
           severity="info"

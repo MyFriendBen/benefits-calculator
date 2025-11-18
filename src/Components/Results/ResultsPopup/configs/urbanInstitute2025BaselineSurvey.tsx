@@ -18,6 +18,12 @@ import { FormData } from '../../../../Types/FormData';
  * Simply remove the <ResultsPopup {...getUrbanInstitute2025BaselineSurveyConfig(...)} /> line from Results.tsx
  */
 
+// Constants
+const ELIGIBLE_STATES = ['co', 'nc'] as const;
+const MIN_AGE = 18;
+const SURVEY_BASE_URL = 'https://urban.co1.qualtrics.com/jfe/form/SV_9EojHuKftrhVpmC';
+const SPANISH_LOCALE = 'es';
+
 /**
  * Checks if user is eligible to see the Urban Institute 2025 Baseline Survey popup
  *
@@ -25,12 +31,15 @@ import { FormData } from '../../../../Types/FormData';
  * - User is in Colorado (whiteLabel is 'co') or North Carolina (whiteLabel is 'nc')
  * - User is 18 years old or older (head of household age >= 18)
  */
-function checkSurveyEligibility(formData: FormData, whiteLabel: string): boolean {
+function checkSurveyEligibility(formData: FormData, whiteLabel: string | undefined): boolean {
   // Check state from whiteLabel
-  const isColorado = whiteLabel === 'co';
-  const isNorthCarolina = whiteLabel === 'nc';
+  if (!whiteLabel) {
+    return false;
+  }
 
-  if (!isColorado && !isNorthCarolina) {
+  const isEligibleState = ELIGIBLE_STATES.includes(whiteLabel as typeof ELIGIBLE_STATES[number]);
+
+  if (!isEligibleState) {
     return false;
   }
 
@@ -46,7 +55,7 @@ function checkSurveyEligibility(formData: FormData, whiteLabel: string): boolean
     return false;
   }
 
-  if (headOfHousehold.age < 18) {
+  if (headOfHousehold.age < MIN_AGE) {
     return false;
   }
 
@@ -57,25 +66,24 @@ function checkSurveyEligibility(formData: FormData, whiteLabel: string): boolean
  * Gets the Urban Institute 2025 Baseline Survey popup configuration
  *
  * @param formData - The user's form data for eligibility checking
- * @param whiteLabel - The state code (e.g., 'co', 'nc')
+ * @param whiteLabel - The state code (e.g., 'co', 'nc') - can be undefined if not set
  * @param locale - The user's selected language ('en' or 'es')
  * @param uuid - The screener ID to pass to the survey
  * @returns Configuration object to spread into ResultsPopup component
  */
 export function getUrbanInstitute2025BaselineSurveyConfig(
   formData: FormData,
-  whiteLabel: string,
+  whiteLabel: string | undefined,
   locale: string,
   uuid?: string
 ) {
   // Build the survey URL based on language
-  const baseUrl = 'https://urban.co1.qualtrics.com/jfe/form/SV_9EojHuKftrhVpmC';
-  const isSpanish = locale === 'es';
+  const isSpanish = locale === SPANISH_LOCALE;
   const screenerId = uuid ?? '';
 
   const surveyUrl = isSpanish
-    ? `${baseUrl}?Q_Language=ES&screenerid=${screenerId}`
-    : `${baseUrl}?screenerid=${screenerId}`;
+    ? `${SURVEY_BASE_URL}?Q_Language=ES&screenerid=${screenerId}`
+    : `${SURVEY_BASE_URL}?screenerid=${screenerId}`;
 
   return {
     shouldShow: () => checkSurveyEligibility(formData, whiteLabel),
