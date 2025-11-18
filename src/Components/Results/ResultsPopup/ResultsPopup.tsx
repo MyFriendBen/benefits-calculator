@@ -4,8 +4,6 @@ import { FormattedMessage } from 'react-intl';
 import { useState, useCallback } from 'react';
 import './ResultsPopup.css';
 
-type ColorTheme = 'blue' | 'orange';
-
 /**
  * Props for the ResultsPopup component
  */
@@ -36,19 +34,10 @@ type ResultsPopupProps = {
    */
   minimizedText?: React.ReactNode;
   /**
-   * Optional color theme for styling the popup
-   * - blue: Uses primary theme colors
-   * - orange: Uses orange/error theme colors (default)
-   * @default "orange"
+   * Optional boolean to start the popup in minimized state
+   * @default false
    */
-  colorTheme?: ColorTheme;
-  /**
-   * Optional initial display state of the popup
-   * - 'popup': Show as full popup initially (default)
-   * - 'minimized': Start in minimized state
-   * @default "popup"
-   */
-  initialState?: 'popup' | 'minimized';
+  startMinimized?: boolean;
 };
 
 /**
@@ -61,8 +50,7 @@ type ResultsPopupProps = {
  *   message={<FormattedMessage id="popup.message" defaultMessage="Important message" />}
  *   linkUrl="https://example.com"
  *   linkText={<FormattedMessage id="popup.linkText" defaultMessage="Click here" />}
- *   colorTheme="blue"
- *   initialState="minimized"
+ *   startMinimized={true}
  * />
  */
 const ResultsPopup = ({
@@ -71,10 +59,9 @@ const ResultsPopup = ({
   linkUrl,
   linkText = <FormattedMessage id="resultsPopup.learnMore" defaultMessage="Learn More" />,
   minimizedText = <FormattedMessage id="resultsPopup.minimized" defaultMessage="Click to learn more" />,
-  colorTheme = 'orange',
-  initialState = 'popup',
+  startMinimized = false,
 }: ResultsPopupProps) => {
-  const [isMinimized, setIsMinimized] = useState(initialState === 'minimized');
+  const [isMinimized, setIsMinimized] = useState(startMinimized);
   const [isDismissed, setIsDismissed] = useState(false);
 
   const handleMinimize = useCallback(() => {
@@ -99,7 +86,7 @@ const ResultsPopup = ({
   if (isMinimized) {
     return (
       <div
-        className={`results-popup-minimized ${colorTheme === 'blue' ? 'theme-blue' : 'theme-orange'}`}
+        className="results-popup-minimized theme-orange"
         onClick={handleRestore}
         role="button"
         tabIndex={0}
@@ -146,7 +133,7 @@ const ResultsPopup = ({
 
       {/* Popup content */}
       <div
-        className={`results-popup-container ${colorTheme === 'blue' ? 'theme-blue' : 'theme-orange'}`}
+        className="results-popup-container theme-orange"
         role="dialog"
         aria-label="Survey invitation"
       >
