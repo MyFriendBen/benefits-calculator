@@ -13,7 +13,7 @@ import {
 } from './rebateTypes';
 import QuestionDescription from '../../QuestionComponents/QuestionDescription';
 
-type ItemGroup = 'air_source_heat_pump' | 'clothes_dryer' | 'generic_heat_pump' | 'water_heater';
+type ItemGroup = 'air_source_heat_pump' | 'clothes_dryer' | 'generic_heat_pump' | 'insulation' | 'water_heater';
 
 /**
  * Some incentives are for multiple items. These groups define headlines for
@@ -41,6 +41,17 @@ const ITEM_GROUPS: { group: ItemGroup; members: Set<EnergyCalculatorItemType> }[
       'ductless_heat_pump',
       'geothermal_heating_installation',
       'other_heat_pump',
+    ]),
+  },
+  {
+    group: 'insulation',
+    members: new Set([
+      'attic_or_roof_insulation',
+      'basement_insulation',
+      'crawlspace_insulation',
+      'floor_insulation',
+      'other_insulation',
+      'wall_insulation',
     ]),
   },
   {
@@ -78,6 +89,13 @@ const multipleItemsName = (items: EnergyCalculatorItemType[]) => {
             <FormattedMessage
               id="energyCalculator.rebatePage.title.itemName.genericHeatPump"
               defaultMessage="a heat pump"
+            />
+          );
+        case 'insulation':
+          return (
+            <FormattedMessage
+              id="energyCalculator.rebatePage.title.itemName.insulation"
+              defaultMessage="insulation"
             />
           );
         case 'water_heater':
@@ -144,11 +162,32 @@ function ItemName({ rebate }: RebateComponentProps) {
           defaultMessage="a ductless heat pump"
         />
       );
+    case 'duct_sealing':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.ductSealing"
+          defaultMessage="duct sealing"
+        />
+      );
     case 'electric_stove':
       return (
         <FormattedMessage
           id="energyCalculator.rebatePage.title.itemName.electricStove"
           defaultMessage="an electric/induction stove"
+        />
+      );
+    case 'electric_thermal_storage_and_slab':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.electricThermalStorageAndSlab"
+          defaultMessage="electric thermal storage and slab"
+        />
+      );
+    case 'evaporative_cooler':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.evaporativeCooler"
+          defaultMessage="an evaporative cooler"
         />
       );
     case 'geothermal_heating_installation':
@@ -237,6 +276,55 @@ function ItemName({ rebate }: RebateComponentProps) {
         <FormattedMessage
           id="energyCalculator.rebatePage.title.itemName.energyAudit"
           defaultMessage="an energy audit"
+        />
+      );
+    case 'air_sealing':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.airSealing"
+          defaultMessage="air sealing"
+        />
+      );
+    case 'attic_or_roof_insulation':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.atticOrRoofInsulation"
+          defaultMessage="attic or roof insulation"
+        />
+      );
+    case 'basement_insulation':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.basementInsulation"
+          defaultMessage="basement insulation"
+        />
+      );
+    case 'crawlspace_insulation':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.crawlspaceInsulation"
+          defaultMessage="crawlspace insulation"
+        />
+      );
+    case 'floor_insulation':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.floorInsulation"
+          defaultMessage="floor insulation"
+        />
+      );
+    case 'other_insulation':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.otherInsulation"
+          defaultMessage="other insulation"
+        />
+      );
+    case 'wall_insulation':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.wallInsulation"
+          defaultMessage="wall insulation"
         />
       );
     default: {
