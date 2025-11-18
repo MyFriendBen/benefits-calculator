@@ -10,6 +10,8 @@ import {
   EnergyCalculatorIncentive,
   EnergyCalculatorItemType,
   EnergyCalculatorRebate,
+  EnergyCalculatorRebateCategoryType,
+  ENERGY_CALCULATOR_CATEGORY_TITLE_MAP,
 } from './rebateTypes';
 import QuestionDescription from '../../QuestionComponents/QuestionDescription';
 
@@ -119,13 +121,19 @@ const multipleItemsName = (items: EnergyCalculatorItemType[]) => {
 
 type RebateComponentProps = {
   rebate: EnergyCalculatorRebate;
+  categoryType?: EnergyCalculatorRebateCategoryType;
 };
 
-function ItemName({ rebate }: RebateComponentProps) {
+function ItemName({ rebate, categoryType }: RebateComponentProps) {
   const itemsToRender = rebate.items;
 
   if (itemsToRender.length > 1) {
-    return multipleItemsName(itemsToRender);
+    const groupName = multipleItemsName(itemsToRender);
+    // If no group match found and we have a category, use the category name as fallback (with lowercase styling)
+    if (groupName === null && categoryType) {
+      return <span style={{ textTransform: 'lowercase' }}>{ENERGY_CALCULATOR_CATEGORY_TITLE_MAP[categoryType]}</span>;
+    }
+    return groupName;
   }
 
   if (itemsToRender.length !== 1) {
@@ -373,7 +381,7 @@ const FormatUnit = ({ unit }: FormatUnitProps) => {
   }
 };
 
-export function EnergyCalculatorRebateCardTitle({ rebate }: RebateComponentProps) {
+export function EnergyCalculatorRebateCardTitle({ rebate, categoryType }: RebateComponentProps) {
   const amount = rebate.amount;
   if (amount.type === 'dollar_amount') {
     if (amount.maximum !== undefined) {
@@ -382,7 +390,7 @@ export function EnergyCalculatorRebateCardTitle({ rebate }: RebateComponentProps
           <FormattedMessage id="energyCalculator.rebatePage.title.dollarAmount.max.1" defaultMessage="Up to $" />
           {amount.maximum.toLocaleString()}
           <FormattedMessage id="energyCalculator.rebatePage.title.dollarAmount.max.2" defaultMessage=" off " />
-          <ItemName rebate={rebate} />
+          <ItemName rebate={rebate} categoryType={categoryType} />
         </>
       );
     }
@@ -390,7 +398,7 @@ export function EnergyCalculatorRebateCardTitle({ rebate }: RebateComponentProps
       <>
         ${amount.number.toLocaleString()}
         <FormattedMessage id="energyCalculator.rebatePage.title.dollarAmount.noMax.1" defaultMessage=" off " />
-        <ItemName rebate={rebate} />
+        <ItemName rebate={rebate} categoryType={categoryType} />
       </>
     );
   } else if (amount.type === 'percent') {
@@ -400,7 +408,7 @@ export function EnergyCalculatorRebateCardTitle({ rebate }: RebateComponentProps
         <>
           {percentStr}
           <FormattedMessage id="energyCalculator.rebatePage.title.percent.max.1" defaultMessage=" of cost of " />
-          <ItemName rebate={rebate} />
+          <ItemName rebate={rebate} categoryType={categoryType} />
           <FormattedMessage id="energyCalculator.rebatePage.title.percent.max.2" defaultMessage=", up to $" />
           {amount.maximum.toLocaleString()}
         </>
@@ -410,7 +418,7 @@ export function EnergyCalculatorRebateCardTitle({ rebate }: RebateComponentProps
       <>
         {percentStr}
         <FormattedMessage id="energyCalculator.rebatePage.title.percent.noMax.1" defaultMessage=" of cost of " />
-        <ItemName rebate={rebate} />
+        <ItemName rebate={rebate} categoryType={categoryType} />
       </>
     );
   } else if (amount.type === 'dollars_per_unit') {
@@ -423,7 +431,7 @@ export function EnergyCalculatorRebateCardTitle({ rebate }: RebateComponentProps
         <>
           ${amount.number.toLocaleString()}/<FormatUnit unit={amount.unit} />
           <FormattedMessage id="energyCalculator.rebatePage.title.perUnit.max.1" defaultMessage=" off " />
-          <ItemName rebate={rebate} />
+          <ItemName rebate={rebate} categoryType={categoryType} />
           <FormattedMessage id="energyCalculator.rebatePage.title.perUnit.max.2" defaultMessage=", up to $" />
           {amount.maximum.toLocaleString()}
         </>
@@ -434,7 +442,7 @@ export function EnergyCalculatorRebateCardTitle({ rebate }: RebateComponentProps
       <>
         ${amount.number.toLocaleString()}/<FormatUnit unit={amount.unit} />
         <FormattedMessage id="energyCalculator.rebatePage.title.perUnit.noMax.1" defaultMessage=" off " />
-        <ItemName rebate={rebate} />
+        <ItemName rebate={rebate} categoryType={categoryType} />
       </>
     );
   }
@@ -492,7 +500,7 @@ function staticAmountSavingCalculatorGenerator(amount: number, maxAmount: number
  * Previously displayed in: src/Components/EnergyCalculator/Results/RebatePage.tsx:111
  * Remains in code as CDS wanted the option to reintroduce it easily
  */
-export function EnergyCalculatorRebateCalculator({ rebate }: RebateComponentProps) {
+export function EnergyCalculatorRebateCalculator({ rebate, categoryType }: RebateComponentProps) {
   const [cost, setCost] = useState(0);
   const translateNumber = useTranslateNumber();
 
@@ -531,7 +539,7 @@ export function EnergyCalculatorRebateCalculator({ rebate }: RebateComponentProp
           label={
             <>
               <FormattedMessage id="energyCalculator.rebatePage.calculator.input.cost" defaultMessage="Cost of " />
-              <ItemName rebate={rebate} />
+              <ItemName rebate={rebate} categoryType={categoryType} />
             </>
           }
           variant="outlined"
