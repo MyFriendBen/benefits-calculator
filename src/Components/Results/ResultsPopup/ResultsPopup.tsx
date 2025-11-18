@@ -43,15 +43,6 @@ type ResultsPopupProps = {
 /**
  * ResultsPopup component displays a dismissible popup that can be minimized.
  * When minimized, it shows as a small box in the bottom-right corner.
- *
- * @example
- * <ResultsPopup
- *   shouldShow={() => someCondition === true}
- *   message={<FormattedMessage id="popup.message" defaultMessage="Important message" />}
- *   linkUrl="https://example.com"
- *   linkText={<FormattedMessage id="popup.linkText" defaultMessage="Click here" />}
- *   startMinimized={true}
- * />
  */
 const ResultsPopup = ({
   shouldShow,
