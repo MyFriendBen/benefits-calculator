@@ -15,7 +15,9 @@ import { FormData } from '../../../../Types/FormData';
  * - Languages: English and Spanish
  *
  * To remove this survey after reaching 300 respondents:
- * Simply remove the <ResultsPopup {...getUrbanInstitute2025BaselineSurveyConfig(...)} /> line from Results.tsx
+ * 1. Remove the import: import { getUrbanInstitute2025BaselineSurveyConfig } from './ResultsPopup/configs/urbanInstitute2025BaselineSurvey';
+ * 2. Remove the popupConfig useMemo that calls getUrbanInstitute2025BaselineSurveyConfig(...)
+ * 3. Remove the <ResultsPopup {...popupConfig} /> line from Results.tsx
  */
 
 // Constants
