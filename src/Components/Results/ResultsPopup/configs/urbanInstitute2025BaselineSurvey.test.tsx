@@ -97,9 +97,8 @@ describe('urbanInstitute2025BaselineSurvey', () => {
         expect(config.shouldShow()).toBe(false);
       });
 
-      it('returns shouldShow true when head of household age is a valid number (even if passed as undefined in mock)', () => {
-        // Note: Our createMockFormData function doesn't actually handle undefined correctly
-        // It would need special handling to truly set age to undefined
+      it('returns shouldShow false when head of household age is undefined', () => {
+        // Setting age to undefined to test the undefined case
         const formData = createMockFormData();
         formData.householdData[0].age = undefined as any;
         const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'en', 'test-uuid');
@@ -268,11 +267,11 @@ describe('urbanInstitute2025BaselineSurvey', () => {
       // First call should return true
       expect(config.shouldShow()).toBe(true);
 
-      // Modify formData (this won't affect the closure, but demonstrates the function behavior)
+      // Mutate the formData object to set age to 17
       formData.householdData[0].age = 17;
 
-      // The shouldShow function has a closure over the original formData
-      // So this should still return false based on the modified reference
+      // The shouldShow function reads from the current formData object, so mutating age to 17
+      // should cause it to return false (since 17 < 18)
       expect(config.shouldShow()).toBe(false);
     });
 
