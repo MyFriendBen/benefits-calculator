@@ -15,7 +15,6 @@ const renderWithProviders = (formData: FormData) => {
   );
 };
 
-
 jest.mock('../Config/configHook', () => ({
   useConfig: () => ({
     food: { text: 'Food Resources', icon: null },
@@ -24,8 +23,8 @@ jest.mock('../Config/configHook', () => ({
 }));
 
 describe('NcLink211Message', () => {
+  it('renders basic NC211 message', () => {
     const formData = createFormData();
-
     renderWithProviders(formData);
 
     expect(screen.getByText(/For more local resources please visit/i)).toBeInTheDocument();
@@ -34,11 +33,11 @@ describe('NcLink211Message', () => {
 
   it('renders links for household needs when present', () => {
     const formData = createFormData();
-    formData.acuteHHConditions={ food: true, housing: true };
-
+    formData.acuteHHConditions = { food: true, housing: true };
     renderWithProviders(formData);
 
     expect(screen.getByText(/More local resources from NC211/i)).toBeInTheDocument();
     expect(screen.getByText(/Food Resources/i)).toBeInTheDocument();
     expect(screen.getByText(/Housing Resources/i)).toBeInTheDocument();
   });
+});

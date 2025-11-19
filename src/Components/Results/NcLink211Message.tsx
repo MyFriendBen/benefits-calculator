@@ -112,24 +112,40 @@ export default function NcLink211Message() {
   return(
     <div> 
       <FormattedMessage id="link211nc.resources" defaultMessage="More local resources from NC211: " />
-      {Object.entries(householdNeeds).map(([key, value]) => (
-        <div key={key} style={{display: "inline-block", fontWeight: '700', fontFamily: 'Open Sans, sans-serif', marginBottom: "0.5rem", marginRight: "0.5rem"}}>
-          <a
-            href={buildQueryURL(value)}
-            target="_blank"
-            rel="noopener noreferrer"
+      {Object.entries(householdNeeds).map(([key, value]) => {
+        const option = acuteConditionOptions[key];
+        if (!option) {
+          return null;
+        }
+
+        return (
+          <div 
+            key={key}
             style={{
-              backgroundColor: "#e6e7e8",
-              borderRadius: "9999rem",
-              padding: "0.125rem 0.5rem",
-              textDecoration: "underline",
-              color: "#264D91",
+              display: 'inline-block',
+              fontWeight: '700',
+              fontFamily: 'Open Sans, sans-serif',
+              marginBottom: '0.5rem',
+              marginRight: '0.5rem',
             }}
           >
-            {acuteConditionOptions[key].text}
-          </a>
-        </div>
-      ))}
+            <a
+              href={buildQueryURL(value)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                backgroundColor: '#e6e7e8',
+                borderRadius: '9999rem',
+                padding: '0.125rem 0.5rem',
+                textDecoration: 'underline',
+                color: '#264D91',
+              }}
+            >
+              {option.text}
+            </a>
+          </div>
+        );
+      })}
     </div>
   );
 }
