@@ -8,7 +8,7 @@ import NcLink211Message from './NcLink211Message';
 const renderWithProviders = (formData: FormData) => {
   return render(
     <IntlProvider locale="en" defaultLocale="en">
-      <Context.Provider value={{ formData }}>
+      <Context.Provider value={{ formData } as any}>
         <NcLink211Message />
       </Context.Provider>
     </IntlProvider>
