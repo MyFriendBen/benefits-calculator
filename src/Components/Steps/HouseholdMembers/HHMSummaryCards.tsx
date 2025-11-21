@@ -37,10 +37,10 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
   const formatBirthMonthYear = useFormatBirthMonthYear();
 
   const handleEditBtnSubmit = async (memberIndex: number) => {
-    const isValid = await triggerValidation();
-    if (isValid) {
-      navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`);
-    }
+    // Navigate directly without validation when editing a member
+    // Validation will happen when they submit that member's form
+    // Pass state to indicate we're in edit mode
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, { state: { isEditing: true } });
   };
 
   const formatToUSD = (num: number) => {
@@ -67,32 +67,21 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
     return (
       <article className={containerClassName} key={memberIndex}>
         <div className="household-member-header">
-          <h3 className="member-added-relationship">{relationship}:</h3>
+          <h3 className="member-added-relationship">
+            {relationship} ({translateNumber(age)})
+          </h3>
           <div className="household-member-edit-button">
             <IconButton
               onClick={() => {
                 handleEditBtnSubmit(memberIndex);
               }}
               aria-label={editHHMemberAriaLabel}
+              size="small"
             >
-              <EditIcon />
+              <EditIcon fontSize="small" />
             </IconButton>
           </div>
         </div>
-        <div className="member-added-age">
-          <strong>
-            <FormattedMessage id="questions.age-inputLabel" defaultMessage="Age: " />
-          </strong>
-          {translateNumber(age)}
-        </div>
-        {hasBirthMonthYear({ birthMonth, birthYear }) && (
-          <div className="member-added-age">
-            <strong>
-              <FormattedMessage id="householdDataBlock.memberCard.birthYearMonth" defaultMessage="Birth Month/Year: " />
-            </strong>
-            {formatBirthMonthYear({ birthMonth, birthYear })}
-          </div>
-        )}
         <div className="member-added-income">
           <strong>
             <FormattedMessage id="householdDataBlock.member-income" defaultMessage="Income: " />
@@ -123,16 +112,13 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
   };
 
   //hHMemberSummaries will have the length of members that have already been saved to formData
-  //We want the active/current member's summary card to update synchronously as we change their information
-  //so we swap out the current one for the one we create using the memberData in state
+  //We only want to show members that come BEFORE the current member (already completed)
   const summariesWActiveMemberCard = [
-    ...formData.householdData.map((member, memberIndex) => {
-      if (memberIndex === pageNumber - 1) {
-        // Update the current member synchronously
-        return createFormDataMemberCard(memberIndex, activeMemberData, relationshipOptions);
-      }
-      return createFormDataMemberCard(memberIndex, member, relationshipOptions);
-    }),
+    ...formData.householdData
+      .slice(0, pageNumber - 1) // Only show members before the current one
+      .map((member, memberIndex) => {
+        return createFormDataMemberCard(memberIndex, member, relationshipOptions);
+      }),
   ];
 
   return (

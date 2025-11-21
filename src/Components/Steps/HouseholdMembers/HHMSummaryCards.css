@@ -3,10 +3,12 @@
   flex-direction: column;
   flex-wrap: wrap;
   outline: 1px solid black;
-  border-radius: 10px;
-  padding: 0.7rem;
-  margin: 0.5rem 1rem 0.5rem 0;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  margin: 0.5rem 0.75rem 0.5rem 0;
   position: relative;
+  font-size: 0.875rem;
+  max-width: 200px;
 }
 
 .household-member-header {

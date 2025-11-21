@@ -21,7 +21,7 @@ const HouseholdSize = () => {
   const { formData } = useContext(Context);
   const { uuid } = useParams();
   const backNavigationFunction = useDefaultBackNavigationFunction('householdSize');
-  const nextStep = useGoToNextStep('householdSize', '1');
+  const nextStep = useGoToNextStep('householdSize', '0');
   const intl = useIntl();
   const { updateScreen } = useScreenApi();
 
