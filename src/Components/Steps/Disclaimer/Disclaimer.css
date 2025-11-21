@@ -4,13 +4,15 @@
 }
 
 .disclaimer-font {
-  font-family: 'Open Sans';
+  font-family: var(--font-body);
   font-weight: 400;
+  font-size: 0.875rem;
 }
 
 .disclaimer-text-section {
-  font-family: 'Open Sans';
+  font-family: var(--font-body);
   font-weight: 400;
+  font-size: 0.875rem;
   background-color: var(--secondary-background-color);
   padding: 1rem;
 }

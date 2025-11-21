@@ -6,6 +6,7 @@ export type Expense = {
 };
 
 export type IncomeStream = {
+  incomeCategory: string;
   incomeStreamName: string;
   incomeAmount: string;
   incomeFrequency: string;
@@ -110,6 +111,7 @@ export type FormData = {
 };
 
 export type Conditions = {
+  none?: boolean;
   student?: boolean;
   pregnant?: boolean;
   blindOrVisuallyImpaired?: boolean;

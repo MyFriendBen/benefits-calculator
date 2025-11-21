@@ -44,7 +44,7 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
   };
 
   const formatToUSD = (num: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num);
   };
 
   const createMemberCard = (
@@ -84,10 +84,9 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
         </div>
         <div className="member-added-income">
           <strong>
-            <FormattedMessage id="householdDataBlock.member-income" defaultMessage="Income: " />
+            <FormattedMessage id="householdDataBlock.member-income" defaultMessage="Annual Income: " />
           </strong>
           {translateNumber(formatToUSD(Number(income)))}
-          <FormattedMessage id="displayAnnualIncome.annual" defaultMessage=" annually" />
         </div>
       </article>
     );

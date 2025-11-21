@@ -88,10 +88,11 @@ const HouseholdMemberForm = () => {
     useConfig<Record<'you' | 'them', Record<keyof Conditions, { text: FormattedMessageType; icon: ReactNode }>>>(
       'condition_options',
     );
-  const incomeOptions = useConfig<Record<string, FormattedMessageType>>('income_options');
-  const incomeStreamsMenuItems = createMenuItems(
-    incomeOptions,
-    <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectMenuItem" defaultMessage="Select" />,
+  const incomeCategories = useConfig<Record<string, FormattedMessageType>>('income_categories');
+  const incomeOptions = useConfig<Record<string, Record<string, FormattedMessageType>>>('income_options');
+  const incomeCategoriesMenuItems = createMenuItems(
+    incomeCategories,
+    <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectCategory" defaultMessage="Select category" />,
   );
   const frequencyOptions = useConfig<Record<string, FormattedMessageType>>('frequency_options');
 
@@ -159,6 +160,7 @@ const HouseholdMemberForm = () => {
   const incomeAmountRegex = /^\d{0,7}(?:\d\.\d{0,2})?$/;
   const incomeSourcesSchema = z
     .object({
+      incomeCategory: z.string().min(1, { message: 'Please select an income category' }),
       incomeStreamName: z.string().min(1, { message: renderIncomeStreamNameHelperText(intl) }),
       incomeFrequency: z.string().min(1, { message: renderIncomeFrequencyHelperText(intl) }),
       hoursPerWeek: z.string().trim(),
@@ -242,7 +244,7 @@ const HouseholdMemberForm = () => {
     ? {
         ...baseSchema,
         birthMonth: z.number().min(1).max(12),
-        birthYear: z.number().min(new Date().getFullYear() - MAX_AGE).max(new Date().getFullYear()),
+        birthYear: z.coerce.number().min(new Date().getFullYear() - MAX_AGE).max(new Date().getFullYear()),
         relationshipToHH: z.string().min(1, { message: 'Please select a relationship' }),
       }
     : baseSchema;
@@ -355,6 +357,7 @@ const HouseholdMemberForm = () => {
 
     if (hasTruthyIncome && noIncomeStreamsAreListed && hadIncomeOrIsNew) {
       append({
+        incomeCategory: '',
         incomeStreamName: '',
         incomeAmount: '',
         incomeFrequency: '',
@@ -542,7 +545,9 @@ const HouseholdMemberForm = () => {
           <FormattedMessage id="householdDataBlock.questionHeader" defaultMessage="Tell us about yourself" />
         ) : (
           <>
-            Tell us about your {relationshipText}{age !== null && `, age ${age}`}
+            Tell us about your{' '}
+            <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span>
+            {age !== null && `, age ${age}`}
           </>
         )}
       </QuestionHeader>
@@ -660,7 +665,7 @@ const HouseholdMemberForm = () => {
               <QuestionDescription>
                 <FormattedMessage
                   id="householdDataBlock.incomeSourcesDescription"
-                  defaultMessage="Enter income for yourself from the last 12 months. Estimates are okay!"
+                  defaultMessage="Enter income for yourself. You can enter income for other household members later."
                 />
               </QuestionDescription>
               <Stack spacing={2} sx={{ marginTop: '0.5rem' }}>
@@ -679,81 +684,127 @@ const HouseholdMemberForm = () => {
                         borderRadius: '8px',
                       }}
                     >
-                      <Box sx={{ display: 'flex', gap: '1rem', flex: 1, flexWrap: 'wrap' }}>
-                        <Box sx={{ flex: '1 1 200px', minWidth: '150px' }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
+                        {/* First Row: Income Category */}
+                        <Box sx={{ width: '100%' }}>
                           <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                            Income Type
+                            Income Category
                           </Typography>
                           <FormControl
                             fullWidth
                             size="small"
-                            error={errors.incomeStreams?.[index]?.incomeStreamName !== undefined}
+                            error={errors.incomeStreams?.[index]?.incomeCategory !== undefined}
                           >
                             <Controller
-                              name={`incomeStreams.${index}.incomeStreamName`}
+                              name={`incomeStreams.${index}.incomeCategory`}
                               control={control}
                               render={({ field }) => (
                                 <Select
                                   {...field}
                                   displayEmpty
                                   sx={{ backgroundColor: '#fff' }}
+                                  onChange={(e) => {
+                                    field.onChange(e);
+                                    // Reset specific type when category changes
+                                    setValue(`incomeStreams.${index}.incomeStreamName`, '');
+                                  }}
                                 >
-                                  {incomeStreamsMenuItems}
+                                  {incomeCategoriesMenuItems}
                                 </Select>
                               )}
                             />
                           </FormControl>
                         </Box>
 
-                        <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
-                          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                            Amount
-                          </Typography>
-                          <Controller
-                            name={`incomeStreams.${index}.incomeAmount`}
-                            control={control}
-                            render={({ field }) => (
-                              <TextField
-                                {...field}
-                                fullWidth
-                                size="small"
-                                variant="outlined"
-                                placeholder="0.00"
-                                inputProps={NUM_PAD_PROPS}
-                                onChange={handleNumbersOnly(field.onChange, DOLLARS)}
-                                sx={{ backgroundColor: '#fff' }}
-                                error={errors.incomeStreams?.[index]?.incomeAmount !== undefined}
-                                InputProps={{
-                                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                        {/* Second Row: Specific Type, Amount, Frequency */}
+                        <Box sx={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                          <Box sx={{ flex: '1 1 200px', minWidth: '150px' }}>
+                            <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                              Specific Type
+                            </Typography>
+                            <FormControl
+                              fullWidth
+                              size="small"
+                              error={errors.incomeStreams?.[index]?.incomeStreamName !== undefined}
+                            >
+                              <Controller
+                                name={`incomeStreams.${index}.incomeStreamName`}
+                                control={control}
+                                render={({ field }) => {
+                                  const selectedCategory = watch('incomeStreams')[index]?.incomeCategory;
+                                  const categoryOptions = selectedCategory && incomeOptions[selectedCategory]
+                                    ? incomeOptions[selectedCategory]
+                                    : {};
+                                  const specificTypeMenuItems = createMenuItems(
+                                    categoryOptions,
+                                    <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectType" defaultMessage="Select type" />,
+                                  );
+
+                                  return (
+                                    <Select
+                                      {...field}
+                                      displayEmpty
+                                      sx={{ backgroundColor: '#fff' }}
+                                      disabled={!selectedCategory}
+                                    >
+                                      {specificTypeMenuItems}
+                                    </Select>
+                                  );
                                 }}
                               />
-                            )}
-                          />
-                        </Box>
+                            </FormControl>
+                          </Box>
 
-                        <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
-                          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                            Frequency
-                          </Typography>
-                          <FormControl
-                            fullWidth
-                            size="small"
-                            error={errors.incomeStreams?.[index]?.incomeFrequency !== undefined}
-                          >
+                          <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
+                            <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                              Amount
+                            </Typography>
                             <Controller
-                              name={`incomeStreams.${index}.incomeFrequency`}
+                              name={`incomeStreams.${index}.incomeAmount`}
                               control={control}
                               render={({ field }) => (
-                                <Select
+                                <TextField
                                   {...field}
-                                  displayEmpty
+                                  fullWidth
+                                  size="small"
+                                  variant="outlined"
+                                  placeholder="0.00"
+                                  inputProps={NUM_PAD_PROPS}
+                                  onChange={handleNumbersOnly(field.onChange, DOLLARS)}
                                   sx={{ backgroundColor: '#fff' }}
-                                >
-                                  {frequencyMenuItems}
-                                </Select>
+                                  error={errors.incomeStreams?.[index]?.incomeAmount !== undefined}
+                                  InputProps={{
+                                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                  }}
+                                />
                               )}
                             />
-                          </FormControl>
+                          </Box>
+
+                          <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
+                            <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                              Frequency
+                            </Typography>
+                            <FormControl
+                              fullWidth
+                              size="small"
+                              error={errors.incomeStreams?.[index]?.incomeFrequency !== undefined}
+                            >
+                              <Controller
+                                name={`incomeStreams.${index}.incomeFrequency`}
+                                control={control}
+                                render={({ field }) => (
+                                  <Select
+                                    {...field}
+                                    displayEmpty
+                                    sx={{ backgroundColor: '#fff' }}
+                                  >
+                                    {frequencyMenuItems}
+                                  </Select>
+                                )}
+                              />
+                            </FormControl>
+                          </Box>
                         </Box>
                       </Box>
 
@@ -773,6 +824,7 @@ const HouseholdMemberForm = () => {
                   fullWidth
                   onClick={() =>
                     append({
+                      incomeCategory: '',
                       incomeStreamName: '',
                       incomeAmount: '',
                       incomeFrequency: '',

@@ -187,6 +187,7 @@ const getHouseholdMemberBody = (householdMemberData: HouseholdData): ApiHousehol
 const getIncomeStreamsBodies = (householdMemberData: HouseholdData): ApiIncome[] => {
   return householdMemberData.incomeStreams.map((incomeStream) => {
     return {
+      category: incomeStream.incomeCategory,
       type: incomeStream.incomeStreamName,
       amount: Number(incomeStream.incomeAmount),
       frequency: incomeStream.incomeFrequency,

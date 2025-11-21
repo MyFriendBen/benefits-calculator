@@ -145,6 +145,7 @@ export function useUpdateFormData() {
       const incomes = [];
       for (const income of member.income_streams) {
         incomes.push({
+          incomeCategory: income.category ?? '',
           incomeStreamName: income.type ?? '',
           incomeAmount: String(income.amount) ?? '',
           incomeFrequency: income.frequency ?? '',
@@ -169,6 +170,11 @@ export function useUpdateFormData() {
         birthMonth: member.birth_month ?? undefined,
         relationshipToHH: member.relationship ? member.relationship : defaultRelationship,
         conditions: {
+          // Note: 'none' is a frontend-only field that's not stored in the backend.
+          // We always default it to false when loading from the API since we can't
+          // determine if the user explicitly selected "none" vs just not having any conditions.
+          // The user can re-select "none" if needed when editing.
+          none: false,
           student: member.student ?? false,
           pregnant: member.pregnant ?? false,
           blindOrVisuallyImpaired: member.visually_impaired ?? false,

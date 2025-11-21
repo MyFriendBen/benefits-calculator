@@ -29,9 +29,9 @@ p {
 }
 
 .question-description {
-  margin-bottom: 0.25rem;
+  margin-bottom: 1rem;
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .help-text, .MuiTypography-root.help-text  {
