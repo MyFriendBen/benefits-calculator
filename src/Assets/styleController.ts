@@ -266,6 +266,26 @@ function generateMuiOverides(theme: ITheme) {
           },
         },
       },
+      MuiInputBase: {
+        styleOverrides: {
+          root: {
+            fontSize: '0.875rem',
+            fontFamily: 'var(--font-body)',
+          },
+          input: {
+            fontSize: '0.875rem',
+            fontFamily: 'var(--font-body)',
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          select: {
+            fontSize: '0.875rem',
+            fontFamily: 'var(--font-body)',
+          },
+        },
+      },
     },
   };
 }

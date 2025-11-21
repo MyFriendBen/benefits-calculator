@@ -78,6 +78,19 @@
   color: var(--primary-color);
 }
 
+/* text input and select font sizing */
+.MuiInputBase-root,
+.MuiInputBase-input,
+.MuiSelect-select {
+  font-size: 0.875rem !important;
+  font-family: var(--font-body) !important;
+}
+
+.MuiInputLabel-root {
+  font-size: 0.875rem !important;
+  font-family: var(--font-body) !important;
+}
+
 /* text input outline in a focus state */
 .MuiOutlinedInput-root.MuiInputBase-formControl.Mui-focused
   .MuiOutlinedInput-notchedOutline.MuiOutlinedInput-notchedOutline {

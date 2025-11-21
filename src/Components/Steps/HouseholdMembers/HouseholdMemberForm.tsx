@@ -4,6 +4,7 @@ import HHMSummaryCards from './HHMSummaryCards';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Context } from '../../Wrapper/Wrapper';
 import { ReactNode, useContext, useEffect, useMemo } from 'react';
+import { ReactComponent as NoneIcon } from '../../../Assets/icons/General/OptionCard/HealthInsurance/none.svg';
 import { Conditions, HealthInsurance, HouseholdData } from '../../../Types/FormData';
 import {
   Autocomplete,
@@ -597,31 +598,20 @@ const HouseholdMemberForm = () => {
   };
 
   const displayHealthCareQuestion = () => {
-    if (pageNumber === 1) {
-      return (
-        <QuestionQuestion>
-          <FormattedMessage
-            id="questions.healthInsurance-you"
-            defaultMessage="Which type of health insurance do you have?"
-          />
-        </QuestionQuestion>
-      );
-    } else {
-      return (
-        <QuestionQuestion>
-          <FormattedMessage
-            id="questions.healthInsurance-they"
-            defaultMessage="What type of health insurance do they have?"
-          />
-        </QuestionQuestion>
-      );
-    }
+    return (
+      <QuestionQuestion>
+        <FormattedMessage
+          id="questions.healthInsurance"
+          defaultMessage="Health Insurance"
+        />
+      </QuestionQuestion>
+    );
   };
 
   const displayHealthInsuranceBlock = () => {
     return (
       <div className="section-container">
-        <Stack sx={{ padding: '0.75rem 0', paddingBottom: '0.75rem', borderBottom: '1px solid #e0e0e0' }} className="section">
+        <Stack sx={{ margin: '0.75rem 0', paddingBottom: '0.75rem', borderBottom: '1px solid #e0e0e0' }} className="section">
           {displayHealthCareQuestion()}
           <QuestionDescription>
             <FormattedMessage id="insurance.chooseAllThatApply" defaultMessage="Choose all that apply." />
@@ -644,30 +634,42 @@ const HouseholdMemberForm = () => {
   };
 
   const displayConditionsQuestion = () => {
-    const formattedMsgId =
-      pageNumber === 1
-        ? 'householdDataBlock.createConditionsQuestion-do-these-apply-to-you'
-        : 'householdDataBlock.createConditionsQuestion-do-these-apply';
+    const noneOption = {
+      none: {
+        icon: <NoneIcon className="option-card-icon" />,
+        text: (
+          <FormattedMessage
+            id="conditions.none"
+            defaultMessage="I don't have any of these circumstances"
+          />
+        ),
+      },
+    };
 
-    const formattedMsgDefaultMsg =
-      pageNumber === 1 ? 'Do any of these apply to you?' : 'Do any of these apply to them?';
+    const conditionsWithNone = {
+      ...noneOption,
+      ...(pageNumber === 1 ? conditionOptions.you : conditionOptions.them),
+    };
 
     return (
       <Box sx={{ margin: '0.75rem 0', paddingBottom: '0.75rem', borderBottom: '1px solid #e0e0e0' }}>
         <QuestionQuestion>
-          <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
+          <FormattedMessage
+            id="householdDataBlock.specialCircumstances"
+            defaultMessage="Special Circumstances"
+          />
         </QuestionQuestion>
         <QuestionDescription>
           <FormattedMessage
             id="householdDataBlock.createConditionsQuestion-pick"
-            defaultMessage="Choose all that apply. If none apply, skip this question."
+            defaultMessage="Choose all that apply."
           />
         </QuestionDescription>
         <RHFOptionCardGroup
           fields={watch('conditions')}
           setValue={setValue as unknown as (name: string, value: unknown, config?: Object) => void}
           name="conditions"
-          options={pageNumber === 1 ? conditionOptions.you : conditionOptions.them}
+          options={conditionsWithNone}
         />
       </Box>
     );
@@ -734,22 +736,17 @@ const HouseholdMemberForm = () => {
       defaultMessage: 'has an income',
     });
 
-    const formattedMsgId =
-      pageNumber === 1 ? 'questions.hasIncome' : 'householdDataBlock.createIncomeRadioQuestion-questionLabel';
-
-    const formattedMsgDefaultMsg =
-      pageNumber === 1
-        ? 'Do you have an income?'
-        : 'Does this individual in your household have significant income you have not already included?';
-
     // Get age status to conditionally show income disclaimer for 16+ users
     const { isUnder16 } = calculateCurrentAgeStatus();
-    
+
     return (
       <Box className="section-container" sx={{ paddingTop: '0.75rem' }}>
         <div className="section">
           <QuestionQuestion>
-            <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
+            <FormattedMessage
+              id="questions.incomeSources"
+              defaultMessage="Income Sources"
+            />
             <HelpButton>
               <FormattedMessage
                 id="householdDataBlock.createIncomeRadioQuestion-questionDescription"

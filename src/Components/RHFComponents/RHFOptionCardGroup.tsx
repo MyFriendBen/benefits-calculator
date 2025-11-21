@@ -62,9 +62,14 @@ const RHFOptionCardGroup = <T extends FieldValues>({
 
       const isSelected = values[optionKey];
       let containerClass = 'option-card';
+      let actionAreaClass = 'card-action-area';
 
       if (isSelected) {
         containerClass += ' selected-option-card';
+      }
+
+      if (optionKey === 'none') {
+        actionAreaClass += ' option-card-none';
       }
 
       if (getReferrer('featureFlags').includes('white_multi_select_tile_icon')) {
@@ -74,7 +79,7 @@ const RHFOptionCardGroup = <T extends FieldValues>({
       return (
         <CardActionArea
           key={`${name}-key-${index}`}
-          className="card-action-area"
+          className={actionAreaClass}
           onClick={() => handleOptionCardClick(optionKey)}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
@@ -84,18 +89,13 @@ const RHFOptionCardGroup = <T extends FieldValues>({
         >
           <Card className={containerClass}>
             <Stack direction="row" alignItems="center" justifyContent="center" sx={{ flex: 1, height: '100%' }}>
-              <CardContent sx={{ display: 'flex', alignItems: 'center', padding: '0.5rem', flex: 1 }}>
+              <CardContent sx={{ display: 'flex', alignItems: 'center', padding: 0, flex: 1, '&:last-child': { paddingBottom: 0 } }}>
                 <Box className="option-card-icon">{options[optionKey].icon}</Box>
-                <Typography className={isSelected ? 'option-card-text' : ''} sx={{ textAlign: 'left', fontSize: '0.875rem' }}>
+                <Typography className={isSelected ? 'option-card-text' : ''} sx={{ textAlign: 'left', fontSize: '0.875rem', margin: 0, padding: 0 }}>
                   {translatedAriaLabel}
                 </Typography>
               </CardContent>
             </Stack>
-            {isSelected && (
-              <Stack direction="row" justifyContent="flex-end" alignItems="flex-end">
-                <Checkmark className="checkmark" />
-              </Stack>
-            )}
           </Card>
         </CardActionArea>
       );
