@@ -76,3 +76,10 @@ export const renderIncomeAmountHelperText = (intlHook: IntlShape) => {
     defaultMessage: 'Please enter a number greater than 0.',
   });
 };
+
+export const renderConditionsSelectOneHelperText = (intlHook: IntlShape) => {
+  return intlHook.formatMessage({
+    id: 'validation-helperText.selectOneCondition',
+    defaultMessage: 'Please select at least one special circumstance option.',
+  });
+};

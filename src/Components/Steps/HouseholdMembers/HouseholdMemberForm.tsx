@@ -13,6 +13,7 @@ import {
   FormControl,
   FormControlLabel,
   FormHelperText,
+  IconButton,
   InputAdornment,
   InputLabel,
   MenuItem,
@@ -21,6 +22,7 @@ import {
   Select,
   Stack,
   TextField,
+  Typography,
 } from '@mui/material';
 import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
 import { useStepNumber } from '../../../Assets/stepDirectory';
@@ -36,6 +38,7 @@ import QuestionDescription from '../../QuestionComponents/QuestionDescription';
 import { FormattedMessageType } from '../../../Types/Questions';
 import HelpButton from '../../HelpBubbleIcon/HelpButton';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { createMenuItems } from '../SelectHelperFunctions/SelectHelperFunctions';
 import CloseButton from '../../CloseButton/CloseButton';
 import {
@@ -50,6 +53,7 @@ import {
   renderHoursWorkedHelperText,
   renderIncomeAmountHelperText,
   renderHealthInsNonePlusTheyHelperText,
+  renderConditionsSelectOneHelperText,
 } from './HelperTextFunctions';
 import { DOLLARS, handleNumbersOnly, numberInputProps, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
 import useScreenApi from '../../../Assets/updateScreen';
@@ -85,8 +89,27 @@ const HouseholdMemberForm = () => {
     <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectMenuItem" defaultMessage="Select" />,
   );
   const frequencyOptions = useConfig<Record<string, FormattedMessageType>>('frequency_options');
+
+  // Sort frequency options from least frequent to most frequent
+  const frequencyOrder = ['once', 'yearly', 'monthly', 'semimonthly', 'biweekly', 'weekly', 'hourly'];
+  const sortedFrequencyOptions: Record<string, FormattedMessageType> = {};
+
+  // First add all options in the defined order
+  frequencyOrder.forEach(key => {
+    if (frequencyOptions[key]) {
+      sortedFrequencyOptions[key] = frequencyOptions[key];
+    }
+  });
+
+  // Then add any remaining options that weren't in the order array
+  Object.keys(frequencyOptions).forEach(key => {
+    if (!sortedFrequencyOptions[key]) {
+      sortedFrequencyOptions[key] = frequencyOptions[key];
+    }
+  });
+
   const frequencyMenuItems = createMenuItems(
-    frequencyOptions,
+    sortedFrequencyOptions,
     <FormattedMessage id="personIncomeBlock.createFrequencyMenuItems-disabledSelectMenuItem" defaultMessage="Select" />,
   );
   const redirectToConfirmationPage = useShouldRedirectToConfirmation();
@@ -214,13 +237,18 @@ const HouseholdMemberForm = () => {
             message: healthInsNonPlusHelperText,
           },
         ),
-      conditions: z.object({
-        student: z.boolean(),
-        pregnant: z.boolean(),
-        blindOrVisuallyImpaired: z.boolean(),
-        disabled: z.boolean(),
-        longTermDisability: z.boolean(),
-      }),
+      conditions: z
+        .object({
+          student: z.boolean(),
+          pregnant: z.boolean(),
+          blindOrVisuallyImpaired: z.boolean(),
+          disabled: z.boolean(),
+          longTermDisability: z.boolean(),
+          none: z.boolean().optional().default(false),
+        })
+        .refine((conditionOptions) => Object.values(conditionOptions).some((option) => option === true), {
+          message: renderConditionsSelectOneHelperText(intl),
+        }),
       relationshipToHH: z
         .string()
         .refine((value) => [...Object.keys(relationshipOptions)].includes(value) || pageNumber === 1, {
@@ -274,6 +302,7 @@ const HouseholdMemberForm = () => {
     setValue,
     getValues,
     trigger,
+    clearErrors,
   } = useStepForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -616,18 +645,19 @@ const HouseholdMemberForm = () => {
           <QuestionDescription>
             <FormattedMessage id="insurance.chooseAllThatApply" defaultMessage="Choose all that apply." />
           </QuestionDescription>
+          {errors.healthInsurance !== undefined && (
+            <FormHelperText sx={{ ml: 0, mb: 1 }}>
+              <ErrorMessageWrapper fontSize="1rem">{errors.healthInsurance.message}</ErrorMessageWrapper>
+            </FormHelperText>
+          )}
           <RHFOptionCardGroup
             fields={watch('healthInsurance')}
             setValue={setValue as unknown as (name: string, value: unknown, config?: Object) => void}
             name="healthInsurance"
             options={pageNumber === 1 ? healthInsuranceOptions.you : healthInsuranceOptions.them}
             triggerValidation={trigger}
+            clearErrors={clearErrors}
           />
-          {errors.healthInsurance !== undefined && (
-            <FormHelperText sx={{ ml: 0 }}>
-              <ErrorMessageWrapper fontSize="1rem">{errors.healthInsurance.message}</ErrorMessageWrapper>
-            </FormHelperText>
-          )}
         </Stack>
       </div>
     );
@@ -665,11 +695,17 @@ const HouseholdMemberForm = () => {
             defaultMessage="Choose all that apply."
           />
         </QuestionDescription>
+        {errors.conditions !== undefined && (
+          <FormHelperText sx={{ ml: 0, mb: 1 }}>
+            <ErrorMessageWrapper fontSize="1rem">{errors.conditions.message}</ErrorMessageWrapper>
+          </FormHelperText>
+        )}
         <RHFOptionCardGroup
           fields={watch('conditions')}
           setValue={setValue as unknown as (name: string, value: unknown, config?: Object) => void}
           name="conditions"
           options={conditionsWithNone}
+          clearErrors={clearErrors}
         />
       </Box>
     );
@@ -1131,38 +1167,130 @@ const HouseholdMemberForm = () => {
         {createBasicInformationSection()}
         {displayHealthInsuranceBlock()}
         {displayConditionsQuestion()}
-        <div>
-          <Stack sx={{ margin: '0.75rem 0' }}>
-            {createIncomeRadioQuestion()}
-            {fields.map((field, index) => {
-              const selectedIncomeStreamSource = watch('incomeStreams')[index].incomeStreamName;
-              const selectedIncomeFrequency = watch('incomeStreams')[index].incomeFrequency;
+        <Box sx={{ margin: '0.75rem 0', paddingBottom: '0.75rem', borderBottom: '1px solid #e0e0e0' }}>
+              <QuestionQuestion>
+                <FormattedMessage id="householdDataBlock.incomeSources" defaultMessage="Income Sources" />
+                <HelpButton>
+                  <FormattedMessage
+                    id="householdDataBlock.createIncomeRadioQuestion-questionDescription"
+                    defaultMessage="This includes money from jobs, alimony, investments, or gifts. Income is the money earned or received before deducting taxes"
+                  />
+                </HelpButton>
+              </QuestionQuestion>
+              <QuestionDescription>
+                <FormattedMessage
+                  id="householdDataBlock.incomeSourcesDescription"
+                  defaultMessage="Enter income for yourself from the last 12 months. Estimates are okay!"
+                />
+              </QuestionDescription>
+              <Stack spacing={2} sx={{ marginTop: '1rem' }}>
+                {fields.map((field, index) => {
+                  const selectedIncomeFrequency = watch('incomeStreams')[index].incomeFrequency;
 
-              return (
-                <div className="section-container income-block-container" key={field.id}>
-                  <div className={index % 2 === 0 ? 'section' : ''}>
-                    {index !== 0 && (
-                      <div className="delete-button-container">
-                        <CloseButton handleClose={() => remove(index)} />
-                      </div>
-                    )}
-                    <div>
-                      {index === 0 && renderFirstIncomeBlockQ()}
-                      {index !== 0 && renderAdditionalIncomeBlockQ()}
-                      {renderIncomeStreamNameSelect(index)}
-                      {renderIncomeFrequencySelect(selectedIncomeStreamSource, index)}
-                      {selectedIncomeFrequency === 'hourly' &&
-                        renderHoursPerWeekTextfield(index, selectedIncomeStreamSource)}
-                      {renderIncomeAmountTextfield(index, selectedIncomeFrequency, selectedIncomeStreamSource)}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-            {hasTruthyIncome && (
-              <div>
+                  return (
+                    <Box
+                      key={field.id}
+                      sx={{
+                        display: 'flex',
+                        gap: '1rem',
+                        alignItems: 'flex-start',
+                        padding: '1rem',
+                        backgroundColor: '#f5f5f5',
+                        borderRadius: '8px',
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', gap: '1rem', flex: 1, flexWrap: 'wrap' }}>
+                        <Box sx={{ flex: '1 1 200px', minWidth: '150px' }}>
+                          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                            Income Type
+                          </Typography>
+                          <FormControl
+                            fullWidth
+                            size="small"
+                            error={errors.incomeStreams?.[index]?.incomeStreamName !== undefined}
+                          >
+                            <Controller
+                              name={`incomeStreams.${index}.incomeStreamName`}
+                              control={control}
+                              render={({ field }) => (
+                                <Select
+                                  {...field}
+                                  displayEmpty
+                                  sx={{ backgroundColor: '#fff' }}
+                                >
+                                  {incomeStreamsMenuItems}
+                                </Select>
+                              )}
+                            />
+                          </FormControl>
+                        </Box>
+
+                        <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
+                          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                            Amount
+                          </Typography>
+                          <Controller
+                            name={`incomeStreams.${index}.incomeAmount`}
+                            control={control}
+                            render={({ field }) => (
+                              <TextField
+                                {...field}
+                                fullWidth
+                                size="small"
+                                variant="outlined"
+                                placeholder="0.00"
+                                inputProps={NUM_PAD_PROPS}
+                                onChange={handleNumbersOnly(field.onChange, DOLLARS)}
+                                sx={{ backgroundColor: '#fff' }}
+                                error={errors.incomeStreams?.[index]?.incomeAmount !== undefined}
+                                InputProps={{
+                                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                }}
+                              />
+                            )}
+                          />
+                        </Box>
+
+                        <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
+                          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                            Frequency
+                          </Typography>
+                          <FormControl
+                            fullWidth
+                            size="small"
+                            error={errors.incomeStreams?.[index]?.incomeFrequency !== undefined}
+                          >
+                            <Controller
+                              name={`incomeStreams.${index}.incomeFrequency`}
+                              control={control}
+                              render={({ field }) => (
+                                <Select
+                                  {...field}
+                                  displayEmpty
+                                  sx={{ backgroundColor: '#fff' }}
+                                >
+                                  {frequencyMenuItems}
+                                </Select>
+                              )}
+                            />
+                          </FormControl>
+                        </Box>
+                      </Box>
+
+                      <IconButton
+                        onClick={() => remove(index)}
+                        sx={{ marginTop: '1.5rem' }}
+                        aria-label="delete income source"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  );
+                })}
+
                 <Button
                   variant="outlined"
+                  fullWidth
                   onClick={() =>
                     append({
                       incomeStreamName: '',
@@ -1173,13 +1301,17 @@ const HouseholdMemberForm = () => {
                   }
                   startIcon={<AddIcon />}
                   type="button"
+                  sx={{
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontSize: '1rem',
+                  }}
                 >
-                  <FormattedMessage id="personIncomeBlock.return-addIncomeButton" defaultMessage="Add another income" />
+                  <FormattedMessage id="personIncomeBlock.return-addIncomeButton" defaultMessage="+ Add Another Income Source" />
                 </Button>
-              </div>
-            )}
-          </Stack>
-        </div>
+              </Stack>
+        </Box>
         <PrevAndContinueButtons backNavigationFunction={backNavigationFunction} />
       </form>
     </main>

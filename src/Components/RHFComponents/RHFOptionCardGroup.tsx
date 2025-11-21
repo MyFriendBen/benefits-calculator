@@ -3,7 +3,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import { CardActionArea, Typography, Stack, Box } from '@mui/material';
 import { ReactComponent as Checkmark } from '../../Assets/icons/General/OptionCard/checkmark.svg';
-import { FieldValues, Path, PathValue, UseFormTrigger, UseFormSetValue } from 'react-hook-form';
+import { FieldValues, Path, PathValue, UseFormTrigger, UseFormSetValue, UseFormClearErrors } from 'react-hook-form';
 import '../OptionCardGroup/OptionCardGroup.css';
 import { Context } from '../Wrapper/Wrapper';
 import { useContext } from 'react';
@@ -26,6 +26,7 @@ type RHFOptionCardGroupProps<T extends FieldValues> = {
   options: Options;
   triggerValidation?: UseFormTrigger<T>;
   customColumnNo?: string;
+  clearErrors?: UseFormClearErrors<T>;
 };
 
 const RHFOptionCardGroup = <T extends FieldValues>({
@@ -35,6 +36,7 @@ const RHFOptionCardGroup = <T extends FieldValues>({
   options,
   triggerValidation,
   customColumnNo,
+  clearErrors,
 }: RHFOptionCardGroupProps<T>) => {
   const { getReferrer } = useContext(Context);
   const intl = useIntl();
@@ -42,12 +44,13 @@ const RHFOptionCardGroup = <T extends FieldValues>({
   const handleOptionCardClick = async (optionName: string) => {
     const updatedValue = !fields[optionName];
     setValue(`${name}.${optionName}` as Path<T>, updatedValue as PathValue<T, Path<T>>, {
-      shouldValidate: true,
+      shouldValidate: false,
       shouldDirty: true,
     });
 
-    if (triggerValidation) {
-      await triggerValidation(name);
+    // Clear errors when user selects an option
+    if (clearErrors) {
+      clearErrors(name);
     }
   };
 
