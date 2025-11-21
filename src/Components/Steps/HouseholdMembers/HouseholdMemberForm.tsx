@@ -329,6 +329,7 @@ const HouseholdMemberForm = () => {
             blindOrVisuallyImpaired: false,
             disabled: false,
             longTermDisability: false,
+            none: false,
           },
       relationshipToHH: determineDefaultRelationshipToHH(),
       hasIncome: determineDefaultHasIncome(),
@@ -346,8 +347,15 @@ const HouseholdMemberForm = () => {
   });
 
   useEffect(() => {
-    const noIncomeStreamsAreListed = Number(getValues('incomeStreams').length === 0);
-    if (hasTruthyIncome && noIncomeStreamsAreListed) {
+    const noIncomeStreamsAreListed = getValues('incomeStreams').length === 0;
+
+    // Only auto-add an income row if:
+    // 1. User indicates they have income (hasTruthyIncome is true)
+    // 2. There are no income streams listed
+    // 3. This is NOT a return visit (householdMemberFormData doesn't exist or has no saved incomeStreams)
+    const isNewForm = !householdMemberFormData || householdMemberFormData.incomeStreams.length === 0;
+
+    if (hasTruthyIncome && noIncomeStreamsAreListed && isNewForm) {
       append({
         incomeStreamName: '',
         incomeAmount: '',
@@ -359,7 +367,7 @@ const HouseholdMemberForm = () => {
     if (!hasTruthyIncome) {
       replace([]);
     }
-  }, [watchHasIncome, append, replace, getValues, hasTruthyIncome]);
+  }, [watchHasIncome, append, replace, getValues, hasTruthyIncome, householdMemberFormData]);
   
   const { calculateCurrentAgeStatus } = useAgeCalculation(watch);
   
@@ -1183,7 +1191,7 @@ const HouseholdMemberForm = () => {
                   defaultMessage="Enter income for yourself from the last 12 months. Estimates are okay!"
                 />
               </QuestionDescription>
-              <Stack spacing={2} sx={{ marginTop: '1rem' }}>
+              <Stack spacing={2} sx={{ marginTop: '0.5rem' }}>
                 {fields.map((field, index) => {
                   const selectedIncomeFrequency = watch('incomeStreams')[index].incomeFrequency;
 
