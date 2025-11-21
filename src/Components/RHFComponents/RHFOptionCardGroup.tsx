@@ -74,7 +74,6 @@ const RHFOptionCardGroup = <T extends FieldValues>({
       return (
         <CardActionArea
           key={`${name}-key-${index}`}
-          sx={{ width: '15rem' }}
           className="card-action-area"
           onClick={() => handleOptionCardClick(optionKey)}
           onKeyDown={(event) => {
@@ -84,10 +83,12 @@ const RHFOptionCardGroup = <T extends FieldValues>({
           }}
         >
           <Card className={containerClass}>
-            <Stack direction="column" justifyContent="center" sx={{ flex: 1 }}>
-              <CardContent sx={{ textAlign: 'center', padding: '0.5rem' }}>
-                <Box className="multi-select-icon">{options[optionKey].icon}</Box>
-                <Typography className={isSelected ? 'option-card-text' : ''}>{translatedAriaLabel}</Typography>
+            <Stack direction="row" alignItems="center" justifyContent="center" sx={{ flex: 1, height: '100%' }}>
+              <CardContent sx={{ display: 'flex', alignItems: 'center', padding: '0.5rem', flex: 1 }}>
+                <Box className="option-card-icon">{options[optionKey].icon}</Box>
+                <Typography className={isSelected ? 'option-card-text' : ''} sx={{ textAlign: 'left', fontSize: '0.875rem' }}>
+                  {translatedAriaLabel}
+                </Typography>
               </CardContent>
             </Stack>
             {isSelected && (

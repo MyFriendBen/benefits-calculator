@@ -366,6 +366,130 @@ const HouseholdMemberForm = () => {
     await updateScreen(updatedFormData);
   };
 
+  const createBasicInformationSection = () => {
+    return (
+      <Box sx={{ marginBottom: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid #e0e0e0' }}>
+        <QuestionQuestion>
+          <FormattedMessage
+            id="householdDataBlock.basicInformation"
+            defaultMessage="Basic Information"
+          />
+        </QuestionQuestion>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <FormControl
+            sx={{ mt: 1, mb: 2, minWidth: '13.125rem', flex: '1' }}
+            error={errors.birthMonth !== undefined}
+          >
+            <InputLabel id="birth-month">
+              <FormattedMessage id="ageInput.month.label" defaultMessage="Birth Month" />
+            </InputLabel>
+            <Controller
+              name="birthMonth"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <Select
+                    {...field}
+                    labelId="birth-month"
+                    label={<FormattedMessage id="ageInput.month.label" defaultMessage="Birth Month" />}
+                  >
+                    {Object.entries(MONTHS).map(([key, value]) => {
+                      return (
+                        <MenuItem value={String(key)} key={key}>
+                          {value}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                  {errors.birthMonth !== undefined && (
+                    <FormHelperText sx={{ ml: 0 }}>
+                      <ErrorMessageWrapper fontSize="1rem">{errors.birthMonth.message}</ErrorMessageWrapper>
+                    </FormHelperText>
+                  )}
+                </>
+              )}
+            />
+          </FormControl>
+          <Controller
+            name="birthYear"
+            control={control}
+            render={({ field }) => (
+              <FormControl
+                sx={{ mt: 1, mb: 2, minWidth: '13.125rem', flex: '1' }}
+                error={errors.birthYear !== undefined}
+              >
+                <TextField
+                  {...field}
+                  label={<FormattedMessage id="ageInput.year.label" defaultMessage="Birth Year" />}
+                  inputProps={NUM_PAD_PROPS}
+                  onChange={handleNumbersOnly(field.onChange)}
+                  sx={{ backgroundColor: '#fff' }}
+                  error={errors.birthYear !== undefined}
+                />
+                {errors.birthYear !== undefined && (
+                  <FormHelperText sx={{ ml: 0 }}>
+                    <ErrorMessageWrapper fontSize="1rem">{errors.birthYear.message}</ErrorMessageWrapper>
+                  </FormHelperText>
+                )}
+              </FormControl>
+            )}
+          />
+          <FormControl sx={{ mt: 1, mb: 2, minWidth: '13.125rem', flex: '1' }} error={!!errors.relationshipToHH}>
+            <InputLabel id="relation-to-hh-label">
+              <FormattedMessage
+                id="householdDataBlock.createDropdownCompProps-inputLabelText"
+                defaultMessage="Relation to you"
+              />
+            </InputLabel>
+            <Controller
+              name="relationshipToHH"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <Select
+                    {...field}
+                    labelId="relation-to-hh-label"
+                    id="relationship-to-hh-select"
+                    label={
+                      <FormattedMessage
+                        id="householdDataBlock.createDropdownCompProps-inputLabelText"
+                        defaultMessage="Relation to you"
+                      />
+                    }
+                    sx={{ backgroundColor: '#fff' }}
+                    disabled={pageNumber === 1}
+                  >
+                    {pageNumber === 1 ? (
+                      <MenuItem value="headOfHousehold">
+                        <FormattedMessage id="householdDataBlock.self" defaultMessage="Self" />
+                      </MenuItem>
+                    ) : (
+                      <>
+                        <MenuItem value="" disabled>
+                          <FormattedMessage id="select.placeholder" defaultMessage="Select" />
+                        </MenuItem>
+                        {Object.entries(relationshipOptions).map(([key, value]) => (
+                          <MenuItem value={key} key={key}>
+                            {value}
+                          </MenuItem>
+                        ))}
+                      </>
+                    )}
+                  </Select>
+                  {errors.relationshipToHH && (
+                    <FormHelperText sx={{ ml: 0 }}>
+                      <ErrorMessageWrapper fontSize="1rem">{errors.relationshipToHH.message}</ErrorMessageWrapper>
+                    </FormHelperText>
+                  )}
+                </>
+              )}
+            />
+          </FormControl>
+        </div>
+      </Box>
+    );
+  };
+
   const createAgeQuestion = () => {
     return (
       <Box sx={{ marginBottom: '1.5rem' }}>
@@ -497,7 +621,7 @@ const HouseholdMemberForm = () => {
   const displayHealthInsuranceBlock = () => {
     return (
       <div className="section-container">
-        <Stack sx={{ padding: '3rem 0' }} className="section">
+        <Stack sx={{ padding: '0.75rem 0', paddingBottom: '0.75rem', borderBottom: '1px solid #e0e0e0' }} className="section">
           {displayHealthCareQuestion()}
           <QuestionDescription>
             <FormattedMessage id="insurance.chooseAllThatApply" defaultMessage="Choose all that apply." />
@@ -529,7 +653,7 @@ const HouseholdMemberForm = () => {
       pageNumber === 1 ? 'Do any of these apply to you?' : 'Do any of these apply to them?';
 
     return (
-      <Box sx={{ margin: '3rem 0' }}>
+      <Box sx={{ margin: '0.75rem 0', paddingBottom: '0.75rem', borderBottom: '1px solid #e0e0e0' }}>
         <QuestionQuestion>
           <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
         </QuestionQuestion>
@@ -622,7 +746,7 @@ const HouseholdMemberForm = () => {
     const { isUnder16 } = calculateCurrentAgeStatus();
     
     return (
-      <Box className="section-container" sx={{ paddingTop: '3rem' }}>
+      <Box className="section-container" sx={{ paddingTop: '0.75rem' }}>
         <div className="section">
           <QuestionQuestion>
             <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
@@ -1007,12 +1131,11 @@ const HouseholdMemberForm = () => {
           window.scroll({ top: 0, left: 0, behavior: 'smooth' });
         })}
       >
-        {pageNumber !== 1 && createHOfHRelationQuestion()}
-        {createAgeQuestion()}
+        {createBasicInformationSection()}
         {displayHealthInsuranceBlock()}
         {displayConditionsQuestion()}
         <div>
-          <Stack sx={{ margin: '3rem 0' }}>
+          <Stack sx={{ margin: '0.75rem 0' }}>
             {createIncomeRadioQuestion()}
             {fields.map((field, index) => {
               const selectedIncomeStreamSource = watch('incomeStreams')[index].incomeStreamName;

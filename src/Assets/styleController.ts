@@ -27,6 +27,8 @@ export interface ITheme {
     '--active-border-color': string;
     '--warning-background-color'?: string;
     '--warning-text-color'?: string;
+    '--font-heading': string;
+    '--font-body': string;
   };
 }
 
@@ -56,6 +58,8 @@ const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--footer-color': '#41528C',
       '--active-border-color': '#B85A27',
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
     },
   },
   twoOneOne: {
@@ -81,6 +85,8 @@ const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--footer-color': '#ffffff',
       '--active-border-color': '#005191',
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
     },
   },
   twoOneOneNC: {
@@ -106,6 +112,8 @@ const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--footer-color': '#ffffff',
       '--active-border-color': '#21296B',
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
     },
   },
   nc_lanc: {
@@ -131,6 +139,8 @@ const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--footer-color': '#FFFFFF',
       '--active-border-color': '#8CCCF2',
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
     },
   },
   co_energy: {
@@ -158,6 +168,8 @@ const themes: Themes = {
       '--active-border-color': '#FFD100',
       '--warning-background-color': '#F5E6C8',
       '--warning-text-color': '#6b5d00',
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
     },
   },
 };
@@ -194,7 +206,7 @@ function generateMuiOverides(theme: ITheme) {
               border: '1px solid black',
               borderRadius: '12px',
               fontWeight: 'bold',
-              fontFamily: 'Open Sans',
+              fontFamily: 'var(--font-body)',
               ':hover': {
                 backgroundColor: lavenderColor,
                 color: deepBlueColor,
@@ -209,7 +221,7 @@ function generateMuiOverides(theme: ITheme) {
               border: 'none',
               borderRadius: '12px',
               fontWeight: 'bold',
-              fontFamily: 'Open Sans',
+              fontFamily: 'var(--font-body)',
               ':hover': {
                 backgroundColor: theme.outlineHoverBackgroundColor,
                 color: theme.outlineHoverColor,

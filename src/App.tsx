@@ -30,7 +30,6 @@ import ValidateUuid from './Components/RouterUtil/ValidateUuid';
 import FaviconManager from './Components/FaviconManager/FaviconManager';
 import './App.css';
 import useCampaign from './Components/CampaignAnalytics/useCampaign';
-import SystemBanner from './Components/Common/SystemBanner/SystemBanner';
 
 const App = () => {
   const location = useLocation();
@@ -43,7 +42,6 @@ const App = () => {
     setTheme: changeTheme,
     pageIsLoading,
     getReferrer,
-    config,
   } = useContext(Context);
   const stepDirectory = useStepDirectory();
   const totalSteps = stepDirectory.length + STARTING_QUESTION_NUMBER;
@@ -151,10 +149,7 @@ const App = () => {
         <CssBaseline />
         <FaviconManager />
         <BrandedHeader />
-        <Box className="main-max-width">
-          {config?.banner_messages && config.banner_messages.length > 0 && (
-            <SystemBanner banners={config.banner_messages} />
-          )}
+        <Box sx={{ backgroundColor: '#ffffff', width: '100%' }}>
           <Routes>
             <Route path="step-1" element={<ProgressBar step={1} />} />
             <Route path=":whiteLabel/step-1" element={<ProgressBar step={1} />} />
@@ -166,6 +161,8 @@ const App = () => {
             <Route path=":whiteLabel/:uuid/confirm-information" element={<ProgressBar step={totalSteps} />} />
             <Route path="*" element={<></>} />
           </Routes>
+        </Box>
+        <Box className="content-max-width">
           <Routes>
             {languageRouteWrapper(
               <>

@@ -1,5 +1,5 @@
 p {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   color: black;
 }
 
@@ -8,33 +8,34 @@ p {
 }
 
 .question-header {
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-weight: bold;
   color: var(--secondary-color);
 }
 
 .question-secondary-header {
   font-size: 1.2rem;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-weight: bold;
   color: var(--primary-color);
 }
 
 .question-label {
-  font-size: 1.375rem;
+  font-size: 1rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-  font-family: 'Open Sans', serif;
+  font-family: var(--font-body);
   color: black;
 }
 
 .question-description {
-  margin-bottom: 1rem;
-  font-family: 'Open Sans', serif;
+  margin-bottom: 0.25rem;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
 }
 
 .help-text, .MuiTypography-root.help-text  {
-  font-family: 'Open Sans', serif;
+  font-family: var(--font-body);
   font-size: 1rem;
   font-weight: 200;
   color: black;
