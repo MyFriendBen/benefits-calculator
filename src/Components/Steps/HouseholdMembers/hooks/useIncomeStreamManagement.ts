@@ -15,7 +15,8 @@ interface UseIncomeStreamManagementParams<T> {
 
 /**
  * Custom hook to manage income stream field array logic
- * Handles auto-adding/removing income streams based on hasIncome value
+ * - Clears income streams when hasIncome is false
+ * - Auto-adds empty income stream when transitioning from false to true
  */
 export const useIncomeStreamManagement = <T extends { incomeStreams: IncomeStreamsArray }>({
   hasTruthyIncome,
@@ -24,25 +25,21 @@ export const useIncomeStreamManagement = <T extends { incomeStreams: IncomeStrea
   append,
   replace,
 }: UseIncomeStreamManagementParams<T>) => {
-  const previousHasIncomeRef = useRef(hasTruthyIncome);
+  const previousHasIncomeRef = useRef(false);
 
   useEffect(() => {
-    // Clear all income streams if user indicates no income
+    // Clear all income streams when user indicates no income
     if (!hasTruthyIncome) {
       replace([]);
       previousHasIncomeRef.current = false;
       return;
     }
 
-    // Only auto-add income stream if transitioning from false to true
-    const isTransitioningToHasIncome = !previousHasIncomeRef.current && hasTruthyIncome;
+    // Auto-add empty income stream when transitioning from "no income" to "has income"
+    if (!previousHasIncomeRef.current && hasTruthyIncome) {
+      const currentIncomeStreams = getValues('incomeStreams') as IncomeStreamsArray;
 
-    if (isTransitioningToHasIncome) {
-      const currentIncomeStreams = getValues('incomeStreams');
-      const noIncomeStreams = currentIncomeStreams.length === 0;
-      const isNewMemberOrHadIncome = !householdMemberFormData?.id || householdMemberFormData.hasIncome === true;
-
-      if (noIncomeStreams && isNewMemberOrHadIncome) {
+      if (currentIncomeStreams.length === 0) {
         append(EMPTY_INCOME_STREAM as any);
       }
     }

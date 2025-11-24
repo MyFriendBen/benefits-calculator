@@ -65,7 +65,7 @@ const IncomeSection = ({
   };
 
   return (
-    <Box sx={SECTION_STYLES}>
+    <Box id="income-section" sx={SECTION_STYLES}>
       <QuestionQuestion>
         <FormattedMessage id="householdDataBlock.incomeSources" defaultMessage="Income Sources" />
         <HelpButton>

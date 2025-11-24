@@ -30,7 +30,7 @@ const HealthInsuranceSection = ({
   pageNumber,
 }: HealthInsuranceSectionProps) => {
   return (
-    <div className="section-container">
+    <div id="health-insurance-section" className="section-container">
       <Stack sx={SECTION_STYLES} className="section">
         <QuestionQuestion>
           <FormattedMessage id="questions.healthInsurance" defaultMessage="Health Insurance" />

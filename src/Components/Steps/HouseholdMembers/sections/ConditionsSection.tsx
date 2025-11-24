@@ -45,7 +45,7 @@ const ConditionsSection = ({
   };
 
   return (
-    <Box sx={SECTION_STYLES}>
+    <Box id="conditions-section" sx={SECTION_STYLES}>
       <QuestionQuestion>
         <FormattedMessage
           id="householdDataBlock.specialCircumstances"

@@ -218,14 +218,21 @@ const HouseholdMemberForm = () => {
       return 'false';
     }
 
+    // If member has income streams, they definitely have income
     if (householdMemberFormData.incomeStreams.length > 0) {
       return 'true';
     }
 
-    if (householdMemberFormData.id) {
+    // If member has health insurance selections, they've been through this page before
+    // (income section comes before health insurance in the form flow)
+    const hasProgressedThroughForm = householdMemberFormData.healthInsurance &&
+      Object.values(householdMemberFormData.healthInsurance).some(v => v === true);
+
+    if (hasProgressedThroughForm) {
       return householdMemberFormData.hasIncome ? 'true' : 'false';
     }
 
+    // First time visiting this page - use age-based logic
     return determineDefaultIncomeByAge(householdMemberFormData);
   };
 
@@ -348,6 +355,32 @@ const HouseholdMemberForm = () => {
     await updateScreen(updatedFormData);
   };
 
+  const handleFormError = (formErrors: typeof errors) => {
+    // Scroll to the first section with an error
+    const errorSections = [
+      { key: 'birthMonth', id: 'basic-info-section' },
+      { key: 'birthYear', id: 'basic-info-section' },
+      { key: 'relationshipToHH', id: 'basic-info-section' },
+      { key: 'healthInsurance', id: 'health-insurance-section' },
+      { key: 'conditions', id: 'conditions-section' },
+      { key: 'hasIncome', id: 'income-section' },
+      { key: 'incomeStreams', id: 'income-section' },
+    ];
+
+    for (const section of errorSections) {
+      if ((formErrors as any)[section.key]) {
+        const element = document.getElementById(section.id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return;
+        }
+      }
+    }
+
+    // Fallback to scrolling to top if no section found
+    window.scroll({ top: 0, left: 0, behavior: 'smooth' });
+  };
+
   // Calculate age for header
   const age = calculateAge(householdMemberFormData?.birthYear, householdMemberFormData?.birthMonth);
   const relationship = householdMemberFormData?.relationshipToHH;
@@ -393,9 +426,7 @@ const HouseholdMemberForm = () => {
 
       <form
         key={`household-member-${pageNumber}`}
-        onSubmit={handleSubmit(formSubmitHandler, () => {
-          window.scroll({ top: 0, left: 0, behavior: 'smooth' });
-        })}
+        onSubmit={handleSubmit(formSubmitHandler, handleFormError)}
       >
         {shouldShowBasicInfo && (
           <BasicInfoSection

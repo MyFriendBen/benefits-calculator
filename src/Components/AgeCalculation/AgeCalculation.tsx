@@ -66,10 +66,10 @@ export function calculateAgeStatus(
  * @returns 'true' if should default to having income, 'false' otherwise
  */
 export function determineDefaultIncomeByAge(
-  householdMemberFormData: { 
-    incomeStreams?: Array<any>; 
-    birthYear?: number; 
-    birthMonth?: number 
+  householdMemberFormData: {
+    incomeStreams?: Array<any>;
+    birthYear?: number;
+    birthMonth?: number
   } | undefined
 ): 'true' | 'false' {
   if (householdMemberFormData === undefined) {

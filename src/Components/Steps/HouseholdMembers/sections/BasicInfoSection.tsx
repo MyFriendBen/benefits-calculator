@@ -143,7 +143,7 @@ const BasicInfoSection = ({
 
   // With section header (for HouseholdMemberForm)
   return (
-    <Box sx={SECTION_STYLES}>
+    <Box id="basic-info-section" sx={SECTION_STYLES}>
       <QuestionQuestion>
         <FormattedMessage id="householdDataBlock.basicInfo" defaultMessage="Basic Information" />
       </QuestionQuestion>
