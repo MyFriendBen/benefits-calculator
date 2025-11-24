@@ -119,30 +119,8 @@ const multipleItemsName = (items: EnergyCalculatorItemType[]) => {
   return null;
 };
 
-// Lowercase category names for use in sentence context (e.g., "100% of cost of heating and cooling")
-// These allow localizers to control casing and preserve acronyms/grammar rules per language
-const CATEGORY_LOWERCASE_MAP: Record<EnergyCalculatorRebateCategoryType, FormattedMessageType> = {
-  hvac: (
-    <FormattedMessage
-      id="energyCalculator.results.category.hvac.lowercase"
-      defaultMessage="heating and cooling"
-    />
-  ),
-  waterHeater: (
-    <FormattedMessage id="energyCalculator.results.category.waterHeater.lowercase" defaultMessage="water heating" />
-  ),
-  stove: <FormattedMessage id="energyCalculator.results.category.stove.lowercase" defaultMessage="cooking" />,
-  efficiencyWeatherization: (
-    <FormattedMessage
-      id="energyCalculator.results.category.efficiencyWeatherization.lowercase"
-      defaultMessage="efficiency and weatherization"
-    />
-  ),
-};
-
 type RebateComponentProps = {
   rebate: EnergyCalculatorRebate;
-  categoryType?: EnergyCalculatorRebateCategoryType;
 };
 
 /**
@@ -198,7 +176,7 @@ const getPageBasedTitle = (page: EnergyCalculatorRebateCategoryType): FormattedM
   }
 };
 
-function ItemName({ rebate, categoryType }: RebateComponentProps) {
+function ItemName({ rebate }: RebateComponentProps) {
   const itemsToRender = rebate.items;
 
   if (itemsToRender.length > 1) {
@@ -212,10 +190,6 @@ function ItemName({ rebate, categoryType }: RebateComponentProps) {
         return getPageBasedTitle(mostFrequentPage);
       }
 
-      // Final fallback if no page can be determined
-      if (categoryType) {
-        return CATEGORY_LOWERCASE_MAP[categoryType];
-      }
       // Last resort fallback for multi-item rebates without a category
       return <FormattedMessage id="energyCalculator.rebatePage.title.itemName.multipleItems" defaultMessage="upgrades" />;
     }
@@ -467,7 +441,7 @@ const FormatUnit = ({ unit }: FormatUnitProps) => {
   }
 };
 
-export function EnergyCalculatorRebateCardTitle({ rebate, categoryType }: RebateComponentProps) {
+export function EnergyCalculatorRebateCardTitle({ rebate }: RebateComponentProps) {
   const amount = rebate.amount;
   if (amount.type === 'dollar_amount') {
     if (amount.maximum !== undefined) {
@@ -476,7 +450,7 @@ export function EnergyCalculatorRebateCardTitle({ rebate, categoryType }: Rebate
           <FormattedMessage id="energyCalculator.rebatePage.title.dollarAmount.max.1" defaultMessage="Up to $" />
           {amount.maximum.toLocaleString()}
           <FormattedMessage id="energyCalculator.rebatePage.title.dollarAmount.max.2" defaultMessage=" off " />
-          <ItemName rebate={rebate} categoryType={categoryType} />
+          <ItemName rebate={rebate} />
         </>
       );
     }
@@ -484,7 +458,7 @@ export function EnergyCalculatorRebateCardTitle({ rebate, categoryType }: Rebate
       <>
         ${amount.number.toLocaleString()}
         <FormattedMessage id="energyCalculator.rebatePage.title.dollarAmount.noMax.1" defaultMessage=" off " />
-        <ItemName rebate={rebate} categoryType={categoryType} />
+        <ItemName rebate={rebate} />
       </>
     );
   } else if (amount.type === 'percent') {
@@ -494,7 +468,7 @@ export function EnergyCalculatorRebateCardTitle({ rebate, categoryType }: Rebate
         <>
           {percentStr}
           <FormattedMessage id="energyCalculator.rebatePage.title.percent.max.1" defaultMessage=" of cost of " />
-          <ItemName rebate={rebate} categoryType={categoryType} />
+          <ItemName rebate={rebate} />
           <FormattedMessage id="energyCalculator.rebatePage.title.percent.max.2" defaultMessage=", up to $" />
           {amount.maximum.toLocaleString()}
         </>
@@ -504,7 +478,7 @@ export function EnergyCalculatorRebateCardTitle({ rebate, categoryType }: Rebate
       <>
         {percentStr}
         <FormattedMessage id="energyCalculator.rebatePage.title.percent.noMax.1" defaultMessage=" of cost of " />
-        <ItemName rebate={rebate} categoryType={categoryType} />
+        <ItemName rebate={rebate} />
       </>
     );
   } else if (amount.type === 'dollars_per_unit') {
@@ -517,7 +491,7 @@ export function EnergyCalculatorRebateCardTitle({ rebate, categoryType }: Rebate
         <>
           ${amount.number.toLocaleString()}/<FormatUnit unit={amount.unit} />
           <FormattedMessage id="energyCalculator.rebatePage.title.perUnit.max.1" defaultMessage=" off " />
-          <ItemName rebate={rebate} categoryType={categoryType} />
+          <ItemName rebate={rebate} />
           <FormattedMessage id="energyCalculator.rebatePage.title.perUnit.max.2" defaultMessage=", up to $" />
           {amount.maximum.toLocaleString()}
         </>
@@ -528,7 +502,7 @@ export function EnergyCalculatorRebateCardTitle({ rebate, categoryType }: Rebate
       <>
         ${amount.number.toLocaleString()}/<FormatUnit unit={amount.unit} />
         <FormattedMessage id="energyCalculator.rebatePage.title.perUnit.noMax.1" defaultMessage=" off " />
-        <ItemName rebate={rebate} categoryType={categoryType} />
+        <ItemName rebate={rebate} />
       </>
     );
   }
@@ -586,7 +560,7 @@ function staticAmountSavingCalculatorGenerator(amount: number, maxAmount: number
  * Previously displayed in: src/Components/EnergyCalculator/Results/RebatePage.tsx:111
  * Remains in code as CDS wanted the option to reintroduce it easily
  */
-export function EnergyCalculatorRebateCalculator({ rebate, categoryType }: RebateComponentProps) {
+export function EnergyCalculatorRebateCalculator({ rebate }: RebateComponentProps) {
   const [cost, setCost] = useState(0);
   const translateNumber = useTranslateNumber();
 
@@ -625,7 +599,7 @@ export function EnergyCalculatorRebateCalculator({ rebate, categoryType }: Rebat
           label={
             <>
               <FormattedMessage id="energyCalculator.rebatePage.calculator.input.cost" defaultMessage="Cost of " />
-              <ItemName rebate={rebate} categoryType={categoryType} />
+              <ItemName rebate={rebate} />
             </>
           }
           variant="outlined"
