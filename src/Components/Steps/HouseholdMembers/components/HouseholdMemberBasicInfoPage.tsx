@@ -193,20 +193,20 @@ const HouseholdMemberBasicInfoPage = () => {
       </Typography>
 
       <form onSubmit={handleSubmit(formSubmitHandler)}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {fields.map((field, index) => (
             <Box
               key={field.id}
               sx={{
-                padding: '1.5rem',
+                padding: '1rem',
                 backgroundColor: 'var(--secondary-background-color)',
                 borderRadius: '8px',
                 border: '1px solid #e0e0e0',
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                <PersonIcon style={{ width: '2.5rem', height: '2.5rem', fill: 'var(--primary-color)' }} />
-                <Typography sx={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--secondary-color)', fontFamily: 'var(--font-heading)' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                <PersonIcon style={{ width: '2rem', height: '2rem', fill: 'var(--primary-color)' }} />
+                <Typography sx={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--secondary-color)', fontFamily: 'var(--font-heading)' }}>
                   {index === 0 ? (
                     <FormattedMessage id="householdDataBlock.basicInfo.you" defaultMessage="You" />
                   ) : (
