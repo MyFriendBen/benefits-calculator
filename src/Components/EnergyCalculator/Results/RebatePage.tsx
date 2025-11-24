@@ -95,6 +95,12 @@ function RebateCard({ rebate, rebateCategory }: RebateProps) {
           {rebateTypes(rebate).map((type, index) => {
             return <span key={index}>{type}</span>;
           })}
+          {rebate.ira_status === 'paused' && (
+            <div className="energy-calculator-expiration-badge">
+              <WarningIcon className="energy-calculator-expiration-icon" />
+              <FormattedMessage id="energyCalculator.rebatePage.status.paused" defaultMessage="Paused" />
+            </div>
+          )}
           {rebate.authority_type === 'federal' && rebate.payment_methods.includes('tax_credit') && rebate.end_date && (
             <div className="energy-calculator-expiration-badge">
               <WarningIcon className="energy-calculator-expiration-icon" />
