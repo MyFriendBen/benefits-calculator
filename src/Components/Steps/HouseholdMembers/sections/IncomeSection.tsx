@@ -88,7 +88,9 @@ const IncomeSection = ({
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
                 {/* First Row: Income Category */}
                 <Box sx={{ width: '100%' }}>
-                  <Typography sx={FORM_FIELD_LABEL_STYLES}>Income Category</Typography>
+                  <Typography sx={FORM_FIELD_LABEL_STYLES}>
+                    <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Category" />
+                  </Typography>
                   <FormControl
                     fullWidth
                     size="small"
@@ -117,7 +119,9 @@ const IncomeSection = ({
                 {/* Second Row: Specific Type, Amount, Frequency */}
                 <Box sx={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                   <Box sx={{ flex: '1 1 200px', minWidth: '150px' }}>
-                    <Typography sx={FORM_FIELD_LABEL_STYLES}>Specific Type</Typography>
+                    <Typography sx={FORM_FIELD_LABEL_STYLES}>
+                      <FormattedMessage id="personIncomeBlock.specificType" defaultMessage="Specific Type" />
+                    </Typography>
                     <FormControl
                       fullWidth
                       size="small"
@@ -152,7 +156,9 @@ const IncomeSection = ({
                   </Box>
 
                   <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
-                    <Typography sx={FORM_FIELD_LABEL_STYLES}>Amount</Typography>
+                    <Typography sx={FORM_FIELD_LABEL_STYLES}>
+                      <FormattedMessage id="personIncomeBlock.preTaxAmount" defaultMessage="Pre-Tax Amount" />
+                    </Typography>
                     <Controller
                       name={`incomeStreams.${index}.incomeAmount`}
                       control={control}
@@ -176,7 +182,9 @@ const IncomeSection = ({
                   </Box>
 
                   <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
-                    <Typography sx={FORM_FIELD_LABEL_STYLES}>Frequency</Typography>
+                    <Typography sx={FORM_FIELD_LABEL_STYLES}>
+                      <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
+                    </Typography>
                     <FormControl
                       fullWidth
                       size="small"
