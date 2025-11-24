@@ -37,7 +37,7 @@ export default function TrackedOutboundLink({
     <a
       href={href}
       target={openInNewTab ? '_blank' : undefined}
-      rel={openInNewTab ? 'noopener' : undefined}
+      rel={openInNewTab ? 'noopener noreferrer' : undefined}
       onClick={handleClick}
       className={className}
       {...anchorProps}
