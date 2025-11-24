@@ -1,8 +1,8 @@
 import { useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { Controller, useFieldArray, SubmitHandler } from 'react-hook-form';
-import { Box, TextField, FormControl, Select, MenuItem, Typography, InputLabel } from '@mui/material';
+import { useFieldArray, SubmitHandler } from 'react-hook-form';
+import { Typography } from '@mui/material';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Context } from '../../../Wrapper/Wrapper';
@@ -10,14 +10,13 @@ import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
 import PrevAndContinueButtons from '../../../PrevAndContinueButtons/PrevAndContinueButtons';
 import useScreenApi from '../../../../Assets/updateScreen';
 import useStepForm from '../../stepForm';
-import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
 import { FormattedMessageType } from '../../../../Types/Questions';
 import { useConfig } from '../../../Config/configHook';
-import { createMenuItems } from '../../SelectHelperFunctions/SelectHelperFunctions';
-import { getCurrentMonthYear, YEARS, MAX_AGE } from '../../../../Assets/age';
-import { MONTHS } from '../utils/data';
+import { getCurrentMonthYear, MAX_AGE } from '../../../../Assets/age';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { ReactComponent as PersonIcon } from '../../../../Assets/icons/General/head.svg';
+import BasicInfoSection from '../sections/BasicInfoSection';
+import '../styles/HouseholdMemberBasicInfoPage.css';
 
 const HouseholdMemberBasicInfoPage = () => {
   const { formData } = useContext(Context);
@@ -164,18 +163,6 @@ const HouseholdMemberBasicInfoPage = () => {
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/1`);
   };
 
-  const monthMenuItems = createMenuItems(
-    MONTHS,
-    <FormattedMessage id="ageInput.selectMonth" defaultMessage="Select Month" />
-  );
-
-  const yearMenuItems = createMenuItems(
-    YEARS.reduce((acc, year) => {
-      acc[String(year)] = String(year);
-      return acc;
-    }, {} as Record<string, string>),
-    <FormattedMessage id="ageInput.selectYear" defaultMessage="Select Year" />
-  );
 
   return (
     <main className="benefits-form">
@@ -185,7 +172,7 @@ const HouseholdMemberBasicInfoPage = () => {
           defaultMessage="Tell us about each household member"
         />
       </QuestionHeader>
-      <Typography sx={{ marginBottom: '1.5rem', fontSize: '1rem', color: '#666' }}>
+      <Typography className="household-basic-info-page__subheader">
         <FormattedMessage
           id="householdDataBlock.basicInfo.subheader"
           defaultMessage="We'll ask about their birth date and relationship to you"
@@ -193,20 +180,12 @@ const HouseholdMemberBasicInfoPage = () => {
       </Typography>
 
       <form onSubmit={handleSubmit(formSubmitHandler)}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="household-basic-info-page__form-container">
           {fields.map((field, index) => (
-            <Box
-              key={field.id}
-              sx={{
-                padding: '1rem',
-                backgroundColor: 'var(--secondary-background-color)',
-                borderRadius: '8px',
-                border: '1px solid #e0e0e0',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                <PersonIcon style={{ width: '2rem', height: '2rem', fill: 'var(--primary-color)' }} />
-                <Typography sx={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--secondary-color)', fontFamily: 'var(--font-heading)' }}>
+            <div key={field.id} className="household-basic-info-page__person-card">
+              <div className="household-basic-info-page__person-header">
+                <PersonIcon className="household-basic-info-page__person-icon" />
+                <Typography className="household-basic-info-page__person-title">
                   {index === 0 ? (
                     <FormattedMessage id="householdDataBlock.basicInfo.you" defaultMessage="You" />
                   ) : (
@@ -217,96 +196,21 @@ const HouseholdMemberBasicInfoPage = () => {
                     />
                   )}
                 </Typography>
-              </Box>
+              </div>
 
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: '1rem' }}>
-                {/* Birth Month */}
-                <FormControl fullWidth error={errors.members?.[index]?.birthMonth !== undefined}>
-                  <InputLabel>
-                    <FormattedMessage id="ageInput.birthMonth" defaultMessage="Birth Month" />
-                  </InputLabel>
-                  <Controller
-                    name={`members.${index}.birthMonth`}
-                    control={control}
-                    render={({ field }) => (
-                      <Select {...field} label="Birth Month">
-                        {monthMenuItems}
-                      </Select>
-                    )}
-                  />
-                  {errors.members?.[index]?.birthMonth && (
-                    <Typography sx={{ color: 'error.main', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-                      <ErrorMessageWrapper fontSize="0.75rem">
-                        {errors.members[index]?.birthMonth?.message}
-                      </ErrorMessageWrapper>
-                    </Typography>
-                  )}
-                </FormControl>
-
-                {/* Birth Year */}
-                <FormControl fullWidth error={errors.members?.[index]?.birthYear !== undefined}>
-                  <Controller
-                    name={`members.${index}.birthYear`}
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        label={<FormattedMessage id="ageInput.birthYear" defaultMessage="Birth Year" />}
-                        variant="outlined"
-                        inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-                      />
-                    )}
-                  />
-                  {errors.members?.[index]?.birthYear && (
-                    <Typography sx={{ color: 'error.main', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-                      <ErrorMessageWrapper fontSize="0.75rem">
-                        {errors.members[index]?.birthYear?.message}
-                      </ErrorMessageWrapper>
-                    </Typography>
-                  )}
-                </FormControl>
-
-                {/* Relationship */}
-                <FormControl fullWidth error={errors.members?.[index]?.relationshipToHH !== undefined}>
-                  <InputLabel>
-                    <FormattedMessage
-                      id="householdDataBlock.relationshipToYou"
-                      defaultMessage="Relationship to you"
-                    />
-                  </InputLabel>
-                  <Controller
-                    name={`members.${index}.relationshipToHH`}
-                    control={control}
-                    render={({ field }) => (
-                      <Select {...field} label="Relationship to you" disabled={index === 0}>
-                        {index === 0 ? (
-                          <MenuItem value="headOfHousehold">
-                            <FormattedMessage id="relationship.self" defaultMessage="Self" />
-                          </MenuItem>
-                        ) : (
-                          createMenuItems(
-                            relationshipOptions,
-                            <FormattedMessage
-                              id="householdDataBlock.selectRelationship"
-                              defaultMessage="Select relationship"
-                            />
-                          )
-                        )}
-                      </Select>
-                    )}
-                  />
-                  {errors.members?.[index]?.relationshipToHH && (
-                    <Typography sx={{ color: 'error.main', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-                      <ErrorMessageWrapper fontSize="0.75rem">
-                        {errors.members[index]?.relationshipToHH?.message}
-                      </ErrorMessageWrapper>
-                    </Typography>
-                  )}
-                </FormControl>
-              </Box>
-            </Box>
+              <div className="household-basic-info-page__fields-grid">
+                <BasicInfoSection
+                  control={control}
+                  errors={errors}
+                  fieldPrefix={`members.${index}`}
+                  isFirstMember={index === 0}
+                  relationshipOptions={relationshipOptions}
+                  showSectionHeader={false}
+                />
+              </div>
+            </div>
           ))}
-        </Box>
+        </div>
 
         <PrevAndContinueButtons backNavigationFunction={backNavigationFunction} />
       </form>

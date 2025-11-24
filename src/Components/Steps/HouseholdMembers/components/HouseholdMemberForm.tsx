@@ -394,7 +394,7 @@ const HouseholdMemberForm = () => {
           <BasicInfoSection
             control={control}
             errors={errors}
-            pageNumber={pageNumber}
+            isFirstMember={pageNumber === 1}
             relationshipOptions={relationshipOptions}
           />
         )}

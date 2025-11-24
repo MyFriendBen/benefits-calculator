@@ -38,7 +38,7 @@ interface IncomeSectionProps {
   setValue: (name: any, value: any) => void;
   incomeCategories: Record<string, FormattedMessageType>;
   incomeOptions: Record<string, Record<string, FormattedMessageType>>;
-  frequencyMenuItems: JSX.Element | JSX.Element[];
+  frequencyMenuItems: JSX.Element[];
 }
 
 const IncomeSection = ({
@@ -57,6 +57,12 @@ const IncomeSection = ({
     incomeCategories,
     <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectCategory" defaultMessage="Select category" />,
   );
+
+  // Helper to safely get error for income stream field
+  const getIncomeStreamError = (index: number, fieldName: string) => {
+    const incomeStreamsErrors = errors.incomeStreams as any;
+    return incomeStreamsErrors?.[index]?.[fieldName];
+  };
 
   return (
     <Box sx={SECTION_STYLES}>
@@ -86,7 +92,7 @@ const IncomeSection = ({
                   <FormControl
                     fullWidth
                     size="small"
-                    error={errors.incomeStreams?.[index]?.incomeCategory !== undefined}
+                    error={getIncomeStreamError(index, 'incomeCategory') !== undefined}
                   >
                     <Controller
                       name={`incomeStreams.${index}.incomeCategory`}
@@ -115,7 +121,7 @@ const IncomeSection = ({
                     <FormControl
                       fullWidth
                       size="small"
-                      error={errors.incomeStreams?.[index]?.incomeStreamName !== undefined}
+                      error={getIncomeStreamError(index, 'incomeStreamName') !== undefined}
                     >
                       <Controller
                         name={`incomeStreams.${index}.incomeStreamName`}
@@ -160,7 +166,7 @@ const IncomeSection = ({
                           inputProps={NUM_PAD_PROPS}
                           onChange={handleNumbersOnly(field.onChange, DOLLARS)}
                           sx={WHITE_INPUT_STYLES}
-                          error={errors.incomeStreams?.[index]?.incomeAmount !== undefined}
+                          error={getIncomeStreamError(index, 'incomeAmount') !== undefined}
                           InputProps={{
                             startAdornment: <InputAdornment position="start">$</InputAdornment>,
                           }}
@@ -174,7 +180,7 @@ const IncomeSection = ({
                     <FormControl
                       fullWidth
                       size="small"
-                      error={errors.incomeStreams?.[index]?.incomeFrequency !== undefined}
+                      error={getIncomeStreamError(index, 'incomeFrequency') !== undefined}
                     >
                       <Controller
                         name={`incomeStreams.${index}.incomeFrequency`}
