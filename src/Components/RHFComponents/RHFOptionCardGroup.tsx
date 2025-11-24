@@ -43,6 +43,29 @@ const RHFOptionCardGroup = <T extends FieldValues>({
 
   const handleOptionCardClick = async (optionName: string) => {
     const updatedValue = !fields[optionName];
+
+    // Handle mutual exclusivity with "none"
+    if (optionName === 'none' && updatedValue) {
+      // If selecting "none", deselect all other options
+      Object.keys(fields).forEach((key) => {
+        if (key !== 'none') {
+          setValue(`${name}.${key}` as Path<T>, false as PathValue<T, Path<T>>, {
+            shouldValidate: false,
+            shouldDirty: true,
+          });
+        }
+      });
+    } else if (optionName !== 'none' && updatedValue) {
+      // If selecting any option other than "none", deselect "none"
+      if (fields.none) {
+        setValue(`${name}.none` as Path<T>, false as PathValue<T, Path<T>>, {
+          shouldValidate: false,
+          shouldDirty: true,
+        });
+      }
+    }
+
+    // Set the clicked option's value
     setValue(`${name}.${optionName}` as Path<T>, updatedValue as PathValue<T, Path<T>>, {
       shouldValidate: false,
       shouldDirty: true,

@@ -55,6 +55,13 @@ const HouseholdMemberForm = () => {
   const currentMemberIndex = pageNumber - 1;
   const householdMemberFormData = formData.householdData[currentMemberIndex] as HouseholdData | undefined;
 
+  console.log('🔍 HouseholdMemberForm Debug:', {
+    pageNumber,
+    currentMemberIndex,
+    householdMemberFormData,
+    conditions: householdMemberFormData?.conditions,
+  });
+
   // Show basic info (birth date & relationship) when:
   // 1. Household size is 1 (only the user), OR
   // 2. User is editing from a summary card (location state indicates isEditing)
