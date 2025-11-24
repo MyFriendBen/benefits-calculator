@@ -48,7 +48,9 @@ function checkSurveyEligibility(formData: FormData, whiteLabel: string | undefin
   }
 
   // Check locale (must be English or Spanish)
-  const isEligibleLocale = ELIGIBLE_LOCALES.includes(locale as typeof ELIGIBLE_LOCALES[number]);
+  // Support locale formats like 'en', 'en-US', 'es', 'es-MX', etc.
+  const localePrefix = locale.toLowerCase().split('-')[0];
+  const isEligibleLocale = ELIGIBLE_LOCALES.includes(localePrefix as typeof ELIGIBLE_LOCALES[number]);
 
   if (!isEligibleLocale) {
     return false;
