@@ -125,7 +125,7 @@ describe('ResultsPopup', () => {
       const link = screen.getByRole('link', { name: mockLinkText });
       expect(link).toHaveAttribute('href', mockLinkUrl);
       expect(link).toHaveAttribute('target', '_blank');
-      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+      expect(link).toHaveAttribute('rel', 'noopener');
     });
   });
 
