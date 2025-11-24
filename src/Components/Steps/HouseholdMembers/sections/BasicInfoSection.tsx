@@ -5,8 +5,9 @@ import QuestionQuestion from '../../../QuestionComponents/QuestionQuestion';
 import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
 import { createMenuItems } from '../../SelectHelperFunctions/SelectHelperFunctions';
 import { FormattedMessageType } from '../../../../Types/Questions';
-import { SECTION_STYLES, BASIC_INFO_GRID_STYLES } from '../utils/constants';
+import { BASIC_INFO_GRID_STYLES } from '../utils/constants';
 import { MONTHS } from '../utils/data';
+import '../styles/HouseholdMemberSections.css';
 
 interface BasicInfoSectionProps {
   control: Control<any>;
@@ -143,7 +144,7 @@ const BasicInfoSection = ({
 
   // With section header (for HouseholdMemberForm)
   return (
-    <Box id="basic-info-section" sx={SECTION_STYLES}>
+    <Box id="basic-info-section" className="section">
       <QuestionQuestion>
         <FormattedMessage id="householdDataBlock.basicInfo" defaultMessage="Basic Information" />
       </QuestionQuestion>

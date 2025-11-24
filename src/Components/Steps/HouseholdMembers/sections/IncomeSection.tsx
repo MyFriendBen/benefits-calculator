@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   FormControl,
+  FormHelperText,
   IconButton,
   InputAdornment,
   Select,
@@ -16,17 +17,12 @@ import { Control, Controller, UseFieldArrayAppend, UseFieldArrayRemove, FieldArr
 import QuestionQuestion from '../../../QuestionComponents/QuestionQuestion';
 import QuestionDescription from '../../../QuestionComponents/QuestionDescription';
 import HelpButton from '../../../HelpBubbleIcon/HelpButton';
+import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
 import { createMenuItems } from '../../SelectHelperFunctions/SelectHelperFunctions';
 import { FormattedMessageType } from '../../../../Types/Questions';
 import { DOLLARS, handleNumbersOnly, NUM_PAD_PROPS } from '../../../../Assets/numInputHelpers';
-import {
-  SECTION_STYLES,
-  INCOME_BOX_STYLES,
-  FORM_FIELD_LABEL_STYLES,
-  WHITE_INPUT_STYLES,
-  INCOME_BUTTON_STYLES
-} from '../utils/constants';
-import { EMPTY_INCOME_STREAM, IncomeStreamFormData } from '../utils/types';
+import { EMPTY_INCOME_STREAM } from '../utils/types';
+import '../styles/HouseholdMemberSections.css';
 
 interface IncomeSectionProps {
   control: Control<any>;
@@ -65,7 +61,7 @@ const IncomeSection = ({
   };
 
   return (
-    <Box id="income-section" sx={SECTION_STYLES}>
+    <Box id="income-section" className="section">
       <QuestionQuestion>
         <FormattedMessage id="householdDataBlock.incomeSources" defaultMessage="Income Sources" />
         <HelpButton>
@@ -81,14 +77,24 @@ const IncomeSection = ({
           defaultMessage="Enter income for yourself. You can enter income for other household members later."
         />
       </QuestionDescription>
+      {errors.incomeStreams && (
+        <FormHelperText sx={{ ml: 0, mb: 1 }}>
+          <ErrorMessageWrapper fontSize="var(--error-message-font-size)">
+            <FormattedMessage
+              id="householdDataBlock.incomeStreamsError"
+              defaultMessage="Please complete all income fields or remove this income source."
+            />
+          </ErrorMessageWrapper>
+        </FormHelperText>
+      )}
       <Stack spacing={2} sx={{ marginTop: '0.5rem' }}>
         {fields.map((field, index) => {
           return (
-            <Box key={field.id} sx={INCOME_BOX_STYLES}>
+            <Box key={field.id} className="income-box">
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
                 {/* First Row: Income Category */}
                 <Box sx={{ width: '100%' }}>
-                  <Typography sx={FORM_FIELD_LABEL_STYLES}>
+                  <Typography className="form-field-label">
                     <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Category" />
                   </Typography>
                   <FormControl
@@ -103,7 +109,7 @@ const IncomeSection = ({
                         <Select
                           {...field}
                           displayEmpty
-                          sx={WHITE_INPUT_STYLES}
+                          sx={{ backgroundColor: '#fff' }}
                           onChange={(e) => {
                             field.onChange(e);
                             setValue(`incomeStreams.${index}.incomeStreamName`, '');
@@ -119,7 +125,7 @@ const IncomeSection = ({
                 {/* Second Row: Specific Type, Amount, Frequency */}
                 <Box sx={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                   <Box sx={{ flex: '1 1 200px', minWidth: '150px' }}>
-                    <Typography sx={FORM_FIELD_LABEL_STYLES}>
+                    <Typography className="form-field-label">
                       <FormattedMessage id="personIncomeBlock.specificType" defaultMessage="Specific Type" />
                     </Typography>
                     <FormControl
@@ -144,7 +150,7 @@ const IncomeSection = ({
                             <Select
                               {...field}
                               displayEmpty
-                              sx={WHITE_INPUT_STYLES}
+                              sx={{ backgroundColor: '#fff' }}
                               disabled={!selectedCategory}
                             >
                               {specificTypeMenuItems}
@@ -156,7 +162,7 @@ const IncomeSection = ({
                   </Box>
 
                   <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
-                    <Typography sx={FORM_FIELD_LABEL_STYLES}>
+                    <Typography className="form-field-label">
                       <FormattedMessage id="personIncomeBlock.preTaxAmount" defaultMessage="Pre-Tax Amount" />
                     </Typography>
                     <Controller
@@ -171,7 +177,7 @@ const IncomeSection = ({
                           placeholder="0.00"
                           inputProps={NUM_PAD_PROPS}
                           onChange={handleNumbersOnly(field.onChange, DOLLARS)}
-                          sx={WHITE_INPUT_STYLES}
+                          sx={{ backgroundColor: '#fff' }}
                           error={getIncomeStreamError(index, 'incomeAmount') !== undefined}
                           InputProps={{
                             startAdornment: <InputAdornment position="start">$</InputAdornment>,
@@ -182,7 +188,7 @@ const IncomeSection = ({
                   </Box>
 
                   <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
-                    <Typography sx={FORM_FIELD_LABEL_STYLES}>
+                    <Typography className="form-field-label">
                       <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
                     </Typography>
                     <FormControl
@@ -194,7 +200,7 @@ const IncomeSection = ({
                         name={`incomeStreams.${index}.incomeFrequency`}
                         control={control}
                         render={({ field }) => (
-                          <Select {...field} displayEmpty sx={WHITE_INPUT_STYLES}>
+                          <Select {...field} displayEmpty sx={{ backgroundColor: '#fff' }}>
                             {frequencyMenuItems}
                           </Select>
                         )}
@@ -221,7 +227,7 @@ const IncomeSection = ({
           onClick={() => append(EMPTY_INCOME_STREAM as any)}
           startIcon={<AddIcon />}
           type="button"
-          sx={INCOME_BUTTON_STYLES}
+          className="income-button"
         >
           <FormattedMessage id="personIncomeBlock.return-addIncomeButton" defaultMessage="+ Add Another Income Source" />
         </Button>

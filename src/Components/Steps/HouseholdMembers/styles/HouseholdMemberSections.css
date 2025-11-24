@@ -1,0 +1,33 @@
+/* Household Member Form Section Styles */
+
+.section {
+  margin: 0.75rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--divider-color);
+}
+
+.income-box {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background-color: var(--input-section-background);
+  border-radius: 8px;
+}
+
+.form-field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.white-input {
+  background-color: #fff;
+}
+
+.income-button {
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-transform: none;
+  font-size: 1rem;
+}

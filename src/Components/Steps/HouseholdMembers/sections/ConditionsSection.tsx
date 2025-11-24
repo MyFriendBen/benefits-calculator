@@ -8,7 +8,7 @@ import RHFOptionCardGroup from '../../../RHFComponents/RHFOptionCardGroup';
 import { ReactComponent as NoneIcon } from '../../../../Assets/icons/General/OptionCard/HealthInsurance/none.svg';
 import { Conditions } from '../../../../Types/FormData';
 import { ConditionOptions } from '../utils/types';
-import { SECTION_STYLES } from '../utils/constants';
+import '../styles/HouseholdMemberSections.css';
 
 interface ConditionsSectionProps {
   errors: FieldErrors<any>;
@@ -45,7 +45,7 @@ const ConditionsSection = ({
   };
 
   return (
-    <Box id="conditions-section" sx={SECTION_STYLES}>
+    <Box id="conditions-section" className="section">
       <QuestionQuestion>
         <FormattedMessage
           id="householdDataBlock.specialCircumstances"
@@ -60,7 +60,7 @@ const ConditionsSection = ({
       </QuestionDescription>
       {errors.conditions && (
         <FormHelperText sx={{ ml: 0, mb: 1 }}>
-          <ErrorMessageWrapper fontSize="1rem">{errors.conditions.message as string}</ErrorMessageWrapper>
+          <ErrorMessageWrapper fontSize="var(--error-message-font-size)">{errors.conditions.message as string}</ErrorMessageWrapper>
         </FormHelperText>
       )}
       <RHFOptionCardGroup

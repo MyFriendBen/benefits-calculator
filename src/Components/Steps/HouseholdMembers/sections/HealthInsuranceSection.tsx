@@ -7,7 +7,7 @@ import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
 import RHFOptionCardGroup from '../../../RHFComponents/RHFOptionCardGroup';
 import { HealthInsurance } from '../../../../Types/FormData';
 import { HealthInsuranceOptions } from '../utils/types';
-import { SECTION_STYLES } from '../utils/constants';
+import '../styles/HouseholdMemberSections.css';
 
 interface HealthInsuranceSectionProps {
   control: Control<any>;
@@ -31,7 +31,7 @@ const HealthInsuranceSection = ({
 }: HealthInsuranceSectionProps) => {
   return (
     <div id="health-insurance-section" className="section-container">
-      <Stack sx={SECTION_STYLES} className="section">
+      <Stack className="section">
         <QuestionQuestion>
           <FormattedMessage id="questions.healthInsurance" defaultMessage="Health Insurance" />
         </QuestionQuestion>
@@ -40,7 +40,7 @@ const HealthInsuranceSection = ({
         </QuestionDescription>
         {errors.healthInsurance && (
           <FormHelperText sx={{ ml: 0, mb: 1 }}>
-            <ErrorMessageWrapper fontSize="1rem">{errors.healthInsurance.message as string}</ErrorMessageWrapper>
+            <ErrorMessageWrapper fontSize="var(--error-message-font-size)">{errors.healthInsurance.message as string}</ErrorMessageWrapper>
           </FormHelperText>
         )}
         <RHFOptionCardGroup
