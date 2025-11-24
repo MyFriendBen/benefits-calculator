@@ -37,8 +37,10 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
   const handleEditBtnSubmit = async (memberIndex: number) => {
     // Navigate directly without validation when editing a member
     // Validation will happen when they submit that member's form
-    // Pass state to indicate we're in edit mode
-    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, { state: { isEditing: true } });
+    // Pass state to indicate we're in edit mode and where to return
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, {
+      state: { isEditing: true, returnToPage: pageNumber }
+    });
   };
 
   const formatToUSD = (num: number) => {

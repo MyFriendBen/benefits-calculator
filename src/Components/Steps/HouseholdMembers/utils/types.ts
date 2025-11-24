@@ -4,6 +4,7 @@ import { HealthInsurance, Conditions } from '../../../Types/FormData';
 
 export type LocationState = {
   isEditing?: boolean;
+  returnToPage?: number;
 };
 
 export type HealthInsuranceOption = {

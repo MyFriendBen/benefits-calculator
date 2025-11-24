@@ -101,6 +101,13 @@ const HouseholdMemberForm = () => {
       return;
     }
 
+    // If user is editing from a summary card, return them to the page they came from
+    const locationState = location.state as LocationState | null;
+    if (locationState?.isEditing && locationState?.returnToPage !== undefined) {
+      navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${locationState.returnToPage}`);
+      return;
+    }
+
     if (Number(pageNumber + 1) <= formData.householdSize) {
       navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${pageNumber + 1}`);
     } else {
