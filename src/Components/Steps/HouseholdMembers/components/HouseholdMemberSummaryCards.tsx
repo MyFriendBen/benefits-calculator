@@ -1,18 +1,17 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Box, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import { calcAge, hasBirthMonthYear, useFormatBirthMonthYear } from '../../../Assets/age';
-import { useConfig } from '../../Config/configHook';
-import { useTranslateNumber } from '../../../Assets/languageOptions';
-import { FormData, HouseholdData } from '../../../Types/FormData';
-import { FormattedMessageType, QuestionName } from '../../../Types/Questions';
+import { calcAge } from '../../../../Assets/age';
+import { useConfig } from '../../../Config/configHook';
+import { useTranslateNumber } from '../../../../Assets/languageOptions';
+import { HouseholdData } from '../../../../Types/FormData';
+import { FormattedMessageType, QuestionName } from '../../../../Types/Questions';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useContext } from 'react';
-import { WrapperContext } from '../../../Types/WrapperContext';
-import { useStepNumber } from '../../../Assets/stepDirectory';
-import { Context } from '../../Wrapper/Wrapper';
-import './HHMSummaryCards.css';
-import { calcMemberYearlyIncome } from '../../../Assets/income';
+import { useStepNumber } from '../../../../Assets/stepDirectory';
+import { Context } from '../../../Wrapper/Wrapper';
+import '../styles/HouseholdMemberSummaryCards.css';
+import { calcMemberYearlyIncome } from '../../../../Assets/income';
 
 type HHMSummariesProps = {
   activeMemberData: HouseholdData;
@@ -34,7 +33,6 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
     defaultMessage: 'edit household member',
   });
   const navigate = useNavigate();
-  const formatBirthMonthYear = useFormatBirthMonthYear();
 
   const handleEditBtnSubmit = async (memberIndex: number) => {
     // Navigate directly without validation when editing a member
@@ -54,7 +52,7 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
     income: number,
     relationship_options: Record<string, FormattedMessageType>,
   ) => {
-    const { relationshipToHH, birthYear, birthMonth } = memberData;
+    const { relationshipToHH } = memberData;
     const containerClassName = `member-added-container ${
       memberIndex + 1 === pageNumber ? 'current-household-member' : ''
     }`;

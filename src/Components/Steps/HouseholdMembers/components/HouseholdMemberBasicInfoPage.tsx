@@ -5,19 +5,19 @@ import { Controller, useFieldArray, SubmitHandler } from 'react-hook-form';
 import { Box, TextField, FormControl, Select, MenuItem, Typography, InputLabel } from '@mui/material';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Context } from '../../Wrapper/Wrapper';
-import QuestionHeader from '../../QuestionComponents/QuestionHeader';
-import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
-import useScreenApi from '../../../Assets/updateScreen';
-import useStepForm from '../stepForm';
-import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
-import { FormattedMessageType } from '../../../Types/Questions';
-import { useConfig } from '../../Config/configHook';
-import { createMenuItems } from '../SelectHelperFunctions/SelectHelperFunctions';
-import { getCurrentMonthYear, YEARS, MAX_AGE } from '../../../Assets/age';
-import { MONTHS } from './MONTHS';
-import { useStepNumber } from '../../../Assets/stepDirectory';
-import { ReactComponent as PersonIcon } from '../../../Assets/icons/General/head.svg';
+import { Context } from '../../../Wrapper/Wrapper';
+import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
+import PrevAndContinueButtons from '../../../PrevAndContinueButtons/PrevAndContinueButtons';
+import useScreenApi from '../../../../Assets/updateScreen';
+import useStepForm from '../../stepForm';
+import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
+import { FormattedMessageType } from '../../../../Types/Questions';
+import { useConfig } from '../../../Config/configHook';
+import { createMenuItems } from '../../SelectHelperFunctions/SelectHelperFunctions';
+import { getCurrentMonthYear, YEARS, MAX_AGE } from '../../../../Assets/age';
+import { MONTHS } from '../utils/data';
+import { useStepNumber } from '../../../../Assets/stepDirectory';
+import { ReactComponent as PersonIcon } from '../../../../Assets/icons/General/head.svg';
 
 const HouseholdMemberBasicInfoPage = () => {
   const { formData } = useContext(Context);
@@ -31,8 +31,9 @@ const HouseholdMemberBasicInfoPage = () => {
   const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
 
   const backNavigationFunction = () => {
-    if (uuid === undefined) {
-      throw new Error('uuid is undefined');
+    if (!uuid) {
+      console.error('UUID is undefined');
+      return;
     }
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId - 1}`);
   };
@@ -122,7 +123,7 @@ const HouseholdMemberBasicInfoPage = () => {
       const existingMember = formData.householdData[index];
       return {
         ...existingMember,
-        id: existingMember?.id ?? Date.now() + index,
+        id: existingMember?.id ?? crypto.randomUUID(),
         frontendId: existingMember?.frontendId ?? crypto.randomUUID(),
         birthMonth: Number(member.birthMonth),
         birthYear: Number(member.birthYear),
@@ -147,6 +148,7 @@ const HouseholdMemberBasicInfoPage = () => {
           emergency_medicaid: false,
           family_planning: false,
           va: false,
+          mass_health: false,
         },
       };
     });

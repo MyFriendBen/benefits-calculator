@@ -23,7 +23,7 @@ import SelectStatePage from './Components/Steps/SelectStatePage';
 import RedirectToWhiteLabel from './Components/RouterUtil/RedirectToWhiteLabel';
 import CurrentBenefits from './Components/CurrentBenefits/CurrentBenefits';
 import EcHouseholdMemberForm from './Components/EnergyCalculator/Steps/HouseholdMemberForm';
-import HouseholdMemberForm from './Components/Steps/HouseholdMembers/HouseholdMemberForm';
+import HouseholdMemberRouter from './Components/Steps/HouseholdMembers';
 import EnergyCalculatorLandingPage from './Components/EnergyCalculator/LandingPage/LandingPage';
 import WhiteLabelRouter from './Components/RouterUtil/WhiteLabelRouter';
 import ValidateUuid from './Components/RouterUtil/ValidateUuid';
@@ -199,7 +199,7 @@ const App = () => {
                     path={`step-${householdMemberStepNumber}/:page`}
                     element={
                       <ValidateUuid>
-                        <HouseholdMemberForm key={window.location.href} />
+                        <HouseholdMemberRouter key={window.location.href} />
                       </ValidateUuid>
                     }
                   />
