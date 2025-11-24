@@ -11,6 +11,7 @@ import {
   EnergyCalculatorItemType,
   EnergyCalculatorRebate,
   EnergyCalculatorRebateCategoryType,
+  ENERGY_CALCULATOR_CATEGORY_MAP,
 } from './rebateTypes';
 import QuestionDescription from '../../QuestionComponents/QuestionDescription';
 
@@ -144,13 +145,74 @@ type RebateComponentProps = {
   categoryType?: EnergyCalculatorRebateCategoryType;
 };
 
+/**
+ * Determines which page/category appears most frequently among the items
+ * Used for displaying page-based titles when items span multiple groups/pages
+ */
+const getMostFrequentPage = (items: EnergyCalculatorItemType[]): EnergyCalculatorRebateCategoryType | null => {
+  const pageCounts = items.reduce((counts, item) => {
+    const page = ENERGY_CALCULATOR_CATEGORY_MAP[item];
+    if (page) counts[page] = (counts[page] || 0) + 1;
+    return counts;
+  }, {} as Partial<Record<EnergyCalculatorRebateCategoryType, number>>);
+
+  return Object.entries(pageCounts).reduce(
+    (max, [page, count]) => (count > (max.count ?? 0) ? { page: page as EnergyCalculatorRebateCategoryType, count } : max),
+    { page: null as EnergyCalculatorRebateCategoryType | null, count: 0 }
+  ).page;
+};
+
+/**
+ * Returns the page-specific title for rebates spanning multiple groups/pages
+ */
+const getPageBasedTitle = (page: EnergyCalculatorRebateCategoryType): FormattedMessageType => {
+  switch (page) {
+    case 'efficiencyWeatherization':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.pageEfficiencyWeatherization"
+          defaultMessage="efficiency & weatherization"
+        />
+      );
+    case 'waterHeater':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.pageWaterHeater"
+          defaultMessage="water heater"
+        />
+      );
+    case 'hvac':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.pageHVAC"
+          defaultMessage="heating, ventilation & cooling"
+        />
+      );
+    case 'stove':
+      return (
+        <FormattedMessage
+          id="energyCalculator.rebatePage.title.itemName.pageStove"
+          defaultMessage="upgrade"
+        />
+      );
+  }
+};
+
 function ItemName({ rebate, categoryType }: RebateComponentProps) {
   const itemsToRender = rebate.items;
 
   if (itemsToRender.length > 1) {
     const groupName = multipleItemsName(itemsToRender);
-    // If no group match found, use category fallback or generic text
+    // If no group match found, check if items span multiple groups/pages
     if (groupName === null) {
+      // Determine which page appears most frequently among the items
+      const mostFrequentPage = getMostFrequentPage(itemsToRender);
+
+      if (mostFrequentPage) {
+        return getPageBasedTitle(mostFrequentPage);
+      }
+
+      // Final fallback if no page can be determined
       if (categoryType) {
         return CATEGORY_LOWERCASE_MAP[categoryType];
       }

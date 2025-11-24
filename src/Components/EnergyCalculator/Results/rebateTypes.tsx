@@ -75,6 +75,7 @@ export interface EnergyCalculatorIncentive {
   short_description?: string;
 
   eligible?: boolean;
+  ira_status?: 'active' | 'paused' | 'inactive';
 }
 
 export interface EnergyCalculatorAPILocation {
