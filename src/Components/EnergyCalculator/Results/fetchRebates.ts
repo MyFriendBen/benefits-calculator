@@ -82,7 +82,9 @@ function createQueryString(formData: FormData, lang: Language) {
 
 async function getRebates(formData: FormData, lang: Language) {
   const queryString = createQueryString(formData, lang);
-  const res = await fetch(`https://api.rewiringamerica.org/api/v1/calculator${queryString}`, {
+  const apiUrl = `https://api.rewiringamerica.org/api/v1/calculator${queryString}`;
+
+  const res = await fetch(apiUrl, {
     method: 'GET',
     headers: {
       Authorization: API_KEY,
@@ -100,7 +102,8 @@ async function getRebates(formData: FormData, lang: Language) {
       const category = ENERGY_CALCULATOR_CATEGORY_MAP[item];
 
       if (category === undefined) {
-        continue;
+        // skip if uncategorized
+        continue
       }
 
       categories.add(category);
