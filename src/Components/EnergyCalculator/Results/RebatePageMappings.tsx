@@ -18,6 +18,15 @@ import QuestionDescription from '../../QuestionComponents/QuestionDescription';
 // ============================================================================
 // CONFIGURATION OBJECTS
 // ============================================================================
+//
+// This file handles display logic for energy calculator rebates. The main flow is:
+// 1. Configuration maps define all display strings (item names, units, payment types)
+// 2. Helper functions determine which strings to use based on rebate data
+// 3. Components (ItemName, EnergyCalculatorRebateCardTitle) render the final UI
+//
+// To add a new item type: Add an entry to ITEM_NAME_MAP
+// To add a new payment method: Add an entry to PAYMENT_METHOD_MAP
+// ============================================================================
 
 type MessageConfig = {
   id: string;
@@ -150,8 +159,12 @@ const ITEM_NAME_MAP: Record<EnergyCalculatorItemType, MessageConfig> = {
 
 /**
  * Item groups for multi-item rebates
- * Note: Groups are checked in order, so if one group is a subset of another,
- * the smaller group should be listed first (e.g. air source heat pumps before generic heat pumps)
+ *
+ * These groups define unified names for rebates covering multiple related items.
+ * Example: A rebate for ['ducted_heat_pump', 'ductless_heat_pump'] displays as "an air source heat pump"
+ *
+ * IMPORTANT: Groups are checked in order. If one group is a subset of another,
+ * list the smaller group FIRST (e.g., 'air_source_heat_pump' before 'generic_heat_pump')
  */
 const ITEM_GROUPS: Array<{
   group: ItemGroup;
@@ -215,6 +228,10 @@ const ITEM_GROUPS: Array<{
 
 /**
  * Page-based titles for multi-item rebates spanning multiple categories
+ *
+ * Used when rebate items don't match a predefined group but span multiple item types.
+ * The most frequently occurring category among the items determines which title to use.
+ * Example: A rebate with 2 hvac items and 1 weatherization item → "heating, ventilation & cooling"
  */
 const PAGE_TITLE_MAP: Record<EnergyCalculatorRebateCategoryType, MessageConfig> = {
   efficiencyWeatherization: {
@@ -361,6 +378,16 @@ const getSingleItemName = (item: EnergyCalculatorItemType): FormattedMessageType
 
 /**
  * Gets the display name for multiple items
+ *
+ * Three-tier fallback strategy for multi-item rebates:
+ * 1. Predefined groups: Check if ALL items belong to a known group (ITEM_GROUPS)
+ *    Example: ['ducted_heat_pump', 'ductless_heat_pump'] → "an air source heat pump"
+ *
+ * 2. Most frequent category: If items span multiple groups, use the most common category
+ *    Example: ['ducted_heat_pump', 'electric_panel'] → "heating, ventilation & cooling" (hvac wins)
+ *
+ * 3. Generic fallback: If no clear category emerges
+ *    Example: Items from multiple categories with no clear winner → "upgrades"
  */
 const getMultiItemName = (items: EnergyCalculatorItemType[]): FormattedMessageType => {
   // First, try to match a predefined group
@@ -386,6 +413,14 @@ const getMultiItemName = (items: EnergyCalculatorItemType[]): FormattedMessageTy
 
 /**
  * Renders the item name for a rebate (handles single and multiple items)
+ *
+ * Logic flow:
+ * - Empty items → return null
+ * - Single item → lookup in ITEM_NAME_MAP
+ * - Multiple items → try these in order:
+ *   1. Match predefined group (e.g., "insulation", "heat pump")
+ *   2. Use most frequent category page (e.g., "efficiency & weatherization")
+ *   3. Fallback to generic "upgrades"
  */
 function ItemName({ rebate }: RebateComponentProps) {
   const items = rebate.items;
@@ -411,6 +446,14 @@ const FormatUnit = ({ unit }: { unit: EnergyCalculatorAmountUnit }) => {
 
 /**
  * Formats a title for a rebate card based on amount type
+ *
+ * Generates titles like:
+ * - "Up to $8,000 off a heat pump" (dollar_amount with max)
+ * - "$1,200 off insulation" (dollar_amount without max)
+ * - "30% of cost of a heat pump, up to $2,000" (percent with max)
+ * - "$8/square foot off insulation, up to $1,600" (dollars_per_unit with max)
+ *
+ * The item name is determined by ItemName component (see its docs for logic)
  */
 export function EnergyCalculatorRebateCardTitle({ rebate }: RebateComponentProps) {
   const amount = rebate.amount;
