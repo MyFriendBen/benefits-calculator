@@ -30,12 +30,18 @@ const ConditionsSection = ({
   const noneOption = {
     none: {
       icon: <NoneIcon className="option-card-icon" />,
-      text: (
-        <FormattedMessage
-          id="conditions.none"
-          defaultMessage="I don't have any of these circumstances"
-        />
-      ),
+      text:
+        pageNumber === 1 ? (
+          <FormattedMessage
+            id="conditions.none"
+            defaultMessage="I don't have any of these circumstances"
+          />
+        ) : (
+          <FormattedMessage
+            id="conditions.none-they"
+            defaultMessage="They don't have any of these circumstances"
+          />
+        ),
     },
   };
 
