@@ -1,7 +1,7 @@
 import { useContext, useState, useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useResultsContext } from '../Results';
-import { Button, Typography, Tooltip, Select, MenuItem, FormControl, useMediaQuery, useTheme } from '@mui/material';
+import { Button, Typography, Select, MenuItem, FormControl, useMediaQuery, Tooltip } from '@mui/material';
 import {
   calculatedCitizenshipFilters,
   CitizenLabelOptions,
@@ -27,8 +27,7 @@ export const Filter = () => {
   const { filtersChecked, setFiltersChecked } = useResultsContext();
   const { formData } = useContext(Context);
   const intl = useIntl();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery('(max-width: 900px)');
 
   // Get currently selected citizenship status from filters
   const getSelectedCitizenship = (): CitizenLabelOptions => {
@@ -88,12 +87,17 @@ export const Filter = () => {
             <Tooltip
               key={option}
               title={
-                <div className="citizenship-tooltip">
-                  <Typography variant="body2">{citizenshipFilterConfig[option].tooltip}</Typography>
-                </div>
+                <Typography variant="body2" className="citizenship-tooltip-text">
+                  {citizenshipFilterConfig[option].tooltip}
+                </Typography>
               }
               placement="top"
               arrow
+              componentsProps={{
+                tooltip: {
+                  className: 'citizenship-tooltip-card',
+                },
+              }}
             >
               <Button
                 className={`citizenship-option-button ${isSelected ? 'selected' : ''}`}
@@ -154,7 +158,7 @@ export const Filter = () => {
         <Typography variant="body2" color="text.secondary" className="help-text">
           <FormattedMessage
             id="filterSection.citizenHelpText"
-            defaultMessage="Household members may have mixed immigration status. This means that some people in your home may qualify for benefits even if others do not. Use this filter to see how a person's status affects their ability to qualify. If you sign up for a public benefit or file a tax return, your family's information may be shared with immigration officials."
+            defaultMessage="Select a citizenship status to see which benefits that person may qualify for. If your household has members with different statuses, you can check each one separately to see their options. This tool is completely private—we do not store or share any information about your selections."
           />
         </Typography>
       </div>
