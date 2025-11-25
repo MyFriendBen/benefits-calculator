@@ -55,19 +55,6 @@ export function ResultsCard({ name, detail1, detail2, link, flags = [], containe
 
   const isMobile = size < 775 ? true : false;
 
-  type ConditonalWrapperProps = {
-    children: React.ReactElement;
-    condition: boolean;
-    wrapper: (children: React.ReactElement) => JSX.Element;
-  };
-  const ConditonalWrapper: React.FC<ConditonalWrapperProps> = ({ condition, wrapper, children }) => {
-    if (condition) {
-      return wrapper(children);
-    }
-
-    return children;
-  };
-
   const containerClass = 'result-program-container ' + containerClassNames.join(' ');
 
   return (
@@ -81,23 +68,22 @@ export function ResultsCard({ name, detail1, detail2, link, flags = [], containe
           );
         })}
       </div>
-      <ConditonalWrapper
-        condition={isMobile}
-        wrapper={(children) => <div className="result-program-more-info-wrapper">{children}</div>}
-      >
-        <>
+      {isMobile ? (
+        <div className="result-program-more-info-wrapper">
           <div className="result-program-more-info">
             <Link to={link}>{name}</Link>
           </div>
-          {isMobile && (
-            <div className="result-program-more-info-button">
-              <Link to={link} data-testid="more-info-link">
-                <FormattedMessage id="more-info" defaultMessage="More Info" />
-              </Link>
-            </div>
-          )}
-        </>
-      </ConditonalWrapper>
+          <div className="result-program-more-info-button">
+            <Link to={link} data-testid="more-info-link">
+              <FormattedMessage id="more-info" defaultMessage="More Info" />
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="result-program-more-info">
+          <Link to={link}>{name}</Link>
+        </div>
+      )}
       <hr />
       <div className="result-program-details-wrapper">
         <ResultsCardDetail {...detail1} />

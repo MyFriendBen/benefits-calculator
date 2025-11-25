@@ -122,3 +122,17 @@
     max-height: calc(70vh - 40px);
   }
 }
+
+@media (max-width: 480px) {
+  .results-section-header {
+    font-size: 1.1rem;
+  }
+
+  .filter-description .MuiTypography-root {
+    font-size: 0.875rem;
+  }
+
+  .filter-section-container {
+    margin-bottom: 1rem;
+  }
+}

@@ -246,7 +246,7 @@
   }
 
   .results-header-programs-count {
-    font-size: x-large;
+    font-size: 2.5rem;
     font-weight: 700;
     margin: auto;
     font-family: 'Roboto Slab', serif;
@@ -313,10 +313,14 @@
   }
 
   .results-header-programs-count {
-    font-size: xx-large;
+    font-size: 3rem !important;
     font-weight: 700;
     padding-bottom: 0.25rem;
     font-family: 'Roboto Slab', serif;
+  }
+
+  .results-header-programs-count-text > div:not(.results-header-programs-count) {
+    font-size: 0.75rem;
   }
 
   .results-header-values {
@@ -332,11 +336,6 @@
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
     color: var(--primary-color);
-  }
-
-  .results-header {
-    display: flex;
-    flex-direction: row;
   }
 
   .result-program-more-info {
@@ -359,6 +358,8 @@
     padding-top: 0.75rem;
     line-height: normal;
     padding-bottom: 0.5rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
     margin-right: 1rem;
   }
 
@@ -373,10 +374,16 @@
   }
 
   .results-header-programs-count {
-    font-size: xx-large;
+    font-size: 2.5rem !important;
     font-weight: 700;
-    padding-bottom: 0.25rem;
+    padding-bottom: 0;
     font-family: 'Roboto Slab', serif;
+  }
+
+  .results-header-programs-count-text > div:not(.results-header-programs-count) {
+    font-size: 0.75rem;
+    white-space: normal;
+    word-wrap: break-word;
   }
 
   .results-header-values {
@@ -394,8 +401,46 @@
     color: var(--primary-color);
   }
 
-  .results-header {
-    display: flex;
-    flex-direction: row;
+  .category-heading-text-style {
+    font-size: 1.25rem;
+  }
+
+  .category-heading-text-style.normal-weight {
+    font-size: 1.1rem;
+  }
+
+  .category-heading-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .category-heading-column {
+    margin-bottom: 0.25rem;
+  }
+
+  .box-right {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .results-tab a {
+    font-size: 0.45rem !important;
+    padding: 0.5rem 0.25rem;
+  }
+
+  .results-tab-container {
+    padding: 0.5rem 0.5rem 0 0.5rem;
+  }
+
+  .results-section-header {
+    margin-top: 0.5rem;
+  }
+
+  .results-header-values {
+    font-size: 1.35rem;
+  }
+
+  .results-header-label {
+    font-size: 0.75rem;
   }
 }

@@ -59,6 +59,7 @@ const UrgentNeedBanner = () => {
               mb: 2,
               fontFamily: '"Open Sans", sans-serif',
               lineHeight: 1.5,
+              fontSize: { xs: '0.875rem', sm: '1rem' },
             }}
           >
             <ResultsTranslate translation={need.notification_message!} />

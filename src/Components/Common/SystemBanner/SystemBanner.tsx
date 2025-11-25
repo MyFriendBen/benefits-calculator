@@ -108,6 +108,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
                   fontFamily: '"Open Sans", sans-serif',
                   lineHeight: 1.5,
                   fontWeight: 600,
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
                 }}
               >
                 {titleText}
@@ -144,6 +145,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
                 sx={{
                   fontFamily: '"Open Sans", sans-serif',
                   lineHeight: 1.5,
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
                 }}
               >
                 {processedContent}

@@ -93,6 +93,14 @@
   color: white;
   font-weight: 600;
   text-transform: uppercase;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  #select-language {
+    margin-right: 0;
+    padding-right: 0.5rem;
+  }
 }
 
 .white-header #select-language {
