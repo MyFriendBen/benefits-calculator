@@ -10,11 +10,12 @@ import {
   renderHoursWorkedHelperText,
   renderIncomeAmountHelperText,
   renderConditionsSelectOneHelperText,
+  renderIncomeCategoryHelperText,
+  hasAtLeastOneTrue,
+  validateNoneExclusive,
+  validateHourlyIncome,
+  validateIncomeAmount,
 } from './validation';
-
-// Regex patterns
-const ONE_OR_MORE_DIGITS_BUT_NOT_ALL_ZERO = /^(?!0+$)\d+$/;
-const INCOME_AMOUNT_REGEX = /^\d{0,7}(?:\d\.\d{0,2})?$/;
 
 /**
  * Creates an income source validation schema
@@ -22,24 +23,19 @@ const INCOME_AMOUNT_REGEX = /^\d{0,7}(?:\d\.\d{0,2})?$/;
 const createIncomeSourceSchema = (intl: IntlShape) => {
   return z
     .object({
-      incomeCategory: z.string().min(1, { message: 'Please select an income category' }),
+      incomeCategory: z.string().min(1, { message: renderIncomeCategoryHelperText(intl) }),
       incomeStreamName: z.string().min(1, { message: renderIncomeStreamNameHelperText(intl) }),
       incomeFrequency: z.string().min(1, { message: renderIncomeFrequencyHelperText(intl) }),
       hoursPerWeek: z.string().trim(),
       incomeAmount: z
         .string()
         .trim()
-        .refine((value) => INCOME_AMOUNT_REGEX.test(value) && Number(value) > 0, {
+        .refine(validateIncomeAmount, {
           message: renderIncomeAmountHelperText(intl),
         }),
     })
     .refine(
-      (data) => {
-        if (data.incomeFrequency === 'hourly') {
-          return ONE_OR_MORE_DIGITS_BUT_NOT_ALL_ZERO.test(data.hoursPerWeek);
-        }
-        return true;
-      },
+      (data) => validateHourlyIncome(data.incomeFrequency, data.hoursPerWeek),
       { message: renderHoursWorkedHelperText(intl), path: ['hoursPerWeek'] }
     );
 };
@@ -64,20 +60,12 @@ const createHealthInsuranceSchema = (intl: IntlShape, pageNumber: number) => {
       va: z.boolean().optional().default(false),
       mass_health: z.boolean().optional().default(false),
     })
-    .refine((insuranceOptions) => Object.values(insuranceOptions).some((option) => option === true), {
+    .refine(hasAtLeastOneTrue, {
       message: renderHealthInsSelectOneHelperText(intl),
     })
-    .refine(
-      (insuranceOptions) => {
-        if (insuranceOptions.none) {
-          return Object.entries(insuranceOptions)
-            .filter(([key]) => key !== 'none')
-            .every(([, value]) => value === false);
-        }
-        return true;
-      },
-      { message: healthInsNonePlusHelperText }
-    );
+    .refine(validateNoneExclusive, {
+      message: healthInsNonePlusHelperText,
+    });
 };
 
 /**
@@ -93,7 +81,7 @@ const createConditionsSchema = (intl: IntlShape) => {
       longTermDisability: z.boolean(),
       none: z.boolean().optional().default(false),
     })
-    .refine((conditionOptions) => Object.values(conditionOptions).some((option) => option === true), {
+    .refine(hasAtLeastOneTrue, {
       message: renderConditionsSelectOneHelperText(intl),
     });
 };
