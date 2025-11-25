@@ -18,7 +18,6 @@ import { useShouldRedirectToConfirmation } from '../../../QuestionComponents/que
 import useStepForm from '../../stepForm';
 import { LocationState } from '../utils/types';
 import { sortFrequencyOptions, calculateAge, createHouseholdMemberData, scrollToFirstError } from '../utils/helpers';
-import { useIncomeStreamManagement } from '../hooks/useIncomeStreamManagement';
 import { useHouseholdMembersNavigation } from '../hooks/useHouseholdMembersNavigation';
 import { useHouseholdMemberConfig } from '../hooks/useHouseholdMemberConfig';
 import { createHouseholdMemberSchema } from '../utils/schema';
@@ -105,21 +104,9 @@ const HouseholdMemberForm = () => {
     },
   });
 
-  const watchHasIncome = watch('hasIncome');
-  const hasTruthyIncome = watchHasIncome === 'true';
-
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: 'incomeStreams',
-  });
-
-  // INCOME MANAGEMENT
-  useIncomeStreamManagement({
-    hasTruthyIncome,
-    householdMemberFormData,
-    getValues,
-    append,
-    replace,
   });
 
   // EFFECTS
