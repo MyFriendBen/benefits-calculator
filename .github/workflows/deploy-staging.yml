@@ -3,7 +3,7 @@ name: Deploy to Staging
 on:
   push:
     branches:
-      - dev
+      - main
 
 jobs:
   deploy:
@@ -14,17 +14,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Heroku CLI
-        run: |
-          curl https://cli-assets.heroku.com/install.sh | sh
-
       - name: Deploy to Heroku
-        uses: akhileshns/heroku-deploy@v3.13.15
+        uses: ./.github/actions/deploy-to-heroku
         with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ secrets.HEROKU_STAGING_APP_NAME }}
-          heroku_email: ${{ secrets.HEROKU_EMAIL }}
-        id: heroku_deploy
+          heroku-api-key: ${{ secrets.HEROKU_API_KEY }}
+          heroku-app-name: ${{ secrets.HEROKU_STAGING_APP_NAME }}
+          heroku-email: ${{ secrets.HEROKU_EMAIL }}
 
       - name: Get commit info
         id: commit_info
@@ -36,29 +31,11 @@ jobs:
 
       - name: Send Slack notification on failure
         if: failure()
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          payload=$(jq -n \
-            --arg repo "${{ github.repository }}" \
-            --arg short_sha "${{ steps.commit_info.outputs.sha }}" \
-            --arg full_sha "${{ github.sha }}" \
-            --arg author "${{ steps.commit_info.outputs.author }}" \
-            --arg message "${{ steps.commit_info.outputs.message }}" \
-            --arg run_id "${{ github.run_id }}" \
-            '{
-              text: "❌ Frontend Staging Deployment Failed",
-              blocks: [
-                {type: "header", text: {type: "plain_text", text: "❌ Frontend Staging Deployment Failed"}},
-                {type: "section", fields: [
-                  {type: "mrkdwn", text: "*Environment:*\nStaging"},
-                  {type: "mrkdwn", text: "*Commit:*\n<https://github.com/\($repo)/commit/\($full_sha)|\($short_sha)>"},
-                  {type: "mrkdwn", text: "*Author:*\n\($author)"},
-                  {type: "mrkdwn", text: "*Workflow:*\n<https://github.com/\($repo)/actions/runs/\($run_id)|View Logs>"}
-                ]},
-                {type: "section", text: {type: "mrkdwn", text: "*Commit Message:*\n\($message)"}}
-              ]
-            }')
-          curl -X POST "$SLACK_WEBHOOK_URL" \
-            -H 'Content-Type: application/json' \
-            -d "$payload"
+        uses: ./.github/actions/slack-notify-frontend
+        with:
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          status: failure
+          environment: staging
+          commit-sha: ${{ steps.commit_info.outputs.sha }}
+          commit-message: ${{ steps.commit_info.outputs.message }}
+          commit-author: ${{ steps.commit_info.outputs.author }}

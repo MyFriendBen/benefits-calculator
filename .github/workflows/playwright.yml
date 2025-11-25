@@ -12,13 +12,8 @@ jobs:
       - name: Checkout frontend repo
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install frontend dependencies
-        run: npm ci
+      - name: Setup Node.js and dependencies
+        uses: ./.github/actions/setup-node-dependencies
 
       - name: Install Playwright Chromium Browser
         run: npx playwright install chromium
