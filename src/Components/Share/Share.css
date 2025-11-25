@@ -111,5 +111,16 @@ button {
 
   .icon {
     margin: 0 0.15rem;
+    padding: 0.25rem;
+  }
+
+  .feedback-button-and-text {
+    padding: 0.375rem 0.75rem;
+    width: 9rem;
+    font-size: 0.75rem;
+  }
+
+  .share-text-container p {
+    font-size: 0.875rem;
   }
 }

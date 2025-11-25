@@ -73,7 +73,21 @@
   }
 
   .footer-policy-container {
-    justify-content: flex-start;
-    padding-left: 1rem;
+    justify-content: center;
+    padding-left: 0;
+  }
+
+  .policy-link {
+    font-size: 0.625rem;
+    margin: 0 0.5rem 0.75rem 0.5rem;
+  }
+
+  .bottom-top-margin p,
+  .bottom-top-margin a {
+    font-size: 0.75rem;
+  }
+
+  .bottom-top-margin {
+    margin: 0.5rem 0;
   }
 }
