@@ -28,6 +28,7 @@ export const Filter = () => {
   const { formData } = useContext(Context);
   const intl = useIntl();
   const isMobile = useMediaQuery('(max-width: 900px)');
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   // Get currently selected citizenship status from filters
   const getSelectedCitizenship = (): CitizenLabelOptions => {
@@ -155,12 +156,26 @@ export const Filter = () => {
         <FormattedMessage id="filterSection.header" defaultMessage="Filter Results by Citizenship" />
       </h2>
       <div className="filter-description">
-        <Typography variant="body2" color="text.secondary" className="help-text">
-          <FormattedMessage
-            id="filterSection.citizenHelpText"
-            defaultMessage="Select a citizenship status to see which benefits that person may qualify for. If your household has members with different statuses, you can check each one separately to see their options. This tool is completely private—we do not store or share any information about your selections."
-          />
-        </Typography>
+        <div className={isMobile && !isDescriptionExpanded ? 'collapsed' : ''}>
+          <Typography variant="body2" color="text.secondary" className="help-text">
+            <FormattedMessage
+              id="filterSection.citizenHelpText"
+              defaultMessage="Select a citizenship status to see which benefits that person may qualify for. If your household has members with different statuses, you can check each one separately to see their options. This tool is completely private—we do not store or share any information about your selections."
+            />
+          </Typography>
+        </div>
+        {isMobile && (
+          <Button
+            className="show-more-button"
+            onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+            aria-label={isDescriptionExpanded ? 'Show less' : 'Show more'}
+          >
+            <FormattedMessage
+              id={isDescriptionExpanded ? 'filterSection.showLess' : 'filterSection.showMore'}
+              defaultMessage={isDescriptionExpanded ? 'Show less' : 'Show more'}
+            />
+          </Button>
+        )}
       </div>
       <div className="filter-controls">
         {isMobile ? renderMobileDropdown() : renderDesktopButtons()}

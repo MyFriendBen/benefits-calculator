@@ -17,6 +17,43 @@
   line-height: 1.6;
 }
 
+/* Collapsed state on mobile with fade effect */
+.filter-description .collapsed {
+  max-height: 3em; /* Approximately 2 lines */
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.filter-description .collapsed::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2em;
+  background: linear-gradient(to bottom, transparent, white);
+  pointer-events: none;
+}
+
+.show-more-button.MuiButton-root {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: none;
+  font-weight: 500;
+  text-transform: none;
+  padding: 0;
+  font-size: 0.875rem;
+  text-decoration: none;
+  min-width: auto;
+  display: block;
+}
+
+.show-more-button.MuiButton-root:hover {
+  background-color: transparent;
+  text-decoration: underline;
+}
+
 .filter-controls {
   display: flex;
   flex-direction: column;
