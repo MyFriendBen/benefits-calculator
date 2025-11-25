@@ -10,25 +10,20 @@ import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { SubmitHandler, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import PrevAndContinueButtons from '../../../PrevAndContinueButtons/PrevAndContinueButtons';
-import { useConfig } from '../../../Config/configHook';
-import { FormattedMessageType } from '../../../../Types/Questions';
 import { createMenuItems } from '../../SelectHelperFunctions/SelectHelperFunctions';
 import useScreenApi from '../../../../Assets/updateScreen';
 import { QUESTION_TITLES } from '../../../../Assets/pageTitleTags';
-import '../styles/PersonIncomeBlock.css';
+import '../styles/IncomeSection.css';
 import { useShouldRedirectToConfirmation } from '../../../QuestionComponents/questionHooks';
 import useStepForm from '../../stepForm';
-import {
-  LocationState,
-  HealthInsuranceOptions,
-  ConditionOptions,
-} from '../utils/types';
+import { LocationState } from '../utils/types';
 import { sortFrequencyOptions, calculateAge } from '../utils/calculations';
 import { useIncomeStreamManagement } from '../hooks/useIncomeStreamManagement';
 import { useHouseholdMembersNavigation } from '../hooks/useHouseholdMembersNavigation';
+import { useHouseholdMemberConfig } from '../hooks/useHouseholdMemberConfig';
 import { createHouseholdMemberSchema } from '../utils/schema';
 import { createDefaultValues } from '../utils/defaultValues';
-import { ERROR_SECTION_MAP } from '../utils/constants';
+import { createHouseholdMemberData, scrollToFirstError } from '../utils/formSubmission';
 import HealthInsuranceSection from '../sections/HealthInsuranceSection';
 import ConditionsSection from '../sections/ConditionsSection';
 import IncomeSection from '../sections/IncomeSection';
@@ -55,12 +50,14 @@ const HouseholdMemberForm = () => {
   const shouldShowBasicInfo = formData.householdSize === 1 || isEditing;
 
   // CONFIGURATION
-  const healthInsuranceOptions = useConfig<HealthInsuranceOptions>('health_insurance_options');
-  const conditionOptions = useConfig<ConditionOptions>('condition_options');
-  const incomeCategories = useConfig<Record<string, FormattedMessageType>>('income_categories');
-  const incomeOptions = useConfig<Record<string, Record<string, FormattedMessageType>>>('income_options');
-  const frequencyOptions = useConfig<Record<string, FormattedMessageType>>('frequency_options');
-  const relationshipOptions = useConfig<Record<string, FormattedMessageType>>('relationship_options');
+  const {
+    healthInsuranceOptions,
+    conditionOptions,
+    incomeCategories,
+    incomeOptions,
+    frequencyOptions,
+    relationshipOptions,
+  } = useHouseholdMemberConfig();
 
   const sortedFrequencyOptions = sortFrequencyOptions(frequencyOptions);
   const frequencyMenuItems = createMenuItems(
@@ -148,40 +145,20 @@ const HouseholdMemberForm = () => {
     }
 
     const updatedHouseholdData = [...formData.householdData];
-    updatedHouseholdData[currentMemberIndex] = {
-      ...memberData,
-      id: formData.householdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
-      frontendId: formData.householdData[currentMemberIndex]?.frontendId ?? crypto.randomUUID(),
-      birthYear: shouldShowBasicInfo && 'birthYear' in memberData
-        ? (memberData.birthYear as number)
-        : (householdMemberFormData?.birthYear ?? 0),
-      birthMonth: shouldShowBasicInfo && 'birthMonth' in memberData
-        ? (memberData.birthMonth as number)
-        : (householdMemberFormData?.birthMonth ?? 0),
-      relationshipToHH: shouldShowBasicInfo && 'relationshipToHH' in memberData
-        ? (memberData.relationshipToHH as string)
-        : (householdMemberFormData?.relationshipToHH ?? ''),
-      hasIncome: memberData.hasIncome === 'true',
-    } as HouseholdData;
+    updatedHouseholdData[currentMemberIndex] = createHouseholdMemberData({
+      memberData,
+      currentMemberIndex,
+      existingHouseholdData: formData.householdData,
+      shouldShowBasicInfo,
+      householdMemberFormData,
+    });
 
     const updatedFormData = { ...formData, householdData: updatedHouseholdData };
     await updateScreen(updatedFormData);
   };
 
   const handleFormError = (formErrors: typeof errors) => {
-    // Scroll to the first section with an error
-    for (const section of ERROR_SECTION_MAP) {
-      if ((formErrors as any)[section.key]) {
-        const element = document.getElementById(section.id);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          return;
-        }
-      }
-    }
-
-    // Fallback to scrolling to top if no section found
-    window.scroll({ top: 0, left: 0, behavior: 'smooth' });
+    scrollToFirstError(formErrors);
   };
 
   // HEADER DISPLAY
@@ -193,11 +170,11 @@ const HouseholdMemberForm = () => {
   return (
     <main className="benefits-form">
       {pageNumber > 1 && (
-        <section aria-label="Previous household members" style={{ marginBottom: '1.5rem' }}>
-          <h2 className="question-label" style={{ marginBottom: '0.25rem' }}>
+        <section aria-label="Previous household members" className="previous-members-section">
+          <h2 className="question-label previous-members-heading">
             <FormattedMessage id="householdDataBlock.soFarToldAbout" defaultMessage="So far you've told us about:" />
           </h2>
-          <Box sx={{ marginBottom: '0.5rem' }}>
+          <Box className="summary-cards-container">
             <HouseholdMemberSummaryCards
               activeMemberData={{
                 ...getValues(),
@@ -212,7 +189,7 @@ const HouseholdMemberForm = () => {
               questionName="householdData"
             />
           </Box>
-          <Box sx={{ borderBottom: '1px solid #e0e0e0', marginBottom: '0.75rem' }} />
+          <Box className="section-divider" />
         </section>
       )}
 

@@ -31,3 +31,21 @@
   text-transform: none;
   font-size: 1rem;
 }
+
+/* HouseholdMemberForm specific styles */
+.previous-members-section {
+  margin-bottom: 1.5rem;
+}
+
+.previous-members-heading {
+  margin-bottom: 0.25rem;
+}
+
+.summary-cards-container {
+  margin-bottom: 0.5rem;
+}
+
+.section-divider {
+  border-bottom: 1px solid var(--divider-color);
+  margin-bottom: 0.75rem;
+}

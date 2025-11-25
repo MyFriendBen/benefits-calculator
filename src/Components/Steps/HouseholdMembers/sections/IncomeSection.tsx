@@ -25,13 +25,13 @@ import { EMPTY_INCOME_STREAM } from '../utils/types';
 import '../styles/HouseholdMemberSections.css';
 
 interface IncomeSectionProps {
-  control: Control<any>;
-  errors: FieldErrors<any>;
-  fields: FieldArrayWithId<any, 'incomeStreams', 'id'>[];
-  append: UseFieldArrayAppend<any, 'incomeStreams'>;
+  control: Control;
+  errors: FieldErrors;
+  fields: FieldArrayWithId<any, 'incomeStreams', 'id'>[]; // Keep as any due to dynamic field array structure
+  append: UseFieldArrayAppend<any, 'incomeStreams'>; // Keep as any for field array operations
   remove: UseFieldArrayRemove;
-  watch: (name: string) => any;
-  setValue: (name: any, value: any) => void;
+  watch: (name: string) => any; // Keep as any for flexible watch return types
+  setValue: (name: string, value: any) => void; // Improved: name is string, value can be any
   incomeCategories: Record<string, FormattedMessageType>;
   incomeOptions: Record<string, Record<string, FormattedMessageType>>;
   frequencyMenuItems: JSX.Element[];
@@ -87,13 +87,13 @@ const IncomeSection = ({
           </ErrorMessageWrapper>
         </FormHelperText>
       )}
-      <Stack spacing={2} sx={{ marginTop: '0.5rem' }}>
+      <Stack spacing={2} className="income-streams-stack">
         {fields.map((field, index) => {
           return (
             <Box key={field.id} className="income-box">
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
+              <Box className="income-fields-container">
                 {/* First Row: Income Category */}
-                <Box sx={{ width: '100%' }}>
+                <Box className="income-category-container">
                   <Typography className="form-field-label">
                     <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Category" />
                   </Typography>
@@ -123,8 +123,8 @@ const IncomeSection = ({
                 </Box>
 
                 {/* Second Row: Specific Type, Amount, Frequency */}
-                <Box sx={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                  <Box sx={{ flex: '1 1 200px', minWidth: '150px' }}>
+                <Box className="income-fields-row">
+                  <Box className="income-field-specific-type">
                     <Typography className="form-field-label">
                       <FormattedMessage id="personIncomeBlock.specificType" defaultMessage="Specific Type" />
                     </Typography>
@@ -161,7 +161,7 @@ const IncomeSection = ({
                     </FormControl>
                   </Box>
 
-                  <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
+                  <Box className="income-field-amount">
                     <Typography className="form-field-label">
                       <FormattedMessage id="personIncomeBlock.preTaxAmount" defaultMessage="Pre-Tax Amount" />
                     </Typography>
@@ -187,7 +187,7 @@ const IncomeSection = ({
                     />
                   </Box>
 
-                  <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
+                  <Box className="income-field-frequency">
                     <Typography className="form-field-label">
                       <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
                     </Typography>
@@ -212,7 +212,7 @@ const IncomeSection = ({
 
               <IconButton
                 onClick={() => remove(index)}
-                sx={{ marginTop: '1.5rem' }}
+                className="income-delete-button"
                 aria-label="delete income source"
               >
                 <DeleteIcon />

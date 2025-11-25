@@ -10,12 +10,12 @@ import { HealthInsuranceOptions } from '../utils/types';
 import '../styles/HouseholdMemberSections.css';
 
 interface HealthInsuranceSectionProps {
-  control: Control<any>;
-  errors: FieldErrors<any>;
+  control: Control;
+  errors: FieldErrors;
   healthInsurance: HealthInsurance;
-  setValue: UseFormSetValue<any>;
-  trigger: UseFormTrigger<any>;
-  clearErrors: UseFormClearErrors<any>;
+  setValue: UseFormSetValue<any>; // Keep as any since setValue signature is complex with dynamic fields
+  trigger: UseFormTrigger<any>; // Keep as any for flexibility
+  clearErrors: UseFormClearErrors<any>; // Keep as any for flexibility
   options: HealthInsuranceOptions;
   pageNumber: number;
 }

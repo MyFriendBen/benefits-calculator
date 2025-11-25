@@ -5,13 +5,12 @@ import QuestionQuestion from '../../../QuestionComponents/QuestionQuestion';
 import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
 import { createMenuItems } from '../../SelectHelperFunctions/SelectHelperFunctions';
 import { FormattedMessageType } from '../../../../Types/Questions';
-import { BASIC_INFO_GRID_STYLES } from '../utils/constants';
-import { MONTHS } from '../utils/data';
+import { BASIC_INFO_GRID_STYLES, MONTHS } from '../utils/constants';
 import '../styles/HouseholdMemberSections.css';
 
 interface BasicInfoSectionProps {
-  control: Control<any>;
-  errors: FieldErrors<any>;
+  control: Control;
+  errors: FieldErrors;
   fieldPrefix?: string; // e.g., "members.0" or "" for root level
   isFirstMember?: boolean; // Whether this is the head of household
   relationshipOptions: Record<string, FormattedMessageType>;
@@ -39,7 +38,7 @@ const BasicInfoSection = ({
   const getError = (fieldName: string) => {
     if (!fieldPrefix) return errors[fieldName];
     const parts = fieldPrefix.split('.');
-    let error: any = errors;
+    let error = errors as Record<string, any>;
     for (const part of parts) {
       error = error?.[part];
     }

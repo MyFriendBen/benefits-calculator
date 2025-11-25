@@ -11,10 +11,10 @@ import { ConditionOptions } from '../utils/types';
 import '../styles/HouseholdMemberSections.css';
 
 interface ConditionsSectionProps {
-  errors: FieldErrors<any>;
+  errors: FieldErrors;
   conditions: Conditions;
-  setValue: UseFormSetValue<any>;
-  clearErrors: UseFormClearErrors<any>;
+  setValue: UseFormSetValue<any>; // Keep as any for flexibility with dynamic field updates
+  clearErrors: UseFormClearErrors<any>; // Keep as any for flexibility
   options: ConditionOptions;
   pageNumber: number;
 }

@@ -26,7 +26,7 @@ import { useStepNumber } from '../../../Assets/stepDirectory';
 import * as z from 'zod';
 import { Controller, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { MONTHS } from '../../Steps/HouseholdMembers/utils/data';
+import { MONTHS } from '../../Steps/HouseholdMembers/utils/constants';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import MultiSelectTiles from '../../OptionCardGroup/MultiSelectTiles';
@@ -53,7 +53,7 @@ import { QUESTION_TITLES } from '../../../Assets/pageTitleTags';
 import { getCurrentMonthYear, YEARS, MAX_AGE } from '../../../Assets/age';
 import { useAgeCalculation } from '../../AgeCalculation/useAgeCalculation';
 import { determineDefaultIncomeByAge } from '../../AgeCalculation/AgeCalculation';
-import '../../Steps/HouseholdMembers/styles/PersonIncomeBlock.css';
+import '../../Steps/HouseholdMembers/styles/IncomeSection.css';
 import { useShouldRedirectToConfirmation } from '../../QuestionComponents/questionHooks';
 import useStepForm from '../../Steps/stepForm';
 
