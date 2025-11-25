@@ -1,4 +1,6 @@
 import { HouseholdData } from '../../../../Types/FormData';
+import { calculateAgeStatus } from '../../../AgeCalculation/AgeCalculation';
+import { EMPTY_INCOME_STREAM } from './constants';
 
 /**
  * Default health insurance object
@@ -17,9 +19,9 @@ export const DEFAULT_HEALTH_INSURANCE = {
 };
 
 /**
- * Default conditions object
+ * Default special conditions object
  */
-export const DEFAULT_CONDITIONS = {
+export const DEFAULT_SPECIAL_CONDITIONS = {
   student: false,
   pregnant: false,
   blindOrVisuallyImpaired: false,
@@ -29,17 +31,55 @@ export const DEFAULT_CONDITIONS = {
 };
 
 /**
- * Determines whether a household member should default to having income
- * Since there's no explicit yes/no question in the UI, this is derived from income streams
+ * Helper to check if user has health insurance selections (indicates they've progressed through form)
  */
-export const determineDefaultHasIncome = (householdMemberFormData: HouseholdData | undefined): string => {
-  if (!householdMemberFormData) {
-    return 'false';
+const hasProgressedThroughForm = (data?: HouseholdData): boolean => {
+  return !!data?.healthInsurance && Object.values(data.healthInsurance).some((v) => v === true);
+};
+
+/**
+ * Helper to check if member is working age (16-70)
+ */
+const isWorkingAge = (birthYear?: number, birthMonth?: number): boolean => {
+  if (!birthYear || !birthMonth) return false;
+  const { age } = calculateAgeStatus(birthMonth, birthYear);
+  return age !== null && age >= 16 && age <= 70;
+};
+
+/**
+ * Determines default income streams - auto-adds for working-age members on first visit
+ */
+const getDefaultIncomeStreams = (data?: HouseholdData): any[] => {
+  const existing = data?.incomeStreams ?? [];
+
+  // On first visit only, auto-add empty income box for working-age members
+  const isFirstVisit = !hasProgressedThroughForm(data) && existing.length === 0;
+  if (isFirstVisit && isWorkingAge(data?.birthYear, data?.birthMonth)) {
+    return [EMPTY_INCOME_STREAM];
   }
 
-  // hasIncome is directly derived from whether there are income streams
-  // This ensures the form state matches the actual data
-  return householdMemberFormData.incomeStreams.length > 0 ? 'true' : 'false';
+  return existing;
+};
+
+/**
+ * Determines default special conditions - infers "none" selection from backend data
+ */
+const getDefaultSpecialConditions = (data?: HouseholdData): typeof DEFAULT_SPECIAL_CONDITIONS => {
+  if (!data?.specialConditions) return DEFAULT_SPECIAL_CONDITIONS;
+
+  const merged = { ...DEFAULT_SPECIAL_CONDITIONS, ...data.specialConditions };
+
+  // Backend doesn't persist "none" - infer it from context
+  const hasAnyCondition = Object.entries(merged)
+    .filter(([key]) => key !== 'none')
+    .some(([, value]) => value === true);
+
+  // If they've been through form but no special conditions are true, they selected "none"
+  if (hasProgressedThroughForm(data) && !hasAnyCondition) {
+    return { ...merged, none: true };
+  }
+
+  return merged;
 };
 
 /**
@@ -49,27 +89,27 @@ export const createDefaultValues = (
   householdMemberFormData: HouseholdData | undefined,
   shouldShowBasicInfo: boolean
 ) => {
-  const baseDefaultValues = {
-    healthInsurance: householdMemberFormData?.healthInsurance ?? DEFAULT_HEALTH_INSURANCE,
-    conditions: householdMemberFormData?.conditions ?? DEFAULT_CONDITIONS,
-    hasIncome: determineDefaultHasIncome(householdMemberFormData),
-    incomeStreams: householdMemberFormData?.incomeStreams ?? [],
+  const incomeStreams = getDefaultIncomeStreams(householdMemberFormData);
+
+  const baseDefaults = {
+    healthInsurance: householdMemberFormData?.healthInsurance
+      ? { ...DEFAULT_HEALTH_INSURANCE, ...householdMemberFormData.healthInsurance }
+      : DEFAULT_HEALTH_INSURANCE,
+    specialConditions: getDefaultSpecialConditions(householdMemberFormData),
+    hasIncome: incomeStreams.length > 0 ? 'true' : 'false',
+    incomeStreams,
   };
 
-  if (!shouldShowBasicInfo) {
-    return baseDefaultValues;
-  }
+  if (!shouldShowBasicInfo) return baseDefaults;
 
   return {
-    ...baseDefaultValues,
-    birthMonth:
-      householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
-        ? householdMemberFormData.birthMonth
-        : 0,
-    birthYear:
-      householdMemberFormData?.birthYear && householdMemberFormData.birthYear > 0
-        ? householdMemberFormData.birthYear
-        : ('' as unknown as number),
+    ...baseDefaults,
+    birthMonth: householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
+      ? householdMemberFormData.birthMonth
+      : 0,
+    birthYear: householdMemberFormData?.birthYear && householdMemberFormData.birthYear > 0
+      ? householdMemberFormData.birthYear
+      : ('' as unknown as number),
     relationshipToHH: householdMemberFormData?.relationshipToHH ?? '',
   };
 };

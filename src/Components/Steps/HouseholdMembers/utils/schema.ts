@@ -69,9 +69,9 @@ const createHealthInsuranceSchema = (intl: IntlShape, pageNumber: number) => {
 };
 
 /**
- * Creates conditions validation schema
+ * Creates special conditions validation schema
  */
-const createConditionsSchema = (intl: IntlShape) => {
+const createSpecialConditionsSchema = (intl: IntlShape) => {
   return z
     .object({
       student: z.boolean(),
@@ -103,7 +103,7 @@ export const createHouseholdMemberSchema = (
 
   const baseSchema = {
     healthInsurance: createHealthInsuranceSchema(intl, pageNumber),
-    conditions: createConditionsSchema(intl),
+    specialConditions: createSpecialConditionsSchema(intl),
     hasIncome: hasIncomeSchema,
     incomeStreams: incomeStreamsSchema,
   };

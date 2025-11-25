@@ -127,7 +127,7 @@ const HouseholdMemberBasicInfoPage = () => {
         birthMonth: Number(member.birthMonth),
         birthYear: Number(member.birthYear),
         relationshipToHH: member.relationshipToHH,
-        conditions: existingMember?.conditions ?? {
+        specialConditions: existingMember?.specialConditions ?? {
           student: false,
           pregnant: false,
           blindOrVisuallyImpaired: false,

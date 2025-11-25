@@ -10,23 +10,23 @@ import { Conditions } from '../../../../Types/FormData';
 import { ConditionOptions } from '../utils/types';
 import '../styles/HouseholdMemberSections.css';
 
-interface ConditionsSectionProps {
+interface SpecialConditionsSectionProps {
   errors: FieldErrors<any>;
-  conditions: Conditions;
+  specialConditions: Conditions;
   setValue: UseFormSetValue<any>;
   clearErrors: UseFormClearErrors<any>;
   options: ConditionOptions;
   pageNumber: number;
 }
 
-const ConditionsSection = ({
+const SpecialConditionsSection = ({
   errors,
-  conditions,
+  specialConditions,
   setValue,
   clearErrors,
   options,
   pageNumber,
-}: ConditionsSectionProps) => {
+}: SpecialConditionsSectionProps) => {
   const noneOption = {
     none: {
       icon: <NoneIcon className="option-card-icon" />,
@@ -64,15 +64,15 @@ const ConditionsSection = ({
           defaultMessage="Choose all that apply."
         />
       </QuestionDescription>
-      {errors.conditions && (
+      {errors.specialConditions && (
         <FormHelperText sx={{ ml: 0, mb: 1 }}>
-          <ErrorMessageWrapper fontSize="var(--error-message-font-size)">{errors.conditions.message as string}</ErrorMessageWrapper>
+          <ErrorMessageWrapper fontSize="var(--error-message-font-size)">{errors.specialConditions.message as string}</ErrorMessageWrapper>
         </FormHelperText>
       )}
       <RHFOptionCardGroup
-        fields={conditions}
+        fields={specialConditions}
         setValue={setValue}
-        name="conditions"
+        name="specialConditions"
         options={conditionsWithNone}
         clearErrors={clearErrors}
       />
@@ -80,4 +80,4 @@ const ConditionsSection = ({
   );
 };
 
-export default ConditionsSection;
+export default SpecialConditionsSection;

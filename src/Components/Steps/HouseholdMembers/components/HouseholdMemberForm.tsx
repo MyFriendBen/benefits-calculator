@@ -23,7 +23,7 @@ import { useHouseholdMemberConfig } from '../hooks/useHouseholdMemberConfig';
 import { createHouseholdMemberSchema } from '../utils/schema';
 import { createDefaultValues } from '../utils/defaultValues';
 import HealthInsuranceSection from '../sections/HealthInsuranceSection';
-import ConditionsSection from '../sections/ConditionsSection';
+import SpecialConditionsSection from '../sections/SpecialConditionsSection';
 import IncomeSection from '../sections/IncomeSection';
 import BasicInfoSection from '../sections/BasicInfoSection';
 
@@ -215,9 +215,9 @@ const HouseholdMemberForm = () => {
           pageNumber={pageNumber}
         />
 
-        <ConditionsSection
+        <SpecialConditionsSection
           errors={errors}
-          conditions={watch('conditions')}
+          specialConditions={watch('specialConditions')}
           setValue={setValue}
           clearErrors={clearErrors}
           options={conditionOptions}

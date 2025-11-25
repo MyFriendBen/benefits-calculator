@@ -21,7 +21,7 @@ import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
 import { createMenuItems } from '../../SelectHelperFunctions/SelectHelperFunctions';
 import { FormattedMessageType } from '../../../../Types/Questions';
 import { DOLLARS, handleNumbersOnly, NUM_PAD_PROPS } from '../../../../Assets/numInputHelpers';
-import { EMPTY_INCOME_STREAM } from '../utils/types';
+import { EMPTY_INCOME_STREAM } from '../utils/constants';
 import '../styles/HouseholdMemberSections.css';
 
 interface IncomeSectionProps {

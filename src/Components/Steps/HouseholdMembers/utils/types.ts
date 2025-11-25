@@ -28,11 +28,3 @@ export type IncomeStreamFormData = {
   incomeFrequency: string;
   hoursPerWeek: string;
 };
-
-export const EMPTY_INCOME_STREAM: IncomeStreamFormData = {
-  incomeCategory: '',
-  incomeStreamName: '',
-  incomeAmount: '',
-  incomeFrequency: '',
-  hoursPerWeek: '',
-};
