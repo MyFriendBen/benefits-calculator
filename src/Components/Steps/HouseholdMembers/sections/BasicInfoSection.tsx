@@ -9,8 +9,8 @@ import { BASIC_INFO_GRID_STYLES, MONTHS } from '../utils/constants';
 import '../styles/HouseholdMemberSections.css';
 
 interface BasicInfoSectionProps {
-  control: Control;
-  errors: FieldErrors;
+  control: Control<any>;
+  errors: FieldErrors<any>;
   fieldPrefix?: string; // e.g., "members.0" or "" for root level
   isFirstMember?: boolean; // Whether this is the head of household
   relationshipOptions: Record<string, FormattedMessageType>;

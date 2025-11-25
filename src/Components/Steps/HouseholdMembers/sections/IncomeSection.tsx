@@ -25,13 +25,13 @@ import { EMPTY_INCOME_STREAM } from '../utils/types';
 import '../styles/HouseholdMemberSections.css';
 
 interface IncomeSectionProps {
-  control: Control;
-  errors: FieldErrors;
-  fields: FieldArrayWithId<any, 'incomeStreams', 'id'>[]; // Keep as any due to dynamic field array structure
-  append: UseFieldArrayAppend<any, 'incomeStreams'>; // Keep as any for field array operations
+  control: Control<any>;
+  errors: FieldErrors<any>;
+  fields: FieldArrayWithId<any, 'incomeStreams', 'id'>[];
+  append: UseFieldArrayAppend<any, 'incomeStreams'>;
   remove: UseFieldArrayRemove;
-  watch: (name: string) => any; // Keep as any for flexible watch return types
-  setValue: (name: string, value: any) => void; // Improved: name is string, value can be any
+  watch: (name: string) => any;
+  setValue: (name: string, value: any) => void;
   incomeCategories: Record<string, FormattedMessageType>;
   incomeOptions: Record<string, Record<string, FormattedMessageType>>;
   frequencyMenuItems: JSX.Element[];
