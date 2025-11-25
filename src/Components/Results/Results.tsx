@@ -162,7 +162,6 @@ const Results = ({ type }: ResultsProps) => {
   const [filtersChecked, setFiltersChecked] = useState<Record<CitizenLabels, boolean>>({
     citizen: true,
     non_citizen: false,
-    green_card: false,
     refugee: false,
     gc_5plus: false,
     gc_5less: false,

@@ -88,11 +88,19 @@ export const createFiltersChecked = (
 ): Record<CitizenLabels, boolean> => ({
   citizen: true,
   non_citizen: false,
-  green_card: false,
   gc_5plus: false,
   gc_5less: false,
   refugee: false,
   otherWithWorkPermission: false,
+  gc_18plus_no5: false,
+  gc_under18_no5: false,
+  otherHealthCareUnder19: false,
+  otherHealthCarePregnant: false,
+  notPregnantOrUnder19ForOmniSalud: false,
+  notPregnantOrUnder19ForEmergencyMedicaid: false,
+  notPregnantForMassHealthLimited: false,
+  notPregnantOrChildForMassHealthLimited: false,
+  otherHealthCareUnder21: false,
   ...overrides,
 } as Record<CitizenLabels, boolean>);
 
