@@ -28,45 +28,11 @@ jobs:
 
       - name: Get commit info
         id: commit_info
-        if: always()
+        if: failure()
         run: |
           echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "message=$(git log -1 --pretty=%B | head -n 1)" >> $GITHUB_OUTPUT
           echo "author=$(git log -1 --pretty=%an)" >> $GITHUB_OUTPUT
-          echo "timestamp=$(git log -1 --format=%ct)" >> $GITHUB_OUTPUT
-
-      - name: Send Slack notification on success
-        if: success()
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          payload=$(jq -n \
-            --arg repo "${{ github.repository }}" \
-            --arg short_sha "${{ steps.commit_info.outputs.sha }}" \
-            --arg full_sha "${{ github.sha }}" \
-            --arg author "${{ steps.commit_info.outputs.author }}" \
-            --arg message "${{ steps.commit_info.outputs.message }}" \
-            --arg app "${{ secrets.HEROKU_STAGING_APP_NAME }}" \
-            --arg timestamp "${{ steps.commit_info.outputs.timestamp }}" \
-            '{
-              text: "✅ Frontend Staging Deployment Successful",
-              blocks: [
-                {type: "header", text: {type: "plain_text", text: "✅ Frontend Staging Deployment Successful"}},
-                {type: "section", fields: [
-                  {type: "mrkdwn", text: "*Environment:*\nStaging"},
-                  {type: "mrkdwn", text: "*Commit:*\n<https://github.com/\($repo)/commit/\($full_sha)|\($short_sha)>"},
-                  {type: "mrkdwn", text: "*Author:*\n\($author)"},
-                  {type: "mrkdwn", text: "*App:*\n<https://\($app).herokuapp.com|View App>"}
-                ]},
-                {type: "section", text: {type: "mrkdwn", text: "*Commit Message:*\n\($message)"}},
-                {type: "context", elements: [
-                  {type: "mrkdwn", text: "Deployed at <!date^\($timestamp)^{date_short_pretty} at {time}|$(date)>"}
-                ]}
-              ]
-            }')
-          curl -X POST "$SLACK_WEBHOOK_URL" \
-            -H 'Content-Type: application/json' \
-            -d "$payload"
 
       - name: Send Slack notification on failure
         if: failure()

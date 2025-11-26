@@ -1,0 +1,154 @@
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInFromCenter {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes slideInFromBottomRight {
+  from { opacity: 0; transform: translateY(100px) scale(0.5); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Backdrop overlay */
+.results-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10001;
+  animation: fadeIn 0.3s ease-in;
+}
+
+/* Full popup container */
+.results-popup-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10002;
+  max-width: 800px;
+  width: calc(100% - 2rem);
+  padding: 1rem;
+  animation: slideInFromCenter 0.3s ease-out;
+}
+
+/* Shared Alert styles */
+.results-popup-container .MuiAlert-root,
+.results-popup-minimized .MuiAlert-root {
+  background-color: white;
+  border: 2px solid var(--secondary-color);
+  position: relative;
+}
+
+/* Full popup Alert */
+.results-popup-container .MuiAlert-root {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 1.75rem 1rem 1rem;
+}
+
+.results-popup-container .MuiAlert-message {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+}
+
+.results-popup-text {
+  font-family: "Open Sans", sans-serif;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Button styles */
+.results-popup-container .results-popup-button {
+  display: inline-block;
+  color: white;
+  font-size: 0.8rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  margin-bottom: 0.5rem;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  background-color: var(--secondary-color);
+  text-decoration: none;
+  font-family: "Open Sans", sans-serif;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+}
+
+.results-popup-container .results-popup-button:hover {
+  background-color: white;
+  color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+@media (min-width: 768px) {
+  .results-popup-button {
+    padding: 0.5rem 1.5rem;
+  }
+}
+
+/* Close button - full popup */
+.results-popup-container .results-popup-close-button,
+.results-popup-container .results-popup-close-button.MuiIconButton-root {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem;
+}
+
+/* Minimized popup */
+.results-popup-minimized {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 10002;
+  max-width: 350px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  animation: slideInFromBottomRight 0.3s ease-out;
+}
+
+.results-popup-minimized:hover {
+  transform: scale(1.05);
+}
+
+.results-popup-minimized .MuiAlert-root {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  margin: 0;
+}
+
+.results-popup-minimized .MuiAlert-action {
+  padding-left: 4px;
+  margin-left: 0;
+}
+
+.results-popup-minimized .MuiTypography-root {
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+/* Close button - minimized */
+.results-popup-minimized .results-popup-minimized-close-button,
+.results-popup-minimized .results-popup-minimized-close-button.MuiIconButton-root {
+  position: relative;
+  z-index: 10;
+  padding: 4px;
+  margin-top: -10px;
+  margin-right: -4px;
+}
+
+.results-popup-minimized .results-popup-minimized-close-button:hover,
+.results-popup-minimized .results-popup-minimized-close-button.MuiIconButton-root:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}

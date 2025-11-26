@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { UrgentNeed } from '../../../Types/Results';
 import ResultsTranslate from '../Translate/Translate';
 import { formatPhoneNumber, generateNeedId, ICON_OPTIONS_MAP } from '../helpers';
+import TrackedOutboundLink from '../../Common/TrackedOutboundLink/TrackedOutboundLink';
 import './NeedCard.css';
 
 type NeedsCardProps = {
@@ -11,8 +12,7 @@ type NeedsCardProps = {
 };
 
 const getIcon = (messageType: string) => {
-  const Icon = ICON_OPTIONS_MAP[messageType] ?? ICON_OPTIONS_MAP['default']
-
+  const Icon = ICON_OPTIONS_MAP[messageType] ?? ICON_OPTIONS_MAP['default'];
 
   if (Icon !== undefined) {
     return <Icon />;
@@ -89,9 +89,15 @@ const NeedCard = ({ need }: NeedsCardProps) => {
           )}
           {translatedLink !== '' && (
             <div className="visit-website-btn-container">
-              <a href={translatedLink} target="_blank" className="visit-website-btn">
+              <TrackedOutboundLink
+                href={translatedLink}
+                action="visit_website"
+                label={need.name.default_message}
+                category="additional_resources"
+                className="visit-website-btn"
+              >
                 <FormattedMessage id="visit-website-btn" defaultMessage="Visit Website" />
-              </a>
+              </TrackedOutboundLink>
             </div>
           )}
         </>
