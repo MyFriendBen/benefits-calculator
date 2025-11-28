@@ -9,7 +9,7 @@
 }
 
 .filter-description {
-  margin-bottom: .25rem;
+  margin-bottom: 0;
 
 }
 
@@ -45,6 +45,7 @@
   font-weight: 500;
   text-transform: none;
   padding: 0;
+  margin-bottom: 0.25rem;
   font-size: 0.875rem;
   text-decoration: none;
   min-width: auto;

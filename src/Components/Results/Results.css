@@ -384,12 +384,11 @@
   .results-header-programs-count {
     font-size: 2.5rem !important;
     font-weight: 700;
-    padding-bottom: 0.25rem;
     font-family: 'Roboto Slab', serif;
   }
 
   .results-header-programs-count-text > div:not(.results-header-programs-count) {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     white-space: normal;
     word-wrap: break-word;
   }
