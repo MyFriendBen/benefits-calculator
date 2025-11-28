@@ -28,6 +28,11 @@
   border-radius: 1rem 1rem 0 0;
 }
 
+.results-tab a h1 {
+  font-size: 1rem;
+  margin: 0;
+}
+
 .results-tab a.active {
   background-color: white;
 }
@@ -106,6 +111,7 @@
 
 .category-heading-text-style.normal-weight {
   font-weight: normal;
+  font-size: 1.2rem;
 }
 
 .results-header-container {
@@ -163,7 +169,7 @@
   line-height: normal;
   font-family: 'Roboto Slab', serif;
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   margin: auto;
   color: var(--primary-color);
 }
@@ -246,12 +252,13 @@
   }
 
   .results-header-programs-count {
-    font-size: 2.5rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    margin: auto;
+    margin: 0;
     font-family: 'Roboto Slab', serif;
     display: flex;
     margin-right: 0.5rem;
+    align-items: center;
   }
 
   .results-header-values {

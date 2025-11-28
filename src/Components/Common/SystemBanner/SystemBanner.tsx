@@ -76,7 +76,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
       sx={{
         width: '100%',
         px: '1rem',
-        marginTop: '2rem',
+        marginTop: { xs: '1rem', sm: '1rem' },
       }}
       spacing={2}
     >
@@ -95,6 +95,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
               border: `2px solid ${theme.primaryColor}`,
               '& .MuiAlert-icon': {
                 color: theme.primaryColor,
+                alignItems: 'center',
               },
               '& .MuiAlert-message': {
                 width: '100%',
