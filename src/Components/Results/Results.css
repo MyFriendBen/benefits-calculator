@@ -107,6 +107,7 @@
   font-family: 'Roboto Slab', serif;
   font-weight: 700;
   color: var(--secondary-color);
+  font-size: 1.3rem;
 }
 
 .category-heading-text-style.normal-weight {
