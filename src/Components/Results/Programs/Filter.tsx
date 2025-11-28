@@ -28,6 +28,7 @@ export const Filter = () => {
   const { formData } = useContext(Context);
   const intl = useIntl();
   const isMobile = useMediaQuery('(max-width: 1200px)');
+  const isNarrowScreen = useMediaQuery('(max-width: 600px)');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   // Get currently selected citizenship status from filters
@@ -156,7 +157,7 @@ export const Filter = () => {
         <FormattedMessage id="filterSection.header" defaultMessage="Filter Results by Citizenship" />
       </h2>
       <div className="filter-description">
-        <div className={isMobile && !isDescriptionExpanded ? 'collapsed' : ''}>
+        <div className={isNarrowScreen && !isDescriptionExpanded ? 'collapsed' : ''}>
           <Typography variant="body2" color="text.secondary" className="help-text">
             <FormattedMessage
               id="filterSection.citizenHelpText"
@@ -164,7 +165,7 @@ export const Filter = () => {
             />
           </Typography>
         </div>
-        {isMobile && (
+        {isNarrowScreen && (
           <Button
             className="show-more-button"
             onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
