@@ -5,7 +5,7 @@
   color: #fff;
   background-color: var(--secondary-color);
   border-radius: 1.5625rem;
-  padding: 0.25rem 0.75rem;
+  padding: 0.1rem 0.75rem;
   font-weight: bold;
   font-size: 0.75rem;
   border: 1px solid var(--secondary-color);
@@ -26,8 +26,8 @@
 
 .save-icon {
   margin-left: 0.5rem;
-  height: 2rem;
-  width: 2rem;
+  height: 1.8rem;
+  width: 1.8rem;
 }
 
 .results-back-save-buttons:hover .save-icon {
