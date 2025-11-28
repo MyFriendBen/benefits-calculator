@@ -24,7 +24,7 @@ const ResultsTabs = () => {
           className={({ isActive }) => (isActive ? 'active' : '')}
           data-testid="long-term-benefits-tab"
         >
-          <h1 style={{ fontSize: '1rem' }}>
+          <h1>
             <FormattedMessage id="resultsOptions.longTermBenefits" defaultMessage="Long-Term Benefits " />(
             {translateNumber(programs.length)})
           </h1>
@@ -36,7 +36,7 @@ const ResultsTabs = () => {
           className={({ isActive }) => (isActive ? 'active' : '')}
           data-testid="near-term-benefits-tab"
         >
-          <h1 style={{ fontSize: '1rem' }}>
+          <h1>
             <FormattedMessage id="resultsOptions.nearTermBenefits" defaultMessage="Additional Resources " />(
             {translateNumber(needs.length)})
           </h1>

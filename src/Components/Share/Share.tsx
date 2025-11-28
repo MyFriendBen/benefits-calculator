@@ -42,7 +42,8 @@ const Share = forwardRef(function Share() {
   };
 
   const shareUrl = getReferrer('shareLink') || 'default';
-  const iconSize = { color: '#fff', fontSize: '2rem' };
+  const isMobile = window.innerWidth <= 700;
+  const iconSize = { color: '#fff', fontSize: isMobile ? '1.5rem' : '2rem' };
 
   const copyLink = () => {
     navigator.clipboard.writeText(shareUrl);

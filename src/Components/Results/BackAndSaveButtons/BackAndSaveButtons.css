@@ -5,7 +5,7 @@
   color: #fff;
   background-color: var(--secondary-color);
   border-radius: 1.5625rem;
-  padding: 0.05rem 0.75rem;
+  padding: 0.1rem 0.75rem;
   font-weight: bold;
   font-size: 0.75rem;
   border: 1px solid var(--secondary-color);
@@ -26,8 +26,8 @@
 
 .save-icon {
   margin-left: 0.5rem;
-  height: 2rem;
-  width: 2rem;
+  height: 1.8rem;
+  width: 1.8rem;
 }
 
 .results-back-save-buttons:hover .save-icon {
@@ -51,14 +51,20 @@
   .results-back-save-btn-container {
     padding: 0.5rem 1rem;
     margin-top: 0.5rem;
+    gap: 0.5rem;
   }
 
   .save-icon {
-    height: 1.5rem;
-    width: 1.5rem;
+    height: 2rem;
+    width: 2rem;
+    margin-left: -0.25rem;
   }
 
   .results-back-save-buttons {
-    padding: 0.05rem 0.5rem;
+    padding: 0.5rem 0.5rem;
+  }
+
+  .btn-icon-text-container {
+    gap: 0;
   }
 }
