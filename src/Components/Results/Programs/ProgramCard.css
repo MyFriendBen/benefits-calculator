@@ -199,6 +199,7 @@ h1.header-text-bottom {
   }
 
   .result-program-details strong {
-    font-size: 1.1rem;
+    font-size: 0.875rem;
+    padding-top: .2rem;
   }
 }

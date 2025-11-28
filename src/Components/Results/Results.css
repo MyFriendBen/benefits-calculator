@@ -437,7 +437,7 @@
   }
 
   .results-tab a h1 {
-  font-size: .9rem;
+  font-size: .85rem;
   margin: 0;
 }
 
@@ -455,5 +455,9 @@
 
   .results-header-label {
     font-size: 0.75rem;
+  }
+
+  .result-program-details-box strong {
+    font-size: 0.3rem;
   }
 }
