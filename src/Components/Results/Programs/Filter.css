@@ -4,17 +4,19 @@
 }
 
 .results-section-header {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   color: var(--primary-color);
 }
 
 .filter-description {
   margin-bottom: .5rem;
+  
 }
 
 .filter-description .help-text {
   line-height: 1.6;
-  margin: 0.2rem;
+  font-size: .85rem;
+  padding-bottom: .3rem;
 }
 
 /* Collapsed state on mobile with fade effect */
@@ -70,7 +72,7 @@
 }
 
 .citizenship-option-button.MuiButton-root {
-  padding: 0.5rem 1.125rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 1.5625rem; /* Oval/pill shape */
   border: 1px solid var(--primary-color);
   background-color: #ffffff;
@@ -214,7 +216,7 @@
 }
 
 /* Hide current selection in mobile dropdown mode */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .current-selection {
     display: none;
   }
