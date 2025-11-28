@@ -221,7 +221,7 @@
 @media (min-width: 775px) {
   .results-header-programs-count-text {
     height: 3rem;
-    border-radius: 0.5rem;
+    border-radius: 0.2rem;
     background-color: var(--primary-color);
     color: white;
     font-family: 'Open Sans', sans-serif;
