@@ -44,7 +44,14 @@
   stroke: currentColor !important;
 }
 
-@media (max-width: 700px) {
+/**
+ * Breakpoints (must match src/Constants/breakpoints.ts):
+ * Mobile:  0-480px
+ * Tablet:  481-774px
+ * Desktop: 775px+
+ */
+
+@media (max-width: 774px) {
   .co-benefits-container {
     font-size: 1rem;
   }

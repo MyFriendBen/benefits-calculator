@@ -5,7 +5,7 @@
 export const BREAKPOINTS = {
   /** Mobile devices - up to 480px */
   mobile: 480,
-  /** Tablet/Desktop threshold - 775px and above is considered desktop */
+  /** Tablet/Desktop threshold - 775px */
   tablet: 775,
 } as const;
 
