@@ -230,7 +230,7 @@ const ECHouseholdMemberForm = () => {
       birthYear: householdMemberFormData?.birthYear ? String(householdMemberFormData.birthYear) : '',
       conditions: {
         survivingSpouse: householdMemberFormData?.energyCalculator?.survivingSpouse ?? false,
-        disabled: householdMemberFormData?.conditions.disabled ?? false,
+        disabled: householdMemberFormData?.specialConditions.disabled ?? false,
         medicalEquipment: householdMemberFormData?.energyCalculator?.medicalEquipment ?? false,
       },
       receivesSsi: householdMemberFormData?.energyCalculator?.receivesSsi ? 'true' : 'false',
@@ -297,8 +297,7 @@ const ECHouseholdMemberForm = () => {
       ...memberData,
       id: formData.householdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
       frontendId: formData.householdData[currentMemberIndex]?.frontendId ?? crypto.randomUUID(),
-      conditions: {
-        ...memberData.conditions,
+      specialConditions: {
         disabled: memberData.conditions.disabled,
       },
       birthYear: Number(memberData.birthYear),
