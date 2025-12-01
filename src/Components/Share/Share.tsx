@@ -14,10 +14,12 @@ import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import LinkIcon from '@mui/icons-material/Link';
 import CheckIcon from '@mui/icons-material/Check';
+import { useMediaQuery } from '@mui/material';
 import { Context } from '../Wrapper/Wrapper';
 import dataLayerPush from '../../Assets/analytics';
 import './Share.css';
 import { useConfig } from '../Config/configHook';
+import { BREAKPOINTS } from '../../utils/breakpoints';
 
 const Share = forwardRef(function Share() {
   const [copied, setCopied] = useState(false);
@@ -25,6 +27,8 @@ const Share = forwardRef(function Share() {
   const { email, survey } = useConfig<{ email: string; survey: string }>('feedback_links');
   const surveyLink = survey;
   const intl = useIntl();
+  // Mobile is below desktop breakpoint (0-767px)
+  const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.desktop - 1}px)`);
 
   const labels = {
     email: intl.formatMessage({
@@ -42,7 +46,7 @@ const Share = forwardRef(function Share() {
   };
 
   const shareUrl = getReferrer('shareLink') || 'default';
-  const iconSize = { color: '#fff', fontSize: '2rem' };
+  const iconSize = { color: '#fff', fontSize: isMobile ? '1.5rem' : '2rem' };
 
   const copyLink = () => {
     navigator.clipboard.writeText(shareUrl);

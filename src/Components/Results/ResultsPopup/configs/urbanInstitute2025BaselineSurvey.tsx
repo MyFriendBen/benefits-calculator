@@ -22,6 +22,7 @@ import { FormData } from '../../../../Types/FormData';
 
 // Constants
 const ELIGIBLE_STATES = ['co', 'nc'] as const;
+const ELIGIBLE_LOCALES = ['en', 'es'] as const;
 const MIN_AGE = 18;
 const SURVEY_BASE_URL = 'https://urban.co1.qualtrics.com/jfe/form/SV_9EojHuKftrhVpmC';
 const SPANISH_LOCALE = 'es';
@@ -32,8 +33,9 @@ const SPANISH_LOCALE = 'es';
  * Eligibility criteria:
  * - User is in Colorado (whiteLabel is 'co') or North Carolina (whiteLabel is 'nc')
  * - User is 18 years old or older (head of household age >= 18)
+ * - User's locale is English ('en') or Spanish ('es')
  */
-function checkSurveyEligibility(formData: FormData, whiteLabel: string | undefined): boolean {
+function checkSurveyEligibility(formData: FormData, whiteLabel: string | undefined, locale: string): boolean {
   // Check state from whiteLabel
   if (!whiteLabel) {
     return false;
@@ -42,6 +44,15 @@ function checkSurveyEligibility(formData: FormData, whiteLabel: string | undefin
   const isEligibleState = ELIGIBLE_STATES.includes(whiteLabel as typeof ELIGIBLE_STATES[number]);
 
   if (!isEligibleState) {
+    return false;
+  }
+
+  // Check locale (must be English or Spanish)
+  // Support locale formats like 'en', 'en-US', 'es', 'es-MX', etc.
+  const localePrefix = locale.toLowerCase().split('-')[0];
+  const isEligibleLocale = ELIGIBLE_LOCALES.includes(localePrefix as typeof ELIGIBLE_LOCALES[number]);
+
+  if (!isEligibleLocale) {
     return false;
   }
 
@@ -88,7 +99,7 @@ export function getUrbanInstitute2025BaselineSurveyConfig(
     : `${SURVEY_BASE_URL}?screenerid=${screenerId}`;
 
   return {
-    shouldShow: () => checkSurveyEligibility(formData, whiteLabel),
+    shouldShow: () => checkSurveyEligibility(formData, whiteLabel, locale),
     message: (
       <FormattedMessage
         id="resultsPopup.urbanInstitute.message"

@@ -1,4 +1,4 @@
-import { Alert, IconButton, Button, Typography } from '@mui/material';
+import { Alert, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { FormattedMessage } from 'react-intl';
 import { useState, useCallback, useEffect, useRef } from 'react';
@@ -165,17 +165,15 @@ const ResultsPopup = ({
           </Typography>
 
           {linkUrl && (
-            <Button
-              component="a"
+            <a
               href={linkUrl}
               target="_blank"
-              rel="noopener noreferrer"
-              variant="contained"
+              rel="noopener"
               className="results-popup-button"
               onClick={handleMinimize}
             >
               {linkText}
-            </Button>
+            </a>
           )}
         </Alert>
       </div>
