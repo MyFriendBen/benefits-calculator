@@ -34,3 +34,50 @@
 .help-text {
   margin: 0;
 }
+
+/* Expense box container */
+.expense-box {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background-color: var(--input-section-background);
+  border-radius: 8px;
+}
+
+/* Expense fields container */
+.expense-fields-wrapper {
+  flex: 1;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Expense type field - longer */
+.expense-field-type {
+  flex: 2 1 300px;
+  min-width: 250px;
+}
+
+/* Expense amount field - shorter */
+.expense-field-amount {
+  flex: 1 1 120px;
+  min-width: 120px;
+}
+
+/* Expense delete button */
+.expense-delete-button {
+  align-self: flex-start;
+}
+
+/* Add expense button container */
+.add-expense-button-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+/* White background for inputs */
+.white-input {
+  background-color: #fff;
+}
