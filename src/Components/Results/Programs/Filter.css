@@ -16,7 +16,7 @@
 .filter-description .help-text {
   line-height: 1.6;
   font-size: .85rem;
-  padding-bottom: .3rem;
+  padding-bottom: 0;
 }
 
 /* Collapsed state on mobile with fade effect */
