@@ -70,8 +70,6 @@
   text-decoration: none;
   font-size: 0.8rem;
   border-radius: 0.75rem;
-  top: 0.75rem;
-  right: 3rem;
   padding: 0.5rem 0.75rem;
   background-color: var(--primary-color);
 }
@@ -114,6 +112,7 @@ h1.header-text-bottom {
   text-wrap: wrap;
 }
 
+/* Tablet and Desktop - 775px and above */
 @media (min-width: 775px) {
   .result-program-container:last-child {
     margin-bottom: 3rem;
@@ -158,6 +157,7 @@ h1.header-text-bottom {
   }
 }
 
+/* Mobile - below 775px */
 @media (max-width: 775px) {
   .result-program-details-wrapper {
     width: 100%;

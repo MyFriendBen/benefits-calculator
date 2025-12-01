@@ -49,6 +49,10 @@
   margin-left: 1rem;
 }
 
+.subcategory-indentation.vertical-align {
+  padding: 0.5rem 0;
+}
+
 #citizenshipPopover .MuiPaper-root.MuiPopover-paper {
   border-radius: 0 1.5625rem 1.5625rem 1.5625rem;
   width: 21rem;
@@ -111,7 +115,8 @@
   padding: 0.25rem 0.75rem;
 }
 
-@media (max-width: 500px), (max-height: 700px) {
+/* Small mobile or short screens */
+@media (max-width: 480px), (max-height: 700px) {
   #citizenshipPopover .MuiPaper-root.MuiPopover-paper {
     max-height: 70vh;
     width: 95vw;
@@ -123,6 +128,7 @@
   }
 }
 
+/* Mobile - 480px and below */
 @media (max-width: 480px) {
   .results-section-header {
     font-size: 1.1rem;
