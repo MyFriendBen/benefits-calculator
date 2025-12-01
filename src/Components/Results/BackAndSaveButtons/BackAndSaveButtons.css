@@ -1,3 +1,9 @@
+/**
+ * Breakpoints (must match src/Constants/breakpoints.ts):
+ * Mobile:  0-767px
+ * Desktop: 768px+
+ */
+
 .results-back-save-buttons {
   display: inline-flex;
   align-items: center;
@@ -47,7 +53,7 @@
   padding-left: 0.5rem;
 }
 
-@media (max-width: 500px) {
+@media (max-width: 767px) {
   .results-back-save-btn-container {
     padding: 0.5rem 1rem;
     margin-top: 0.5rem;
@@ -57,11 +63,6 @@
   .save-icon {
     height: 2rem;
     width: 2rem;
-    margin-left: -0.25rem;
-  }
-
-  .results-back-save-buttons {
-    padding: 0.5rem 0.5rem;
   }
 
   .btn-icon-text-container {

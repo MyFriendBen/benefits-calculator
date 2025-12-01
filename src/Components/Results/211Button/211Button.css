@@ -1,3 +1,9 @@
+/**
+ * Breakpoints (must match src/Constants/breakpoints.ts):
+ * Mobile:  0-767px
+ * Desktop: 768px+
+ */
+
 .button211 {
   display: flex;
   background-color: var(--primary-color);
@@ -40,13 +46,14 @@
   margin-bottom: 0.5rem;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 767px) {
   .help-text-for-211-button-font {
     font-size: 1.25rem;
   }
 
   .button211 {
     font-size: 0.85rem;
-    padding: 0.5rem 1.25rem;
+    padding: 0.75rem 1.5rem;
+    min-height: 44px;
   }
 }

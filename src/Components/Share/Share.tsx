@@ -1,4 +1,4 @@
-import { forwardRef, useState, useContext, ReactElement } from 'react';
+import { forwardRef, useState, useContext, ReactElement, useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import {
   EmailShareButton,
@@ -18,13 +18,27 @@ import { Context } from '../Wrapper/Wrapper';
 import dataLayerPush from '../../Assets/analytics';
 import './Share.css';
 import { useConfig } from '../Config/configHook';
+import { isMobileWidth } from '../../Constants/breakpoints';
 
 const Share = forwardRef(function Share() {
   const [copied, setCopied] = useState(false);
+  const windowWidth = window.innerWidth;
+  const [size, setSize] = useState(windowWidth);
   const { getReferrer } = useContext(Context);
   const { email, survey } = useConfig<{ email: string; survey: string }>('feedback_links');
   const surveyLink = survey;
   const intl = useIntl();
+
+  useEffect(() => {
+    function handleResize() {
+      setSize(window.innerWidth);
+    }
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   const labels = {
     email: intl.formatMessage({
@@ -42,7 +56,7 @@ const Share = forwardRef(function Share() {
   };
 
   const shareUrl = getReferrer('shareLink') || 'default';
-  const isMobile = window.innerWidth <= 700;
+  const isMobile = isMobileWidth(size);
   const iconSize = { color: '#fff', fontSize: isMobile ? '1.5rem' : '2rem' };
 
   const copyLink = () => {

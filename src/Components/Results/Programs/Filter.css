@@ -1,3 +1,9 @@
+/**
+ * Breakpoints (must match src/Constants/breakpoints.ts):
+ * Mobile:  0-767px
+ * Desktop: 768px+
+ */
+
 .filter-section-container {
   margin-bottom: 1rem;
   width: 100%;
@@ -17,6 +23,19 @@
   line-height: 1.6;
   font-size: .85rem;
   padding-bottom: 0;
+}
+
+.citizenship-button.MuiButton-root {
+  background-color: #ffffff;
+  color: var(--primary-color);
+  border-radius: 1.5625rem;
+  border: 1px solid var(--primary-color);
+}
+
+.flat-white-border-bottom.MuiButton-root {
+  border-radius: 1.5625rem 1.5625rem 0 0;
+  border-bottom: 1px solid #ffffff;
+  background-color: #ffffff;
 }
 
 /* Collapsed state on mobile with fade effect */
@@ -52,6 +71,24 @@
   display: block;
 }
 
+.active-blue.MuiButton-root {
+  background-color: rgba(65, 82, 140, 0.14);
+}
+
+.reset-button.MuiButton-root {
+  background-color: #ffffff;
+  color: var(--primary-color);
+  border: none;
+  font-weight: 500;
+  text-transform: none;
+  padding: 0;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  text-decoration: none;
+  min-width: auto;
+  display: block;
+}
+
 .show-more-button.MuiButton-root:hover {
   background-color: transparent;
   text-decoration: underline;
@@ -70,6 +107,16 @@
   flex-wrap: wrap;
   gap: 0.625rem;
   width: 100%;
+}
+
+.subcategory-indentation.vertical-align {
+  padding: 0.5rem 0;
+}
+
+#citizenshipPopover .MuiPaper-root.MuiPopover-paper {
+  border-radius: 0 1.5625rem 1.5625rem 1.5625rem;
+  width: 21rem;
+  border: 1px solid var(--primary-color);
 }
 
 .citizenship-option-button.MuiButton-root {
@@ -221,6 +268,15 @@
   .filter-section-container {
     margin-bottom: 1.5rem;
   }
+}
+
+/* Small mobile or short screens */
+@media (max-width: 767px), (max-height: 700px) {
+  #citizenshipPopover .MuiPaper-root.MuiPopover-paper {
+    max-height: 70vh;
+    width: 95vw;
+    margin: 0 8px;
+  }
 
   .results-section-header {
     font-size: 1.125rem;
@@ -264,7 +320,8 @@
   }
 }
 
-@media (max-width: 480px) {
+/* Mobile - 767px and below */
+@media (max-width: 767px) {
   .results-section-header {
     font-size: 1.1rem;
   }

@@ -62,7 +62,13 @@
   text-transform: uppercase;
 }
 
-@media (max-width: 700px) {
+/**
+ * Breakpoints (must match src/Constants/breakpoints.ts):
+ * Mobile:  0-767px
+ * Desktop: 768px+
+ */
+
+@media (max-width: 767px) {
   .footer-content-container {
     flex-direction: column;
     padding-bottom: 1rem;
@@ -73,12 +79,11 @@
   }
 
   .footer-policy-container {
-    justify-content: center;
     padding-left: 0;
   }
 
   .policy-link {
-    font-size: 0.625rem;
+    font-size: 0.875rem;
     margin: 0 0.5rem 0.75rem 0.5rem;
   }
 

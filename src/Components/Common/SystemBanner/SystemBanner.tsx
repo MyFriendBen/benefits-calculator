@@ -76,7 +76,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
       sx={{
         width: '100%',
         px: '1rem',
-        marginTop: { xs: '1rem', sm: '1rem' },
+        marginTop: '1rem',
       }}
       spacing={2}
     >
