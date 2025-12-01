@@ -79,7 +79,7 @@
   gap: 0.25rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 774px) {
   .icon-wrapper {
     margin-right: 0;
   }
@@ -106,7 +106,7 @@
   align-items: center;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 774px) {
   #select-language {
     margin-right: 0;
     padding-right: 1.5rem;

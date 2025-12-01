@@ -84,7 +84,7 @@ button {
   cursor: pointer;
 }
 
-@media (min-width: 601px) {
+@media (min-width: 775px) {
   .icon:hover > .icon-name {
     max-width: 130px;
     margin-left: 0.3rem;
@@ -98,12 +98,11 @@ button {
 
 /**
  * Breakpoints (must match src/Constants/breakpoints.ts):
- * Mobile:  0-480px
- * Tablet:  481-775px
- * Desktop: 776px+
+ * Mobile:  0-774px
+ * Desktop: 775px+
  */
 
-@media (max-width: 480px) {
+@media (max-width: 774px) {
   .container {
     width: 80%;
   }

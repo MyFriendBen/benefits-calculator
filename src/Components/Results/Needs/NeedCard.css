@@ -1,8 +1,7 @@
 /**
  * Breakpoints (must match src/Constants/breakpoints.ts):
- * Mobile:  0-480px
- * Tablet:  481-775px
- * Desktop: 776px+
+ * Mobile:  0-774px
+ * Desktop: 775px+
  */
 
 .result-resource-more-info {
@@ -111,7 +110,7 @@
   text-decoration: none;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 774px) {
   .result-resource-more-info span strong {
     font-size: 1rem;
   }

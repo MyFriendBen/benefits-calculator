@@ -1,8 +1,7 @@
 /**
  * Breakpoints (must match src/Constants/breakpoints.ts):
- * Mobile:  0-480px
- * Tablet:  481-775px
- * Desktop: 776px+
+ * Mobile:  0-774px
+ * Desktop: 775px+
  */
 
 .button211 {
@@ -47,7 +46,7 @@
   margin-bottom: 0.5rem;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 774px) {
   .help-text-for-211-button-font {
     font-size: 1.25rem;
   }

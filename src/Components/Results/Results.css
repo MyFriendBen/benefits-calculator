@@ -1,8 +1,7 @@
 /**
  * Breakpoints (must match src/Constants/breakpoints.ts):
- * Mobile:  0-480px
- * Tablet:  481-775px
- * Desktop: 776px+
+ * Mobile:  0-774px
+ * Desktop: 775px+
  */
 
 .results-loading-container {
@@ -225,7 +224,7 @@
   border-radius: 0.75rem;
 }
 
-/* DESKTOP - 775px and above (matches BREAKPOINTS.tablet in src/Constants/breakpoints.ts) */
+/* DESKTOP - 775px and above (matches BREAKPOINTS.desktop in src/Constants/breakpoints.ts) */
 @media (min-width: 775px) {
   .results-header-programs-count-text {
     height: 3rem;
@@ -301,67 +300,8 @@
 }
 
 /* Please keep all media queries at the end of the file so that the styles cascade correctly */
-/* TABLET - 481px to 775px (matches BREAKPOINTS in src/Constants/breakpoints.ts) */
-@media only screen and (min-width: 481px) and (max-width: 775px) {
-  .results-header-programs-count-text {
-    width: 7rem;
-    height: 7rem;
-    background-color: var(--primary-color);
-    color: white;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    text-align: center;
-    padding-top: 0.75rem;
-    line-height: normal;
-    padding-bottom: 0.5rem;
-    margin-right: 1rem;
-  }
-
-  .column-row {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .results-header {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .results-header-programs-count {
-    font-size: 3rem !important;
-    font-weight: 700;
-    padding-bottom: 0.25rem;
-    font-family: 'Roboto Slab', serif;
-  }
-
-  .results-header-programs-count-text > div:not(.results-header-programs-count) {
-    font-size: 0.75rem;
-  }
-
-  .results-header-values {
-    font-family: 'Roboto Slab', serif;
-    font-weight: 700;
-    color: var(--primary-color);
-    border-bottom: 1.5px solid var(--primary-color);
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .results-header-label {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    color: var(--primary-color);
-  }
-
-  .result-program-more-info {
-    width: 20%;
-    vertical-align: top;
-    line-height: normal;
-  }
-}
-
-/* MOBILE - 480px and below (matches BREAKPOINTS.mobile in src/Constants/breakpoints.ts) */
-@media (max-width: 480px) {
+/* MOBILE - 774px and below */
+@media (max-width: 774px) {
   .results-header-programs-count-text {
     width: 7rem;
     height: 7rem;
@@ -385,7 +325,9 @@
 
   .results-header {
     display: flex;
+    justify-content: center;
     flex-direction: row;
+    align-items: center;
   }
 
   .results-header-programs-count {
@@ -407,12 +349,14 @@
     border-bottom: 1.5px solid var(--primary-color);
     display: flex;
     justify-content: space-between;
+    font-size: 1.35rem;
   }
 
   .results-header-label {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
     color: var(--primary-color);
+    font-size: 0.75rem;
   }
 
   .category-heading-text-style {
@@ -452,13 +396,5 @@
 
   .results-section-header {
     margin-top: 0.5rem;
-  }
-
-  .results-header-values {
-    font-size: 1.35rem;
-  }
-
-  .results-header-label {
-    font-size: 0.75rem;
   }
 }

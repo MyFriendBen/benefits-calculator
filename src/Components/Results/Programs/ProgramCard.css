@@ -1,8 +1,7 @@
 /**
  * Breakpoints (must match src/Constants/breakpoints.ts):
- * Mobile:  0-480px
- * Tablet:  481-775px
- * Desktop: 776px+
+ * Mobile:  0-774px
+ * Desktop: 775px+
  */
 
 .result-program-container {
@@ -118,7 +117,7 @@ h1.header-text-bottom {
   text-wrap: wrap;
 }
 
-/* Tablet and Desktop - 775px and above */
+/* Desktop - 775px and above */
 @media (min-width: 775px) {
   .result-program-container:last-child {
     margin-bottom: 3rem;
@@ -163,8 +162,8 @@ h1.header-text-bottom {
   }
 }
 
-/* Mobile - below 775px */
-@media (max-width: 775px) {
+/* Mobile - 774px and below */
+@media (max-width: 774px) {
   .result-program-details-wrapper {
     width: 100%;
   }

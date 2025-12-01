@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from 'react';
 import './ProgramCard.css';
 import { findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
 import { FormattedMessageType } from '../../../Types/Questions';
-import { BREAKPOINTS, isMobileWidth } from '../../../Constants/breakpoints';
+import { isMobileWidth } from '../../../Constants/breakpoints';
 
 type ResultsCardDetail = {
   title: FormattedMessageType;
