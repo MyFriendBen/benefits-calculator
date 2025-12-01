@@ -32,7 +32,6 @@
 .result-program-details {
   flex: 0.5 0.5;
   font-size: 0.9rem;
-  display: inline-block;
   font-weight: 100;
   line-height: normal;
   width: 50%;
@@ -192,10 +191,11 @@ h1.header-text-bottom {
 
   .result-program-details {
     padding: 0.75rem 1rem;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
   }
 
   .result-program-details strong {
     font-size: 1.1rem;
+    padding-top: .2rem
   }
 }
