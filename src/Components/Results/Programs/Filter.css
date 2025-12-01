@@ -1,3 +1,10 @@
+/**
+ * Breakpoints (must match src/Constants/breakpoints.ts):
+ * Mobile:  0-480px
+ * Tablet:  481-775px
+ * Desktop: 776px+
+ */
+
 .filter-section-container {
   margin-bottom: 2rem;
 }

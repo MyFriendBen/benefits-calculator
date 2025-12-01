@@ -1,3 +1,10 @@
+/**
+ * Breakpoints (must match src/Constants/breakpoints.ts):
+ * Mobile:  0-480px
+ * Tablet:  481-775px
+ * Desktop: 776px+
+ */
+
 .result-program-container {
   position: relative;
   border: 2px solid var(--secondary-color);
@@ -196,6 +203,6 @@ h1.header-text-bottom {
 
   .result-program-details strong {
     font-size: 1.1rem;
-    padding-top: .2rem
+    padding-top: 0.2rem;
   }
 }

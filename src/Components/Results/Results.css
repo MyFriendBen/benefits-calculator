@@ -1,3 +1,10 @@
+/**
+ * Breakpoints (must match src/Constants/breakpoints.ts):
+ * Mobile:  0-480px
+ * Tablet:  481-775px
+ * Desktop: 776px+
+ */
+
 .results-loading-container {
   flex: 1;
 }
@@ -432,7 +439,6 @@
   }
 
   .results-tab a {
-    font-size: 0.45rem !important;
     padding: 0.5rem 0.25rem;
   }
 
