@@ -1,7 +1,7 @@
 /**
  * Breakpoints (must match src/Constants/breakpoints.ts):
- * Mobile:  0-774px
- * Desktop: 775px+
+ * Mobile:  0-767px
+ * Desktop: 768px+
  */
 
 .result-program-container {
@@ -117,8 +117,8 @@ h1.header-text-bottom {
   text-wrap: wrap;
 }
 
-/* Desktop - 775px and above */
-@media (min-width: 775px) {
+/* Desktop - 768px and above */
+@media (min-width: 768px) {
   .result-program-container:last-child {
     margin-bottom: 3rem;
   }
@@ -162,8 +162,8 @@ h1.header-text-bottom {
   }
 }
 
-/* Mobile - 774px and below */
-@media (max-width: 774px) {
+/* Mobile - 767px and below */
+@media (max-width: 767px) {
   .result-program-details-wrapper {
     width: 100%;
   }

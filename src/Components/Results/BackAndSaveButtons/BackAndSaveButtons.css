@@ -1,7 +1,7 @@
 /**
  * Breakpoints (must match src/Constants/breakpoints.ts):
- * Mobile:  0-774px
- * Desktop: 775px+
+ * Mobile:  0-767px
+ * Desktop: 768px+
  */
 
 .results-back-save-buttons {
@@ -53,7 +53,7 @@
   padding-left: 0.5rem;
 }
 
-@media (max-width: 774px) {
+@media (max-width: 767px) {
   .results-back-save-btn-container {
     padding: 0.5rem 1rem;
     margin-top: 0.5rem;

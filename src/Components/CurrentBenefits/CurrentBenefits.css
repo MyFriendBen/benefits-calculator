@@ -46,11 +46,11 @@
 
 /**
  * Breakpoints (must match src/Constants/breakpoints.ts):
- * Mobile:  0-774px
- * Desktop: 775px+
+ * Mobile:  0-767px
+ * Desktop: 768px+
  */
 
-@media (max-width: 774px) {
+@media (max-width: 767px) {
   .co-benefits-container {
     font-size: 1rem;
   }

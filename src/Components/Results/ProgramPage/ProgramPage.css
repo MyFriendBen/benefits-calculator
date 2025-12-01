@@ -322,8 +322,8 @@ li.apply-info {
   }
 }
 
-/* Mobile - 774px and below */
-@media (max-width: 774px) {
+/* Mobile - 767px and below */
+@media (max-width: 767px) {
   .program-icon-and-header {
     justify-content: center;
   }

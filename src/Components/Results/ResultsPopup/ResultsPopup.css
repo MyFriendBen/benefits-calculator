@@ -90,7 +90,7 @@
   border-color: var(--secondary-color);
 }
 
-@media (min-width: 775px) {
+@media (min-width: 768px) {
   .results-popup-button {
     padding: 0.5rem 1.5rem;
   }

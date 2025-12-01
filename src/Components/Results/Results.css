@@ -1,7 +1,7 @@
 /**
  * Breakpoints (must match src/Constants/breakpoints.ts):
- * Mobile:  0-774px
- * Desktop: 775px+
+ * Mobile:  0-767px
+ * Desktop: 768px+
  */
 
 .results-loading-container {
@@ -224,8 +224,8 @@
   border-radius: 0.75rem;
 }
 
-/* DESKTOP - 775px and above (matches BREAKPOINTS.desktop in src/Constants/breakpoints.ts) */
-@media (min-width: 775px) {
+/* DESKTOP - 768px and above (matches BREAKPOINTS.desktop in src/Constants/breakpoints.ts) */
+@media (min-width: 768px) {
   .results-header-programs-count-text {
     height: 3rem;
     border-radius: 0.2rem;
@@ -300,8 +300,8 @@
 }
 
 /* Please keep all media queries at the end of the file so that the styles cascade correctly */
-/* MOBILE - 774px and below */
-@media (max-width: 774px) {
+/* MOBILE - 767px and below */
+@media (max-width: 767px) {
   .results-header-programs-count-text {
     width: 7rem;
     height: 7rem;

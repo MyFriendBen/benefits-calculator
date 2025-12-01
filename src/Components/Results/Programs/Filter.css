@@ -1,7 +1,7 @@
 /**
  * Breakpoints (must match src/Constants/breakpoints.ts):
- * Mobile:  0-774px
- * Desktop: 775px+
+ * Mobile:  0-767px
+ * Desktop: 768px+
  */
 
 .filter-section-container {
@@ -122,7 +122,7 @@
 }
 
 /* Small mobile or short screens */
-@media (max-width: 774px), (max-height: 700px) {
+@media (max-width: 767px), (max-height: 700px) {
   #citizenshipPopover .MuiPaper-root.MuiPopover-paper {
     max-height: 70vh;
     width: 95vw;
@@ -134,8 +134,8 @@
   }
 }
 
-/* Mobile - 774px and below */
-@media (max-width: 774px) {
+/* Mobile - 767px and below */
+@media (max-width: 767px) {
   .results-section-header {
     font-size: 1.1rem;
   }
