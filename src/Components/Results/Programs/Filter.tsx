@@ -12,6 +12,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import './Filter.css';
 import '../../QuestionComponentContainer/QuestionComponentContainer.css';
 import { Context } from '../../Wrapper/Wrapper';
+import { BREAKPOINTS } from '../../../utils/breakpoints';
 
 // Define the order of citizenship options
 const CITIZENSHIP_OPTIONS: CitizenLabelOptions[] = [
@@ -27,8 +28,8 @@ export const Filter = () => {
   const { filtersChecked, setFiltersChecked } = useResultsContext();
   const { formData } = useContext(Context);
   const intl = useIntl();
-  const isMobile = useMediaQuery('(max-width: 1200px)');
-  const isNarrowScreen = useMediaQuery('(max-width: 600px)');
+  const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.desktop - 1}px)`);
+  const collapseDescription = useMediaQuery('(max-width: 600px)');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   // Get currently selected citizenship status from filters
@@ -157,7 +158,7 @@ export const Filter = () => {
         <FormattedMessage id="filterSection.header" defaultMessage="Filter Results by Citizenship" />
       </h2>
       <div className="filter-description">
-        <div className={isNarrowScreen && !isDescriptionExpanded ? 'collapsed' : ''}>
+        <div className={collapseDescription && !isDescriptionExpanded ? 'collapsed' : ''}>
           <Typography variant="body2" color="text.secondary" className="help-text">
             <FormattedMessage
               id="filterSection.citizenHelpText"
@@ -165,7 +166,7 @@ export const Filter = () => {
             />
           </Typography>
         </div>
-        {isNarrowScreen && (
+        {collapseDescription && (
           <Button
             className="show-more-button"
             onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
