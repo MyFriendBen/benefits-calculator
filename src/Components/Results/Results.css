@@ -219,7 +219,7 @@
 }
 
 /* DESKTOP */
-@media (min-width: 775px) {
+@media (min-width: var(--breakpoint-tablet)) {
   .results-header-programs-count-text {
     height: 3rem;
     border-radius: 0.2rem;
@@ -295,7 +295,7 @@
 
 /* Please keep all media queries at the end of the file so that the styles cascade correctly */
 /* TABLET */
-@media only screen and (min-width: 481px) and (max-width: 775px) {
+@media only screen and (min-width: calc(var(--breakpoint-mobile) + 1px)) and (max-width: var(--breakpoint-tablet)) {
   .results-header-programs-count-text {
     width: 7rem;
     height: 7rem;
@@ -354,7 +354,7 @@
 }
 
 /* MOBILE */
-@media (max-width: 480px) {
+@media (max-width: var(--breakpoint-mobile)) {
   .results-header-programs-count-text {
     width: 7rem;
     height: 7rem;
