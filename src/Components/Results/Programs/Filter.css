@@ -12,7 +12,7 @@
 }
 
 .citizenship-button.MuiButton-root {
-  background-color: #ffff;
+  background-color: #ffffff;
   color: var(--primary-color);
   border-radius: 1.5625rem;
   border: 1px solid var(--primary-color);
@@ -20,15 +20,15 @@
 
 .flat-white-border-bottom.MuiButton-root {
   border-radius: 1.5625rem 1.5625rem 0 0;
-  border-bottom: #ffff;
-  background-color: #ffff;
+  border-bottom: #ffffff;
+  background-color: #ffffff;
 }
 
 .flat-white-border-bottom.MuiButton-root::after {
   content: '';
   height: 2px;
   width: 100%;
-  background-color: #ffff;
+  background-color: #ffffff;
   z-index: 10000;
   position: absolute;
   bottom: 0;
@@ -39,7 +39,7 @@
 }
 
 .reset-button.MuiButton-root {
-  background-color: #ffff;
+  background-color: #ffffff;
   color: var(--primary-color);
   border: none;
   font-weight: 400;

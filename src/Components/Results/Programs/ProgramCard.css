@@ -31,6 +31,12 @@
 
 .result-program-details {
   flex: 0.5 0.5;
+  font-size: 0.9rem;
+  display: inline-block;
+  font-weight: 100;
+  line-height: normal;
+  width: 50%;
+  padding: 1rem 2rem;
 }
 
 .result-program-details-wrapper {
@@ -68,15 +74,6 @@
   right: 3rem;
   padding: 0.5rem 0.75rem;
   background-color: var(--primary-color);
-}
-
-.result-program-details {
-  font-size: 0.9rem;
-  display: inline-block;
-  font-weight: 100;
-  line-height: normal;
-  width: 50%;
-  padding: 1rem 2rem;
 }
 
 .result-program-details strong {
@@ -174,7 +171,7 @@ h1.header-text-bottom {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem 0.75rem 1rem;
+    padding: 0.75rem 1rem;
   }
 
   .result-program-more-info {

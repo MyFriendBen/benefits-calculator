@@ -53,7 +53,7 @@ export function ResultsCard({ name, detail1, detail2, link, flags = [], containe
     };
   }, []);
 
-  const isMobile = size < 775 ? true : false;
+  const isMobile = size < 775;
 
   const containerClass = 'result-program-container ' + containerClassNames.join(' ');
 
@@ -147,7 +147,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
     }
 
     return flags;
-  }, []);
+  }, [program.new, program.low_confidence]);
 
   const programPageLink = useResultsLink(`results/benefits/${programId}`);
   const value = useFormatDisplayValue(program);

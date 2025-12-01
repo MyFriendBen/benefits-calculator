@@ -437,9 +437,9 @@
   }
 
   .results-tab a h1 {
-  font-size: .9rem;
-  margin: 0;
-}
+    font-size: .9rem;
+    margin: 0;
+  }
 
   .results-tab-container {
     padding: 0.5rem 0.5rem 0 0.5rem;
