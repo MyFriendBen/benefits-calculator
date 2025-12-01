@@ -4,6 +4,7 @@
   flex-wrap: wrap;
   margin: 1.5rem auto 0 auto;
   max-width: 50rem;
+  justify-content: center;
 }
 
 .multi-select-card-container {
