@@ -36,7 +36,7 @@ jobs:
     timeout-minutes: 30
     environment:
       name: production
-      url: https://benefits-calculator-v1.herokuapp.com
+      url: ${{ secrets.HEROKU_PROD_URL }}
 
     steps:
       - name: Checkout release tag
