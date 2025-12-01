@@ -83,6 +83,9 @@ const createSpecialConditionsSchema = (intl: IntlShape) => {
     })
     .refine(hasAtLeastOneTrue, {
       message: renderConditionsSelectOneHelperText(intl),
+    })
+    .refine(validateNoneExclusive, {
+      message: 'If you select "none", you cannot select other options',
     });
 };
 

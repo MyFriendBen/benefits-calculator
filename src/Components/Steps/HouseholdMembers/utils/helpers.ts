@@ -61,7 +61,7 @@ export const createHouseholdMemberData = ({
   shouldShowBasicInfo,
   householdMemberFormData,
 }: CreateHouseholdMemberDataParams): HouseholdData => {
-  return {
+  const result = {
     ...memberData,
     id: existingHouseholdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
     frontendId: existingHouseholdData[currentMemberIndex]?.frontendId ?? crypto.randomUUID(),
@@ -76,6 +76,11 @@ export const createHouseholdMemberData = ({
       : (householdMemberFormData?.relationshipToHH ?? ''),
     hasIncome: memberData.hasIncome === 'true',
   } as HouseholdData;
+
+  console.log('createHouseholdMemberData - memberData:', memberData);
+  console.log('createHouseholdMemberData - result:', result);
+
+  return result;
 };
 
 /**

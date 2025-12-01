@@ -36,10 +36,10 @@ const DefaultConfirmationHHData = () => {
     them: IconAndFormattedMessageMap;
   }>('health_insurance_options');
 
-  const conditionsString = (conditions: Conditions) => {
+  const conditionsString = (specialConditions: Conditions) => {
     const conditionText = [];
 
-    if (conditions.student) {
+    if (specialConditions.student) {
       conditionText.push(
         formatMessage({
           id: 'confirmation.headOfHouseholdDataBlock-studentText',
@@ -48,7 +48,7 @@ const DefaultConfirmationHHData = () => {
       );
     }
 
-    if (conditions.pregnant) {
+    if (specialConditions.pregnant) {
       conditionText.push(
         formatMessage({
           id: 'confirmation.headOfHouseholdDataBlock-pregnantText',
@@ -57,7 +57,7 @@ const DefaultConfirmationHHData = () => {
       );
     }
 
-    if (conditions.blindOrVisuallyImpaired) {
+    if (specialConditions.blindOrVisuallyImpaired) {
       conditionText.push(
         formatMessage({
           id: 'confirmation.headOfHouseholdDataBlock-blindOrVisuallyImpairedText',
@@ -66,7 +66,7 @@ const DefaultConfirmationHHData = () => {
       );
     }
 
-    if (conditions.disabled) {
+    if (specialConditions.disabled) {
       conditionText.push(
         formatMessage({
           id: 'confirmation.headOfHouseholdDataBlock-disabledText',
@@ -75,7 +75,7 @@ const DefaultConfirmationHHData = () => {
       );
     }
 
-    if (conditions.longTermDisability) {
+    if (specialConditions.longTermDisability) {
       conditionText.push(
         formatMessage({
           id: 'confirmation.longTermDisability',

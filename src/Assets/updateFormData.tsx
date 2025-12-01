@@ -186,7 +186,7 @@ export function useUpdateFormData() {
           noneValue = false;
         } else {
           // No other conditions - either preserve explicit 'none' or infer it
-          noneValue = existingMember?.conditions?.none ?? true;
+          noneValue = existingMember?.specialConditions?.none ?? true;
         }
       }
       // Otherwise, leave noneValue as false (member hasn't reached conditions page yet)
@@ -198,7 +198,7 @@ export function useUpdateFormData() {
         birthYear: member.birth_year ?? undefined,
         birthMonth: member.birth_month ?? undefined,
         relationshipToHH: member.relationship ? member.relationship : defaultRelationship,
-        conditions: {
+        specialConditions: {
           // Preserve or infer 'none' only for existing members
           none: noneValue,
           student: member.student ?? false,
