@@ -96,7 +96,14 @@ button {
   }
 }
 
-@media (max-width: 700px) {
+/**
+ * Breakpoints (must match src/Constants/breakpoints.ts):
+ * Mobile:  0-480px
+ * Tablet:  481-775px
+ * Desktop: 776px+
+ */
+
+@media (max-width: 480px) {
   .container {
     width: 80%;
   }
