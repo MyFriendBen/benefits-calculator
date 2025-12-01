@@ -5,30 +5,28 @@
 export const BREAKPOINTS = {
   /** Mobile devices - up to 480px */
   mobile: 480,
-  /** Tablet devices - 481px to 774px */
+  /** Tablet/Desktop threshold - 775px and above is considered desktop */
   tablet: 775,
-  /** Desktop devices - 775px and above */
-  desktop: 1200,
 } as const;
 
 /**
  * Helper function to check if current window width is mobile
  * @param width - Current window width in pixels
- * @returns true if width is less than or equal to mobile breakpoint
+ * @returns true if width is less than or equal to mobile breakpoint (480px)
  */
-export const isMobileWidth = (width: number): boolean => width < BREAKPOINTS.tablet;
+export const isMobileWidth = (width: number): boolean => width <= BREAKPOINTS.mobile;
 
 /**
  * Helper function to check if current window width is tablet
  * @param width - Current window width in pixels
- * @returns true if width is between mobile and desktop breakpoints
+ * @returns true if width is between mobile and tablet breakpoints (481-774px)
  */
 export const isTabletWidth = (width: number): boolean =>
-  width >= BREAKPOINTS.tablet && width < BREAKPOINTS.desktop;
+  width > BREAKPOINTS.mobile && width < BREAKPOINTS.tablet;
 
 /**
  * Helper function to check if current window width is desktop
  * @param width - Current window width in pixels
- * @returns true if width is greater than or equal to desktop breakpoint
+ * @returns true if width is greater than or equal to tablet breakpoint (775px+)
  */
-export const isDesktopWidth = (width: number): boolean => width >= BREAKPOINTS.desktop;
+export const isDesktopWidth = (width: number): boolean => width >= BREAKPOINTS.tablet;
