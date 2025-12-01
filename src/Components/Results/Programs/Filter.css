@@ -120,7 +120,7 @@
 }
 
 /* Small mobile or short screens */
-@media (max-width: 480px), (max-height: 700px) {
+@media (max-width: var(--breakpoint-mobile)), (max-height: 700px) {
   #citizenshipPopover .MuiPaper-root.MuiPopover-paper {
     max-height: 70vh;
     width: 95vw;
@@ -133,7 +133,7 @@
 }
 
 /* Mobile - 480px and below */
-@media (max-width: 480px) {
+@media (max-width: var(--breakpoint-mobile)) {
   .results-section-header {
     font-size: 1.1rem;
   }

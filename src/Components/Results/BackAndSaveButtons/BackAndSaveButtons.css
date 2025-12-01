@@ -47,7 +47,7 @@
   padding-left: 0.5rem;
 }
 
-@media (max-width: 500px) {
+@media (max-width: var(--breakpoint-mobile)) {
   .results-back-save-btn-container {
     padding: 0.5rem 1rem;
     margin-top: 0.5rem;

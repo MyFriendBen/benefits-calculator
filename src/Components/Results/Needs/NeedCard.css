@@ -104,7 +104,7 @@
   text-decoration: none;
 }
 
-@media (max-width: 500px) {
+@media (max-width: var(--breakpoint-mobile)) {
   .result-resource-more-info span strong {
     font-size: 1rem;
   }
