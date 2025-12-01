@@ -40,7 +40,7 @@
   margin-bottom: 0.5rem;
 }
 
-@media (max-width: var(--breakpoint-mobile)) {
+@media (max-width: 480px) {
   .help-text-for-211-button-font {
     font-size: 1.25rem;
   }

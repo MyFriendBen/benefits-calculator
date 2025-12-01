@@ -218,8 +218,8 @@
   border-radius: 0.75rem;
 }
 
-/* DESKTOP */
-@media (min-width: var(--breakpoint-tablet)) {
+/* DESKTOP - 775px and above (matches BREAKPOINTS.tablet in src/Constants/breakpoints.ts) */
+@media (min-width: 775px) {
   .results-header-programs-count-text {
     height: 3rem;
     border-radius: 0.2rem;
@@ -294,8 +294,8 @@
 }
 
 /* Please keep all media queries at the end of the file so that the styles cascade correctly */
-/* TABLET */
-@media only screen and (min-width: calc(var(--breakpoint-mobile) + 1px)) and (max-width: var(--breakpoint-tablet)) {
+/* TABLET - 481px to 775px (matches BREAKPOINTS in src/Constants/breakpoints.ts) */
+@media only screen and (min-width: 481px) and (max-width: 775px) {
   .results-header-programs-count-text {
     width: 7rem;
     height: 7rem;
@@ -353,8 +353,8 @@
   }
 }
 
-/* MOBILE */
-@media (max-width: var(--breakpoint-mobile)) {
+/* MOBILE - 480px and below (matches BREAKPOINTS.mobile in src/Constants/breakpoints.ts) */
+@media (max-width: 480px) {
   .results-header-programs-count-text {
     width: 7rem;
     height: 7rem;

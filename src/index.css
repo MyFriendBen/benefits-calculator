@@ -4,11 +4,6 @@
   --confirmation-background: #d3f2f0;
   --main-max-width: 999999rem;
 
-  /* Breakpoints - should match src/Constants/breakpoints.ts */
-  --breakpoint-mobile: 480px;
-  --breakpoint-tablet: 775px;
-  --breakpoint-desktop: 1200px;
-
   font-size: 16px;
 }
 
