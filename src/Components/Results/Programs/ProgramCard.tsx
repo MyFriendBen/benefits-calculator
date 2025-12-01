@@ -3,10 +3,12 @@ import { Program } from '../../../Types/Results';
 import { FormattedMessage } from 'react-intl';
 import { useFormatDisplayValue } from '../FormattedValue';
 import ResultsTranslate from '../Translate/Translate';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useMediaQuery } from '@mui/material';
 import './ProgramCard.css';
 import { findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
 import { FormattedMessageType } from '../../../Types/Questions';
+import { BREAKPOINTS } from '../../../utils/breakpoints';
 
 type ResultsCardDetail = {
   title: FormattedMessageType;
@@ -39,35 +41,8 @@ type ResultsCardProps = {
 };
 
 export function ResultsCard({ name, detail1, detail2, link, flags = [], containerClassNames = [] }: ResultsCardProps) {
-  const windowWidth = window.innerWidth;
-  const [size, setSize] = useState(windowWidth);
-
-  useEffect(() => {
-    function handleResize() {
-      setSize(window.innerWidth);
-    }
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  const isMobile = size < 775 ? true : false;
-
-  type ConditonalWrapperProps = {
-    children: React.ReactElement;
-    condition: boolean;
-    wrapper: (children: React.ReactElement) => JSX.Element;
-  };
-  const ConditonalWrapper: React.FC<ConditonalWrapperProps> = ({ condition, wrapper, children }) => {
-    if (condition) {
-      return wrapper(children);
-    }
-
-    return children;
-  };
-
+  // Mobile is below desktop breakpoint (0-767px)
+  const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.desktop - 1}px)`);
   const containerClass = 'result-program-container ' + containerClassNames.join(' ');
 
   return (
@@ -81,23 +56,22 @@ export function ResultsCard({ name, detail1, detail2, link, flags = [], containe
           );
         })}
       </div>
-      <ConditonalWrapper
-        condition={isMobile}
-        wrapper={(children) => <div className="result-program-more-info-wrapper">{children}</div>}
-      >
-        <>
+      {isMobile ? (
+        <div className="result-program-more-info-wrapper">
           <div className="result-program-more-info">
             <Link to={link}>{name}</Link>
           </div>
-          {isMobile && (
-            <div className="result-program-more-info-button">
-              <Link to={link} data-testid="more-info-link">
-                <FormattedMessage id="more-info" defaultMessage="More Info" />
-              </Link>
-            </div>
-          )}
-        </>
-      </ConditonalWrapper>
+          <div className="result-program-more-info-button">
+            <Link to={link} data-testid="more-info-link">
+              <FormattedMessage id="more-info" defaultMessage="More Info" />
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="result-program-more-info">
+          <Link to={link}>{name}</Link>
+        </div>
+      )}
       <hr />
       <div className="result-program-details-wrapper">
         <ResultsCardDetail {...detail1} />
@@ -161,7 +135,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
     }
 
     return flags;
-  }, []);
+  }, [program.new, program.low_confidence]);
 
   const programPageLink = useResultsLink(`results/benefits/${programId}`);
   const value = useFormatDisplayValue(program);

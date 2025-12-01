@@ -76,7 +76,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
       sx={{
         width: '100%',
         px: '1rem',
-        marginTop: '2rem',
+        marginTop: '1rem',
       }}
       spacing={2}
     >
@@ -95,6 +95,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
               border: `2px solid ${theme.primaryColor}`,
               '& .MuiAlert-icon': {
                 color: theme.primaryColor,
+                alignItems: 'center',
               },
               '& .MuiAlert-message': {
                 width: '100%',
@@ -108,6 +109,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
                   fontFamily: '"Open Sans", sans-serif',
                   lineHeight: 1.5,
                   fontWeight: 600,
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
                 }}
               >
                 {titleText}
@@ -144,6 +146,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
                 sx={{
                   fontFamily: '"Open Sans", sans-serif',
                   lineHeight: 1.5,
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
                 }}
               >
                 {processedContent}

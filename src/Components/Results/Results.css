@@ -1,3 +1,9 @@
+/**
+ * Breakpoints (must match src/utils/breakpoints.ts):
+ * Mobile:  0-767px
+ * Desktop: 768px+
+ */
+
 .results-loading-container {
   flex: 1;
 }
@@ -26,6 +32,11 @@
   background-color: #e6e7e8;
   color: var(--primary-color);
   border-radius: 1rem 1rem 0 0;
+}
+
+.results-tab a h1 {
+  font-size: 1rem;
+  margin: 0;
 }
 
 .results-tab a.active {
@@ -102,10 +113,12 @@
   font-family: 'Roboto Slab', serif;
   font-weight: 700;
   color: var(--secondary-color);
+  font-size: 1.3rem;
 }
 
 .category-heading-text-style.normal-weight {
   font-weight: normal;
+  font-size: 1.2rem;
 }
 
 .results-header-container {
@@ -163,7 +176,7 @@
   line-height: normal;
   font-family: 'Roboto Slab', serif;
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   margin: auto;
   color: var(--primary-color);
 }
@@ -211,11 +224,11 @@
   border-radius: 0.75rem;
 }
 
-/* DESKTOP */
-@media (min-width: 775px) {
+/* DESKTOP - 768px and above (matches BREAKPOINTS.desktop in src/utils/breakpoints.ts) */
+@media (min-width: 768px) {
   .results-header-programs-count-text {
     height: 3rem;
-    border-radius: 0.5rem;
+    border-radius: 0.2rem;
     background-color: var(--primary-color);
     color: white;
     font-family: 'Open Sans', sans-serif;
@@ -246,12 +259,13 @@
   }
 
   .results-header-programs-count {
-    font-size: x-large;
+    font-size: 1.5rem;
     font-weight: 700;
-    margin: auto;
+    margin: 0;
     font-family: 'Roboto Slab', serif;
     display: flex;
     margin-right: 0.5rem;
+    align-items: center;
   }
 
   .results-header-values {
@@ -286,8 +300,8 @@
 }
 
 /* Please keep all media queries at the end of the file so that the styles cascade correctly */
-/* TABLET */
-@media only screen and (min-width: 481px) and (max-width: 775px) {
+/* MOBILE - 767px and below */
+@media (max-width: 767px) {
   .results-header-programs-count-text {
     width: 7rem;
     height: 7rem;
@@ -299,6 +313,8 @@
     padding-top: 0.75rem;
     line-height: normal;
     padding-bottom: 0.5rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
     margin-right: 1rem;
   }
 
@@ -309,14 +325,21 @@
 
   .results-header {
     display: flex;
+    justify-content: center;
     flex-direction: row;
+    align-items: center;
   }
 
   .results-header-programs-count {
-    font-size: xx-large;
+    font-size: 2.5rem !important;
     font-weight: 700;
-    padding-bottom: 0.25rem;
     font-family: 'Roboto Slab', serif;
+  }
+
+  .results-header-programs-count-text > div:not(.results-header-programs-count) {
+    font-size: 0.85rem;
+    white-space: normal;
+    word-wrap: break-word;
   }
 
   .results-header-values {
@@ -326,76 +349,52 @@
     border-bottom: 1.5px solid var(--primary-color);
     display: flex;
     justify-content: space-between;
+    font-size: 1.35rem;
   }
 
   .results-header-label {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
     color: var(--primary-color);
+    font-size: 0.75rem;
   }
 
-  .results-header {
-    display: flex;
-    flex-direction: row;
+  .category-heading-text-style {
+    font-size: 1.25rem;
   }
 
-  .result-program-more-info {
-    width: 20%;
-    vertical-align: top;
-    line-height: normal;
-  }
-}
-
-/* MOBILE */
-@media (max-width: 480px) {
-  .results-header-programs-count-text {
-    width: 7rem;
-    height: 7rem;
-    background-color: var(--primary-color);
-    color: white;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    text-align: center;
-    padding-top: 0.75rem;
-    line-height: normal;
-    padding-bottom: 0.5rem;
-    margin-right: 1rem;
+  .category-heading-text-style.normal-weight {
+    font-size: 1.1rem;
   }
 
-  .column-row {
-    display: flex;
+  .category-heading-container {
     flex-direction: column;
+    align-items: flex-start;
   }
 
-  .results-header {
-    display: flex;
-    flex-direction: row;
+  .category-heading-column {
+    margin-bottom: 0.25rem;
   }
 
-  .results-header-programs-count {
-    font-size: xx-large;
-    font-weight: 700;
-    padding-bottom: 0.25rem;
-    font-family: 'Roboto Slab', serif;
+  .box-right {
+    width: 100%;
+    margin-bottom: 0.5rem;
   }
 
-  .results-header-values {
-    font-family: 'Roboto Slab', serif;
-    font-weight: 700;
-    color: var(--primary-color);
-    border-bottom: 1.5px solid var(--primary-color);
-    display: flex;
-    justify-content: space-between;
+  .results-tab a {
+    padding: 0.5rem 0.25rem;
   }
 
-  .results-header-label {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    color: var(--primary-color);
+  .results-tab a h1 {
+    font-size: .9rem;
+    margin: 0;
   }
 
-  .results-header {
-    display: flex;
-    flex-direction: row;
+  .results-tab-container {
+    padding: 0.5rem 0.5rem 0 0.5rem;
+  }
+
+  .results-section-header {
+    margin-top: 0.5rem;
   }
 }
