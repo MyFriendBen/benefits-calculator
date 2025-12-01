@@ -63,7 +63,7 @@
 }
 
 /**
- * Breakpoints (must match src/Constants/breakpoints.ts):
+ * Breakpoints (must match src/utils/breakpoints.ts):
  * Mobile:  0-767px
  * Desktop: 768px+
  */
@@ -89,7 +89,7 @@
 
   .bottom-top-margin p,
   .bottom-top-margin a {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
   }
 
   .bottom-top-margin {

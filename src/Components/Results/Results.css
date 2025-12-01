@@ -1,5 +1,5 @@
 /**
- * Breakpoints (must match src/Constants/breakpoints.ts):
+ * Breakpoints (must match src/utils/breakpoints.ts):
  * Mobile:  0-767px
  * Desktop: 768px+
  */
@@ -224,7 +224,7 @@
   border-radius: 0.75rem;
 }
 
-/* DESKTOP - 768px and above (matches BREAKPOINTS.desktop in src/Constants/breakpoints.ts) */
+/* DESKTOP - 768px and above (matches BREAKPOINTS.desktop in src/utils/breakpoints.ts) */
 @media (min-width: 768px) {
   .results-header-programs-count-text {
     height: 3rem;

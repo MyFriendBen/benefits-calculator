@@ -3,11 +3,12 @@ import { Program } from '../../../Types/Results';
 import { FormattedMessage } from 'react-intl';
 import { useFormatDisplayValue } from '../FormattedValue';
 import ResultsTranslate from '../Translate/Translate';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useMediaQuery } from '@mui/material';
 import './ProgramCard.css';
 import { findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
 import { FormattedMessageType } from '../../../Types/Questions';
-import { isMobileWidth } from '../../../Constants/breakpoints';
+import { BREAKPOINTS } from '../../../utils/breakpoints';
 
 type ResultsCardDetail = {
   title: FormattedMessageType;
@@ -40,22 +41,8 @@ type ResultsCardProps = {
 };
 
 export function ResultsCard({ name, detail1, detail2, link, flags = [], containerClassNames = [] }: ResultsCardProps) {
-  const windowWidth = window.innerWidth;
-  const [size, setSize] = useState(windowWidth);
-
-  useEffect(() => {
-    function handleResize() {
-      setSize(window.innerWidth);
-    }
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  const isMobile = isMobileWidth(size);
-
+  // Mobile is below desktop breakpoint (0-767px)
+  const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.desktop - 1}px)`);
   const containerClass = 'result-program-container ' + containerClassNames.join(' ');
 
   return (
