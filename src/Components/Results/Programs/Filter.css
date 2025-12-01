@@ -22,7 +22,6 @@
 .filter-description .help-text {
   line-height: 1.6;
   font-size: .85rem;
-  padding-bottom: 0;
 }
 
 .citizenship-button.MuiButton-root {
@@ -103,8 +102,8 @@
 
 /* Desktop Button Layout */
 .citizenship-buttons-container {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 0.625rem;
   width: 100%;
 }
@@ -136,8 +135,6 @@
   min-height: 32px;
   position: relative;
   white-space: nowrap;
-  flex: 1 1 auto;
-  min-width: 130px;
 }
 
 .citizenship-option-button.MuiButton-root:hover {
@@ -256,44 +253,12 @@
   display: none;
 }
 
-/* Hide current selection in mobile dropdown mode */
-@media (max-width: 1200px) {
-  .current-selection {
-    display: none;
-  }
-}
-
-/* Responsive Design */
-@media (max-width: 600px) {
-  .filter-section-container {
-    margin-bottom: 1.5rem;
-  }
-}
-
-/* Small mobile or short screens */
-@media (max-width: 767px), (max-height: 700px) {
+/* Short screens */
+@media (max-height: 700px) {
   #citizenshipPopover .MuiPaper-root.MuiPopover-paper {
     max-height: 70vh;
     width: 95vw;
     margin: 0 8px;
-  }
-
-  .results-section-header {
-    font-size: 1.125rem;
-  }
-
-  .citizenship-option-button.MuiButton-root {
-    font-size: 0.75rem;
-    padding: 0.5rem 1rem;
-    min-height: 32px;
-  }
-
-  .citizenship-option-button .info-icon {
-    font-size: 0.75rem;
-  }
-
-  .current-selection {
-    font-size: 0.875rem;
   }
 }
 
@@ -320,17 +285,32 @@
   }
 }
 
-/* Mobile - 767px and below */
+/* Mobile - 767px and below (matches BREAKPOINTS.desktop - 1) */
 @media (max-width: 767px) {
   .results-section-header {
-    font-size: 1.1rem;
+    font-size: 1rem;
+  }
+
+  .filter-description {
+    margin-bottom: 0.5rem;
   }
 
   .filter-description .MuiTypography-root {
-    font-size: 0.875rem;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
   }
 
   .filter-section-container {
     margin-bottom: 1rem;
+  }
+
+  .citizenship-option-button.MuiButton-root {
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
+    min-height: 32px;
+  }
+
+  .citizenship-option-button .info-icon {
+    font-size: 0.75rem;
   }
 }

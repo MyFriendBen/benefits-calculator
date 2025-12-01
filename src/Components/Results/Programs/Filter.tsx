@@ -29,7 +29,7 @@ export const Filter = () => {
   const { formData } = useContext(Context);
   const intl = useIntl();
   const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.desktop - 1}px)`);
-  const collapseDescription = useMediaQuery('(max-width: 600px)');
+  const collapseDescription = useMediaQuery('(max-width: 730px)');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   // Get currently selected citizenship status from filters
