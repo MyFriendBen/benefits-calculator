@@ -20,7 +20,7 @@ const clone = <T>(obj: T): T =>
 function getCheckedFilterNames(filtersChecked: Record<CitizenLabels, boolean>): string[] {
   return Object.entries(filtersChecked)
     .filter(([_, isChecked]) => isChecked)
-    .map(([filterName, _]) => filterName);
+    .map(([filterName]) => filterName);
 }
 
 /**
@@ -28,14 +28,8 @@ function getCheckedFilterNames(filtersChecked: Record<CitizenLabels, boolean>): 
  */
 function getCheckedNonCalculatedFilterNames(filtersChecked: Record<CitizenLabels, boolean>): string[] {
   return Object.entries(filtersChecked)
-    .filter(([filterName, isChecked]) => {
-      // Skip calculated filters
-      if (filterName in calculatedCitizenshipFilters) {
-        return false;
-      }
-      return isChecked;
-    })
-    .map(([filterName, _]) => filterName);
+    .filter(([filterName, isChecked]) => isChecked && !(filterName in calculatedCitizenshipFilters))
+    .map(([filterName]) => filterName);
 }
 
 /**
@@ -103,17 +97,15 @@ function updateMemberEligibilities(
  * Checks if a program meets basic visibility requirements (ignoring exclusions)
  */
 function isProgramBasicallyVisible(
-  program: Program, 
+  program: Program,
   checkedFilterNames: string[]
 ): boolean {
-  const meetsLegalStatus = program.legal_status_required.some(status => 
-    checkedFilterNames.includes(status)
+  return (
+    program.legal_status_required.some((status) => checkedFilterNames.includes(status)) &&
+    program.eligible &&
+    programValue(program) > 0 &&
+    !program.already_has
   );
-  const isEligible = program.eligible;
-  const hasValue = programValue(program) > 0;
-  const userDoesNotHaveProgram = !program.already_has;
-
-  return meetsLegalStatus && isEligible && hasValue && userDoesNotHaveProgram;
 }
 
 /**
@@ -176,14 +168,10 @@ export default function filterProgramsGenerator(
 ) {
   return (programs: Program[]) => {
     // Step 1: Update member eligibility based on calculated filters
-    const programsWithUpdatedEligibility = updateMemberEligibilities(programs, formData, filtersChecked);
-    
+    const updatedPrograms = updateMemberEligibilities(programs, formData, filtersChecked);
     // Step 2: Apply basic visibility filters
-    const basicVisiblePrograms = applyBasicFilters(programsWithUpdatedEligibility, filtersChecked, isAdminView);
-    
-    // Step 3: Apply program exclusions (admin view is handled inside)
-    const finalPrograms = applyProgramExclusions(basicVisiblePrograms, isAdminView);
-    
-    return finalPrograms;
+    const visiblePrograms = applyBasicFilters(updatedPrograms, filtersChecked, isAdminView);
+    // Step 3: Apply program exclusions
+    return applyProgramExclusions(visiblePrograms, isAdminView);
   };
 }
