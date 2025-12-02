@@ -17,8 +17,8 @@
 
 /* Simple section for basic info (no colored header) */
 .simple-confirmation-section {
-  padding: 0 0 2rem 0;
-  margin-top: 1.5rem;
+  padding: 0 0 1rem 0;
+  margin-top: 1rem;
   border-bottom: 1px solid #d0d0d0;
 }
 
@@ -99,8 +99,8 @@ svg.edit-button-simple polygon,
 
 /* Full ConfirmationBlock section (for household member table with colored header) */
 .confirmation-section {
-  padding: 0 0 2rem 0;
-  margin-top: 1.5rem;
+  padding: 0 0 1rem 0;
+  margin-top: 1rem;
   border-bottom: 1px solid #d0d0d0;
 }
 
@@ -253,7 +253,7 @@ svg.edit-button polygon,
 .confirmation-row {
   display: grid;
   grid-template-columns: minmax(200px, 20%) 1fr;
-  padding: 0.75rem 0;
+  padding: 0.5rem 0;
   border-top: 1px solid #e8e8e8;
   align-items: start;
   gap: 3rem;
