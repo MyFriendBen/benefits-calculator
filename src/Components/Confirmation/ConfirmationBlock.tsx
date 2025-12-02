@@ -94,14 +94,18 @@ export default function ConfirmationBlock({
 type ConfirmationItemParams = {
   label?: ReactNode;
   value: ReactNode;
+  editLink?: ReactNode;
 };
 
 // be sure to include the ":" in the label
-export function ConfirmationItem({ label, value }: ConfirmationItemParams) {
+export function ConfirmationItem({ label, value, editLink }: ConfirmationItemParams) {
   return (
     <div className="confirmation-row">
       {label && <div className="confirmation-row-label">{label}</div>}
-      <div className="confirmation-row-value">{value}</div>
+      <div className="confirmation-row-value">
+        <div className="confirmation-row-value-content">{value}</div>
+        {editLink && <div className="confirmation-row-value-edit">{editLink}</div>}
+      </div>
     </div>
   );
 }

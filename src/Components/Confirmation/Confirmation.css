@@ -48,6 +48,18 @@
   font-size: 1.15rem;
   font-weight: 700;
   color: #000;
+  display: flex;
+  align-items: center;
+}
+
+.simple-section-header h2 svg {
+  flex-shrink: 0;
+}
+
+.simple-section-header h2 svg path,
+.simple-section-header h2 svg circle {
+  fill: var(--secondary-color);
+  stroke: var(--secondary-color);
 }
 
 .simple-section-content {
@@ -76,8 +88,8 @@ svg.edit-button-simple polygon,
 .edit-button-simple svg path,
 .edit-button-simple svg rect,
 .edit-button-simple svg polygon {
-  stroke: #333 !important;
-  fill: #333 !important;
+  stroke: #999 !important;
+  fill: #999 !important;
 }
 
 /* Full ConfirmationBlock section (for household member table with colored header) */
@@ -208,8 +220,8 @@ svg.edit-button polygon,
 .edit-button svg path,
 .edit-button svg rect,
 .edit-button svg polygon {
-  stroke: #333 !important;
-  fill: #333 !important;
+  stroke: #999 !important;
+  fill: #999 !important;
 }
 
 .confirmation-acute-need-list {
@@ -257,6 +269,18 @@ svg.edit-button polygon,
   color: #000;
   font-weight: 400;
   font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.confirmation-row-value-content {
+  flex: 1;
+}
+
+.confirmation-row-value-edit {
+  flex-shrink: 0;
 }
 
 .confirmation-row-value strong {
@@ -285,7 +309,7 @@ svg.edit-button polygon,
 }
 
 .household-member-table th {
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 0.75rem;
   text-align: left;
   font-weight: 600;
   font-size: 0.9rem;
@@ -294,7 +318,7 @@ svg.edit-button polygon,
 }
 
 .household-member-table td {
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 0.75rem;
   border-bottom: 1px solid #e8e8e8;
   vertical-align: top;
   font-size: 0.95rem;
@@ -306,6 +330,11 @@ svg.edit-button polygon,
 
 .household-member-table tbody tr:hover {
   background-color: #fafafa;
+}
+
+.household-member-table td:last-child {
+  padding: 0.5rem 0.25rem;
+  text-align: center;
 }
 
 .household-member-table td .edit-button-simple {

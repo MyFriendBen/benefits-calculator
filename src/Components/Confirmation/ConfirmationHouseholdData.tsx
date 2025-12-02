@@ -143,7 +143,7 @@ const DefaultConfirmationHHData = () => {
             <th><FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions" /></th>
             <th><FormattedMessage id="confirmation.annualIncome" defaultMessage="Annual Income" /></th>
             <th><FormattedMessage id="confirmation.headOfHouseholdDataBlock-healthInsuranceText" defaultMessage="Health Insurance" /></th>
-            <th style={{ width: '60px' }}></th>
+            <th style={{ width: '40px' }}></th>
           </tr>
         </thead>
         <tbody>
