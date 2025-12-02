@@ -36,7 +36,8 @@
   gap: 1rem;
 }
 
-@media (max-width: 630px) {
+/* Mobile breakpoint (0-767px) - matches BREAKPOINTS.desktop - 1 from src/utils/breakpoints.ts */
+@media (max-width: 767px) {
   .energy-calculator-results-header {
     flex-direction: column;
     align-items: center;
