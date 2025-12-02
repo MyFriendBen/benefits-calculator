@@ -1,14 +1,16 @@
 import { ReactNode, useContext } from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
-import { useFormatBirthMonthYear, calcAge, hasBirthMonthYear } from '../../Assets/age';
+import { useFormatBirthMonthYear, hasBirthMonthYear } from '../../Assets/age';
 import { useTranslateNumber } from '../../Assets/languageOptions';
-import { Conditions, IncomeStream } from '../../Types/FormData';
+import { Conditions } from '../../Types/FormData';
 import { FormattedMessageType } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
-import ConfirmationBlock, { formatToUSD, ConfirmationItem } from './ConfirmationBlock';
+import { formatToUSD } from './ConfirmationBlock';
 import { Context } from '../Wrapper/Wrapper';
-import { ReactComponent as Head } from '../../Assets/icons/General/head.svg';
+import { ReactComponent as Edit } from '../../Assets/icons/General/edit.svg';
 import { calcIncomeStreamAmount } from '../../Assets/income';
+import { Link, useParams } from 'react-router-dom';
+import { useStepNumber } from '../../Assets/stepDirectory';
 
 type IconAndFormattedMessageMap = {
   [key: string]: {
@@ -22,6 +24,7 @@ type OptionMap = { [key: string]: FormattedMessageType };
 const DefaultConfirmationHHData = () => {
   const { formData } = useContext(Context);
   const { householdData } = formData;
+  const { whiteLabel, uuid } = useParams();
 
   const { formatMessage } = useIntl();
 
@@ -29,8 +32,6 @@ const DefaultConfirmationHHData = () => {
   const formatBirthMonthYear = useFormatBirthMonthYear();
 
   const relationshipOptions = useConfig<OptionMap>('relationship_options');
-  const incomeOptions = useConfig<Record<string, Record<string, FormattedMessageType>>>('income_options');
-  const frequencyOptions = useConfig<OptionMap>('frequency_options');
   const healthInsuranceOptions = useConfig<{
     you: IconAndFormattedMessageMap;
     them: IconAndFormattedMessageMap;
@@ -94,149 +95,90 @@ const DefaultConfirmationHHData = () => {
     return conditionText.join(', ');
   };
 
-  const listAllIncomeStreams = (incomeStreams: IncomeStream[]) => {
-    const mappedListItems = incomeStreams.map((incomeStream, index) => {
-      // Find the income stream name by searching through all categories
-      let incomeStreamName: FormattedMessageType | undefined;
-      if (incomeStream.incomeCategory && incomeOptions[incomeStream.incomeCategory]) {
-        incomeStreamName = incomeOptions[incomeStream.incomeCategory][incomeStream.incomeStreamName];
-      }
-      const incomeAmount = formatToUSD(Number(incomeStream.incomeAmount));
-      const incomeFrequency = frequencyOptions[incomeStream.incomeFrequency];
-      const hoursPerWeek = incomeStream.hoursPerWeek;
-      const translatedHrsPerWkText = formatMessage({
-        id: 'listAllIncomeStreams.hoursPerWeek',
-        defaultMessage: ' hours/week ',
-      });
-
-      const translatedAnnualText = formatMessage({
-        id: 'displayAnnualIncome.annual',
-        defaultMessage: ' annually',
-      });
-
-      const incomeStreamAmount = calcIncomeStreamAmount(incomeStream);
-
-      const annualAmount = `(${formatToUSD(incomeStreamAmount, 0)}` + translatedAnnualText + `)`;
-
-      return (
-        <li key={index}>
-          <ConfirmationItem
-            label={<>{incomeStreamName}:</>}
-            value={
-              incomeStream.incomeFrequency === 'hourly' ? (
-                <>
-                  {translateNumber(incomeAmount)} {incomeFrequency} ~{translateNumber(hoursPerWeek)}{' '}
-                  {translatedHrsPerWkText} {translateNumber(annualAmount)}
-                </>
-              ) : (
-                <>
-                  {translateNumber(incomeAmount)} {incomeFrequency} {translateNumber(annualAmount)}
-                </>
-              )
-            }
-          />
-        </li>
-      );
-    });
-
-    return mappedListItems;
-  };
-
   const editHouseholdMemberAriaLabel = {
     id: 'confirmation.hhMember.edit-AL',
     defaultMessage: 'edit household member',
   };
-  const householdMemberIconAlt = {
-    id: 'confirmation.hhMember.icon-AL',
-    defaultMessage: 'household member',
+
+  const displayHealthInsurance = (member: any, memberIndex: number) => {
+    const insurance = member.healthInsurance;
+    const selectedNone = insurance?.none === true;
+
+    const youVsThemHealthInsuranceOptions = memberIndex === 0 ? healthInsuranceOptions.you : healthInsuranceOptions.them;
+
+    const allOtherSelectedOptions = Object.entries(insurance ?? {})
+      .filter((hHMemberInsEntry) => hHMemberInsEntry[1] === true)
+      .map((insurance) => {
+        const formattedMessageProp = youVsThemHealthInsuranceOptions[insurance[0]].text.props;
+        return formatMessage({ ...formattedMessageProp });
+      });
+
+    if (selectedNone) {
+      return youVsThemHealthInsuranceOptions.none.text;
+    }
+    return allOtherSelectedOptions.join(', ');
   };
 
-  const householdMemberDataBlocks = householdData.map((member, i) => {
+  const calculateTotalAnnualIncome = (member: any) => {
     const { hasIncome, incomeStreams } = member;
-    const age = calcAge(member);
-    let relationship: FormattedMessageType;
-    if (i === 0) {
-      relationship = <FormattedMessage id="qcc.hoh-text" defaultMessage="Head of Household (You)" />;
-    } else {
-      relationship = relationshipOptions[member.relationshipToHH];
+    if (!hasIncome || incomeStreams.length === 0) {
+      return formatMessage({ id: 'confirmation.noIncome', defaultMessage: 'None' });
     }
 
-    const displayHealthInsurance = () => {
-      const insurance = member.healthInsurance;
-      const selectedNone = insurance?.none === true;
+    const totalAnnual = incomeStreams.reduce((total: number, stream: any) => {
+      return total + calcIncomeStreamAmount(stream);
+    }, 0);
 
-      const youVsThemHealthInsuranceOptions = i === 0 ? healthInsuranceOptions.you : healthInsuranceOptions.them;
+    return translateNumber(formatToUSD(totalAnnual, 0));
+  };
 
-      const allOtherSelectedOptions = Object.entries(insurance ?? {})
-        .filter((hHMemberInsEntry) => hHMemberInsEntry[1] === true)
-        .map((insurance) => {
-          const formattedMessageProp = youVsThemHealthInsuranceOptions[insurance[0]].text.props;
-          return formatMessage({ ...formattedMessageProp });
-        });
-
-      if (selectedNone) {
-        return <>{youVsThemHealthInsuranceOptions.none.text}</>;
-      }
-      return (
-        <ul>
-          {allOtherSelectedOptions.map((option, idx) => (
-            <li key={idx}>{option}</li>
-          ))}
-        </ul>
-      );
-    };
-
-    return (
-      <ConfirmationBlock
-        icon={<Head title={formatMessage(householdMemberIconAlt)} />}
-        title={relationship}
-        editAriaLabel={editHouseholdMemberAriaLabel}
-        stepName="householdData"
-        editUrlEnding={String(i + 1)}
-        key={i}
-      >
-        <ConfirmationItem
-          label={<FormattedMessage id="questions.age-inputLabel" defaultMessage="Age:" />}
-          value={translateNumber(age)}
-        />
-        {hasBirthMonthYear(member) && (
-          <ConfirmationItem
-            label={<FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year:" />}
-            value={formatBirthMonthYear(member)}
-          />
-        )}
-        <ConfirmationItem
-          label={
-            <FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions:" />
-          }
-          value={conditionsString(member.specialConditions)}
-        />
-        <ConfirmationItem
-          label={<FormattedMessage id="confirmation.headOfHouseholdDataBlock-incomeLabel" defaultMessage="Income:" />}
-          value={
-            hasIncome && incomeStreams.length > 0 ? (
-              <ul>{listAllIncomeStreams(incomeStreams)}</ul>
-            ) : (
-              <FormattedMessage id="confirmation.noIncome" defaultMessage="None" />
-            )
-          }
-        />
-        {
-          <ConfirmationItem
-            label={
-              <FormattedMessage
-                id="confirmation.headOfHouseholdDataBlock-healthInsuranceText"
-                defaultMessage="Health Insurance: "
-              />
+  // Return just the table without the ConfirmationBlock wrapper
+  return (
+    <div className="household-member-table-wrapper">
+      <table className="household-member-table">
+        <thead>
+          <tr>
+            <th><FormattedMessage id="confirmation.table.member" defaultMessage="Member" /></th>
+            <th><FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year" /></th>
+            <th><FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions" /></th>
+            <th><FormattedMessage id="confirmation.annualIncome" defaultMessage="Annual Income" /></th>
+            <th><FormattedMessage id="confirmation.headOfHouseholdDataBlock-healthInsuranceText" defaultMessage="Health Insurance" /></th>
+            <th style={{ width: '60px' }}></th>
+          </tr>
+        </thead>
+        <tbody>
+          {householdData.map((member, i) => {
+            let relationship: string | FormattedMessageType;
+            if (i === 0) {
+              relationship = formatMessage({ id: "qcc.hoh-text", defaultMessage: "Head of Household (You)" });
+            } else {
+              relationship = relationshipOptions[member.relationshipToHH];
             }
-            value={displayHealthInsurance()}
-          />
-        }
-      </ConfirmationBlock>
-    );
-  });
 
-  return <>{householdMemberDataBlocks}</>;
+            return (
+              <tr key={i}>
+                <td>{relationship}</td>
+                <td>{hasBirthMonthYear(member) ? formatBirthMonthYear(member) : '-'}</td>
+                <td>{conditionsString(member.specialConditions)}</td>
+                <td>{calculateTotalAnnualIncome(member)}</td>
+                <td>{displayHealthInsurance(member, i)}</td>
+                <td>
+                  <Link
+                    to={`/${whiteLabel}/${uuid}/step-${useStepNumber('householdData')}/${i + 1}`}
+                    state={{ routedFromConfirmationPg: true }}
+                    className="edit-button-simple"
+                    aria-label={formatMessage(editHouseholdMemberAriaLabel)}
+                  >
+                    <Edit title={formatMessage(editHouseholdMemberAriaLabel)} />
+                  </Link>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
 };
 
 export default DefaultConfirmationHHData;

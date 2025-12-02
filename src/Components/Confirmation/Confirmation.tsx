@@ -43,7 +43,12 @@ const Confirmation = () => {
       <QuestionHeader>
         <FormattedMessage id="confirmation.return-subheader" defaultMessage="Is all of your information correct?" />
       </QuestionHeader>
-      <div className="confirmation-container">{displayAllFormData()}</div>
+      <div className="confirmation-container">
+        <div className="confirmation-page-header">
+          <FormattedMessage id="confirmation.return-subheader" defaultMessage="Is all of your information correct?" />
+        </div>
+        {displayAllFormData()}
+      </div>
       <div className="prev-continue-results-buttons confirmation">
         <PreviousButton navFunction={() => navigate(`/${whiteLabel}/${uuid}/step-${totalNumberOfQuestions - 1}`)} />
         <Button variant="contained" onClick={() => navigate(`/${whiteLabel}/${uuid}/results/benefits`)}>
