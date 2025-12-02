@@ -229,11 +229,13 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
         {displayIconAndHeader(program)}
         {displayEstimatedValueAndTime(program)}
       </div>
-      <div className="results-program-page-warning-container">
-        {warningMessages.map((warning, key) => {
-          return <WarningMessage warning={warning} key={key} />;
-        })}
-      </div>
+      {warningMessages.length > 0 && (
+        <div className="results-program-page-warning-container">
+          {warningMessages.map((warning, key) => {
+            return <WarningMessage warning={warning} key={key} />;
+          })}
+        </div>
+      )}
       <div className="apply-button-container">
         {program.apply_button_link.default_message !== '' && (
           <a className="apply-online-button" href={programApplyButtonLink} target="_blank">
