@@ -126,6 +126,7 @@
   fill: #000000;
 }
 
+/* Mobile breakpoint (0-767px) - matches BREAKPOINTS.desktop - 1 from src/utils/breakpoints.ts */
 @media (max-width: 767px) {
   .energy-calculator-rebate-page-container h1 {
     font-size: 1.5rem;
