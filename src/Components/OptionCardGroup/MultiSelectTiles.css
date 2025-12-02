@@ -3,7 +3,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   max-width: 50rem;
-  margin: 0.5rem auto 1rem auto;
+  margin: 1.5rem auto 1.5rem auto;
   align-items: stretch;
 }
 
