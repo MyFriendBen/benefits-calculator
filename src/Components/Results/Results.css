@@ -4,7 +4,7 @@
  * Desktop: 768px+
  */
 
-.content-max-width:has(main) {
+.content-max-width:has(.results-container) {
   margin-top: 0 !important;
   padding: 0 !important;
 }
