@@ -277,7 +277,7 @@ const Results = ({ type }: ResultsProps) => {
           <div className="results-container">
             <ResultsTabs />
             {type === 'program' && <UrgentNeedBanner />}
-            <Grid container sx={{ p: { xs: '1rem', sm: '1rem' } }}>
+            <Grid container sx={{ px: { xs: '1.5rem', sm: '2rem' }, py: { xs: '1rem', sm: '1rem' } }}>
               <Grid item xs={12}>
                 {type === 'need' ? <Needs /> : <Programs />}
               </Grid>
