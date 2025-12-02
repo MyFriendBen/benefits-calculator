@@ -267,16 +267,22 @@ const Results = ({ type }: ResultsProps) => {
   } else if (programId === undefined && (type === 'program' || type === 'need')) {
     return (
       <main>
+        <BackAndSaveButtons
+            navigateToLink={`/${whiteLabel}/${uuid}/confirm-information`}
+            BackToThisPageText={<FormattedMessage id="results.back-to-screen-btn" defaultMessage="BACK TO SCREENER" />}
+          />
         <ResultsContextProvider>
           <ResultsPopup {...popupConfig} />
           <ResultsHeader type={type} />
-          <ResultsTabs />
-          {type === 'program' && <UrgentNeedBanner />}
-          <Grid container sx={{ p: { xs: '1rem', sm: '1rem' } }}>
-            <Grid item xs={12}>
-              {type === 'need' ? <Needs /> : <Programs />}
+          <div className="results-container">
+            <ResultsTabs />
+            {type === 'program' && <UrgentNeedBanner />}
+            <Grid container sx={{ p: { xs: '1rem', sm: '1rem' } }}>
+              <Grid item xs={12}>
+                {type === 'need' ? <Needs /> : <Programs />}
+              </Grid>
             </Grid>
-          </Grid>
+          </div>
           {!noHelpButton && <HelpButton />}
         </ResultsContextProvider>
       </main>
