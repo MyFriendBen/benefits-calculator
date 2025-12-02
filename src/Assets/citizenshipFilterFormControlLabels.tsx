@@ -151,32 +151,3 @@ export const citizenshipFilterConfig: Record<CitizenLabelOptions, CitizenshipFil
     ),
   },
 };
-
-// Legacy labels for backwards compatibility (used in dropdown on mobile)
-const citizenshipFilterFormControlLabels: Record<CitizenLabelOptions, FormattedMessageType> = {
-  citizen: <FormattedMessage id="citizenshipFCtrlLabel-citizen" defaultMessage="U.S. Citizen" />,
-  non_citizen: (
-    <FormattedMessage
-      id="citizenshipFCtrlLabel-non_citizen"
-      defaultMessage="Individuals without lawful U.S. presence or citizenship (includes DACA recipients)"
-    />
-  ),
-  gc_5plus: <FormattedMessage id="citizenshipFCtrlLabel-gc_5plus" defaultMessage="Had green card for 5+ years" />,
-  gc_5less: (
-    <FormattedMessage id="citizenshipFCtrlLabel-gc_5less" defaultMessage="Had green card for less than 5 years" />
-  ),
-  refugee: (
-    <FormattedMessage
-      id="citizenshipFCtrlLabel-refugee"
-      defaultMessage="Granted refugee or asylee status (special rules or waiting periods may apply)"
-    />
-  ),
-  otherWithWorkPermission: (
-    <FormattedMessage
-      id="citizenshipFCtrlLabel-other_work_permission"
-      defaultMessage="Other lawfully present noncitizens with permission to live or work in the U.S. (other rules may apply)"
-    />
-  ),
-};
-
-export default citizenshipFilterFormControlLabels;
