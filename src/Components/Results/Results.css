@@ -122,7 +122,8 @@
 }
 
 .results-header-container {
-  height: 9rem;
+  height: 8rem;
+  padding: .8rem;
 }
 
 .results-header {
@@ -131,7 +132,7 @@
 
 .results-needs-header-background {
   background-color: var(--secondary-background-color);
-  padding: 1rem;
+  /* padding: 1rem; */
 }
 
 .results-needs-header {
@@ -315,7 +316,7 @@
     padding-bottom: 0.5rem;
     padding-left: 0.75rem;
     padding-right: 0.75rem;
-    border-radius: 0.5rem;
+    border-radius: 0.2rem;
   }
 
   .column-row {
