@@ -374,16 +374,16 @@ svg.edit-button polygon,
 
 @media (max-width: 767px) {
   .confirmation-container {
-    margin: 1rem;
-    padding: 0 1rem;
+    margin: 1rem 0;
+    padding: 0;
   }
 
   .simple-confirmation-section {
-    padding: 1.5rem 0;
+    padding: 0 0 1rem 0;
   }
 
   .simple-section-header {
-    padding: 0 0 0.75rem 0;
+    padding: 0 0 0.5rem 0;
   }
 
   .simple-section-header h2 {
@@ -391,11 +391,11 @@ svg.edit-button polygon,
   }
 
   .confirmation-section {
-    padding: 1.5rem 0;
+    padding: 0 0 1rem 0;
   }
 
   .confirmation-section-header {
-    padding: 0.75rem 1rem;
+    padding: 0 0 0.5rem 0;
   }
 
   .confirmation-section-header h2 {
@@ -442,13 +442,13 @@ svg.edit-button polygon,
   }
 
   .prev-continue-results-buttons.confirmation {
-    margin: 1rem;
-    flex-direction: column;
+    margin: 1rem 0;
+    flex-direction: row;
     gap: 1rem;
   }
 
   .prev-continue-results-buttons.confirmation button {
-    width: 100%;
+    flex: 1;
   }
 
   .bottom-margin {
