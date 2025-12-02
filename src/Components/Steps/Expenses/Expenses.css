@@ -29,6 +29,7 @@
 
 .expenses-q-and-help-button {
   margin-bottom: -0.5rem;
+  font-size: 1.1rem;
 }
 
 .help-text {
@@ -55,14 +56,27 @@
 
 /* Expense type field - longer */
 .expense-field-type {
-  flex: 2 1 300px;
-  min-width: 250px;
+  flex: 2 1 200px;
+  min-width: 0;
 }
 
 /* Expense amount field - shorter */
 .expense-field-amount {
   flex: 1 1 120px;
-  min-width: 120px;
+  min-width: 0;
+}
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+  .expense-box {
+    padding: 0.75rem;
+  }
+
+  .expense-field-type,
+  .expense-field-amount {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
 }
 
 /* Expense delete button */

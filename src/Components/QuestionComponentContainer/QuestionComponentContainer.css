@@ -14,14 +14,14 @@ p {
 }
 
 .question-secondary-header {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-family: var(--font-heading);
   font-weight: bold;
   color: var(--primary-color);
 }
 
 .question-label {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
   font-family: var(--font-body);
@@ -75,4 +75,23 @@ p {
 .remember-disclaimer-label {
   font-size: 1.25rem;
   margin-bottom: 8px;
+}
+
+/* Mobile responsive typography */
+@media (max-width: 767px) {
+  .question-label {
+    font-size: 0.9rem;
+  }
+
+  .question-secondary-header {
+    font-size: 0.95rem;
+  }
+
+  .household-data-q-underline {
+    font-size: 1.5rem;
+  }
+
+  .household-data-sub-header {
+    font-size: 1.25rem;
+  }
 }

@@ -137,6 +137,19 @@
   color: black;
 }
 
+/* Mobile responsive typography */
+@media (max-width: 767px) {
+
+  .sub-header,
+  h1.sub-header {
+    font-size: 1.25rem;
+  }
+
+  .question-label {
+    font-size: 1rem;
+  }
+}
+
 /* the following section classes are needed in order to extend the background to the edges of the screen */
 .section-container {
   position: relative;
