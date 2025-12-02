@@ -34,6 +34,10 @@
 @media (max-width: 630px) {
   .energy-calculator-results-header {
     flex-direction: column;
-    align-items: baseline;
+    align-items: center;
+  }
+
+  .energy-calculator-results-header-programs-count-text {
+    margin-right: 0;
   }
 }
