@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useCallback, useMemo } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useResultsContext } from '../Results';
 import { Button, Typography, Select, MenuItem, FormControl, useMediaQuery, Tooltip } from '@mui/material';
@@ -37,21 +37,48 @@ export const Filter = () => {
   const selectedCitizenship =
     CITIZENSHIP_OPTIONS.find((option) => filtersChecked[option]) ?? 'citizen';
 
-  const handleCitizenshipChange = (newStatus: CitizenLabelOptions) => {
-    const newFiltersChecked: Record<string, boolean> = {
-      // Set all citizenship options to false except the selected one
-      ...Object.fromEntries(CITIZENSHIP_OPTIONS.map((option) => [option, option === newStatus])),
-      // Calculate derived filters for the selected status
-      ...Object.fromEntries(
-        Object.entries(calculatedCitizenshipFilters).map(([filterName, calculator]) => [
-          filterName,
-          calculator.linkedFilters.includes(newStatus) && formData.householdData.some(calculator.func),
-        ])
-      ),
+  const handleCitizenshipChange = useCallback((newStatus: CitizenLabelOptions) => {
+    // Build the new filter state with type safety
+    const citizenshipFilters: Partial<Record<CitizenLabelOptions, boolean>> = {};
+    CITIZENSHIP_OPTIONS.forEach((option) => {
+      citizenshipFilters[option] = option === newStatus;
+    });
+
+    // Calculate derived filters for the selected status
+    const calculatedFilters: Record<string, boolean> = {};
+    Object.entries(calculatedCitizenshipFilters).forEach(([filterName, calculator]) => {
+      calculatedFilters[filterName] =
+        calculator.linkedFilters.includes(newStatus) && formData.householdData.some(calculator.func);
+    });
+
+    const newFiltersChecked = {
+      ...citizenshipFilters,
+      ...calculatedFilters,
     };
 
-    setFiltersChecked(newFiltersChecked as Record<CitizenLabels, boolean>);
-  };
+    // Type guard to ensure all required keys are present
+    const isValidFilterState = (filters: unknown): filters is Record<CitizenLabels, boolean> => {
+      if (!filters || typeof filters !== 'object') return false;
+
+      // Check all citizenship options are present
+      const hasAllCitizenshipOptions = CITIZENSHIP_OPTIONS.every(
+        (option) => option in filters && typeof (filters as Record<string, unknown>)[option] === 'boolean'
+      );
+
+      // Check all calculated filters are present
+      const hasAllCalculatedFilters = Object.keys(calculatedCitizenshipFilters).every(
+        (key) => key in filters && typeof (filters as Record<string, unknown>)[key] === 'boolean'
+      );
+
+      return hasAllCitizenshipOptions && hasAllCalculatedFilters;
+    };
+
+    if (isValidFilterState(newFiltersChecked)) {
+      setFiltersChecked(newFiltersChecked);
+    } else {
+      console.error('Invalid filter state generated:', newFiltersChecked);
+    }
+  }, [formData.householdData, setFiltersChecked]);
 
   const renderDesktopButtons = () => {
     return (
@@ -106,7 +133,7 @@ export const Filter = () => {
           })}
         >
           {CITIZENSHIP_OPTIONS.map((option) => (
-            <MenuItem key={option} value={option}>
+            <MenuItem key={option} value={option} selected={selectedCitizenship === option}>
               <div className="dropdown-menu-item">
                 <Typography variant="body1" className="dropdown-label">
                   {citizenshipFilterConfig[option].label}
@@ -128,7 +155,10 @@ export const Filter = () => {
         <FormattedMessage id="filterSection.header" defaultMessage="Filter Results by Citizenship" />
       </h2>
       <div className="filter-description">
-        <div className={collapseDescription && !isDescriptionExpanded ? 'collapsed' : ''}>
+        <div
+          className={collapseDescription && !isDescriptionExpanded ? 'collapsed' : ''}
+          aria-live="polite"
+        >
           <Typography variant="body2" color="text.secondary" className="help-text">
             <FormattedMessage
               id="filterSection.citizenHelpText"

@@ -207,7 +207,7 @@
 
 .child-care-warning-text {
   background-color: var(--secondary-background-color);
-  font-size: 1.25rem;
+  font-size: .9rem;
   color: #000000;
   padding: 0.5rem;
 }
