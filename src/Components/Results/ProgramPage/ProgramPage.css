@@ -326,6 +326,7 @@ li.apply-info {
 @media (max-width: 767px) {
   .program-icon-and-header {
     justify-content: center;
+    padding: 1rem;
   }
 
   .header-text {

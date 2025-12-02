@@ -2,8 +2,7 @@
   display: flex;
   align-items: center;
   flex-direction: column;
-  padding: 1rem 0;
-  gap: 1rem;
+  padding: 1rem 2rem;
 }
 
 .energy-calculator-rebate-page-container h1 {
@@ -101,8 +100,7 @@
 }
 
 .category-description-article {
-  width: 80%;
-  padding: 0 1rem;
+  /* width: 80%; */
   font-family: 'Roboto Slab', serif;
 }
 
@@ -126,4 +124,27 @@
 
 .energy-calculator-expiration-badge .energy-calculator-expiration-icon path {
   fill: #000000;
+}
+
+@media (max-width: 767px) {
+  .energy-calculator-rebate-page-container h1 {
+    font-size: 1.5rem;
+    align-self: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .energy-calculator-rebate-page-container h1 svg {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-right: .5rem;
+  }
+
+  .category-description-article {
+    font-size: 0.9rem;
+    align-self: flex-start;
+  }
+
+  .energy-calculator-rebate-page-container section {
+    align-self: center;
+  }
 }
