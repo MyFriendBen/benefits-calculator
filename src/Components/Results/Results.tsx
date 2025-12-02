@@ -162,7 +162,6 @@ const Results = ({ type }: ResultsProps) => {
   const [filtersChecked, setFiltersChecked] = useState<Record<CitizenLabels, boolean>>({
     citizen: true,
     non_citizen: false,
-    green_card: false,
     refugee: false,
     gc_5plus: false,
     gc_5less: false,
@@ -273,7 +272,7 @@ const Results = ({ type }: ResultsProps) => {
           <ResultsHeader type={type} />
           <ResultsTabs />
           {type === 'program' && <UrgentNeedBanner />}
-          <Grid container sx={{ p: { xs: '1rem', sm: '1rem' }, mt: { xs: '0.5rem', sm: '0.75rem' } }}>
+          <Grid container sx={{ p: { xs: '1rem', sm: '1rem' } }}>
             <Grid item xs={12}>
               {type === 'need' ? <Needs /> : <Programs />}
             </Grid>

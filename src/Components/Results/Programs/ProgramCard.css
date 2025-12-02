@@ -120,7 +120,7 @@ h1.header-text-bottom {
 /* Desktop - 768px and above */
 @media (min-width: 768px) {
   .result-program-container:last-child {
-    margin-bottom: 3rem;
+    margin-bottom: 1.5rem;
   }
 
   .result-program-container {
