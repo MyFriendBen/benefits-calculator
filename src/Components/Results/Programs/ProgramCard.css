@@ -11,6 +11,10 @@
   margin-bottom: 1rem;
 }
 
+.result-program-container:last-child {
+  margin-bottom: 1.5rem !important;
+}
+
 .result-program-container.passed {
   background-color: #d9ead3;
 }

@@ -85,7 +85,7 @@ const Programs = () => {
       {isEnergyCalculator && needsRebates && <EnergyCalculatorRebateCategoryList />}
       {categories.map((category) => {
         return (
-          <div key={category.name.default_message}>
+          <div key={category.name.default_message} className="program-category-section">
             <CategoryHeading category={category} />
             {category.programs.map((program, index) => {
               return <ProgramCard program={program} key={index} />;
