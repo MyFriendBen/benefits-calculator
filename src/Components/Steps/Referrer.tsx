@@ -155,7 +155,7 @@ export default function ReferralSourceStep() {
                 </Select>
                 {errors.referralSource !== undefined && (
                   <FormHelperText>
-                    <ErrorMessageWrapper fontSize="1rem">{errors.referralSource.message}</ErrorMessageWrapper>
+                    <ErrorMessageWrapper fontSize="0.75rem">{errors.referralSource.message}</ErrorMessageWrapper>
                   </FormHelperText>
                 )}
               </>
@@ -183,7 +183,7 @@ export default function ReferralSourceStep() {
                   error={errors.otherReferrer !== undefined}
                   helperText={
                     errors.otherReferrer !== undefined && (
-                      <ErrorMessageWrapper fontSize="1rem">{errors.otherReferrer.message}</ErrorMessageWrapper>
+                      <ErrorMessageWrapper fontSize="0.75rem">{errors.otherReferrer.message}</ErrorMessageWrapper>
                     )
                   }
                 />

@@ -62,8 +62,8 @@ function CheckBoxAccordion<T extends string | number>({
           return (
             <div key={index}>
               <FormControlLabel
-                sx={{ alignItems: 'center', marginTop: '1rem' }}
-                control={<Checkbox checked={values[option.value]} onChange={onCheckboxChange} />}
+                sx={{ alignItems: 'flex-start', marginTop: index === 0 ? '0.5rem' : '0.75rem', marginBottom: 0 }}
+                control={<Checkbox checked={values[option.value]} onChange={onCheckboxChange} sx={{ paddingTop: '4px' }} />}
                 label={option.text}
               />
             </div>
