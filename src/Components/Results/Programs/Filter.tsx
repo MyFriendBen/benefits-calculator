@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useResultsContext } from '../Results';
 import { Button, Typography, Select, MenuItem, FormControl, useMediaQuery, Tooltip } from '@mui/material';
@@ -32,52 +32,24 @@ export const Filter = () => {
   const collapseDescription = useMediaQuery('(max-width: 730px)');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
-  // Get currently selected citizenship status from filters
-  const getSelectedCitizenship = (): CitizenLabelOptions => {
-    for (const option of CITIZENSHIP_OPTIONS) {
-      if (filtersChecked[option]) return option;
-    }
-    return 'citizen'; // default
-  };
-
-  const [selectedCitizenship, setSelectedCitizenship] = useState<CitizenLabelOptions>(getSelectedCitizenship());
-
-  useEffect(() => {
-    setSelectedCitizenship(getSelectedCitizenship());
-  }, [filtersChecked]);
+  // Derive selected citizenship from filtersChecked (exactly one is always true)
+  // Using find() is more efficient than a loop since we know exactly one will match
+  const selectedCitizenship =
+    CITIZENSHIP_OPTIONS.find((option) => filtersChecked[option]) ?? 'citizen';
 
   const handleCitizenshipChange = (newStatus: CitizenLabelOptions) => {
-    // Reset all citizenship filters to false, then set the selected one to true
     const newFiltersChecked: Record<string, boolean> = {
-      citizen: false,
-      non_citizen: false,
-      gc_5plus: false,
-      gc_5less: false,
-      refugee: false,
-      otherWithWorkPermission: false,
-      gc_18plus_no5: false,
-      gc_under18_no5: false,
-      otherHealthCareUnder19: false,
-      otherHealthCarePregnant: false,
-      notPregnantOrUnder19ForOmniSalud: false,
-      notPregnantOrUnder19ForEmergencyMedicaid: false,
-      notPregnantForMassHealthLimited: false,
-      notPregnantOrChildForMassHealthLimited: false,
-      otherHealthCareUnder21: false,
+      // Set all citizenship options to false except the selected one
+      ...Object.fromEntries(CITIZENSHIP_OPTIONS.map((option) => [option, option === newStatus])),
+      // Calculate derived filters for the selected status
+      ...Object.fromEntries(
+        Object.entries(calculatedCitizenshipFilters).map(([filterName, calculator]) => [
+          filterName,
+          calculator.linkedFilters.includes(newStatus) && formData.householdData.some(calculator.func),
+        ])
+      ),
     };
 
-    // Set the selected status to true
-    newFiltersChecked[newStatus] = true;
-
-    // Calculate hidden/derived filters based on household data
-    Object.entries(calculatedCitizenshipFilters).forEach(([filterName, calculator]) => {
-      // Only calculate if this filter is linked to the selected citizenship status
-      if (calculator.linkedFilters.includes(newStatus)) {
-        newFiltersChecked[filterName] = formData.householdData.some(calculator.func);
-      }
-    });
-
-    setSelectedCitizenship(newStatus);
     setFiltersChecked(newFiltersChecked as Record<CitizenLabels, boolean>);
   };
 
@@ -149,8 +121,6 @@ export const Filter = () => {
       </FormControl>
     );
   };
-
-  // Users can click U.S. Citizen button to reset to default
 
   return (
     <div className="filter-section-container">

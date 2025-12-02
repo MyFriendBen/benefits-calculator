@@ -52,7 +52,7 @@
   left: 0;
   right: 0;
   height: 2em;
-  background: linear-gradient(to bottom, transparent, white);
+  background: linear-gradient(to bottom, transparent, var(--background-color, #ffffff));
   pointer-events: none;
 }
 
@@ -84,13 +84,6 @@
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 0.625rem;
   width: 100%;
-}
-
-.citizenship-button.MuiButton-root {
-  background-color: #ffffff;
-  color: var(--primary-color);
-  border-radius: 1.5625rem;
-  border: 1px solid var(--primary-color);
 }
 
 .citizenship-option-button.MuiButton-root {
@@ -132,10 +125,6 @@
   box-shadow: 0 4px 12px rgba(65, 82, 140, 0.3);
 }
 
-.active-blue.MuiButton-root {
-  background-color: rgba(65, 82, 140, 0.14);
-}
-
 .citizenship-option-button .info-icon {
   opacity: 0.6;
   font-size: 0.875rem;
@@ -172,22 +161,6 @@
   font-size: 0.875rem;
   line-height: 1.6;
   color: #333333;
-}
-
-/* ============================================
-   CITIZENSHIP POPOVER
-   ============================================ */
-
-#citizenshipPopover .MuiPaper-root.MuiPopover-paper {
-  border-radius: 0 1.5625rem 1.5625rem 1.5625rem;
-  width: 21rem;
-  border: 1px solid var(--primary-color);
-}
-
-.flat-white-border-bottom.MuiButton-root {
-  border-radius: 1.5625rem 1.5625rem 0 0;
-  border-bottom: 1px solid #ffffff;
-  background-color: #ffffff;
 }
 
 /* ============================================
@@ -310,14 +283,5 @@
 
   .citizenship-option-button .info-icon {
     font-size: 0.75rem;
-  }
-}
-
-/* Small mobile or short screens */
-@media (max-width: 767px), (max-height: 700px) {
-  #citizenshipPopover .MuiPaper-root.MuiPopover-paper {
-    max-height: 70vh;
-    width: 95vw;
-    margin: 0 8px;
   }
 }

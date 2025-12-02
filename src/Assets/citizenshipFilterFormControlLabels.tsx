@@ -24,16 +24,6 @@ export type CalculatedCitizenLabel =
 
 export type CitizenLabels = CitizenLabelOptions | CalculatedCitizenLabel;
 
-// Map for calculated filters based on selected citizenship status
-export const filterNestedMap = new Map<CitizenLabelOptions, CitizenLabelOptions[]>([
-  ['citizen', []],
-  ['non_citizen', []],
-  ['gc_5plus', []],
-  ['gc_5less', []],
-  ['refugee', []],
-  ['otherWithWorkPermission', []],
-]);
-
 type CalculatedCitizenshipFilter = {
   func: (member: HouseholdData) => boolean;
   linkedFilters: CitizenLabelOptions[];
