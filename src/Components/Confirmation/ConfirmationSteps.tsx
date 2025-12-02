@@ -33,7 +33,8 @@ function ZipCode() {
   };
 
   return (
-    <ConfirmationSection
+    <ConfirmationBlock
+      icon={<Residence />}
       title={<FormattedMessage id="confirmation.residenceInfo" defaultMessage="Basic Information" />}
       editAriaLabel={editZipAriaLabel}
       stepName="zipcode"
@@ -47,7 +48,7 @@ function ZipCode() {
         label={<FormattedMessage id="confirmation.displayAllFormData-countyText" defaultMessage="County" />}
         value={county}
       />
-    </ConfirmationSection>
+    </ConfirmationBlock>
   );
 }
 
@@ -75,7 +76,8 @@ function HouseholdSize() {
   const householdSizeText = `${translateNumber(householdSize)} ${formatMessage(householdSizeDescriptor)}`;
 
   return (
-    <ConfirmationSection
+    <ConfirmationBlock
+      icon={<Household />}
       title={
         <>
           <FormattedMessage id="confirmation.displayAllFormData-yourHouseholdLabel" defaultMessage="Household Members" />
@@ -87,7 +89,7 @@ function HouseholdSize() {
       noReturn
     >
       {/* No content needed since size is in the header */}
-    </ConfirmationSection>
+    </ConfirmationBlock>
   );
 }
 
@@ -156,7 +158,8 @@ function Expenses() {
   };
 
   return (
-    <ConfirmationSection
+    <ConfirmationBlock
+      icon={<Resources />}
       title={
         <FormattedMessage
           id="confirmation.financialInfo"
@@ -168,7 +171,7 @@ function Expenses() {
     >
       {allExpenses()}
       {assetsContent()}
-    </ConfirmationSection>
+    </ConfirmationBlock>
   );
 }
 
@@ -258,7 +261,8 @@ function HasBenefits() {
   };
 
   return (
-    <ConfirmationSection
+    <ConfirmationBlock
+      icon={<Benefits />}
       title={
         <FormattedMessage
           id="confirmation.benefitsAdditionalInfo"
@@ -271,7 +275,7 @@ function HasBenefits() {
       {alreadyHasBenefits()}
       {acuteConditionsContent()}
       {referralSourceContent()}
-    </ConfirmationSection>
+    </ConfirmationBlock>
   );
 }
 

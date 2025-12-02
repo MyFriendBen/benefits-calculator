@@ -26,6 +26,10 @@
   margin-top: 0;
 }
 
+.confirmation-section:first-child {
+  margin-top: 0;
+}
+
 .simple-confirmation-section:last-child {
   border-bottom: none;
 }
@@ -35,7 +39,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 2px solid #333;
+  border-bottom: 2px solid #999;
   margin-bottom: 0;
 }
 
@@ -69,14 +73,14 @@
 svg.edit-button-simple path,
 svg.edit-button-simple rect,
 svg.edit-button-simple polygon {
-  stroke: var(--primary-color);
-  fill: var(--primary-color);
+  stroke: #333;
+  fill: #333;
 }
 
 /* Full ConfirmationBlock section (for household member table with colored header) */
 .confirmation-section {
-  padding: 0 0 3rem 0;
-  margin-top: 3rem;
+  padding: 0 0 2rem 0;
+  margin-top: 1.5rem;
   border-bottom: 1px solid #d0d0d0;
 }
 
@@ -85,34 +89,35 @@ svg.edit-button-simple polygon {
 }
 
 .confirmation-section-header {
-  background-color: #f5f5f5;
-  padding: 0.75rem 1.5rem;
+  background-color: transparent;
+  padding: 0 0 0.5rem 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid #d0d0d0;
-  border-bottom: 2px solid #333;
+  border: none;
+  border-bottom: 2px solid #999;
   margin-bottom: 0;
 }
 
 .confirmation-section-header h2 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  color: #000;
 }
 
 .confirmation-section-header svg {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2rem;
+  height: 2rem;
 }
 
 .confirmation-section-header svg path,
 .confirmation-section-header svg circle {
-  fill: var(--primary-color);
-  stroke: var(--primary-color);
+  fill: var(--secondary-color);
+  stroke: var(--secondary-color);
 }
 
 .confirmation-section-content {
@@ -143,14 +148,14 @@ svg.edit-button-simple polygon {
 }
 
 .confirmation-icon svg {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2rem;
+  height: 2rem;
 }
 
 .confirmation-icon svg path,
 .confirmation-icon svg circle {
-  fill: var(--primary-color);
-  stroke: var(--primary-color);
+  fill: var(--secondary-color);
+  stroke: var(--secondary-color);
 }
 
 /* Lucide icons have the class directly on the SVG element */
@@ -166,8 +171,8 @@ svg.confirmation-lucide-icon * {
 
 svg.confirmation-icon path,
 svg.confirmation-icon circle {
-  fill: var(--primary-color);
-  stroke: var(--primary-color);
+  fill: var(--secondary-color);
+  stroke: var(--secondary-color);
 }
 
 .MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-2.css-1o7apob-MuiGrid-root.no-padding {
@@ -197,8 +202,8 @@ svg.confirmation-icon circle {
 svg.edit-button path,
 svg.edit-button rect,
 svg.edit-button polygon {
-  stroke: var(--primary-color);
-  fill: var(--primary-color);
+  stroke: #333;
+  fill: #333;
 }
 
 .confirmation-acute-need-list {
