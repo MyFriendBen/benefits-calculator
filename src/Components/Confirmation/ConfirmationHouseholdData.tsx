@@ -29,7 +29,7 @@ const DefaultConfirmationHHData = () => {
   const formatBirthMonthYear = useFormatBirthMonthYear();
 
   const relationshipOptions = useConfig<OptionMap>('relationship_options');
-  const incomeOptions = useConfig<OptionMap>('income_options');
+  const incomeOptions = useConfig<Record<string, Record<string, FormattedMessageType>>>('income_options');
   const frequencyOptions = useConfig<OptionMap>('frequency_options');
   const healthInsuranceOptions = useConfig<{
     you: IconAndFormattedMessageMap;
@@ -39,7 +39,7 @@ const DefaultConfirmationHHData = () => {
   const conditionsString = (specialConditions: Conditions) => {
     const conditionText = [];
 
-    if (specialConditions.student) {
+    if (specialConditions.student !== undefined && specialConditions.student) {
       conditionText.push(
         formatMessage({
           id: 'confirmation.headOfHouseholdDataBlock-studentText',
@@ -96,7 +96,11 @@ const DefaultConfirmationHHData = () => {
 
   const listAllIncomeStreams = (incomeStreams: IncomeStream[]) => {
     const mappedListItems = incomeStreams.map((incomeStream, index) => {
-      const incomeStreamName = incomeOptions[incomeStream.incomeStreamName];
+      // Find the income stream name by searching through all categories
+      let incomeStreamName: FormattedMessageType | undefined;
+      if (incomeStream.incomeCategory && incomeOptions[incomeStream.incomeCategory]) {
+        incomeStreamName = incomeOptions[incomeStream.incomeCategory][incomeStream.incomeStreamName];
+      }
       const incomeAmount = formatToUSD(Number(incomeStream.incomeAmount));
       const incomeFrequency = frequencyOptions[incomeStream.incomeFrequency];
       const hoursPerWeek = incomeStream.hoursPerWeek;
@@ -205,7 +209,7 @@ const DefaultConfirmationHHData = () => {
           label={
             <FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions:" />
           }
-          value={conditionsString(member.conditions)}
+          value={conditionsString(member.specialConditions)}
         />
         <ConfirmationItem
           label={<FormattedMessage id="confirmation.headOfHouseholdDataBlock-incomeLabel" defaultMessage="Income:" />}
