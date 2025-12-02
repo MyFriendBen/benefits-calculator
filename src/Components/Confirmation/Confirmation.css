@@ -72,9 +72,12 @@
 
 svg.edit-button-simple path,
 svg.edit-button-simple rect,
-svg.edit-button-simple polygon {
-  stroke: #333;
-  fill: #333;
+svg.edit-button-simple polygon,
+.edit-button-simple svg path,
+.edit-button-simple svg rect,
+.edit-button-simple svg polygon {
+  stroke: #333 !important;
+  fill: #333 !important;
 }
 
 /* Full ConfirmationBlock section (for household member table with colored header) */
@@ -201,9 +204,12 @@ svg.confirmation-icon circle {
 
 svg.edit-button path,
 svg.edit-button rect,
-svg.edit-button polygon {
-  stroke: #333;
-  fill: #333;
+svg.edit-button polygon,
+.edit-button svg path,
+.edit-button svg rect,
+.edit-button svg polygon {
+  stroke: #333 !important;
+  fill: #333 !important;
 }
 
 .confirmation-acute-need-list {
