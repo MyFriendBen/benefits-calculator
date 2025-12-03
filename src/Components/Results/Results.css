@@ -199,6 +199,7 @@
 
 .result-program-details strong {
   display: block;
+  font-size: 1.3rem;
 }
 
 .result-program-subheader {
@@ -398,9 +399,5 @@
 
   .results-section-header {
     margin-top: 0.5rem;
-  }
-
-  .result-program-details-box strong {
-    font-size: 1.3rem;
   }
 }
