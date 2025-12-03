@@ -1,9 +1,7 @@
-import { Card, CardActionArea, Stack } from '@mui/material';
+import { Card, CardActionArea } from '@mui/material';
 import { ReactNode, useContext, useMemo } from 'react';
 import { FormattedMessageType } from '../../Types/Questions';
-import { ReactComponent as Checkmark } from '../../Assets/icons/General/OptionCard/checkmark.svg';
 import './MultiSelectTiles.css';
-import { useIntl } from 'react-intl';
 import { Context } from '../Wrapper/Wrapper';
 
 export type MultiSelectTileOption<T extends string | number> = {
@@ -20,7 +18,6 @@ type TileProps<T extends string | number> = {
 
 function Tile<T extends string | number>({ option, selected, onClick }: TileProps<T>) {
   const { getReferrer } = useContext(Context);
-  const { formatMessage } = useIntl();
 
   const featureFlags = getReferrer('featureFlags');
   const containerClass = useMemo(() => {
@@ -44,14 +41,6 @@ function Tile<T extends string | number>({ option, selected, onClick }: TileProp
           <div className="multi-select-icon">{option.icon}</div>
           <div className={selected ? 'option-card-text' : ''}>{option.text}</div>
         </div>
-        {selected && (
-          <Stack direction="row" justifyContent="flex-end" alignItems="flex-end">
-            <Checkmark
-              title={formatMessage({ id: 'multiSelect.checkmark.alt', defaultMessage: 'checked' })}
-              className="checkmark"
-            />
-          </Stack>
-        )}
       </Card>
     </CardActionArea>
   );

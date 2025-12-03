@@ -2,7 +2,6 @@ import { useIntl } from 'react-intl';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import { CardActionArea, Typography, Stack, Box } from '@mui/material';
-import { ReactComponent as Checkmark } from '../../Assets/icons/General/OptionCard/checkmark.svg';
 import { FieldValues, Path, PathValue, UseFormTrigger, UseFormSetValue, UseFormClearErrors } from 'react-hook-form';
 import '../OptionCardGroup/OptionCardGroup.css';
 import { Context } from '../Wrapper/Wrapper';

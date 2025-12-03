@@ -4,8 +4,8 @@
   /* Main container styles if needed */
 }
 
-.household-basic-info-page__subheader {
-  margin-bottom: 1.5rem;
+p.household-basic-info-page__subheader.MuiTypography-root {
+  margin-bottom: 1rem;
   font-size: 1rem;
   color: #666;
 }
