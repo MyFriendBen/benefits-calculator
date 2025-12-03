@@ -1,6 +1,6 @@
 import { Program, Translation, MemberEligibility } from '../../Types/Results';
 import { FormData } from '../../Types/FormData';
-import { CitizenLabels } from '../../Assets/citizenshipFilterFormControlLabels';
+import { CitizenLabels } from './Filter/citizenshipFilterConfig';
 
 export const createTranslation = (text: string): Translation => ({
   default_message: text,

@@ -7,7 +7,7 @@ import {
   CitizenLabelOptions,
   CitizenLabels,
   citizenshipFilterConfig,
-} from '../../../Assets/citizenshipFilterFormControlLabels';
+} from './citizenshipFilterConfig';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import './Filter.css';
 import '../../QuestionComponentContainer/QuestionComponentContainer.css';

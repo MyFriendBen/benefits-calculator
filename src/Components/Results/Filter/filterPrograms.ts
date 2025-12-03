@@ -2,11 +2,11 @@ import {
   CalculatedCitizenLabel,
   calculatedCitizenshipFilters,
   CitizenLabels,
-} from '../../Assets/citizenshipFilterFormControlLabels';
-import { FormData } from '../../Types/FormData';
-import { Program } from '../../Types/Results';
-import { programValue } from './FormattedValue';
-import { findMemberEligibilityMember } from './Results';
+} from './citizenshipFilterConfig';
+import { FormData } from '../../../Types/FormData';
+import { Program } from '../../../Types/Results';
+import { programValue } from '../FormattedValue';
+import { findMemberEligibilityMember } from '../Results';
 
 /**
  * Safe clone helper that falls back to JSON clone when structuredClone is not available
