@@ -43,14 +43,6 @@
   stroke: #ffffff;
 }
 
-.white-icons .cls-checkmark-fill {
-  fill: #ffffff;
-}
-
-.white-icons .cls-checkmark {
-  fill: var(--primary-color);
-}
-
 @media (max-width: 38.125rem) {
   .multiselect-tiles-container {
     grid-template-columns: 1fr;

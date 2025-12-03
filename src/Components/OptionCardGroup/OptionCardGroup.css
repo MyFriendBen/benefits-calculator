@@ -84,19 +84,6 @@
   stroke: var(--icon-color);
 }
 
-.checkmark {
-  position: absolute;
-  top: 50%;
-  right: 0.5rem;
-  transform: translateY(-50%);
-  height: 1.75rem;
-  width: 1.75rem;
-}
-
-.cls-checkmark-fill {
-  fill: var(--icon-color);
-}
-
 /* This css rule targets the svg class of the milk carton fill */
 .food-icon {
   stroke: var(--icon-color);
@@ -146,11 +133,5 @@
 
   p.question-label {
     font-size: 1rem;
-  }
-
-  .checkmark {
-    height: 1.5rem;
-    width: 1.5rem;
-    margin: -2rem 0.5rem 0.5rem 0;
   }
 }

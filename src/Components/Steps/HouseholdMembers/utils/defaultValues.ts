@@ -65,15 +65,12 @@ const getDefaultIncomeStreams = (data?: HouseholdData): any[] => {
  * Determines default special conditions - infers "none" selection from backend data
  */
 const getDefaultSpecialConditions = (data?: HouseholdData): typeof DEFAULT_SPECIAL_CONDITIONS => {
-  console.log('getDefaultSpecialConditions - input data:', data);
 
   if (!data?.specialConditions) {
-    console.log('getDefaultSpecialConditions - no specialConditions, returning defaults');
     return DEFAULT_SPECIAL_CONDITIONS;
   }
 
   const merged = { ...DEFAULT_SPECIAL_CONDITIONS, ...data.specialConditions };
-  console.log('getDefaultSpecialConditions - merged:', merged);
 
   // Backend doesn't persist "none" - infer it from context
   const hasAnyCondition = Object.entries(merged)
@@ -81,15 +78,12 @@ const getDefaultSpecialConditions = (data?: HouseholdData): typeof DEFAULT_SPECI
     .some(([, value]) => value === true);
 
   const progressed = hasProgressedThroughForm(data);
-  console.log('getDefaultSpecialConditions - hasAnyCondition:', hasAnyCondition, 'progressed:', progressed);
 
   // If they've been through form but no special conditions are true, they selected "none"
   if (progressed && !hasAnyCondition) {
-    console.log('getDefaultSpecialConditions - setting none to true');
     return { ...merged, none: true };
   }
 
-  console.log('getDefaultSpecialConditions - returning merged without none');
   return merged;
 };
 

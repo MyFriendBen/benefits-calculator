@@ -2,6 +2,8 @@
   height: 150px;
   width: 150px;
   animation: rotate-s-loader 1s linear infinite;
+  margin-top: 2rem;
+  margin-bottom: 8rem;
 }
 
 @keyframes rotate-s-loader {
@@ -16,5 +18,5 @@
 .loading-text {
   font-size: 1.375rem;
   font-weight: 500;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }

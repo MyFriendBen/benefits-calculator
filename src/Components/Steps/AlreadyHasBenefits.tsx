@@ -51,7 +51,7 @@ function CategoryBenefits({ alreadyHasBenefits, onChange }: CategoryBenefitsProp
             text: (
               <div>
                 <div style={{ fontSize: '0.95rem', fontWeight: 600 }}>{benefit.name}</div>
-                <div style={{ fontSize: '0.85rem', color: '#5a5a5a', marginTop: '0.25rem' }}>{benefit.description}</div>
+                <div style={{ fontSize: '0.85rem', color: '#5a5a5a', marginTop: '0.125rem' }}>{benefit.description}</div>
               </div>
             ),
           };
@@ -225,7 +225,7 @@ function AlreadyHasBenefits() {
         />
         {watch('hasBenefits') === 'true' && (
           <div>
-            <hr style={{ margin: '1rem 0 2rem 0', border: 'none', borderTop: '1px solid #d0d0d0' }} />
+            <hr style={{ margin: '1rem 0 1.2rem 0', border: 'none', borderTop: '1px solid #d0d0d0' }} />
             <QuestionQuestion>
               <FormattedMessage
                 id="questions.hasBenefits-a"

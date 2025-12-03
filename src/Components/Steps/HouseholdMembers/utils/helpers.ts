@@ -77,9 +77,6 @@ export const createHouseholdMemberData = ({
     hasIncome: memberData.hasIncome === 'true',
   } as HouseholdData;
 
-  console.log('createHouseholdMemberData - memberData:', memberData);
-  console.log('createHouseholdMemberData - result:', result);
-
   return result;
 };
 
