@@ -146,8 +146,7 @@ function applyProgramExclusions(programs: Program[], isAdminView: boolean): Prog
 export default function filterProgramsGenerator(
   formData: FormData,
   filterState: FilterState,
-  isAdminView: boolean,
-  allPrograms: Program[],
+  isAdminView: boolean
 ) {
   return (programs: Program[]) => {
     // Step 1: Update member eligibility based on calculated filters

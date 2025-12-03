@@ -169,8 +169,8 @@ const Results = ({ type }: ResultsProps) => {
   const [policyEngineData, setPolicyEngineData] = useState<PolicyEngineData>();
 
   const filterPrograms = useMemo(
-    () => filterProgramsGenerator(formData, filterState, isAdminView, apiResults?.programs || []),
-    [formData, filterState, isAdminView, apiResults?.programs]
+    () => filterProgramsGenerator(formData, filterState, isAdminView),
+    [formData, filterState, isAdminView]
   );
 
   useEffect(() => {
