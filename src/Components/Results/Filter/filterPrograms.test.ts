@@ -2,12 +2,12 @@ import filterProgramsGenerator from './filterPrograms';
 import {
   createProgram,
   createFormData,
-  createFiltersChecked,
+  createFilterState,
   createProgramWithExclusions,
   createProgramWithMembers,
   createMemberEligibility,
-} from './testHelpers';
-import { Program } from '../../Types/Results';
+} from '../testHelpers';
+import { Program } from '../../../Types/Results';
 
 // Polyfill for structuredClone in test environment
 if (!global.structuredClone) {
@@ -15,7 +15,7 @@ if (!global.structuredClone) {
 }
 
 // Mock dependencies
-jest.mock('./FormattedValue', () => ({
+jest.mock('../FormattedValue', () => ({
   programValue: (program: Program) => {
     let total = program.household_value;
     for (const member of program.members) {
@@ -27,7 +27,7 @@ jest.mock('./FormattedValue', () => ({
   },
 }));
 
-jest.mock('./Results', () => ({
+jest.mock('../Results', () => ({
   findMemberEligibilityMember: jest.fn(() => ({
     age: 30,
     relationship: 'yourself',
@@ -41,7 +41,7 @@ jest.mock('./Results', () => ({
 
 describe('filterProgramsGenerator', () => {
   const defaultFormData = createFormData();
-  const defaultFilters = createFiltersChecked();
+  const defaultFilterState = createFilterState();
 
   describe('Basic filtering without exclusions', () => {
     it('should show eligible programs with value', () => {
@@ -51,7 +51,7 @@ describe('filterProgramsGenerator', () => {
         createProgram({ program_id: 3, eligible: true, household_value: 0 }),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       const filtered = filterPrograms(programs);
 
       expect(filtered).toHaveLength(1);
@@ -64,7 +64,7 @@ describe('filterProgramsGenerator', () => {
         createProgram({ program_id: 2, eligible: true, household_value: 100, already_has: true }),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       const filtered = filterPrograms(programs);
 
       expect(filtered).toHaveLength(1);
@@ -78,7 +78,7 @@ describe('filterProgramsGenerator', () => {
         createProgram({ program_id: 3, legal_status_required: ['citizen', 'non_citizen'], household_value: 100 }),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       const filtered = filterPrograms(programs);
 
       expect(filtered).toHaveLength(2);
@@ -92,7 +92,7 @@ describe('filterProgramsGenerator', () => {
         createProgram({ program_id: 3, already_has: true }),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, true, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, true, programs);
       const filtered = filterPrograms(programs);
 
       expect(filtered).toHaveLength(3);
@@ -106,7 +106,7 @@ describe('filterProgramsGenerator', () => {
         createProgramWithExclusions(2, 'Program B', [], true, 100),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       const filtered = filterPrograms(programs);
 
       expect(filtered).toHaveLength(1);
@@ -119,7 +119,7 @@ describe('filterProgramsGenerator', () => {
         createProgramWithExclusions(2, 'Program B', [], true, 100),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       const filtered = filterPrograms(programs);
 
       expect(filtered).toHaveLength(1);
@@ -132,7 +132,7 @@ describe('filterProgramsGenerator', () => {
         createProgramWithExclusions(2, 'Program B', [1], true, 100),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       const filtered = filterPrograms(programs);
 
       // With mutual exclusions, the first program in the array wins
@@ -147,7 +147,7 @@ describe('filterProgramsGenerator', () => {
         createProgramWithExclusions(3, 'Program C', [], true, 100),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       const filtered = filterPrograms(programs);
 
       // Program A excludes B, but B's exclusion of C doesn't matter since B is not visible
@@ -164,7 +164,7 @@ describe('filterProgramsGenerator', () => {
         createProgramWithExclusions(4, 'Program D', [], true, 100),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       const filtered = filterPrograms(programs);
 
       // Programs 1 and 2 should be visible, 3 and 4 should be excluded
@@ -179,7 +179,7 @@ describe('filterProgramsGenerator', () => {
         createProgramWithExclusions(3, 'Program C', [1], true, 100),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       const filtered = filterPrograms(programs);
 
       // In circular dependencies: A excludes B, B excludes C, C excludes A
@@ -194,7 +194,7 @@ describe('filterProgramsGenerator', () => {
         createProgramWithExclusions(2, 'Program B', [], true, 100),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, true, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, true, programs);
       const filtered = filterPrograms(programs);
 
       expect(filtered).toHaveLength(2);
@@ -223,7 +223,7 @@ describe('filterProgramsGenerator', () => {
       ];
 
       // Test with 'citizen' filter only
-      const citizenFilters = createFiltersChecked({ citizen: true, non_citizen: false });
+      const citizenFilters = createFilterState('citizen');
       const filterPrograms1 = filterProgramsGenerator(defaultFormData, citizenFilters, false, programs);
       const filtered1 = filterPrograms1(programs);
 
@@ -231,21 +231,12 @@ describe('filterProgramsGenerator', () => {
       expect(filtered1[0].program_id).toBe(1);
 
       // Test with 'non_citizen' filter only
-      const nonCitizenFilters = createFiltersChecked({ citizen: false, non_citizen: true });
+      const nonCitizenFilters = createFilterState('non_citizen');
       const filterPrograms2 = filterProgramsGenerator(defaultFormData, nonCitizenFilters, false, programs);
       const filtered2 = filterPrograms2(programs);
 
       expect(filtered2).toHaveLength(1);
       expect(filtered2[0].program_id).toBe(2);
-
-      // Test with both filters - both programs meet criteria, but mutual exclusion applies
-      const bothFilters = createFiltersChecked({ citizen: true, non_citizen: true });
-      const filterPrograms3 = filterProgramsGenerator(defaultFormData, bothFilters, false, programs);
-      const filtered3 = filterPrograms3(programs);
-
-      // With mutual exclusions and both filters, both programs meet criteria
-      // But mutual exclusion means only one will be shown
-      expect(filtered3).toHaveLength(1);
     });
 
     it('should handle member-level eligibility with exclusions', () => {
@@ -256,7 +247,7 @@ describe('filterProgramsGenerator', () => {
 
       programs[0].excludes_programs = [2];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       const filtered = filterPrograms(programs);
 
       expect(filtered).toHaveLength(1);
@@ -277,7 +268,7 @@ describe('filterProgramsGenerator', () => {
         )
       );
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       
       // Run filter twice to test caching
       const filtered1 = filterPrograms(programs);
@@ -295,7 +286,7 @@ describe('filterProgramsGenerator', () => {
         createProgramWithExclusions(2, 'Program B', [], true, 100),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       const filtered = filterPrograms(programs);
 
       expect(filtered).toHaveLength(2);
@@ -307,7 +298,7 @@ describe('filterProgramsGenerator', () => {
         createProgram({ program_id: 2, excludes_programs: null, eligible: true, household_value: 100 }),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       const filtered = filterPrograms(programs);
 
       expect(filtered).toHaveLength(2);
@@ -345,7 +336,7 @@ describe('filterProgramsGenerator', () => {
         }),
       ];
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, programs);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, programs);
       const filtered = filterPrograms(programs);
 
       // Programs 1 and 2 should be visible
@@ -363,7 +354,7 @@ describe('filterProgramsGenerator', () => {
         eligible: true,
       });
 
-      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilters, false, [program]);
+      const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false, [program]);
       const filtered = filterPrograms([program]);
 
       expect(filtered).toHaveLength(1);

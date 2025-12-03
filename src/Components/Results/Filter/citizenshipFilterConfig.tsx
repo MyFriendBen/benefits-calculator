@@ -1,7 +1,7 @@
 import { FormattedMessage } from 'react-intl';
-import { HouseholdData } from '../Types/FormData';
-import { FormattedMessageType } from '../Types/Questions';
-import { calcAge } from './age';
+import { HouseholdData } from '../../../Types/FormData';
+import { FormattedMessageType } from '../../../Types/Questions';
+import { calcAge } from '../../../Assets/age';
 
 export type CitizenLabelOptions =
   | 'citizen'
@@ -23,6 +23,14 @@ export type CalculatedCitizenLabel =
   | 'otherHealthCareUnder21';
 
 export type CitizenLabels = CitizenLabelOptions | CalculatedCitizenLabel;
+
+/**
+ * Single-select filter state model
+ */
+export type FilterState = {
+  selectedCitizenship: CitizenLabelOptions;
+  calculatedFilters: Set<CalculatedCitizenLabel>;
+};
 
 type CalculatedCitizenshipFilter = {
   func: (member: HouseholdData) => boolean;
@@ -151,3 +159,40 @@ export const citizenshipFilterConfig: Record<CitizenLabelOptions, CitizenshipFil
     ),
   },
 };
+
+/**
+ * Calculate which derived filters should be active based on citizenship selection and household data
+ */
+export function calculateDerivedFilters(
+  selectedCitizenship: CitizenLabelOptions,
+  householdData: HouseholdData[]
+): Set<CalculatedCitizenLabel> {
+  const activeFilters = new Set<CalculatedCitizenLabel>();
+
+  // Check each calculated filter to see if it applies
+  for (const [filterName, calculator] of Object.entries(calculatedCitizenshipFilters)) {
+    const typedFilterName = filterName as CalculatedCitizenLabel;
+
+    // Only activate if this filter is linked to the selected citizenship
+    if (!calculator.linkedFilters.includes(selectedCitizenship)) {
+      continue;
+    }
+
+    // Only activate if at least one household member meets the condition
+    if (householdData.some(calculator.func)) {
+      activeFilters.add(typedFilterName);
+    }
+  }
+
+  return activeFilters;
+}
+
+/**
+ * Create initial filter state (defaults to 'citizen' with no derived filters)
+ */
+export function createInitialFilterState(): FilterState {
+  return {
+    selectedCitizenship: 'citizen',
+    calculatedFilters: new Set(),
+  };
+}

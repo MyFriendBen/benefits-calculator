@@ -29,7 +29,7 @@ type IconRendererProps = {
 const ProgramPage = ({ program }: ProgramPageProps) => {
   const { uuid } = useParams();
   const { formData, staffToken } = useContext(Context);
-  const { isAdminView, validations, setValidations, programCategories, filtersChecked } = useResultsContext();
+  const { isAdminView, validations, setValidations, programCategories, filterState } = useResultsContext();
   const intl = useIntl();
   const { fetchScreen } = useScreenApi();
   const [openPEmodal, setOpenPEModal] = useState(false);
@@ -167,14 +167,15 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
       }
 
       for (const status of warningMessage.legal_statuses) {
-        if (filtersChecked[status]) {
+        // Check if status matches selected citizenship or any calculated filter
+        if (status === filterState.selectedCitizenship || filterState.calculatedFilters.has(status as any)) {
           return true;
         }
       }
 
       return false;
     });
-  }, [filtersChecked, program]);
+  }, [filterState, program]);
 
   const displayEstimatedValueAndTime = (program: Program) => {
     return (

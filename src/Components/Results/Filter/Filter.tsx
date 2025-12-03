@@ -1,12 +1,11 @@
-import { useContext, useState, useCallback, useMemo } from 'react';
+import { useContext, useState, useCallback } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useResultsContext } from '../Results';
 import { Button, Typography, Select, MenuItem, FormControl, useMediaQuery, Tooltip } from '@mui/material';
 import {
-  calculatedCitizenshipFilters,
   CitizenLabelOptions,
-  CitizenLabels,
   citizenshipFilterConfig,
+  calculateDerivedFilters,
 } from './citizenshipFilterConfig';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import './Filter.css';
@@ -25,60 +24,26 @@ const CITIZENSHIP_OPTIONS: CitizenLabelOptions[] = [
 ];
 
 export const Filter = () => {
-  const { filtersChecked, setFiltersChecked } = useResultsContext();
+  const { filterState, setFilterState } = useResultsContext();
   const { formData } = useContext(Context);
   const intl = useIntl();
   const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.desktop - 1}px)`);
   const collapseDescription = useMediaQuery('(max-width: 730px)');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
-  // Derive selected citizenship from filtersChecked (exactly one is always true)
-  // Using find() is more efficient than a loop since we know exactly one will match
-  const selectedCitizenship =
-    CITIZENSHIP_OPTIONS.find((option) => filtersChecked[option]) ?? 'citizen';
+  // Get selected citizenship from filter state
+  const selectedCitizenship = filterState.selectedCitizenship;
 
   const handleCitizenshipChange = useCallback((newStatus: CitizenLabelOptions) => {
-    // Build the new filter state with type safety
-    const citizenshipFilters: Partial<Record<CitizenLabelOptions, boolean>> = {};
-    CITIZENSHIP_OPTIONS.forEach((option) => {
-      citizenshipFilters[option] = option === newStatus;
+    // Calculate derived filters based on household data
+    const calculatedFilters = calculateDerivedFilters(newStatus, formData.householdData);
+
+    // Create and set new filter state
+    setFilterState({
+      selectedCitizenship: newStatus,
+      calculatedFilters,
     });
-
-    // Calculate derived filters for the selected status
-    const calculatedFilters: Record<string, boolean> = {};
-    Object.entries(calculatedCitizenshipFilters).forEach(([filterName, calculator]) => {
-      calculatedFilters[filterName] =
-        calculator.linkedFilters.includes(newStatus) && formData.householdData.some(calculator.func);
-    });
-
-    const newFiltersChecked = {
-      ...citizenshipFilters,
-      ...calculatedFilters,
-    };
-
-    // Type guard to ensure all required keys are present
-    const isValidFilterState = (filters: unknown): filters is Record<CitizenLabels, boolean> => {
-      if (!filters || typeof filters !== 'object') return false;
-
-      // Check all citizenship options are present
-      const hasAllCitizenshipOptions = CITIZENSHIP_OPTIONS.every(
-        (option) => option in filters && typeof (filters as Record<string, unknown>)[option] === 'boolean'
-      );
-
-      // Check all calculated filters are present
-      const hasAllCalculatedFilters = Object.keys(calculatedCitizenshipFilters).every(
-        (key) => key in filters && typeof (filters as Record<string, unknown>)[key] === 'boolean'
-      );
-
-      return hasAllCitizenshipOptions && hasAllCalculatedFilters;
-    };
-
-    if (isValidFilterState(newFiltersChecked)) {
-      setFiltersChecked(newFiltersChecked);
-    } else {
-      console.error('Invalid filter state generated:', newFiltersChecked);
-    }
-  }, [formData.householdData, setFiltersChecked]);
+  }, [formData.householdData, setFilterState]);
 
   const renderDesktopButtons = () => {
     return (

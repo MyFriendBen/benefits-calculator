@@ -19,7 +19,7 @@ import Needs from './Needs/Needs';
 import Programs from './Programs/Programs';
 import ProgramPage from './ProgramPage/ProgramPage';
 import ResultsTabs from './Tabs/Tabs';
-import { CitizenLabels } from './Filter/citizenshipFilterConfig';
+import { FilterState, createInitialFilterState } from './Filter/citizenshipFilterConfig';
 import dataLayerPush from '../../Assets/analytics';
 import HelpButton from './211Button/211Button';
 import MoreHelp from '../MoreHelp/MoreHelp';
@@ -40,8 +40,8 @@ type WrapperResultsContext = {
   programs: Program[];
   programCategories: ProgramCategory[];
   needs: UrgentNeed[];
-  filtersChecked: Record<CitizenLabels, boolean>;
-  setFiltersChecked: (newFiltersChecked: Record<CitizenLabels, boolean>) => void;
+  filterState: FilterState;
+  setFilterState: (newFilterState: FilterState) => void;
   missingPrograms: boolean;
   isAdminView: boolean;
   validations: Validation[];
@@ -159,23 +159,7 @@ const Results = ({ type }: ResultsProps) => {
     fetchResults();
   }, []);
 
-  const [filtersChecked, setFiltersChecked] = useState<Record<CitizenLabels, boolean>>({
-    citizen: true,
-    non_citizen: false,
-    refugee: false,
-    gc_5plus: false,
-    gc_5less: false,
-    gc_18plus_no5: false,
-    gc_under18_no5: false,
-    otherWithWorkPermission: false,
-    otherHealthCareUnder19: false,
-    otherHealthCarePregnant: false,
-    notPregnantOrUnder19ForOmniSalud: false,
-    notPregnantOrUnder19ForEmergencyMedicaid: false,
-    notPregnantForMassHealthLimited: false,
-    notPregnantOrChildForMassHealthLimited: false,
-    otherHealthCareUnder21: false,
-  });
+  const [filterState, setFilterState] = useState<FilterState>(createInitialFilterState());
   const [programs, setPrograms] = useState<Program[]>([]);
   const [programCategories, setProgramCategories] = useState<ProgramCategory[]>([]);
   const [needs, setNeeds] = useState<UrgentNeed[]>([]);
@@ -185,8 +169,8 @@ const Results = ({ type }: ResultsProps) => {
   const [policyEngineData, setPolicyEngineData] = useState<PolicyEngineData>();
 
   const filterPrograms = useMemo(
-    () => filterProgramsGenerator(formData, filtersChecked, isAdminView, apiResults?.programs || []),
-    [formData, filtersChecked, isAdminView, apiResults?.programs]
+    () => filterProgramsGenerator(formData, filterState, isAdminView, apiResults?.programs || []),
+    [formData, filterState, isAdminView, apiResults?.programs]
   );
 
   useEffect(() => {
@@ -223,8 +207,8 @@ const Results = ({ type }: ResultsProps) => {
           programs,
           programCategories,
           needs,
-          filtersChecked,
-          setFiltersChecked,
+          filterState,
+          setFilterState,
           missingPrograms,
           isAdminView,
           validations,
