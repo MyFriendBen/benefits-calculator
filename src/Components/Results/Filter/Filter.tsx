@@ -28,6 +28,7 @@ export const Filter = () => {
   const { formData } = useContext(Context);
   const intl = useIntl();
   const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.desktop - 1}px)`);
+  // break determined based on when description wraps to 4+ lines - update as needed
   const collapseDescription = useMediaQuery('(max-width: 730px)');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
