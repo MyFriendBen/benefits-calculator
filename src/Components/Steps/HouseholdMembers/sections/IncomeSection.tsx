@@ -94,7 +94,7 @@ const IncomeSection = ({
               <Box className="income-fields-container">
                 {/* First Row: Income Category */}
                 <Box className="income-category-container">
-                  <Typography className="form-field-label">
+                  <Typography className="form-field-label" sx={{ fontSize: '0.875rem' }}>
                     <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Category" />
                   </Typography>
                   <FormControl
@@ -125,7 +125,7 @@ const IncomeSection = ({
                 {/* Second Row: Specific Type, Amount, Frequency */}
                 <Box className="income-fields-row">
                   <Box className="income-field-specific-type">
-                    <Typography className="form-field-label">
+                    <Typography className="form-field-label" sx={{ fontSize: '0.875rem' }}>
                       <FormattedMessage id="personIncomeBlock.specificType" defaultMessage="Specific Type" />
                     </Typography>
                     <FormControl
@@ -162,7 +162,7 @@ const IncomeSection = ({
                   </Box>
 
                   <Box className="income-field-amount">
-                    <Typography className="form-field-label">
+                    <Typography className="form-field-label" sx={{ fontSize: '0.875rem' }}>
                       <FormattedMessage id="personIncomeBlock.preTaxAmount" defaultMessage="Pre-Tax Amount" />
                     </Typography>
                     <Controller
@@ -188,7 +188,7 @@ const IncomeSection = ({
                   </Box>
 
                   <Box className="income-field-frequency">
-                    <Typography className="form-field-label">
+                    <Typography className="form-field-label" sx={{ fontSize: '0.875rem' }}>
                       <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
                     </Typography>
                     <FormControl
@@ -221,16 +221,28 @@ const IncomeSection = ({
           );
         })}
 
-        <Button
-          variant="outlined"
-          fullWidth
-          onClick={() => append(EMPTY_INCOME_STREAM as any)}
-          startIcon={<AddIcon />}
-          type="button"
-          className="income-button"
-        >
-          <FormattedMessage id="personIncomeBlock.return-addIncomeButton" defaultMessage="+ Add Another Income Source" />
-        </Button>
+        <Box sx={{ paddingTop: '0rem', paddingBottom: '1rem' }}>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={() => append(EMPTY_INCOME_STREAM as any)}
+            startIcon={<AddIcon />}
+            type="button"
+            className="income-button"
+            sx={{
+              backgroundColor: 'var(--secondary-color)',
+              color: '#ffffff',
+              border: 'none',
+              '&:hover': {
+                backgroundColor: 'var(--hover-color)',
+                color: 'var(--primary-color)',
+                border: '1px solid var(--primary-color)'
+              }
+            }}
+          >
+            <FormattedMessage id="personIncomeBlock.return-addIncomeButton" defaultMessage="+ Add Another Income Source" />
+          </Button>
+        </Box>
       </Stack>
     </Box>
   );
