@@ -1,3 +1,9 @@
+/**
+ * Breakpoints (must match src/utils/breakpoints.ts):
+ * Mobile:  0-767px
+ * Desktop: 768px+
+ */
+
 .result-program-container {
   position: relative;
   border: 2px solid var(--secondary-color);
@@ -31,6 +37,11 @@
 
 .result-program-details {
   flex: 0.5 0.5;
+  font-size: 0.9rem;
+  font-weight: 100;
+  line-height: normal;
+  width: 50%;
+  padding: 1rem 2rem;
 }
 
 .result-program-details-wrapper {
@@ -49,7 +60,7 @@
   line-height: normal;
   font-family: 'Roboto Slab', serif;
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   padding: 1.25rem 2rem;
 }
 
@@ -64,19 +75,8 @@
   text-decoration: none;
   font-size: 0.8rem;
   border-radius: 0.75rem;
-  top: 0.75rem;
-  right: 3rem;
   padding: 0.5rem 0.75rem;
   background-color: var(--primary-color);
-}
-
-.result-program-details {
-  font-size: 0.9rem;
-  display: inline-block;
-  font-weight: 100;
-  line-height: normal;
-  width: 50%;
-  padding: 1rem 2rem;
 }
 
 .result-program-details strong {
@@ -117,73 +117,10 @@ h1.header-text-bottom {
   text-wrap: wrap;
 }
 
-@media (min-width: 775px) {
-  .results-header-programs-count-text {
-    height: 3rem;
-    border-radius: 0.5rem;
-    background-color: var(--primary-color);
-    color: white;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    margin-right: 1rem;
-    display: flex;
-    align-items: center;
-  }
-
-  .category-heading-column {
-    flex: 1;
-  }
-
-  h2.category-heading-text-style.normal-weight {
-    display: block;
-    text-align: right;
-    width: 100%;
-  }
-
-  .results-data-cell {
-    display: flex;
-    flex-direction: column-reverse;
-    margin: 0.5rem 1rem;
-  }
-
+/* Desktop - 768px and above */
+@media (min-width: 768px) {
   .result-program-container:last-child {
     margin-bottom: 3rem;
-  }
-
-  .column-row {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .results-header {
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .results-header-programs-count {
-    font-size: x-large;
-    font-weight: 700;
-    margin: auto;
-    font-family: 'Roboto Slab', serif;
-    display: flex;
-    margin-right: 0.5rem;
-  }
-
-  .results-header-values {
-    font-family: 'Roboto Slab', serif;
-    font-weight: 700;
-    border-top: 1.5px solid var(--primary-color);
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .results-header-label {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
   }
 
   .result-program-container {
@@ -225,61 +162,46 @@ h1.header-text-bottom {
   }
 }
 
-@media (max-width: 775px) {
-  .results-header-programs-count-text {
-    width: 7rem;
-    height: 7rem;
-    background-color: var(--primary-color);
-    color: white;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    text-align: center;
-    padding-top: 0.75rem;
-    line-height: normal;
-    padding-bottom: 0.5rem;
-    margin-right: 1rem;
-  }
-
-  .column-row {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .results-header {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .results-header-programs-count {
-    font-size: xx-large;
-    font-weight: 700;
-    padding-bottom: 0.25rem;
-    font-family: 'Roboto Slab', serif;
-  }
-
-  .results-header-values {
-    font-family: 'Roboto Slab', serif;
-    font-weight: 700;
-    border-bottom: 1.5px solid var(--primary-color);
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .results-header-label {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-  }
-
-  .results-header {
-    display: flex;
-    flex-direction: row;
-  }
-
+/* Mobile - 767px and below */
+@media (max-width: 767px) {
   .result-program-details-wrapper {
     width: 100%;
   }
 
   .result-program-details:only-child {
     margin-left: 0;
+  }
+
+  .result-program-more-info-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+  }
+
+  .result-program-more-info {
+    font-size: 1rem;
+    padding: 0;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .result-program-more-info-button {
+    flex-shrink: 0;
+    margin-left: 1rem;
+  }
+
+  .result-program-more-info-button a {
+    display: inline-block;
+  }
+
+  .result-program-details {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .result-program-details strong {
+    font-size: 1.1rem;
+    padding-top: 0.2rem;
   }
 }

@@ -126,6 +126,7 @@ svg.edit-button polygon {
 .confirmation-block-content {
   display: block;
   align-content: center;
+  padding-right: 2rem;
 }
 
 @media (max-width: 630px) {
@@ -147,8 +148,8 @@ svg.edit-button polygon {
   }
 
   .section-p {
-    font-size: 0.75rem;
-    line-height: 1.25rem;
+    font-size: 0.9rem;
+    line-height: 1.5rem;
   }
 
   h1.sub-header {

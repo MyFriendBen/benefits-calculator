@@ -103,7 +103,7 @@ const ResultsHeader = ({ type }: ResultsHeaderProps) => {
         BackToThisPageText={<FormattedMessage id="results.back-to-screen-btn" defaultMessage="BACK TO SCREENER" />}
       />
       {isAdminView && <Login setToken={setStaffToken} loggedIn={staffToken !== undefined} />}
-      <div className="results-header-container">{header}</div>
+      <div className={isEnergyCalculator ? "energy-calculator-results-header-container" : "results-header-container"}>{header}</div>
     </>
   );
 };

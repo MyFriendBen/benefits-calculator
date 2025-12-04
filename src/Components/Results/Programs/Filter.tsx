@@ -134,7 +134,6 @@ export const Filter = () => {
             label={citizenshipFilterFormControlLabels[subFilter]}
             control={<Checkbox checked={choosenFilters[subFilter]} onChange={() => handleFilterSelect(subFilter)} />}
             className="subcategory-indentation vertical-align"
-            sx={{ padding: '.5rem 0' }}
           />,
         );
       }

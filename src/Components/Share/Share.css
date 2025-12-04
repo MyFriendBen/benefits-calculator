@@ -84,7 +84,7 @@ button {
   cursor: pointer;
 }
 
-@media (min-width: 601px) {
+@media (min-width: 768px) {
   .icon:hover > .icon-name {
     max-width: 130px;
     margin-left: 0.3rem;
@@ -96,7 +96,13 @@ button {
   }
 }
 
-@media (max-width: 700px) {
+/**
+ * Breakpoints (must match src/utils/breakpoints.ts):
+ * Mobile:  0-767px
+ * Desktop: 768px+
+ */
+
+@media (max-width: 767px) {
   .container {
     width: 80%;
   }
@@ -111,5 +117,16 @@ button {
 
   .icon {
     margin: 0 0.15rem;
+    padding: 0.25rem;
+  }
+
+  .feedback-button-and-text {
+    padding: 0.375rem 0.75rem;
+    width: 9rem;
+    font-size: 0.75rem;
+  }
+
+  .share-text-container p {
+    font-size: 0.875rem;
   }
 }

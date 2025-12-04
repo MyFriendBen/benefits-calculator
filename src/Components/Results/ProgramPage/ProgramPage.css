@@ -322,10 +322,11 @@ li.apply-info {
   }
 }
 
-/* TABLET */
-@media (max-width: 775px) {
+/* Mobile - 767px and below */
+@media (max-width: 767px) {
   .program-icon-and-header {
     justify-content: center;
+    padding: 1rem;
   }
 
   .header-text {

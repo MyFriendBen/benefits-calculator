@@ -1,3 +1,9 @@
+/**
+ * Breakpoints (must match src/utils/breakpoints.ts):
+ * Mobile:  0-767px
+ * Desktop: 768px+
+ */
+
 .filter-section-container {
   margin-bottom: 2rem;
 }
@@ -12,7 +18,7 @@
 }
 
 .citizenship-button.MuiButton-root {
-  background-color: #ffff;
+  background-color: #ffffff;
   color: var(--primary-color);
   border-radius: 1.5625rem;
   border: 1px solid var(--primary-color);
@@ -20,15 +26,15 @@
 
 .flat-white-border-bottom.MuiButton-root {
   border-radius: 1.5625rem 1.5625rem 0 0;
-  border-bottom: #ffff;
-  background-color: #ffff;
+  border-bottom: 1px solid #ffffff;
+  background-color: #ffffff;
 }
 
 .flat-white-border-bottom.MuiButton-root::after {
   content: '';
   height: 2px;
   width: 100%;
-  background-color: #ffff;
+  background-color: #ffffff;
   z-index: 10000;
   position: absolute;
   bottom: 0;
@@ -39,7 +45,7 @@
 }
 
 .reset-button.MuiButton-root {
-  background-color: #ffff;
+  background-color: #ffffff;
   color: var(--primary-color);
   border: none;
   font-weight: 400;
@@ -47,6 +53,10 @@
 
 .subcategory-indentation.MuiFormControlLabel-root {
   margin-left: 1rem;
+}
+
+.subcategory-indentation.vertical-align {
+  padding: 0.5rem 0;
 }
 
 #citizenshipPopover .MuiPaper-root.MuiPopover-paper {
@@ -111,7 +121,8 @@
   padding: 0.25rem 0.75rem;
 }
 
-@media (max-width: 500px), (max-height: 700px) {
+/* Small mobile or short screens */
+@media (max-width: 767px), (max-height: 700px) {
   #citizenshipPopover .MuiPaper-root.MuiPopover-paper {
     max-height: 70vh;
     width: 95vw;
@@ -120,5 +131,20 @@
 
   .filter-ref-container {
     max-height: calc(70vh - 40px);
+  }
+}
+
+/* Mobile - 767px and below */
+@media (max-width: 767px) {
+  .results-section-header {
+    font-size: 1.1rem;
+  }
+
+  .filter-description .MuiTypography-root {
+    font-size: 0.875rem;
+  }
+
+  .filter-section-container {
+    margin-bottom: 1rem;
   }
 }

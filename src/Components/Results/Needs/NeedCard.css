@@ -1,3 +1,9 @@
+/**
+ * Breakpoints (must match src/utils/breakpoints.ts):
+ * Mobile:  0-767px
+ * Desktop: 768px+
+ */
+
 .result-resource-more-info {
   display: flex;
   align-items: center;
@@ -104,7 +110,7 @@
   text-decoration: none;
 }
 
-@media (max-width: 500px) {
+@media (max-width: 767px) {
   .result-resource-more-info span strong {
     font-size: 1rem;
   }

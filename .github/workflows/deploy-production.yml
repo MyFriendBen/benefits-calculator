@@ -1,0 +1,91 @@
+name: Deploy to Production
+
+on:
+  release:
+    types: [created, published]
+
+jobs:
+  test:
+    name: Run Tests on Draft Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event.release.draft == true
+
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Setup Node.js and dependencies
+        uses: ./.github/actions/setup-node-dependencies
+
+      - name: Run unit tests
+        run: npm test -- --coverage --watchAll=false --passWithNoTests
+
+      - name: Run linters
+        uses: wearerequired/lint-action@v2
+        with:
+          eslint: true
+          prettier: true
+
+  deploy:
+    if: github.event.action == 'published'
+    name: Deploy Frontend to Heroku Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: ${{ secrets.HEROKU_PROD_URL }}
+
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Get release info
+        id: release_info
+        run: |
+          echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          echo "name=${{ github.event.release.name }}" >> $GITHUB_OUTPUT
+
+      - name: Send deployment in-progress notification to Slack
+        uses: ./.github/actions/slack-notify
+        with:
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          status: in-progress
+          environment: production
+          release-tag: ${{ steps.release_info.outputs.tag }}
+          release-name: ${{ steps.release_info.outputs.name }}
+          release-url: ${{ github.event.release.html_url }}
+          heroku-app-name: ${{ secrets.HEROKU_PROD_APP_NAME }}
+
+      - name: Deploy to Heroku
+        uses: ./.github/actions/deploy-to-heroku
+        with:
+          heroku-api-key: ${{ secrets.HEROKU_API_KEY }}
+          heroku-app-name: ${{ secrets.HEROKU_PROD_APP_NAME }}
+          heroku-email: ${{ secrets.HEROKU_EMAIL }}
+
+      - name: Send deployment success notification to Slack
+        if: success()
+        uses: ./.github/actions/slack-notify
+        with:
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          status: success
+          environment: production
+          release-tag: ${{ steps.release_info.outputs.tag }}
+          release-name: ${{ steps.release_info.outputs.name }}
+          release-url: ${{ github.event.release.html_url }}
+          heroku-app-name: ${{ secrets.HEROKU_PROD_APP_NAME }}
+
+      - name: Send deployment failure notification to Slack
+        if: failure()
+        uses: ./.github/actions/slack-notify
+        with:
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          status: failure
+          environment: production
+          release-tag: ${{ steps.release_info.outputs.tag }}
+          release-url: ${{ github.event.release.html_url }}
