@@ -16,7 +16,7 @@
   border: 0.05px solid #6d6e71;
   box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
   /* Remove aspect-ratio to allow flexible height */
-  min-height: 5rem;
+  min-height: 4rem;
   height: 100%;
   width: 100%;
   padding: 1rem;
@@ -46,10 +46,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 2.5rem;
-  width: 2.5rem;
+  height: 2rem;
+  width: 2rem;
   margin-right: 0.75rem;
   flex-shrink: 0;
+}
+
+.flat-rectangle-icon svg {
+  height: 3rem;
+  width: 3rem;
 }
 
 .flat-rectangle-card-text {

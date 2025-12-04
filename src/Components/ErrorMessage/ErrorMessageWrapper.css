@@ -7,5 +7,6 @@
 
 .error-message {
   margin-top: 2px;
+  margin-left: .5rem;
   font-family: 'Open Sans';
 }

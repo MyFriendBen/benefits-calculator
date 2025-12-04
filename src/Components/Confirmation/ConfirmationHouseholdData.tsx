@@ -165,7 +165,7 @@ const DefaultConfirmationHHData = () => {
                 <td>
                   <Link
                     to={`/${whiteLabel}/${uuid}/step-${useStepNumber('householdData')}/${i + 1}`}
-                    state={{ routedFromConfirmationPg: true }}
+                    state={{ routedFromConfirmationPg: true, isEditing: true }}
                     className="edit-button-simple"
                     aria-label={formatMessage(editHouseholdMemberAriaLabel)}
                   >
