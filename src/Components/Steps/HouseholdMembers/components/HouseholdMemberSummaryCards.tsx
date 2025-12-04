@@ -1,6 +1,5 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Box } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import { calcAge } from '../../../../Assets/age';
 import { useConfig } from '../../../Config/configHook';
@@ -77,18 +76,16 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
       <article
         className={containerClassName}
         key={memberIndex}
-        onClick={isCompleted ? () => handleEditBtnSubmit(memberIndex) : undefined}
-        role={isCompleted ? "button" : undefined}
-        tabIndex={isCompleted ? 0 : undefined}
-        aria-label={isCompleted ? editHHMemberAriaLabel : undefined}
+        onClick={isCompleted && !isCurrentMember ? () => handleEditBtnSubmit(memberIndex) : undefined}
+        role={isCompleted && !isCurrentMember ? "button" : undefined}
+        tabIndex={isCompleted && !isCurrentMember ? 0 : undefined}
+        aria-label={isCompleted && !isCurrentMember ? editHHMemberAriaLabel : undefined}
       >
-        <div className="household-member-status-icon">
-          {isCurrentMember ? (
+        {isCurrentMember && (
+          <div className="household-member-status-icon">
             <ConstructionIcon className="current-icon" sx={{ fontSize: '.9rem' }} />
-          ) : (
-            isCompleted && <CheckCircleIcon className="completed-icon" sx={{ fontSize: '.9rem' }} />
-          )}
-        </div>
+          </div>
+        )}
         <div className="household-member-header">
           <h3 className="member-added-relationship">
             {relationship} ({translateNumber(age)})

@@ -13,12 +13,12 @@
   position: relative;
   font-size: 0.75rem;
   box-sizing: border-box;
-  background-color: #f8f9fa;
+  background-color: var(--input-section-background);
   width: auto;
 }
 
 .member-added-container.completed-household-member {
-  background-color: white;
+  background-color: var(--input-section-background);
   border-style: solid;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .current-icon {
-  color: var(--primary-color);
+  color: var(--secondary-color);
   font-size: .5rem;
   display: block;
 }
@@ -61,12 +61,28 @@
 }
 
 .completed-household-member {
-  border-color: var(--secondary-color);
+  border-color: var(--primary-color);
+}
+
+.completed-household-member .member-added-relationship {
+  color: var(--primary-color);
+}
+
+.completed-household-member .member-added-income {
+  color: var(--primary-color);
 }
 
 .current-household-member {
-  border-color: var(--primary-color);
-  border-width: 3px;
+  border-color: var(--secondary-color);
+  border-style: solid;
+}
+
+.current-household-member .member-added-relationship {
+  color: var(--secondary-color);
+}
+
+.current-household-member .member-added-income {
+  color: var(--secondary-color);
 }
 
 .member-added-relationship {
@@ -133,6 +149,21 @@
 .member-added-container[role="button"]:hover .household-member-header,
 .member-added-container[role="button"]:hover .member-added-income {
   opacity: 0.3;
+}
+
+/* Disable hover effects for current member */
+.current-household-member[role="button"]:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.current-household-member .hover-edit-button {
+  display: none;
+}
+
+.current-household-member:hover .household-member-header,
+.current-household-member:hover .member-added-income {
+  opacity: 1;
 }
 
 @media (max-width: 600px) {

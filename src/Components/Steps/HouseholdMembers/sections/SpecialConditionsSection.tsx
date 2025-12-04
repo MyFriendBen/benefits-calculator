@@ -61,7 +61,7 @@ const SpecialConditionsSection = ({
       <QuestionDescription>
         <FormattedMessage
           id="householdDataBlock.createConditionsQuestion-pick"
-          defaultMessage="Choose all that apply."
+          defaultMessage="Choose all that apply"
         />
       </QuestionDescription>
       {errors.specialConditions && (
