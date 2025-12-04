@@ -35,6 +35,7 @@ import { helperText } from '../../HelperText/HelperText';
 import './Expenses.css';
 import '../HouseholdMembers/styles/HouseholdMemberSections.css';
 import useStepForm from '../stepForm';
+import { getDefaultFormItems } from '../../../Assets/formDefaultHelpers';
 
 const Expenses = () => {
   const { formData } = useContext(Context);
@@ -88,35 +89,26 @@ const Expenses = () => {
   });
   type FormSchema = z.infer<typeof formSchema>;
 
-  // Helper to check if user has been asked about expenses before
-  // We check if they have household data (which comes before expenses in the flow)
-  const hasProgressedPastExpenses = formData.householdData && formData.householdData.length > 0;
+  // Helper to check if user has been to the expenses page before
+  // Check if hasExpenses field has been set (it's set when they submit this form)
+  const hasVisitedExpensesBefore = formData.hasExpenses !== undefined && formData.hasExpenses !== '';
 
-  // Determine default expenses:
-  // - If they have existing expenses, use those (with backward compatibility)
-  // - If it's their first visit, show one empty box
-  // - If they've been here before and deleted all expenses, respect that (empty array)
-  const getDefaultExpenses = () => {
-    const existing = formData.expenses ?? [];
+  // Empty expense template
+  const EMPTY_EXPENSE = { expenseSourceName: '', expenseAmount: '', expenseFrequency: 'monthly' };
 
-    // If they have expenses, ensure they all have frequency field (backward compatibility)
-    if (existing.length > 0) {
-      return existing.map(expense => ({
-        ...expense,
-        expenseFrequency: expense.expenseFrequency || 'monthly'
-      }));
-    }
+  // Get default expenses using shared logic
+  const rawExpenses = getDefaultFormItems(
+    formData.expenses,
+    hasVisitedExpensesBefore,
+    true, // Always show one empty box on first visit
+    EMPTY_EXPENSE
+  );
 
-    // If it's first visit, show one empty box
-    if (!hasProgressedPastExpenses) {
-      return [{ expenseSourceName: '', expenseAmount: '', expenseFrequency: 'monthly' }];
-    }
-
-    // They've been here before and deleted everything - respect that
-    return [];
-  };
-
-  const defaultExpenses = getDefaultExpenses();
+  // Apply backward compatibility: ensure all expenses have frequency field
+  const defaultExpenses = rawExpenses.map(expense => ({
+    ...expense,
+    expenseFrequency: expense.expenseFrequency || 'monthly'
+  }));
 
   const {
     control,

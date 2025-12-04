@@ -51,15 +51,12 @@ const isWorkingAge = (birthYear?: number, birthMonth?: number): boolean => {
  * Determines default income streams - auto-adds for working-age members on first visit
  */
 const getDefaultIncomeStreams = (data?: HouseholdData): any[] => {
-  const existing = data?.incomeStreams ?? [];
-
-  // On first visit only, auto-add empty income box for working-age members
-  const isFirstVisit = !hasProgressedThroughForm(data) && existing.length === 0;
-  if (isFirstVisit && isWorkingAge(data?.birthYear, data?.birthMonth)) {
-    return [EMPTY_INCOME_STREAM];
-  }
-
-  return existing;
+  return getDefaultFormItems(
+    data?.incomeStreams,
+    hasProgressedThroughForm(data),
+    isWorkingAge(data?.birthYear, data?.birthMonth),
+    EMPTY_INCOME_STREAM
+  );
 };
 
 /**
