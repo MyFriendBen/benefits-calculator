@@ -113,10 +113,10 @@ const RHFOptionCardGroup = <T extends FieldValues>({
           }}
         >
           <Card className={containerClass}>
-            <Stack direction="row" alignItems="center" justifyContent="center" sx={{ flex: 1, height: '100%' }}>
-              <CardContent sx={{ display: 'flex', alignItems: 'center', padding: 0, flex: 1, '&:last-child': { paddingBottom: 0 } }}>
+            <Stack direction="column" alignItems="center" justifyContent="center" sx={{ flex: 1, height: '100%' }}>
+              <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 0, '&:last-child': { paddingBottom: 0 } }}>
                 <Box className="option-card-icon">{options[optionKey].icon}</Box>
-                <Typography className={isSelected ? 'option-card-text' : ''} sx={{ textAlign: 'left', fontSize: '0.875rem', margin: 0, padding: 0 }}>
+                <Typography className={isSelected ? 'option-card-text' : ''} sx={{ textAlign: 'center', fontSize: '0.75rem', margin: 0, padding: 0 }}>
                   {translatedAriaLabel}
                 </Typography>
               </CardContent>
