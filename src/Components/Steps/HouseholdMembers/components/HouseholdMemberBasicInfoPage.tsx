@@ -39,25 +39,25 @@ const HouseholdMemberBasicInfoPage = () => {
 
   // Create zod schema for validation
   const memberSchema = z.object({
-    birthMonth: z.string().min(1, {
+    birthMonth: z.number().min(1, {
       message: intl.formatMessage({
         id: 'ageInput.month.error',
         defaultMessage: 'Please enter a birth month.',
       }),
-    }),
-    birthYear: z
-      .string()
-      .trim()
-      .min(1, {
+    }).max(12),
+    birthYear: z.coerce
+      .number()
+      .min(CURRENT_YEAR - MAX_AGE, {
         message: intl.formatMessage({
           id: 'ageInput.year.error',
           defaultMessage: 'Please enter a birth year.',
         }),
       })
-      .refine((value) => {
-        const year = Number(value);
-        const age = CURRENT_YEAR - year;
-        return year <= CURRENT_YEAR && age < MAX_AGE;
+      .max(CURRENT_YEAR, {
+        message: intl.formatMessage({
+          id: 'ageInput.year.error',
+          defaultMessage: 'Please enter a birth year.',
+        }),
       }),
     relationshipToHH: z.string().min(1, {
       message: intl.formatMessage({
@@ -67,8 +67,8 @@ const HouseholdMemberBasicInfoPage = () => {
     }),
   }).refine(
     ({ birthMonth, birthYear }) => {
-      if (Number(birthYear) === CURRENT_YEAR) {
-        return Number(birthMonth) <= CURRENT_MONTH;
+      if (birthYear === CURRENT_YEAR) {
+        return birthMonth <= CURRENT_MONTH;
       }
       return true;
     },
@@ -91,8 +91,8 @@ const HouseholdMemberBasicInfoPage = () => {
   const defaultMembers = Array.from({ length: formData.householdSize }, (_, index) => {
     const existingMember = formData.householdData[index];
     return {
-      birthMonth: existingMember?.birthMonth ? String(existingMember.birthMonth) : '',
-      birthYear: existingMember?.birthYear ? String(existingMember.birthYear) : '',
+      birthMonth: existingMember?.birthMonth || 0,
+      birthYear: existingMember?.birthYear || ('' as unknown as number),
       relationshipToHH: existingMember?.relationshipToHH || (index === 0 ? 'headOfHousehold' : ''),
     };
   });
@@ -124,8 +124,8 @@ const HouseholdMemberBasicInfoPage = () => {
         ...existingMember,
         id: existingMember?.id ?? crypto.randomUUID(),
         frontendId: existingMember?.frontendId ?? crypto.randomUUID(),
-        birthMonth: Number(member.birthMonth),
-        birthYear: Number(member.birthYear),
+        birthMonth: member.birthMonth,
+        birthYear: member.birthYear,
         relationshipToHH: member.relationshipToHH,
         specialConditions: existingMember?.specialConditions ?? {
           student: false,

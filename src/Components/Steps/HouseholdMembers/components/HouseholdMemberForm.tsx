@@ -79,7 +79,7 @@ const HouseholdMemberForm = () => {
   const formSchema = createHouseholdMemberSchema(intl, shouldShowBasicInfo, pageNumber);
   type FormSchema = typeof formSchema._type;
 
-  const defaultValues = createDefaultValues(householdMemberFormData, shouldShowBasicInfo);
+  const defaultValues = createDefaultValues(householdMemberFormData, shouldShowBasicInfo, pageNumber === 1);
 
   const {
     control,

@@ -65,7 +65,13 @@ const BasicInfoSection = ({
           name={getFieldName('birthMonth')}
           control={control}
           render={({ field }) => (
-            <Select {...field} label="Birth Month">
+            <Select
+              {...field}
+              label="Birth Month"
+              value={field.value || ''}
+              onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+              displayEmpty
+            >
               {monthMenuItems}
             </Select>
           )}

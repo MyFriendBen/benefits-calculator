@@ -92,7 +92,8 @@ const getDefaultSpecialConditions = (data?: HouseholdData): typeof DEFAULT_SPECI
  */
 export const createDefaultValues = (
   householdMemberFormData: HouseholdData | undefined,
-  shouldShowBasicInfo: boolean
+  shouldShowBasicInfo: boolean,
+  isFirstMember: boolean = false
 ) => {
   const incomeStreams = getDefaultIncomeStreams(householdMemberFormData);
 
@@ -115,6 +116,6 @@ export const createDefaultValues = (
     birthYear: householdMemberFormData?.birthYear && householdMemberFormData.birthYear > 0
       ? householdMemberFormData.birthYear
       : ('' as unknown as number),
-    relationshipToHH: householdMemberFormData?.relationshipToHH ?? '',
+    relationshipToHH: householdMemberFormData?.relationshipToHH ?? (isFirstMember ? 'headOfHousehold' : ''),
   };
 };
