@@ -196,11 +196,36 @@ const getIncomeStreamsBodies = (householdMemberData: HouseholdData): ApiIncome[]
   });
 };
 
+/**
+ * Converts expense amount from any frequency to monthly amount
+ */
+const convertToMonthlyExpense = (amount: number, frequency: string): number => {
+  switch (frequency) {
+    case 'daily':
+      return Math.round((amount * 365) / 12);
+    case 'weekly':
+      return Math.round((amount * 52) / 12);
+    case 'monthly':
+      return amount;
+    case 'annually':
+    case 'yearly':
+      return Math.round(amount / 12);
+    default:
+      // Default to monthly if frequency is unknown
+      return amount;
+  }
+};
+
 const getExpensesBodies = (formData: FormData): ApiExpense[] => {
   return formData.expenses.map((expense) => {
+    const originalAmount = expense.expenseAmount === '' ? 0 : Number(expense.expenseAmount);
+    // Use 'monthly' as default frequency for backward compatibility
+    const frequency = expense.expenseFrequency || 'monthly';
+    const monthlyAmount = convertToMonthlyExpense(originalAmount, frequency);
+
     return {
       type: expense.expenseSourceName,
-      amount: expense.expenseAmount === '' ? 0 : Number(expense.expenseAmount),
+      amount: monthlyAmount,
       frequency: 'monthly',
     };
   });

@@ -1,0 +1,95 @@
+.flat-rectangle-tiles-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  max-width: 50rem;
+  margin: 1.5rem auto 1.5rem auto;
+  align-items: stretch;
+}
+
+.flat-rectangle-card.MuiPaper-root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 0.05px solid #6d6e71;
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+  /* Remove aspect-ratio to allow flexible height */
+  min-height: 5rem;
+  height: 100%;
+  width: 100%;
+  padding: 1rem;
+  background-color: #ffffff;
+}
+
+.flat-rectangle-card:hover {
+  background-color: var(--hover-color);
+  color: var(--option-card-hover-font-color);
+}
+
+.selected-flat-rectangle-card.MuiPaper-root {
+  background-color: var(--primary-color);
+}
+
+.flat-rectangle-card-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  height: 100%;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.flat-rectangle-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 2.5rem;
+  width: 2.5rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.flat-rectangle-card-text {
+  color: #ffffff;
+  text-align: left;
+  line-height: 1.2;
+  margin: 0;
+  padding: 0;
+}
+
+/* Icon styling for lucide icons */
+.flat-rectangle-icon .option-card-lucide-icon * {
+  fill: white !important;
+  stroke: var(--icon-color);
+}
+
+/* Selected state icon styling */
+.selected-flat-rectangle-card .option-card-lucide-icon * {
+  fill: var(--primary-color) !important;
+  stroke: white;
+}
+
+.selected-flat-rectangle-card.white-icons .flat-rectangle-icon path,
+.selected-flat-rectangle-card.white-icons .flat-rectangle-icon rect {
+  fill: #ffffff;
+  stroke: #ffffff;
+}
+
+@media (max-width: 38.125rem) {
+  .flat-rectangle-tiles-container {
+    grid-template-columns: 1fr;
+    gap: 0.938rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .flat-rectangle-action-area.MuiButtonBase-root,
+  .flat-rectangle-card.MuiPaper-root,
+  .selected-flat-rectangle-card.MuiPaper-root {
+    width: 100%;
+    min-height: 4rem;
+  }
+}
