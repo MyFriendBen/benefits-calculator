@@ -155,11 +155,14 @@ const HouseholdMemberForm = () => {
   // RENDER
   return (
     <main className="benefits-form">
-      {pageNumber > 1 && (
-        <section aria-label="Previous household members" className="previous-members-section">
+      {(pageNumber > 1 || (pageNumber === 1 && formData.householdSize > 1)) && (
+        <section aria-label="Your household members" className="previous-members-section">
           <h2 className="question-label previous-members-heading">
-            <FormattedMessage id="householdDataBlock.soFarToldAbout" defaultMessage="So far you've told us about:" />
+            <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Your Household" />
           </h2>
+          <p className="question-sub-label">
+            <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="Click any completed member to edit." />
+          </p>
           <Box className="summary-cards-container">
             <HouseholdMemberSummaryCards
               activeMemberData={{
@@ -175,7 +178,6 @@ const HouseholdMemberForm = () => {
               questionName="householdData"
             />
           </Box>
-          <Box className="section-divider" />
         </section>
       )}
 

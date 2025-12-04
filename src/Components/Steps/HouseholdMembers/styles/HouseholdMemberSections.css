@@ -34,15 +34,27 @@
 
 /* HouseholdMemberForm specific styles */
 .previous-members-section {
-  margin-bottom: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
 }
 
 .previous-members-heading {
-  margin-bottom: 0.25rem;
+  margin-top: 0;
+}
+
+.question-sub-label {
+  font-size: 0.875rem;
+  /* margin-top: 0; */
+  margin-bottom: 0.75rem;
+  color: #666;
 }
 
 .summary-cards-container {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
 }
 
 .section-divider {

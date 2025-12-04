@@ -1,29 +1,90 @@
+.household-members-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .member-added-container {
   display: inline-flex;
   flex-direction: column;
-  flex-wrap: wrap;
-  outline: 1px solid black;
+  border: 2px dashed #ccc;
   border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  margin: 0.5rem 0.75rem 0.5rem 0;
+  padding: 0.5rem 0.625rem;
   position: relative;
-  font-size: 0.875rem;
-  max-width: 280px;
+  font-size: 0.75rem;
+  box-sizing: border-box;
+  background-color: #f8f9fa;
+  width: auto;
+}
+
+.member-added-container.completed-household-member {
+  background-color: white;
+  border-style: solid;
+}
+
+.member-added-container.current-household-member {
+  background-color: white;
+  border-style: solid;
+}
+
+.household-member-status-icon {
+  position: absolute;
+  top: -0.5rem;
+  left: -0.35rem;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.05rem;
+}
+
+.completed-icon {
+  color: var(--secondary-color);
+  font-size: .5rem;
+  display: block;
+}
+
+.current-icon {
+  color: var(--primary-color);
+  font-size: .5rem;
+  display: block;
 }
 
 .household-member-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: 0;
+  margin-bottom: 0.1rem;
+  padding-left: 0;
+}
+
+.completed-household-member {
+  border-color: var(--secondary-color);
 }
 
 .current-household-member {
-  outline: 3px solid var(--active-border-color);
-  box-shadow: 1px 1px 10px rgb(0 0 0 / 0.4);
+  border-color: var(--primary-color);
+  border-width: 3px;
 }
 
 .member-added-relationship {
   color: var(--primary-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.member-added-income {
+  font-size: 0.75rem;
+  padding-left: 0;
+}
+
+.income-missing {
+  color: #d32f2f;
+  font-style: italic;
 }
 
 .household-data-sub-header {
@@ -34,6 +95,44 @@
   display: flex;
   justify-content: space-between;
   margin-top: 1rem;
+}
+
+/* Clickable card styles */
+.member-added-container[role="button"] {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.member-added-container[role="button"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.hover-edit-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border: 2px solid var(--primary-color);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--primary-color);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.member-added-container[role="button"]:hover .hover-edit-button {
+  opacity: 1;
+}
+
+.member-added-container[role="button"]:hover .household-member-header,
+.member-added-container[role="button"]:hover .member-added-income {
+  opacity: 0.3;
 }
 
 @media (max-width: 600px) {

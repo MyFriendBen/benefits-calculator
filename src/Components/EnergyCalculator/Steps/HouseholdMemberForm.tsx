@@ -939,7 +939,7 @@ const ECHouseholdMemberForm = () => {
     <main className="benefits-form">
       <QuestionHeader>
         {pageNumber === 1 ? (
-          <FormattedMessage id="householdDataBlock.questionHeader" defaultMessage="Tell us about yourself." />
+          <FormattedMessage id="householdDataBlock.questionHeader" defaultMessage="Tell us about yourself" />
         ) : (
           <FormattedMessage
             id="questions.householdData"
