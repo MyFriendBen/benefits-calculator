@@ -1,7 +1,7 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Box } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ConstructionIcon from '@mui/icons-material/Construction';
 import { calcAge } from '../../../../Assets/age';
 import { useConfig } from '../../../Config/configHook';
 import { useTranslateNumber } from '../../../../Assets/languageOptions';
@@ -84,7 +84,7 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
       >
         <div className="household-member-status-icon">
           {isCurrentMember ? (
-            <AccessTimeIcon className="current-icon" sx={{ fontSize: '.9rem' }} />
+            <ConstructionIcon className="current-icon" sx={{ fontSize: '.9rem' }} />
           ) : (
             isCompleted && <CheckCircleIcon className="completed-icon" sx={{ fontSize: '.9rem' }} />
           )}
