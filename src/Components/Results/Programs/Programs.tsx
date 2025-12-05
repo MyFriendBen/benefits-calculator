@@ -1,6 +1,6 @@
 import { ProgramCategory } from '../../../Types/Results';
 import { findValidationForProgram, useResultsContext } from '../Results';
-import Filter from './Filter';
+import Filter from '../Filter/Filter';
 import ProgramCard from './ProgramCard';
 import CategoryHeading from '../CategoryHeading/CategoryHeading';
 import { useMemo } from 'react';
