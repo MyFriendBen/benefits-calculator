@@ -163,7 +163,6 @@ export type ApiFormData = {
   has_il_ctc: boolean | null;
   has_il_transit_reduced_fare: boolean | null;
   has_il_bap: boolean | null;
-  has_il_csfp: boolean | null;
   has_medicaid?: boolean | null;
   has_rtdlive: boolean | null;
   has_cccap: boolean | null;
