@@ -7,6 +7,16 @@
   padding: 3rem;
   color: black;
   font-family: Roboto Slab, serif;
+  max-width: 330px;
+}
+
+.privacy-note-container {
+font-family: Roboto Slab, serif;
+font-weight: 400;
+font-size: 12px;
+line-height: 1;
+margin-top: 1rem;
+max-width: 100%; 
 }
 
 .copy-results-text {

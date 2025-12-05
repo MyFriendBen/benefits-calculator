@@ -87,6 +87,12 @@ const SaveMyResultsModal = forwardRef(function SaveMyResultsModal({ close }: Sav
       {displayCopyResults()}
       <EmailTextfield setSnackbar={setSnackbar} />
       <PhoneTextfield setSnackbar={setSnackbar} />
+      <p className="privacy-note-container">
+        <FormattedMessage
+          id="saveMyResults.privacy-note"
+          defaultMessage="*Your contact information will only be used to send your results. We will not store your email address or cell phone number."
+        />
+      </p>
     </div>
   );
 });
