@@ -40,7 +40,6 @@ export function useUpdateFormData() {
         il_ctc: response.has_il_ctc ?? false,
         il_transit_reduced_fare: response.has_il_transit_reduced_fare ?? false,
         il_bap: response.has_il_bap ?? false,
-        il_csfp: response.has_csfp ?? false,
         il_liheap: response.has_il_liheap ?? false,
         lifeline: response.has_lifeline ?? false,
         leap: response.has_leap ?? false,
