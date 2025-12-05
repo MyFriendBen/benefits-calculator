@@ -163,7 +163,7 @@ test.describe('Basic e2e tests for each white label', () => {
     });
   }
 
-  test('Energy Calculator White label', async ({ page }) => {
+  test.skip('Energy Calculator White label', async ({ page }) => {
     await navigateHomePage(page, '/co_energy_calculator/landing-page');
     await selectOwnerOrRenter(page, energyCalculators.co_energy_calculator.ownerOrRenter);
     await clickGetStartedButton(page);

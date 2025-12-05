@@ -45,7 +45,7 @@ export function useUpdateFormData() {
         leap: response.has_leap ?? false,
         nc_lieap: response.has_nc_lieap ?? false,
         nc_head_start: response.has_nc_head_start ?? false,
-        nccip: response.has_nccip ?? false,        
+        nccip: response.has_nccip ?? false,      
         mydenver: response.has_mydenver ?? false,
         nslp: response.has_nslp ?? false,
         oap: response.has_oap ?? false,
