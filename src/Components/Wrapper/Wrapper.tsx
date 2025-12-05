@@ -27,7 +27,7 @@ const initialFormData: FormData = {
   benefits: {
     acp: false,
     andcs: false,
-    cccap: false,
+    ccap: false,
     coctc: false,
     coeitc: false,
     coheadstart: false,
@@ -37,7 +37,6 @@ const initialFormData: FormData = {
     denverpresc: false,
     ede: false,
     eitc: false,
-    il_ccap: false,
     lifeline: false,
     leap: false,
     mydenver: false,
