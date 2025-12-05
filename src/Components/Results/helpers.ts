@@ -1,4 +1,5 @@
 import type { ComponentType, SVGProps } from 'react';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { ReactComponent as Food } from '../../Assets/icons/UrgentNeeds/AcuteConditions/food.svg';
 import { ReactComponent as Residence } from '../../Assets/icons/General/residence.svg';
 import { ReactComponent as HealthCare } from '../../Assets/icons/Programs/CategoryHeading/healthcare.svg';
@@ -63,11 +64,13 @@ export const ICON_OPTIONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGEleme
 };
 
 export const formatPhoneNumber = (phoneNumber: string): string => {
-  if (phoneNumber.length !== 12) {
-    return phoneNumber;
+  const parsed = parsePhoneNumberFromString(phoneNumber, 'US');
+
+  if (parsed && parsed.isValid()) {
+    return parsed.formatNational();
   }
 
-  return `+${phoneNumber[1]}-${phoneNumber.slice(2, 5)}-${phoneNumber.slice(5, 8)}-${phoneNumber.slice(8)}`;
+  return phoneNumber;
 };
 
 /**
