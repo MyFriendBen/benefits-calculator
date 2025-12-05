@@ -63,11 +63,26 @@ export const ICON_OPTIONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGEleme
 };
 
 export const formatPhoneNumber = (phoneNumber: string): string => {
-  if (phoneNumber.length !== 12) {
-    return phoneNumber;
+  // Remove all non-numeric characters except leading +
+  const cleaned = phoneNumber.replace(/[^\d+]/g, '');
+
+  // Handle international format: +1XXXXXXXXXX (14 chars with +1)
+  if (cleaned.startsWith('+1') && cleaned.length === 12) {
+    return `+1 (${cleaned.slice(2, 5)}) ${cleaned.slice(5, 8)}-${cleaned.slice(8)}`;
   }
 
-  return `+${phoneNumber[1]}-${phoneNumber.slice(2, 5)}-${phoneNumber.slice(5, 8)}-${phoneNumber.slice(8)}`;
+  // Handle 10-digit US number
+  if (cleaned.length === 10) {
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+  }
+
+  // Handle 11-digit US number (with leading 1)
+  if (cleaned.length === 11 && cleaned.startsWith('1')) {
+    return `+1 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
+  }
+
+  // Return original if format doesn't match expected patterns
+  return phoneNumber;
 };
 
 /**
