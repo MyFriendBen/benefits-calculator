@@ -21,7 +21,11 @@ If you complete backend Steps 4-6 (white label config) but skip frontend changes
 
 ## Quick Steps
 
-All changes are in 5 files. Add your benefit key (e.g., `il_csfp`) to each:
+**⚠️ For multi-state programs**: Use the canonical name (e.g., `csfp`, `snap`, `wic`) - NO state prefix!
+
+**📝 Note**: If adding a variant of an existing program (e.g., adding `il_csfp` when `tx_csfp` already exists), the canonical name (`csfp`) is **already in the frontend**. You can skip Steps 1-5 below and **only need backend changes**. Check if the canonical name exists in FormData.ts before proceeding.
+
+All changes are in 5 files. Add your benefit key to each:
 
 ### 1. Add to Benefits Type
 
@@ -30,7 +34,7 @@ All changes are in 5 files. Add your benefit key (e.g., `il_csfp`) to each:
 ```typescript
 export type Benefits = {
   // ... existing benefits ...
-  il_csfp: boolean;  // ← Add your benefit here
+  csfp: boolean;  // ← Use canonical name (no il_ prefix)
   // ... more benefits ...
 };
 ```
@@ -42,7 +46,7 @@ export type Benefits = {
 ```typescript
 export type ApiFormData = {
   // ... existing fields ...
-  has_il_csfp: boolean | null;  // ← Add has_{benefit_key}
+  has_csfp: boolean | null;  // ← Add has_{canonical_name}
   // ... more fields ...
 };
 ```
@@ -56,7 +60,7 @@ In the `getScreensBody` function:
 ```typescript
 const screenBody: ApiFormData = {
   // ... existing mappings ...
-  has_il_csfp: formData.benefits.il_csfp ?? null,  // ← Add mapping
+  has_csfp: formData.benefits.csfp ?? null,  // ← Use canonical name
   // ... more mappings ...
 };
 ```
@@ -71,7 +75,7 @@ In the `updateFormData` function:
 benefits: {
   ...formData.benefits,
   // ... existing benefits ...
-  il_csfp: screen.has_il_csfp ?? false,  // ← Add reverse mapping
+  csfp: response.has_csfp ?? false,  // ← Use canonical name
   // ... more benefits ...
 }
 ```
@@ -86,7 +90,7 @@ In `initialFormData`:
 const initialFormData: FormData = {
   benefits: {
     // ... existing benefits ...
-    il_csfp: false,  // ← Add default value
+    csfp: false,  // ← Use canonical name
     // ... more benefits ...
   },
   // ... other fields ...
@@ -131,17 +135,23 @@ npm run type-check
 
 ## Naming Convention
 
-The benefit key must match across all systems:
+**IMPORTANT**: For programs that exist in multiple states, use **canonical names** (no state prefix) everywhere in the frontend and config, even though the program's `name_abbreviated` has a state prefix.
+
+Example for IL CSFP:
 
 ```
-Frontend FormData → benefits.il_csfp
-Frontend API Type → has_il_csfp
-Backend API Field → has_il_csfp
-Backend Model     → Screen.has_il_csfp
-Backend Config    → category_benefits["..."]["benefits"]["il_csfp"]
+Backend Config       → category_benefits["..."]["benefits"]["csfp"]  ⚠️ NO prefix!
+Frontend FormData    → benefits.csfp
+Frontend API Type    → has_csfp (in updateScreen.ts)
+Backend API Field    → has_csfp (in Screen model)
+Backend Model Field  → Screen.has_csfp
+Program name_abbrev  → "il_csfp" (HAS prefix)
 ```
 
-**Pattern**: Use the same key everywhere, with `has_` prefix for backend fields.
+**Pattern**:
+- Config and frontend use canonical name (`csfp`, `snap`, `wic`)
+- Program `name_abbreviated` uses state prefix (`il_csfp`) for uniqueness
+- Backend `has_benefit()` maps program name → shared database field
 
 ---
 

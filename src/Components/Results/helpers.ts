@@ -1,4 +1,5 @@
 import type { ComponentType, SVGProps } from 'react';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { ReactComponent as Food } from '../../Assets/icons/UrgentNeeds/AcuteConditions/food.svg';
 import { ReactComponent as Residence } from '../../Assets/icons/General/residence.svg';
 import { ReactComponent as HealthCare } from '../../Assets/icons/Programs/CategoryHeading/healthcare.svg';
@@ -63,25 +64,12 @@ export const ICON_OPTIONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGEleme
 };
 
 export const formatPhoneNumber = (phoneNumber: string): string => {
-  // Remove all non-numeric characters except leading +
-  const cleaned = phoneNumber.replace(/[^\d+]/g, '');
+  const parsed = parsePhoneNumberFromString(phoneNumber, 'US');
 
-  // Handle international format: +1XXXXXXXXXX (14 chars with +1)
-  if (cleaned.startsWith('+1') && cleaned.length === 12) {
-    return `+1 (${cleaned.slice(2, 5)}) ${cleaned.slice(5, 8)}-${cleaned.slice(8)}`;
+  if (parsed && parsed.isValid()) {
+    return parsed.formatNational();
   }
 
-  // Handle 10-digit US number
-  if (cleaned.length === 10) {
-    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
-  }
-
-  // Handle 11-digit US number (with leading 1)
-  if (cleaned.length === 11 && cleaned.startsWith('1')) {
-    return `+1 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
-  }
-
-  // Return original if format doesn't match expected patterns
   return phoneNumber;
 };
 
