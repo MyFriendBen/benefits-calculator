@@ -211,7 +211,7 @@ li.apply-info {
 .program-description {
   margin-bottom: 2rem;
   font-size: 1rem;
-  white-space: pre-line;
+  white-space: pre-wrap;
 }
 
 .icon-header-est-values {

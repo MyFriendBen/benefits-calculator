@@ -334,9 +334,12 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
         )}
       </div>
       <div className="content-width">
-        <section className="program-description">
-          <ResultsTranslate translation={program.description} />
-        </section>
+        <section
+          className="program-description"
+          dangerouslySetInnerHTML={{ __html: program.description.default_message }}
+        />
+      </div>
+      <div className="content-width">
         {program.navigators.length > 0 && (
           <section className="apply-box">
             <h2 className="content-header">
