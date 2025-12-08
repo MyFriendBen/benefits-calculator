@@ -1,6 +1,6 @@
 import { Program, Translation, MemberEligibility } from '../../Types/Results';
 import { FormData } from '../../Types/FormData';
-import { CitizenLabels } from '../../Assets/citizenshipFilterFormControlLabels';
+import { FilterState, CitizenLabelOptions } from './Filter/citizenshipFilterConfig';
 
 export const createTranslation = (text: string): Translation => ({
   default_message: text,
@@ -83,18 +83,12 @@ export const createFormData = (overrides: Partial<FormData> = {}): FormData => (
   ...overrides,
 } as FormData);
 
-export const createFiltersChecked = (
-  overrides: Partial<Record<CitizenLabels, boolean>> = {}
-): Record<CitizenLabels, boolean> => ({
-  citizen: true,
-  non_citizen: false,
-  green_card: false,
-  gc_5plus: false,
-  gc_5less: false,
-  refugee: false,
-  otherWithWorkPermission: false,
-  ...overrides,
-} as Record<CitizenLabels, boolean>);
+export const createFilterState = (
+  selectedCitizenship: CitizenLabelOptions = 'citizen'
+): FilterState => ({
+  selectedCitizenship,
+  calculatedFilters: new Set(),
+});
 
 export const createProgramWithExclusions = (
   id: number,
