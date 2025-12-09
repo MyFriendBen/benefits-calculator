@@ -5,10 +5,35 @@ import QuestionQuestion from '../../../QuestionComponents/QuestionQuestion';
 import QuestionDescription from '../../../QuestionComponents/QuestionDescription';
 import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
 import RHFOptionCardGroup from '../../../RHFComponents/RHFOptionCardGroup';
-import { ReactComponent as NoneIcon } from '../../../../Assets/icons/General/OptionCard/HealthInsurance/none.svg';
 import { Conditions } from '../../../../Types/FormData';
 import { ConditionOptions } from '../utils/types';
 import '../styles/HouseholdMemberSections.css';
+
+const BlockIconThin = () => (
+  <svg
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    className="option-card-mui-icon"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      r="9.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      fill="none"
+    />
+    <line
+      x1="5.5"
+      y1="5.5"
+      x2="18.5"
+      y2="18.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
 
 interface SpecialConditionsSectionProps {
   errors: FieldErrors<any>;
@@ -29,7 +54,7 @@ const SpecialConditionsSection = ({
 }: SpecialConditionsSectionProps) => {
   const noneOption = {
     none: {
-      icon: <NoneIcon className="option-card-icon" />,
+      icon: <BlockIconThin />,
       text:
         pageNumber === 1 ? (
           <FormattedMessage

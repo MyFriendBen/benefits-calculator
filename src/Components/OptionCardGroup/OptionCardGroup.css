@@ -52,6 +52,20 @@
   flex-shrink: 0;
 }
 
+.option-card-mui-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  color: var(--icon-color) !important;
+  display: block;
+  margin: 0 auto;
+}
+
+.option-card-mui-icon * {
+  fill: none !important;
+  stroke: var(--icon-color) !important;
+}
+
 .option-card-lucide-icon.car-icon-scaled {
   transform: scale(1.4);
 }
@@ -171,6 +185,11 @@
     height: 2.5rem;
     width: 2.5rem;
     min-width: 2.5rem;
+  }
+
+  .option-card-mui-icon {
+    font-size: 2.75rem !important;
+    margin-right: 0.75rem;
   }
 
   div.sub-header,
