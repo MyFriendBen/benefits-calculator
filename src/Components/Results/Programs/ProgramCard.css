@@ -65,7 +65,7 @@
   font-family: 'Roboto Slab', serif;
   font-weight: 700;
   font-size: 1.1rem;
-  padding: 1.25rem 2rem;
+  padding: 1.3rem;
 }
 
 .result-program-more-info a {
@@ -184,7 +184,7 @@ h1.header-text-bottom {
   }
 
   .result-program-more-info {
-    font-size: 1rem;
+    font-size: 0.95rem;
     padding: 0;
     flex: 1;
     min-width: 0;
@@ -205,7 +205,7 @@ h1.header-text-bottom {
   }
 
   .result-program-details strong {
-    font-size: 1rem;
+    font-size: 0.95rem;
     padding-top: 0.3rem;
   }
 }

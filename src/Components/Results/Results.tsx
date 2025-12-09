@@ -258,6 +258,7 @@ const Results = ({ type }: ResultsProps) => {
         <ResultsContextProvider>
           <ResultsPopup {...popupConfig} />
           <ResultsHeader type={type} />
+          <div className="results-container">
           <ResultsTabs />
           {type === 'program' && <UrgentNeedBanner />}
           <Grid container sx={{ p: { xs: '1rem', sm: '1rem' } }}>
@@ -265,6 +266,7 @@ const Results = ({ type }: ResultsProps) => {
               {type === 'need' ? <Needs /> : <Programs />}
             </Grid>
           </Grid>
+          </div>
           {!noHelpButton && <HelpButton />}
         </ResultsContextProvider>
       </main>

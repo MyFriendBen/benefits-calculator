@@ -214,7 +214,7 @@
 
 .result-program-details strong {
   display: block;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
 }
 
 .result-program-subheader {
@@ -423,10 +423,6 @@
 
   .results-header-label {
     font-size: 0.75rem;
-  }
-
-  .result-program-details-box strong {
-    font-size: 0.3rem;
   }
 
   .child-care-warning-text {
