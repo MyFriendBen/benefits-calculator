@@ -25,6 +25,7 @@
     "@types/react-dom": "^18.2.6",
     "@types/react-gtm-module": "^2.0.3",
     "@uiw/react-json-view": "^2.0.0-alpha.37",
+    "libphonenumber-js": "^1.12.31",
     "nepali-number": "^1.0.3",
     "prettier": "^2.8.8",
     "react": "^18.0.0",

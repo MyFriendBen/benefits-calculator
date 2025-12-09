@@ -66,6 +66,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  margin-top: 0.5rem;
 }
 
 .category-heading-icon {
@@ -198,6 +199,7 @@
 
 .result-program-details strong {
   display: block;
+  font-size: 1.3rem;
 }
 
 .result-program-subheader {
