@@ -29,7 +29,7 @@ p {
 }
 
 .question-description {
-  margin-bottom: 1rem;
+  margin-bottom: .5rem;
   font-family: var(--font-body);
   font-size: 0.875rem;
 }

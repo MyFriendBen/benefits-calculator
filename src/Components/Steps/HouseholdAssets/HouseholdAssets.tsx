@@ -84,7 +84,7 @@ const HouseholdAssets = () => {
       </QuestionHeader>
       <QuestionQuestion>
         <FormattedMessage
-          id="questions.householdAssets"
+          id="questions.householdAssets.expanded"
           defaultMessage="How much does your whole household have right now in:"
         />
       </QuestionQuestion>

@@ -35,12 +35,23 @@ type CategoryBenefitsConfig = {
 type CategoryBenefitsProps = {
   alreadyHasBenefits: { [key: string]: boolean };
   onChange: (alreadyHasBenefits: { [key: string]: boolean }) => void;
+  expandAll: boolean;
+  onExpandAllChange: (expandAll: boolean) => void;
 };
 
-function CategoryBenefits({ alreadyHasBenefits, onChange }: CategoryBenefitsProps) {
+function CategoryBenefits({ alreadyHasBenefits, onChange, expandAll, onExpandAllChange }: CategoryBenefitsProps) {
   const [currentExpanded, setCurrentExpanded] = useState(-1); // start with all accordions closed
 
   const benefits = useConfig<CategoryBenefitsConfig>('category_benefits');
+
+  // When expandAll changes, update accordion states
+  useEffect(() => {
+    if (expandAll) {
+      // When expanding all, we'll handle this in the accordion expanded prop
+    } else {
+      setCurrentExpanded(-1); // collapse all
+    }
+  }, [expandAll]);
 
   return (
     <>
@@ -61,10 +72,11 @@ function CategoryBenefits({ alreadyHasBenefits, onChange }: CategoryBenefitsProp
           <CheckBoxAccordion
             name={details.category_name}
             options={options}
-            expanded={currentExpanded === index}
+            expanded={expandAll || currentExpanded === index}
             onExpand={(isExpanded) => {
               if (isExpanded) {
                 setCurrentExpanded(index);
+                onExpandAllChange(false); // turn off expand all when manually expanding one
               } else {
                 if (currentExpanded === index) {
                   setCurrentExpanded(-1); // close all
@@ -93,6 +105,7 @@ function AlreadyHasBenefits() {
   const { uuid } = useParams();
   const backNavigationFunction = useDefaultBackNavigationFunction('hasBenefits');
   const { updateScreen } = useScreenApi();
+  const [expandAll, setExpandAll] = useState(false);
 
   const formSchema = z
     .object({
@@ -235,9 +248,32 @@ function AlreadyHasBenefits() {
             <QuestionDescription>
               <FormattedMessage
                 id="questions.hasBenefits-description-expanded"
-                defaultMessage="Select all that apply. Expand each category to see available options."
+                defaultMessage="Click on each category to see available options. Select all benefits that apply."
               />
             </QuestionDescription>
+            <div style={{ marginTop: '0.5rem', marginBottom: '0.75rem' }}>
+              <span
+                onClick={() => setExpandAll(!expandAll)}
+                style={{
+                  color: '#1976d2',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  fontSize: '0.9rem',
+                }}
+              >
+                {expandAll ? (
+                  <FormattedMessage
+                    id="questions.hasBenefits-collapse-all"
+                    defaultMessage="Click here to collapse all"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="questions.hasBenefits-expand-all"
+                    defaultMessage="Click here to expand all"
+                  />
+                )}
+              </span>
+            </div>
             <CategoryBenefits
               alreadyHasBenefits={watch('alreadyHasBenefits')}
               onChange={(values) =>
@@ -247,6 +283,8 @@ function AlreadyHasBenefits() {
                   shouldTouch: true,
                 })
               }
+              expandAll={expandAll}
+              onExpandAllChange={setExpandAll}
             />
             {errors.alreadyHasBenefits !== undefined && (
               <ErrorMessageWrapper fontSize="1rem">

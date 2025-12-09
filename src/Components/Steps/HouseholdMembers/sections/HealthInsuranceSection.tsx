@@ -33,10 +33,10 @@ const HealthInsuranceSection = ({
     <div id="health-insurance-section" className="section-container">
       <Stack className="section">
         <QuestionQuestion>
-          <FormattedMessage id="questions.healthInsurance" defaultMessage="Health Insurance" />
+          <FormattedMessage id="questions.healthInsurance.minimal" defaultMessage="Health Insurance" />
         </QuestionQuestion>
         <QuestionDescription>
-          <FormattedMessage id="insurance.chooseAllThatApply" defaultMessage="Choose all that apply" />
+          <FormattedMessage id="questions.chooseAllThatApply" defaultMessage="Choose all that apply" />
         </QuestionDescription>
         {errors.healthInsurance && (
           <FormHelperText sx={{ ml: 0, mb: 1 }}>
