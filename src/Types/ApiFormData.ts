@@ -201,6 +201,7 @@ export type ApiFormData = {
   has_ma_maeitc: boolean | null;
   has_ma_macfc: boolean | null;
   has_head_start: boolean | null;
+  has_early_head_start: boolean | null;
   has_co_andso: boolean | null;
   has_co_care: boolean | null;
   has_project_cope: boolean | null;
