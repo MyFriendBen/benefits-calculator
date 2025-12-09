@@ -103,6 +103,19 @@
   margin-bottom: 1rem;
 }
 
+/* Add another expense button styles */
+.add-another-expense-button.MuiButton-root {
+  background-color: var(--secondary-color);
+  color: #ffffff;
+  border: none;
+}
+
+.add-another-expense-button.MuiButton-root:hover {
+  background-color: var(--hover-color);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
 /* White background for inputs */
 .white-input {
   background-color: #fff;

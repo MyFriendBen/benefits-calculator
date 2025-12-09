@@ -318,9 +318,10 @@ const Expenses = () => {
             );
           })}
         </Stack>
-        <Box className="add-expense-button-container">
+        <Box sx={{ paddingTop: '0rem', paddingBottom: '1rem' }}>
           <Button
-            variant="outlined"
+            variant="contained"
+            fullWidth
             onClick={() =>
               append({
                 expenseSourceName: '',
@@ -330,6 +331,7 @@ const Expenses = () => {
             }
             startIcon={<AddIcon />}
             type="button"
+            className="add-another-expense-button"
           >
             <FormattedMessage id="expenseBlock.return-addExpenseButton" defaultMessage="Add another expense" />
           </Button>
