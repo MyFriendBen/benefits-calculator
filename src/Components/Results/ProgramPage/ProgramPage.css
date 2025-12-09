@@ -211,7 +211,18 @@ li.apply-info {
 .program-description {
   margin-bottom: 2rem;
   font-size: 1rem;
-  white-space: pre-line;
+  white-space: pre-wrap;
+  tab-size: 4;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  line-height: 1.6;
+}
+
+@media (max-width: 767px) {
+  .program-description {
+    tab-size: 2;
+    font-size: 0.95rem;
+  }
 }
 
 .icon-header-est-values {
