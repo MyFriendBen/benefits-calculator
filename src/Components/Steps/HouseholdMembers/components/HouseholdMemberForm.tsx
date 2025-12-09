@@ -158,7 +158,7 @@ const HouseholdMemberForm = () => {
       {(pageNumber > 1 || (pageNumber === 1 && formData.householdSize > 1)) && (
         <section aria-label="Your household members" className="previous-members-section">
           <h2 className="question-label previous-members-heading">
-            <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Your Household" />
+            <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
           </h2>
           <p className="question-sub-label">
             <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="Click any completed member to edit" />

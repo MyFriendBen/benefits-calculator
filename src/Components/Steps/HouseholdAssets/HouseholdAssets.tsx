@@ -1,7 +1,6 @@
 import { Controller, SubmitHandler } from 'react-hook-form';
 import { InputAdornment, Stack, TextField } from '@mui/material';
 import { FormattedMessage, useIntl } from 'react-intl';
-import HelpButton from '../../HelpBubbleIcon/HelpButton';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
 import QuestionDescription from '../../QuestionComponents/QuestionDescription';
@@ -84,18 +83,10 @@ const HouseholdAssets = () => {
         <FormattedMessage id="qcc.about_household" defaultMessage="Tell us about your household" />
       </QuestionHeader>
       <QuestionQuestion>
-        <>
-          <FormattedMessage
-            id="questions.householdAssets"
-            defaultMessage="How much does your whole household have right now in:"
-          />
-          <HelpButton>
-            <FormattedMessage
-              id="questions.householdAssets-description"
-              defaultMessage="In some cases, eligibility for benefits may be affected if your household owns other valuable assets such as a car or life insurance policy."
-            />
-          </HelpButton>
-        </>
+        <FormattedMessage
+          id="questions.householdAssets"
+          defaultMessage="How much does your whole household have right now in:"
+        />
       </QuestionQuestion>
       <form onSubmit={handleSubmit(formSubmitHandler)}>
         <Stack spacing={2} sx={{ mt: 2, mb: 2 }}>

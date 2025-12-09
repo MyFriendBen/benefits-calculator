@@ -441,7 +441,7 @@ const ECHouseholdMemberForm = () => {
           <QuestionDescription>
             <FormattedMessage
               id="householdDataBlock.createConditionsQuestion-pick"
-              defaultMessage="Choose all that apply. If none apply, skip this question."
+              defaultMessage="Choose all that apply"
             />
           </QuestionDescription>
           <MultiSelectTiles
