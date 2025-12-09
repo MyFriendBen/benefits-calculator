@@ -27,7 +27,6 @@ export function useUpdateFormData() {
       benefits: {
         acp: response.has_acp ?? false,
         andcs: response.has_andcs ?? false,
-        cccap: response.has_cccap ?? false,
         coeitc: response.has_coeitc ?? false,
         coheadstart: response.has_chs ?? false,
         coPropTaxRentHeatCreditRebate: response.has_cpcr ?? false,
@@ -66,6 +65,7 @@ export function useUpdateFormData() {
         section_8: response.has_section_8 ?? false,
         chp: response.has_chp ?? false,
         medicaid: response.has_medicaid ?? false,
+        ccap: response.has_ccap ?? false,
         csfp: response.has_csfp ?? false,
         ccdf: response.has_ccdf ?? false,
         aca: response.has_aca ?? false,

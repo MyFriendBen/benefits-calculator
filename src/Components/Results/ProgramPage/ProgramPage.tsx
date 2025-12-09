@@ -337,6 +337,8 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
         <section className="program-description">
           <ResultsTranslate translation={program.description} />
         </section>
+      </div>
+      <div className="content-width">
         {program.navigators.length > 0 && (
           <section className="apply-box">
             <h2 className="content-header">
