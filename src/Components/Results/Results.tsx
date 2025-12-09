@@ -19,7 +19,7 @@ import Needs from './Needs/Needs';
 import Programs from './Programs/Programs';
 import ProgramPage from './ProgramPage/ProgramPage';
 import ResultsTabs from './Tabs/Tabs';
-import { CitizenLabels } from '../../Assets/citizenshipFilterFormControlLabels';
+import { FilterState, createInitialFilterState } from './Filter/citizenshipFilterConfig';
 import dataLayerPush from '../../Assets/analytics';
 import HelpButton from './211Button/211Button';
 import MoreHelp from '../MoreHelp/MoreHelp';
@@ -29,7 +29,7 @@ import { FormattedMessage } from 'react-intl';
 import './Results.css';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { FormData } from '../../Types/FormData';
-import filterProgramsGenerator from './filterPrograms';
+import filterProgramsGenerator from './Filter/filterPrograms';
 import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRebates';
 import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/rebateTypes';
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
@@ -40,8 +40,8 @@ type WrapperResultsContext = {
   programs: Program[];
   programCategories: ProgramCategory[];
   needs: UrgentNeed[];
-  filtersChecked: Record<CitizenLabels, boolean>;
-  setFiltersChecked: (newFiltersChecked: Record<CitizenLabels, boolean>) => void;
+  filterState: FilterState;
+  setFilterState: (newFilterState: FilterState) => void;
   missingPrograms: boolean;
   isAdminView: boolean;
   validations: Validation[];
@@ -159,23 +159,7 @@ const Results = ({ type }: ResultsProps) => {
     fetchResults();
   }, []);
 
-  const [filtersChecked, setFiltersChecked] = useState<Record<CitizenLabels, boolean>>({
-    citizen: true,
-    non_citizen: false,
-    refugee: false,
-    gc_5plus: false,
-    gc_5less: false,
-    gc_18plus_no5: false,
-    gc_under18_no5: false,
-    otherWithWorkPermission: false,
-    otherHealthCareUnder19: false,
-    otherHealthCarePregnant: false,
-    notPregnantOrUnder19ForOmniSalud: false,
-    notPregnantOrUnder19ForEmergencyMedicaid: false,
-    notPregnantForMassHealthLimited: false,
-    notPregnantOrChildForMassHealthLimited: false,
-    otherHealthCareUnder21: false,
-  });
+  const [filterState, setFilterState] = useState<FilterState>(createInitialFilterState());
   const [programs, setPrograms] = useState<Program[]>([]);
   const [programCategories, setProgramCategories] = useState<ProgramCategory[]>([]);
   const [needs, setNeeds] = useState<UrgentNeed[]>([]);
@@ -185,8 +169,8 @@ const Results = ({ type }: ResultsProps) => {
   const [policyEngineData, setPolicyEngineData] = useState<PolicyEngineData>();
 
   const filterPrograms = useMemo(
-    () => filterProgramsGenerator(formData, filtersChecked, isAdminView, apiResults?.programs || []),
-    [formData, filtersChecked, isAdminView, apiResults?.programs]
+    () => filterProgramsGenerator(formData, filterState, isAdminView),
+    [formData, filterState, isAdminView]
   );
 
   useEffect(() => {
@@ -223,8 +207,8 @@ const Results = ({ type }: ResultsProps) => {
           programs,
           programCategories,
           needs,
-          filtersChecked,
-          setFiltersChecked,
+          filterState,
+          setFilterState,
           missingPrograms,
           isAdminView,
           validations,
@@ -274,15 +258,13 @@ const Results = ({ type }: ResultsProps) => {
         <ResultsContextProvider>
           <ResultsPopup {...popupConfig} />
           <ResultsHeader type={type} />
-          <div className="results-container">
-            <ResultsTabs />
-            {type === 'program' && <UrgentNeedBanner />}
-            <Grid container sx={{ px: { xs: '1.5rem', sm: '2rem' }, py: { xs: '1rem', sm: '1rem' } }}>
-              <Grid item xs={12}>
-                {type === 'need' ? <Needs /> : <Programs />}
-              </Grid>
+          <ResultsTabs />
+          {type === 'program' && <UrgentNeedBanner />}
+          <Grid container sx={{ p: { xs: '1rem', sm: '1rem' } }}>
+            <Grid item xs={12}>
+              {type === 'need' ? <Needs /> : <Programs />}
             </Grid>
-          </div>
+          </Grid>
           {!noHelpButton && <HelpButton />}
         </ResultsContextProvider>
       </main>

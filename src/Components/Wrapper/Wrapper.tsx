@@ -27,7 +27,7 @@ const initialFormData: FormData = {
   benefits: {
     acp: false,
     andcs: false,
-    cccap: false,
+    ccap: false,
     coctc: false,
     coeitc: false,
     coheadstart: false,

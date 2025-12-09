@@ -124,7 +124,7 @@ h1.header-text-bottom {
 /* Desktop - 768px and above */
 @media (min-width: 768px) {
   .result-program-container:last-child {
-    margin-bottom: 3rem;
+    margin-bottom: 1.5rem;
   }
 
   .result-program-container {
@@ -180,7 +180,7 @@ h1.header-text-bottom {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: 1rem;
   }
 
   .result-program-more-info {
@@ -205,7 +205,7 @@ h1.header-text-bottom {
   }
 
   .result-program-details strong {
-    font-size: 1.1rem;
-    padding-top: 0.2rem;
+    font-size: 1rem;
+    padding-top: 0.3rem;
   }
 }

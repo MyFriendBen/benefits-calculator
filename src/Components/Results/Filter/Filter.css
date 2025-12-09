@@ -4,8 +4,12 @@
  * Desktop: 768px+
  */
 
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
 .filter-section-container {
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
   width: 100%;
 }
 
@@ -16,28 +20,24 @@
 
 .filter-description {
   margin-bottom: 0;
-
 }
 
 .filter-description .help-text {
   line-height: 1.6;
-  font-size: .85rem;
+  font-size: 0.85rem;
 }
 
-.citizenship-button.MuiButton-root {
-  background-color: #ffffff;
-  color: var(--primary-color);
-  border-radius: 1.5625rem;
-  border: 1px solid var(--primary-color);
+.filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-.flat-white-border-bottom.MuiButton-root {
-  border-radius: 1.5625rem 1.5625rem 0 0;
-  border-bottom: 1px solid #ffffff;
-  background-color: #ffffff;
-}
+/* ============================================
+   FILTER DESCRIPTION - COLLAPSIBLE
+   ============================================ */
 
-/* Collapsed state on mobile with fade effect */
 .filter-description .collapsed {
   max-height: 3em; /* Approximately 2 lines */
   overflow: hidden;
@@ -52,7 +52,7 @@
   left: 0;
   right: 0;
   height: 2em;
-  background: linear-gradient(to bottom, transparent, white);
+  background: linear-gradient(to bottom, transparent, var(--background-color, #ffffff));
   pointer-events: none;
 }
 
@@ -70,73 +70,39 @@
   display: block;
 }
 
-.active-blue.MuiButton-root {
-  background-color: rgba(65, 82, 140, 0.14);
-}
-
-.reset-button.MuiButton-root {
-  background-color: #ffffff;
-  color: var(--primary-color);
-  border: none;
-  font-weight: 500;
-  text-transform: none;
-  padding: 0;
-  margin-bottom: 0.25rem;
-  font-size: 0.875rem;
-  text-decoration: none;
-  min-width: auto;
-  display: block;
-}
-
 .show-more-button.MuiButton-root:hover {
   background-color: transparent;
   text-decoration: underline;
 }
 
-.filter-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
+/* ============================================
+   CITIZENSHIP BUTTONS - DESKTOP
+   ============================================ */
 
-/* Desktop Button Layout */
 .citizenship-buttons-container {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.625rem;
   width: 100%;
-  overflow-x: auto;
-}
-
-.subcategory-indentation.vertical-align {
-  padding: 0.5rem 0;
-}
-
-#citizenshipPopover .MuiPaper-root.MuiPopover-paper {
-  border-radius: 0 1.5625rem 1.5625rem 1.5625rem;
-  width: 21rem;
-  border: 1px solid var(--primary-color);
 }
 
 .citizenship-option-button.MuiButton-root {
-  padding: 0.375rem 0.5rem;
+  padding: 0.375rem 0.625rem;
   border-radius: 1.5625rem; /* Oval/pill shape */
   border: 1px solid var(--primary-color);
   background-color: #ffffff;
   color: var(--primary-color);
   text-transform: none;
   font-weight: 500;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.2rem;
+  gap: 0.25rem;
   transition: all 0.2s ease-in-out;
   min-height: 32px;
   position: relative;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .citizenship-option-button.MuiButton-root:hover {
@@ -169,7 +135,10 @@
   opacity: 0.9;
 }
 
-/* Tooltip Card Styling */
+/* ============================================
+   CITIZENSHIP TOOLTIPS
+   ============================================ */
+
 .citizenship-tooltip-card.MuiTooltip-tooltip {
   background-color: #ffffff;
   color: #333333;
@@ -194,7 +163,10 @@
   color: #333333;
 }
 
-/* Mobile Dropdown */
+/* ============================================
+   CITIZENSHIP DROPDOWN - MOBILE
+   ============================================ */
+
 .citizenship-dropdown {
   width: 100%;
 }
@@ -229,42 +201,35 @@
 }
 
 .dropdown-description {
-  font-size: 0.75rem !important;;
+  font-size: 0.75rem !important;
   line-height: 1.3;
   color: #666;
 }
 
-/* Reset Button */
-.reset-button.MuiButton-root {
-  background-color: transparent;
-  color: var(--primary-color);
-  border: none;
-  font-weight: 500;
-  text-transform: none;
-  padding: 0.5rem 1rem;
-  align-self: flex-start;
-}
+/* ============================================
+   PRINT STYLES
+   ============================================ */
 
-.reset-button.MuiButton-root:hover {
-  background-color: rgba(65, 82, 140, 0.08);
-  text-decoration: underline;
-}
-
-/* Current Selection Display */
 .current-selection {
   display: none;
 }
 
-/* Short screens */
-@media (max-height: 700px) {
-  #citizenshipPopover .MuiPaper-root.MuiPopover-paper {
-    max-height: 70vh;
-    width: 95vw;
-    margin: 0 8px;
+@media print {
+  .filter-controls {
+    display: none;
+  }
+
+  .current-selection {
+    display: block;
+    border: 1px solid #000;
+    background-color: transparent;
   }
 }
 
-/* Accessibility - Focus States */
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
 .citizenship-option-button.MuiButton-root:focus-visible {
   outline: 3px solid var(--primary-color);
   outline-offset: 2px;
@@ -275,19 +240,10 @@
   outline-offset: 2px;
 }
 
-/* Print Styles */
-@media print {
-  .filter-controls {
-    display: none;
-  }
+/* ============================================
+   MOBILE - 767px and below
+   ============================================ */
 
-  .current-selection {
-    border: 1px solid #000;
-    background-color: transparent;
-  }
-}
-
-/* Mobile - 767px and below (matches BREAKPOINTS.desktop - 1) */
 @media (max-width: 767px) {
   .results-section-header {
     font-size: 1rem;
@@ -302,14 +258,8 @@
     margin-bottom: 0.5rem;
   }
 
-  .filter-section-container {
-    margin-bottom: 1rem;
-  }
-
   .citizenship-option-button.MuiButton-root {
-    font-size: 0.75rem;
     padding: 0.5rem 1rem;
-    min-height: 32px;
   }
 
   .citizenship-option-button .info-icon {

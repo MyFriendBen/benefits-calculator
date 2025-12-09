@@ -58,7 +58,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
         )}
       </div>
       {category.description.default_message !== '' && (
-        <p className="child-care-warning-text">
+        <p className="results-category-description">
           <ResultsTranslate translation={category.description} />
         </p>
       )}

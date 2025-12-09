@@ -96,7 +96,7 @@ const ResultsHeader = ({ type }: ResultsHeaderProps) => {
   return (
     <>
       {isAdminView && <Login setToken={setStaffToken} loggedIn={staffToken !== undefined} />}
-      <div className="results-header-container">{header}</div>
+      <div className={isEnergyCalculator ? "energy-calculator-results-header-container" : "results-header-container"}>{header}</div>
     </>
   );
 };

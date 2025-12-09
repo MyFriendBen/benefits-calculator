@@ -9,6 +9,7 @@
 
 .multiselect-tiles-container .option-card.MuiPaper-root {
   box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+  justify-content: center;
 }
 
 .multi-select-card-container {

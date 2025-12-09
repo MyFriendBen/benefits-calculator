@@ -1,7 +1,7 @@
 import { FormattedMessage } from 'react-intl';
-import { HouseholdData } from '../Types/FormData';
-import { FormattedMessageType } from '../Types/Questions';
-import { calcAge } from './age';
+import { HouseholdData } from '../../../Types/FormData';
+import { FormattedMessageType } from '../../../Types/Questions';
+import { calcAge } from '../../../Assets/age';
 
 export type CitizenLabelOptions =
   | 'citizen'
@@ -24,15 +24,13 @@ export type CalculatedCitizenLabel =
 
 export type CitizenLabels = CitizenLabelOptions | CalculatedCitizenLabel;
 
-// Map for calculated filters based on selected citizenship status
-export const filterNestedMap = new Map<CitizenLabelOptions, CitizenLabelOptions[]>([
-  ['citizen', []],
-  ['non_citizen', []],
-  ['gc_5plus', []],
-  ['gc_5less', []],
-  ['refugee', []],
-  ['otherWithWorkPermission', []],
-]);
+/**
+ * Single-select filter state model
+ */
+export type FilterState = {
+  selectedCitizenship: CitizenLabelOptions;
+  calculatedFilters: Set<CalculatedCitizenLabel>;
+};
 
 type CalculatedCitizenshipFilter = {
   func: (member: HouseholdData) => boolean;
@@ -40,13 +38,13 @@ type CalculatedCitizenshipFilter = {
 };
 
 function notPregnantOrUnder19(member: HouseholdData) {
-  return !member.specialConditions.pregnant && calcAge(member) >= 19;
+  return !member.conditions.pregnant && calcAge(member) >= 19;
 }
 
 export const calculatedCitizenshipFilters: Record<CalculatedCitizenLabel, CalculatedCitizenshipFilter> = {
   otherHealthCarePregnant: {
     func: (member) => {
-      return member.specialConditions.pregnant ?? false;
+      return member.conditions.pregnant ?? false;
     },
     linkedFilters: ['non_citizen', 'refugee', 'gc_5plus', 'gc_5less', 'otherWithWorkPermission'],
   },
@@ -78,13 +76,13 @@ export const calculatedCitizenshipFilters: Record<CalculatedCitizenLabel, Calcul
   },
   notPregnantForMassHealthLimited: {
     func: (member) => {
-      return !(member.specialConditions.pregnant ?? false);
+      return !(member.conditions.pregnant ?? false);
     },
     linkedFilters: ['non_citizen'],
   },
   notPregnantOrChildForMassHealthLimited: {
     func: (member) => {
-      const pregnant = member.specialConditions.pregnant ?? false;
+      const pregnant = member.conditions.pregnant ?? false;
       const age = calcAge(member);
       const under21 = age < 21;
       return !pregnant && !under21;
@@ -162,31 +160,39 @@ export const citizenshipFilterConfig: Record<CitizenLabelOptions, CitizenshipFil
   },
 };
 
-// Legacy labels for backwards compatibility (used in dropdown on mobile)
-const citizenshipFilterFormControlLabels: Record<CitizenLabelOptions, FormattedMessageType> = {
-  citizen: <FormattedMessage id="citizenshipFCtrlLabel-citizen" defaultMessage="U.S. Citizen" />,
-  non_citizen: (
-    <FormattedMessage
-      id="citizenshipFCtrlLabel-non_citizen"
-      defaultMessage="Individuals without lawful U.S. presence or citizenship (includes DACA recipients)"
-    />
-  ),
-  gc_5plus: <FormattedMessage id="citizenshipFCtrlLabel-gc_5plus" defaultMessage="Had green card for 5+ years" />,
-  gc_5less: (
-    <FormattedMessage id="citizenshipFCtrlLabel-gc_5less" defaultMessage="Had green card for less than 5 years" />
-  ),
-  refugee: (
-    <FormattedMessage
-      id="citizenshipFCtrlLabel-refugee"
-      defaultMessage="Granted refugee or asylee status (special rules or waiting periods may apply)"
-    />
-  ),
-  otherWithWorkPermission: (
-    <FormattedMessage
-      id="citizenshipFCtrlLabel-other_work_permission"
-      defaultMessage="Other lawfully present noncitizens with permission to live or work in the U.S. (other rules may apply)"
-    />
-  ),
-};
+/**
+ * Calculate which derived filters should be active based on citizenship selection and household data
+ */
+export function calculateDerivedFilters(
+  selectedCitizenship: CitizenLabelOptions,
+  householdData: HouseholdData[]
+): Set<CalculatedCitizenLabel> {
+  const activeFilters = new Set<CalculatedCitizenLabel>();
 
-export default citizenshipFilterFormControlLabels;
+  // Check each calculated filter to see if it applies
+  for (const [filterName, calculator] of Object.entries(calculatedCitizenshipFilters)) {
+    const typedFilterName = filterName as CalculatedCitizenLabel;
+
+    // Only activate if this filter is linked to the selected citizenship
+    if (!calculator.linkedFilters.includes(selectedCitizenship)) {
+      continue;
+    }
+
+    // Only activate if at least one household member meets the condition
+    if (householdData.some(calculator.func)) {
+      activeFilters.add(typedFilterName);
+    }
+  }
+
+  return activeFilters;
+}
+
+/**
+ * Create initial filter state (defaults to 'citizen' with no derived filters)
+ */
+export function createInitialFilterState(): FilterState {
+  return {
+    selectedCitizenship: 'citizen',
+    calculatedFilters: new Set(),
+  };
+}

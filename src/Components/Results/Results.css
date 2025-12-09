@@ -79,6 +79,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  margin-top: 0.5rem;
 }
 
 
@@ -213,15 +214,16 @@
 
 .result-program-details strong {
   display: block;
+  font-size: 1.3rem;
 }
 
 .result-program-subheader {
   font: Open Sans, sans-serif;
 }
 
-.child-care-warning-text {
+.results-category-description {
   background-color: var(--secondary-background-color);
-  font-size: 1rem;
+  font-size: .9rem;
   color: #000000;
   padding: 0.5rem;
 }
@@ -331,6 +333,7 @@
     padding-left: 0.75rem;
     padding-right: 0.75rem;
     margin-right: 1rem;
+    border-radius: 0.2rem;
   }
 
   .column-row {
@@ -343,6 +346,7 @@
     justify-content: center;
     flex-direction: row;
     align-items: center;
+    gap: 1rem;
   }
 
   .results-header-programs-count {

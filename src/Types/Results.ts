@@ -1,4 +1,4 @@
-import { CitizenLabels } from '../Assets/citizenshipFilterFormControlLabels';
+import { CitizenLabels } from '../Components/Results/Filter/citizenshipFilterConfig';
 import { Language } from '../Assets/languageOptions';
 
 export type Translation = {

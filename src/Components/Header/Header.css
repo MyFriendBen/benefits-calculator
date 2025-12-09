@@ -132,7 +132,10 @@
 .small-header-language-dropdown svg {
   width: 1rem;
   height: 1rem;
-  transform: translateY(0.2rem);
+}
+
+.small-header-language-dropdown .MuiSelect-icon {
+  top: 2px !important;
 }
 
 #select-language:focus-visible {

@@ -29,7 +29,7 @@ type IconRendererProps = {
 const ProgramPage = ({ program }: ProgramPageProps) => {
   const { uuid } = useParams();
   const { formData, staffToken } = useContext(Context);
-  const { isAdminView, validations, setValidations, programCategories, filtersChecked } = useResultsContext();
+  const { isAdminView, validations, setValidations, programCategories, filterState } = useResultsContext();
   const intl = useIntl();
   const { fetchScreen } = useScreenApi();
   const [openPEmodal, setOpenPEModal] = useState(false);
@@ -167,14 +167,15 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
       }
 
       for (const status of warningMessage.legal_statuses) {
-        if (filtersChecked[status]) {
+        // Check if status matches selected citizenship or any calculated filter
+        if (status === filterState.selectedCitizenship || filterState.calculatedFilters.has(status as any)) {
           return true;
         }
       }
 
       return false;
     });
-  }, [filtersChecked, program]);
+  }, [filterState, program]);
 
   const displayEstimatedValueAndTime = (program: Program) => {
     return (
@@ -229,11 +230,13 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
         {displayIconAndHeader(program)}
         {displayEstimatedValueAndTime(program)}
       </div>
-      <div className="results-program-page-warning-container">
-        {warningMessages.map((warning, key) => {
-          return <WarningMessage warning={warning} key={key} />;
-        })}
-      </div>
+      {warningMessages.length > 0 && (
+        <div className="results-program-page-warning-container">
+          {warningMessages.map((warning, key) => {
+            return <WarningMessage warning={warning} key={key} />;
+          })}
+        </div>
+      )}
       <div className="apply-button-container">
         {program.apply_button_link.default_message !== '' && (
           <a className="apply-online-button" href={programApplyButtonLink} target="_blank">
@@ -331,6 +334,11 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
         )}
       </div>
       <div className="content-width">
+        <section className="program-description">
+          <ResultsTranslate translation={program.description} />
+        </section>
+      </div>
+      <div className="content-width">
         {program.navigators.length > 0 && (
           <section className="apply-box">
             <h2 className="content-header">
@@ -402,9 +410,6 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
             </ul>
           </section>
         )}
-        <section className="program-description">
-          <ResultsTranslate translation={program.description} />
-        </section>
         {program.required_programs.length > 0 && (
           <section className="program-page-required-programs-section">
             <h3 className="program-page-required-programs-header">
