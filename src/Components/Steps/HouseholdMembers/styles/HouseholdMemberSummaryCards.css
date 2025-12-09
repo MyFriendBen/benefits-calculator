@@ -200,4 +200,8 @@
   .member-added-income {
     display: none;
   }
+
+  .question-buttons {
+    padding: 0 1rem !important;
+  }
 }
