@@ -36,7 +36,7 @@ const HealthInsuranceSection = ({
           <FormattedMessage id="questions.healthInsurance.minimal" defaultMessage="Health Insurance" />
         </QuestionQuestion>
         <QuestionDescription>
-          <FormattedMessage id="questions.chooseAllThatApply" defaultMessage="Choose all that apply" />
+          <FormattedMessage id="questions.chooseAllThatApply" defaultMessage="Select all that apply" />
         </QuestionDescription>
         {errors.healthInsurance && (
           <FormHelperText sx={{ ml: 0, mb: 1 }}>

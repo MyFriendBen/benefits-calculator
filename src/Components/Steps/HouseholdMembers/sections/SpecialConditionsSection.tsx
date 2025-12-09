@@ -86,7 +86,7 @@ const SpecialConditionsSection = ({
       <QuestionDescription>
         <FormattedMessage
           id="questions.chooseAllThatApply"
-          defaultMessage="Choose all that apply"
+          defaultMessage="Select all that apply"
         />
       </QuestionDescription>
       {errors.specialConditions && (
