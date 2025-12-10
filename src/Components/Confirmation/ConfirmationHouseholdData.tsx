@@ -135,7 +135,8 @@ const DefaultConfirmationHHData = () => {
   // Return just the table without the ConfirmationBlock wrapper
   return (
     <div className="household-member-table-wrapper">
-      <table className="household-member-table">
+      {/* Desktop table view */}
+      <table className="household-member-table household-member-table-desktop">
         <thead>
           <tr>
             <th><FormattedMessage id="confirmation.table.member" defaultMessage="Member" /></th>
@@ -150,7 +151,7 @@ const DefaultConfirmationHHData = () => {
           {householdData.map((member, i) => {
             let relationship: string | FormattedMessageType;
             if (i === 0) {
-              relationship = formatMessage({ id: "qcc.hoh-text", defaultMessage: "Head of Household (You)" });
+              relationship = formatMessage({ id: "qcc.you", defaultMessage: "You" });
             } else {
               relationship = relationshipOptions[member.relationshipToHH];
             }
@@ -177,6 +178,68 @@ const DefaultConfirmationHHData = () => {
           })}
         </tbody>
       </table>
+
+      {/* Mobile card view */}
+      <div className="household-member-cards">
+        {householdData.map((member, i) => {
+          let relationship: string | FormattedMessageType;
+          if (i === 0) {
+            relationship = formatMessage({ id: "qcc.you", defaultMessage: "You" });
+          } else {
+            relationship = relationshipOptions[member.relationshipToHH];
+          }
+
+          return (
+            <div key={i} className="household-member-card">
+              <div className="household-member-card-header">
+                <h3 className="household-member-card-title">{relationship}</h3>
+                <Link
+                  to={`/${whiteLabel}/${uuid}/step-${useStepNumber('householdData')}/${i + 1}`}
+                  state={{ routedFromConfirmationPg: true, isEditing: true }}
+                  className="edit-button-simple"
+                  aria-label={formatMessage(editHouseholdMemberAriaLabel)}
+                >
+                  <Edit title={formatMessage(editHouseholdMemberAriaLabel)} />
+                </Link>
+              </div>
+              <div className="household-member-card-body">
+                <div className="household-member-card-field">
+                  <span className="household-member-card-label">
+                    <FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year" />
+                  </span>
+                  <span className="household-member-card-value">
+                    {hasBirthMonthYear(member) ? formatBirthMonthYear(member) : '-'}
+                  </span>
+                </div>
+                <div className="household-member-card-field">
+                  <span className="household-member-card-label">
+                    <FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions" />
+                  </span>
+                  <span className="household-member-card-value">
+                    {conditionsString(member.specialConditions)}
+                  </span>
+                </div>
+                <div className="household-member-card-field">
+                  <span className="household-member-card-label">
+                    <FormattedMessage id="confirmation.annualIncome" defaultMessage="Annual Income" />
+                  </span>
+                  <span className="household-member-card-value">
+                    {calculateTotalAnnualIncome(member)}
+                  </span>
+                </div>
+                <div className="household-member-card-field">
+                  <span className="household-member-card-label">
+                    <FormattedMessage id="confirmation.headOfHouseholdDataBlock-healthInsuranceText" defaultMessage="Health Insurance" />
+                  </span>
+                  <span className="household-member-card-value">
+                    {displayHealthInsurance(member, i)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

@@ -84,7 +84,10 @@ function HouseholdSize() {
       title={
         <>
           <FormattedMessage id="confirmation.displayAllFormData-yourHouseholdLabel" defaultMessage="Household Members" />
-          {' '}({householdSizeText})
+          {' '}<span className="household-member-count">
+            <span className="household-member-count-full">({householdSizeText})</span>
+            <span className="household-member-count-short">({translateNumber(householdSize)})</span>
+          </span>
         </>
       }
       editAriaLabel={editHouseholdSizeAriaLabel}
