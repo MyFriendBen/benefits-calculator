@@ -181,6 +181,7 @@ export type ApiFormData = {
   has_il_liheap: boolean | null;
   has_nc_lieap: boolean | null;
   has_nccip: boolean | null;
+  has_nc_head_start: boolean | null;
   has_oap: boolean | null;
   has_coctc: boolean | null;
   has_upk: boolean | null;

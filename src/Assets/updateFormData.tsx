@@ -83,6 +83,7 @@ export function useUpdateFormData() {
         cesn_heap: response.has_cesn_heap ?? false,
         cfhc: response.has_cfhc ?? false,
         shitc: response.has_shitc ?? false,
+        nc_head_start: response.has_nc_head_start ?? false,
       },
       referralSource: response.referral_source ?? undefined,
       immutableReferrer: response.referrer_code ?? undefined,
