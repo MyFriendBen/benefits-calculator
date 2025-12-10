@@ -75,6 +75,8 @@ export function useUpdateFormData() {
         ma_mbta: response.has_ma_mbta ?? false,
         ma_maeitc: response.has_ma_maeitc ?? false,
         ma_macfc: response.has_ma_macfc ?? false,
+        head_start: response.has_head_start ?? false,
+        early_head_start: response.has_early_head_start ?? false,
         co_andso: response.has_co_andso ?? false,
         co_care: response.has_co_care ?? false,
         project_cope: response.has_project_cope ?? false,
