@@ -6,7 +6,7 @@ import { z } from 'zod';
 import useScreenApi from '../../Assets/updateScreen';
 import { FormattedMessageType } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
-import MultiSelectTiles from '../OptionCardGroup/MultiSelectTiles';
+import FlatRectangleTiles from '../OptionCardGroup/FlatRectangleTiles';
 import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import { useDefaultBackNavigationFunction } from '../QuestionComponents/questionHooks';
@@ -61,7 +61,7 @@ function ImmediateNeeds() {
         />
       </QuestionQuestion>
       <form onSubmit={handleSubmit(submitHandler)}>
-        <MultiSelectTiles
+        <FlatRectangleTiles
           values={watch('needs')}
           onChange={(values) => {
             setValue('needs', values);

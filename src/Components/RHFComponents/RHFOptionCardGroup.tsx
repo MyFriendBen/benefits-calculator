@@ -2,8 +2,7 @@ import { useIntl } from 'react-intl';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import { CardActionArea, Typography, Stack, Box } from '@mui/material';
-import { ReactComponent as Checkmark } from '../../Assets/icons/General/OptionCard/checkmark.svg';
-import { FieldValues, Path, PathValue, UseFormTrigger, UseFormSetValue } from 'react-hook-form';
+import { FieldValues, Path, PathValue, UseFormTrigger, UseFormSetValue, UseFormClearErrors } from 'react-hook-form';
 import '../OptionCardGroup/OptionCardGroup.css';
 import { Context } from '../Wrapper/Wrapper';
 import { useContext } from 'react';
@@ -26,6 +25,7 @@ type RHFOptionCardGroupProps<T extends FieldValues> = {
   options: Options;
   triggerValidation?: UseFormTrigger<T>;
   customColumnNo?: string;
+  clearErrors?: UseFormClearErrors<T>;
 };
 
 const RHFOptionCardGroup = <T extends FieldValues>({
@@ -35,19 +35,44 @@ const RHFOptionCardGroup = <T extends FieldValues>({
   options,
   triggerValidation,
   customColumnNo,
+  clearErrors,
 }: RHFOptionCardGroupProps<T>) => {
   const { getReferrer } = useContext(Context);
   const intl = useIntl();
 
   const handleOptionCardClick = async (optionName: string) => {
     const updatedValue = !fields[optionName];
+
+    // Handle mutual exclusivity with "none"
+    if (optionName === 'none' && updatedValue) {
+      // If selecting "none", deselect all other options
+      Object.keys(fields).forEach((key) => {
+        if (key !== 'none') {
+          setValue(`${name}.${key}` as Path<T>, false as PathValue<T, Path<T>>, {
+            shouldValidate: false,
+            shouldDirty: true,
+          });
+        }
+      });
+    } else if (optionName !== 'none' && updatedValue) {
+      // If selecting any option other than "none", deselect "none"
+      if (fields.none) {
+        setValue(`${name}.none` as Path<T>, false as PathValue<T, Path<T>>, {
+          shouldValidate: false,
+          shouldDirty: true,
+        });
+      }
+    }
+
+    // Set the clicked option's value
     setValue(`${name}.${optionName}` as Path<T>, updatedValue as PathValue<T, Path<T>>, {
-      shouldValidate: true,
+      shouldValidate: false,
       shouldDirty: true,
     });
 
-    if (triggerValidation) {
-      await triggerValidation(name);
+    // Clear errors when user selects an option
+    if (clearErrors) {
+      clearErrors(name);
     }
   };
 
@@ -62,9 +87,14 @@ const RHFOptionCardGroup = <T extends FieldValues>({
 
       const isSelected = values[optionKey];
       let containerClass = 'option-card';
+      let actionAreaClass = 'card-action-area';
 
       if (isSelected) {
         containerClass += ' selected-option-card';
+      }
+
+      if (optionKey === 'none') {
+        actionAreaClass += ' option-card-none';
       }
 
       if (getReferrer('featureFlags').includes('white_multi_select_tile_icon')) {
@@ -74,8 +104,7 @@ const RHFOptionCardGroup = <T extends FieldValues>({
       return (
         <CardActionArea
           key={`${name}-key-${index}`}
-          sx={{ width: '15rem' }}
-          className="card-action-area"
+          className={actionAreaClass}
           onClick={() => handleOptionCardClick(optionKey)}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
@@ -84,17 +113,14 @@ const RHFOptionCardGroup = <T extends FieldValues>({
           }}
         >
           <Card className={containerClass}>
-            <Stack direction="column" justifyContent="center" sx={{ flex: 1 }}>
-              <CardContent sx={{ textAlign: 'center', padding: '0.5rem' }}>
-                <Box className="multi-select-icon">{options[optionKey].icon}</Box>
-                <Typography className={isSelected ? 'option-card-text' : ''}>{translatedAriaLabel}</Typography>
+            <Stack direction="column" alignItems="center" justifyContent="center" sx={{ flex: 1, height: '100%' }}>
+              <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 0, '&:last-child': { paddingBottom: 0 } }}>
+                <Box className="option-card-icon">{options[optionKey].icon}</Box>
+                <Typography className={isSelected ? 'option-card-text' : ''} sx={{ textAlign: 'center', fontSize: '0.75rem', margin: 0, padding: 0 }}>
+                  {translatedAriaLabel}
+                </Typography>
               </CardContent>
             </Stack>
-            {isSelected && (
-              <Stack direction="row" justifyContent="flex-end" alignItems="flex-end">
-                <Checkmark className="checkmark" />
-              </Stack>
-            )}
           </Card>
         </CardActionArea>
       );

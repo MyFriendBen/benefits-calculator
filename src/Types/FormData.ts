@@ -3,9 +3,11 @@ import { UtmParameters } from '../Components/CampaignAnalytics/useUtmParameters'
 export type Expense = {
   expenseSourceName: string;
   expenseAmount: string;
+  expenseFrequency: string;
 };
 
 export type IncomeStream = {
+  incomeCategory: string;
   incomeStreamName: string;
   incomeAmount: string;
   incomeFrequency: string;
@@ -43,7 +45,7 @@ export type HouseholdData = {
   birthYear?: number;
   birthMonth?: number;
   relationshipToHH: string;
-  conditions: Conditions;
+  specialConditions: Conditions;
   hasIncome: boolean;
   incomeStreams: IncomeStream[];
   energyCalculator?: EnergyCalculatorMember;
@@ -110,6 +112,7 @@ export type FormData = {
 };
 
 export type Conditions = {
+  none?: boolean;
   student?: boolean;
   pregnant?: boolean;
   blindOrVisuallyImpaired?: boolean;

@@ -23,14 +23,13 @@ import SelectStatePage from './Components/Steps/SelectStatePage';
 import RedirectToWhiteLabel from './Components/RouterUtil/RedirectToWhiteLabel';
 import CurrentBenefits from './Components/CurrentBenefits/CurrentBenefits';
 import EcHouseholdMemberForm from './Components/EnergyCalculator/Steps/HouseholdMemberForm';
-import HouseholdMemberForm from './Components/Steps/HouseholdMembers/HouseholdMemberForm';
+import HouseholdMemberRouter from './Components/Steps/HouseholdMembers';
 import EnergyCalculatorLandingPage from './Components/EnergyCalculator/LandingPage/LandingPage';
 import WhiteLabelRouter from './Components/RouterUtil/WhiteLabelRouter';
 import ValidateUuid from './Components/RouterUtil/ValidateUuid';
 import FaviconManager from './Components/FaviconManager/FaviconManager';
 import './App.css';
 import useCampaign from './Components/CampaignAnalytics/useCampaign';
-import SystemBanner from './Components/Common/SystemBanner/SystemBanner';
 
 const App = () => {
   const location = useLocation();
@@ -43,7 +42,6 @@ const App = () => {
     setTheme: changeTheme,
     pageIsLoading,
     getReferrer,
-    config,
   } = useContext(Context);
   const stepDirectory = useStepDirectory();
   const totalSteps = stepDirectory.length + STARTING_QUESTION_NUMBER;
@@ -151,10 +149,7 @@ const App = () => {
         <CssBaseline />
         <FaviconManager />
         <BrandedHeader />
-        <Box className="main-max-width">
-          {config?.banner_messages && config.banner_messages.length > 0 && (
-            <SystemBanner banners={config.banner_messages} />
-          )}
+        <Box sx={{ backgroundColor: '#ffffff', width: '100%' }}>
           <Routes>
             <Route path="step-1" element={<ProgressBar step={1} />} />
             <Route path=":whiteLabel/step-1" element={<ProgressBar step={1} />} />
@@ -166,6 +161,8 @@ const App = () => {
             <Route path=":whiteLabel/:uuid/confirm-information" element={<ProgressBar step={totalSteps} />} />
             <Route path="*" element={<></>} />
           </Routes>
+        </Box>
+        <Box className="content-max-width">
           <Routes>
             {languageRouteWrapper(
               <>
@@ -202,7 +199,7 @@ const App = () => {
                     path={`step-${householdMemberStepNumber}/:page`}
                     element={
                       <ValidateUuid>
-                        <HouseholdMemberForm key={window.location.href} />
+                        <HouseholdMemberRouter key={window.location.href} />
                       </ValidateUuid>
                     }
                   />

@@ -147,6 +147,7 @@ export function useUpdateFormData() {
       const incomes = [];
       for (const income of member.income_streams) {
         incomes.push({
+          incomeCategory: income.category ?? '',
           incomeStreamName: income.type ?? '',
           incomeAmount: String(income.amount) ?? '',
           incomeFrequency: income.frequency ?? '',
@@ -163,6 +164,35 @@ export function useUpdateFormData() {
         };
       }
 
+      // Preserve the 'none' value from existing frontend state since it's not stored in backend
+      const existingMember = formData.householdData.find(m => m.frontendId === member.frontend_id);
+
+      // Check if member has any actual conditions selected in backend
+      const hasOtherConditions = member.student || member.pregnant || member.visually_impaired ||
+                                  member.disabled || member.long_term_disability;
+
+      // Only infer 'none' if this member has completed the health insurance section
+      // Check if any insurance boolean field is true
+      const hasInsuranceSelections = member.insurance !== null &&
+        member.insurance !== undefined &&
+        (member.insurance.none || member.insurance.employer || member.insurance.private ||
+         member.insurance.chp || member.insurance.medicaid || member.insurance.medicare ||
+         member.insurance.emergency_medicaid || member.insurance.family_planning ||
+         member.insurance.va || member.insurance.mass_health);
+
+      let noneValue = false;
+      if (hasInsuranceSelections) {
+        // Member has submitted health insurance section
+        if (hasOtherConditions) {
+          // Has other conditions selected - 'none' should be false
+          noneValue = false;
+        } else {
+          // No other conditions - either preserve explicit 'none' or infer it
+          noneValue = existingMember?.specialConditions?.none ?? true;
+        }
+      }
+      // Otherwise, leave noneValue as false (member hasn't reached conditions page yet)
+
       updatedFormData.householdData.push({
         id: member.id,
         frontendId: member.frontend_id,
@@ -170,7 +200,9 @@ export function useUpdateFormData() {
         birthYear: member.birth_year ?? undefined,
         birthMonth: member.birth_month ?? undefined,
         relationshipToHH: member.relationship ? member.relationship : defaultRelationship,
-        conditions: {
+        specialConditions: {
+          // Preserve or infer 'none' only for existing members
+          none: noneValue,
           student: member.student ?? false,
           pregnant: member.pregnant ?? false,
           blindOrVisuallyImpaired: member.visually_impaired ?? false,

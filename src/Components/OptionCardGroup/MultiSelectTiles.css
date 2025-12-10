@@ -1,26 +1,35 @@
 .multiselect-tiles-container {
-  display: flex;
-  gap: 1.85rem;
-  flex-wrap: wrap;
-  margin: 1.5rem auto 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
   max-width: 50rem;
+  margin: 1.5rem auto 1.5rem auto;
+  align-items: stretch;
+}
+
+.multiselect-tiles-container .option-card.MuiPaper-root {
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
   justify-content: center;
 }
 
 .multi-select-card-container {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: row;
+  justify-content: flex-start;
   align-items: center;
   height: 100%;
   font-size: 1rem;
+  width: 100%;
 }
 
 .multi-select-icon {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 0.5rem;
+  height: 2.5rem;
+  width: 2.5rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
 }
 
 
@@ -35,16 +44,11 @@
   stroke: #ffffff;
 }
 
-.white-icons .cls-checkmark-fill {
-  fill: #ffffff;
-}
-
-.white-icons .cls-checkmark {
-  fill: var(--primary-color);
-}
-
 @media (max-width: 38.125rem) {
   .multiselect-tiles-container {
-    padding: 0;
+    grid-template-columns: 1fr;
+    gap: 0.938rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 }

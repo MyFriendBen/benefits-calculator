@@ -26,7 +26,7 @@ type SystemBannerProps = {
  * Supports multiple banners with collapsible content
  */
 const SystemBanner = ({ banners }: SystemBannerProps) => {
-  const { theme, config } = useContext(Context);
+  const { theme } = useContext(Context);
   const intl = useIntl();
 
   // Helper to extract string value from FormattedMessage or plain string

@@ -142,13 +142,13 @@ const EnergyCalcConfirmationHHData = () => {
         />
         {hasBirthMonthYear(member) && (
           <ConfirmationItem
-            label={<FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year:" />}
+            label={<FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year" />}
             value={formatBirthMonthYear(member)}
           />
         )}
         <ConfirmationItem
           label={
-            <FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions:" />
+            <FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions" />
           }
           value={energyCalculatorConditionsList(member)}
         />

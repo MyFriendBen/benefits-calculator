@@ -174,11 +174,11 @@ const getHouseholdMemberBody = (householdMemberData: HouseholdData): ApiHousehol
     birth_year: householdMemberData.birthYear ?? null,
     birth_month: householdMemberData.birthMonth ?? null,
     relationship: householdMemberData.relationshipToHH,
-    student: householdMemberData.conditions.student ?? null,
-    pregnant: householdMemberData.conditions.pregnant ?? null,
-    visually_impaired: householdMemberData.conditions.blindOrVisuallyImpaired ?? null,
-    disabled: householdMemberData.conditions.disabled ?? null,
-    long_term_disability: householdMemberData.conditions.longTermDisability ?? null,
+    student: householdMemberData.specialConditions?.student ?? null,
+    pregnant: householdMemberData.specialConditions?.pregnant ?? null,
+    visually_impaired: householdMemberData.specialConditions?.blindOrVisuallyImpaired ?? null,
+    disabled: householdMemberData.specialConditions?.disabled ?? null,
+    long_term_disability: householdMemberData.specialConditions?.longTermDisability ?? null,
     has_income: householdMemberData.hasIncome,
     income_streams: incomes,
     energy_calculator: getEnergyCalculatorMemberBody(householdMemberData.energyCalculator),
@@ -189,6 +189,7 @@ const getHouseholdMemberBody = (householdMemberData: HouseholdData): ApiHousehol
 const getIncomeStreamsBodies = (householdMemberData: HouseholdData): ApiIncome[] => {
   return householdMemberData.incomeStreams.map((incomeStream) => {
     return {
+      category: incomeStream.incomeCategory,
       type: incomeStream.incomeStreamName,
       amount: Number(incomeStream.incomeAmount),
       frequency: incomeStream.incomeFrequency,
@@ -197,11 +198,36 @@ const getIncomeStreamsBodies = (householdMemberData: HouseholdData): ApiIncome[]
   });
 };
 
+/**
+ * Converts expense amount from any frequency to monthly amount
+ */
+const convertToMonthlyExpense = (amount: number, frequency: string): number => {
+  switch (frequency) {
+    case 'daily':
+      return Math.round((amount * 365) / 12);
+    case 'weekly':
+      return Math.round((amount * 52) / 12);
+    case 'monthly':
+      return amount;
+    case 'annually':
+    case 'yearly':
+      return Math.round(amount / 12);
+    default:
+      // Default to monthly if frequency is unknown
+      return amount;
+  }
+};
+
 const getExpensesBodies = (formData: FormData): ApiExpense[] => {
   return formData.expenses.map((expense) => {
+    const originalAmount = expense.expenseAmount === '' ? 0 : Number(expense.expenseAmount);
+    // Use 'monthly' as default frequency for backward compatibility
+    const frequency = expense.expenseFrequency || 'monthly';
+    const monthlyAmount = convertToMonthlyExpense(originalAmount, frequency);
+
     return {
       type: expense.expenseSourceName,
-      amount: expense.expenseAmount === '' ? 0 : Number(expense.expenseAmount),
+      amount: monthlyAmount,
       frequency: 'monthly',
     };
   });

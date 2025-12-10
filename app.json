@@ -1,0 +1,53 @@
+{
+  "_readme": [
+    "This file configures Heroku Review Apps for the benefits-calculator frontend.",
+    "All environment variable VALUES must be set in the Heroku Pipeline UI under 'Review Apps > Review app config vars'.",
+    "This file only documents what variables are required - actual secret values are managed in Heroku, not committed to git."
+  ],
+  "name": "MyFriendBen Benefits Calculator",
+  "description": "Benefits eligibility screener frontend - Review App",
+  "repository": "https://github.com/Gary-Community-Ventures/benefits-calculator",
+  "logo": "https://www.myfriendbencalculator.org/static/media/mfb_logo.png",
+  "keywords": ["react", "typescript", "benefits", "eligibility"],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "REACT_APP_API_KEY": {
+      "description": "API authentication token for backend communication - Set in Heroku dashboard",
+      "required": true
+    },
+    "REACT_APP_DOMAIN_URL": {
+      "description": "Backend API base URL - Set in Heroku dashboard (e.g., https://cobenefits-api-staging.herokuapp.com)",
+      "required": true
+    },
+    "REACT_APP_STATE": {
+      "description": "Default state configuration (e.g., CO, IL, NC)",
+      "required": false
+    },
+    "REACT_APP_ENERGY_CALCULATOR_REWIRING_AMERICA_API_KEY": {
+      "description": "API key for Rewiring America energy calculator integration - Set in Heroku dashboard",
+      "required": false
+    },
+    "REACT_APP_MUI_LICENSE_KEY": {
+      "description": "Material-UI Pro license key - Set in Heroku dashboard",
+      "required": false
+    },
+    "REACT_APP_GOOGLE_ANALYTICS_ID": {
+      "description": "Google Analytics tracking ID (optional for review apps)",
+      "required": false
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "stack": "heroku-22",
+  "scripts": {
+    "postdeploy": "echo 'Review app deployed successfully!'"
+  }
+}

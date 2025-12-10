@@ -2,8 +2,6 @@ import { CardContent } from '@mui/material';
 import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Context } from '../../Wrapper/Wrapper';
-import BackAndSaveButtons from '../BackAndSaveButtons/BackAndSaveButtons';
-import { useParams } from 'react-router-dom';
 import { useResultsContext } from '../Results';
 import { calculateTotalValue } from '../FormattedValue';
 import '../../Results/Results.css';
@@ -85,7 +83,6 @@ const NeedsHeader = () => {
 };
 
 const ResultsHeader = ({ type }: ResultsHeaderProps) => {
-  const { whiteLabel, uuid } = useParams();
   const { staffToken, setStaffToken } = useContext(Context);
   const { isAdminView } = useResultsContext();
   const isEnergyCalculator = useIsEnergyCalculator();
@@ -98,10 +95,6 @@ const ResultsHeader = ({ type }: ResultsHeaderProps) => {
 
   return (
     <>
-      <BackAndSaveButtons
-        navigateToLink={`/${whiteLabel}/${uuid}/confirm-information`}
-        BackToThisPageText={<FormattedMessage id="results.back-to-screen-btn" defaultMessage="BACK TO SCREENER" />}
-      />
       {isAdminView && <Login setToken={setStaffToken} loggedIn={staffToken !== undefined} />}
       <div className={isEnergyCalculator ? "energy-calculator-results-header-container" : "results-header-container"}>{header}</div>
     </>

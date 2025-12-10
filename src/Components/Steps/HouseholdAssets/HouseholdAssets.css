@@ -1,0 +1,13 @@
+/* Asset input box container */
+.asset-box {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  background-color: var(--input-section-background);
+  border-radius: 8px;
+}
+
+.asset-box .question-description {
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+}

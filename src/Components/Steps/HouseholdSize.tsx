@@ -21,7 +21,8 @@ const HouseholdSize = () => {
   const { formData } = useContext(Context);
   const { uuid } = useParams();
   const backNavigationFunction = useDefaultBackNavigationFunction('householdSize');
-  const nextStep = useGoToNextStep('householdSize', '1');
+  const nextStepPage0 = useGoToNextStep('householdSize', '0');
+  const nextStepPage1 = useGoToNextStep('householdSize', '1');
   const intl = useIntl();
   const { updateScreen } = useScreenApi();
 
@@ -54,7 +55,6 @@ const HouseholdSize = () => {
       householdSize: formData.householdSize || undefined,
     },
     questionName: 'householdSize',
-    onSubmitSuccessfulOverride: nextStep,
   });
 
   const formSubmitHandler: SubmitHandler<FormSchema> = async ({ householdSize }) => {
@@ -65,6 +65,13 @@ const HouseholdSize = () => {
         householdData: formData.householdData.slice(0, householdSize),
       };
       await updateScreen(updatedFormData);
+
+      // Navigate to page 1 if household size is 1, otherwise page 0
+      if (householdSize === 1) {
+        nextStepPage1();
+      } else {
+        nextStepPage0();
+      }
     }
   };
 

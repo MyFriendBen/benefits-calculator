@@ -38,29 +38,31 @@ const BackAndSaveButtons = ({ navigateToLink, BackToThisPageText }: BackAndSaveB
 
   return (
     <div className="results-back-save-btn-container">
-      <button
-        data-testid="back-to-results-button"
-        className="results-back-save-buttons"
-        onClick={() => {
-          navigate(navigateToLink);
-        }}
-        aria-label={intl.formatMessage(backBtnALProps)}
-      >
-        <div className="btn-icon-text-container padding-right">
-          <LeftArrowIcon />
-          {BackToThisPageText}
-        </div>
-      </button>
-      <button
-        className="results-back-save-buttons"
-        onClick={() => setOpenSaveModal(!openSaveModal)}
-        aria-label={intl.formatMessage(saveMyResultsBtnALProps)}
-      >
-        <div className="btn-icon-text-container padding-left">
-          <FormattedMessage id="results.save-results-btn" defaultMessage="SAVE MY RESULTS" />
-          <SaveIcon className="save-icon" />
-        </div>
-      </button>
+      <div className="results-back-save-btn-wrapper">
+        <button
+          data-testid="back-to-results-button"
+          className="results-back-save-buttons"
+          onClick={() => {
+            navigate(navigateToLink);
+          }}
+          aria-label={intl.formatMessage(backBtnALProps)}
+        >
+          <div className="btn-icon-text-container padding-right">
+            <LeftArrowIcon />
+            {BackToThisPageText}
+          </div>
+        </button>
+        <button
+          className="results-back-save-buttons"
+          onClick={() => setOpenSaveModal(!openSaveModal)}
+          aria-label={intl.formatMessage(saveMyResultsBtnALProps)}
+        >
+          <div className="btn-icon-text-container padding-left">
+            <FormattedMessage id="results.save-results-btn" defaultMessage="SAVE MY RESULTS" />
+            <SaveIcon className="save-icon" />
+          </div>
+        </button>
+      </div>
       <Modal open={openSaveModal} aria-label={intl.formatMessage(emailResultsModalALProps)}>
         <SaveMyResultsModal close={() => setOpenSaveModal(!openSaveModal)} />
       </Modal>

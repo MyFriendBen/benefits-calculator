@@ -1,6 +1,6 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
-import HHMSummaryCards from '../../Steps/HouseholdMembers/HHMSummaryCards';
+import HouseholdMemberSummaryCards from '../../Steps/HouseholdMembers/components/HouseholdMemberSummaryCards';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Context } from '../../Wrapper/Wrapper';
 import { ReactNode, useContext, useEffect, useMemo } from 'react';
@@ -26,7 +26,7 @@ import { useStepNumber } from '../../../Assets/stepDirectory';
 import * as z from 'zod';
 import { Controller, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { MONTHS } from '../../Steps/HouseholdMembers/MONTHS';
+import { MONTHS } from '../../Steps/HouseholdMembers/utils/constants';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import MultiSelectTiles from '../../OptionCardGroup/MultiSelectTiles';
@@ -46,14 +46,14 @@ import {
   renderIncomeFrequencyHelperText,
   renderHoursWorkedHelperText,
   renderIncomeAmountHelperText,
-} from '../../Steps/HouseholdMembers/HelperTextFunctions';
+} from '../../Steps/HouseholdMembers/utils/validation';
 import { DOLLARS, handleNumbersOnly, numberInputProps, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
 import useScreenApi from '../../../Assets/updateScreen';
 import { QUESTION_TITLES } from '../../../Assets/pageTitleTags';
 import { getCurrentMonthYear, YEARS, MAX_AGE } from '../../../Assets/age';
 import { useAgeCalculation } from '../../AgeCalculation/useAgeCalculation';
 import { determineDefaultIncomeByAge } from '../../AgeCalculation/AgeCalculation';
-import '../../../Components/Steps/HouseholdMembers/PersonIncomeBlock.css';
+import '../../Steps/HouseholdMembers/styles/IncomeSection.css';
 import { useShouldRedirectToConfirmation } from '../../QuestionComponents/questionHooks';
 import useStepForm from '../../Steps/stepForm';
 
@@ -230,7 +230,7 @@ const ECHouseholdMemberForm = () => {
       birthYear: householdMemberFormData?.birthYear ? String(householdMemberFormData.birthYear) : '',
       conditions: {
         survivingSpouse: householdMemberFormData?.energyCalculator?.survivingSpouse ?? false,
-        disabled: householdMemberFormData?.conditions.disabled ?? false,
+        disabled: householdMemberFormData?.specialConditions.disabled ?? false,
         medicalEquipment: householdMemberFormData?.energyCalculator?.medicalEquipment ?? false,
       },
       receivesSsi: householdMemberFormData?.energyCalculator?.receivesSsi ? 'true' : 'false',
@@ -239,7 +239,8 @@ const ECHouseholdMemberForm = () => {
       incomeStreams: householdMemberFormData?.incomeStreams ?? [],
     },
     questionName: 'energyCalculatorHouseholdData',
-    onSubmitSuccessfulOverride: () => nextStep(uuid, currentStepId, pageNumber),
+    // Provide empty override to prevent automatic navigation - we'll navigate manually in formSubmitHandler
+    onSubmitSuccessfulOverride: () => {},
   });
   const watchHasIncome = watch('hasIncome');
   const hasTruthyIncome = watchHasIncome === 'true';
@@ -297,13 +298,16 @@ const ECHouseholdMemberForm = () => {
       ...memberData,
       id: formData.householdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
       frontendId: formData.householdData[currentMemberIndex]?.frontendId ?? crypto.randomUUID(),
-      conditions: {
-        ...memberData.conditions,
+      specialConditions: {
         disabled: memberData.conditions.disabled,
       },
       birthYear: Number(memberData.birthYear),
       birthMonth: Number(memberData.birthMonth),
       hasIncome: memberData.hasIncome === 'true',
+      incomeStreams: memberData.incomeStreams.map(stream => ({
+        ...stream,
+        incomeCategory: '', // Energy calculator uses simplified income form without categories
+      })),
 
       energyCalculator: {
         survivingSpouse: memberData.conditions.survivingSpouse,
@@ -315,7 +319,12 @@ const ECHouseholdMemberForm = () => {
     const updatedHouseholdData = [...formData.householdData];
     updatedHouseholdData[currentMemberIndex] = updatedMemberData;
     const updatedFormData = { ...formData, householdData: updatedHouseholdData };
+
+    // Wait for the API call to complete and context to update before navigating
     await updateScreen(updatedFormData);
+
+    // Now navigate after data is saved
+    nextStep(uuid, currentStepId, pageNumber);
   };
 
   const createAgeQuestion = () => {
@@ -442,7 +451,7 @@ const ECHouseholdMemberForm = () => {
           <QuestionDescription>
             <FormattedMessage
               id="householdDataBlock.createConditionsQuestion-pick"
-              defaultMessage="Choose all that apply. If none apply, skip this question."
+              defaultMessage="Select all that apply"
             />
           </QuestionDescription>
           <MultiSelectTiles
@@ -940,7 +949,7 @@ const ECHouseholdMemberForm = () => {
     <main className="benefits-form">
       <QuestionHeader>
         {pageNumber === 1 ? (
-          <FormattedMessage id="householdDataBlock.questionHeader" defaultMessage="Tell us about yourself." />
+          <FormattedMessage id="householdDataBlock.questionHeader" defaultMessage="Tell us about yourself" />
         ) : (
           <FormattedMessage
             id="questions.householdData"
@@ -948,7 +957,7 @@ const ECHouseholdMemberForm = () => {
           />
         )}
       </QuestionHeader>
-      <HHMSummaryCards
+      <HouseholdMemberSummaryCards
         activeMemberData={{
           ...getValues(),
           id: formData.householdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
@@ -956,6 +965,13 @@ const ECHouseholdMemberForm = () => {
           birthYear: getValues().birthYear ? Number(getValues().birthYear) : undefined,
           birthMonth: getValues().birthMonth ? Number(getValues().birthMonth) : undefined,
           hasIncome: Boolean(getValues().hasIncome),
+          incomeStreams: getValues().incomeStreams.map(stream => ({
+            ...stream,
+            incomeCategory: '',
+          })),
+          specialConditions: {
+            disabled: getValues().conditions.disabled,
+          },
         }}
         triggerValidation={trigger}
         questionName="energyCalculatorHouseholdData"
