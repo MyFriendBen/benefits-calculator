@@ -125,11 +125,8 @@ const HouseholdMemberForm = () => {
       return;
     }
 
-    console.log('Form memberData before transformation:', memberData);
-    console.log('Income streams from form:', memberData.incomeStreams);
-
     const updatedHouseholdData = [...formData.householdData];
-    const transformedMemberData = createHouseholdMemberData({
+    updatedHouseholdData[currentMemberIndex] = createHouseholdMemberData({
       memberData,
       currentMemberIndex,
       existingHouseholdData: formData.householdData,
@@ -137,26 +134,10 @@ const HouseholdMemberForm = () => {
       householdMemberFormData,
     });
 
-    console.log('Transformed member data:', transformedMemberData);
-    console.log('Income streams after transformation:', transformedMemberData.incomeStreams);
-
-    updatedHouseholdData[currentMemberIndex] = transformedMemberData;
-
     const updatedFormData = { ...formData, householdData: updatedHouseholdData };
-
-    console.log('About to call updateScreen with all household members:');
-    updatedFormData.householdData.forEach((member, idx) => {
-      console.log(`Member ${idx}:`, {
-        relationship: member.relationshipToHH,
-        hasIncome: member.hasIncome,
-        incomeStreams: member.incomeStreams,
-      });
-    });
 
     // Wait for the API call to complete and context to update before navigating
     await updateScreen(updatedFormData);
-
-    console.log('updateScreen completed, navigating...');
 
     // Now navigate after data is saved
     navigateNext();
