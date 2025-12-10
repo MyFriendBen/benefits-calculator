@@ -61,6 +61,10 @@ export const createHouseholdMemberData = ({
   shouldShowBasicInfo,
   householdMemberFormData,
 }: CreateHouseholdMemberDataParams): HouseholdData => {
+  const incomeStreams = memberData.incomeStreams || [];
+  // Set hasIncome based on whether there are actual income streams, not just the form field
+  const hasIncome = memberData.hasIncome === 'true' || incomeStreams.length > 0;
+
   const result = {
     ...memberData,
     id: existingHouseholdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
@@ -74,7 +78,8 @@ export const createHouseholdMemberData = ({
     relationshipToHH: shouldShowBasicInfo && 'relationshipToHH' in memberData
       ? (memberData.relationshipToHH as string)
       : (householdMemberFormData?.relationshipToHH ?? ''),
-    hasIncome: memberData.hasIncome === 'true',
+    hasIncome,
+    incomeStreams,
   } as HouseholdData;
 
   return result;

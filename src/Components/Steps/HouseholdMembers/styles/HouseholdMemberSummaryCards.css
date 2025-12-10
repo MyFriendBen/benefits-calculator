@@ -201,6 +201,16 @@
     display: none;
   }
 
+  /* Hide hover edit button on mobile */
+  .hover-edit-button {
+    display: none !important;
+  }
+
+  .member-added-container[role="button"]:hover .household-member-header,
+  .member-added-container[role="button"]:hover .member-added-income {
+    opacity: 1;
+  }
+
   .question-buttons {
     padding: 0;
   }

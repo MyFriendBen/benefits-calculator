@@ -95,13 +95,8 @@ const HouseholdMemberForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues as FormSchema,
     questionName: 'householdData',
-    onSubmitSuccessfulOverride: () => {
-      if (!uuid) {
-        console.error('UUID is undefined');
-        return;
-      }
-      navigateNext();
-    },
+    // Provide empty override to prevent automatic navigation - we'll navigate manually in formSubmitHandler
+    onSubmitSuccessfulOverride: () => {},
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -130,8 +125,11 @@ const HouseholdMemberForm = () => {
       return;
     }
 
+    console.log('Form memberData before transformation:', memberData);
+    console.log('Income streams from form:', memberData.incomeStreams);
+
     const updatedHouseholdData = [...formData.householdData];
-    updatedHouseholdData[currentMemberIndex] = createHouseholdMemberData({
+    const transformedMemberData = createHouseholdMemberData({
       memberData,
       currentMemberIndex,
       existingHouseholdData: formData.householdData,
@@ -139,8 +137,29 @@ const HouseholdMemberForm = () => {
       householdMemberFormData,
     });
 
+    console.log('Transformed member data:', transformedMemberData);
+    console.log('Income streams after transformation:', transformedMemberData.incomeStreams);
+
+    updatedHouseholdData[currentMemberIndex] = transformedMemberData;
+
     const updatedFormData = { ...formData, householdData: updatedHouseholdData };
+
+    console.log('About to call updateScreen with all household members:');
+    updatedFormData.householdData.forEach((member, idx) => {
+      console.log(`Member ${idx}:`, {
+        relationship: member.relationshipToHH,
+        hasIncome: member.hasIncome,
+        incomeStreams: member.incomeStreams,
+      });
+    });
+
+    // Wait for the API call to complete and context to update before navigating
     await updateScreen(updatedFormData);
+
+    console.log('updateScreen completed, navigating...');
+
+    // Now navigate after data is saved
+    navigateNext();
   };
 
   const handleFormError = (formErrors: typeof errors) => {

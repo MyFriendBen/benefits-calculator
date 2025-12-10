@@ -239,7 +239,8 @@ const ECHouseholdMemberForm = () => {
       incomeStreams: householdMemberFormData?.incomeStreams ?? [],
     },
     questionName: 'energyCalculatorHouseholdData',
-    onSubmitSuccessfulOverride: () => nextStep(uuid, currentStepId, pageNumber),
+    // Provide empty override to prevent automatic navigation - we'll navigate manually in formSubmitHandler
+    onSubmitSuccessfulOverride: () => {},
   });
   const watchHasIncome = watch('hasIncome');
   const hasTruthyIncome = watchHasIncome === 'true';
@@ -303,6 +304,10 @@ const ECHouseholdMemberForm = () => {
       birthYear: Number(memberData.birthYear),
       birthMonth: Number(memberData.birthMonth),
       hasIncome: memberData.hasIncome === 'true',
+      incomeStreams: memberData.incomeStreams.map(stream => ({
+        ...stream,
+        incomeCategory: '', // Energy calculator uses simplified income form without categories
+      })),
 
       energyCalculator: {
         survivingSpouse: memberData.conditions.survivingSpouse,
@@ -314,7 +319,12 @@ const ECHouseholdMemberForm = () => {
     const updatedHouseholdData = [...formData.householdData];
     updatedHouseholdData[currentMemberIndex] = updatedMemberData;
     const updatedFormData = { ...formData, householdData: updatedHouseholdData };
+
+    // Wait for the API call to complete and context to update before navigating
     await updateScreen(updatedFormData);
+
+    // Now navigate after data is saved
+    nextStep(uuid, currentStepId, pageNumber);
   };
 
   const createAgeQuestion = () => {
@@ -955,6 +965,13 @@ const ECHouseholdMemberForm = () => {
           birthYear: getValues().birthYear ? Number(getValues().birthYear) : undefined,
           birthMonth: getValues().birthMonth ? Number(getValues().birthMonth) : undefined,
           hasIncome: Boolean(getValues().hasIncome),
+          incomeStreams: getValues().incomeStreams.map(stream => ({
+            ...stream,
+            incomeCategory: '',
+          })),
+          specialConditions: {
+            disabled: getValues().conditions.disabled,
+          },
         }}
         triggerValidation={trigger}
         questionName="energyCalculatorHouseholdData"
