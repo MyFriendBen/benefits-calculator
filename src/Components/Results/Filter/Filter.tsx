@@ -66,7 +66,6 @@ export const Filter = () => {
                   className: 'citizenship-tooltip-card',
                 },
               }}
-              disableInteractive
             >
               <Button
                 className={`citizenship-option-button ${isSelected ? 'selected' : ''}`}

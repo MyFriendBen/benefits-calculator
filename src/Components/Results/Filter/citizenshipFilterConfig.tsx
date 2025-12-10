@@ -38,13 +38,13 @@ type CalculatedCitizenshipFilter = {
 };
 
 function notPregnantOrUnder19(member: HouseholdData) {
-  return !member.conditions.pregnant && calcAge(member) >= 19;
+  return !member.specialConditions.pregnant && calcAge(member) >= 19;
 }
 
 export const calculatedCitizenshipFilters: Record<CalculatedCitizenLabel, CalculatedCitizenshipFilter> = {
   otherHealthCarePregnant: {
     func: (member) => {
-      return member.conditions.pregnant ?? false;
+      return member.specialConditions.pregnant ?? false;
     },
     linkedFilters: ['non_citizen', 'refugee', 'gc_5plus', 'gc_5less', 'otherWithWorkPermission'],
   },
@@ -76,13 +76,13 @@ export const calculatedCitizenshipFilters: Record<CalculatedCitizenLabel, Calcul
   },
   notPregnantForMassHealthLimited: {
     func: (member) => {
-      return !(member.conditions.pregnant ?? false);
+      return !(member.specialConditions.pregnant ?? false);
     },
     linkedFilters: ['non_citizen'],
   },
   notPregnantOrChildForMassHealthLimited: {
     func: (member) => {
-      const pregnant = member.conditions.pregnant ?? false;
+      const pregnant = member.specialConditions.pregnant ?? false;
       const age = calcAge(member);
       const under21 = age < 21;
       return !pregnant && !under21;
