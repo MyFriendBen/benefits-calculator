@@ -166,7 +166,7 @@ export type ApiFormData = {
   has_il_hbwd: boolean | null;
   has_medicaid?: boolean | null;
   has_rtdlive: boolean | null;
-  has_cccap: boolean | null;
+  has_ccap: boolean | null;
   has_mydenver: boolean | null;
   has_chp?: boolean | null;
   has_ccb?: boolean | null;
@@ -201,6 +201,8 @@ export type ApiFormData = {
   has_ma_mbta: boolean | null;
   has_ma_maeitc: boolean | null;
   has_ma_macfc: boolean | null;
+  has_head_start: boolean | null;
+  has_early_head_start: boolean | null;
   has_co_andso: boolean | null;
   has_co_care: boolean | null;
   has_project_cope: boolean | null;
