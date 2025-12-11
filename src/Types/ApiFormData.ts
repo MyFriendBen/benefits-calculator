@@ -208,6 +208,7 @@ export type ApiFormData = {
   has_cesn_heap: boolean | null;
   has_cfhc: boolean | null;
   has_shitc: boolean | null;
+  has_family_planning: boolean | null;
   has_employer_hi?: boolean | null;
   has_private_hi?: boolean | null;
   has_medicaid_hi?: boolean | null;
