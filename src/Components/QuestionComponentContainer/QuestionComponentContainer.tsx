@@ -5,7 +5,7 @@ import Expenses from '../Steps/Expenses/Expenses';
 import HouseholdSize from '../Steps/HouseholdSize';
 import { useStepName } from '../../Assets/stepDirectory';
 import ReferralSourceStep from '../Steps/Referrer';
-import { OTHER_PAGE_TITLES, QUESTION_TITLES } from '../../Assets/pageTitleTags';
+import { OTHER_PAGE_TITLES, QUESTION_TITLES, getAppPrefixedTitle } from '../../Assets/pageTitleTags';
 import AlreadyHasBenefits from '../Steps/AlreadyHasBenefits';
 import ImmediateNeeds from '../Steps/ImmediateNeeds';
 import SignUp from '../Steps/SignUp/SignUp';
@@ -18,7 +18,7 @@ import Utilities from '../EnergyCalculator/Steps/Utilities';
 import './QuestionComponentContainer.css';
 
 const QuestionComponentContainer = () => {
-  let { id } = useParams();
+  let { id, whiteLabel } = useParams();
 
   if (id === undefined) {
     throw new Error('steps must have a step-[id]');
@@ -30,8 +30,8 @@ const QuestionComponentContainer = () => {
       document.title = OTHER_PAGE_TITLES.default;
       return;
     }
-    document.title = QUESTION_TITLES[questionName];
-  }, [questionName]);
+    document.title = getAppPrefixedTitle(whiteLabel, QUESTION_TITLES[questionName]);
+  }, [questionName, whiteLabel]);
 
   switch (questionName) {
     case 'zipcode':

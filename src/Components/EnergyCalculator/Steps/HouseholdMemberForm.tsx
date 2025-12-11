@@ -49,7 +49,7 @@ import {
 } from '../../Steps/HouseholdMembers/HelperTextFunctions';
 import { DOLLARS, handleNumbersOnly, numberInputProps, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
 import useScreenApi from '../../../Assets/updateScreen';
-import { QUESTION_TITLES } from '../../../Assets/pageTitleTags';
+import { QUESTION_TITLES, getAppPrefixedTitle } from '../../../Assets/pageTitleTags';
 import { getCurrentMonthYear, YEARS, MAX_AGE } from '../../../Assets/age';
 import { useAgeCalculation } from '../../AgeCalculation/useAgeCalculation';
 import { determineDefaultIncomeByAge } from '../../AgeCalculation/AgeCalculation';
@@ -198,8 +198,8 @@ const ECHouseholdMemberForm = () => {
   type FormSchema = z.infer<typeof formSchema>;
 
   useEffect(() => {
-    document.title = QUESTION_TITLES.householdData;
-  }, []);
+    document.title = getAppPrefixedTitle(whiteLabel, QUESTION_TITLES.householdData);
+  }, [whiteLabel]);
 
   const determineDefaultRelationshipToHH = () => {
     if (householdMemberFormData && householdMemberFormData.relationshipToHH) {
@@ -249,7 +249,7 @@ const ECHouseholdMemberForm = () => {
   });
   const watchIsDisabled = watch('conditions.disabled');
 
-  useEffect(() => {    
+  useEffect(() => {
     const noIncomeStreamsAreListed = getValues('incomeStreams').length === 0;
     if (hasTruthyIncome && noIncomeStreamsAreListed) {
       append({

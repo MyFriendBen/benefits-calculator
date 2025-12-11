@@ -9,7 +9,7 @@ import { useQueryString } from '../QuestionComponents/questionHooks';
 import FormContinueButton from '../ContinueButton/FormContinueButton';
 import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
 import { STATES } from './SelectStatePage';
-import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
+import { OTHER_PAGE_TITLES, getAppPrefixedTitle } from '../../Assets/pageTitleTags';
 import { useUpdateWhiteLabelAndNavigate } from '../RouterUtil/RedirectToWhiteLabel';
 
 const SelectLanguagePage = () => {
@@ -21,8 +21,8 @@ const SelectLanguagePage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = OTHER_PAGE_TITLES.language;
-  }, []);
+    document.title = getAppPrefixedTitle(whiteLabel, OTHER_PAGE_TITLES.language);
+  }, [whiteLabel]);
 
   const createMenuItems = (optionList: Record<string, string>, disabledFMId: string, disabledFMDefault: string) => {
     const disabledSelectMenuItem = (

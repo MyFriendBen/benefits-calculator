@@ -7,7 +7,7 @@ import PreviousButton from '../PreviousButton/PreviousButton';
 import './Confirmation.css';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import STEP_CONFIRMATIONS from './ConfirmationSteps';
-import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
+import { OTHER_PAGE_TITLES, getAppPrefixedTitle } from '../../Assets/pageTitleTags';
 
 const Confirmation = () => {
   const { uuid, whiteLabel } = useParams();
@@ -15,8 +15,8 @@ const Confirmation = () => {
   const stepDirectory = useStepDirectory();
 
   useEffect(() => {
-    document.title = OTHER_PAGE_TITLES.confirmation;
-  }, []);
+    document.title = getAppPrefixedTitle(whiteLabel, OTHER_PAGE_TITLES.confirmation);
+  }, [whiteLabel]);
 
   useEffect(() => {
     const continueOnEnter = (event: KeyboardEvent) => {

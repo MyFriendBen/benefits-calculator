@@ -2,21 +2,21 @@ import { QuestionName } from '../Types/Questions';
 
 export const QUESTION_TITLES: Record<QuestionName, string> = {
   // This is for steps that get rendered in the QCC
-  zipcode: 'MyFriendBen – Zip and County',
-  householdSize: 'MyFriendBen – Number of Household Members',
-  householdData: 'MyFriendBen – Household Member',
-  hasExpenses: 'MyFriendBen – Expenses',
-  householdAssets: 'MyFriendBen – Assets',
-  hasBenefits: 'MyFriendBen – Existing Benefits',
-  acuteHHConditions: 'MyFriendBen – Near Term Help',
-  referralSource: 'MyFriendBen – Referral',
-  signUpInfo: 'MyFriendBen – Optional Sign Up',
-  energyCalculatorApplianceStatus: 'MyFriendBen – Appliance Broken or Needs Replacement?',
-  energyCalculatorHouseholdData: 'MyFriendBen – Household Member',
-  energyCalculatorUtilityStatus: 'MyFriendBen – Utility Service Status',
-  energyCalculatorElectricityProvider: 'MyFriendBen – Electricity Provider',
-  energyCalculatorGasProvider: 'MyFriendBen – Gas Provider',
-  energyCalculatorExpenses: 'MyFriendBen – Expenses',
+  zipcode: 'Zip and County',
+  householdSize: 'Number of Household Members',
+  householdData: 'Household Member',
+  hasExpenses: 'Expenses',
+  householdAssets: 'Assets',
+  hasBenefits: 'Existing Benefits',
+  acuteHHConditions: 'Near Term Help',
+  referralSource: 'Referral',
+  signUpInfo: 'Optional Sign Up',
+  energyCalculatorApplianceStatus: 'Appliance Broken or Needs Replacement?',
+  energyCalculatorHouseholdData: 'Household Member',
+  energyCalculatorUtilityStatus: 'Utility Service Status',
+  energyCalculatorElectricityProvider: 'Electricity Provider',
+  energyCalculatorGasProvider: 'Gas Provider',
+  energyCalculatorExpenses: 'Expenses',
 };
 
 export type OtherStepName =
@@ -30,12 +30,24 @@ export type OtherStepName =
   | 'energyCalculatorRedirectToMFB';
 
 export const OTHER_PAGE_TITLES: Record<OtherStepName, string> = {
-  language: 'MyFriendBen – Preferred Language',
-  disclaimer: 'MyFriendBen – Legal',
-  state: 'MyFriendBen – State',
-  confirmation: 'MyFriendBen – Confirmation',
-  results: 'MyFriendBen – Results',
+  language: 'Preferred Language',
+  disclaimer: 'Legal',
+  state: 'State',
+  confirmation: 'Confirmation',
+  results: 'Results',
   default: 'MyFriendBen',
-  energyCalculatorLandingPage: 'MyFriendBen – Energy Calculator',
+  energyCalculatorLandingPage: 'Energy Calculator',
   energyCalculatorRedirectToMFB: 'Redirect to MFB',
+};
+
+export type AppKey = 'mfb' | 'cesn';
+
+export const APP_PREFIXES: Record<AppKey, string> = {
+  mfb: 'MyFriendBen - ',
+  cesn: 'Colorado Energy Savings Navigator - ',
+};
+
+export const getAppPrefixedTitle = (whiteLabel: string | undefined, pageTitle: string) => {
+  const currentPrefix = whiteLabel === 'co_energy_calculator' ? APP_PREFIXES.cesn : APP_PREFIXES.mfb;
+  return currentPrefix + pageTitle;
 };

@@ -2,7 +2,7 @@ import { FormattedMessage } from 'react-intl';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
 import { useEffect } from 'react';
-import { OTHER_PAGE_TITLES } from '../../../Assets/pageTitleTags';
+import { OTHER_PAGE_TITLES, APP_PREFIXES } from '../../../Assets/pageTitleTags';
 import { ReactComponent as Apartment } from '../Icons/Apartment.svg';
 import { ReactComponent as Housing } from '../../../Assets/icons/General/residence.svg';
 import { CardActionArea, Card, Stack, CardContent, Box } from '@mui/material';
@@ -11,7 +11,7 @@ import { useQueryString } from '../../QuestionComponents/questionHooks';
 
 const LandingPage = () => {
   useEffect(() => {
-    document.title = OTHER_PAGE_TITLES.energyCalculatorLandingPage;
+    document.title = APP_PREFIXES.cesn + OTHER_PAGE_TITLES.energyCalculatorLandingPage;
   }, []);
 
   const homeownerQueryString = useQueryString({ path: null });

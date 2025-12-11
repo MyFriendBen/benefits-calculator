@@ -14,7 +14,7 @@ import { useConfig, useLocalizedLink } from '../../Config/configHook';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useQueryString } from '../../QuestionComponents/questionHooks';
-import { OTHER_PAGE_TITLES } from '../../../Assets/pageTitleTags';
+import { OTHER_PAGE_TITLES, getAppPrefixedTitle } from '../../../Assets/pageTitleTags';
 import useScreenApi from '../../../Assets/updateScreen';
 import { OverrideableTranslation } from '../../../Assets/languageOptions';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
@@ -50,8 +50,8 @@ const Disclaimer = () => {
   };
 
   useEffect(() => {
-    document.title = OTHER_PAGE_TITLES.disclaimer;
-  }, []);
+    document.title = getAppPrefixedTitle(whiteLabel, OTHER_PAGE_TITLES.disclaimer);
+  }, [whiteLabel]);
 
   const { formatMessage } = useIntl();
   const isChecked = () => {

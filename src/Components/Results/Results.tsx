@@ -27,7 +27,7 @@ import BackAndSaveButtons from './BackAndSaveButtons/BackAndSaveButtons';
 import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
 import { FormattedMessage } from 'react-intl';
 import './Results.css';
-import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
+import { OTHER_PAGE_TITLES, getAppPrefixedTitle } from '../../Assets/pageTitleTags';
 import { FormData } from '../../Types/FormData';
 import filterProgramsGenerator from './Filter/filterPrograms';
 import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRebates';
@@ -123,8 +123,8 @@ const Results = ({ type }: ResultsProps) => {
   }, [uuid]);
 
   useEffect(() => {
-    document.title = OTHER_PAGE_TITLES.results;
-  }, []);
+    document.title = getAppPrefixedTitle(whiteLabel, OTHER_PAGE_TITLES.results);
+  }, [whiteLabel]);
 
   const fetchResults = async () => {
     try {
