@@ -11,12 +11,12 @@
 }
 
 .privacy-note-container {
-font-family: Roboto Slab, serif;
-font-weight: 400;
-font-size: 14px;
-line-height: 1.4;
-margin-top: 1rem;
-max-width: 100%; 
+  font-family: Roboto Slab, serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.4;
+  margin-top: 1rem;
+  max-width: 100%;
 }
 
 .copy-results-text {
