@@ -17,6 +17,7 @@ import { useQueryString } from '../../QuestionComponents/questionHooks';
 import { OTHER_PAGE_TITLES } from '../../../Assets/pageTitleTags';
 import useScreenApi from '../../../Assets/updateScreen';
 import '../../../Components/Steps/Disclaimer/Disclaimer.css';
+import { usePageTitle } from '../../Config/usePageTitle';
 
 const isTrue = (value: boolean) => {
   return value;
@@ -45,9 +46,7 @@ const Disclaimer = () => {
     navigate(`/co_energy_calculator/step-1${queryString}`);
   };
 
-  useEffect(() => {
-    document.title = OTHER_PAGE_TITLES.disclaimer;
-  }, []);
+  usePageTitle(OTHER_PAGE_TITLES.disclaimer);
 
   const { formatMessage } = useIntl();
   const isChecked = () => {
