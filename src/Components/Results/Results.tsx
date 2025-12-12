@@ -27,7 +27,7 @@ import BackAndSaveButtons from './BackAndSaveButtons/BackAndSaveButtons';
 import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
 import { FormattedMessage } from 'react-intl';
 import './Results.css';
-import { OTHER_PAGE_TITLES, getAppPrefixedTitle } from '../../Assets/pageTitleTags';
+import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { FormData } from '../../Types/FormData';
 import filterProgramsGenerator from './Filter/filterPrograms';
 import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRebates';
@@ -35,6 +35,7 @@ import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/reba
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
 import ResultsPopup from './ResultsPopup/ResultsPopup';
 import { getUrbanInstitute2025BaselineSurveyConfig } from './ResultsPopup/configs/urbanInstitute2025BaselineSurvey';
+import { usePageTitle } from '../Config/usePageTitle';
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -122,9 +123,7 @@ const Results = ({ type }: ResultsProps) => {
     dataLayerPush({ event: 'config', user_id: uuid });
   }, [uuid]);
 
-  useEffect(() => {
-    document.title = getAppPrefixedTitle(whiteLabel, OTHER_PAGE_TITLES.results);
-  }, [whiteLabel]);
+  usePageTitle(OTHER_PAGE_TITLES.results);
 
   const fetchResults = async () => {
     try {

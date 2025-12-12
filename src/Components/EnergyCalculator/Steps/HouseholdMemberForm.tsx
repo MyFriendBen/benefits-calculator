@@ -49,13 +49,14 @@ import {
 } from '../../Steps/HouseholdMembers/HelperTextFunctions';
 import { DOLLARS, handleNumbersOnly, numberInputProps, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
 import useScreenApi from '../../../Assets/updateScreen';
-import { QUESTION_TITLES, getAppPrefixedTitle } from '../../../Assets/pageTitleTags';
+import { QUESTION_TITLES } from '../../../Assets/pageTitleTags';
 import { getCurrentMonthYear, YEARS, MAX_AGE } from '../../../Assets/age';
 import { useAgeCalculation } from '../../AgeCalculation/useAgeCalculation';
 import { determineDefaultIncomeByAge } from '../../AgeCalculation/AgeCalculation';
 import '../../../Components/Steps/HouseholdMembers/PersonIncomeBlock.css';
 import { useShouldRedirectToConfirmation } from '../../QuestionComponents/questionHooks';
 import useStepForm from '../../Steps/stepForm';
+import { usePageTitle } from '../../Config/usePageTitle';
 
 const ECHouseholdMemberForm = () => {
   const { formData } = useContext(Context);
@@ -197,9 +198,7 @@ const ECHouseholdMemberForm = () => {
     );
   type FormSchema = z.infer<typeof formSchema>;
 
-  useEffect(() => {
-    document.title = getAppPrefixedTitle(whiteLabel, QUESTION_TITLES.householdData);
-  }, [whiteLabel]);
+  usePageTitle(QUESTION_TITLES.householdData);
 
   const determineDefaultRelationshipToHH = () => {
     if (householdMemberFormData && householdMemberFormData.relationshipToHH) {

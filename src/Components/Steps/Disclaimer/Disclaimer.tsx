@@ -14,12 +14,13 @@ import { useConfig, useLocalizedLink } from '../../Config/configHook';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useQueryString } from '../../QuestionComponents/questionHooks';
-import { OTHER_PAGE_TITLES, getAppPrefixedTitle } from '../../../Assets/pageTitleTags';
+import { OTHER_PAGE_TITLES } from '../../../Assets/pageTitleTags';
 import useScreenApi from '../../../Assets/updateScreen';
 import { OverrideableTranslation } from '../../../Assets/languageOptions';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorDisclaimer from '../../EnergyCalculator/Steps/Disclaimer';
 import './Disclaimer.css';
+import { usePageTitle } from '../../Config/usePageTitle';
 
 const isTrue = (value: boolean) => {
   return value;
@@ -49,9 +50,7 @@ const Disclaimer = () => {
     navigate(`/${whiteLabel}/step-1${queryString}`);
   };
 
-  useEffect(() => {
-    document.title = getAppPrefixedTitle(whiteLabel, OTHER_PAGE_TITLES.disclaimer);
-  }, [whiteLabel]);
+  usePageTitle(OTHER_PAGE_TITLES.disclaimer);
 
   const { formatMessage } = useIntl();
   const isChecked = () => {

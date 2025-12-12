@@ -12,7 +12,8 @@ import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
 import { useUpdateWhiteLabelAndNavigate } from '../RouterUtil/RedirectToWhiteLabel';
 import QuestionDescription from '../QuestionComponents/QuestionDescription';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { OTHER_PAGE_TITLES, getAppPrefixedTitle } from '../../Assets/pageTitleTags';
+import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
+import { usePageTitle } from '../Config/usePageTitle';
 
 export const STATES: { [key: string]: string } = { co: 'Colorado', nc: 'North Carolina' };
 
@@ -22,9 +23,7 @@ const SelectStatePage = () => {
   const queryString = useQueryString();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    document.title = getAppPrefixedTitle(whiteLabel, OTHER_PAGE_TITLES.state);
-  }, [whiteLabel]);
+  usePageTitle(OTHER_PAGE_TITLES.state);
 
   const { formatMessage } = useIntl();
 
