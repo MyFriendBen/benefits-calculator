@@ -27,7 +27,7 @@ const Confirmation = () => {
     return () => {
       document.removeEventListener('keydown', continueOnEnter); // remove event listener on onmount
     };
-  });
+  }, [navigate, whiteLabel, uuid]);
 
   const displayAllFormData = () => {
     return stepDirectory.map((step) => {

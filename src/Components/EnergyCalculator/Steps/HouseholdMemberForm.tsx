@@ -198,7 +198,7 @@ const ECHouseholdMemberForm = () => {
     );
   type FormSchema = z.infer<typeof formSchema>;
 
-  usePageTitle(QUESTION_TITLES.householdData);
+  usePageTitle(QUESTION_TITLES.energyCalculatorHouseholdData);
 
   const determineDefaultRelationshipToHH = () => {
     if (householdMemberFormData && householdMemberFormData.relationshipToHH) {
