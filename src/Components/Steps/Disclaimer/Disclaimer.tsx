@@ -20,7 +20,7 @@ import { OverrideableTranslation } from '../../../Assets/languageOptions';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorDisclaimer from '../../EnergyCalculator/Steps/Disclaimer';
 import './Disclaimer.css';
-import { usePageTitle } from '../../Config/usePageTitle';
+import { usePageTitle } from '../../Common/usePageTitle';
 
 const isTrue = (value: boolean) => {
   return value;

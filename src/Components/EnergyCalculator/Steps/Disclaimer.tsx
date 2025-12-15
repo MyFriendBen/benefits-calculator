@@ -17,7 +17,7 @@ import { useQueryString } from '../../QuestionComponents/questionHooks';
 import { OTHER_PAGE_TITLES } from '../../../Assets/pageTitleTags';
 import useScreenApi from '../../../Assets/updateScreen';
 import '../../../Components/Steps/Disclaimer/Disclaimer.css';
-import { usePageTitle } from '../../Config/usePageTitle';
+import { usePageTitle } from '../../Common/usePageTitle';
 
 const isTrue = (value: boolean) => {
   return value;

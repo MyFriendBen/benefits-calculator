@@ -7,7 +7,7 @@ import { ReactComponent as Housing } from '../../../Assets/icons/General/residen
 import { CardActionArea, Card, Stack, CardContent, Box } from '@mui/material';
 import './LandingPage.css';
 import { useQueryString } from '../../QuestionComponents/questionHooks';
-import { usePageTitle } from '../../Config/usePageTitle';
+import { usePageTitle } from '../../Common/usePageTitle';
 
 const LandingPage = () => {
 

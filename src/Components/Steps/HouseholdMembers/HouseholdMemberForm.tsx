@@ -59,7 +59,7 @@ import { determineDefaultIncomeByAge } from '../../AgeCalculation/AgeCalculation
 import './PersonIncomeBlock.css';
 import { useShouldRedirectToConfirmation } from '../../QuestionComponents/questionHooks';
 import useStepForm from '../stepForm';
-import { usePageTitle } from '../../Config/usePageTitle';
+import { usePageTitle } from '../../Common/usePageTitle';
 
 const HouseholdMemberForm = () => {
   const { formData } = useContext(Context);

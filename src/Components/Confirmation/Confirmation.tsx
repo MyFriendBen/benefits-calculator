@@ -8,7 +8,7 @@ import './Confirmation.css';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import STEP_CONFIRMATIONS from './ConfirmationSteps';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
-import { usePageTitle } from '../Config/usePageTitle';
+import { usePageTitle } from '../Common/usePageTitle';
 
 const Confirmation = () => {
   const { uuid, whiteLabel } = useParams();

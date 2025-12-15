@@ -35,7 +35,7 @@ import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/reba
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
 import ResultsPopup from './ResultsPopup/ResultsPopup';
 import { getUrbanInstitute2025BaselineSurveyConfig } from './ResultsPopup/configs/urbanInstitute2025BaselineSurvey';
-import { usePageTitle } from '../Config/usePageTitle';
+import { usePageTitle } from '../Common/usePageTitle';
 
 type WrapperResultsContext = {
   programs: Program[];

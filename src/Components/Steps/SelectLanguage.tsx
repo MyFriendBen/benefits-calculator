@@ -11,7 +11,7 @@ import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
 import { STATES } from './SelectStatePage';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { useUpdateWhiteLabelAndNavigate } from '../RouterUtil/RedirectToWhiteLabel';
-import { usePageTitle } from '../Config/usePageTitle';
+import { usePageTitle } from '../Common/usePageTitle';
 
 const SelectLanguagePage = () => {
   const { locale, selectLanguage, configLoading } = useContext(Context);

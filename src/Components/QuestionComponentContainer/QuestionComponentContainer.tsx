@@ -16,7 +16,7 @@ import EnergyCalculatorExpenses from '../EnergyCalculator/Steps/Expenses';
 import Appliances from '../EnergyCalculator/Steps/Appliances';
 import Utilities from '../EnergyCalculator/Steps/Utilities';
 import './QuestionComponentContainer.css';
-import { usePageTitle } from '../Config/usePageTitle';
+import { usePageTitle } from '../Common/usePageTitle';
 
 const QuestionComponentContainer = () => {
   let { id } = useParams();

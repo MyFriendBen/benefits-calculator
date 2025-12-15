@@ -56,7 +56,7 @@ import { determineDefaultIncomeByAge } from '../../AgeCalculation/AgeCalculation
 import '../../../Components/Steps/HouseholdMembers/PersonIncomeBlock.css';
 import { useShouldRedirectToConfirmation } from '../../QuestionComponents/questionHooks';
 import useStepForm from '../../Steps/stepForm';
-import { usePageTitle } from '../../Config/usePageTitle';
+import { usePageTitle } from '../../Common/usePageTitle';
 
 const ECHouseholdMemberForm = () => {
   const { formData } = useContext(Context);
