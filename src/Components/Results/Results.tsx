@@ -35,6 +35,7 @@ import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/reba
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
 import ResultsPopup from './ResultsPopup/ResultsPopup';
 import { getUrbanInstitute2025BaselineSurveyConfig } from './ResultsPopup/configs/urbanInstitute2025BaselineSurvey';
+import { usePageTitle } from '../Common/usePageTitle';
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -122,9 +123,7 @@ const Results = ({ type }: ResultsProps) => {
     dataLayerPush({ event: 'config', user_id: uuid });
   }, [uuid]);
 
-  useEffect(() => {
-    document.title = OTHER_PAGE_TITLES.results;
-  }, []);
+  usePageTitle(OTHER_PAGE_TITLES.results);
 
   const fetchResults = async () => {
     try {

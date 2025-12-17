@@ -56,6 +56,7 @@ import { determineDefaultIncomeByAge } from '../../AgeCalculation/AgeCalculation
 import '../../../Components/Steps/HouseholdMembers/PersonIncomeBlock.css';
 import { useShouldRedirectToConfirmation } from '../../QuestionComponents/questionHooks';
 import useStepForm from '../../Steps/stepForm';
+import { usePageTitle } from '../../Common/usePageTitle';
 
 const ECHouseholdMemberForm = () => {
   const { formData } = useContext(Context);
@@ -197,9 +198,7 @@ const ECHouseholdMemberForm = () => {
     );
   type FormSchema = z.infer<typeof formSchema>;
 
-  useEffect(() => {
-    document.title = QUESTION_TITLES.householdData;
-  }, []);
+  usePageTitle(QUESTION_TITLES.energyCalculatorHouseholdData);
 
   const determineDefaultRelationshipToHH = () => {
     if (householdMemberFormData && householdMemberFormData.relationshipToHH) {
@@ -249,7 +248,7 @@ const ECHouseholdMemberForm = () => {
   });
   const watchIsDisabled = watch('conditions.disabled');
 
-  useEffect(() => {    
+  useEffect(() => {
     const noIncomeStreamsAreListed = getValues('incomeStreams').length === 0;
     if (hasTruthyIncome && noIncomeStreamsAreListed) {
       append({

@@ -59,6 +59,7 @@ import { determineDefaultIncomeByAge } from '../../AgeCalculation/AgeCalculation
 import './PersonIncomeBlock.css';
 import { useShouldRedirectToConfirmation } from '../../QuestionComponents/questionHooks';
 import useStepForm from '../stepForm';
+import { usePageTitle } from '../../Common/usePageTitle';
 
 const HouseholdMemberForm = () => {
   const { formData } = useContext(Context);
@@ -240,9 +241,7 @@ const HouseholdMemberForm = () => {
     );
   type FormSchema = z.infer<typeof formSchema>;
 
-  useEffect(() => {
-    document.title = QUESTION_TITLES.householdData;
-  }, []);
+  usePageTitle(QUESTION_TITLES.householdData);
 
   const determineDefaultRelationshipToHH = () => {
     if (householdMemberFormData && householdMemberFormData.relationshipToHH) {

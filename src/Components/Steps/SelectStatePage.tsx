@@ -1,5 +1,6 @@
 import { FormControl, Select, InputLabel, MenuItem, FormHelperText } from '@mui/material';
 import { FormattedMessage, useIntl } from 'react-intl';
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import { useQueryString } from '../QuestionComponents/questionHooks';
@@ -11,6 +12,8 @@ import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
 import { useUpdateWhiteLabelAndNavigate } from '../RouterUtil/RedirectToWhiteLabel';
 import QuestionDescription from '../QuestionComponents/QuestionDescription';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
+import { usePageTitle } from '../Common/usePageTitle';
 
 export const STATES: { [key: string]: string } = { co: 'Colorado', nc: 'North Carolina' };
 
@@ -19,6 +22,8 @@ const SelectStatePage = () => {
 
   const queryString = useQueryString();
   const navigate = useNavigate();
+
+  usePageTitle(OTHER_PAGE_TITLES.state);
 
   const { formatMessage } = useIntl();
 
