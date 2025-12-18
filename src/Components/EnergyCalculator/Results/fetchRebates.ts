@@ -85,13 +85,22 @@ function isActiveRebate(rebate: any) {
   const todayDateOnly = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
 
   if (rebate.end_date) {
+    let rebateEndDate: Date | null = null;
+
+    // Preferred strict YYYY-MM-DD parsing
     const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(rebate.end_date);
     if (match) {
       const [, year, month, day] = match;
-      const rebateEndDate = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
-      //Expired rebates -> hide
-      if (rebateEndDate < todayDateOnly) return false;
+      rebateEndDate = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+    } else {
+      // Fallback for ISO-like or other valid date formats
+      const parsed = new Date(rebate.end_date);
+      if (!Number.isNaN(parsed.getTime())) {
+        rebateEndDate = parsed;
+      }
     }
+    //Expired rebates -> hide
+    if (rebateEndDate && rebateEndDate < todayDateOnly) return false;
   }
 
   //Paused rebates -> hide
