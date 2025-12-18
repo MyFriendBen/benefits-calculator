@@ -80,6 +80,35 @@ function createQueryString(formData: FormData, lang: Language) {
   return `?${query.toString()}`;
 }
 
+function isActiveRebate(rebate: any) {
+  const today = new Date();
+  const todayDateOnly = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+
+  if (rebate.end_date) {
+    let rebateEndDate: Date | null = null;
+
+    // Preferred strict YYYY-MM-DD parsing
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(rebate.end_date);
+    if (match) {
+      const [, year, month, day] = match;
+      rebateEndDate = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+    } else {
+      // Fallback for ISO-like or other valid date formats
+      const parsed = new Date(rebate.end_date);
+      if (!Number.isNaN(parsed.getTime())) {
+        rebateEndDate = parsed;
+      }
+    }
+    //Expired rebates -> hide
+    if (rebateEndDate && rebateEndDate < todayDateOnly) return false;
+  }
+
+  //Paused rebates -> hide
+  if (rebate.ira_status === 'paused') return false;
+
+  return true;
+}
+
 async function getRebates(formData: FormData, lang: Language) {
   const queryString = createQueryString(formData, lang);
   const apiUrl = `https://api.rewiringamerica.org/api/v1/calculator${queryString}`;
@@ -95,7 +124,10 @@ async function getRebates(formData: FormData, lang: Language) {
 
   const rebateCategories: EnergyCalculatorRebateCategory[] = [];
 
-  for (const rebate of data.incentives) {
+  //active rebates filter
+  const activeRebates = data.incentives.filter(isActiveRebate);
+
+  for (const rebate of activeRebates) {
     const categories = new Set<EnergyCalculatorRebateCategoryType>();
 
     for (const item of rebate.items) {
