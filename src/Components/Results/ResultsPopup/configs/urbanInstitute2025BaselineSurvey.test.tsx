@@ -6,6 +6,14 @@ jest.mock('react-intl', () => ({
   FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => defaultMessage,
 }));
 
+/**
+ * NOTE: Survey is TEMPORARILY DISABLED
+ * The ELIGIBLE_STATES constant is currently set to [] (empty array)
+ * All shouldShow() calls will return false until the survey is re-enabled.
+ *
+ * To re-enable tests for when survey is active, restore ELIGIBLE_STATES = ['co', 'nc']
+ * in urbanInstitute2025BaselineSurvey.tsx and update tests accordingly.
+ */
 describe('urbanInstitute2025BaselineSurvey', () => {
   const createMockFormData = (age: number | null = 25, householdSize: number = 1): FormData => ({
     householdData: Array.from({ length: householdSize }, (_, index) => ({
@@ -31,19 +39,21 @@ describe('urbanInstitute2025BaselineSurvey', () => {
   });
 
   describe('Eligibility Checks', () => {
-    describe('State Eligibility', () => {
-      it('returns shouldShow true for Colorado (co)', () => {
+    describe('State Eligibility (Survey Disabled)', () => {
+      // Survey is currently disabled - ELIGIBLE_STATES = []
+      // All states should return false until re-enabled
+      it('returns shouldShow false for Colorado (co) - survey disabled', () => {
         const formData = createMockFormData();
         const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'en', 'test-uuid');
 
-        expect(config.shouldShow()).toBe(true);
+        expect(config.shouldShow()).toBe(false);
       });
 
-      it('returns shouldShow true for North Carolina (nc)', () => {
+      it('returns shouldShow false for North Carolina (nc) - survey disabled', () => {
         const formData = createMockFormData();
         const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'nc', 'en', 'test-uuid');
 
-        expect(config.shouldShow()).toBe(true);
+        expect(config.shouldShow()).toBe(false);
       });
 
       it('returns shouldShow false for other states', () => {
@@ -68,19 +78,20 @@ describe('urbanInstitute2025BaselineSurvey', () => {
       });
     });
 
-    describe('Age Eligibility', () => {
-      it('returns shouldShow true when head of household is exactly 18', () => {
+    describe('Age Eligibility (Survey Disabled)', () => {
+      // Survey is currently disabled - all tests return false regardless of age
+      it('returns shouldShow false when head of household is exactly 18 - survey disabled', () => {
         const formData = createMockFormData(18);
         const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'en', 'test-uuid');
 
-        expect(config.shouldShow()).toBe(true);
+        expect(config.shouldShow()).toBe(false);
       });
 
-      it('returns shouldShow true when head of household is over 18', () => {
+      it('returns shouldShow false when head of household is over 18 - survey disabled', () => {
         const formData = createMockFormData(25);
         const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'en', 'test-uuid');
 
-        expect(config.shouldShow()).toBe(true);
+        expect(config.shouldShow()).toBe(false);
       });
 
       it('returns shouldShow false when head of household is under 18', () => {
@@ -142,7 +153,7 @@ describe('urbanInstitute2025BaselineSurvey', () => {
         expect(config.shouldShow()).toBe(false);
       });
 
-      it('only checks first household member age, not others', () => {
+      it('returns shouldShow false regardless of household members - survey disabled', () => {
         const formData = createMockFormData(25, 3);
         // Set second member age to under 18
         formData.householdData[1].age = 10;
@@ -150,26 +161,27 @@ describe('urbanInstitute2025BaselineSurvey', () => {
 
         const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'en', 'test-uuid');
 
-        expect(config.shouldShow()).toBe(true);
+        expect(config.shouldShow()).toBe(false);
       });
     });
 
-    describe('Combined Eligibility', () => {
-      it('returns shouldShow true when all criteria met', () => {
+    describe('Combined Eligibility (Survey Disabled)', () => {
+      // Survey is currently disabled - all combinations return false
+      it('returns shouldShow false even when all criteria would be met - survey disabled', () => {
         const formData = createMockFormData(25);
         const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'en', 'test-uuid');
 
-        expect(config.shouldShow()).toBe(true);
+        expect(config.shouldShow()).toBe(false);
       });
 
-      it('returns shouldShow false when state is ineligible even if age is valid', () => {
+      it('returns shouldShow false when state is ineligible', () => {
         const formData = createMockFormData(25);
         const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'ny', 'en', 'test-uuid');
 
         expect(config.shouldShow()).toBe(false);
       });
 
-      it('returns shouldShow false when age is ineligible even if state is valid', () => {
+      it('returns shouldShow false when age is ineligible', () => {
         const formData = createMockFormData(17);
         const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'en', 'test-uuid');
 
@@ -259,38 +271,39 @@ describe('urbanInstitute2025BaselineSurvey', () => {
     });
   });
 
-  describe('shouldShow Function Behavior', () => {
-    it('evaluates shouldShow with current formData and whiteLabel', () => {
+  describe('shouldShow Function Behavior (Survey Disabled)', () => {
+    // Survey is currently disabled - shouldShow always returns false
+    it('always returns false when survey is disabled', () => {
       const formData = createMockFormData(25);
       const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'en', 'test-uuid');
 
-      // First call should return true
-      expect(config.shouldShow()).toBe(true);
+      // Survey is disabled, so always returns false
+      expect(config.shouldShow()).toBe(false);
 
       // Mutate the formData object to set age to 17
       formData.householdData[0].age = 17;
 
-      // The shouldShow function reads from the current formData object, so mutating age to 17
-      // should cause it to return false (since 17 < 18)
+      // Still returns false because survey is disabled
       expect(config.shouldShow()).toBe(false);
     });
 
-    it('can be called multiple times', () => {
+    it('can be called multiple times consistently', () => {
       const formData = createMockFormData();
       const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'en', 'test-uuid');
 
-      expect(config.shouldShow()).toBe(true);
-      expect(config.shouldShow()).toBe(true);
-      expect(config.shouldShow()).toBe(true);
+      expect(config.shouldShow()).toBe(false);
+      expect(config.shouldShow()).toBe(false);
+      expect(config.shouldShow()).toBe(false);
     });
   });
 
-  describe('Edge Cases and Robustness', () => {
-    it('handles large age values', () => {
+  describe('Edge Cases and Robustness (Survey Disabled)', () => {
+    // Survey is disabled - all shouldShow tests return false
+    it('handles large age values - returns false when survey disabled', () => {
       const formData = createMockFormData(120);
       const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'en', 'test-uuid');
 
-      expect(config.shouldShow()).toBe(true);
+      expect(config.shouldShow()).toBe(false);
     });
 
     it('handles zero age', () => {
