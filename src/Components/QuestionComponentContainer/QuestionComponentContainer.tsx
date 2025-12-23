@@ -16,6 +16,7 @@ import EnergyCalculatorExpenses from '../EnergyCalculator/Steps/Expenses';
 import Appliances from '../EnergyCalculator/Steps/Appliances';
 import Utilities from '../EnergyCalculator/Steps/Utilities';
 import './QuestionComponentContainer.css';
+import { usePageTitle } from '../Common/usePageTitle';
 
 const QuestionComponentContainer = () => {
   let { id } = useParams();
@@ -25,13 +26,8 @@ const QuestionComponentContainer = () => {
   }
   const questionName = useStepName(+id);
 
-  useEffect(() => {
-    if (questionName === undefined) {
-      document.title = OTHER_PAGE_TITLES.default;
-      return;
-    }
-    document.title = QUESTION_TITLES[questionName];
-  }, [questionName]);
+  const pageTitle = questionName === undefined ? OTHER_PAGE_TITLES.default : QUESTION_TITLES[questionName];
+  usePageTitle(pageTitle)
 
   switch (questionName) {
     case 'zipcode':

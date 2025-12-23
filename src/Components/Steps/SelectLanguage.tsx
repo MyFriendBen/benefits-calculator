@@ -11,6 +11,7 @@ import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
 import { STATES } from './SelectStatePage';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { useUpdateWhiteLabelAndNavigate } from '../RouterUtil/RedirectToWhiteLabel';
+import { usePageTitle } from '../Common/usePageTitle';
 
 const SelectLanguagePage = () => {
   const { locale, selectLanguage, configLoading } = useContext(Context);
@@ -20,9 +21,7 @@ const SelectLanguagePage = () => {
   const queryString = useQueryString();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    document.title = OTHER_PAGE_TITLES.language;
-  }, []);
+  usePageTitle(OTHER_PAGE_TITLES.language);
 
   const createMenuItems = (optionList: Record<string, string>, disabledFMId: string, disabledFMDefault: string) => {
     const disabledSelectMenuItem = (

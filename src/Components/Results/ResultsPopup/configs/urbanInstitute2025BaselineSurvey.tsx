@@ -21,7 +21,9 @@ import { FormData } from '../../../../Types/FormData';
  */
 
 // Constants
-const ELIGIBLE_STATES = ['co', 'nc'] as const;
+// TEMPORARILY DISABLED - Survey paused for both CO and NC
+// To re-enable, restore: const ELIGIBLE_STATES = ['co', 'nc'] as const;
+const ELIGIBLE_STATES = [] as const;
 const ELIGIBLE_LOCALES = ['en', 'es'] as const;
 const MIN_AGE = 18;
 const SURVEY_BASE_URL = 'https://urban.co1.qualtrics.com/jfe/form/SV_9EojHuKftrhVpmC';
@@ -41,7 +43,7 @@ function checkSurveyEligibility(formData: FormData, whiteLabel: string | undefin
     return false;
   }
 
-  const isEligibleState = ELIGIBLE_STATES.includes(whiteLabel as typeof ELIGIBLE_STATES[number]);
+  const isEligibleState = ELIGIBLE_STATES.includes(whiteLabel as (typeof ELIGIBLE_STATES)[number]);
 
   if (!isEligibleState) {
     return false;
@@ -50,7 +52,7 @@ function checkSurveyEligibility(formData: FormData, whiteLabel: string | undefin
   // Check locale (must be English or Spanish)
   // Support locale formats like 'en', 'en-US', 'es', 'es-MX', etc.
   const localePrefix = locale.toLowerCase().split('-')[0];
-  const isEligibleLocale = ELIGIBLE_LOCALES.includes(localePrefix as typeof ELIGIBLE_LOCALES[number]);
+  const isEligibleLocale = ELIGIBLE_LOCALES.includes(localePrefix as (typeof ELIGIBLE_LOCALES)[number]);
 
   if (!isEligibleLocale) {
     return false;
@@ -88,7 +90,7 @@ export function getUrbanInstitute2025BaselineSurveyConfig(
   formData: FormData,
   whiteLabel: string | undefined,
   locale: string,
-  uuid?: string
+  uuid?: string,
 ) {
   // Build the survey URL based on language
   const isSpanish = locale === SPANISH_LOCALE;
@@ -108,7 +110,9 @@ export function getUrbanInstitute2025BaselineSurveyConfig(
     ),
     linkUrl: surveyUrl,
     linkText: <FormattedMessage id="resultsPopup.urbanInstitute.button" defaultMessage="Take Survey" />,
-    minimizedText: <FormattedMessage id="resultsPopup.urbanInstitute.minimized" defaultMessage="Help Us Improve - Get $10" />,
+    minimizedText: (
+      <FormattedMessage id="resultsPopup.urbanInstitute.minimized" defaultMessage="Help Us Improve - Get $10" />
+    ),
     startMinimized: true,
   };
 }

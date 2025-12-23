@@ -20,6 +20,7 @@ import { OverrideableTranslation } from '../../../Assets/languageOptions';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorDisclaimer from '../../EnergyCalculator/Steps/Disclaimer';
 import './Disclaimer.css';
+import { usePageTitle } from '../../Common/usePageTitle';
 
 const isTrue = (value: boolean) => {
   return value;
@@ -49,9 +50,7 @@ const Disclaimer = () => {
     navigate(`/${whiteLabel}/step-1${queryString}`);
   };
 
-  useEffect(() => {
-    document.title = OTHER_PAGE_TITLES.disclaimer;
-  }, []);
+  usePageTitle(OTHER_PAGE_TITLES.disclaimer);
 
   const { formatMessage } = useIntl();
   const isChecked = () => {

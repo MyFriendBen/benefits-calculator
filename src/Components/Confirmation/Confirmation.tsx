@@ -8,15 +8,14 @@ import './Confirmation.css';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import STEP_CONFIRMATIONS from './ConfirmationSteps';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
+import { usePageTitle } from '../Common/usePageTitle';
 
 const Confirmation = () => {
   const { uuid, whiteLabel } = useParams();
   const navigate = useNavigate();
   const stepDirectory = useStepDirectory();
 
-  useEffect(() => {
-    document.title = OTHER_PAGE_TITLES.confirmation;
-  }, []);
+  usePageTitle(OTHER_PAGE_TITLES.confirmation);
 
   useEffect(() => {
     const continueOnEnter = (event: KeyboardEvent) => {
@@ -28,7 +27,7 @@ const Confirmation = () => {
     return () => {
       document.removeEventListener('keydown', continueOnEnter); // remove event listener on onmount
     };
-  });
+  }, [navigate, whiteLabel, uuid]);
 
   const displayAllFormData = () => {
     return stepDirectory.map((step) => {
