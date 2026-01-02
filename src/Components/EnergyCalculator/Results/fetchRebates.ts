@@ -98,6 +98,14 @@ function isActiveRebate(rebate: EnergyCalculatorRebate) {
       const parsed = new Date(rebate.end_date);
       if (!Number.isNaN(parsed.getTime())) {
         rebateEndDate = parsed;
+      } else {
+        // Log parsing failure for debugging
+        console.warn(
+          `Failed to parse end_date for rebate: ${rebate.short_description || 'unknown'}`,
+          `Raw end_date: "${rebate.end_date}"`,
+        );
+        // Treat unparseable dates as expired for safety
+        return false;
       }
     }
     // Expired rebates -> hide
