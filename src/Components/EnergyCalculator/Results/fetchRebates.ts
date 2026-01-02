@@ -12,6 +12,7 @@ import {
   ENERGY_CALCULATOR_CATEGORY_MAP,
   ENERGY_CALCULATOR_CATEGORY_TITLE_MAP,
   ENERGY_CALCULATOR_ITEMS,
+  EnergyCalculatorRebate
 } from './rebateTypes';
 import { sortRebateCategories } from './sortRebates';
 
@@ -80,7 +81,7 @@ function createQueryString(formData: FormData, lang: Language) {
   return `?${query.toString()}`;
 }
 
-function isActiveRebate(rebate: any) {
+function isActiveRebate(rebate: EnergyCalculatorRebate) {
   const today = new Date();
   const todayDateOnly = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
 
@@ -99,11 +100,11 @@ function isActiveRebate(rebate: any) {
         rebateEndDate = parsed;
       }
     }
-    //Expired rebates -> hide
+    // Expired rebates -> hide
     if (rebateEndDate && rebateEndDate < todayDateOnly) return false;
   }
 
-  //Paused rebates -> hide
+  // Paused rebates -> hide
   if (rebate.ira_status === 'paused') return false;
 
   return true;
@@ -124,7 +125,7 @@ async function getRebates(formData: FormData, lang: Language) {
 
   const rebateCategories: EnergyCalculatorRebateCategory[] = [];
 
-  //active rebates filter
+  // Active rebates filter
   const activeRebates = data.incentives.filter(isActiveRebate);
 
   for (const rebate of activeRebates) {
