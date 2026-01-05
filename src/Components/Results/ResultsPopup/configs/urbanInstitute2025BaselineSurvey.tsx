@@ -51,7 +51,7 @@ function checkSurveyEligibility(formData: FormData, whiteLabel: string | undefin
   }
 
   // Check locale (must be English or Spanish)
-  // Support locale formats like 'en', 'en-US', 'es', 'es-MX', etc.
+  // Handles locale formats like 'en-us', 'es', 'pt-br', etc.
   const localePrefix = locale.toLowerCase().split('-')[0];
   const isEligibleLocale = ELIGIBLE_LOCALES.includes(localePrefix as (typeof ELIGIBLE_LOCALES)[number]);
 
@@ -94,7 +94,7 @@ export function getUrbanInstitute2025BaselineSurveyConfig(
   uuid?: string,
 ) {
   // Build the survey URL based on language
-  // Support locale formats like 'es', 'es-MX', 'es-ES', etc.
+  // Handles locale formats like 'en-us', 'es', etc.
   const localePrefix = locale.toLowerCase().split('-')[0];
   const isSpanish = localePrefix === SPANISH_LOCALE;
   const screenerId = uuid ?? '';

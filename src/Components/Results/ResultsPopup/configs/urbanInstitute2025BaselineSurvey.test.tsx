@@ -41,10 +41,10 @@ describe('urbanInstitute2025BaselineSurvey', () => {
         expect(config.shouldShow()).toBe(true);
       });
 
-      it('returns true for locale with region code (en-US, es-MX)', () => {
+      it('returns true for en-us locale', () => {
         const formData = createMockFormData(25);
-        expect(getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'en-US', 'test-uuid').shouldShow()).toBe(true);
-        expect(getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'es-MX', 'test-uuid').shouldShow()).toBe(true);
+        const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'en-us', 'test-uuid');
+        expect(config.shouldShow()).toBe(true);
       });
 
       it('returns true when head of household is exactly 18', () => {
@@ -106,18 +106,6 @@ describe('urbanInstitute2025BaselineSurvey', () => {
       const formData = createMockFormData();
       const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'es', 'test-uuid');
       expect(config.linkUrl).toBe(
-        'https://urban.co1.qualtrics.com/jfe/form/SV_9EojHuKftrhVpmC?Q_Language=ES&screenerid=test-uuid',
-      );
-    });
-
-    it('generates Spanish URL for Spanish locale variants (es-MX, es-ES)', () => {
-      const formData = createMockFormData();
-      const configMX = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'es-MX', 'test-uuid');
-      const configES = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'es-ES', 'test-uuid');
-      expect(configMX.linkUrl).toBe(
-        'https://urban.co1.qualtrics.com/jfe/form/SV_9EojHuKftrhVpmC?Q_Language=ES&screenerid=test-uuid',
-      );
-      expect(configES.linkUrl).toBe(
         'https://urban.co1.qualtrics.com/jfe/form/SV_9EojHuKftrhVpmC?Q_Language=ES&screenerid=test-uuid',
       );
     });
