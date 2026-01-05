@@ -21,10 +21,11 @@ import { FormData } from '../../../../Types/FormData';
  */
 
 // Constants
-// TEMPORARILY DISABLED - Survey paused for both CO and NC
-// To re-enable, restore: const ELIGIBLE_STATES = ['co', 'nc'] as const;
-const ELIGIBLE_STATES = [] as const;
+// Set to false to disable the survey without changing other logic
+const SURVEY_ENABLED = true;
+const ELIGIBLE_STATES = ['co', 'nc'] as const;
 const ELIGIBLE_LOCALES = ['en', 'es'] as const;
+
 const MIN_AGE = 18;
 const SURVEY_BASE_URL = 'https://urban.co1.qualtrics.com/jfe/form/SV_9EojHuKftrhVpmC';
 const SPANISH_LOCALE = 'es';
@@ -50,7 +51,7 @@ function checkSurveyEligibility(formData: FormData, whiteLabel: string | undefin
   }
 
   // Check locale (must be English or Spanish)
-  // Support locale formats like 'en', 'en-US', 'es', 'es-MX', etc.
+  // Handles locale formats like 'en-us', 'es', 'pt-br', etc.
   const localePrefix = locale.toLowerCase().split('-')[0];
   const isEligibleLocale = ELIGIBLE_LOCALES.includes(localePrefix as (typeof ELIGIBLE_LOCALES)[number]);
 
@@ -93,7 +94,9 @@ export function getUrbanInstitute2025BaselineSurveyConfig(
   uuid?: string,
 ) {
   // Build the survey URL based on language
-  const isSpanish = locale === SPANISH_LOCALE;
+  // Handles locale formats like 'en-us', 'es', etc.
+  const localePrefix = locale.toLowerCase().split('-')[0];
+  const isSpanish = localePrefix === SPANISH_LOCALE;
   const screenerId = uuid ?? '';
 
   const surveyUrl = isSpanish
@@ -101,7 +104,7 @@ export function getUrbanInstitute2025BaselineSurveyConfig(
     : `${SURVEY_BASE_URL}?screenerid=${screenerId}`;
 
   return {
-    shouldShow: () => checkSurveyEligibility(formData, whiteLabel, locale),
+    shouldShow: () => SURVEY_ENABLED && checkSurveyEligibility(formData, whiteLabel, locale),
     message: (
       <FormattedMessage
         id="resultsPopup.urbanInstitute.message"
