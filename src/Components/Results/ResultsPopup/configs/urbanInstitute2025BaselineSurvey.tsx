@@ -94,7 +94,9 @@ export function getUrbanInstitute2025BaselineSurveyConfig(
   uuid?: string,
 ) {
   // Build the survey URL based on language
-  const isSpanish = locale === SPANISH_LOCALE;
+  // Support locale formats like 'es', 'es-MX', 'es-ES', etc.
+  const localePrefix = locale.toLowerCase().split('-')[0];
+  const isSpanish = localePrefix === SPANISH_LOCALE;
   const screenerId = uuid ?? '';
 
   const surveyUrl = isSpanish

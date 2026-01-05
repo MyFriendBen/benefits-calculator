@@ -110,6 +110,18 @@ describe('urbanInstitute2025BaselineSurvey', () => {
       );
     });
 
+    it('generates Spanish URL for Spanish locale variants (es-MX, es-ES)', () => {
+      const formData = createMockFormData();
+      const configMX = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'es-MX', 'test-uuid');
+      const configES = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'es-ES', 'test-uuid');
+      expect(configMX.linkUrl).toBe(
+        'https://urban.co1.qualtrics.com/jfe/form/SV_9EojHuKftrhVpmC?Q_Language=ES&screenerid=test-uuid',
+      );
+      expect(configES.linkUrl).toBe(
+        'https://urban.co1.qualtrics.com/jfe/form/SV_9EojHuKftrhVpmC?Q_Language=ES&screenerid=test-uuid',
+      );
+    });
+
     it('handles missing uuid', () => {
       const formData = createMockFormData();
       const config = getUrbanInstitute2025BaselineSurveyConfig(formData, 'co', 'en', undefined);
