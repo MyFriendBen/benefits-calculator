@@ -21,10 +21,11 @@ import { FormData } from '../../../../Types/FormData';
  */
 
 // Constants
-// TEMPORARILY DISABLED - Survey paused for both CO and NC
-// To re-enable, restore: const ELIGIBLE_STATES = ['co', 'nc'] as const;
-const ELIGIBLE_STATES = [] as const;
+// Set to false to disable the survey without changing other logic
+const SURVEY_ENABLED = true;
+const ELIGIBLE_STATES = ['co', 'nc'] as const;
 const ELIGIBLE_LOCALES = ['en', 'es'] as const;
+
 const MIN_AGE = 18;
 const SURVEY_BASE_URL = 'https://urban.co1.qualtrics.com/jfe/form/SV_9EojHuKftrhVpmC';
 const SPANISH_LOCALE = 'es';
@@ -101,7 +102,7 @@ export function getUrbanInstitute2025BaselineSurveyConfig(
     : `${SURVEY_BASE_URL}?screenerid=${screenerId}`;
 
   return {
-    shouldShow: () => checkSurveyEligibility(formData, whiteLabel, locale),
+    shouldShow: () => SURVEY_ENABLED && checkSurveyEligibility(formData, whiteLabel, locale),
     message: (
       <FormattedMessage
         id="resultsPopup.urbanInstitute.message"
