@@ -95,9 +95,9 @@ function RebateCard({ rebate, rebateCategory }: RebateProps) {
           {rebateTypes(rebate).map((type, index) => {
             return <span key={index}>{type}</span>;
           })}
-          {rebate.authority_type === 'federal' && rebate.payment_methods.includes('tax_credit') && rebate.end_date && (
+          {rebate.end_date && (
             <div className="energy-calculator-expiration-badge">
-              <WarningIcon className="energy-calculator-expiration-icon" />
+              <WarningIcon className="energy-calculator-expiration-icon" role="img" aria-label="Warning expiration end date"/>
               <FormattedMessage
                 id="energyCalculator.rebatePage.expiration.ending"
                 defaultMessage="Ending on {date}"
