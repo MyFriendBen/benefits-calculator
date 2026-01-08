@@ -334,11 +334,6 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
         )}
       </div>
       <div className="content-width">
-        <section className="program-description">
-          <ResultsTranslate translation={program.description} />
-        </section>
-      </div>
-      <div className="content-width">
         {program.navigators.length > 0 && (
           <section className="apply-box">
             <h2 className="content-header">
@@ -410,6 +405,9 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
             </ul>
           </section>
         )}
+        <section className="program-description">
+          <ResultsTranslate translation={program.description} />
+        </section>
         {program.required_programs.length > 0 && (
           <section className="program-page-required-programs-section">
             <h3 className="program-page-required-programs-header">
