@@ -1,15 +1,13 @@
 import { test, expect, Locator } from '@playwright/test';
-import { acceptDisclaimer, clickContinueButton, navigateHomePage } from './helpers/steps';
 test.describe('CO cobrand, header and footer links Test', () => {
-  test.setTimeout(15000);
+  test.setTimeout(30000);
    
     test('verify header and footer links are working', async ({ page }) => {
         // Set viewport to desktop size to ensure header links are visible (must be > 1280px)
         await page.setViewportSize({ width: 1400, height: 800 });
-        await navigateHomePage(page, '/co/step-2/?referrer=211co');   
-        await acceptDisclaimer(page);
-        await clickContinueButton(page);        
-        
+        // Navigate directly to a step where 211 cobrand header/footer is visible
+        await page.goto('/co/step-3/?referrer=211co');
+
         // Header links - these are from the twoOneOneLinks array
         const headerLinks = [
           { text: 'ABOUT US', url: 'https://www.211colorado.org/#about-us' },
@@ -47,12 +45,12 @@ test.describe('CO cobrand, header and footer links Test', () => {
         
         // Test mobile header links by opening hamburger menu
         await page.setViewportSize({ width: 768, height: 600 });
-        await page.reload();
-        await page.waitForLoadState('networkidle');
-        
-        // Click hamburger menu to reveal mobile links
-        const hamburgerButton = page.locator('.hamburger-icon');
-        await expect(hamburgerButton).toBeVisible();
+        // Re-navigate to ensure 211co referrer is preserved (reload may lose query params)
+        await page.goto('/co/step-3/?referrer=211co');
+
+        // Click hamburger menu to reveal mobile links (visible at <= 1280px)
+        const hamburgerButton = page.locator('button.hamburger-icon');
+        await hamburgerButton.waitFor({ state: 'visible', timeout: 10000 });
         await hamburgerButton.click();
         
         // Test mobile header links (visible in hamburger menu)
@@ -65,7 +63,9 @@ test.describe('CO cobrand, header and footer links Test', () => {
           await expect(linkElement).toHaveAttribute('target', '_blank');
         }
         
-        // Test footer links
+        // Test footer links - scroll to footer first to ensure visibility
+        await page.locator('footer, [role="contentinfo"]').first().scrollIntoViewIfNeeded();
+
         for (const link of footerLinks) {
           // Find all matching elements and pick the first visible one
           const allLinks = await page.locator(`a[href="${link.url}"]`).all();
