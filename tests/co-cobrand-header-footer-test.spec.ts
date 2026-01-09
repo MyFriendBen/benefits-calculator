@@ -50,7 +50,6 @@ test.describe('CO cobrand, header and footer links Test', () => {
 
         // Click hamburger menu to reveal mobile links (visible at <= 1280px)
         const hamburgerButton = page.locator('button.hamburger-icon');
-        await hamburgerButton.waitFor({ state: 'visible', timeout: 10000 });
         await hamburgerButton.click();
         
         // Test mobile header links (visible in hamburger menu)
