@@ -217,6 +217,7 @@ export type ApiFormData = {
   has_medicaid_hi?: boolean | null;
   has_medicare_hi?: boolean | null;
   has_nc_medicare_savings?: boolean | null;
+  has_tx_dart?: boolean | null;
   has_chp_hi?: boolean | null;
   has_no_hi?: boolean | null;
   needs_food: boolean | null;
