@@ -101,6 +101,7 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     has_cfhc: formData.benefits.cfhc ?? null,
     has_shitc: formData.benefits.shitc ?? null,
     has_tx_dart: formData.benefits.tx_dart ?? null,
+    has_harris_county_rides: formData.benefits.harris_county_rides ?? null,
     referral_source: formData.referralSource ?? null,
     referrer_code: formData.immutableReferrer ?? null,
     path: formData.path ?? null,
