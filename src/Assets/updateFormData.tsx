@@ -87,6 +87,7 @@ export function useUpdateFormData() {
         cesn_heap: response.has_cesn_heap ?? false,
         cfhc: response.has_cfhc ?? false,
         shitc: response.has_shitc ?? false,
+        tx_dart: response.has_tx_dart ?? false,
         harris_county_rides: response.has_harris_county_rides ?? false,
       },
       referralSource: response.referral_source ?? undefined,
