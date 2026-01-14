@@ -410,7 +410,7 @@ export const renderCategoryDescription = (rebateType: EnergyCalculatorRebateCate
           defaultMessage="You may qualify for savings on the cost of a new or used electric vehicle (EV) or new electric bike (eBike). EVs cost less to maintain than gas-powered cars, in addition to being quieter, and having longer-lasting brakes and lower emissions. E-bikes are a safe, reliable, and quick method of transportation that can reduce many short vehicle trips. For more information on the benefits and considerations of transitioning to an EV, visit "
         />
       ),
-      href: 'https://energyoffice.colorado.gov/transportation/electric-vehicles',
+      href: 'https://homes.rewiringamerica.org/projects/driving-homeowner',
     },
   };
   const categoryDescription = categoryDescriptionMap[rebateType].formattedMessage;
