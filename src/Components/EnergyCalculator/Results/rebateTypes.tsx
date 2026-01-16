@@ -57,7 +57,7 @@ export const ENERGY_CALCULATOR_ITEMS = [
   'rooftop_solar_installation',
   'smart_thermostat',
   'wall_insulation',
-  // electric vehicles
+  // electric vehicles and bikes
   'new_electric_vehicle',
   'used_electric_vehicle',
   'new_plugin_hybrid_vehicle',
@@ -135,7 +135,7 @@ export interface EnergyCalculatorAPIResponse {
 
 export type EnergyCalculatorRebate = EnergyCalculatorIncentive;
 
-export type EnergyCalculatorRebateCategoryType = 'hvac' | 'waterHeater' | 'stove' | 'efficiencyWeatherization' | 'electricVehicles';
+export type EnergyCalculatorRebateCategoryType = 'hvac' | 'waterHeater' | 'stove' | 'efficiencyWeatherization' | 'electricVehiclesAndBikes';
 
 export const ENERGY_CALCULATOR_CATEGORY_MAP: Record<EnergyCalculatorItemType, EnergyCalculatorRebateCategoryType> = {
   air_to_water_heat_pump: 'hvac',
@@ -167,12 +167,12 @@ export const ENERGY_CALCULATOR_CATEGORY_MAP: Record<EnergyCalculatorItemType, En
   rooftop_solar_installation: 'efficiencyWeatherization',
   smart_thermostat: 'efficiencyWeatherization',
   wall_insulation: 'efficiencyWeatherization',
-  new_electric_vehicle: 'electricVehicles',
-  used_electric_vehicle: 'electricVehicles',
-  new_plugin_hybrid_vehicle: 'electricVehicles',
-  used_plugin_hybrid_vehicle: 'electricVehicles',
-  electric_vehicle_charger: 'electricVehicles',
-  ebike: 'electricVehicles',
+  new_electric_vehicle: 'electricVehiclesAndBikes',
+  used_electric_vehicle: 'electricVehiclesAndBikes',
+  new_plugin_hybrid_vehicle: 'electricVehiclesAndBikes',
+  used_plugin_hybrid_vehicle: 'electricVehiclesAndBikes',
+  electric_vehicle_charger: 'electricVehiclesAndBikes',
+  ebike: 'electricVehiclesAndBikes',
 };
 
 export const ENERGY_CALCULATOR_CATEGORY_TITLE_MAP: Record<EnergyCalculatorRebateCategoryType, FormattedMessageType> = {
@@ -192,10 +192,10 @@ export const ENERGY_CALCULATOR_CATEGORY_TITLE_MAP: Record<EnergyCalculatorRebate
       defaultMessage="Efficiency & Weatherization"
     />
   ),
-  electricVehicles: (
+  electricVehiclesAndBikes: (
     <FormattedMessage
-      id="energyCalculator.results.category.electricVehicles.title"
-      defaultMessage="Electric Vehicles"
+      id="energyCalculator.results.category.electricVehiclesAndBikes.title"
+      defaultMessage="Electric Vehicles And Bikes"
     />
   ),
 };
@@ -403,18 +403,39 @@ export const renderCategoryDescription = (rebateType: EnergyCalculatorRebateCate
       ),
       href: 'https://homes.rewiringamerica.org/projects/landlord/talk-to-your-landlord-about-electrification-renter',
     },
-    electricVehicles: {
+    electricVehiclesAndBikes: {
       formattedMessage: (
         <FormattedMessage
-          id="electricVehicles.categoryDescription"
-          defaultMessage="You may qualify for savings on the cost of a new or used electric vehicle (EV) or new electric bike (eBike). EVs cost less to maintain than gas-powered cars, in addition to being quieter, and having longer-lasting brakes and lower emissions. E-bikes are a safe, reliable, and quick method of transportation that can reduce many short vehicle trips. For more information on the benefits and considerations of transitioning to an EV, visit "
+          id="electricVehiclesAndBikes.categoryDescription"
+          defaultMessage="You may qualify for savings on the cost of a new or used electric vehicle (EV) or new electric bike (e-bike). EVs include battery electric vehicles (BEV) and plug-in hybrid electric vehicles (PHEV). EVs cost less to maintain than gas-powered cars, in addition to being quieter, and having longer-lasting brakes and lower emissions. E-bikes are a safe, reliable, and quick method of transportation that can reduce many short vehicle trips. For more information on the benefits and considerations of transitioning to an EV, visit "
         />
       ),
-      href: 'https://homes.rewiringamerica.org/projects/driving-homeowner',
+      href: 'https://evco.colorado.gov',
     },
   };
   const categoryDescription = categoryDescriptionMap[rebateType].formattedMessage;
   const href = categoryDescriptionMap[rebateType].href;
+
+  // Special handling for Electric Vehicles category - show EVCO link instead of Rewiring America
+  if (rebateType === 'electricVehiclesAndBikes') {
+    return (
+      <article className="category-description-article">
+        {categoryDescription}
+        <TrackedOutboundLink
+          href={href}
+          className="link-color"
+          action="evco_link_click"
+          label="EVCO"
+          category="energy_rebate"
+          additionalData={{
+            rebate_category: rebateType,
+          }}
+        >
+          EVCO.
+        </TrackedOutboundLink>
+      </article>
+    );
+  }
 
   return (
     <article className="category-description-article">
