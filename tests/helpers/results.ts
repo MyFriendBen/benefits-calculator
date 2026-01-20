@@ -212,8 +212,7 @@ export async function testMoreInfoNavigationFlow(page: Page): Promise<FlowResult
     // Verify we're on program details page by checking URL pattern
     await expect(page).toHaveURL(/\/results\/benefits\/\d+/);
 
-    // Verify we're on program details page by checking for the back button
-    // (which is always present, unlike Apply button which is conditional)
+    // Verify we're on program details page by checking for the back button    
     const backButtonSelectors = [
       '[data-testid="back-to-results-button"]',
       '.back-to-results-button-container',
@@ -238,7 +237,7 @@ export async function testMoreInfoNavigationFlow(page: Page): Promise<FlowResult
       throw new Error('Could not verify program details page - no back button found');
     }
 
-    // Optional: Check if Apply button is present (not all programs have this)
+    
     // Using .apply-online-button class which is consistent regardless of button text
     try {
       const applyButton = page.locator('.apply-online-button');
