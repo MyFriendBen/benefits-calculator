@@ -209,11 +209,34 @@ export async function testMoreInfoNavigationFlow(page: Page): Promise<FlowResult
     // Click More Info link to go to program details
     await clickMoreInfoLink(page);
 
-    // Verify we're on program details page
+    // Verify we're on program details page by checking URL pattern
     await expect(page).toHaveURL(/\/results\/benefits\/\d+/);
 
-    // Verify Apply Online button is displayed on details page
-    await expect(page.locator('button:has-text("Apply Online"), a:has-text("Apply Online")')).toBeVisible();
+    // Verify we're on program details page by checking for the back button
+    // (which is always present, unlike Apply Online which is conditional)
+    const backButtonSelectors = [
+      '[data-testid="back-to-results-button"]',
+      '.back-to-results-button-container',
+      'button:has-text("BACK TO RESULTS")',
+      'a:has-text("BACK TO RESULTS")',
+      'text=/back to results/i',
+    ];
+
+    let detailsPageVerified = false;
+    for (const selector of backButtonSelectors) {
+      try {
+        await expect(page.locator(selector).first()).toBeVisible({ timeout: 10000 });
+        console.log(`[Results] Verified program details page with selector: ${selector}`);
+        detailsPageVerified = true;
+        break;
+      } catch {
+        // Try next selector
+      }
+    }
+
+    if (!detailsPageVerified) {
+      throw new Error('Could not verify program details page - no back button found');
+    }
 
     // Click Back to Results button
     await clickBackToResults(page);
