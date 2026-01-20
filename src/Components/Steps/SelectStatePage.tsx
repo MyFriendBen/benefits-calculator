@@ -15,7 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { usePageTitle } from '../Common/usePageTitle';
 
-export const STATES: { [key: string]: string } = { co: 'Colorado', nc: 'North Carolina' };
+export const STATES: { [key: string]: string } = { co: 'Colorado', nc: 'North Carolina', ma: 'Massachusetts', il: 'Illinois' };
 
 const SelectStatePage = () => {
   const { whiteLabel, uuid } = useParams();
