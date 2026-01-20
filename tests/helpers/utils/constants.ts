@@ -32,7 +32,6 @@ export const WHITE_LABELS = {
   NC: 'nc',
   CO: 'co',
   MA: 'ma',
-  IL: 'il',
   CO_ENERGY_CALCULATOR: 'co_energy_calculator',
 };
 
@@ -60,6 +59,4 @@ export const TIMEOUTS = {
 export const STATES = {
   NORTH_CAROLINA: 'North Carolina',
   COLORADO: 'Colorado',
-  MASSACHUSETTS: 'Massachusetts',
-  ILLINOIS: 'Illinois',
 };
