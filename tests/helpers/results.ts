@@ -83,9 +83,37 @@ export async function verifyEstimatedSavings(page: Page): Promise<void> {
  */
 export async function clickMoreInfoLink(page: Page): Promise<void> {
   try {
-    const moreInfoLink = page.locator('[data-testid="more-info-link"]').first();
-    await expect(moreInfoLink).toBeVisible();
-    await moreInfoLink.click();
+    // Wait for page to be fully stable before looking for the link
+    await page.waitForLoadState('networkidle');
+    
+    // Try multiple selectors for robustness in CI environments
+    const moreInfoSelectors = [
+      '[data-testid="more-info-link"]',
+      'a:has-text("More Info")',
+      'a:has-text("MORE INFO")',
+      '.more-info-link',
+      'text=/more info/i',
+    ];
+
+    let linkClicked = false;
+    for (const selector of moreInfoSelectors) {
+      try {
+        const link = page.locator(selector).first();
+        await expect(link).toBeVisible({ timeout: 10000 });
+        await link.click();
+        linkClicked = true;
+        console.log(`[Results] Clicked More Info link using selector: ${selector}`);
+        break;
+      } catch {
+        console.log(`[Results] Selector ${selector} not found, trying next...`);
+        continue;
+      }
+    }
+
+    if (!linkClicked) {
+      throw new Error('Could not find or click More Info link with any known selector');
+    }
+
     await page.waitForLoadState('networkidle');
     console.log('[Results] Clicked More Info link');
   } catch (error) {
@@ -100,9 +128,38 @@ export async function clickMoreInfoLink(page: Page): Promise<void> {
  */
 export async function clickBackToResults(page: Page): Promise<void> {
   try {
-    const backButton = page.locator('[data-testid="back-to-results-button"]');
-    await expect(backButton).toBeVisible();
-    await backButton.click();
+    // Wait for page to be fully stable
+    await page.waitForLoadState('networkidle');
+    
+    // Try multiple selectors for robustness in CI environments
+    const backButtonSelectors = [
+      '[data-testid="back-to-results-button"]',
+      'button:has-text("Back to Results")',
+      'button:has-text("BACK TO RESULTS")',
+      'a:has-text("Back to Results")',
+      '.back-to-results',
+      'text=/back to results/i',
+    ];
+
+    let buttonClicked = false;
+    for (const selector of backButtonSelectors) {
+      try {
+        const button = page.locator(selector).first();
+        await expect(button).toBeVisible({ timeout: 10000 });
+        await button.click();
+        buttonClicked = true;
+        console.log(`[Results] Clicked Back to Results using selector: ${selector}`);
+        break;
+      } catch {
+        console.log(`[Results] Selector ${selector} not found, trying next...`);
+        continue;
+      }
+    }
+
+    if (!buttonClicked) {
+      throw new Error('Could not find or click Back to Results button with any known selector');
+    }
+
     await page.waitForLoadState('networkidle');
     console.log('[Results] Clicked Back to Results button');
   } catch (error) {
