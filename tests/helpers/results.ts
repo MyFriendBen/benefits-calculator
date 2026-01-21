@@ -217,6 +217,7 @@ export async function testMoreInfoNavigationFlow(page: Page): Promise<FlowResult
     const applyButton = page.locator('.apply-online-button');
     try {
       await applyButton.waitFor({ state: 'visible', timeout: 3000 });
+      await expect(applyButton).toBeVisible();
       console.log('[Results] Apply button found on program details page');
     } catch {
       console.log('[Results] Apply button not present for this program (this is expected for some programs)');
