@@ -212,13 +212,12 @@ export async function testMoreInfoNavigationFlow(page: Page): Promise<FlowResult
     // Verify we're on program details page by checking URL pattern
     await expect(page).toHaveURL(/\/results\/benefits\/\d+/);
 
-    
+    // Optional: Check if Apply button is present (not all programs have this)
     // Using .apply-online-button class which is consistent regardless of button text
+    const applyButton = page.locator('.apply-online-button');
     try {
-      const applyButton = page.locator('.apply-online-button');
-      if (await applyButton.isVisible({ timeout: 3000 })) {
-        console.log('[Results] Apply button found on program details page');
-      }
+      await applyButton.waitFor({ state: 'visible', timeout: 3000 });
+      console.log('[Results] Apply button found on program details page');
     } catch {
       console.log('[Results] Apply button not present for this program (this is expected for some programs)');
     }
