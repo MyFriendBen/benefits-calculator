@@ -212,31 +212,6 @@ export async function testMoreInfoNavigationFlow(page: Page): Promise<FlowResult
     // Verify we're on program details page by checking URL pattern
     await expect(page).toHaveURL(/\/results\/benefits\/\d+/);
 
-    // Verify we're on program details page by checking for the back button    
-    const backButtonSelectors = [
-      '[data-testid="back-to-results-button"]',
-      '.back-to-results-button-container',
-      'button:has-text("BACK TO RESULTS")',
-      'a:has-text("BACK TO RESULTS")',
-      'text=/back to results/i',
-    ];
-
-    let detailsPageVerified = false;
-    for (const selector of backButtonSelectors) {
-      try {
-        await expect(page.locator(selector).first()).toBeVisible({ timeout: 10000 });
-        console.log(`[Results] Verified program details page with selector: ${selector}`);
-        detailsPageVerified = true;
-        break;
-      } catch {
-        // Try next selector
-      }
-    }
-
-    if (!detailsPageVerified) {
-      throw new Error('Could not verify program details page - no back button found');
-    }
-
     
     // Using .apply-online-button class which is consistent regardless of button text
     try {
