@@ -46,6 +46,7 @@ export async function waitForResultsPageLoad(page: Page, timeoutMs: number = 600
  */
 export async function verifyEstimatedSavings(page: Page): Promise<void> {
   try {
+    
     // Look for savings display section - may have different selectors based on implementation
     const savingsSelectors = [
       '[data-testid="estimated-savings"]',
