@@ -33,8 +33,6 @@ import filterProgramsGenerator from './Filter/filterPrograms';
 import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRebates';
 import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/rebateTypes';
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
-import ResultsPopup from './ResultsPopup/ResultsPopup';
-import { getUrbanInstitute2025BaselineSurveyConfig } from './ResultsPopup/configs/urbanInstitute2025BaselineSurvey';
 import { usePageTitle } from '../Common/usePageTitle';
 
 type WrapperResultsContext = {
@@ -100,7 +98,6 @@ export function useResultsLink(link: string) {
   return addAdminToLink(`/${whiteLabel}/${uuid}/${link}`, isAdminView);
 }
 
-
 const Results = ({ type }: ResultsProps) => {
   const { formData, getReferrer, locale } = useContext(Context);
   const { whiteLabel, uuid, programId, energyCalculatorRebateType } = useParams();
@@ -112,12 +109,6 @@ const Results = ({ type }: ResultsProps) => {
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
   const [apiResults, setApiResults] = useState<EligibilityResults | undefined>();
-
-  const popupConfig = useMemo(
-    //prevent unnecessary re-renders of results popup
-    () => getUrbanInstitute2025BaselineSurveyConfig(formData, whiteLabel, locale, uuid),
-    [formData, whiteLabel, locale, uuid]
-  );
 
   useEffect(() => {
     dataLayerPush({ event: 'config', user_id: uuid });
@@ -251,7 +242,6 @@ const Results = ({ type }: ResultsProps) => {
     return (
       <main>
         <ResultsContextProvider>
-          <ResultsPopup {...popupConfig} />
           <ResultsHeader type={type} />
           <ResultsTabs />
           {type === 'program' && <UrgentNeedBanner />}

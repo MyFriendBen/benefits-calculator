@@ -5,7 +5,7 @@ import { FormData } from '../../../../Types/FormData';
  * URBAN INSTITUTE 2025 BASELINE SURVEY - November/December 2025
  *
  * This file contains the configuration for the Urban Institute 2025 Baseline Survey popup.
- * The survey will run until 300 respondents complete it (expected completion: ~Jan 2026).
+ * The survey ran until 300 respondents completed it (completed Jan 20, 2026).
  *
  * Survey Details:
  * - Compensation: $10 Amazon gift card
@@ -13,16 +13,29 @@ import { FormData } from '../../../../Types/FormData';
  * - Target states: Colorado and North Carolina only
  * - Target demographic: Adults over 18 years old
  * - Languages: English and Spanish
+ * 
+ * To termporarily pause this survey:
+ * 1. set SURVEY_ENABLED to false below
  *
- * To remove this survey after reaching 300 respondents:
+ * To permananetly remove this survey (e.g. once 300 responsdents reached):
  * 1. Remove the import: import { getUrbanInstitute2025BaselineSurveyConfig } from './ResultsPopup/configs/urbanInstitute2025BaselineSurvey';
  * 2. Remove the popupConfig useMemo that calls getUrbanInstitute2025BaselineSurveyConfig(...)
  * 3. Remove the <ResultsPopup {...popupConfig} /> line from Results.tsx
+ * 
+ * To add back in the survey:
+ * 1. Add the import: import { getUrbanInstitute2025BaselineSurveyConfig } from './ResultsPopup/configs/urbanInstitute2025BaselineSurvey'; 
+ * 2. Add popupConfig useMemo within Results component 
+ *    const popupConfig = useMemo(
+ *        //prevent unnecessary re-renders of results popup
+ *        () => getUrbanInstitute2025BaselineSurveyConfig(formData, whiteLabel, locale, uuid),
+ *        [formData, whiteLabel, locale, uuid]
+ *    );
+ * 3. Add <ResultsPopup {...popupConfig} /> above the <ResultsHeader type={type} /> in Results component
  */
 
 // Constants
 // Set to false to disable the survey without changing other logic
-const SURVEY_ENABLED = true;
+const SURVEY_ENABLED = false;
 const ELIGIBLE_STATES = ['co', 'nc'] as const;
 const ELIGIBLE_LOCALES = ['en', 'es'] as const;
 
