@@ -221,6 +221,12 @@ const HouseholdMemberForm = () => {
         disabled: z.boolean(),
         longTermDisability: z.boolean(),
       }),
+      studentEligibility: z.object({
+        studentFullTime: z.boolean(),
+        studentJobTrainingProgram: z.boolean(),
+        hasWorkStudy: z.boolean(),
+        worksAtLeast20Hours: z.boolean(),
+      }),
       relationshipToHH: z
         .string()
         .refine((value) => [...Object.keys(relationshipOptions)].includes(value) || pageNumber === 1, {
@@ -299,6 +305,14 @@ const HouseholdMemberForm = () => {
             disabled: false,
             longTermDisability: false,
           },
+      studentEligibility: householdMemberFormData?.studentEligibility
+        ? householdMemberFormData.studentEligibility
+        : {
+            studentFullTime: false,
+            studentJobTrainingProgram: false,
+            hasWorkStudy: false,
+            worksAtLeast20Hours: false,
+          },
       relationshipToHH: determineDefaultRelationshipToHH(),
       hasIncome: determineDefaultHasIncome(),
       incomeStreams: householdMemberFormData?.incomeStreams ?? [],
@@ -345,6 +359,21 @@ const HouseholdMemberForm = () => {
       setValue('hasIncome', 'false', { shouldDirty: true });
     }
   }, [watchBirthMonth, watchBirthYear, setValue, calculateCurrentAgeStatus, getValues]);
+
+  // Watch student condition to conditionally show student eligibility questions
+  const watchIsStudent = watch('conditions.student');
+
+  // Reset student eligibility fields when student condition is deselected
+  useEffect(() => {
+    if (!watchIsStudent) {
+      setValue('studentEligibility', {
+        studentFullTime: false,
+        studentJobTrainingProgram: false,
+        hasWorkStudy: false,
+        worksAtLeast20Hours: false,
+      });
+    }
+  }, [watchIsStudent, setValue]);
 
 
   const formSubmitHandler: SubmitHandler<FormSchema> = async (memberData) => {
@@ -544,6 +573,176 @@ const HouseholdMemberForm = () => {
           name="conditions"
           options={pageNumber === 1 ? conditionOptions.you : conditionOptions.them}
         />
+        {getValues('conditions.student') && createStudentEligibilityQuestions()}
+      </Box>
+    );
+  };
+
+  const createStudentEligibilityQuestions = () => {
+    return (
+      <Box sx={{ mt: 2, pl: 2, borderLeft: '3px solid #e0e0e0', fontSize: '1.12rem', '& .question-label': { fontSize: '1.12rem' } }}>
+        <Box component="h4" sx={{ fontWeight: 700, mb: 2, mt: 0, fontSize: '1.13rem', color: 'text.primary' }}>
+          <FormattedMessage id="studentEligibility.sectionTitle" defaultMessage="Student Information" />
+        </Box>
+        {/* Question 1: Enrolled half-time or more */}
+        <Box sx={{ pb: '1.5rem' }}>
+          <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
+            <FormattedMessage
+              id={pageNumber === 1 ? 'studentEligibility.you-enrolledHalfTime' : 'studentEligibility.they-enrolledHalfTime'}
+              defaultMessage={
+                pageNumber === 1
+                  ? 'Are you enrolled half-time or more in a university, college, or community college as defined by your educational institution?'
+                  : 'Are they enrolled half-time or more in a university, college, or community college as defined by their educational institution?'
+              }
+            />
+          </Box>
+          <Controller
+            name="studentEligibility.studentFullTime"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                {...field}
+                value={field.value ? 'true' : 'false'}
+                onChange={(e) => field.onChange(e.target.value === 'true')}
+                aria-label={intl.formatMessage({
+                  id: 'studentEligibility.enrolledHalfTime-ariaLabel',
+                  defaultMessage: 'enrolled half-time or more',
+                })}
+              >
+                <FormControlLabel
+                  value="true"
+                  control={<Radio size="small" />}
+                  label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
+                />
+                <FormControlLabel
+                  value="false"
+                  control={<Radio size="small" />}
+                  label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
+                />
+              </RadioGroup>
+            )}
+          />
+        </Box>
+
+        {/* Question 2: Job training program */}
+        <Box sx={{ pb: '1.5rem' }}>
+          <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
+            <FormattedMessage
+              id={pageNumber === 1 ? 'studentEligibility.you-jobTraining' : 'studentEligibility.they-jobTraining'}
+              defaultMessage={
+                pageNumber === 1
+                  ? 'Is the program you are enrolled in a job training program?'
+                  : 'Is the program they are enrolled in a job training program?'
+              }
+            />
+          </Box>
+          <Controller
+            name="studentEligibility.studentJobTrainingProgram"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                {...field}
+                value={field.value ? 'true' : 'false'}
+                onChange={(e) => field.onChange(e.target.value === 'true')}
+                aria-label={intl.formatMessage({
+                  id: 'studentEligibility.jobTraining-ariaLabel',
+                  defaultMessage: 'job training program',
+                })}
+              >
+                <FormControlLabel
+                  value="true"
+                  control={<Radio size="small" />}
+                  label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
+                />
+                <FormControlLabel
+                  value="false"
+                  control={<Radio size="small" />}
+                  label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
+                />
+              </RadioGroup>
+            )}
+          />
+        </Box>
+
+        {/* Question 3: Work study program */}
+        <Box sx={{ pb: '1.5rem' }}>
+          <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
+            <FormattedMessage
+              id={pageNumber === 1 ? 'studentEligibility.you-workStudy' : 'studentEligibility.they-workStudy'}
+              defaultMessage={
+                pageNumber === 1
+                  ? 'Do you have a federal or state work study program?'
+                  : 'Do they have a federal or state work study program?'
+              }
+            />
+          </Box>
+          <Controller
+            name="studentEligibility.hasWorkStudy"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                {...field}
+                value={field.value ? 'true' : 'false'}
+                onChange={(e) => field.onChange(e.target.value === 'true')}
+                aria-label={intl.formatMessage({
+                  id: 'studentEligibility.workStudy-ariaLabel',
+                  defaultMessage: 'work study program',
+                })}
+              >
+                <FormControlLabel
+                  value="true"
+                  control={<Radio size="small" />}
+                  label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
+                />
+                <FormControlLabel
+                  value="false"
+                  control={<Radio size="small" />}
+                  label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
+                />
+              </RadioGroup>
+            )}
+          />
+        </Box>
+
+        {/* Question 4: Works 20+ hours per week */}
+        <Box sx={{ pb: '1.5rem' }}>
+          <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
+            <FormattedMessage
+              id={pageNumber === 1 ? 'studentEligibility.you-works20Hours' : 'studentEligibility.they-works20Hours'}
+              defaultMessage={
+                pageNumber === 1
+                  ? 'Do you work 20 or more hours per week in other employment, including self-employment? (If the hours you work changes each week, do you work at least 80 hours in a month?)'
+                  : 'Do they work 20 or more hours per week in other employment, including self-employment? (If the hours they work changes each week, do they work at least 80 hours in a month?)'
+              }
+            />
+          </Box>
+          <Controller
+            name="studentEligibility.worksAtLeast20Hours"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                {...field}
+                value={field.value ? 'true' : 'false'}
+                onChange={(e) => field.onChange(e.target.value === 'true')}
+                aria-label={intl.formatMessage({
+                  id: 'studentEligibility.works20Hours-ariaLabel',
+                  defaultMessage: 'works 20 hours or more',
+                })}
+              >
+                <FormControlLabel
+                  value="true"
+                  control={<Radio size="small" />}
+                  label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
+                />
+                <FormControlLabel
+                  value="false"
+                  control={<Radio size="small" />}
+                  label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
+                />
+              </RadioGroup>
+            )}
+          />
+        </Box>
       </Box>
     );
   };
