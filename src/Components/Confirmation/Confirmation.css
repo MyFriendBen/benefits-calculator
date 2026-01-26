@@ -1,62 +1,198 @@
 .confirmation-section-underline {
   margin-bottom: 24px;
   padding-bottom: 24px;
-  border-bottom: 1px solid #505c66;
+  border-bottom: 1px solid var(--divider-color);
 }
 
 .confirmation-container {
-  margin: 2rem 10% 2rem 10%;
+  max-width: 1200px;
+  margin: 1rem auto 2rem;
+  background-color: transparent;
+  border: none;
+}
+
+.confirmation-page-header {
+  display: none;
+}
+
+/* Simple section for basic info (no colored header) */
+.simple-confirmation-section {
+  padding: 0 0 1rem 0;
+  margin-top: 1rem;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.simple-confirmation-section:first-child {
+  margin-top: 0;
+}
+
+.confirmation-section:first-child {
+  margin-top: 0;
+}
+
+.simple-confirmation-section:last-child {
+  border-bottom: none;
+}
+
+.simple-section-header {
+  padding: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #999;
+  margin-bottom: 0;
+}
+
+.simple-section-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #000;
+  display: flex;
+  align-items: center;
+}
+
+.simple-section-header h2 svg {
+  flex-shrink: 0;
+}
+
+.simple-section-header h2 svg path,
+.simple-section-header h2 svg circle {
+  fill: var(--secondary-color);
+  stroke: var(--secondary-color);
+}
+
+.simple-section-content {
+  padding: 0;
+}
+
+.edit-button-simple {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.edit-button-simple svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.edit-button-simple:hover {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+svg.edit-button-simple path,
+svg.edit-button-simple rect,
+svg.edit-button-simple polygon,
+.edit-button-simple svg path,
+.edit-button-simple svg rect,
+.edit-button-simple svg polygon {
+  stroke: #999 !important;
+  fill: #999 !important;
+}
+
+/* Full ConfirmationBlock section (for household member table with colored header) */
+.confirmation-section {
+  padding: 0 0 1rem 0;
+  margin-top: 1rem;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.confirmation-section:last-child {
+  border-bottom: none;
+}
+
+.confirmation-section-header {
+  background-color: transparent;
+  padding: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: none;
+  border-bottom: 2px solid #999;
+  margin-bottom: 0;
+}
+
+.confirmation-section-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #000;
+}
+
+.confirmation-section-header svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.confirmation-section-header svg path,
+.confirmation-section-header svg circle {
+  fill: var(--secondary-color);
+  stroke: var(--secondary-color);
+}
+
+.confirmation-section-content {
+  padding: 0;
 }
 
 .confirmation-block-container {
-  background-color: var(--secondary-background-color);
-  padding: 2rem;
-  margin-bottom: 2rem;
+  background-color: white;
+  padding: 0;
+  margin-bottom: 0;
   position: relative;
-  display: flex;
+  display: block;
 }
 
 .confirmation-container > div {
-  background-color: var(--secondary-background-color);
-  padding: 1rem;
-  margin-bottom: 2rem;
+  background-color: white;
+  padding: 0;
+  margin-bottom: 0;
   position: relative;
 }
 
 .confirmation-icon {
-  min-width: 6rem;
-  margin: 0 2rem;
-  display: flex;
+  min-width: auto;
+  margin: 0;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
 }
 
 .confirmation-icon svg {
-  width: 6rem;
-  height: 6rem;
+  width: 2rem;
+  height: 2rem;
 }
 
 .confirmation-icon svg path,
 .confirmation-icon svg circle {
-  fill: var(--secondary-icon-color);
-  stroke: var(--secondary-icon-color);
+  fill: var(--secondary-color);
+  stroke: var(--secondary-color);
 }
 
 /* Lucide icons have the class directly on the SVG element */
 svg.confirmation-lucide-icon {
-  width: 4.75rem;
-  height: 4.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 svg.confirmation-lucide-icon * {
   fill: white !important;
-  stroke: var(--secondary-icon-color);
+  stroke: var(--primary-color);
 }
 
 svg.confirmation-icon path,
 svg.confirmation-icon circle {
-  fill: var(--secondary-icon-color);
-  stroke: var(--secondary-icon-color);
+  fill: var(--secondary-color);
+  stroke: var(--secondary-color);
 }
 
 .MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-2.css-1o7apob-MuiGrid-root.no-padding {
@@ -64,27 +200,33 @@ svg.confirmation-icon circle {
 }
 
 .edit-button {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 1.5rem;
-  transform: translate(50%, -50%);
+  height: 1.5rem;
+  padding: 0;
+  background: transparent;
+  border: none;
 }
 
 .edit-button:hover {
   cursor: pointer;
+  opacity: 0.7;
 }
 
 [dir='rtl'] .edit-button {
-  left: 2rem;
-  right: unset;
+  transform: scaleX(-1);
 }
 
 svg.edit-button path,
 svg.edit-button rect,
-svg.edit-button polygon {
-  stroke: var(--midBlue-color);
-  fill: var(--midBlue-color);
+svg.edit-button polygon,
+.edit-button svg path,
+.edit-button svg rect,
+.edit-button svg polygon {
+  stroke: #999 !important;
+  fill: #999 !important;
 }
 
 .confirmation-acute-need-list {
@@ -95,8 +237,6 @@ svg.edit-button polygon {
 .prev-continue-results-buttons.confirmation {
   display: flex;
   justify-content: space-between;
-  margin-left: 10%;
-  margin-right: 10%;
 }
 
 .section-title {
@@ -107,6 +247,127 @@ svg.edit-button polygon {
 
 .section-p {
   line-height: 2rem;
+}
+
+/* Table-like layout for confirmation items */
+.confirmation-row {
+  display: grid;
+  grid-template-columns: minmax(200px, 20%) 1fr;
+  padding: 0.5rem 0;
+  border-top: 1px solid #e8e8e8;
+  align-items: start;
+  gap: 3rem;
+}
+
+.confirmation-row:first-child {
+  border-top: none;
+}
+
+.confirmation-row-label {
+  font-weight: 400;
+  color: #555;
+  padding-top: 0;
+  font-size: 0.95rem;
+}
+
+.confirmation-row-value {
+  color: #000;
+  font-weight: 400;
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.confirmation-row-value-content {
+  flex: 1;
+}
+
+.confirmation-row-value-edit {
+  flex-shrink: 0;
+}
+
+.confirmation-row-value strong {
+  font-weight: 600;
+}
+
+/* Household member table styles */
+.household-member-table-wrapper {
+  padding: 0;
+  overflow-x: auto;
+  margin-top: 0.75rem;
+}
+
+/* Desktop table gets border */
+.household-member-table-desktop {
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+}
+
+/* Hide mobile cards on desktop */
+.household-member-cards {
+  display: none;
+}
+
+/* Show full count on desktop, hide short version */
+.household-member-count-full {
+  display: inline;
+}
+
+.household-member-count-short {
+  display: none;
+}
+
+.household-member-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.household-member-table thead {
+  background-color: #f5f5f5;
+}
+
+.household-member-table th {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #d0d0d0;
+  color: #333;
+}
+
+.household-member-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e8e8e8;
+  vertical-align: top;
+  font-size: 0.9rem;
+}
+
+.household-member-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.household-member-table tbody tr:hover {
+  background-color: #fafafa;
+}
+
+.household-member-table td:last-child {
+  padding: 0.5rem 0.25rem;
+  text-align: center;
+}
+
+.household-member-table td .edit-button-simple {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.household-member-table td .edit-button-simple svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .flip-horizontally {
@@ -129,18 +390,62 @@ svg.edit-button polygon {
   padding-right: 2rem;
 }
 
-@media (max-width: 630px) {
+@media (max-width: 767px) {
   .confirmation-container {
-    margin: 0;
+    margin: 0.5rem 0;
+    padding: 0;
+  }
+
+  .simple-confirmation-section {
+    padding: 0 0 0.75rem 0;
+    margin-top: 0.75rem;
+  }
+
+  .simple-section-header {
+    padding: 0 0 0.35rem 0;
+  }
+
+  .simple-section-header h2 {
+    font-size: 0.95rem;
+  }
+
+  .confirmation-section {
+    padding: 0 0 0.75rem 0;
+    margin-top: 0.75rem;
+  }
+
+  .confirmation-section-header {
+    padding: 0 0 0.35rem 0;
+  }
+
+  .confirmation-section-header h2 {
+    font-size: 0.95rem;
+  }
+
+  .confirmation-row {
+    grid-template-columns: 1fr;
+    padding: 0.5rem 0;
+    gap: 0.25rem;
+  }
+
+  .confirmation-row-label {
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+    font-size: 0.85rem;
+  }
+
+  .confirmation-row-value {
+    font-size: 0.85rem;
   }
 
   .edit-button {
-    width: 1rem;
+    width: 1.25rem;
+    height: 1.25rem;
   }
 
   .MuiSvgIcon-root.home-icon {
-    height: 2rem;
-    width: 2rem;
+    height: 1.25rem;
+    width: 1.25rem;
   }
 
   .section-title {
@@ -157,20 +462,95 @@ svg.edit-button polygon {
   }
 
   .prev-continue-results-buttons.confirmation {
-    margin: 1rem 0 0 0;
+    margin: 1rem 0;
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .prev-continue-results-buttons.confirmation button {
+    flex: 1;
   }
 
   .bottom-margin {
     margin-bottom: 0.5rem;
   }
 
-  .confirmation-icon {
-    min-width: 4rem;
-    margin: 0 1rem 0 0;
+  .household-member-count-full {
+    display: none;
+  }
+
+  .household-member-count-short {
+    display: inline;
   }
 
   .confirmation-icon svg {
-    width: 3rem;
-    height: 3rem;
+    width: 2rem;
+    height: 2rem;
+  }
+
+  /* Hide desktop table on mobile */
+  .household-member-table-desktop {
+    display: none;
+  }
+
+  /* Show mobile cards on mobile */
+  .household-member-cards {
+    display: block;
+    margin-top: 0.5rem;
+  }
+
+  .household-member-card {
+    background-color: white;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+  }
+
+  .household-member-card:last-child {
+    margin-bottom: 0;
+  }
+
+  .household-member-card-header {
+    background-color: #f5f5f5;
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #d0d0d0;
+  }
+
+  .household-member-card-title {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    flex: 1;
+  }
+
+  .household-member-card-body {
+    padding: 0.75rem;
+  }
+
+  .household-member-card-field {
+    margin-bottom: 0.65rem;
+  }
+
+  .household-member-card-field:last-child {
+    margin-bottom: 0;
+  }
+
+  .household-member-card-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: #555;
+    margin-bottom: 0.15rem;
+  }
+
+  .household-member-card-value {
+    display: block;
+    font-size: 0.85rem;
+    color: #000;
   }
 }
