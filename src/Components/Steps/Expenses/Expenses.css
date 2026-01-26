@@ -29,8 +29,94 @@
 
 .expenses-q-and-help-button {
   margin-bottom: -0.5rem;
+  font-size: 1.1rem;
 }
 
 .help-text {
   margin: 0;
+}
+
+/* Expense box container */
+.expense-box {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background-color: var(--input-section-background);
+  border-radius: 8px;
+}
+
+/* Expense fields container - vertical layout */
+.expense-fields-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Expense type field - full width on first row */
+.expense-field-type {
+  width: 100%;
+}
+
+/* Amount and frequency row - flex container */
+.expense-amount-frequency-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Expense amount field - takes up equal space */
+.expense-field-amount {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+/* Expense frequency field - takes up equal space */
+.expense-field-frequency {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+  .expense-box {
+    padding: 0.75rem;
+  }
+
+  .expense-field-amount,
+  .expense-field-frequency {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+}
+
+/* Expense delete button */
+.expense-delete-button {
+  align-self: flex-start;
+}
+
+/* Add expense button container */
+.add-expense-button-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+/* Add another expense button styles */
+.add-another-expense-button.MuiButton-root {
+  background-color: var(--secondary-color);
+  color: #ffffff;
+  border: none;
+}
+
+.add-another-expense-button.MuiButton-root:hover {
+  background-color: var(--hover-color);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
+/* White background for inputs */
+.white-input {
+  background-color: #fff;
 }
