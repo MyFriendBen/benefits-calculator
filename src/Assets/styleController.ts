@@ -13,20 +13,40 @@ export interface ITheme {
   outlineHoverColor: string;
   progressBarColor: string;
   cssVariables: {
+    // Colors - Primary & Secondary
     '--primary-color': string;
     '--secondary-color': string;
-    '--secondary-background-color': string;
-    '--main-max-width': string;
-    'font-size': string;
     '--midBlue-color': string;
+    '--footer-color': string;
+
+    // Colors - Background
+    '--secondary-background-color': string;
+    '--input-section-background': string;
     '--hover-color': string;
+
+    // Colors - Icons
     '--icon-color': string;
     '--secondary-icon-color': string;
+
+    // Colors - Interactive States
     '--option-card-hover-font-color': string;
-    '--footer-color': string;
     '--active-border-color': string;
+
+    // Colors - Borders & Dividers
+    '--divider-color': string;
+
+    // Colors - Warnings (optional)
     '--warning-background-color'?: string;
     '--warning-text-color'?: string;
+
+    // Typography
+    '--font-heading': string;
+    '--font-body': string;
+    'font-size': string;
+    '--error-message-font-size': string;
+
+    // Layout
+    '--main-max-width': string;
   };
 }
 
@@ -44,18 +64,36 @@ const themes: Themes = {
     outlineHoverBackgroundColor: '#ECDEED',
     progressBarColor: '#D6743F',
     cssVariables: {
+      // Colors - Primary & Secondary
       '--primary-color': '#293457',
       '--secondary-color': '#B85A27',
-      '--secondary-background-color': '#FBF9FC',
-      '--main-max-width': '1310px',
-      'font-size': '18px',
       '--midBlue-color': '#41528C',
+      '--footer-color': '#41528C',
+
+      // Colors - Background
+      '--secondary-background-color': '#FBF9FC',
+      '--input-section-background': '#f5f5f5',
       '--hover-color': '#ECDEED',
+
+      // Colors - Icons
       '--icon-color': '#D6743F',
       '--secondary-icon-color': '#D6743F',
+
+      // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
-      '--footer-color': '#41528C',
       '--active-border-color': '#B85A27',
+
+      // Colors - Borders & Dividers
+      '--divider-color': 'rgba(0, 0, 0, 0.12)',
+
+      // Typography
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
+      'font-size': '18px',
+      '--error-message-font-size': '0.875rem',
+
+      // Layout
+      '--main-max-width': '1310px',
     },
   },
   twoOneOne: {
@@ -69,18 +107,36 @@ const themes: Themes = {
     outlineHoverColor: '#FFFFFF',
     progressBarColor: '#539ED0',
     cssVariables: {
+      // Colors - Primary & Secondary
       '--primary-color': '#005191',
       '--secondary-color': '#005191',
-      '--secondary-background-color': '#F7F7F7',
-      '--main-max-width': '1310px',
-      'font-size': '18px',
       '--midBlue-color': '#41528C',
+      '--footer-color': '#ffffff',
+
+      // Colors - Background
+      '--secondary-background-color': '#F7F7F7',
+      '--input-section-background': '#f5f5f5',
       '--hover-color': '#EFEFEF',
+
+      // Colors - Icons
       '--icon-color': '#ff443b',
       '--secondary-icon-color': '#005191',
+
+      // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
-      '--footer-color': '#ffffff',
       '--active-border-color': '#005191',
+
+      // Colors - Borders & Dividers
+      '--divider-color': 'rgba(0, 0, 0, 0.12)',
+
+      // Typography
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
+      'font-size': '18px',
+      '--error-message-font-size': '0.875rem',
+
+      // Layout
+      '--main-max-width': '1310px',
     },
   },
   twoOneOneNC: {
@@ -94,18 +150,36 @@ const themes: Themes = {
     outlineHoverColor: '#FFFFFF',
     progressBarColor: '#5082F0',
     cssVariables: {
+      // Colors - Primary & Secondary
       '--primary-color': '#21296B',
       '--secondary-color': '#21296B',
-      '--secondary-background-color': '#F7F7F7',
-      '--main-max-width': '1310px',
-      'font-size': '18px',
       '--midBlue-color': '#41528C',
+      '--footer-color': '#ffffff',
+
+      // Colors - Background
+      '--secondary-background-color': '#F7F7F7',
+      '--input-section-background': '#f5f5f5',
       '--hover-color': '#FFFFFF',
+
+      // Colors - Icons
       '--icon-color': '#ff443b',
       '--secondary-icon-color': '#21296B',
+
+      // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
-      '--footer-color': '#ffffff',
       '--active-border-color': '#21296B',
+
+      // Colors - Borders & Dividers
+      '--divider-color': 'rgba(0, 0, 0, 0.12)',
+
+      // Typography
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
+      'font-size': '18px',
+      '--error-message-font-size': '0.875rem',
+
+      // Layout
+      '--main-max-width': '1310px',
     },
   },
   nc_lanc: {
@@ -119,18 +193,36 @@ const themes: Themes = {
     outlineHoverColor: '#FFFFFF',
     progressBarColor: '#268FBF',
     cssVariables: {
+      // Colors - Primary & Secondary
       '--primary-color': '#003863',
       '--secondary-color': '#003863',
-      '--secondary-background-color': '#F7F7F7',
-      '--main-max-width': '1310px',
-      'font-size': '18px',
       '--midBlue-color': '#003863',
+      '--footer-color': '#FFFFFF',
+
+      // Colors - Background
+      '--secondary-background-color': '#F7F7F7',
+      '--input-section-background': '#f5f5f5',
       '--hover-color': '#FFFFFF',
+
+      // Colors - Icons
       '--icon-color': '#D6743F',
       '--secondary-icon-color': '#000000',
+
+      // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
-      '--footer-color': '#FFFFFF',
       '--active-border-color': '#8CCCF2',
+
+      // Colors - Borders & Dividers
+      '--divider-color': 'rgba(0, 0, 0, 0.12)',
+
+      // Typography
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
+      'font-size': '18px',
+      '--error-message-font-size': '0.875rem',
+
+      // Layout
+      '--main-max-width': '1310px',
     },
   },
   co_energy: {
@@ -144,20 +236,40 @@ const themes: Themes = {
     outlineHoverColor: '#001970',
     progressBarColor: '#FFD100',
     cssVariables: {
+      // Colors - Primary & Secondary
       '--primary-color': '#001970',
       '--secondary-color': '#001970',
-      '--secondary-background-color': '#FBFBFB',
-      '--main-max-width': '1310px',
-      'font-size': '18px',
       '--midBlue-color': '#001970',
+      '--footer-color': '#373737',
+
+      // Colors - Background
+      '--secondary-background-color': '#FBFBFB',
+      '--input-section-background': '#f5f5f5',
       '--hover-color': '#FFFFFF',
+
+      // Colors - Icons
       '--icon-color': '#C3002F',
       '--secondary-icon-color': '#C3002F',
+
+      // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
-      '--footer-color': '#373737',
       '--active-border-color': '#FFD100',
+
+      // Colors - Borders & Dividers
+      '--divider-color': 'rgba(0, 0, 0, 0.12)',
+
+      // Colors - Warnings
       '--warning-background-color': '#F5E6C8',
       '--warning-text-color': '#6b5d00',
+
+      // Typography
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
+      'font-size': '18px',
+      '--error-message-font-size': '0.875rem',
+
+      // Layout
+      '--main-max-width': '1310px',
     },
   },
 };
@@ -201,7 +313,7 @@ function generateMuiOverides(theme: ITheme) {
               border: '1px solid black',
               borderRadius: '12px',
               fontWeight: 'bold',
-              fontFamily: 'Open Sans',
+              fontFamily: 'var(--font-body)',
               ':hover': {
                 backgroundColor: lavenderColor,
                 color: deepBlueColor,
@@ -216,7 +328,7 @@ function generateMuiOverides(theme: ITheme) {
               border: 'none',
               borderRadius: '12px',
               fontWeight: 'bold',
-              fontFamily: 'Open Sans',
+              fontFamily: 'var(--font-body)',
               ':hover': {
                 backgroundColor: theme.outlineHoverBackgroundColor,
                 color: theme.outlineHoverColor,
@@ -258,6 +370,26 @@ function generateMuiOverides(theme: ITheme) {
             '&:hover': {
               color: darkTerraCottaColor,
             },
+          },
+        },
+      },
+      MuiInputBase: {
+        styleOverrides: {
+          root: {
+            fontSize: '0.875rem',
+            fontFamily: 'var(--font-body)',
+          },
+          input: {
+            fontSize: '0.875rem',
+            fontFamily: 'var(--font-body)',
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          select: {
+            fontSize: '0.875rem',
+            fontFamily: 'var(--font-body)',
           },
         },
       },
