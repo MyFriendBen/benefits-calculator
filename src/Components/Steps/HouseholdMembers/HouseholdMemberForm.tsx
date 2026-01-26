@@ -588,12 +588,12 @@ const HouseholdMemberForm = () => {
         <Box sx={{ pb: '1.5rem' }}>
           <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
             <FormattedMessage
-              id={pageNumber === 1 ? 'studentEligibility.you-enrolledHalfTime' : 'studentEligibility.they-enrolledHalfTime'}
-              defaultMessage={
-                pageNumber === 1
-                  ? 'Are you enrolled half-time or more in a university, college, or community college as defined by your educational institution?'
-                  : 'Are they enrolled half-time or more in a university, college, or community college as defined by their educational institution?'
-              }
+              id="studentEligibility.enrolledHalfTime"
+              defaultMessage="Are enrolled half-time or more in a university, college, or community college as defined by educational institution?"
+              values={{
+                subject: pageNumber === 1 ? 'you' : 'they',
+                possessive: pageNumber === 1 ? 'your' : 'their',
+              }}
             />
           </Box>
           <Controller
@@ -628,12 +628,11 @@ const HouseholdMemberForm = () => {
         <Box sx={{ pb: '1.5rem' }}>
           <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
             <FormattedMessage
-              id={pageNumber === 1 ? 'studentEligibility.you-jobTraining' : 'studentEligibility.they-jobTraining'}
-              defaultMessage={
-                pageNumber === 1
-                  ? 'Is the program you are enrolled in a job training program?'
-                  : 'Is the program they are enrolled in a job training program?'
-              }
+              id="studentEligibility.jobTraining"
+              defaultMessage="Is the program are enrolled in a job training program?"
+              values={{
+                subject: pageNumber === 1 ? 'you' : 'they',
+              }}
             />
           </Box>
           <Controller
@@ -668,12 +667,11 @@ const HouseholdMemberForm = () => {
         <Box sx={{ pb: '1.5rem' }}>
           <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
             <FormattedMessage
-              id={pageNumber === 1 ? 'studentEligibility.you-workStudy' : 'studentEligibility.they-workStudy'}
-              defaultMessage={
-                pageNumber === 1
-                  ? 'Do you have a federal or state work study program?'
-                  : 'Do they have a federal or state work study program?'
-              }
+              id="studentEligibility.workStudy"
+              defaultMessage="Do have a federal or state work study program?"
+              values={{
+                subject: pageNumber === 1 ? 'you' : 'they',
+              }}
             />
           </Box>
           <Controller
@@ -708,12 +706,11 @@ const HouseholdMemberForm = () => {
         <Box sx={{ pb: '1.5rem' }}>
           <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
             <FormattedMessage
-              id={pageNumber === 1 ? 'studentEligibility.you-works20Hours' : 'studentEligibility.they-works20Hours'}
-              defaultMessage={
-                pageNumber === 1
-                  ? 'Do you work 20 or more hours per week in other employment, including self-employment? (If the hours you work changes each week, do you work at least 80 hours in a month?)'
-                  : 'Do they work 20 or more hours per week in other employment, including self-employment? (If the hours they work changes each week, do they work at least 80 hours in a month?)'
-              }
+              id="studentEligibility.works20Hours"
+              defaultMessage="Do work 20 or more hours per week in other employment, including self-employment? (If the hours work changes each week, do work at least 80 hours in a month?)"
+              values={{
+                subject: pageNumber === 1 ? 'you' : 'they',
+              }}
             />
           </Box>
           <Controller
