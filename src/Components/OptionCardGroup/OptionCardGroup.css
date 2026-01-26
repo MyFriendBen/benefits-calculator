@@ -1,9 +1,15 @@
 .option-card.MuiPaper-root {
+  position: relative;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   border: 0.05px solid #6d6e71;
-  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-  height: 15rem;
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+  aspect-ratio: 1;
+  height: 100%;
+  width: 100%;
+  padding: 1rem;
   background-color: #ffffff;
 }
 
@@ -18,11 +24,16 @@
 
 .option-card-text {
   color: #ffffff;
+  text-align: center;
+  line-height: 1.2;
+  margin: 0;
+  padding: 0;
 }
 
 .option-card-icon {
-  height: 4.375rem;
-  width: 4.375rem;
+  height: 4rem;
+  width: 4rem;
+  flex-shrink: 0;
 }
 .option-card-icon.youth-development-icon {
   height: 7rem;
@@ -35,8 +46,24 @@
 }
 
 .option-card-lucide-icon {
-  height: 4.375rem;
-  width: 4.375rem;
+  height: 2.5rem;
+  width: 2.5rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.option-card-mui-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  color: var(--icon-color) !important;
+  display: block;
+  margin: 0 auto;
+}
+
+.option-card-mui-icon * {
+  fill: none !important;
+  stroke: var(--icon-color) !important;
 }
 
 .option-card-lucide-icon.car-icon-scaled {
@@ -62,16 +89,6 @@
   stroke: var(--icon-color);
 }
 
-.checkmark {
-  height: 1.75rem;
-  width: 1.75rem;
-  margin: -2.25rem 0.5rem 0.5rem 0;
-}
-
-.cls-checkmark-fill {
-  fill: var(--icon-color);
-}
-
 /* This css rule targets the svg class of the milk carton fill */
 .food-icon {
   stroke: var(--icon-color);
@@ -80,13 +97,17 @@
 }
 
 .option-cards-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.875rem;
-  max-width: 50.375rem;
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  max-width: 85%;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  align-items: stretch;
+}
+
+.option-card.MuiPaper-root .MuiTypography-root {
+  font-size: 0.875rem !important;
 }
 
 .two-columns {
@@ -95,21 +116,82 @@
 
 @media (max-width: 38.125rem) {
   div.option-cards-container {
-    gap: 0.938rem;
-    margin-top: 1.5rem;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-top: .75rem;
     margin-bottom: 1.5rem;
+    max-width: 100%;
+    width: 100%;
+    padding: 0;
   }
 
-  .card-action-area.MuiButtonBase-root,
+  .card-action-area.MuiButtonBase-root {
+    width: 100%;
+  }
+
   .option-card.MuiPaper-root,
   .selected-option-card.MuiPaper-root {
     width: 100%;
-    height: 10rem;
+    min-height: auto;
+    aspect-ratio: unset;
+    padding: 1rem;
+  }
+
+  /* Change to horizontal layout on mobile */
+  .option-card.MuiPaper-root {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .option-card.MuiPaper-root .MuiStack-root {
+    flex-direction: row !important;
+    align-items: center !important;
+    width: 100%;
+    justify-content: flex-start !important;
+  }
+
+  .option-card.MuiPaper-root .MuiCardContent-root {
+    flex-direction: row !important;
+    align-items: center !important;
+    width: 100%;
+    padding: 0rem .3rem !important;
+  }
+
+  .option-card-icon {
+    height: 2rem;
+    width: 2rem;
+    min-width: 2rem;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .option-card-icon svg {
+    height: 2.75rem !important;
+    width: 2.75rem !important;
+  }
+
+  .option-card.MuiPaper-root .MuiTypography-root {
+    text-align: left !important;
+    font-size: 1rem !important;
+    line-height: 1.3 !important;
+    flex: 1;
   }
 
   .option-card-image {
-    height: 3.5rem;
-    width: 3.5rem;
+    height: 2.5rem;
+    width: 2.5rem;
+    min-width: 2.5rem;
+  }
+
+  .option-card.MuiPaper-root .option-card-mui-icon {
+    width: 2rem !important;
+    height: 2rem !important;
+    margin: 0 0.75rem 0 0 !important;
+    display: inline-block !important;
   }
 
   div.sub-header,
@@ -120,11 +202,5 @@
 
   p.question-label {
     font-size: 1rem;
-  }
-
-  .checkmark {
-    height: 1.5rem;
-    width: 1.5rem;
-    margin: -2rem 0.5rem 0.5rem 0;
   }
 }
