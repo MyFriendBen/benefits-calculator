@@ -89,6 +89,7 @@ export function useUpdateFormData() {
         shitc: response.has_shitc ?? false,
         tx_dart: response.has_tx_dart ?? false,
         harris_county_rides: response.has_harris_county_rides ?? false,
+        ccs: response.has_ccs ?? false,
       },
       referralSource: response.referral_source ?? undefined,
       immutableReferrer: response.referrer_code ?? undefined,
