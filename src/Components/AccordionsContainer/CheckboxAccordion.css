@@ -1,6 +1,40 @@
+div.checkbox-accordion-container {
+  margin-bottom: 0.75rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px !important;
+  overflow: hidden;
+  box-shadow: none !important;
+}
+
+div.checkbox-accordion-container.MuiAccordion-root:first-of-type {
+  border-radius: 8px !important;
+}
+
+div.checkbox-accordion-container.MuiAccordion-root:last-of-type {
+  border-radius: 8px !important;
+}
+
+div.checkbox-accordion-container.MuiAccordion-root::before {
+  display: none;
+}
+
 div.Mui-expanded.checkbox-accordion-container {
-  margin: 0rem;
-  padding-bottom: 1rem;
+  margin: 0rem 0rem 0.75rem 0rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+div.checkbox-accordion-container .MuiAccordionSummary-root {
+  min-height: 48px !important;
+}
+
+div.checkbox-accordion-container .MuiAccordionSummary-content {
+  margin: 12px 0 !important;
+}
+
+div.checkbox-accordion-container .MuiAccordionDetails-root {
+  padding: 8px 16px 16px 16px;
 }
 
 .checkbox-accordion-title {
