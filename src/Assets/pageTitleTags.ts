@@ -39,15 +39,3 @@ export const OTHER_PAGE_TITLES: Record<OtherStepName, string> = {
   energyCalculatorLandingPage: 'Energy Calculator',
   energyCalculatorRedirectToMFB: 'Redirect to MFB',
 };
-
-export type AppKey = 'mfb' | 'cesn';
-
-export const APP_PREFIXES: Record<AppKey, string> = {
-  mfb: 'MyFriendBen - ',
-  cesn: 'Colorado Energy Savings Navigator - ',
-};
-
-export const getAppPrefixedTitle = (whiteLabel: string | undefined, pageTitle: string) => {
-  const currentPrefix = whiteLabel === 'co_energy_calculator' ? APP_PREFIXES.cesn : APP_PREFIXES.mfb;
-  return currentPrefix + pageTitle;
-};
