@@ -573,7 +573,7 @@ const HouseholdMemberForm = () => {
           name="conditions"
           options={pageNumber === 1 ? conditionOptions.you : conditionOptions.them}
         />
-        {getValues('conditions.student') && createStudentEligibilityQuestions()}
+        {watchIsStudent && createStudentEligibilityQuestions()}
       </Box>
     );
   };
@@ -589,7 +589,7 @@ const HouseholdMemberForm = () => {
           <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
             <FormattedMessage
               id="studentEligibility.enrolledHalfTime"
-              defaultMessage="Are enrolled half-time or more in a university, college, or community college as defined by educational institution?"
+              defaultMessage="Are you enrolled half-time or more in a university, college, or community college as defined by the educational institution?"
               values={{
                 subject: pageNumber === 1 ? 'you' : 'they',
                 possessive: pageNumber === 1 ? 'your' : 'their',
@@ -629,7 +629,7 @@ const HouseholdMemberForm = () => {
           <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
             <FormattedMessage
               id="studentEligibility.jobTraining"
-              defaultMessage="Is the program are enrolled in a job training program?"
+              defaultMessage="Is the program you are enrolled in a job training program?"
               values={{
                 subject: pageNumber === 1 ? 'you' : 'they',
               }}
@@ -668,7 +668,7 @@ const HouseholdMemberForm = () => {
           <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
             <FormattedMessage
               id="studentEligibility.workStudy"
-              defaultMessage="Do have a federal or state work study program?"
+              defaultMessage="Do you have a federal or state work study program?"
               values={{
                 subject: pageNumber === 1 ? 'you' : 'they',
               }}
@@ -707,7 +707,7 @@ const HouseholdMemberForm = () => {
           <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
             <FormattedMessage
               id="studentEligibility.works20Hours"
-              defaultMessage="Do work 20 or more hours per week in other employment, including self-employment? (If the hours work changes each week, do work at least 80 hours in a month?)"
+              defaultMessage="Do you work 20 or more hours per week in other employment, including self-employment? (If the hours you work changes each week, do you work at least 80 hours in a month?)"
               values={{
                 subject: pageNumber === 1 ? 'you' : 'they',
               }}
