@@ -24,3 +24,8 @@ export type IncomeStreamFormData = {
   incomeFrequency: string;
   hoursPerWeek: string;
 };
+
+export type LocationState = {
+  isEditing?: boolean;
+  returnToPage?: number;
+};
