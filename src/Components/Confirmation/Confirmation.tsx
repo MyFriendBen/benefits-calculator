@@ -8,14 +8,15 @@ import './Confirmation.css';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import STEP_CONFIRMATIONS from './ConfirmationSteps';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
-import { usePageTitle } from '../Common/usePageTitle';
 
 const Confirmation = () => {
   const { uuid, whiteLabel } = useParams();
   const navigate = useNavigate();
   const stepDirectory = useStepDirectory();
 
-  usePageTitle(OTHER_PAGE_TITLES.confirmation);
+  useEffect(() => {
+    document.title = OTHER_PAGE_TITLES.confirmation;
+  }, []);
 
   useEffect(() => {
     const continueOnEnter = (event: KeyboardEvent) => {
@@ -27,7 +28,7 @@ const Confirmation = () => {
     return () => {
       document.removeEventListener('keydown', continueOnEnter); // remove event listener on onmount
     };
-  }, [navigate, whiteLabel, uuid]);
+  });
 
   const displayAllFormData = () => {
     return stepDirectory.map((step) => {
@@ -42,7 +43,12 @@ const Confirmation = () => {
       <QuestionHeader>
         <FormattedMessage id="confirmation.return-subheader" defaultMessage="Is all of your information correct?" />
       </QuestionHeader>
-      <div className="confirmation-container">{displayAllFormData()}</div>
+      <div className="confirmation-container">
+        <div className="confirmation-page-header">
+          <FormattedMessage id="confirmation.return-subheader" defaultMessage="Is all of your information correct?" />
+        </div>
+        {displayAllFormData()}
+      </div>
       <div className="prev-continue-results-buttons confirmation">
         <PreviousButton navFunction={() => navigate(`/${whiteLabel}/${uuid}/step-${totalNumberOfQuestions - 1}`)} />
         <Button variant="contained" onClick={() => navigate(`/${whiteLabel}/${uuid}/results/benefits`)}>
