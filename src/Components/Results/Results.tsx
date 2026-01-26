@@ -33,7 +33,8 @@ import filterProgramsGenerator from './Filter/filterPrograms';
 import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRebates';
 import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/rebateTypes';
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
-import { usePageTitle } from '../Common/usePageTitle';
+import ResultsPopup from './ResultsPopup/ResultsPopup';
+import { getUrbanInstitute2025BaselineSurveyConfig } from './ResultsPopup/configs/urbanInstitute2025BaselineSurvey';
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -98,6 +99,7 @@ export function useResultsLink(link: string) {
   return addAdminToLink(`/${whiteLabel}/${uuid}/${link}`, isAdminView);
 }
 
+
 const Results = ({ type }: ResultsProps) => {
   const { formData, getReferrer, locale } = useContext(Context);
   const { whiteLabel, uuid, programId, energyCalculatorRebateType } = useParams();
@@ -110,11 +112,19 @@ const Results = ({ type }: ResultsProps) => {
   const [apiError, setApiError] = useState(false);
   const [apiResults, setApiResults] = useState<EligibilityResults | undefined>();
 
+  const popupConfig = useMemo(
+    //prevent unnecessary re-renders of results popup
+    () => getUrbanInstitute2025BaselineSurveyConfig(formData, whiteLabel, locale, uuid),
+    [formData, whiteLabel, locale, uuid]
+  );
+
   useEffect(() => {
     dataLayerPush({ event: 'config', user_id: uuid });
   }, [uuid]);
 
-  usePageTitle(OTHER_PAGE_TITLES.results);
+  useEffect(() => {
+    document.title = OTHER_PAGE_TITLES.results;
+  }, []);
 
   const fetchResults = async () => {
     try {
@@ -241,8 +251,14 @@ const Results = ({ type }: ResultsProps) => {
   } else if (programId === undefined && (type === 'program' || type === 'need')) {
     return (
       <main>
+        <BackAndSaveButtons
+            navigateToLink={`/${whiteLabel}/${uuid}/confirm-information`}
+            BackToThisPageText={<FormattedMessage id="results.back-to-screen-btn" defaultMessage="BACK TO SCREENER" />}
+          />
         <ResultsContextProvider>
+          <ResultsPopup {...popupConfig} />
           <ResultsHeader type={type} />
+          <div className="results-container">
           <ResultsTabs />
           {type === 'program' && <UrgentNeedBanner />}
           <Grid container sx={{ p: { xs: '1rem', sm: '1rem' } }}>
@@ -250,6 +266,7 @@ const Results = ({ type }: ResultsProps) => {
               {type === 'need' ? <Needs /> : <Programs />}
             </Grid>
           </Grid>
+          </div>
           {!noHelpButton && <HelpButton />}
         </ResultsContextProvider>
       </main>

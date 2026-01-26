@@ -24,10 +24,24 @@
 }
 
 .results-back-save-btn-container {
+  background-color: #ffffff;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.results-back-save-btn-wrapper {
   display: flex;
   justify-content: space-between;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
   padding: 1rem;
-  margin-bottom: 1px;
 }
 
 .save-icon {
