@@ -175,8 +175,8 @@ export function useUpdateFormData() {
         studentEligibility = {
           studentFullTime: member.student_full_time ?? false,
           studentJobTrainingProgram: member.student_job_training_program ?? false,
-          hasWorkStudy: member.has_work_study ?? false,
-          worksAtLeast20Hours: member.works_at_least_20_hours ?? false,
+          studentHasWorkStudy: member.student_has_work_study ?? false,
+          studentWorks20PlusHrs: member.student_works_20_plus_hrs ?? false,
         };
       }
 

@@ -224,8 +224,8 @@ const HouseholdMemberForm = () => {
       studentEligibility: z.object({
         studentFullTime: z.boolean(),
         studentJobTrainingProgram: z.boolean(),
-        hasWorkStudy: z.boolean(),
-        worksAtLeast20Hours: z.boolean(),
+        studentHasWorkStudy: z.boolean(),
+        studentWorks20PlusHrs: z.boolean(),
       }),
       relationshipToHH: z
         .string()
@@ -310,8 +310,8 @@ const HouseholdMemberForm = () => {
         : {
             studentFullTime: false,
             studentJobTrainingProgram: false,
-            hasWorkStudy: false,
-            worksAtLeast20Hours: false,
+            studentHasWorkStudy: false,
+            studentWorks20PlusHrs: false,
           },
       relationshipToHH: determineDefaultRelationshipToHH(),
       hasIncome: determineDefaultHasIncome(),
@@ -369,8 +369,8 @@ const HouseholdMemberForm = () => {
       setValue('studentEligibility', {
         studentFullTime: false,
         studentJobTrainingProgram: false,
-        hasWorkStudy: false,
-        worksAtLeast20Hours: false,
+        studentHasWorkStudy: false,
+        studentWorks20PlusHrs: false,
       });
     }
   }, [watchIsStudent, setValue]);
@@ -675,7 +675,7 @@ const HouseholdMemberForm = () => {
             />
           </Box>
           <Controller
-            name="studentEligibility.hasWorkStudy"
+            name="studentEligibility.studentHasWorkStudy"
             control={control}
             render={({ field }) => (
               <RadioGroup
@@ -714,7 +714,7 @@ const HouseholdMemberForm = () => {
             />
           </Box>
           <Controller
-            name="studentEligibility.worksAtLeast20Hours"
+            name="studentEligibility.studentWorks20PlusHrs"
             control={control}
             render={({ field }) => (
               <RadioGroup

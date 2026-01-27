@@ -121,8 +121,8 @@ export type Conditions = {
 export type StudentEligibility = {
   studentFullTime?: boolean;
   studentJobTrainingProgram?: boolean;
-  hasWorkStudy?: boolean;
-  worksAtLeast20Hours?: boolean;
+  studentHasWorkStudy?: boolean;
+  studentWorks20PlusHrs?: boolean;
 };
 
 export const isCustomTypedLocationState = (
