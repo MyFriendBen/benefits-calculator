@@ -305,14 +305,12 @@ const HouseholdMemberForm = () => {
             disabled: false,
             longTermDisability: false,
           },
-      studentEligibility: householdMemberFormData?.studentEligibility
-        ? householdMemberFormData.studentEligibility
-        : {
-            studentFullTime: false,
-            studentJobTrainingProgram: false,
-            studentHasWorkStudy: false,
-            studentWorks20PlusHrs: false,
-          },
+      studentEligibility: {
+        studentFullTime: householdMemberFormData?.studentEligibility?.studentFullTime ?? false,
+        studentJobTrainingProgram: householdMemberFormData?.studentEligibility?.studentJobTrainingProgram ?? false,
+        studentHasWorkStudy: householdMemberFormData?.studentEligibility?.studentHasWorkStudy ?? false,
+        studentWorks20PlusHrs: householdMemberFormData?.studentEligibility?.studentWorks20PlusHrs ?? false,
+      },
       relationshipToHH: determineDefaultRelationshipToHH(),
       hasIncome: determineDefaultHasIncome(),
       incomeStreams: householdMemberFormData?.incomeStreams ?? [],
