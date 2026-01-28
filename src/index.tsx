@@ -5,8 +5,10 @@ import { BrowserRouter } from 'react-router-dom';
 import Wrapper from './Components/Wrapper/Wrapper';
 import './index.css';
 import { initializeGTM } from './Assets/analytics';
+import { handleCustomDomainRedirect } from './config/customDomains';
 
 initializeGTM();
+handleCustomDomainRedirect();
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
