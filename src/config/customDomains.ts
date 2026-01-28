@@ -16,9 +16,13 @@ export function handleCustomDomainRedirect(): void {
   if (!config) return;
 
   const path = window.location.pathname;
+  const search = window.location.search;
+  const hash = window.location.hash;
+  const basePath = `/${config.whiteLabel}`;
+  const isUnderWhiteLabel = path === basePath || path.startsWith(`${basePath}/`);
 
-  if (!path.startsWith(`/${config.whiteLabel}`)) {
+  if (!isUnderWhiteLabel) {
     const targetPath = path === '/' ? config.defaultPath : path;
-    window.location.replace(`/${config.whiteLabel}${targetPath}`);
+    window.location.replace(`${basePath}${targetPath}${search}${hash}`);
   }
 }
