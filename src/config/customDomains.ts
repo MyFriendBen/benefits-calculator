@@ -5,8 +5,8 @@ type CustomDomainConfig = {
 
 const CUSTOM_DOMAINS: Record<string, CustomDomainConfig> = {
   'energysavings.colorado.gov': {
-    whiteLabel: 'co_energy_calculator',
-    defaultPath: '/landing-page',
+    whiteLabel: 'cesn',
+    defaultPath: '',
   },
 };
 

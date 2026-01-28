@@ -32,7 +32,7 @@ export const WHITE_LABELS = {
   NC: 'nc',
   CO: 'co',
   MA: 'ma',
-  CO_ENERGY_CALCULATOR: 'co_energy_calculator',
+  CESN: 'cesn',
 };
 
 /**
