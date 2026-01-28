@@ -51,7 +51,7 @@ All tracking sends events with this structure:
 
 ## Current Usage
 
-Currently implemented for rebate application links in the Colorado Energy Calculator:
+Currently implemented for rebate application links in the Colorado Energy Savings Navigator:
 
 - **Rebate Links**: Tracks clicks on "Learn how to apply" links with program name, rebate type, and category
 
