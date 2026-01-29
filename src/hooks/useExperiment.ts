@@ -5,7 +5,7 @@ import { NPSVariant } from '../Components/Referrer/referrerHook';
 
 const STORAGE_PREFIX = 'experiment_override_';
 
-const VALID_NPS_VARIANTS: NPSVariant[] = ['floating', 'inline', 'control'];
+const VALID_NPS_VARIANTS: NPSVariant[] = ['floating', 'inline', 'off'];
 
 /**
  * Hook for NPS A/B test experiment with override support for testing.

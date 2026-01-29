@@ -17,9 +17,9 @@ type NPSWidgetProps = {
  * To test variants, add ?npsVariant=floating or ?npsVariant=inline to the URL
  */
 export default function NPSWidget({ eligibilitySnapshotId }: NPSWidgetProps) {
-  const variant = useExperiment('npsVariant', 'control');
+  const variant = useExperiment('npsVariant', 'off');
 
-  if (variant === 'control') {
+  if (variant === 'off') {
     return null;
   }
 

@@ -8,7 +8,7 @@ type ReferrerOptions<T> = {
 
 export type StepDirectory = QuestionName[] | { default: QuestionName[]; [key: string]: QuestionName[] };
 
-export type NPSVariant = 'floating' | 'inline' | 'control';
+export type NPSVariant = 'floating' | 'inline' | 'off';
 
 export type ReferrerData = {
   theme: ReferrerOptions<string>;
