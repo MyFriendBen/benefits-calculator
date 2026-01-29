@@ -8,8 +8,6 @@ type ReferrerOptions<T> = {
 
 export type StepDirectory = QuestionName[] | { default: QuestionName[]; [key: string]: QuestionName[] };
 
-export type NPSVariant = 'floating' | 'inline' | 'off';
-
 export type ReferrerData = {
   theme: ReferrerOptions<string>;
   logoSource: ReferrerOptions<string>;
@@ -25,7 +23,6 @@ export type ReferrerData = {
   noResultMessage: ReferrerOptions<FormattedMessageType>;
   defaultLanguage: ReferrerOptions<string>;
   stateName: ReferrerOptions<string>;
-  npsVariant: ReferrerOptions<NPSVariant>;
 };
 
 export type ReferrerDataValue<T extends keyof ReferrerData> = T extends
@@ -47,8 +44,6 @@ export type ReferrerDataValue<T extends keyof ReferrerData> = T extends
   ? string[]
   : T extends 'noResultMessage'
   ? FormattedMessageType
-  : T extends 'npsVariant'
-  ? NPSVariant
   : never;
 
 export default function useReferrer(referrerCode?: string, referrerData?: ReferrerData) {

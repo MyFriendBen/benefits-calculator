@@ -1,19 +1,27 @@
 import { useContext, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Context } from '../Components/Wrapper/Wrapper';
-import { NPSVariant } from '../Components/Referrer/referrerHook';
+
+export type NPSVariant = 'floating' | 'inline' | 'off';
+
+type ExperimentsConfig = {
+  npsVariant?: {
+    default: NPSVariant;
+    [key: string]: NPSVariant | undefined;
+  };
+};
 
 const STORAGE_PREFIX = 'experiment_override_';
 
 const VALID_NPS_VARIANTS: NPSVariant[] = ['floating', 'inline', 'off'];
 
 /**
- * Hook for NPS A/B test experiment with override support for testing.
+ * Hook for A/B test experiments with override support for testing.
  *
  * Priority order:
  * 1. URL parameter (e.g., ?npsVariant=floating)
  * 2. localStorage override (for persistent testing)
- * 3. Backend config via getReferrer
+ * 3. Backend config via experiments config
  *
  * To test variants:
  * - URL: Add ?npsVariant=floating or ?npsVariant=inline to the URL
@@ -24,7 +32,7 @@ export function useExperiment(
   experimentName: 'npsVariant',
   defaultValue: NPSVariant,
 ): NPSVariant {
-  const { getReferrer } = useContext(Context);
+  const { config } = useContext(Context);
   const [searchParams] = useSearchParams();
 
   const variant = useMemo(() => {
@@ -41,13 +49,18 @@ export function useExperiment(
       return localOverride as NPSVariant;
     }
 
-    // 3. Fall back to backend config
+    // 3. Fall back to backend experiments config
     try {
-      return getReferrer('npsVariant', defaultValue);
+      const experiments = config?.experiments as ExperimentsConfig | undefined;
+      const experimentConfig = experiments?.[experimentName];
+      if (experimentConfig) {
+        return experimentConfig.default ?? defaultValue;
+      }
+      return defaultValue;
     } catch {
       return defaultValue;
     }
-  }, [experimentName, defaultValue, getReferrer, searchParams]);
+  }, [experimentName, defaultValue, config, searchParams]);
 
   return variant;
 }
