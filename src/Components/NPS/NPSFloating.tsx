@@ -1,20 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './NPS.css';
 
 type NPSFloatingProps = {
   eligibilitySnapshotId?: number;
 };
 
+const SHOW_DELAY_MS = 5000; // 5 seconds
+
 /**
- * Floating NPS widget - appears in bottom-right corner
- * TODO: Replace placeholder with actual design
+ * Floating NPS widget - appears in bottom-right corner after a delay
  */
 export default function NPSFloating({ eligibilitySnapshotId }: NPSFloatingProps) {
+  const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  if (isDismissed) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, SHOW_DELAY_MS);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!isVisible || isDismissed) {
     return null;
   }
 
