@@ -47,7 +47,7 @@ export default function NPSFloating({ eligibilitySnapshotId }: NPSFloatingProps)
         </button>
       </div>
       <div className="nps-floating-content">
-        <p>How likely would you recommend us?</p>
+        <p>How likely are you to recommend MyFriendBen to a friend?</p>
         <div className="nps-score-buttons">
           {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
             <button
@@ -60,8 +60,8 @@ export default function NPSFloating({ eligibilitySnapshotId }: NPSFloatingProps)
           ))}
         </div>
         <div className="nps-labels">
-          <span>Not likely</span>
-          <span>Very likely</span>
+          <span>Not at all likely</span>
+          <span>Extremely likely</span>
         </div>
       </div>
     </div>

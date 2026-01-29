@@ -1,36 +1,39 @@
 /* Shared NPS styles */
 .nps-score-buttons {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   justify-content: center;
   margin: 16px 0 8px;
 }
 
 .nps-score-btn {
-  width: 36px;
-  height: 36px;
-  border: 1px solid #ccc;
+  width: 44px;
+  height: 40px;
+  border: 2px solid #e0e0e0;
   border-radius: 4px;
   background: white;
   cursor: pointer;
+  font-family: 'Open Sans', sans-serif;
   font-size: 14px;
-  transition: all 0.2s;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .nps-score-btn:hover {
-  border-color: #1976d2;
-  background: #e3f2fd;
+  border-color: var(--secondary-color);
+  background: #f5fffe;
 }
 
 .nps-score-btn.selected {
-  background: #1976d2;
+  background: var(--secondary-color);
   color: white;
-  border-color: #1976d2;
+  border-color: var(--secondary-color);
 }
 
 .nps-labels {
   display: flex;
   justify-content: space-between;
+  font-family: 'Open Sans', sans-serif;
   font-size: 12px;
   color: #666;
   padding: 0 4px;
@@ -44,9 +47,21 @@
   width: 320px;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   z-index: 1000;
-  border: 1px solid #e0e0e0;
+  border: 2px solid var(--secondary-color);
+  animation: npsSlideIn 0.3s ease-out;
+}
+
+@keyframes npsSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .nps-floating-header {
@@ -54,10 +69,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: #f57c00;
+  background: var(--secondary-color);
   color: white;
-  border-radius: 8px 8px 0 0;
-  font-weight: 500;
+  border-radius: 6px 6px 0 0;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .nps-dismiss-btn {
@@ -68,25 +85,45 @@
   cursor: pointer;
   padding: 0;
   line-height: 1;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.nps-dismiss-btn:hover {
+  opacity: 1;
 }
 
 .nps-floating-content {
-  padding: 16px;
+  padding: 12px 16px 16px;
 }
 
 .nps-floating-content p {
   margin: 0 0 8px;
   text-align: center;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  color: #333;
 }
 
 .nps-close-btn {
   display: block;
   margin: 12px auto 0;
-  padding: 8px 16px;
-  background: #f5f5f5;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 8px 24px;
+  background: var(--secondary-color);
+  color: white;
+  border: 2px solid transparent;
+  border-radius: 8px;
   cursor: pointer;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.nps-close-btn:hover {
+  background: white;
+  color: var(--secondary-color);
+  border-color: var(--secondary-color);
 }
 
 /* Inline variant */
@@ -100,19 +137,24 @@
 
 .nps-inline-title {
   margin: 0 0 8px;
+  font-family: 'Open Sans', sans-serif;
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--primary-color);
 }
 
 .nps-inline-subtitle {
   margin: 0 0 16px;
+  font-family: 'Open Sans', sans-serif;
   color: #666;
   font-size: 14px;
 }
 
 .nps-thank-you {
+  font-family: 'Open Sans', sans-serif;
   font-size: 16px;
-  color: #2e7d32;
+  color: var(--primary-color);
+  font-weight: 500;
 }
 
 /* Responsive */
@@ -131,5 +173,13 @@
 
   .nps-score-buttons {
     gap: 4px;
+  }
+
+  .nps-inline {
+    padding: 24px 16px;
+  }
+
+  .nps-inline-title {
+    font-size: 18px;
   }
 }
