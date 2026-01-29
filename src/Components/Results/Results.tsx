@@ -34,6 +34,7 @@ import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRe
 import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/rebateTypes';
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
 import { usePageTitle } from '../Common/usePageTitle';
+import { NPSWidget } from '../NPS';
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -251,6 +252,7 @@ const Results = ({ type }: ResultsProps) => {
             </Grid>
           </Grid>
           {!noHelpButton && <HelpButton />}
+          <NPSWidget />
         </ResultsContextProvider>
       </main>
     );

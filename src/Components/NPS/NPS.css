@@ -1,0 +1,135 @@
+/* Shared NPS styles */
+.nps-score-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 16px 0 8px;
+}
+
+.nps-score-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.nps-score-btn:hover {
+  border-color: #1976d2;
+  background: #e3f2fd;
+}
+
+.nps-score-btn.selected {
+  background: #1976d2;
+  color: white;
+  border-color: #1976d2;
+}
+
+.nps-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+  padding: 0 4px;
+}
+
+/* Floating variant */
+.nps-floating {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 320px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  border: 1px solid #e0e0e0;
+}
+
+.nps-floating-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f57c00;
+  color: white;
+  border-radius: 8px 8px 0 0;
+  font-weight: 500;
+}
+
+.nps-dismiss-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.nps-floating-content {
+  padding: 16px;
+}
+
+.nps-floating-content p {
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.nps-close-btn {
+  display: block;
+  margin: 12px auto 0;
+  padding: 8px 16px;
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Inline variant */
+.nps-inline {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 32px;
+  text-align: center;
+  border-top: 1px solid #e0e0e0;
+}
+
+.nps-inline-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.nps-inline-subtitle {
+  margin: 0 0 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+.nps-thank-you {
+  font-size: 16px;
+  color: #2e7d32;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .nps-floating {
+    width: calc(100% - 32px);
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .nps-score-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .nps-score-buttons {
+    gap: 4px;
+  }
+}
