@@ -43,10 +43,14 @@ export function useExperiment(
     }
 
     // 2. Check localStorage override
-    const storageKey = `${STORAGE_PREFIX}${experimentName}`;
-    const localOverride = localStorage.getItem(storageKey);
-    if (localOverride && VALID_NPS_VARIANTS.includes(localOverride as NPSVariant)) {
-      return localOverride as NPSVariant;
+    try {
+      const storageKey = `${STORAGE_PREFIX}${experimentName}`;
+      const localOverride = localStorage.getItem(storageKey);
+      if (localOverride && VALID_NPS_VARIANTS.includes(localOverride as NPSVariant)) {
+        return localOverride as NPSVariant;
+      }
+    } catch {
+      // localStorage may be unavailable in private browsing
     }
 
     // 3. Fall back to backend experiments config
@@ -69,12 +73,20 @@ export function useExperiment(
  * Helper to set a persistent experiment override (for dev/QA use)
  */
 export function setExperimentOverride(experimentName: 'npsVariant', value: NPSVariant): void {
-  localStorage.setItem(`${STORAGE_PREFIX}${experimentName}`, value);
+  try {
+    localStorage.setItem(`${STORAGE_PREFIX}${experimentName}`, value);
+  } catch {
+    // localStorage may be unavailable in private browsing
+  }
 }
 
 /**
  * Helper to clear an experiment override
  */
 export function clearExperimentOverride(experimentName: 'npsVariant'): void {
-  localStorage.removeItem(`${STORAGE_PREFIX}${experimentName}`);
+  try {
+    localStorage.removeItem(`${STORAGE_PREFIX}${experimentName}`);
+  } catch {
+    // localStorage may be unavailable in private browsing
+  }
 }

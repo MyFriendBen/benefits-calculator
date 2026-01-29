@@ -252,7 +252,7 @@ const Results = ({ type }: ResultsProps) => {
             </Grid>
           </Grid>
           {!noHelpButton && <HelpButton />}
-          <NPSWidget />
+          <NPSWidget uuid={uuid} />
         </ResultsContextProvider>
       </main>
     );

@@ -3,7 +3,7 @@ import NPSFloating from './NPSFloating';
 import NPSInline from './NPSInline';
 
 type NPSWidgetProps = {
-  eligibilitySnapshotId?: number;
+  uuid?: string;
 };
 
 /**
@@ -12,11 +12,11 @@ type NPSWidgetProps = {
  * Variants:
  * - 'floating': Bottom-right floating widget
  * - 'inline': Full-width section at bottom of results
- * - 'control': Don't show NPS (default)
+ * - 'off': Don't show NPS (default, used by white labels that opt out)
  *
  * To test variants, add ?npsVariant=floating or ?npsVariant=inline to the URL
  */
-export default function NPSWidget({ eligibilitySnapshotId }: NPSWidgetProps) {
+export default function NPSWidget({ uuid }: NPSWidgetProps) {
   const variant = useExperiment('npsVariant', 'off');
 
   if (variant === 'off') {
@@ -24,8 +24,8 @@ export default function NPSWidget({ eligibilitySnapshotId }: NPSWidgetProps) {
   }
 
   if (variant === 'floating') {
-    return <NPSFloating eligibilitySnapshotId={eligibilitySnapshotId} />;
+    return <NPSFloating uuid={uuid} />;
   }
 
-  return <NPSInline eligibilitySnapshotId={eligibilitySnapshotId} />;
+  return <NPSInline uuid={uuid} />;
 }

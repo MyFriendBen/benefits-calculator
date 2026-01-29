@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNPSState } from './useNPSState';
+import NPSScoreButtons from './NPSScoreButtons';
 import './NPS.css';
 
 type NPSFloatingProps = {
-  eligibilitySnapshotId?: number;
+  uuid?: string;
 };
 
 const SHOW_DELAY_MS = 5000; // 5 seconds
@@ -10,11 +12,10 @@ const SHOW_DELAY_MS = 5000; // 5 seconds
 /**
  * Floating NPS widget - appears in bottom-right corner after a delay
  */
-export default function NPSFloating({ eligibilitySnapshotId }: NPSFloatingProps) {
+export default function NPSFloating({ uuid }: NPSFloatingProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
-  const [selectedScore, setSelectedScore] = useState<number | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { selectedScore, isSubmitted, submitScore } = useNPSState('floating', uuid);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -27,13 +28,6 @@ export default function NPSFloating({ eligibilitySnapshotId }: NPSFloatingProps)
   if (!isVisible || isDismissed) {
     return null;
   }
-
-  const handleScoreClick = (score: number) => {
-    setSelectedScore(score);
-    // TODO: Submit to API
-    console.log('NPS Score submitted:', { score, variant: 'floating', eligibilitySnapshotId });
-    setIsSubmitted(true);
-  };
 
   if (isSubmitted) {
     return (
@@ -55,21 +49,7 @@ export default function NPSFloating({ eligibilitySnapshotId }: NPSFloatingProps)
       </button>
       <div className="nps-floating-content">
         <p>How likely are you to recommend MyFriendBen to a friend?</p>
-        <div className="nps-score-buttons">
-          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
-            <button
-              key={score}
-              onClick={() => handleScoreClick(score)}
-              className={`nps-score-btn ${selectedScore === score ? 'selected' : ''}`}
-            >
-              {score}
-            </button>
-          ))}
-        </div>
-        <div className="nps-labels">
-          <span>Not at all likely</span>
-          <span>Extremely likely</span>
-        </div>
+        <NPSScoreButtons selectedScore={selectedScore} onScoreClick={submitScore} />
       </div>
     </div>
   );
