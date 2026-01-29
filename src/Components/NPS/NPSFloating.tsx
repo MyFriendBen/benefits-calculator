@@ -50,12 +50,9 @@ export default function NPSFloating({ eligibilitySnapshotId }: NPSFloatingProps)
 
   return (
     <div className="nps-floating">
-      <div className="nps-floating-header">
-        <span>Quick Feedback</span>
-        <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label="Dismiss">
-          ×
-        </button>
-      </div>
+      <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label="Dismiss">
+        ×
+      </button>
       <div className="nps-floating-content">
         <p>How likely are you to recommend MyFriendBen to a friend?</p>
         <div className="nps-score-buttons">
