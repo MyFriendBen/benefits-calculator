@@ -35,8 +35,7 @@ type ResultsCardFlag = {
 };
 
 type EligibleMemberTag = {
-  label: string;
-  isHousehold?: boolean;
+  label: FormattedMessageType;
 };
 
 type ResultsCardProps = {
@@ -192,17 +191,19 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
 
     const eligibleMembersList = program.members.filter((m) => m.eligible);
 
-    // If no individual member eligibility data, this is a household-level program (e.g. SNAP)
-    if (eligibleMembersList.length === 0) {
+    // If program is eligible but no individual members are marked eligible,
+    // it's a household-level program (e.g. SNAP)
+    if (program.eligible && eligibleMembersList.length === 0) {
       return [
         {
-          label: formatMessage({
-            id: 'programCard.household',
-            defaultMessage: 'Household',
-          }),
-          isHousehold: true,
+          label: <FormattedMessage id="programCard.household" defaultMessage="Household" />,
         },
       ];
+    }
+
+    // If no members are eligible (and program isn't eligible), show nothing
+    if (eligibleMembersList.length === 0) {
+      return [];
     }
 
     // Show individual eligible members (even if all are eligible)
@@ -211,25 +212,41 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
       const memberIndex = formData.householdData.findIndex((m) => m.frontendId === member.frontendId);
       const age = calcAge(member);
 
-      let relationshipLabel: string;
       if (memberIndex === 0) {
-        // Head of household - show relationship option label for "headOfHH" or default
-        relationshipLabel = formatMessage({
-          id: 'relationshipOptions.yourself',
-          defaultMessage: 'Yourself',
-        });
-      } else {
-        const relationOption = relationshipOptions[member.relationshipToHH];
-        if (relationOption && typeof relationOption === 'object' && 'props' in relationOption) {
-          relationshipLabel = formatMessage(relationOption.props);
-        } else {
-          relationshipLabel = member.relationshipToHH;
-        }
+        // Head of household
+        return {
+          label: (
+            <FormattedMessage
+              id="programCard.eligibleMember.yourself"
+              defaultMessage="{relationship}, {age}"
+              values={{
+                relationship: <FormattedMessage id="relationshipOptions.yourself" defaultMessage="Yourself" />,
+                age,
+              }}
+            />
+          ),
+        };
       }
 
+      const relationOption = relationshipOptions[member.relationshipToHH];
+      const relationshipLabel =
+        relationOption && typeof relationOption === 'object' && 'props' in relationOption ? (
+          <FormattedMessage {...relationOption.props} />
+        ) : (
+          member.relationshipToHH
+        );
+
       return {
-        label: `${relationshipLabel}, ${age}`,
-        isHousehold: false,
+        label: (
+          <FormattedMessage
+            id="programCard.eligibleMember"
+            defaultMessage="{relationship}, {age}"
+            values={{
+              relationship: relationshipLabel,
+              age,
+            }}
+          />
+        ),
       };
     });
   }, [program.members, formData, relationshipOptions, formatMessage]);
