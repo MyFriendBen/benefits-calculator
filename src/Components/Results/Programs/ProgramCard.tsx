@@ -1,14 +1,17 @@
 import { Link } from 'react-router-dom';
 import { Program } from '../../../Types/Results';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { useFormatDisplayValue } from '../FormattedValue';
 import ResultsTranslate from '../Translate/Translate';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { useMediaQuery } from '@mui/material';
 import './ProgramCard.css';
-import { findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
+import { findMemberEligibilityMember, findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
 import { FormattedMessageType } from '../../../Types/Questions';
 import { BREAKPOINTS } from '../../../utils/breakpoints';
+import { Context } from '../../Wrapper/Wrapper';
+import { useConfig } from '../../Config/configHook';
+import { calcAge } from '../../../Assets/age';
 
 type ResultsCardDetail = {
   title: FormattedMessageType;
@@ -31,6 +34,11 @@ type ResultsCardFlag = {
   className: string;
 };
 
+type EligibleMemberTag = {
+  label: string;
+  isHousehold?: boolean;
+};
+
 type ResultsCardProps = {
   name: FormattedMessageType;
   detail1: ResultsCardDetail;
@@ -38,9 +46,39 @@ type ResultsCardProps = {
   link: string;
   flags?: ResultsCardFlag[];
   containerClassNames?: string[];
+  eligibleMembers?: EligibleMemberTag[];
 };
 
-export function ResultsCard({ name, detail1, detail2, link, flags = [], containerClassNames = [] }: ResultsCardProps) {
+function EligibleMemberTags({ members }: { members: EligibleMemberTag[] }) {
+  if (members.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="eligible-members-container">
+      <span className="eligible-members-label">
+        <FormattedMessage id="programCard.eligible-label" defaultMessage="Eligible:" />
+      </span>
+      <div className="eligible-members-tags">
+        {members.map((member, i) => (
+          <span key={i} className="eligible-member-tag">
+            {member.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function ResultsCard({
+  name,
+  detail1,
+  detail2,
+  link,
+  flags = [],
+  containerClassNames = [],
+  eligibleMembers = [],
+}: ResultsCardProps) {
   // Mobile is below desktop breakpoint (0-767px)
   const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.desktop - 1}px)`);
   const containerClass = 'result-program-container ' + containerClassNames.join(' ');
@@ -57,19 +95,23 @@ export function ResultsCard({ name, detail1, detail2, link, flags = [], containe
         })}
       </div>
       {isMobile ? (
-        <div className="result-program-more-info-wrapper">
-          <div className="result-program-more-info">
-            <Link to={link}>{name}</Link>
+        <div className="result-program-mobile-header">
+          <div className="result-program-more-info-wrapper">
+            <div className="result-program-more-info">
+              <Link to={link}>{name}</Link>
+            </div>
+            <div className="result-program-more-info-button">
+              <Link to={link} data-testid="more-info-link">
+                <FormattedMessage id="more-info" defaultMessage="More Info" />
+              </Link>
+            </div>
           </div>
-          <div className="result-program-more-info-button">
-            <Link to={link} data-testid="more-info-link">
-              <FormattedMessage id="more-info" defaultMessage="More Info" />
-            </Link>
-          </div>
+          <EligibleMemberTags members={eligibleMembers} />
         </div>
       ) : (
         <div className="result-program-more-info">
           <Link to={link}>{name}</Link>
+          <EligibleMemberTags members={eligibleMembers} />
         </div>
       )}
       <hr />
@@ -97,6 +139,9 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
   const programName = program.name;
   const programId = program.program_id;
   const { validations, isAdminView } = useResultsContext();
+  const { formData } = useContext(Context);
+  const relationshipOptions = useConfig<{ [key: string]: FormattedMessageType }>('relationship_options');
+  const { formatMessage } = useIntl();
 
   const containerClass = useMemo(() => {
     const classNames = [];
@@ -137,6 +182,58 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
     return flags;
   }, [program.new, program.low_confidence]);
 
+  const eligibleMembers = useMemo(() => {
+    const totalMembers = formData.householdData.length;
+
+    // Only show eligible member tags if household has more than 1 member
+    if (totalMembers <= 1) {
+      return [];
+    }
+
+    const eligibleMembersList = program.members.filter((m) => m.eligible);
+
+    // If no individual member eligibility data, this is a household-level program (e.g. SNAP)
+    if (eligibleMembersList.length === 0) {
+      return [
+        {
+          label: formatMessage({
+            id: 'programCard.entire-household',
+            defaultMessage: 'Entire household',
+          }),
+          isHousehold: true,
+        },
+      ];
+    }
+
+    // Show individual eligible members (even if all are eligible)
+    return eligibleMembersList.map((memberEligibility) => {
+      const member = findMemberEligibilityMember(formData, memberEligibility);
+      const memberIndex = formData.householdData.findIndex((m) => m.frontendId === member.frontendId);
+      const age = calcAge(member);
+
+      let relationshipLabel: string;
+      if (memberIndex === 0) {
+        // Head of household - show relationship option label for "headOfHH" or default
+        relationshipLabel = formatMessage({
+          id: 'relationshipOptions.yourself',
+          defaultMessage: 'Yourself',
+        });
+      } else {
+        const relationOption = relationshipOptions[member.relationshipToHH];
+        if (relationOption && typeof relationOption === 'object' && 'props' in relationOption) {
+          relationshipLabel = formatMessage(relationOption.props);
+        } else {
+          relationshipLabel = member.relationshipToHH;
+        }
+      }
+
+      return {
+        label: `${relationshipLabel}, ${age}`,
+        isHousehold: false,
+      };
+    });
+  }, [program.members, formData, relationshipOptions, formatMessage]);
+
   const programPageLink = useResultsLink(`results/benefits/${programId}`);
   const value = useFormatDisplayValue(program);
 
@@ -154,6 +251,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
       flags={flags}
       link={programPageLink}
       containerClassNames={containerClass}
+      eligibleMembers={eligibleMembers}
     />
   );
 };
