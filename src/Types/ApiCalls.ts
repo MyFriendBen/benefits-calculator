@@ -22,7 +22,7 @@ export type ProgramCategoryResponse = {
   programs: {
     name: Translation;
     website_description: Translation;
-    apply_button_link: Translation;
+    apply_button_link?: Translation;
   }[];
 }[];
 
@@ -38,7 +38,7 @@ export type UrgentNeedTypeResponse = {
   urgent_needs: {
     name: Translation;
     website_description: Translation;
-    link: Translation;
+    link?: Translation;
   }[];
 }[];
 

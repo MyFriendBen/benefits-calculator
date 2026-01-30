@@ -118,8 +118,7 @@ const CurrentBenefits = () => {
             className="program-name"
             href={link}
             target="_blank"
-            rel="noreferrer"
-            style={{ color: 'inherit', textDecoration: 'none' }}
+            rel="noopener noreferrer"
           >
             <ResultsTranslate translation={program.name} />
           </a>
@@ -142,7 +141,7 @@ const CurrentBenefits = () => {
       const iconKey = icon.toLowerCase();
       const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'default';
       const CategoryIcon = ICON_OPTIONS_MAP[actualIconKey];
-      
+
       const isLucideIcon = LUCIDE_ICONS.includes(actualIconKey);
       const iconClassName = isLucideIcon ? 'category-heading-icon category-lucide-icon' : 'category-heading-icon';
 
