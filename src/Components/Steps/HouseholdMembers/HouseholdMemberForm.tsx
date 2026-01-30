@@ -61,6 +61,47 @@ import { useShouldRedirectToConfirmation } from '../../QuestionComponents/questi
 import useStepForm from '../stepForm';
 import { usePageTitle } from '../../Common/usePageTitle';
 
+type StudentQuestion = {
+  name: 'studentFullTime' | 'studentJobTrainingProgram' | 'studentHasWorkStudy' | 'studentWorks20PlusHrs';
+  messageId: string;
+  defaultMessage: string;
+  ariaLabelId: string;
+  ariaLabelDefault: string;
+};
+
+const STUDENT_QUESTIONS: StudentQuestion[] = [
+  {
+    name: 'studentFullTime',
+    messageId: 'studentEligibility.enrolledHalfTime',
+    defaultMessage:
+      'Are {subject} enrolled half-time or more in a university, college, or community college as defined by the educational institution?',
+    ariaLabelId: 'studentEligibility.enrolledHalfTime-ariaLabel',
+    ariaLabelDefault: 'enrolled half-time or more',
+  },
+  {
+    name: 'studentJobTrainingProgram',
+    messageId: 'studentEligibility.jobTraining',
+    defaultMessage: 'Is the program {subject} are enrolled in a job training program?',
+    ariaLabelId: 'studentEligibility.jobTraining-ariaLabel',
+    ariaLabelDefault: 'job training program',
+  },
+  {
+    name: 'studentHasWorkStudy',
+    messageId: 'studentEligibility.workStudy',
+    defaultMessage: 'Do {subject} have a federal or state work study program?',
+    ariaLabelId: 'studentEligibility.workStudy-ariaLabel',
+    ariaLabelDefault: 'work study program',
+  },
+  {
+    name: 'studentWorks20PlusHrs',
+    messageId: 'studentEligibility.works20Hours',
+    defaultMessage:
+      'Do {subject} work 20 or more hours per week in other employment, including self-employment? (If the hours {subject} work changes each week, do {subject} work at least 80 hours in a month?)',
+    ariaLabelId: 'studentEligibility.works20Hours-ariaLabel',
+    ariaLabelDefault: 'works 20 hours or more',
+  },
+];
+
 const HouseholdMemberForm = () => {
   const { formData } = useContext(Context);
   const { uuid, page, whiteLabel } = useParams();
@@ -221,6 +262,12 @@ const HouseholdMemberForm = () => {
         disabled: z.boolean(),
         longTermDisability: z.boolean(),
       }),
+      studentEligibility: z.object({
+        studentFullTime: z.boolean(),
+        studentJobTrainingProgram: z.boolean(),
+        studentHasWorkStudy: z.boolean(),
+        studentWorks20PlusHrs: z.boolean(),
+      }),
       relationshipToHH: z
         .string()
         .refine((value) => [...Object.keys(relationshipOptions)].includes(value) || pageNumber === 1, {
@@ -299,6 +346,12 @@ const HouseholdMemberForm = () => {
             disabled: false,
             longTermDisability: false,
           },
+      studentEligibility: {
+        studentFullTime: householdMemberFormData?.studentEligibility?.studentFullTime ?? false,
+        studentJobTrainingProgram: householdMemberFormData?.studentEligibility?.studentJobTrainingProgram ?? false,
+        studentHasWorkStudy: householdMemberFormData?.studentEligibility?.studentHasWorkStudy ?? false,
+        studentWorks20PlusHrs: householdMemberFormData?.studentEligibility?.studentWorks20PlusHrs ?? false,
+      },
       relationshipToHH: determineDefaultRelationshipToHH(),
       hasIncome: determineDefaultHasIncome(),
       incomeStreams: householdMemberFormData?.incomeStreams ?? [],
@@ -345,6 +398,21 @@ const HouseholdMemberForm = () => {
       setValue('hasIncome', 'false', { shouldDirty: true });
     }
   }, [watchBirthMonth, watchBirthYear, setValue, calculateCurrentAgeStatus, getValues]);
+
+  // Watch student condition to conditionally show student eligibility questions
+  const watchIsStudent = watch('conditions.student');
+
+  // Reset student eligibility fields when student condition is deselected
+  useEffect(() => {
+    if (!watchIsStudent) {
+      setValue('studentEligibility', {
+        studentFullTime: false,
+        studentJobTrainingProgram: false,
+        studentHasWorkStudy: false,
+        studentWorks20PlusHrs: false,
+      });
+    }
+  }, [watchIsStudent, setValue]);
 
 
   const formSubmitHandler: SubmitHandler<FormSchema> = async (memberData) => {
@@ -544,6 +612,57 @@ const HouseholdMemberForm = () => {
           name="conditions"
           options={pageNumber === 1 ? conditionOptions.you : conditionOptions.them}
         />
+        {watchIsStudent && createStudentEligibilityQuestions()}
+      </Box>
+    );
+  };
+
+  const createStudentEligibilityQuestions = () => {
+    return (
+      <Box sx={{ mt: 2, pl: 2, borderLeft: '3px solid #e0e0e0', fontSize: '1.12rem', '& .question-label': { fontSize: '1.12rem' } }}>
+        <Box component="h4" sx={{ fontWeight: 700, mb: 2, mt: 0, fontSize: '1.13rem', color: 'text.primary' }}>
+          <FormattedMessage id="studentEligibility.sectionTitle" defaultMessage="Student Information" />
+        </Box>
+        {STUDENT_QUESTIONS.map(({ name, messageId, defaultMessage, ariaLabelId, ariaLabelDefault }) => (
+          <Box key={name} sx={{ pb: '1.5rem' }}>
+            <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
+              <FormattedMessage
+                id={messageId}
+                defaultMessage={defaultMessage}
+                values={{
+                  subject: pageNumber === 1 ? 'you' : 'they',
+                  possessive: pageNumber === 1 ? 'your' : 'their',
+                }}
+              />
+            </Box>
+            <Controller
+              name={`studentEligibility.${name}`}
+              control={control}
+              render={({ field }) => (
+                <RadioGroup
+                  {...field}
+                  value={field.value ? 'true' : 'false'}
+                  onChange={(e) => field.onChange(e.target.value === 'true')}
+                  aria-label={intl.formatMessage({
+                    id: ariaLabelId,
+                    defaultMessage: ariaLabelDefault,
+                  })}
+                >
+                  <FormControlLabel
+                    value="true"
+                    control={<Radio size="small" />}
+                    label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
+                  />
+                  <FormControlLabel
+                    value="false"
+                    control={<Radio size="small" />}
+                    label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
+                  />
+                </RadioGroup>
+              )}
+            />
+          </Box>
+        ))}
       </Box>
     );
   };
