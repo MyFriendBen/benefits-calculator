@@ -133,6 +133,10 @@ type ProgramCardProps = {
   program: Program;
 };
 
+type Features = {
+  show_eligible_member_tags?: boolean;
+};
+
 const ProgramCard = ({ program }: ProgramCardProps) => {
   const estimatedAppTime = program.estimated_application_time;
   const programName = program.name;
@@ -140,6 +144,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
   const { validations, isAdminView } = useResultsContext();
   const { formData } = useContext(Context);
   const relationshipOptions = useConfig<{ [key: string]: FormattedMessageType }>('relationship_options');
+  const features = useConfig<Features>('features');
   const { formatMessage } = useIntl();
 
   const containerClass = useMemo(() => {
@@ -182,6 +187,11 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
   }, [program.new, program.low_confidence]);
 
   const eligibleMembers = useMemo(() => {
+    // Check if feature is enabled (default to true if not specified)
+    if (features.show_eligible_member_tags === false) {
+      return [];
+    }
+
     const totalMembers = formData.householdData.length;
 
     // Only show eligible member tags if household has more than 1 member
@@ -249,7 +259,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
         ),
       };
     });
-  }, [program.members, formData, relationshipOptions, formatMessage]);
+  }, [program.members, program.eligible, formData, relationshipOptions, formatMessage, features.show_eligible_member_tags]);
 
   const programPageLink = useResultsLink(`results/benefits/${programId}`);
   const value = useFormatDisplayValue(program);
