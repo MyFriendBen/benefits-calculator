@@ -197,8 +197,8 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
       return [
         {
           label: formatMessage({
-            id: 'programCard.entire-household',
-            defaultMessage: 'Entire household',
+            id: 'programCard.household',
+            defaultMessage: 'Household',
           }),
           isHousehold: true,
         },
