@@ -61,6 +61,47 @@ import { useShouldRedirectToConfirmation } from '../../QuestionComponents/questi
 import useStepForm from '../stepForm';
 import { usePageTitle } from '../../Common/usePageTitle';
 
+type StudentQuestion = {
+  name: 'studentFullTime' | 'studentJobTrainingProgram' | 'studentHasWorkStudy' | 'studentWorks20PlusHrs';
+  messageId: string;
+  defaultMessage: string;
+  ariaLabelId: string;
+  ariaLabelDefault: string;
+};
+
+const STUDENT_QUESTIONS: StudentQuestion[] = [
+  {
+    name: 'studentFullTime',
+    messageId: 'studentEligibility.enrolledHalfTime',
+    defaultMessage:
+      'Are {subject} enrolled half-time or more in a university, college, or community college as defined by the educational institution?',
+    ariaLabelId: 'studentEligibility.enrolledHalfTime-ariaLabel',
+    ariaLabelDefault: 'enrolled half-time or more',
+  },
+  {
+    name: 'studentJobTrainingProgram',
+    messageId: 'studentEligibility.jobTraining',
+    defaultMessage: 'Is the program {subject} are enrolled in a job training program?',
+    ariaLabelId: 'studentEligibility.jobTraining-ariaLabel',
+    ariaLabelDefault: 'job training program',
+  },
+  {
+    name: 'studentHasWorkStudy',
+    messageId: 'studentEligibility.workStudy',
+    defaultMessage: 'Do {subject} have a federal or state work study program?',
+    ariaLabelId: 'studentEligibility.workStudy-ariaLabel',
+    ariaLabelDefault: 'work study program',
+  },
+  {
+    name: 'studentWorks20PlusHrs',
+    messageId: 'studentEligibility.works20Hours',
+    defaultMessage:
+      'Do {subject} work 20 or more hours per week in other employment, including self-employment? (If the hours {subject} work changes each week, do {subject} work at least 80 hours in a month?)',
+    ariaLabelId: 'studentEligibility.works20Hours-ariaLabel',
+    ariaLabelDefault: 'works 20 hours or more',
+  },
+];
+
 const HouseholdMemberForm = () => {
   const { formData } = useContext(Context);
   const { uuid, page, whiteLabel } = useParams();
@@ -582,162 +623,46 @@ const HouseholdMemberForm = () => {
         <Box component="h4" sx={{ fontWeight: 700, mb: 2, mt: 0, fontSize: '1.13rem', color: 'text.primary' }}>
           <FormattedMessage id="studentEligibility.sectionTitle" defaultMessage="Student Information" />
         </Box>
-        {/* Question 1: Enrolled half-time or more */}
-        <Box sx={{ pb: '1.5rem' }}>
-          <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
-            <FormattedMessage
-              id="studentEligibility.enrolledHalfTime"
-              defaultMessage="Are you enrolled half-time or more in a university, college, or community college as defined by the educational institution?"
-              values={{
-                subject: pageNumber === 1 ? 'you' : 'they',
-                possessive: pageNumber === 1 ? 'your' : 'their',
-              }}
+        {STUDENT_QUESTIONS.map(({ name, messageId, defaultMessage, ariaLabelId, ariaLabelDefault }) => (
+          <Box key={name} sx={{ pb: '1.5rem' }}>
+            <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
+              <FormattedMessage
+                id={messageId}
+                defaultMessage={defaultMessage}
+                values={{
+                  subject: pageNumber === 1 ? 'you' : 'they',
+                  possessive: pageNumber === 1 ? 'your' : 'their',
+                }}
+              />
+            </Box>
+            <Controller
+              name={`studentEligibility.${name}`}
+              control={control}
+              render={({ field }) => (
+                <RadioGroup
+                  {...field}
+                  value={field.value ? 'true' : 'false'}
+                  onChange={(e) => field.onChange(e.target.value === 'true')}
+                  aria-label={intl.formatMessage({
+                    id: ariaLabelId,
+                    defaultMessage: ariaLabelDefault,
+                  })}
+                >
+                  <FormControlLabel
+                    value="true"
+                    control={<Radio size="small" />}
+                    label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
+                  />
+                  <FormControlLabel
+                    value="false"
+                    control={<Radio size="small" />}
+                    label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
+                  />
+                </RadioGroup>
+              )}
             />
           </Box>
-          <Controller
-            name="studentEligibility.studentFullTime"
-            control={control}
-            render={({ field }) => (
-              <RadioGroup
-                {...field}
-                value={field.value ? 'true' : 'false'}
-                onChange={(e) => field.onChange(e.target.value === 'true')}
-                aria-label={intl.formatMessage({
-                  id: 'studentEligibility.enrolledHalfTime-ariaLabel',
-                  defaultMessage: 'enrolled half-time or more',
-                })}
-              >
-                <FormControlLabel
-                  value="true"
-                  control={<Radio size="small" />}
-                  label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
-                />
-                <FormControlLabel
-                  value="false"
-                  control={<Radio size="small" />}
-                  label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
-                />
-              </RadioGroup>
-            )}
-          />
-        </Box>
-
-        {/* Question 2: Job training program */}
-        <Box sx={{ pb: '1.5rem' }}>
-          <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
-            <FormattedMessage
-              id="studentEligibility.jobTraining"
-              defaultMessage="Is the program you are enrolled in a job training program?"
-              values={{
-                subject: pageNumber === 1 ? 'you' : 'they',
-              }}
-            />
-          </Box>
-          <Controller
-            name="studentEligibility.studentJobTrainingProgram"
-            control={control}
-            render={({ field }) => (
-              <RadioGroup
-                {...field}
-                value={field.value ? 'true' : 'false'}
-                onChange={(e) => field.onChange(e.target.value === 'true')}
-                aria-label={intl.formatMessage({
-                  id: 'studentEligibility.jobTraining-ariaLabel',
-                  defaultMessage: 'job training program',
-                })}
-              >
-                <FormControlLabel
-                  value="true"
-                  control={<Radio size="small" />}
-                  label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
-                />
-                <FormControlLabel
-                  value="false"
-                  control={<Radio size="small" />}
-                  label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
-                />
-              </RadioGroup>
-            )}
-          />
-        </Box>
-
-        {/* Question 3: Work study program */}
-        <Box sx={{ pb: '1.5rem' }}>
-          <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
-            <FormattedMessage
-              id="studentEligibility.workStudy"
-              defaultMessage="Do you have a federal or state work study program?"
-              values={{
-                subject: pageNumber === 1 ? 'you' : 'they',
-              }}
-            />
-          </Box>
-          <Controller
-            name="studentEligibility.studentHasWorkStudy"
-            control={control}
-            render={({ field }) => (
-              <RadioGroup
-                {...field}
-                value={field.value ? 'true' : 'false'}
-                onChange={(e) => field.onChange(e.target.value === 'true')}
-                aria-label={intl.formatMessage({
-                  id: 'studentEligibility.workStudy-ariaLabel',
-                  defaultMessage: 'work study program',
-                })}
-              >
-                <FormControlLabel
-                  value="true"
-                  control={<Radio size="small" />}
-                  label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
-                />
-                <FormControlLabel
-                  value="false"
-                  control={<Radio size="small" />}
-                  label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
-                />
-              </RadioGroup>
-            )}
-          />
-        </Box>
-
-        {/* Question 4: Works 20+ hours per week */}
-        <Box sx={{ pb: '1.5rem' }}>
-          <Box component="p" sx={{ fontWeight: 700, mb: 1 }}>
-            <FormattedMessage
-              id="studentEligibility.works20Hours"
-              defaultMessage="Do you work 20 or more hours per week in other employment, including self-employment? (If the hours you work changes each week, do you work at least 80 hours in a month?)"
-              values={{
-                subject: pageNumber === 1 ? 'you' : 'they',
-              }}
-            />
-          </Box>
-          <Controller
-            name="studentEligibility.studentWorks20PlusHrs"
-            control={control}
-            render={({ field }) => (
-              <RadioGroup
-                {...field}
-                value={field.value ? 'true' : 'false'}
-                onChange={(e) => field.onChange(e.target.value === 'true')}
-                aria-label={intl.formatMessage({
-                  id: 'studentEligibility.works20Hours-ariaLabel',
-                  defaultMessage: 'works 20 hours or more',
-                })}
-              >
-                <FormControlLabel
-                  value="true"
-                  control={<Radio size="small" />}
-                  label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
-                />
-                <FormControlLabel
-                  value="false"
-                  control={<Radio size="small" />}
-                  label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
-                />
-              </RadioGroup>
-            )}
-          />
-        </Box>
+        ))}
       </Box>
     );
   };
