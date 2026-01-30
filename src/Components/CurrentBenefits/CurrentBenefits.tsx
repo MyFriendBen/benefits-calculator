@@ -17,6 +17,7 @@ import { ICON_OPTIONS_MAP, LUCIDE_ICONS } from '../Results/helpers';
 export type Program = {
   name: Translation;
   description: Translation;
+  applyButtonLink?: Translation;
 };
 
 export type Category = {
@@ -101,11 +102,32 @@ const CurrentBenefits = () => {
   }, []);
 
   const displayProgramSection = (program: Program, index: number) => {
+    const link = program.applyButtonLink
+      ? intl.formatMessage({
+          id: program.applyButtonLink.label,
+          defaultMessage: program.applyButtonLink.default_message,
+        })
+      : '';
+    // If the URL is invalid (e.g. contains "placeholder" from translations) - it is not rendered it as a link.
+    const isValidLink = link && link !== '' && !link.toLowerCase().includes('placeholder');
+
     return (
       <div className="bottom-margin" key={index}>
-        <p className="program-name">
-          <ResultsTranslate translation={program.name} />
-        </p>
+        {isValidLink ? (
+          <a
+            className="program-name"
+            href={link}
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: 'inherit', textDecoration: 'none' }}
+          >
+            <ResultsTranslate translation={program.name} />
+          </a>
+        ) : (
+          <p className="program-name">
+            <ResultsTranslate translation={program.name} />
+          </p>
+        )}
         <p>
           <ResultsTranslate translation={program.description} />
         </p>

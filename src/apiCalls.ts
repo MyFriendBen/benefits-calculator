@@ -144,7 +144,11 @@ const getAllLongTermPrograms = async (whiteLabel: string) => {
 
   for (const category of data) {
     const programs: Program[] = category.programs.map((program) => {
-      return { name: program.name, description: program.website_description };
+      return {
+        name: program.name,
+        description: program.website_description,
+        applyButtonLink: program.apply_button_link,
+      };
     });
 
     categories.push({ ...category, programs });
@@ -168,7 +172,11 @@ const getAllNearTermPrograms = async (whiteLabel: string) => {
 
   for (const type of data) {
     const urgentNeeds: Program[] = type.urgent_needs.map((program) => {
-      return { name: program.name, description: program.website_description };
+      return {
+        name: program.name,
+        description: program.website_description,
+        applyButtonLink: program.link,
+      };
     });
 
     const { urgent_needs, ...rest } = type;
