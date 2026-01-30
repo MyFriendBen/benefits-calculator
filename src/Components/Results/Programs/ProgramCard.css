@@ -60,7 +60,7 @@
   line-height: normal;
   font-family: 'Roboto Slab', serif;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   padding: 1.25rem 2rem;
 }
 
@@ -168,6 +168,7 @@ h1.header-text-bottom {
     position: relative;
     display: flex;
     align-items: center;
+    padding-right: 3.5rem;
   }
 
   .result-program-more-info {
@@ -200,6 +201,7 @@ h1.header-text-bottom {
 
   .result-program-details strong {
     display: inline-block;
+    font-size: 1.1rem;
   }
 }
 
