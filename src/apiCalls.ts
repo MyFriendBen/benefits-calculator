@@ -147,7 +147,7 @@ const getAllLongTermPrograms = async (whiteLabel: string) => {
       return {
         name: program.name,
         description: program.website_description,
-        applyButtonLink: program.apply_button_link,
+        link: program.learn_more_link,
       };
     });
 
@@ -175,7 +175,7 @@ const getAllNearTermPrograms = async (whiteLabel: string) => {
       return {
         name: program.name,
         description: program.website_description,
-        applyButtonLink: program.link,
+        link: program.link,
       };
     });
 

@@ -22,7 +22,7 @@ export type ProgramCategoryResponse = {
   programs: {
     name: Translation;
     website_description: Translation;
-    apply_button_link?: Translation;
+    learn_more_link?: Translation;
   }[];
 }[];
 
