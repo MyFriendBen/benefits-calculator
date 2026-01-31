@@ -82,7 +82,7 @@ const HouseholdSize = () => {
           <HelpButton>
             <OverrideableTranslation
               id="questions.householdSize-helpText"
-              defaultMessage="This is usually family members whom you live with and share important resources with like food and bills. If other adults 18 or older in your household file their own tax return, ask them to complete this tool to determine if they qualify for benefits. But even if you and your spouse file taxes separately, include your spouse in the household."
+              defaultMessage="This is usually family members whom you live with and share important resources with like food and bills. If other adults 18 or older in your household file their own tax return, ask them to complete this tool to determine if they qualify for benefits. But even if you and your spouse file taxes separately, include your spouse in the household. Count everyone on your tax return. Also count your spouse, even if you file taxes apart. If you don't file taxes, count the people you live with and also buy and prepare food with."
             />
           </HelpButton>
         </>
