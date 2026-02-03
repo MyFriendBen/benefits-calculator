@@ -52,6 +52,7 @@ export async function fillDateOfBirth(page: Page, month: string, year: string) {
   await page.getByRole('option', { name: year }).click();
 }
 
+// 
 export async function selectInsurance(page: Page, insuranceType: string) {
   await page.locator('.option-cards-container').first().getByRole('button', { name: insuranceType }).click();
 }
