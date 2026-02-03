@@ -1,3 +1,8 @@
 .help-button-icon-color {
   fill: var(--icon-color);
 }
+
+.help-text-emphasis {
+  color: red;
+  margin-top: 0.5em;
+}
