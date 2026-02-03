@@ -15,6 +15,7 @@ import {
   selectState,
 } from './helpers/steps';
 import {
+  selectECIncome,
   selectElectricProvider,
   selectHeatingSource,
   selectHouseholdInfo,
@@ -206,6 +207,12 @@ test.describe('Basic e2e tests for each white label', () => {
       energyCalculators.co_energy_calculator.dobYear,
     );
     await selectStatus(page, energyCalculators.co_energy_calculator.status);
+    await selectECIncome(
+      page,
+      energyCalculators.co_energy_calculator.incomeType,
+      energyCalculators.co_energy_calculator.incomeFrequency,
+      energyCalculators.co_energy_calculator.incomeAmount,
+    );
     await clickContinueButton(page);
     await expect(page).toHaveURL(/\/co_energy_calculator\/.*\/step-7/);
 
