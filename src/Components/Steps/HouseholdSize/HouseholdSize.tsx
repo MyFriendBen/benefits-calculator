@@ -1,21 +1,21 @@
 import { TextField } from '@mui/material';
 import { Controller, SubmitHandler } from 'react-hook-form';
-import { Context } from '../Wrapper/Wrapper';
-import { useContext } from 'react';
+import { Context } from '../../Wrapper/Wrapper';
+import { useContext, useState } from 'react';
 import * as z from 'zod';
 import { FormattedMessage, useIntl } from 'react-intl';
-import QuestionHeader from '../QuestionComponents/QuestionHeader';
-import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
-import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
+import QuestionHeader from '../../QuestionComponents/QuestionHeader';
+import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
+import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useParams } from 'react-router-dom';
-import { useDefaultBackNavigationFunction, useGoToNextStep } from '../QuestionComponents/questionHooks';
-import HelpButton from '../HelpBubbleIcon/HelpButton';
-import { handleNumbersOnly, NUM_PAD_PROPS } from '../../Assets/numInputHelpers';
-import useScreenApi from '../../Assets/updateScreen';
-import { OverrideableTranslation } from '../../Assets/languageOptions';
-import useStepForm from './stepForm';
+import { useDefaultBackNavigationFunction, useGoToNextStep } from '../../QuestionComponents/questionHooks';
+import { handleNumbersOnly, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
+import useScreenApi from '../../../Assets/updateScreen';
+import { OverrideableTranslation } from '../../../Assets/languageOptions';
+import useStepForm from '../stepForm';
 import { zodResolver } from '@hookform/resolvers/zod';
-import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
+import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
+import './HouseholdSize.css';
 
 const HouseholdSize = () => {
   const { formData } = useContext(Context);
@@ -24,6 +24,7 @@ const HouseholdSize = () => {
   const nextStep = useGoToNextStep('householdSize', '1');
   const intl = useIntl();
   const { updateScreen } = useScreenApi();
+  const [showRoommateInfo, setShowRoommateInfo] = useState(false);
 
   const formSchema = z.object({
     householdSize: z.coerce
@@ -79,19 +80,51 @@ const HouseholdSize = () => {
             id="questions.householdSize"
             defaultMessage="Including you, how many people are in your household?"
           />
-          <HelpButton>
+          <ul className="household-size-help-list">
+            <li>
+              <strong>
+                <OverrideableTranslation
+                  id="questions.householdSize-helpText-fileTaxes-label"
+                  defaultMessage="If you file taxes:"
+                />
+              </strong>{' '}
+              <OverrideableTranslation
+                id="questions.householdSize-helpText-fileTaxes-description"
+                defaultMessage="Count everyone on your tax return. Also count your spouse, even if you file taxes apart."
+              />
+            </li>
+            <li>
+              <strong>
+                <OverrideableTranslation
+                  id="questions.householdSize-helpText-noFileTaxes-label"
+                  defaultMessage="If you don't file taxes:"
+                />
+              </strong>{' '}
+              <OverrideableTranslation
+                id="questions.householdSize-helpText-noFileTaxes-description"
+                defaultMessage="Count the people you live with and also buy and prepare food with."
+              />
+            </li>
+          </ul>
+          <button
+            type="button"
+            className="household-size-roommate-link"
+            onClick={() => setShowRoommateInfo(!showRoommateInfo)}
+            aria-expanded={showRoommateInfo}
+          >
             <OverrideableTranslation
-              id="questions.householdSize-helpText"
-              defaultMessage="This is usually family members whom you live with and share important resources with like food and bills. If other adults 18 or older in your household file their own tax return, ask them to complete this tool to determine if they qualify for benefits. But even if you and your spouse file taxes separately, include your spouse in the household. Count everyone on your tax return. Also count your spouse, even if you file taxes apart. If you don't file taxes, count the people you live with and also buy and prepare food with." 
-            />
-            <div className="help-text-emphasis">
-            <OverrideableTranslation
-              id="questions.householdSize-helpText-short"
+              id="questions.householdSize-roommateToggle"
               defaultMessage="Not sure who to include? (What about roommates?)"
-              />         
-                
-              </div>
-          </HelpButton>
+            />
+          </button>
+          {showRoommateInfo && (
+            <p className="household-size-roommate-info">
+              <OverrideableTranslation
+                id="questions.householdSize-roommateInfo"
+                defaultMessage="If you have a roommate but don't share food costs with them, don't count them. They should use this tool on their own to check their benefits."
+              />
+            </p>
+          )}
         </>
       </QuestionQuestion>
       <form onSubmit={handleSubmit(formSubmitHandler)}>
