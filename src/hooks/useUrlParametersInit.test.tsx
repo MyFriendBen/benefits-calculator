@@ -117,14 +117,33 @@ describe('useUrlParametersInit', () => {
     expect(mockSetFormData).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle test param as boolean', () => {
-    const wrapper = createWrapper('/?test=false');
+  it('should only set isTest to true when param equals "true"', () => {
+    const wrapperTrue = createWrapper('/?test=true');
+    const wrapperFalse = createWrapper('/?test=false');
+    const wrapperEmpty = createWrapper('/?test=');
 
-    renderHook(() => useUrlParametersInit(), { wrapper });
-
+    renderHook(() => useUrlParametersInit(), { wrapper: wrapperTrue });
     expect(mockSetFormData).toHaveBeenCalledWith(
       expect.objectContaining({
-        isTest: false, // Boolean(searchParams.get('test')) returns true if param exists
+        isTest: true,
+      })
+    );
+
+    mockSetFormData.mockClear();
+
+    renderHook(() => useUrlParametersInit(), { wrapper: wrapperFalse });
+    expect(mockSetFormData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isTest: false, // 'false' string should not set isTest to true
+      })
+    );
+
+    mockSetFormData.mockClear();
+
+    renderHook(() => useUrlParametersInit(), { wrapper: wrapperEmpty });
+    expect(mockSetFormData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isTest: false, // Empty value should not set isTest to true
       })
     );
   });

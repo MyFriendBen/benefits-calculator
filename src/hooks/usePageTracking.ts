@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import dataLayerPush from '../Assets/analytics';
 
 /**
- * Tracks page changes by pushing analytics events whenever the pathname changes.
+ * Tracks page changes by pushing analytics events whenever the pathname or search changes.
  */
 export const usePageTracking = () => {
   const location = useLocation();
@@ -11,7 +11,7 @@ export const usePageTracking = () => {
   useEffect(() => {
     dataLayerPush({
       event: 'Page Change',
-      url: window.location.pathname + window.location.search,
+      url: location.pathname + location.search,
     });
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 };

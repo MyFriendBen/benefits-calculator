@@ -18,7 +18,7 @@ export const useUrlParametersInit = () => {
   useEffect(() => {
     const referrerParam = searchParams.get('referrer');
     const utmParam = searchParams.get('utm_source');
-    const testParam = Boolean(searchParams.get('test'));
+    const testParam = searchParams.get('test') === 'true';
     const externalIdParam = searchParams.get('externalid');
     const pathParam = searchParams.get('path') ?? 'default';
 
