@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Zipcode } from '../Steps/Zipcode';
 import Expenses from '../Steps/Expenses/Expenses';
-import HouseholdSize from '../Steps/HouseholdSize';
+import HouseholdSize from '../Steps/HouseholdSize/HouseholdSize';
 import { useStepName } from '../../Assets/stepDirectory';
 import ReferralSourceStep from '../Steps/Referrer';
 import { OTHER_PAGE_TITLES, QUESTION_TITLES } from '../../Assets/pageTitleTags';
