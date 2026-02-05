@@ -1,26 +1,22 @@
 import { CssBaseline, createTheme, ThemeProvider } from '@mui/material';
-import { useState, useEffect, useContext } from 'react';
-import { useLocation, Navigate, Routes, Route, useSearchParams } from 'react-router-dom';
+import { useContext, useMemo } from 'react';
+import { useLocation, Navigate, Routes, Route } from 'react-router-dom';
 import { LicenseInfo } from '@mui/x-license-pro';
 import { Context } from './Components/Wrapper/Wrapper';
-import FetchScreen from './Components/FetchScreen/FetchScreen';
+import LoadingRoutes from './Components/RouterUtil/LoadingRoutes';
+import ProgressBarRoutes from './Components/RouterUtil/ProgressBarRoutes';
 import QuestionComponentContainer from './Components/QuestionComponentContainer/QuestionComponentContainer';
 import Confirmation from './Components/Confirmation/Confirmation';
 import Results from './Components/Results/Results';
 import Disclaimer from './Components/Steps/Disclaimer/Disclaimer';
-import ProgressBar from './Components/ProgressBar/ProgressBar';
 import JeffcoLandingPage from './Components/JeffcoComponents/JeffcoLandingPage/JeffcoLandingPage';
 import SelectLanguagePage from './Components/Steps/SelectLanguage';
 import { STARTING_QUESTION_NUMBER, useStepNumber, useStepDirectory } from './Assets/stepDirectory';
 import Box from '@mui/material/Box';
 import { BrandedFooter, BrandedHeader } from './Components/Referrer/Referrer';
-import dataLayerPush from './Assets/analytics';
-import { OTHER_PAGE_TITLES } from './Assets/pageTitleTags';
-LicenseInfo.setLicenseKey(process.env.REACT_APP_MUI_LICENSE_KEY + '=');
 import CcigLandingPage from './Components/CcigComponents/CcigLandingPage';
 import languageRouteWrapper from './Components/RouterUtil/LanguageRouter';
 import SelectStatePage from './Components/Steps/SelectStatePage';
-import RedirectToWhiteLabel from './Components/RouterUtil/RedirectToWhiteLabel';
 import CurrentBenefits from './Components/CurrentBenefits/CurrentBenefits';
 import EcHouseholdMemberForm from './Components/EnergyCalculator/Steps/HouseholdMemberForm';
 import HouseholdMemberForm from './Components/Steps/HouseholdMembers/HouseholdMemberForm';
@@ -32,116 +28,31 @@ import FaviconManager from './Components/FaviconManager/FaviconManager';
 import './App.css';
 import useCampaign from './Components/CampaignAnalytics/useCampaign';
 import SystemBanner from './Components/Common/SystemBanner/SystemBanner';
+import { useAppInitialization } from './hooks';
+
+// Initialize MUI X License
+LicenseInfo.setLicenseKey(process.env.REACT_APP_MUI_LICENSE_KEY + '=');
 
 const App = () => {
   const location = useLocation();
   const urlSearchParams = location.search;
-  const [searchParams] = useSearchParams();
-  const {
-    formData,
-    setFormData,
-    styleOverride,
-    setTheme: changeTheme,
-    pageIsLoading,
-    getReferrer,
-    config,
-  } = useContext(Context);
+  const { styleOverride, pageIsLoading, getReferrer, config } = useContext(Context);
   const stepDirectory = useStepDirectory();
   const totalSteps = stepDirectory.length + STARTING_QUESTION_NUMBER;
-  const [theme, setTheme] = useState(createTheme(styleOverride));
+  const theme = useMemo(() => createTheme(styleOverride), [styleOverride]);
   const themeName = getReferrer('theme', 'default');
   const householdMemberStepNumber = useStepNumber('householdData', false);
   const ecHouseholdMemberStepNumber = useStepNumber('energyCalculatorHouseholdData', false);
+
+  // Initialize all app-level side effects
+  useAppInitialization(themeName);
   useCampaign();
-
-  useEffect(() => {
-    changeTheme(themeName as 'default' | 'twoOneOne' | 'twoOneOneNC' | 'nc_lanc');
-  }, [themeName]);
-
-  useEffect(() => {
-    setTheme(createTheme(styleOverride));
-  }, [styleOverride]);
-
-  useEffect(() => {
-    dataLayerPush({
-      event: 'Page Change',
-      url: window.location.pathname + window.location.search,
-    });
-  }, [location.pathname]);
-
-  useEffect(() => {
-    document.title = OTHER_PAGE_TITLES.default;
-  }, []);
-
-  useEffect(() => {
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (window.location.protocol !== 'https:' && !isLocal) {
-      window.location.protocol = 'https';
-    }
-  }, []);
-
-  useEffect(() => {
-    const referrerParam = searchParams.get('referrer');
-    const utmParam = searchParams.get('utm_source');
-    const testParam = searchParams.get('test') ? true : false;
-    const externalIdParam = searchParams.get('externalid');
-    const pathParam = searchParams.get('path') ?? 'default';
-
-    // referrer priority = stored referrer -> referrer param -> utm_source param -> ''
-    const referrer = formData.immutableReferrer ?? referrerParam ?? utmParam ?? '';
-    const referrerSource = formData.referralSource || referrer;
-    const isTest = formData.isTest || testParam;
-    const externalId = formData.externalID ?? externalIdParam ?? undefined;
-    const path = formData.path ?? pathParam;
-
-    setFormData({
-      ...formData,
-      isTest: isTest,
-      externalID: externalId,
-      referralSource: referrerSource,
-      immutableReferrer: referrer,
-      path: path,
-      urlSearchParams: urlSearchParams,
-    });
-  }, [formData.immutableReferrer]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location]);
 
   if (pageIsLoading) {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Routes>
-          {languageRouteWrapper(
-            <>
-              <Route path="jeffcohs" element={<RedirectToWhiteLabel whiteLabel="co" />} />
-              <Route path="jeffcohscm" element={<RedirectToWhiteLabel whiteLabel="co" />} />
-              <Route path="ccig" element={<RedirectToWhiteLabel whiteLabel="co" />} />
-              <Route path="current-benefits" element={<RedirectToWhiteLabel whiteLabel="co" />} />
-              <Route
-                path="step-1"
-                element={
-                  <RedirectToWhiteLabel>
-                    <FetchScreen />
-                  </RedirectToWhiteLabel>
-                }
-              />
-              <Route path=":whiteLabel/current-benefits" element={<FetchScreen />} />
-              <Route path=":whiteLabel/:uuid">
-                <Route path="" element={<FetchScreen />} />
-                <Route path="*" element={<FetchScreen />} />
-              </Route>
-              <Route path=":uuid">
-                <Route path="" element={<FetchScreen />} />
-                <Route path="*" element={<FetchScreen />} />
-              </Route>
-              <Route path="" element={<FetchScreen />} />
-              <Route path="*" element={<FetchScreen />} />
-            </>,
-          )}
-        </Routes>
+        <LoadingRoutes />
       </ThemeProvider>
     );
   }
@@ -156,17 +67,7 @@ const App = () => {
           {config?.banner_messages && config.banner_messages.length > 0 && (
             <SystemBanner banners={config.banner_messages} />
           )}
-          <Routes>
-            <Route path="step-1" element={<ProgressBar step={1} />} />
-            <Route path=":whiteLabel/step-1" element={<ProgressBar step={1} />} />
-            <Route path="select-state" element={<ProgressBar step={1} />} />
-            <Route path=":whiteLabel/select-state" element={<ProgressBar step={1} />} />
-            <Route path=":whiteLabel/step-2" element={<ProgressBar step={2} />} />
-            <Route path=":whiteLabel/:uuid/step-:id" element={<ProgressBar />} />
-            <Route path=":whiteLabel/:uuid/step-:id/:page" element={<ProgressBar />} />
-            <Route path=":whiteLabel/:uuid/confirm-information" element={<ProgressBar step={totalSteps} />} />
-            <Route path="*" element={<></>} />
-          </Routes>
+          <ProgressBarRoutes totalSteps={totalSteps} />
           <Routes>
             {languageRouteWrapper(
               <>
