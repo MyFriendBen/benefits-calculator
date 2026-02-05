@@ -27,6 +27,7 @@ import HouseholdMemberForm from './Components/Steps/HouseholdMembers/HouseholdMe
 import EnergyCalculatorLandingPage from './Components/EnergyCalculator/LandingPage/LandingPage';
 import WhiteLabelRouter from './Components/RouterUtil/WhiteLabelRouter';
 import ValidateUuid from './Components/RouterUtil/ValidateUuid';
+import ValidateWhiteLabel from './Components/RouterUtil/ValidateWhiteLabel';
 import FaviconManager from './Components/FaviconManager/FaviconManager';
 import './App.css';
 import useCampaign from './Components/CampaignAnalytics/useCampaign';
@@ -176,104 +177,29 @@ const App = () => {
                 <Route path="co_energy_calculator/landing-page" element={<EnergyCalculatorLandingPage />} />
                 <Route path="step-1" element={<SelectLanguagePage />} />
                 <Route path="select-state" element={<SelectStatePage />} />
-                <Route path=":whiteLabel/current-benefits" element={<CurrentBenefits />} />
-                <Route path=":whiteLabel/select-state" element={<SelectStatePage />} />
-                <Route path=":whiteLabel/step-1" element={<SelectLanguagePage />} />
-                <Route path=":whiteLabel/step-2" element={<Disclaimer />} />
-                <Route path=":whiteLabel/:uuid">
-                  <Route path="" element={<Navigate to="/step-1" replace />} />
-                  <Route
-                    path="step-1"
-                    element={
-                      <ValidateUuid>
-                        <SelectLanguagePage />
-                      </ValidateUuid>
-                    }
-                  />
-                  <Route
-                    path="step-2"
-                    element={
-                      <ValidateUuid>
-                        <Disclaimer />
-                      </ValidateUuid>
-                    }
-                  />
-                  <Route
-                    path={`step-${householdMemberStepNumber}/:page`}
-                    element={
-                      <ValidateUuid>
-                        <HouseholdMemberForm key={window.location.href} />
-                      </ValidateUuid>
-                    }
-                  />
-                  <Route
-                    path={`step-${ecHouseholdMemberStepNumber}/:page`}
-                    element={
-                      <ValidateUuid>
-                        <EcHouseholdMemberForm key={window.location.href} />
-                      </ValidateUuid>
-                    }
-                  />
-                  <Route
-                    path="step-:id"
-                    element={
-                      <ValidateUuid>
-                        <QuestionComponentContainer key={window.location.href} />
-                      </ValidateUuid>
-                    }
-                  />
-                  <Route
-                    path="confirm-information"
-                    element={
-                      <ValidateUuid>
-                        <Confirmation />
-                      </ValidateUuid>
-                    }
-                  />
-                  <Route
-                    path="results/benefits"
-                    element={
-                      <ValidateUuid>
-                        <Results type="program" />
-                      </ValidateUuid>
-                    }
-                  />
-                  <Route
-                    path="results/near-term-needs"
-                    element={
-                      <ValidateUuid>
-                        <Results type="need" />
-                      </ValidateUuid>
-                    }
-                  />
-                  <Route
-                    path="results/energy-rebates/:energyCalculatorRebateType"
-                    element={
-                      <ValidateUuid>
-                        <Results type="energy-calculator-rebates" />
-                      </ValidateUuid>
-                    }
-                  />
-                  <Route
-                    path="results/benefits/:programId"
-                    element={
-                      <ValidateUuid>
-                        <Results type="program" />
-                      </ValidateUuid>
-                    }
-                  />
-                  <Route
-                    path="results/more-help"
-                    element={
-                      <ValidateUuid>
-                        <Results type="help" />
-                      </ValidateUuid>
-                    }
-                  />
-                  <Route path="results" element={<Navigate to="benefits" replace />} />
-                  <Route path="*" element={<Navigate to="/step-1" replace />} />
+                <Route path=":whiteLabel" element={<ValidateWhiteLabel />}>
+                  <Route index element={<WhiteLabelRouter />} />
+                  <Route path="current-benefits" element={<CurrentBenefits />} />
+                  <Route path="select-state" element={<SelectStatePage />} />
+                  <Route path="step-1" element={<SelectLanguagePage />} />
+                  <Route path="step-2" element={<Disclaimer />} />
+                  <Route path=":uuid" element={<ValidateUuid />}>
+                    <Route path="" element={<Navigate to="/step-1" replace />} />
+                    <Route path="step-1" element={<SelectLanguagePage />} />
+                    <Route path="step-2" element={<Disclaimer />} />
+                    <Route path={`step-${householdMemberStepNumber}/:page`} element={<HouseholdMemberForm key={window.location.href} />} />
+                    <Route path={`step-${ecHouseholdMemberStepNumber}/:page`} element={<EcHouseholdMemberForm key={window.location.href} />} />
+                    <Route path="step-:id" element={<QuestionComponentContainer key={window.location.href} />} />
+                    <Route path="confirm-information" element={<Confirmation />} />
+                    <Route path="results/benefits" element={<Results type="program" />} />
+                    <Route path="results/near-term-needs" element={<Results type="need" />} />
+                    <Route path="results/energy-rebates/:energyCalculatorRebateType" element={<Results type="energy-calculator-rebates" />} />
+                    <Route path="results/benefits/:programId" element={<Results type="program" />} />
+                    <Route path="results/more-help" element={<Results type="help" />} />
+                    <Route path="results" element={<Navigate to="benefits" replace />} />
+                    <Route path="*" element={<Navigate to="/step-1" replace />} />
+                  </Route>
                 </Route>
-                <Route path=":whiteLabel" element={<WhiteLabelRouter />} />
                 <Route path="*" element={<Navigate to={`/step-1${urlSearchParams}`} replace />} />
               </>,
             )}

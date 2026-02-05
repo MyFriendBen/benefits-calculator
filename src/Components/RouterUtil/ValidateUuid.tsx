@@ -1,5 +1,4 @@
-import { PropsWithChildren } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, Outlet, useParams } from 'react-router-dom';
 import { useQueryString } from '../QuestionComponents/questionHooks';
 
 export function isValidUuid(uuid: string) {
@@ -9,18 +8,15 @@ export function isValidUuid(uuid: string) {
   return uuidRegx.test(uuid);
 }
 
-export default function ValidateUuid({ children }: PropsWithChildren) {
+// Layout route that validates the uuid param before rendering child routes
+export default function ValidateUuid() {
   const { uuid } = useParams();
   const queryParams = useQueryString();
   const link = `/step-1${queryParams}`;
 
-  if (uuid === undefined) {
+  if (uuid === undefined || !isValidUuid(uuid)) {
     return <Navigate to={link} replace />;
   }
 
-  if (!isValidUuid(uuid)) {
-    return <Navigate to={link} replace />;
-  }
-
-  return <>{children}</>;
+  return <Outlet />;
 }
