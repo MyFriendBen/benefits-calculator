@@ -173,7 +173,7 @@ const App = () => {
                 <Route path="co/jeffcohs" element={<JeffcoLandingPage referrer="jeffcoHS" />} />
                 <Route path="co/jeffcohscm" element={<JeffcoLandingPage referrer="jeffcoHSCM" />} />
                 <Route path="co/ccig" element={<CcigLandingPage />} />
-                <Route path="cesn" element={<EnergyCalculatorLandingPage />} />
+                <Route path="cesn/landing-page" element={<EnergyCalculatorLandingPage />} />
                 <Route path="step-1" element={<SelectLanguagePage />} />
                 <Route path="select-state" element={<SelectStatePage />} />
                 <Route path=":whiteLabel/current-benefits" element={<CurrentBenefits />} />
