@@ -22,7 +22,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const IconComponent = ICON_OPTIONS_MAP[actualIconKey];
 
   const monthlyCategoryAmt = calculateTotalValue(category) / 12;
-  const shouldShowAmount = showAmount ?? !getReferrer('featureFlags').includes('dont_show_category_values');
+  const shouldShowAmount = showAmount ?? !getReferrer('uiOptions').includes('dont_show_category_values');
 
   const categoryImageAriaLabelProps = {
     id: category.name.label,
