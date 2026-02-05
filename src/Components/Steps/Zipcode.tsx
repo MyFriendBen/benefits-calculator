@@ -27,9 +27,9 @@ export const Zipcode = () => {
   const backNavigationFunction = useDefaultBackNavigationFunction('zipcode');
   const { updateScreen } = useScreenApi();
 
-  const featureFlags = getReferrer('featureFlags');
-  const noChangeStateMessage = featureFlags.includes('no_zipcode_change_state');
-  const noLetsGetStarted = featureFlags.includes('no_lets_get_started');
+  const uiOptions = getReferrer('uiOptions');
+  const noChangeStateMessage = uiOptions.includes('no_zipcode_change_state');
+  const noLetsGetStarted = uiOptions.includes('no_lets_get_started');
   const countiesByZipcode = useConfig<{ [key: string]: { [key: string]: string } }>('counties_by_zipcode');
   const state = useConfig<{ name: string }>('state');
   const { formatMessage } = useIntl();
