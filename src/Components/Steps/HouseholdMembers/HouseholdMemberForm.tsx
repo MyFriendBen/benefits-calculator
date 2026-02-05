@@ -3,7 +3,7 @@ import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import HHMSummaryCards from './HHMSummaryCards';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Context } from '../../Wrapper/Wrapper';
-import { ReactNode, useContext, useEffect, useMemo } from 'react';
+import { ReactNode, useContext, useEffect, useMemo, useRef } from 'react';
 import { Conditions, HealthInsurance, HouseholdData } from '../../../Types/FormData';
 import {
   Autocomplete,
@@ -81,7 +81,7 @@ const STUDENT_QUESTIONS: StudentQuestion[] = [
   {
     name: 'studentJobTrainingProgram',
     messageId: 'studentEligibility.jobTraining',
-    defaultMessage: 'Is the program {subject} are enrolled in a job training program?',
+    defaultMessage: 'Is the program that {subject} are enrolled in a job training program?',
     ariaLabelId: 'studentEligibility.jobTraining-ariaLabel',
     ariaLabelDefault: 'job training program',
   },
@@ -403,8 +403,11 @@ const HouseholdMemberForm = () => {
   const watchIsStudent = watch('conditions.student');
 
   // Reset student eligibility fields when student condition is deselected
+  const prevIsStudent = useRef(watchIsStudent);
+
   useEffect(() => {
-    if (!watchIsStudent) {
+    // Only reset when explicitly deselecting student (was true, now false)
+    if (prevIsStudent.current && !watchIsStudent) {
       setValue('studentEligibility', {
         studentFullTime: false,
         studentJobTrainingProgram: false,
@@ -412,6 +415,7 @@ const HouseholdMemberForm = () => {
         studentWorks20PlusHrs: false,
       });
     }
+    prevIsStudent.current = watchIsStudent;
   }, [watchIsStudent, setValue]);
 
 
