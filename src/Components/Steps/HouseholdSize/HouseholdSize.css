@@ -21,10 +21,28 @@
   font-size: 0.9rem;
   font-weight: 600;
   padding: 0;
-  text-decoration: underline;
+  text-decoration: none;
   text-align: left;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.roommate-link-text {
+  text-decoration: underline;
+}
+
+.chevron {
+  display: inline-block;
+  font-size: 0.65rem;
+  transition: transform 0.2s ease;
+  text-decoration: none;
+}
+
+.chevron-expanded {
+  transform: rotate(90deg);
 }
 
 .household-size-roommate-link:hover {

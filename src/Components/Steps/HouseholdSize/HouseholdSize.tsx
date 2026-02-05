@@ -111,14 +111,22 @@ const HouseholdSize = () => {
             className="household-size-roommate-link link-color"
             onClick={() => setShowRoommateInfo(!showRoommateInfo)}
             aria-expanded={showRoommateInfo}
+            aria-controls="roommate-info-content"
           >
-            <OverrideableTranslation            
-              id="questions.householdSize-roommateToggle"
-              defaultMessage="What about roommates?"
-            />
+            <span className={`chevron ${showRoommateInfo ? 'chevron-expanded' : ''}`}>▶</span>
+            <span className="roommate-link-text">
+              <OverrideableTranslation
+                id="questions.householdSize-roommateToggle"
+                defaultMessage="What about roommates?"
+              />
+            </span>
           </button>
           {showRoommateInfo && (
-            <p className="household-size-roommate-info">
+            <p
+              id="roommate-info-content"
+              className="household-size-roommate-info"
+              aria-live="polite"
+            >
               <OverrideableTranslation
                 id="questions.householdSize-roommateInfo"
                 defaultMessage="If you have a roommate but don't share food costs with them, don't count them. They should use this tool on their own to check their benefits."
