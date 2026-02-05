@@ -9,11 +9,13 @@ import {
   navigateHomePage,
   selectCounty,
   selectInsurance,
+  selectIncome,
   selectNearTermNeeds,
   selectReferralSource,
   selectState,
 } from './helpers/steps';
 import {
+  selectECIncome,
   selectElectricProvider,
   selectHeatingSource,
   selectHouseholdInfo,
@@ -35,6 +37,9 @@ const whiteLabels = {
     dobMonth: 'February',
     dobYear: '2010',
     insurance: "I don't have or know if I have health insurance",
+    incomeType: 'Wages, salaries, tips',
+    incomeFrequency: 'every month',
+    incomeAmount: 2000,
     nearTermNeeds: ['Food or groceries'],
     referralSource: 'Test / Prospective Partner',
     expectedResult: {
@@ -51,6 +56,9 @@ const whiteLabels = {
     dobMonth: 'February',
     dobYear: '2010',
     insurance: "I don't have or know if I have health insurance",
+    incomeType: 'Wages, salaries, tips',
+    incomeFrequency: 'every month',
+    incomeAmount: 2000,
     nearTermNeeds: ['Food or groceries'],
     referralSource: 'Test / Prospective Partner',
     expectedResult: {
@@ -67,6 +75,9 @@ const whiteLabels = {
     dobMonth: 'February',
     dobYear: '2010',
     insurance: "I don't have or know if I have health insurance",
+    incomeType: 'Wages, salaries, tips',
+    incomeFrequency: 'every month',
+    incomeAmount: 2000,
     nearTermNeeds: ['Food or groceries'],
     referralSource: 'Test / Prospective Partner',
     expectedResult: {
@@ -87,6 +98,9 @@ const energyCalculators = {
     dobMonth: 'February',
     dobYear: '2010',
     status: 'Widowed',
+    incomeType: 'Wages, salaries, tips',
+    incomeFrequency: 'every month',
+    incomeAmount: 2000,
     electricProvider: 'Xcel Energy',
     heatingSource: 'Xcel Energy',
     householdInfo: 'You have a past-due electric',
@@ -127,6 +141,7 @@ test.describe('Basic e2e tests for each white label', () => {
 
       await fillDateOfBirth(page, config.dobMonth, config.dobYear);
       await selectInsurance(page, config.insurance);
+      await selectIncome(page, config.incomeType, config.incomeFrequency, config.incomeAmount);
       await clickContinueButton(page);
       await verifyCurrentUrl(page, URL_PATTERNS.EXPENSES);
 
@@ -192,6 +207,12 @@ test.describe('Basic e2e tests for each white label', () => {
       energyCalculators.cesn.dobYear,
     );
     await selectStatus(page, energyCalculators.cesn.status);
+    await selectECIncome(
+      page,
+      energyCalculators.cesn.incomeType,
+      energyCalculators.cesn.incomeFrequency,
+      energyCalculators.cesn.incomeAmount,
+    );
     await clickContinueButton(page);
     await expect(page).toHaveURL(/\/cesn\/.*\/step-7/);
 
