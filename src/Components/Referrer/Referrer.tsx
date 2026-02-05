@@ -20,7 +20,7 @@ import NCHispanicFederationFooter from '../NCHispanicFederation/NCHispanicFedera
 
 export const BrandedHeader = () => {
   const { getReferrer } = useContext(Context);
-  const uiOptions = getReferrer('uiOptions');
+  const uiOptions = getReferrer('uiOptions', [] as string[]);
 
   if (uiOptions.includes('211co')) {
     return <TwoOneOneHeaderCO />;
@@ -39,7 +39,7 @@ export const BrandedHeader = () => {
 
 export const BrandedFooter = () => {
   const { getReferrer } = useContext(Context);
-  const uiOptions = getReferrer('uiOptions');
+  const uiOptions = getReferrer('uiOptions', [] as string[]);
   const isEnergyCalculator = useIsEnergyCalculator();
 
   if (isEnergyCalculator) {
@@ -65,7 +65,7 @@ export const BrandedFooter = () => {
 
 export const ResultsMessageForNeeds = () => {
   const { getReferrer } = useContext(Context);
-  const uiOptions = getReferrer('uiOptions');
+  const uiOptions = getReferrer('uiOptions', [] as string[]);
 
   if (uiOptions.includes('nc_show_211_link')) {
     return <NcLink211Message />;

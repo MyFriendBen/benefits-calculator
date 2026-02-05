@@ -81,11 +81,29 @@ const initialFormData: FormData = {
     legalServices: false,
     savings: false,
   },
+  utm: null,
 };
 
 export const DEFAULT_WHITE_LABEL = '_default';
 
 export const Context = React.createContext<WrapperContext>({} as WrapperContext);
+
+// Extract white label from URL pathname (e.g., /co/uuid/step-1 -> 'co')
+function getWhiteLabelFromUrl(): string {
+  const pathname = window.location.pathname;
+  const parts = pathname.split('/').filter(Boolean);
+
+  // Check if first part looks like a white label (not a step or other route)
+  if (parts.length > 0 && parts[0] !== 'step-1' && parts[0] !== 'select-state') {
+    const possibleWhiteLabel = parts[0];
+    // Basic validation - white labels are typically short alphanumeric
+    if (/^[a-z_]+$/.test(possibleWhiteLabel)) {
+      return possibleWhiteLabel;
+    }
+  }
+
+  return DEFAULT_WHITE_LABEL;
+}
 
 const Wrapper = (props: PropsWithChildren<{}>) => {
   const [staffToken, setStaffToken] = useState<string | undefined>(undefined);
@@ -97,7 +115,8 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
 
-  const [whiteLabel, setWhiteLabel] = useState(DEFAULT_WHITE_LABEL);
+  // Initialize white label from URL to ensure correct config loads
+  const [whiteLabel, setWhiteLabel] = useState(getWhiteLabelFromUrl);
 
   const { configLoading, configResponse: config } = useGetConfig(screenLoading, whiteLabel);
   const { language_options: languageOptions = {} } = config ?? {};

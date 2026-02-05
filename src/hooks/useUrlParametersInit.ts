@@ -38,6 +38,5 @@ export const useUrlParametersInit = () => {
       path: path,
       urlSearchParams: urlSearchParams,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+  }, [formData.immutableReferrer]);
 };

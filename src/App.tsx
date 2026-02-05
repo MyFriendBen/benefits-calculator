@@ -4,16 +4,14 @@ import { useLocation, Navigate, Routes, Route } from 'react-router-dom';
 import { LicenseInfo } from '@mui/x-license-pro';
 import { Context } from './Components/Wrapper/Wrapper';
 import LoadingRoutes from './Components/RouterUtil/LoadingRoutes';
-import ProgressBarRoutes from './Components/RouterUtil/ProgressBarRoutes';
+import AppLayout from './Components/AppLayout/AppLayout';
 import QuestionComponentContainer from './Components/QuestionComponentContainer/QuestionComponentContainer';
 import Confirmation from './Components/Confirmation/Confirmation';
 import Results from './Components/Results/Results';
 import Disclaimer from './Components/Steps/Disclaimer/Disclaimer';
 import JeffcoLandingPage from './Components/JeffcoComponents/JeffcoLandingPage/JeffcoLandingPage';
 import SelectLanguagePage from './Components/Steps/SelectLanguage';
-import { STARTING_QUESTION_NUMBER, useStepNumber, useStepDirectory } from './Assets/stepDirectory';
-import Box from '@mui/material/Box';
-import { BrandedFooter, BrandedHeader } from './Components/Referrer/Referrer';
+import { useStepNumber } from './Assets/stepDirectory';
 import CcigLandingPage from './Components/CcigComponents/CcigLandingPage';
 import languageRouteWrapper from './Components/RouterUtil/LanguageRouter';
 import SelectStatePage from './Components/Steps/SelectStatePage';
@@ -24,10 +22,8 @@ import EnergyCalculatorLandingPage from './Components/EnergyCalculator/LandingPa
 import WhiteLabelRouter from './Components/RouterUtil/WhiteLabelRouter';
 import ValidateUuid from './Components/RouterUtil/ValidateUuid';
 import ValidateWhiteLabel from './Components/RouterUtil/ValidateWhiteLabel';
-import FaviconManager from './Components/FaviconManager/FaviconManager';
 import './App.css';
 import useCampaign from './Components/CampaignAnalytics/useCampaign';
-import SystemBanner from './Components/Common/SystemBanner/SystemBanner';
 import { useAppInitialization } from './hooks';
 
 // Initialize MUI X License
@@ -36,9 +32,7 @@ LicenseInfo.setLicenseKey(process.env.REACT_APP_MUI_LICENSE_KEY + '=');
 const App = () => {
   const location = useLocation();
   const urlSearchParams = location.search;
-  const { styleOverride, pageIsLoading, getReferrer, config } = useContext(Context);
-  const stepDirectory = useStepDirectory();
-  const totalSteps = stepDirectory.length + STARTING_QUESTION_NUMBER;
+  const { styleOverride, pageIsLoading, getReferrer } = useContext(Context);
   const theme = useMemo(() => createTheme(styleOverride), [styleOverride]);
   const themeName = getReferrer('theme', 'default');
   const householdMemberStepNumber = useStepNumber('householdData', false);
@@ -59,16 +53,8 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <div className="app">
-        <CssBaseline />
-        <FaviconManager />
-        <BrandedHeader />
-        <Box className="main-max-width">
-          {config?.banner_messages && config.banner_messages.length > 0 && (
-            <SystemBanner banners={config.banner_messages} />
-          )}
-          <ProgressBarRoutes totalSteps={totalSteps} />
-          <Routes>
+      <AppLayout showLayout={true}>
+        <Routes>
             {languageRouteWrapper(
               <>
                 <Route path="" element={<Navigate to={`/step-1${urlSearchParams}`} replace />} />
@@ -105,9 +91,7 @@ const App = () => {
               </>,
             )}
           </Routes>
-        </Box>
-      </div>
-      <BrandedFooter />
+      </AppLayout>
     </ThemeProvider>
   );
 };
