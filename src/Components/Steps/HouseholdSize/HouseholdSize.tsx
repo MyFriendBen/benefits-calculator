@@ -108,13 +108,13 @@ const HouseholdSize = () => {
           </ul>
           <button
             type="button"
-            className="household-size-roommate-link"
+            className="household-size-roommate-link link-color"
             onClick={() => setShowRoommateInfo(!showRoommateInfo)}
             aria-expanded={showRoommateInfo}
           >
-            <OverrideableTranslation
+            <OverrideableTranslation            
               id="questions.householdSize-roommateToggle"
-              defaultMessage="Not sure who to include? (What about roommates?)"
+              defaultMessage="What about roommates?"
             />
           </button>
           {showRoommateInfo && (
