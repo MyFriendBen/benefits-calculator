@@ -42,7 +42,7 @@ function ZipCode() {
       title={<FormattedMessage id="confirmation.residenceInfo" defaultMessage="Residence Information" />}
       editAriaLabel={editZipAriaLabel}
       stepName="zipcode"
-      noReturn={getReferrer('featureFlags').includes('no_confirmation_return_zipcode')}
+      noReturn={getReferrer('uiOptions').includes('no_confirmation_return_zipcode')}
     >
       <ConfirmationItem
         label={<FormattedMessage id="confirmation.displayAllFormData-zipcodeText" defaultMessage="Zip code: " />}
