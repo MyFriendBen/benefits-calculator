@@ -15,8 +15,8 @@ const AppRoutes = () => {
     <Routes>
       {languageRouteWrapper(
         <>
-          <GlobalRoutes urlSearchParams={urlSearchParams} />
-          <WLScopedRoutes />
+          {GlobalRoutes({ urlSearchParams })}
+          {WLScopedRoutes()}
         </>,
       )}
     </Routes>

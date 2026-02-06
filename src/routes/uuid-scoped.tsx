@@ -40,7 +40,7 @@ const UUIDScopedRoutes = () => {
 
       <Route path="confirm-information" element={<Confirmation />} />
 
-      <ResultsRoutes />
+      {ResultsRoutes()}
 
       {/* Catch-all: redirect any unmatched paths to step-1 */}
       <Route path="*" element={<Navigate to="step-1" replace />} />

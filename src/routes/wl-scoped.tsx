@@ -28,7 +28,7 @@ const WLScopedRoutes = () => {
         <Route path="step-1" element={<SelectLanguagePage />} />
         <Route path="step-2" element={<Disclaimer />} />
 
-        <UUIDScopedRoutes />
+        {UUIDScopedRoutes()}
       </Route>
     </>
   );
