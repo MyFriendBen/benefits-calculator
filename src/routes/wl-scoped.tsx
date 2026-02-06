@@ -7,6 +7,7 @@ import SelectLanguagePage from '../Components/Steps/SelectLanguage';
 import Disclaimer from '../Components/Steps/Disclaimer/Disclaimer';
 import { buildUUIDScopedRoute } from './uuid-scoped';
 import { CUSTOM_LANDING_PAGES } from './custom-landing-pages';
+import SessionInitializer from '../Components/RouterUtil/SessionInitializer';
 
 interface WLScopedRoutesOptions {
   householdMemberStepNumber: number;
@@ -22,10 +23,18 @@ export const buildWLScopedRoutes = ({
   energyCalcHouseholdMemberStepNumber,
 }: WLScopedRoutesOptions): RouteObject[] => {
   // Custom landing pages - checked first before generic :whiteLabel pattern
-  const customLandingPages: RouteObject[] = CUSTOM_LANDING_PAGES.map(({ path, component: Component, props }) => ({
-    path,
-    element: <Component {...(props || {})} />,
-  }));
+  const customLandingPages: RouteObject[] = CUSTOM_LANDING_PAGES.map(
+    ({ path, whiteLabel, component: Component, props }) => ({
+      path,
+      element: <SessionInitializer whiteLabel={whiteLabel} />,
+      children: [
+        {
+          index: true,
+          element: <Component {...(props || {})} />,
+        },
+      ],
+    }),
+  );
 
   // Build UUID-scoped routes
   const uuidRoute = buildUUIDScopedRoute({

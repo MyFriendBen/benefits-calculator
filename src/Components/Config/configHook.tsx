@@ -223,18 +223,44 @@ export function useGetConfig(screenLoading: boolean, whiteLabel: string) {
       return;
     }
 
-    getConfig(whiteLabel).then((value: ConfigApiResponse[]) => {
-      // get data and set loading to false
-      try {
-        if (value !== undefined) {
-          const transformedOutput: Config = transformConfigData(value);
-          setConfigResponse(transformedOutput);
+    getConfig(whiteLabel)
+      .then((value: ConfigApiResponse[]) => {
+        // get data and set loading to false
+        try {
+          if (value !== undefined) {
+            const transformedOutput: Config = transformConfigData(value);
+            setConfigResponse(transformedOutput);
+          }
+        } catch (e) {
+          console.error(e);
         }
-      } catch (e) {
-        console.error(e);
-      }
-      setLoading(false);
-    });
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(`Failed to load config for white label '${whiteLabel}':`, error);
+        // Fallback to default config if white label config doesn't exist
+        if (whiteLabel !== '_default') {
+          console.log(`Falling back to _default config`);
+          getConfig('_default')
+            .then((value: ConfigApiResponse[]) => {
+              try {
+                if (value !== undefined) {
+                  const transformedOutput: Config = transformConfigData(value);
+                  setConfigResponse(transformedOutput);
+                }
+              } catch (e) {
+                console.error('Failed to load default config:', e);
+              }
+              setLoading(false);
+            })
+            .catch((err) => {
+              console.error('Failed to load default config:', err);
+              setLoading(false);
+            });
+        } else {
+          setLoading(false);
+        }
+      });
   }, [screenLoading, whiteLabel]);
 
   return { configLoading, configResponse };

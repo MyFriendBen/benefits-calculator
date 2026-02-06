@@ -13,6 +13,7 @@ import EnergyCalculatorLandingPage from '../Components/EnergyCalculator/LandingP
  */
 interface LandingPageConfig {
   path: string;
+  whiteLabel: string; // The white label this landing page belongs to
   component: ComponentType<any>;
   props?: Record<string, any>;
 }
@@ -20,20 +21,24 @@ interface LandingPageConfig {
 export const CUSTOM_LANDING_PAGES: LandingPageConfig[] = [
   {
     path: 'co/jeffcohs',
+    whiteLabel: 'co',
     component: JeffcoLandingPage,
     props: { referrer: 'jeffcoHS' },
   },
   {
     path: 'co/jeffcohscm',
+    whiteLabel: 'co',
     component: JeffcoLandingPage,
     props: { referrer: 'jeffcoHSCM' },
   },
   {
     path: 'co/ccig',
+    whiteLabel: 'co',
     component: CcigLandingPage,
   },
   {
     path: 'co_energy_calculator/landing-page',
+    whiteLabel: 'co_energy_calculator',
     component: EnergyCalculatorLandingPage,
   },
 ];
