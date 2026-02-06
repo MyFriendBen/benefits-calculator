@@ -4,19 +4,31 @@ import RedirectToWhiteLabel from './RedirectToWhiteLabel';
 import languageRouteWrapper from './LanguageRouter';
 
 /**
+ * Paths that should redirect to white-labeled versions during loading.
+ * These are legacy/shorthand URLs that map to the Colorado white label.
+ */
+const CO_REDIRECT_PATHS = ['jeffcohs', 'jeffcohscm', 'ccig', 'current-benefits'];
+
+/**
  * Loading state routes shown while config/translations are being fetched.
- * All routes render FetchScreen or redirect to white-labeled versions.
+ *
+ * This component handles two phases during initialization:
+ * 1. REDIRECT: Legacy/shorthand URLs → Full white label URLs (e.g., /jeffcohs → /co/jeffcohs)
+ * 2. LOADING: Show FetchScreen while config loads
+ *
+ * Once config/translations finish loading, AppLayout switches to AppRoutes (the main app routes).
  */
 const LoadingRoutes = () => {
-  const redirectPaths = ['jeffcohs', 'jeffcohscm', 'ccig', 'current-benefits'];
-
   return (
     <Routes>
       {languageRouteWrapper(
         <>
-          {redirectPaths.map((path) => (
+          {/* Legacy CO shorthand paths redirect to full white label URL */}
+          {CO_REDIRECT_PATHS.map((path) => (
             <Route key={path} path={path} element={<RedirectToWhiteLabel whiteLabel="co" />} />
           ))}
+
+          {/* step-1 shows loading screen after redirect to white label */}
           <Route
             path="step-1"
             element={
@@ -25,8 +37,11 @@ const LoadingRoutes = () => {
               </RedirectToWhiteLabel>
             }
           />
+
+          {/* White-labeled current-benefits shows loading screen */}
           <Route path=":whiteLabel/current-benefits" element={<FetchScreen />} />
-          {/* All other paths during loading show FetchScreen */}
+
+          {/* Catch-all: show loading screen for all other paths */}
           <Route path="*" element={<FetchScreen />} />
         </>,
       )}
