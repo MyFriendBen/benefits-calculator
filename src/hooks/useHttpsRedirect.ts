@@ -15,7 +15,12 @@ export const useHttpsRedirect = () => {
     if (window.location.protocol !== 'https:' && !isLocal && !hasTriedRedirect) {
       sessionStorage.setItem('https-redirect-attempted', 'true');
       // Use full URL replacement to preserve query params and hash
-      window.location.href = window.location.href.replace('http://', 'https://');
+      // Fallback to protocol setter if href is not available (e.g., in tests)
+      if (window.location.href) {
+        window.location.href = window.location.href.replace('http://', 'https://');
+      } else {
+        window.location.protocol = 'https:';
+      }
     }
   }, []);
 };

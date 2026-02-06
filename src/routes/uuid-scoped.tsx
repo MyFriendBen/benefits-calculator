@@ -27,14 +27,18 @@ const UUIDScopedRoutes = () => {
       {/* TODO(MFB-642): Remove key={window.location.href} anti-pattern. Currently forces full
           remount on navigation. Should be replaced with useEffect + form.reset() pattern when
           page param changes. See Linear ticket for implementation details and testing requirements. */}
-      <Route
-        path={`step-${householdMemberStepNumber}/:page`}
-        element={<HouseholdMemberForm key={window.location.href} />}
-      />
-      <Route
-        path={`step-${energyCalcHouseholdMemberStepNumber}/:page`}
-        element={<EcHouseholdMemberForm key={window.location.href} />}
-      />
+      {householdMemberStepNumber > 0 && (
+        <Route
+          path={`step-${householdMemberStepNumber}/:page`}
+          element={<HouseholdMemberForm key={window.location.href} />}
+        />
+      )}
+      {energyCalcHouseholdMemberStepNumber > 0 && (
+        <Route
+          path={`step-${energyCalcHouseholdMemberStepNumber}/:page`}
+          element={<EcHouseholdMemberForm key={window.location.href} />}
+        />
+      )}
 
       {/* Generic questionnaire step (catch-all for remaining steps) */}
       {/* TODO(MFB-642): Evaluate if key remounting is needed here or if component handles param changes */}

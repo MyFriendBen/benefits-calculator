@@ -2,16 +2,18 @@ import { renderHook } from '@testing-library/react';
 import { useHttpsRedirect } from './useHttpsRedirect';
 
 describe('useHttpsRedirect', () => {
-  const originalLocation = window.location;
   let mockSessionStorage: { [key: string]: string } = {};
+  let mockLocation: any;
 
   beforeEach(() => {
-    // Mock window.location
-    delete (window as any).location;
-    window.location = {
+    // Mock window.location with a writable href property
+    mockLocation = {
       protocol: 'http:',
       hostname: 'example.com',
-    } as any;
+      href: 'http://example.com/path?query=1#hash',
+    };
+    delete (window as any).location;
+    (window as any).location = mockLocation;
 
     // Mock sessionStorage
     mockSessionStorage = {};
@@ -22,7 +24,6 @@ describe('useHttpsRedirect', () => {
   });
 
   afterEach(() => {
-    window.location = originalLocation;
     jest.restoreAllMocks();
   });
 
@@ -30,11 +31,12 @@ describe('useHttpsRedirect', () => {
     renderHook(() => useHttpsRedirect());
 
     expect(sessionStorage.setItem).toHaveBeenCalledWith('https-redirect-attempted', 'true');
-    expect(window.location.protocol).toBe('https');
+    expect(window.location.href).toBe('https://example.com/path?query=1#hash');
   });
 
   it('should not redirect when already on HTTPS', () => {
-    window.location = { protocol: 'https:', hostname: 'example.com' } as any;
+    mockLocation.protocol = 'https:';
+    mockLocation.href = 'https://example.com/path';
 
     renderHook(() => useHttpsRedirect());
 
@@ -42,7 +44,8 @@ describe('useHttpsRedirect', () => {
   });
 
   it('should not redirect on localhost', () => {
-    window.location = { protocol: 'http:', hostname: 'localhost' } as any;
+    mockLocation.hostname = 'localhost';
+    mockLocation.href = 'http://localhost:3000/';
 
     renderHook(() => useHttpsRedirect());
 
@@ -51,7 +54,8 @@ describe('useHttpsRedirect', () => {
   });
 
   it('should not redirect on 127.0.0.1', () => {
-    window.location = { protocol: 'http:', hostname: '127.0.0.1' } as any;
+    mockLocation.hostname = '127.0.0.1';
+    mockLocation.href = 'http://127.0.0.1:3000/';
 
     renderHook(() => useHttpsRedirect());
 
@@ -66,6 +70,6 @@ describe('useHttpsRedirect', () => {
 
     // Should check sessionStorage but not set it again
     expect(sessionStorage.getItem).toHaveBeenCalledWith('https-redirect-attempted');
-    expect(window.location.protocol).toBe('http:'); // Should not change
+    expect(window.location.href).toBe('http://example.com/path?query=1#hash'); // Should not change
   });
 });
