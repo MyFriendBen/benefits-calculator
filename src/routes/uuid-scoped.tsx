@@ -30,6 +30,7 @@ export const buildUUIDScopedRoute = ({
   ];
 
   // Dynamic household member form routes
+  // Only register routes if step exists (> 0). useStepNumber returns -1 when step doesn't exist.
   // TODO(MFB-642): Remove key={window.location.href} anti-pattern. Currently forces full
   // remount on navigation. Should be replaced with useEffect + form.reset() pattern when
   // page param changes. See Linear ticket for implementation details and testing requirements.

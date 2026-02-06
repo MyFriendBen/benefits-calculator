@@ -16,8 +16,17 @@ const ProgressBarManager = ({ totalSteps }: ProgressBarManagerProps) => {
     return null;
   }
 
-  // Override step for confirmation page, otherwise let ProgressBar derive from URL params
-  const step = location.pathname.includes('confirm-information') ? totalSteps : undefined;
+  // Determine step number based on page type
+  let step: number | undefined;
+
+  if (location.pathname.includes('confirm-information')) {
+    // Confirmation page is the final step
+    step = totalSteps;
+  } else if (location.pathname.includes('select-state')) {
+    // Select state is a pre-questionnaire page (step 0 equivalent, but show as step 1 for UX)
+    step = 1;
+  }
+  // Otherwise, let ProgressBar derive step from URL params/pathname
 
   return <ProgressBar step={step} />;
 };

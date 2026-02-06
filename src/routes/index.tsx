@@ -1,6 +1,5 @@
-import { useRoutes, useLocation, RouteObject } from 'react-router-dom';
+import { useRoutes, useLocation } from 'react-router-dom';
 import { useStepNumber } from '../Assets/stepDirectory';
-import languageOptions from '../Assets/languageOptions';
 import { buildGlobalRoutes } from './global';
 import { buildWLScopedRoutes } from './wl-scoped';
 
@@ -14,7 +13,6 @@ import { buildWLScopedRoutes } from './wl-scoped';
 const AppRoutes = () => {
   const location = useLocation();
   const urlSearchParams = location.search;
-  const languages = Object.keys(languageOptions);
 
   // Get dynamic step numbers (hooks must be called in component)
   const householdMemberStepNumber = useStepNumber('householdData', false);
@@ -27,15 +25,7 @@ const AppRoutes = () => {
     energyCalcHouseholdMemberStepNumber,
   });
 
-  // Combine all routes with language prefixes
-  const baseRoutes = [...globalRoutes, ...whiteLabelRoutes];
-
-  const languagePrefixedRoutes: RouteObject[] = languages.map((language) => ({
-    path: language,
-    children: baseRoutes,
-  }));
-
-  const allRoutes = [...languagePrefixedRoutes, ...baseRoutes];
+  const allRoutes = [...whiteLabelRoutes, ...globalRoutes];
 
   return useRoutes(allRoutes);
 };

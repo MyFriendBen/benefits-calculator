@@ -48,7 +48,9 @@ const SessionRestoration = () => {
       }
     } catch (err) {
       console.error('Session restoration failed:', err);
-      navigate('/step-1');
+      // Preserve white label context in error redirect
+      const errorRedirect = whiteLabel ? `/${whiteLabel}/step-1` : '/step-1';
+      navigate(errorRedirect);
       return;
     } finally {
       setScreenLoading(false);
@@ -66,15 +68,17 @@ const SessionRestoration = () => {
     }
   };
 
+  useEffect(() => {
+    // Valid UUID, restore session from API
+    if (uuid !== undefined) {
+      restoreSession();
+    }
+  }, [uuid, whiteLabel]);
+
   // If no valid UUID, just initialize the session without API call
   if (uuid === undefined) {
     return <SessionInitializer />;
   }
-
-  useEffect(() => {
-    // Valid UUID, restore session from API
-    restoreSession();
-  }, [uuid, whiteLabel]);
 
   return <LoadingPage />;
 };

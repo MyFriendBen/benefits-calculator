@@ -3,7 +3,6 @@ import { Routes, Route } from 'react-router-dom';
 import SessionInitializer from './SessionInitializer';
 import SessionRestoration from './SessionRestoration';
 import RedirectToWhiteLabel from './RedirectToWhiteLabel';
-import languageOptions from '../../Assets/languageOptions';
 
 /**
  * Paths that should redirect to white-labeled versions during initialization.
@@ -65,31 +64,6 @@ const buildInitializationRouteElements = (): ReactElement[] => {
 };
 
 /**
- * Wraps routes with language prefix variants (e.g., /es/*, /en/*).
- * Returns both language-prefixed and non-prefixed routes.
- */
-const buildLanguagePrefixedRoutes = (baseRoutes: ReactElement[]): ReactElement[] => {
-  const languages = Object.keys(languageOptions);
-  const languageRoutes: ReactElement[] = [];
-
-  // Add language-prefixed versions
-  languages.forEach((language) => {
-    languageRoutes.push(
-      <Route key={`lang-${language}`} path={`${language}/*`}>
-        {baseRoutes}
-      </Route>
-    );
-  });
-
-  // Add non-prefixed versions
-  baseRoutes.forEach((route) => {
-    languageRoutes.push(route);
-  });
-
-  return languageRoutes;
-};
-
-/**
  * Router active during app initialization (while config/translations are being fetched).
  *
  * Handles three types of routes:
@@ -100,10 +74,9 @@ const buildLanguagePrefixedRoutes = (baseRoutes: ReactElement[]): ReactElement[]
  * Once initialization completes, App.tsx switches to AppRoutes (the main application router).
  */
 const InitializationRouter = () => {
-  const baseRoutes = buildInitializationRouteElements();
-  const allRoutes = buildLanguagePrefixedRoutes(baseRoutes);
+  const routes = buildInitializationRouteElements();
 
-  return <Routes>{allRoutes}</Routes>;
+  return <Routes>{routes}</Routes>;
 };
 
 export default InitializationRouter;
