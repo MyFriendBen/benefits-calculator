@@ -15,6 +15,7 @@ import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueBut
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import { useDefaultBackNavigationFunction } from '../QuestionComponents/questionHooks';
 import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
+import QuestionDescription from '../QuestionComponents/QuestionDescription';
 import { Context } from '../Wrapper/Wrapper';
 import useStepForm from './stepForm';
 import { OverrideableTranslation } from '../../Assets/languageOptions';
@@ -34,12 +35,23 @@ type CategoryBenefitsConfig = {
 type CategoryBenefitsProps = {
   alreadyHasBenefits: { [key: string]: boolean };
   onChange: (alreadyHasBenefits: { [key: string]: boolean }) => void;
+  expandAll: boolean;
+  onExpandAllChange: (expandAll: boolean) => void;
 };
 
-function CategoryBenefits({ alreadyHasBenefits, onChange }: CategoryBenefitsProps) {
-  const [currentExpanded, setCurrentExpanded] = useState(0); // start with the first accordion open
+function CategoryBenefits({ alreadyHasBenefits, onChange, expandAll, onExpandAllChange }: CategoryBenefitsProps) {
+  const [currentExpanded, setCurrentExpanded] = useState(-1); // start with all accordions closed
 
   const benefits = useConfig<CategoryBenefitsConfig>('category_benefits');
+
+  // When expandAll changes, update accordion states
+  useEffect(() => {
+    if (expandAll) {
+      // When expanding all, we'll handle this in the accordion expanded prop
+    } else {
+      setCurrentExpanded(-1); // collapse all
+    }
+  }, [expandAll]);
 
   return (
     <>
@@ -48,10 +60,10 @@ function CategoryBenefits({ alreadyHasBenefits, onChange }: CategoryBenefitsProp
           return {
             value: name,
             text: (
-              <span>
-                <strong>{benefit.name}</strong>
-                {benefit.description}
-              </span>
+              <div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 600 }}>{benefit.name}</div>
+                <div style={{ fontSize: '0.85rem', color: '#5a5a5a', marginTop: '0.125rem' }}>{benefit.description}</div>
+              </div>
             ),
           };
         });
@@ -60,10 +72,11 @@ function CategoryBenefits({ alreadyHasBenefits, onChange }: CategoryBenefitsProp
           <CheckBoxAccordion
             name={details.category_name}
             options={options}
-            expanded={currentExpanded === index}
+            expanded={expandAll || currentExpanded === index}
             onExpand={(isExpanded) => {
               if (isExpanded) {
                 setCurrentExpanded(index);
+                onExpandAllChange(false); // turn off expand all when manually expanding one
               } else {
                 if (currentExpanded === index) {
                   setCurrentExpanded(-1); // close all
@@ -92,6 +105,7 @@ function AlreadyHasBenefits() {
   const { uuid } = useParams();
   const backNavigationFunction = useDefaultBackNavigationFunction('hasBenefits');
   const { updateScreen } = useScreenApi();
+  const [expandAll, setExpandAll] = useState(false);
 
   const formSchema = z
     .object({
@@ -197,23 +211,25 @@ function AlreadyHasBenefits() {
                   id: 'questions.hasBenefits',
                   defaultMessage: 'Does anyone in your household currently have public assistance benefits?',
                 })}
-                sx={{ marginBottom: '1rem' }}
+                sx={{ marginBottom: '0.2rem', gap: '0rem' }}
               >
                 <FormControlLabel
                   value={'true'}
                   control={<Radio />}
-                  label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
+                  label={<span style={{ fontSize: '0.95rem' }}><FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" /></span>}
                 />
                 <FormControlLabel
                   value={'false'}
                   control={<Radio />}
-                  label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
+                  label={<span style={{ fontSize: '0.95rem' }}><FormattedMessage id="radiofield.label-no" defaultMessage="No" /></span>}
                 />
                 <FormControlLabel
                   value={'preferNotToAnswer'}
                   control={<Radio />}
                   label={
-                    <FormattedMessage id="radiofield.label-preferNotToAnswer" defaultMessage="Prefer not to answer" />
+                    <span style={{ fontSize: '0.95rem' }}>
+                      <FormattedMessage id="radiofield.label-preferNotToAnswer" defaultMessage="Prefer not to answer" />
+                    </span>
                   }
                 />
               </RadioGroup>
@@ -222,12 +238,42 @@ function AlreadyHasBenefits() {
         />
         {watch('hasBenefits') === 'true' && (
           <div>
+            <hr style={{ margin: '1rem 0 1.2rem 0', border: 'none', borderTop: '1px solid #d0d0d0' }} />
             <QuestionQuestion>
               <FormattedMessage
                 id="questions.hasBenefits-a"
                 defaultMessage="Please tell us what benefits your household currently has."
               />
             </QuestionQuestion>
+            <QuestionDescription>
+              <FormattedMessage
+                id="questions.hasBenefits-description-expanded"
+                defaultMessage="Click on each category to see available options. Select all benefits that apply."
+              />
+            </QuestionDescription>
+            <div style={{ marginTop: '0.5rem', marginBottom: '0.75rem' }}>
+              <span
+                onClick={() => setExpandAll(!expandAll)}
+                style={{
+                  color: '#1976d2',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  fontSize: '0.9rem',
+                }}
+              >
+                {expandAll ? (
+                  <FormattedMessage
+                    id="questions.hasBenefits-collapse-all"
+                    defaultMessage="Click here to collapse all"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="questions.hasBenefits-expand-all"
+                    defaultMessage="Click here to expand all"
+                  />
+                )}
+              </span>
+            </div>
             <CategoryBenefits
               alreadyHasBenefits={watch('alreadyHasBenefits')}
               onChange={(values) =>
@@ -237,9 +283,11 @@ function AlreadyHasBenefits() {
                   shouldTouch: true,
                 })
               }
+              expandAll={expandAll}
+              onExpandAllChange={setExpandAll}
             />
             {errors.alreadyHasBenefits !== undefined && (
-              <ErrorMessageWrapper fontSize="1.5rem">
+              <ErrorMessageWrapper fontSize="1rem">
                 {errors.alreadyHasBenefits.message as ReactNode}
               </ErrorMessageWrapper>
             )}
