@@ -16,8 +16,8 @@ const WLScopedRoutes = () => {
   return (
     <>
       {/* Custom landing pages - checked first before generic :whiteLabel pattern */}
-      {CUSTOM_LANDING_PAGES.map(({ path, element }) => (
-        <Route key={path} path={path} element={element} />
+      {CUSTOM_LANDING_PAGES.map(({ path, component: Component, props }) => (
+        <Route key={path} path={path} element={<Component {...(props || {})} />} />
       ))}
 
       {/* Generic :whiteLabel routes (matched after custom landing pages) */}

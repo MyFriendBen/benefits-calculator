@@ -1,4 +1,4 @@
-import { useEffect, useContext } from 'react';
+import { useEffect, useContext, useRef } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
 import { Context } from '../Components/Wrapper/Wrapper';
 
@@ -14,8 +14,13 @@ export const useUrlParametersInit = () => {
   const location = useLocation();
   const { formData, setFormData } = useContext(Context);
   const urlSearchParams = location.search;
+  const initializedRef = useRef(false);
 
   useEffect(() => {
+    // Only run once on mount to avoid re-initializing on every render
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
     const referrerParam = searchParams.get('referrer');
     const utmParam = searchParams.get('utm_source');
     const testParam = searchParams.get('test') === 'true';
@@ -38,5 +43,6 @@ export const useUrlParametersInit = () => {
       path: path,
       urlSearchParams: urlSearchParams,
     });
-  }, [formData.immutableReferrer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array with ref guard ensures this only runs once on mount
 };

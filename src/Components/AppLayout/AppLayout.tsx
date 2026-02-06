@@ -17,10 +17,6 @@ interface AppLayoutProps {
  * Renders the header, footer, banner, progress bar, and main content area.
  */
 const AppLayout = ({ children }: AppLayoutProps) => {
-  return <AppLayoutContent>{children}</AppLayoutContent>;
-};
-
-const AppLayoutContent = ({ children }: { children: React.ReactNode }) => {
   const { config } = useContext(Context);
   const stepDirectory = useStepDirectory();
   const totalSteps = stepDirectory ? stepDirectory.length + STARTING_QUESTION_NUMBER : STARTING_QUESTION_NUMBER;

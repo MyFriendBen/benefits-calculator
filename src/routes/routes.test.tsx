@@ -19,12 +19,13 @@ describe('Route Configuration', () => {
       expect(CUSTOM_LANDING_PAGES.length).toBeGreaterThan(0);
     });
 
-    it('should have valid path and element for each landing page', () => {
+    it('should have valid path and component for each landing page', () => {
       CUSTOM_LANDING_PAGES.forEach((page) => {
         expect(page).toHaveProperty('path');
-        expect(page).toHaveProperty('element');
+        expect(page).toHaveProperty('component');
         expect(typeof page.path).toBe('string');
         expect(page.path.length).toBeGreaterThan(0);
+        expect(typeof page.component).toBe('function'); // Components are functions
       });
     });
 
