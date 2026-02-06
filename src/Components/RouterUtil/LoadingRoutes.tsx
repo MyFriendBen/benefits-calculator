@@ -41,6 +41,16 @@ const LoadingRoutes = () => {
           {/* White-labeled current-benefits shows loading screen */}
           <Route path=":whiteLabel/current-benefits" element={<FetchScreen />} />
 
+          {/* UUID routes for data restoration */}
+          <Route path=":whiteLabel/:uuid">
+            <Route path="" element={<FetchScreen />} />
+            <Route path="*" element={<FetchScreen />} />
+          </Route>
+          <Route path=":uuid">
+            <Route path="" element={<FetchScreen />} />
+            <Route path="*" element={<FetchScreen />} />
+          </Route>
+
           {/* Catch-all: show loading screen for all other paths */}
           <Route path="*" element={<FetchScreen />} />
         </>,

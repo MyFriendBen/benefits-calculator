@@ -27,22 +27,24 @@ export const useUrlParametersInit = () => {
     const externalIdParam = searchParams.get('externalid');
     const pathParam = searchParams.get('path') ?? 'default';
 
-    // referrer priority = stored referrer -> referrer param -> utm_source param -> ''
-    const referrer = formData.immutableReferrer ?? referrerParam ?? utmParam ?? '';
-    const referrerSource = formData.referralSource || referrer;
-    const isTest = formData.isTest || testParam;
-    const externalId = formData.externalID ?? externalIdParam ?? undefined;
-    const path = formData.path ?? pathParam;
+    // Use functional update to avoid stale closure and satisfy exhaustive-deps
+    setFormData((currentFormData) => {
+      // referrer priority = stored referrer -> referrer param -> utm_source param -> ''
+      const referrer = currentFormData.immutableReferrer ?? referrerParam ?? utmParam ?? '';
+      const referrerSource = currentFormData.referralSource || referrer;
+      const isTest = currentFormData.isTest || testParam;
+      const externalId = currentFormData.externalID ?? externalIdParam ?? undefined;
+      const path = currentFormData.path ?? pathParam;
 
-    setFormData({
-      ...formData,
-      isTest: isTest,
-      externalID: externalId,
-      referralSource: referrerSource,
-      immutableReferrer: referrer,
-      path: path,
-      urlSearchParams: urlSearchParams,
+      return {
+        ...currentFormData,
+        isTest: isTest,
+        externalID: externalId,
+        referralSource: referrerSource,
+        immutableReferrer: referrer,
+        path: path,
+        urlSearchParams: urlSearchParams,
+      };
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array with ref guard ensures this only runs once on mount
+  }, [searchParams, setFormData, urlSearchParams]); // Include dependencies
 };
