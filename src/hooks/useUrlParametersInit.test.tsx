@@ -33,16 +33,20 @@ describe('useUrlParametersInit', () => {
 
     renderHook(() => useUrlParametersInit(), { wrapper });
 
-    expect(mockSetFormData).toHaveBeenCalledWith(
-      expect.objectContaining({
-        immutableReferrer: 'google',
-        referralSource: 'google',
-        isTest: true,
-        externalID: '123',
-        path: 'custom',
-        urlSearchParams: '?referrer=google&test=true&externalid=123&path=custom',
-      })
-    );
+    expect(mockSetFormData).toHaveBeenCalledWith(expect.any(Function));
+
+    // Call the updater function with the current formData to get the result
+    const updaterFn = mockSetFormData.mock.calls[0][0];
+    const result = updaterFn(defaultFormData);
+
+    expect(result).toMatchObject({
+      immutableReferrer: 'google',
+      referralSource: 'google',
+      isTest: true,
+      externalID: '123',
+      path: 'custom',
+      urlSearchParams: '?referrer=google&test=true&externalid=123&path=custom',
+    });
   });
 
   it('should use utm_source as fallback for referrer', () => {
@@ -50,12 +54,15 @@ describe('useUrlParametersInit', () => {
 
     renderHook(() => useUrlParametersInit(), { wrapper });
 
-    expect(mockSetFormData).toHaveBeenCalledWith(
-      expect.objectContaining({
-        immutableReferrer: 'facebook',
-        referralSource: 'facebook',
-      })
-    );
+    expect(mockSetFormData).toHaveBeenCalledWith(expect.any(Function));
+
+    const updaterFn = mockSetFormData.mock.calls[0][0];
+    const result = updaterFn(defaultFormData);
+
+    expect(result).toMatchObject({
+      immutableReferrer: 'facebook',
+      referralSource: 'facebook',
+    });
   });
 
   it('should prioritize stored referrer over URL params', () => {
@@ -67,11 +74,14 @@ describe('useUrlParametersInit', () => {
 
     renderHook(() => useUrlParametersInit(), { wrapper });
 
-    expect(mockSetFormData).toHaveBeenCalledWith(
-      expect.objectContaining({
-        immutableReferrer: 'stored-referrer', // Should keep stored value
-      })
-    );
+    expect(mockSetFormData).toHaveBeenCalledWith(expect.any(Function));
+
+    const updaterFn = mockSetFormData.mock.calls[0][0];
+    const result = updaterFn(formDataWithReferrer);
+
+    expect(result).toMatchObject({
+      immutableReferrer: 'stored-referrer', // Should keep stored value
+    });
   });
 
   it('should default path to "default" when not provided', () => {
@@ -79,11 +89,14 @@ describe('useUrlParametersInit', () => {
 
     renderHook(() => useUrlParametersInit(), { wrapper });
 
-    expect(mockSetFormData).toHaveBeenCalledWith(
-      expect.objectContaining({
-        path: 'default',
-      })
-    );
+    expect(mockSetFormData).toHaveBeenCalledWith(expect.any(Function));
+
+    const updaterFn = mockSetFormData.mock.calls[0][0];
+    const result = updaterFn(defaultFormData);
+
+    expect(result).toMatchObject({
+      path: 'default',
+    });
   });
 
   it('should preserve existing formData values when URL params not provided', () => {
@@ -96,12 +109,15 @@ describe('useUrlParametersInit', () => {
 
     renderHook(() => useUrlParametersInit(), { wrapper });
 
-    expect(mockSetFormData).toHaveBeenCalledWith(
-      expect.objectContaining({
-        referralSource: 'existing-source',
-        isTest: true,
-      })
-    );
+    expect(mockSetFormData).toHaveBeenCalledWith(expect.any(Function));
+
+    const updaterFn = mockSetFormData.mock.calls[0][0];
+    const result = updaterFn(existingFormData);
+
+    expect(result).toMatchObject({
+      referralSource: 'existing-source',
+      isTest: true,
+    });
   });
 
   it('should only run once on mount', () => {
@@ -123,28 +139,34 @@ describe('useUrlParametersInit', () => {
     const wrapperEmpty = createWrapper('/?test=');
 
     renderHook(() => useUrlParametersInit(), { wrapper: wrapperTrue });
-    expect(mockSetFormData).toHaveBeenCalledWith(
-      expect.objectContaining({
-        isTest: true,
-      })
-    );
+    expect(mockSetFormData).toHaveBeenCalledWith(expect.any(Function));
+
+    let updaterFn = mockSetFormData.mock.calls[0][0];
+    let result = updaterFn(defaultFormData);
+    expect(result).toMatchObject({
+      isTest: true,
+    });
 
     mockSetFormData.mockClear();
 
     renderHook(() => useUrlParametersInit(), { wrapper: wrapperFalse });
-    expect(mockSetFormData).toHaveBeenCalledWith(
-      expect.objectContaining({
-        isTest: false, // 'false' string should not set isTest to true
-      })
-    );
+    expect(mockSetFormData).toHaveBeenCalledWith(expect.any(Function));
+
+    updaterFn = mockSetFormData.mock.calls[0][0];
+    result = updaterFn(defaultFormData);
+    expect(result).toMatchObject({
+      isTest: false, // 'false' string should not set isTest to true
+    });
 
     mockSetFormData.mockClear();
 
     renderHook(() => useUrlParametersInit(), { wrapper: wrapperEmpty });
-    expect(mockSetFormData).toHaveBeenCalledWith(
-      expect.objectContaining({
-        isTest: false, // Empty value should not set isTest to true
-      })
-    );
+    expect(mockSetFormData).toHaveBeenCalledWith(expect.any(Function));
+
+    updaterFn = mockSetFormData.mock.calls[0][0];
+    result = updaterFn(defaultFormData);
+    expect(result).toMatchObject({
+      isTest: false, // Empty value should not set isTest to true
+    });
   });
 });
