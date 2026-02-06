@@ -5,7 +5,7 @@ import { Context } from '../Wrapper/Wrapper';
 import { BrandedFooter, BrandedHeader } from '../Referrer/Referrer';
 import FaviconManager from '../FaviconManager/FaviconManager';
 import SystemBanner, { BannerMessage } from '../Common/SystemBanner/SystemBanner';
-import ProgressBarRoutes from '../RouterUtil/ProgressBarRoutes';
+import ProgressBarManager from '../RouterUtil/ProgressBarManager';
 import { STARTING_QUESTION_NUMBER, useStepDirectory } from '../../Assets/stepDirectory';
 
 interface AppLayoutProps {
@@ -30,7 +30,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
         {config?.banner_messages && (config.banner_messages as BannerMessage[]).length > 0 && (
           <SystemBanner banners={config.banner_messages as BannerMessage[]} />
         )}
-        <ProgressBarRoutes totalSteps={totalSteps} />
+        <ProgressBarManager totalSteps={totalSteps} />
         {children}
       </Box>
       <BrandedFooter />

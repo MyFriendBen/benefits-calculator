@@ -29,6 +29,12 @@ const ProgressBar = ({ step }: ProgressBarProps) => {
   }, [uuid]);
 
   let stepValue = step ?? id ?? 0;
+
+  // Don't render progress bar if we're not on a valid step page
+  if (!stepValue || Number(stepValue) <= 0) {
+    return null;
+  }
+
   let progressPercentage: number = ((Number(stepValue) - 1) / (totalSteps - 1)) * 100;
 
   const progressBarStyles = {
