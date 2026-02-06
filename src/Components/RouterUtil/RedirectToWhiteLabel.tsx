@@ -1,6 +1,7 @@
 import { PropsWithChildren, useContext } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Context } from '../Wrapper/Wrapper';
+import { ALL_VALID_WHITE_LABELS, WhiteLabel } from '../../Types/WhiteLabel';
 
 type Props = PropsWithChildren<{
   whiteLabel?: string;
@@ -64,9 +65,14 @@ export function useUpdateWhiteLabelAndNavigate() {
   const navigate = useNavigate();
 
   return (whiteLabel: string, url: string, replace: boolean = false) => {
-    // Technically, the config won't be loaded for a second,
-    // so we add defaults on the disclaimer page
-    setWhiteLabel(whiteLabel);
-    navigate(url, { replace: replace });
+    // Validate white label before setting it
+    if (ALL_VALID_WHITE_LABELS.includes(whiteLabel as WhiteLabel)) {
+      setWhiteLabel(whiteLabel);
+      navigate(url, { replace: replace });
+    } else {
+      console.error(`Invalid white label: ${whiteLabel}`);
+      // Navigate without setting white label (will use default)
+      navigate(url, { replace: replace });
+    }
   };
 }

@@ -6,6 +6,7 @@ import useScreenApi from '../../Assets/updateScreen';
 import { isValidUuid } from './ValidateUuid';
 import { ScreenApiResponse } from '../../apiCalls';
 import SessionInitializer from './SessionInitializer';
+import { ALL_VALID_WHITE_LABELS, WhiteLabel } from '../../Types/WhiteLabel';
 
 /**
  * Restores a session from a UUID by fetching data from the API.
@@ -58,13 +59,21 @@ const SessionRestoration = () => {
   };
 
   const handleSessionResponse = (response: ScreenApiResponse) => {
-    setWhiteLabel(response.white_label);
+    // Validate white label from API response before setting
+    if (ALL_VALID_WHITE_LABELS.includes(response.white_label as WhiteLabel)) {
+      setWhiteLabel(response.white_label);
 
-    // Redirect to URL with correct white label if needed
-    if (whiteLabel === undefined) {
-      navigate(`/${response.white_label}${location.pathname}`);
-    } else if (whiteLabel !== response.white_label) {
-      navigate(location.pathname.replace(whiteLabel, response.white_label));
+      // Redirect to URL with correct white label if needed
+      if (whiteLabel === undefined) {
+        navigate(`/${response.white_label}${location.pathname}`);
+      } else if (whiteLabel !== response.white_label) {
+        navigate(location.pathname.replace(whiteLabel, response.white_label));
+      }
+    } else {
+      // Invalid white label from API, redirect to step-1 with context preservation
+      console.error(`Invalid white label from API: ${response.white_label}`);
+      const errorRedirect = whiteLabel ? `/${whiteLabel}/step-1` : '/step-1';
+      navigate(errorRedirect);
     }
   };
 
