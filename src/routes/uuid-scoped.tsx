@@ -24,8 +24,9 @@ const UUIDScopedRoutes = () => {
       <Route path="step-2" element={<Disclaimer />} />
 
       {/* Dynamic household member form routes */}
-      {/* TODO: key={window.location.href} forces remount on navigation - investigate if components
-          can handle param changes properly with useEffect + form.reset() instead */}
+      {/* TODO(MFB-642): Remove key={window.location.href} anti-pattern. Currently forces full
+          remount on navigation. Should be replaced with useEffect + form.reset() pattern when
+          page param changes. See Linear ticket for implementation details and testing requirements. */}
       <Route
         path={`step-${householdMemberStepNumber}/:page`}
         element={<HouseholdMemberForm key={window.location.href} />}
@@ -36,6 +37,7 @@ const UUIDScopedRoutes = () => {
       />
 
       {/* Generic questionnaire step (catch-all for remaining steps) */}
+      {/* TODO(MFB-642): Evaluate if key remounting is needed here or if component handles param changes */}
       <Route path="step-:id" element={<QuestionComponentContainer key={window.location.href} />} />
 
       <Route path="confirm-information" element={<Confirmation />} />
