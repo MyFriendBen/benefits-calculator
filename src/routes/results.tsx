@@ -1,5 +1,5 @@
 import { Route, Navigate } from 'react-router-dom';
-import Results from '../components/Results/Results';
+import Results from '../Components/Results/Results';
 
 /**
  * Results page routes - terminal routes displaying calculation results.

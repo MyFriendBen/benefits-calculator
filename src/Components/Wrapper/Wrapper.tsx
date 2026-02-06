@@ -8,6 +8,7 @@ import useReferrer, { ReferrerData } from '../Referrer/referrerHook';
 import { useGetConfig } from '../Config/configHook';
 import { rightToLeftLanguages, Language } from '../../Assets/languageOptions';
 import { HtmlLangUpdater } from '../HtmlLangUpdater/HtmlLangUpdater';
+import { ALL_VALID_WHITE_LABELS, WhiteLabel } from '../../Types/WhiteLabel';
 
 const initialFormData: FormData = {
   isTest: false,
@@ -89,15 +90,15 @@ export const DEFAULT_WHITE_LABEL = '_default';
 export const Context = React.createContext<WrapperContext>({} as WrapperContext);
 
 // Extract white label from URL pathname (e.g., /co/uuid/step-1 -> 'co')
+// Validates against the list of known white labels for security
 function getWhiteLabelFromUrl(): string {
   const pathname = window.location.pathname;
   const parts = pathname.split('/').filter(Boolean);
 
-  // Check if first part looks like a white label (not a step or other route)
-  if (parts.length > 0 && parts[0] !== 'step-1' && parts[0] !== 'select-state') {
+  if (parts.length > 0) {
     const possibleWhiteLabel = parts[0];
-    // Basic validation - white labels are typically short alphanumeric
-    if (/^[a-z_]+$/.test(possibleWhiteLabel)) {
+    // Validate against actual white label list (not just regex pattern)
+    if (ALL_VALID_WHITE_LABELS.includes(possibleWhiteLabel as WhiteLabel)) {
       return possibleWhiteLabel;
     }
   }
