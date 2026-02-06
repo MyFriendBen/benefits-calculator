@@ -10,9 +10,9 @@ export function isValidUuid(uuid: string) {
 
 // Layout route that validates the uuid param before rendering child routes
 export default function ValidateUuid() {
-  const { uuid } = useParams();
+  const { uuid, whiteLabel } = useParams();
   const queryParams = useQueryString();
-  const link = `/step-1${queryParams}`;
+  const link = whiteLabel ? `/${whiteLabel}/step-1${queryParams}` : `/step-1${queryParams}`;
 
   if (uuid === undefined || !isValidUuid(uuid)) {
     return <Navigate to={link} replace />;
