@@ -10,24 +10,13 @@ import { STARTING_QUESTION_NUMBER, useStepDirectory } from '../../Assets/stepDir
 
 interface AppLayoutProps {
   children: React.ReactNode;
-  showLayout?: boolean;
 }
 
 /**
  * Main application layout component.
  * Renders the header, footer, banner, progress bar, and main content area.
- * When showLayout is false, only renders children without header/footer/banner (for loading states).
  */
-const AppLayout = ({ children, showLayout = true }: AppLayoutProps) => {
-  if (!showLayout) {
-    return (
-      <div className="app">
-        <CssBaseline />
-        {children}
-      </div>
-    );
-  }
-
+const AppLayout = ({ children }: AppLayoutProps) => {
   return <AppLayoutContent>{children}</AppLayoutContent>;
 };
 

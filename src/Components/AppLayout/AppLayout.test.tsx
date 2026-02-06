@@ -171,26 +171,9 @@ describe('AppLayout', () => {
     expect(appDiv).toBeInTheDocument();
   });
 
-  it('should not render header/footer/banner when showLayout is false', () => {
+  it('should always render all layout components', () => {
     render(
-      <AppLayout showLayout={false}>
-        <div>Test Content</div>
-      </AppLayout>,
-      { wrapper }
-    );
-
-    // Should render children but not layout components
-    expect(screen.getByText('Test Content')).toBeInTheDocument();
-    expect(screen.queryByTestId('favicon-manager')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('branded-header')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('branded-footer')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('progress-bar-routes')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('system-banner')).not.toBeInTheDocument();
-  });
-
-  it('should render all layout components when showLayout is true', () => {
-    render(
-      <AppLayout showLayout={true}>
+      <AppLayout>
         <div>Test Content</div>
       </AppLayout>,
       { wrapper }

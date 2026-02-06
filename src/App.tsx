@@ -32,7 +32,7 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <AppLayout showLayout={true}>
+      <AppLayout>
         <AppRoutes />
       </AppLayout>
     </ThemeProvider>
