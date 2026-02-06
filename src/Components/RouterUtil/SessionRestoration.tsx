@@ -50,8 +50,9 @@ const SessionRestoration = () => {
       console.error('Session restoration failed:', err);
       navigate('/step-1');
       return;
+    } finally {
+      setScreenLoading(false);
     }
-    setScreenLoading(false);
   };
 
   const handleSessionResponse = (response: ScreenApiResponse) => {
