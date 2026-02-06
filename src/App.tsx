@@ -2,7 +2,7 @@ import { CssBaseline, createTheme, ThemeProvider } from '@mui/material';
 import { useContext, useMemo } from 'react';
 import { LicenseInfo } from '@mui/x-license-pro';
 import { Context } from './Components/Wrapper/Wrapper';
-import LoadingRoutes from './Components/RouterUtil/LoadingRoutes';
+import InitializationRouter from './Components/RouterUtil/InitializationRouter';
 import AppLayout from './Components/AppLayout/AppLayout';
 import AppRoutes from './routes';
 import useCampaign from './Components/CampaignAnalytics/useCampaign';
@@ -25,7 +25,7 @@ const App = () => {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <LoadingRoutes />
+        <InitializationRouter />
       </ThemeProvider>
     );
   }
