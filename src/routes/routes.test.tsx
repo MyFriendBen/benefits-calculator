@@ -69,24 +69,18 @@ describe('Route Configuration', () => {
       // UUIDScoped: /:whiteLabel/:uuid/*
       // Results: /:whiteLabel/:uuid/results/*
 
-      // Import and verify route functions exist and return valid React elements
-      const GlobalRoutes = (await import('./global')).default;
-      const WLScopedRoutes = (await import('./wl-scoped')).default;
-      const UUIDScopedRoutes = (await import('./uuid-scoped')).default;
-      const ResultsRoutes = (await import('./results')).default;
+      // Import and verify route configurations exist
+      const AppRoutes = (await import('./index')).default;
+      const resultsRoutes = (await import('./results')).default;
 
-      // Verify route functions are defined
-      expect(GlobalRoutes).toBeDefined();
-      expect(typeof GlobalRoutes).toBe('function');
+      // AppRoutes is the main routing component using useRoutes
+      expect(AppRoutes).toBeDefined();
+      expect(typeof AppRoutes).toBe('function');
 
-      expect(WLScopedRoutes).toBeDefined();
-      expect(typeof WLScopedRoutes).toBe('function');
-
-      expect(UUIDScopedRoutes).toBeDefined();
-      expect(typeof UUIDScopedRoutes).toBe('function');
-
-      expect(ResultsRoutes).toBeDefined();
-      expect(typeof ResultsRoutes).toBe('function');
+      // ResultsRoutes is a route config array
+      expect(resultsRoutes).toBeDefined();
+      expect(Array.isArray(resultsRoutes)).toBe(true);
+      expect(resultsRoutes.length).toBeGreaterThan(0);
     });
   });
 

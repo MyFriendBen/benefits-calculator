@@ -1,23 +1,19 @@
-import { Route, Navigate } from 'react-router-dom';
+import { Navigate, RouteObject } from 'react-router-dom';
 import Results from '../Components/Results/Results';
 
 /**
  * Results page routes - terminal routes displaying calculation results.
  */
-const ResultsRoutes = () => {
-  return (
-    <>
-      <Route path="results/benefits" element={<Results type="program" />} />
-      <Route path="results/near-term-needs" element={<Results type="need" />} />
-      <Route
-        path="results/energy-rebates/:energyCalculatorRebateType"
-        element={<Results type="energy-calculator-rebates" />}
-      />
-      <Route path="results/benefits/:programId" element={<Results type="program" />} />
-      <Route path="results/more-help" element={<Results type="help" />} />
-      <Route path="results" element={<Navigate to="benefits" replace />} />
-    </>
-  );
-};
+const resultsRoutes: RouteObject[] = [
+  { path: 'results/benefits', element: <Results type="program" /> },
+  { path: 'results/near-term-needs', element: <Results type="need" /> },
+  {
+    path: 'results/energy-rebates/:energyCalculatorRebateType',
+    element: <Results type="energy-calculator-rebates" />,
+  },
+  { path: 'results/benefits/:programId', element: <Results type="program" /> },
+  { path: 'results/more-help', element: <Results type="help" /> },
+  { path: 'results', element: <Navigate to="benefits" replace /> },
+];
 
-export default ResultsRoutes;
+export default resultsRoutes;
