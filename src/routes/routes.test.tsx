@@ -93,7 +93,7 @@ describe('Route Configuration', () => {
       // Extract paths from route objects
       const paths = globalRoutes
         .map((route) => route.path)
-        .filter((path): path is string => typeof path === 'string' && path !== '' && path !== '*');
+        .filter((path) => typeof path === 'string' && path !== '' && path !== '*') as string[];
 
       // Verify each path uses kebab-case (only lowercase, numbers, and hyphens)
       paths.forEach((path) => {
@@ -184,43 +184,96 @@ describe('Route Configuration', () => {
   });
 
   describe('Dynamic Step Number Routes', () => {
-    it('should not register routes with negative step numbers', () => {
-      // When useStepNumber returns -1 (step not found), routes should not be registered
-      // This prevents invalid routes like "step--1/:page" from being created
+    it('should not register routes when step numbers are invalid (negative or zero)', async () => {
+      // When useStepNumber returns -1 (step not found) or 0, routes should NOT be registered
+      // This prevents invalid routes like "step--1/:page" or "step-0/:page" from being created
+      const { buildUUIDScopedRoute } = await import('./uuid-scoped');
 
-      // Test cases for invalid step numbers
+      // Test with invalid step numbers
       const invalidStepNumbers = [-1, -5, 0];
 
       invalidStepNumbers.forEach((stepNum) => {
-        // Verify that negative or zero step numbers don't create valid routes
-        const invalidRoute = `step-${stepNum}/:page`;
+        const route = buildUUIDScopedRoute({
+          householdMemberStepNumber: stepNum,
+          energyCalcHouseholdMemberStepNumber: 4, // Valid number for comparison
+        });
 
-        // The route pattern should not contain double hyphens or step-0
-        if (stepNum < 0) {
-          expect(invalidRoute).toContain('--'); // This would be invalid
-        }
-        if (stepNum === 0) {
-          expect(invalidRoute).toBe('step-0/:page'); // This would be confusing
-        }
+        // Extract all paths from the route's children
+        const paths = route.children?.map((child) => child.path) || [];
 
-        // The conditional rendering (stepNumber > 0) prevents these routes
-        expect(stepNum > 0).toBe(false);
+        // Verify that invalid step patterns are NOT present
+        expect(paths).not.toContain(`step-${stepNum}/:page`);
+
+        // Specifically check no double-hyphens or step-0 patterns
+        paths.forEach((path) => {
+          if (typeof path === 'string' && path.startsWith('step-')) {
+            expect(path).not.toContain('--'); // No double hyphens
+            expect(path).not.toMatch(/^step-0\//); // No step-0
+          }
+        });
       });
     });
 
-    it('should only register routes for valid positive step numbers', () => {
-      // Valid step numbers should be positive integers (> 0)
-      const validStepNumbers = [1, 3, 4, 5, 10];
+    it('should register routes when step numbers are valid (positive integers)', async () => {
+      // Valid step numbers (> 0) should create routes
+      const { buildUUIDScopedRoute } = await import('./uuid-scoped');
+
+      const validStepNumbers = [3, 4, 5, 10];
 
       validStepNumbers.forEach((stepNum) => {
-        const validRoute = `step-${stepNum}/:page`;
+        const route = buildUUIDScopedRoute({
+          householdMemberStepNumber: stepNum,
+          energyCalcHouseholdMemberStepNumber: -1, // Invalid number for comparison
+        });
 
-        // Verify the route format is correct
-        expect(validRoute).toMatch(/^step-\d+\/:page$/);
+        // Extract all paths from the route's children
+        const paths = route.children?.map((child) => child.path) || [];
 
-        // Verify the condition for rendering
-        expect(stepNum > 0).toBe(true);
+        // Verify the valid step route IS present
+        expect(paths).toContain(`step-${stepNum}/:page`);
       });
+    });
+
+    it('should handle both household member routes independently', async () => {
+      // Both householdMemberStepNumber and energyCalcHouseholdMemberStepNumber should be
+      // independently registered based on their validity
+      const { buildUUIDScopedRoute } = await import('./uuid-scoped');
+
+      // Test case 1: Both valid
+      const bothValid = buildUUIDScopedRoute({
+        householdMemberStepNumber: 3,
+        energyCalcHouseholdMemberStepNumber: 4,
+      });
+      const bothValidPaths = bothValid.children?.map((child) => child.path) || [];
+      expect(bothValidPaths).toContain('step-3/:page');
+      expect(bothValidPaths).toContain('step-4/:page');
+
+      // Test case 2: First valid, second invalid
+      const firstValid = buildUUIDScopedRoute({
+        householdMemberStepNumber: 3,
+        energyCalcHouseholdMemberStepNumber: -1,
+      });
+      const firstValidPaths = firstValid.children?.map((child) => child.path) || [];
+      expect(firstValidPaths).toContain('step-3/:page');
+      expect(firstValidPaths).not.toContain('step--1/:page');
+
+      // Test case 3: First invalid, second valid
+      const secondValid = buildUUIDScopedRoute({
+        householdMemberStepNumber: 0,
+        energyCalcHouseholdMemberStepNumber: 4,
+      });
+      const secondValidPaths = secondValid.children?.map((child) => child.path) || [];
+      expect(secondValidPaths).not.toContain('step-0/:page');
+      expect(secondValidPaths).toContain('step-4/:page');
+
+      // Test case 4: Both invalid
+      const bothInvalid = buildUUIDScopedRoute({
+        householdMemberStepNumber: -1,
+        energyCalcHouseholdMemberStepNumber: 0,
+      });
+      const bothInvalidPaths = bothInvalid.children?.map((child) => child.path) || [];
+      expect(bothInvalidPaths).not.toContain('step--1/:page');
+      expect(bothInvalidPaths).not.toContain('step-0/:page');
     });
   });
 });

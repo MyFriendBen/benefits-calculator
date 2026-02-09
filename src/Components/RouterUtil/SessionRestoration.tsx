@@ -27,14 +27,19 @@ const SessionRestoration = () => {
 
   // Parse UUID and white label from params (handles both /:uuid and /:whiteLabel/:uuid)
   const { uuid, whiteLabel } = useMemo(() => {
+    // Check if whiteLabel param is actually a UUID (for /:uuid routes)
+    // This must be checked FIRST before checking if rawUuid is undefined
+    if (rawWhiteLabel !== undefined && isValidUuid(rawWhiteLabel ?? '')) {
+      return { uuid: rawWhiteLabel, whiteLabel: undefined };
+    }
+
+    // If rawUuid is undefined, we have no valid UUID
     if (rawUuid === undefined) {
       return { uuid: undefined, whiteLabel: rawWhiteLabel };
     }
 
-    // Check if whiteLabel param is actually a UUID (for /:uuid routes)
-    if (rawWhiteLabel !== undefined && isValidUuid(rawWhiteLabel ?? '')) {
-      return { uuid: rawWhiteLabel, whiteLabel: undefined };
-    } else if (!isValidUuid(rawUuid)) {
+    // Validate rawUuid
+    if (!isValidUuid(rawUuid)) {
       return { uuid: undefined, whiteLabel: rawWhiteLabel };
     }
 
