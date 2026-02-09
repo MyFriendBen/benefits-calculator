@@ -49,6 +49,7 @@ import {
   renderHoursWorkedHelperText,
   renderIncomeAmountHelperText,
   renderHealthInsNonePlusTheyHelperText,
+  renderStudentEligibilityErrorMessage,
 } from './HelperTextFunctions';
 import { DOLLARS, handleNumbersOnly, numberInputProps, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
 import useScreenApi from '../../../Assets/updateScreen';
@@ -263,10 +264,10 @@ const HouseholdMemberForm = () => {
         longTermDisability: z.boolean(),
       }),
       studentEligibility: z.object({
-        studentFullTime: z.boolean(),
-        studentJobTrainingProgram: z.boolean(),
-        studentHasWorkStudy: z.boolean(),
-        studentWorks20PlusHrs: z.boolean(),
+        studentFullTime: z.union([z.boolean(), z.undefined()]),
+        studentJobTrainingProgram: z.union([z.boolean(), z.undefined()]),
+        studentHasWorkStudy: z.union([z.boolean(), z.undefined()]),
+        studentWorks20PlusHrs: z.union([z.boolean(), z.undefined()]),
       }),
       relationshipToHH: z
         .string()
@@ -285,7 +286,28 @@ const HouseholdMemberForm = () => {
         return true;
       },
       { message: renderFutureBirthMonthHelperText(intl), path: ['birthMonth'] },
-    );
+    )
+    .superRefine(({ conditions, studentEligibility }, ctx) => {
+      // If student is selected, all 4 student eligibility fields must be answered
+      if (conditions.student) {
+        const fields: ('studentFullTime' | 'studentJobTrainingProgram' | 'studentHasWorkStudy' | 'studentWorks20PlusHrs')[] = [
+          'studentFullTime',
+          'studentJobTrainingProgram',
+          'studentHasWorkStudy',
+          'studentWorks20PlusHrs',
+        ];
+
+        fields.forEach((field) => {
+          if (studentEligibility[field] === undefined) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: renderStudentEligibilityErrorMessage(intl),
+              path: ['studentEligibility', field],
+            });
+          }
+        });
+      }
+    });
   type FormSchema = z.infer<typeof formSchema>;
 
   usePageTitle(QUESTION_TITLES.householdData);
@@ -336,6 +358,7 @@ const HouseholdMemberForm = () => {
             emergency_medicaid: false,
             family_planning: false,
             va: false,
+            mass_health: false,
           },
       conditions: householdMemberFormData?.conditions
         ? householdMemberFormData.conditions
@@ -347,10 +370,10 @@ const HouseholdMemberForm = () => {
             longTermDisability: false,
           },
       studentEligibility: {
-        studentFullTime: householdMemberFormData?.studentEligibility?.studentFullTime ?? false,
-        studentJobTrainingProgram: householdMemberFormData?.studentEligibility?.studentJobTrainingProgram ?? false,
-        studentHasWorkStudy: householdMemberFormData?.studentEligibility?.studentHasWorkStudy ?? false,
-        studentWorks20PlusHrs: householdMemberFormData?.studentEligibility?.studentWorks20PlusHrs ?? false,
+        studentFullTime: householdMemberFormData?.studentEligibility?.studentFullTime ?? undefined,
+        studentJobTrainingProgram: householdMemberFormData?.studentEligibility?.studentJobTrainingProgram ?? undefined,
+        studentHasWorkStudy: householdMemberFormData?.studentEligibility?.studentHasWorkStudy ?? undefined,
+        studentWorks20PlusHrs: householdMemberFormData?.studentEligibility?.studentWorks20PlusHrs ?? undefined,
       },
       relationshipToHH: determineDefaultRelationshipToHH(),
       hasIncome: determineDefaultHasIncome(),
@@ -409,10 +432,10 @@ const HouseholdMemberForm = () => {
     // Only reset when explicitly deselecting student (was true, now false)
     if (prevIsStudent.current && !watchIsStudent) {
       setValue('studentEligibility', {
-        studentFullTime: false,
-        studentJobTrainingProgram: false,
-        studentHasWorkStudy: false,
-        studentWorks20PlusHrs: false,
+        studentFullTime: undefined,
+        studentJobTrainingProgram: undefined,
+        studentHasWorkStudy: undefined,
+        studentWorks20PlusHrs: undefined,
       });
     }
     prevIsStudent.current = watchIsStudent;
@@ -643,26 +666,35 @@ const HouseholdMemberForm = () => {
               name={`studentEligibility.${name}`}
               control={control}
               render={({ field }) => (
-                <RadioGroup
-                  {...field}
-                  value={field.value ? 'true' : 'false'}
-                  onChange={(e) => field.onChange(e.target.value === 'true')}
-                  aria-label={intl.formatMessage({
-                    id: ariaLabelId,
-                    defaultMessage: ariaLabelDefault,
-                  })}
-                >
-                  <FormControlLabel
-                    value="true"
-                    control={<Radio size="small" />}
-                    label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
-                  />
-                  <FormControlLabel
-                    value="false"
-                    control={<Radio size="small" />}
-                    label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
-                  />
-                </RadioGroup>
+                <>
+                  <RadioGroup
+                    {...field}
+                    value={field.value === undefined ? '' : field.value ? 'true' : 'false'}
+                    onChange={(e) => field.onChange(e.target.value === 'true')}
+                    aria-label={intl.formatMessage({
+                      id: ariaLabelId,
+                      defaultMessage: ariaLabelDefault,
+                    })}
+                  >
+                    <FormControlLabel
+                      value="true"
+                      control={<Radio size="small" />}
+                      label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
+                    />
+                    <FormControlLabel
+                      value="false"
+                      control={<Radio size="small" />}
+                      label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
+                    />
+                  </RadioGroup>
+                  {errors.studentEligibility?.[name] && (
+                    <FormHelperText sx={{ ml: 0 }}>
+                      <ErrorMessageWrapper fontSize="1rem">
+                        {errors.studentEligibility[name]?.message}
+                      </ErrorMessageWrapper>
+                    </FormHelperText>
+                  )}
+                </>
               )}
             />
           </Box>
