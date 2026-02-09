@@ -43,8 +43,10 @@ const renderWithRouter = (
     <Context.Provider value={mockContext as WrapperContext}>
       <MemoryRouter initialEntries={[`/co/test-uuid/step-${stepId}`]}>
         <Routes>
-          <Route path="/co/:uuid/step-:id" element={<QuestionComponentContainer />} />
-          <Route path="/co/:uuid/step-1" element={<div>Redirected to Step 1</div>} />
+          <Route path="/co/:uuid">
+            <Route path="step-:id" element={<QuestionComponentContainer />} />
+            <Route path="step-1" element={<div>Redirected to Step 1</div>} />
+          </Route>
         </Routes>
       </MemoryRouter>
     </Context.Provider>,
