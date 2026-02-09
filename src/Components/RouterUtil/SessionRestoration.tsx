@@ -1,4 +1,4 @@
-import { useEffect, useContext, useMemo } from 'react';
+import { useEffect, useContext, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Context } from '../Wrapper/Wrapper';
 import LoadingPage from '../LoadingPage/LoadingPage';
@@ -46,7 +46,39 @@ const SessionRestoration = () => {
     return { uuid: rawUuid, whiteLabel: rawWhiteLabel };
   }, [rawUuid, rawWhiteLabel]);
 
-  const restoreSession = async () => {
+  const handleSessionResponse = useCallback(
+    (response: ScreenApiResponse) => {
+      // Validate white label from API response before setting
+      if (ALL_VALID_WHITE_LABELS.includes(response.white_label as WhiteLabel)) {
+        setWhiteLabel(response.white_label);
+
+        // Redirect to URL with correct white label if needed
+        if (whiteLabel === undefined) {
+          navigate(`/${response.white_label}${location.pathname}${location.search}${location.hash}`);
+        } else if (whiteLabel !== response.white_label) {
+          // Replace only the first path segment (white label)
+          const pathSegments = location.pathname.split('/').filter(Boolean);
+
+          // Handle edge case: empty pathname or just '/'
+          if (pathSegments.length === 0) {
+            navigate(`/${response.white_label}/step-1${location.search}${location.hash}`);
+            return;
+          }
+
+          pathSegments[0] = response.white_label;
+          navigate(`/${pathSegments.join('/')}${location.search}${location.hash}`);
+        }
+      } else {
+        // Invalid white label from API, redirect to step-1 with context preservation
+        console.error(`Invalid white label from API: ${response.white_label}`);
+        const errorRedirect = whiteLabel ? `/${whiteLabel}/step-1` : '/step-1';
+        navigate(`${errorRedirect}${location.search}${location.hash}`);
+      }
+    },
+    [whiteLabel, location.pathname, location.search, location.hash, navigate, setWhiteLabel],
+  );
+
+  const restoreSession = useCallback(async () => {
     try {
       // Pass the disambiguated UUID to fetchScreen
       const response = await fetchScreen(uuid);
@@ -62,36 +94,14 @@ const SessionRestoration = () => {
     } finally {
       setScreenLoading(false);
     }
-  };
-
-  const handleSessionResponse = (response: ScreenApiResponse) => {
-    // Validate white label from API response before setting
-    if (ALL_VALID_WHITE_LABELS.includes(response.white_label as WhiteLabel)) {
-      setWhiteLabel(response.white_label);
-
-      // Redirect to URL with correct white label if needed
-      if (whiteLabel === undefined) {
-        navigate(`/${response.white_label}${location.pathname}${location.search}${location.hash}`);
-      } else if (whiteLabel !== response.white_label) {
-        // Replace only the first path segment (white label)
-        const pathSegments = location.pathname.split('/').filter(Boolean);
-        pathSegments[0] = response.white_label;
-        navigate(`/${pathSegments.join('/')}${location.search}${location.hash}`);
-      }
-    } else {
-      // Invalid white label from API, redirect to step-1 with context preservation
-      console.error(`Invalid white label from API: ${response.white_label}`);
-      const errorRedirect = whiteLabel ? `/${whiteLabel}/step-1` : '/step-1';
-      navigate(`${errorRedirect}${location.search}${location.hash}`);
-    }
-  };
+  }, [uuid, whiteLabel, location.search, location.hash, fetchScreen, handleSessionResponse, navigate, setScreenLoading]);
 
   useEffect(() => {
     // Valid UUID, restore session from API
     if (uuid !== undefined) {
       restoreSession();
     }
-  }, [uuid, whiteLabel]);
+  }, [uuid, restoreSession]);
 
   // If no valid UUID, just initialize the session without API call
   if (uuid === undefined) {

@@ -1,11 +1,10 @@
-import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Navigate, useLocation } from 'react-router-dom';
 import { Zipcode } from '../Steps/Zipcode';
 import Expenses from '../Steps/Expenses/Expenses';
 import HouseholdSize from '../Steps/HouseholdSize/HouseholdSize';
-import { useStepName } from '../../Assets/stepDirectory';
+import { useStepName, useStepDirectory, STARTING_QUESTION_NUMBER } from '../../Assets/stepDirectory';
 import ReferralSourceStep from '../Steps/Referrer';
-import { OTHER_PAGE_TITLES, QUESTION_TITLES } from '../../Assets/pageTitleTags';
+import { QUESTION_TITLES } from '../../Assets/pageTitleTags';
 import AlreadyHasBenefits from '../Steps/AlreadyHasBenefits';
 import ImmediateNeeds from '../Steps/ImmediateNeeds';
 import SignUp from '../Steps/SignUp/SignUp';
@@ -20,13 +19,30 @@ import { usePageTitle } from '../Common/usePageTitle';
 
 const QuestionComponentContainer = () => {
   let { id } = useParams();
+  const location = useLocation();
+  const stepDirectory = useStepDirectory();
 
   if (id === undefined) {
     throw new Error('steps must have a step-[id]');
   }
-  const questionName = useStepName(+id);
 
-  const pageTitle = questionName === undefined ? OTHER_PAGE_TITLES.default : QUESTION_TITLES[questionName];
+  // Validate step number is within bounds
+  const stepNumber = +id;
+  const maxStep = stepDirectory.length + STARTING_QUESTION_NUMBER;
+
+  // Redirect to step-1 if step number is invalid (too high, negative, or NaN)
+  if (isNaN(stepNumber) || stepNumber < 1 || stepNumber > maxStep) {
+    return <Navigate to={`../step-1${location.search}${location.hash}`} replace />;
+  }
+
+  const questionName = useStepName(stepNumber);
+
+  // If questionName is still undefined after validation, something is wrong - redirect
+  if (questionName === undefined) {
+    return <Navigate to={`../step-1${location.search}${location.hash}`} replace />;
+  }
+
+  const pageTitle = QUESTION_TITLES[questionName];
   usePageTitle(pageTitle)
 
   switch (questionName) {

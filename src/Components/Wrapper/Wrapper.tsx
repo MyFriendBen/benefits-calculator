@@ -1,4 +1,4 @@
-import React, { useEffect, useState, PropsWithChildren } from 'react';
+import React, { useEffect, useState, useMemo, PropsWithChildren } from 'react';
 import useStyle from '../../Assets/styleController';
 import { IntlProvider } from 'react-intl';
 import { WrapperContext } from '../../Types/WrapperContext';
@@ -141,8 +141,18 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   let [translations, setTranslations] = useState<{ Language: { [key: string]: string } } | {}>({});
 
+  // Helper function to safely access localStorage
+  const getStoredLanguage = (): Language | null => {
+    try {
+      return localStorage.getItem('language') as Language;
+    } catch (e) {
+      console.warn('localStorage unavailable (private browsing or quota exceeded):', e);
+      return null;
+    }
+  };
+
   const initializeLocale = () => {
-    let defaultLanguage = localStorage.getItem('language') as Language;
+    let defaultLanguage = getStoredLanguage();
 
     const userLanguage = navigator.language.toLowerCase() as Language;
 
@@ -183,7 +193,13 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
   }, [locale]);
 
   useEffect(() => {
-    localStorage.setItem('language', locale);
+    // Safely persist language selection
+    try {
+      localStorage.setItem('language', locale);
+    } catch (e) {
+      console.warn('Failed to save language preference to localStorage:', e);
+      // Continue anyway - app will work, just won't persist preference
+    }
 
     if (!(locale in translations)) {
       setMessages({});
@@ -229,29 +245,52 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
     setLocale(newLocale as Language);
   };
 
+  // Memoize context value to prevent unnecessary re-renders of all consumers
+  const contextValue = useMemo(
+    () => ({
+      locale,
+      selectLanguage,
+      config,
+      configLoading,
+      formData,
+      setFormData,
+      theme,
+      setTheme,
+      styleOverride,
+      pageIsLoading,
+      setScreenLoading,
+      stepLoading,
+      setStepLoading,
+      staffToken,
+      setStaffToken,
+      getReferrer,
+      whiteLabel,
+      setWhiteLabel,
+    }),
+    [
+      locale,
+      selectLanguage,
+      config,
+      configLoading,
+      formData,
+      setFormData,
+      theme,
+      setTheme,
+      styleOverride,
+      pageIsLoading,
+      setScreenLoading,
+      stepLoading,
+      setStepLoading,
+      staffToken,
+      setStaffToken,
+      getReferrer,
+      whiteLabel,
+      setWhiteLabel,
+    ],
+  );
+
   return (
-    <Context.Provider
-      value={{
-        locale,
-        selectLanguage,
-        config,
-        configLoading,
-        formData,
-        setFormData,
-        theme,
-        setTheme,
-        styleOverride,
-        pageIsLoading,
-        setScreenLoading,
-        stepLoading,
-        setStepLoading,
-        staffToken,
-        setStaffToken,
-        getReferrer,
-        whiteLabel,
-        setWhiteLabel,
-      }}
-    >
+    <Context.Provider value={contextValue}>
       <IntlProvider locale={locale} messages={messages} defaultLocale={locale}>
         <HtmlLangUpdater />
         {props.children}
