@@ -213,17 +213,20 @@ describe('useGetConfig - Error Handling', () => {
     });
 
     it('should start with loading true and configResponse undefined', () => {
-      // Don't resolve the fetch to keep it in loading state
+      // Mock fetch to return a pending promise
       (global.fetch as jest.Mock).mockImplementation(
         () => new Promise(() => {}) // Never resolves
       );
 
-      const { result } = renderHook(() => useGetConfig(false, 'co'));
+      const { result, unmount } = renderHook(() => useGetConfig(false, 'co'));
 
       const { configLoading, configResponse } = result.current;
 
       expect(configLoading).toBe(true);
       expect(configResponse).toBeUndefined();
+
+      // Clean up to prevent memory leaks
+      unmount();
     });
   });
 });

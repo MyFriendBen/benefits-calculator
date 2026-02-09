@@ -291,10 +291,11 @@ describe('SessionRestoration - UUID Disambiguation', () => {
   it('should show LoadingPage while fetching session data', () => {
     const testUuid = '550e8400-e29b-41d4-a716-446655440000';
 
-    // Don't resolve the promise to keep it in loading state
+    // Mock fetchScreen to return a pending promise
+    // We'll verify loading state immediately before it resolves
     mockFetchScreen.mockImplementation(() => new Promise(() => {}));
 
-    render(
+    const { unmount } = render(
       <MemoryRouter initialEntries={[`/co/${testUuid}`]}>
         <Context.Provider value={defaultContextValue as any}>
           <Routes>
@@ -304,8 +305,11 @@ describe('SessionRestoration - UUID Disambiguation', () => {
       </MemoryRouter>
     );
 
-    // Should show loading page
+    // Should show loading page immediately
     const loadingPage = document.querySelector('[data-testid="loading-page"]');
     expect(loadingPage).toBeInTheDocument();
+
+    // Clean up to prevent memory leaks
+    unmount();
   });
 });
