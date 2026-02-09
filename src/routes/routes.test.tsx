@@ -85,31 +85,101 @@ describe('Route Configuration', () => {
   });
 
   describe('Route Path Patterns', () => {
-    it('should use consistent path naming conventions', () => {
-      // Paths should use kebab-case, not camelCase or snake_case
-      const pathPatterns = [
-        'step-1',
-        'step-2',
-        'select-state',
-        'current-benefits',
-        'confirm-information',
-        'near-term-needs',
-        'energy-rebates',
-        'more-help',
-      ];
+    it('should use consistent path naming conventions in global routes', async () => {
+      // Import and build actual routes
+      const { buildGlobalRoutes } = await import('./global');
+      const globalRoutes = buildGlobalRoutes({ urlSearchParams: '' });
 
-      pathPatterns.forEach((path) => {
-        expect(path).toMatch(/^[a-z0-9-]+$/); // Only lowercase, numbers, and hyphens
+      // Extract paths from route objects
+      const paths = globalRoutes
+        .map((route) => route.path)
+        .filter((path): path is string => typeof path === 'string' && path !== '' && path !== '*');
+
+      // Verify each path uses kebab-case (only lowercase, numbers, and hyphens)
+      paths.forEach((path) => {
+        expect(path).toMatch(/^[a-z0-9-]+$/);
       });
+
+      // Verify we have the expected global routes
+      expect(paths).toContain('step-1');
+      expect(paths).toContain('select-state');
     });
 
-    it('should use consistent parameter naming', () => {
-      // URL parameters should be camelCase
-      const paramNames = ['whiteLabel', 'uuid', 'id', 'page', 'programId', 'energyCalculatorRebateType'];
+    it('should use consistent path naming conventions in white label routes', async () => {
+      const { buildWLScopedRoutes } = await import('./wl-scoped');
+      const wlRoutes = buildWLScopedRoutes({
+        householdMemberStepNumber: 3,
+        energyCalcHouseholdMemberStepNumber: 4,
+      });
 
-      paramNames.forEach((param) => {
+      // Extract paths from the white label route's children
+      const whiteLabelRoute = wlRoutes.find((route) => route.path === ':whiteLabel');
+      expect(whiteLabelRoute).toBeDefined();
+
+      const paths = whiteLabelRoute!.children
+        ?.map((route) => route.path)
+        .filter((path): path is string =>
+          typeof path === 'string' &&
+          path !== '' &&
+          !path.startsWith(':') &&
+          !path.includes('*')
+        ) || [];
+
+      // Verify each path uses kebab-case
+      paths.forEach((path) => {
+        // Skip dynamic step routes like "step-3/:page"
+        const staticPath = path.split('/')[0];
+        if (!staticPath.includes(':')) {
+          expect(staticPath).toMatch(/^[a-z0-9-]+$/);
+        }
+      });
+
+      // Verify expected paths exist
+      expect(paths.some((p) => p.includes('current-benefits'))).toBe(true);
+      expect(paths.some((p) => p.includes('select-state'))).toBe(true);
+      expect(paths.some((p) => p.includes('step-1'))).toBe(true);
+    });
+
+    it('should use consistent parameter naming in route definitions', async () => {
+      const { buildWLScopedRoutes } = await import('./wl-scoped');
+
+      // Build routes to get actual parameter names used
+      const wlRoutes = buildWLScopedRoutes({
+        householdMemberStepNumber: 3,
+        energyCalcHouseholdMemberStepNumber: 4,
+      });
+
+      // Extract parameter names from paths
+      const paramPattern = /:([a-zA-Z]+)/g;
+      const params = new Set<string>();
+
+      wlRoutes.forEach((route) => {
+        if (route.path) {
+          const matches = route.path.matchAll(paramPattern);
+          for (const match of matches) {
+            params.add(match[1]);
+          }
+        }
+
+        // Check nested routes
+        route.children?.forEach((child) => {
+          if (child.path) {
+            const childMatches = child.path.matchAll(paramPattern);
+            for (const match of childMatches) {
+              params.add(match[1]);
+            }
+          }
+        });
+      });
+
+      // Verify all parameters use camelCase
+      Array.from(params).forEach((param) => {
         expect(param).toMatch(/^[a-z][a-zA-Z]*$/); // camelCase
       });
+
+      // Verify expected parameters exist
+      expect(params.has('whiteLabel')).toBe(true);
+      expect(params.has('uuid')).toBe(true);
     });
   });
 
