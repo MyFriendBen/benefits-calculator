@@ -18,32 +18,31 @@ import './QuestionComponentContainer.css';
 import { usePageTitle } from '../Common/usePageTitle';
 
 const QuestionComponentContainer = () => {
+  // ALL HOOKS MUST BE CALLED FIRST - before any conditional returns
   let { id } = useParams();
   const location = useLocation();
   const stepDirectory = useStepDirectory();
 
+  // Calculate step info for all cases
+  const stepNumber = id ? +id : NaN;
+  const maxStep = stepDirectory.length + STARTING_QUESTION_NUMBER;
+  const questionName = !isNaN(stepNumber) ? useStepName(stepNumber) : undefined;
+  const pageTitle = questionName ? QUESTION_TITLES[questionName] : '' as any;
+
+  // Call usePageTitle hook unconditionally
+  usePageTitle(pageTitle);
+
+  // NOW we can do conditional logic and returns
   if (id === undefined) {
     throw new Error('steps must have a step-[id]');
   }
 
-  // Validate step number is within bounds
-  const stepNumber = +id;
-  const maxStep = stepDirectory.length + STARTING_QUESTION_NUMBER;
+  // Validate step number and redirect if needed
+  const isInvalidStep = isNaN(stepNumber) || stepNumber < 1 || stepNumber > maxStep || questionName === undefined;
 
-  // Redirect to step-1 if step number is invalid (too high, negative, or NaN)
-  if (isNaN(stepNumber) || stepNumber < 1 || stepNumber > maxStep) {
+  if (isInvalidStep) {
     return <Navigate to={`../step-1${location.search}${location.hash}`} replace />;
   }
-
-  const questionName = useStepName(stepNumber);
-
-  // If questionName is still undefined after validation, something is wrong - redirect
-  if (questionName === undefined) {
-    return <Navigate to={`../step-1${location.search}${location.hash}`} replace />;
-  }
-
-  const pageTitle = QUESTION_TITLES[questionName];
-  usePageTitle(pageTitle)
 
   switch (questionName) {
     case 'zipcode':
