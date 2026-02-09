@@ -93,7 +93,8 @@ describe('Route Configuration', () => {
       // Extract paths from route objects
       const paths = globalRoutes
         .map((route) => route.path)
-        .filter((path) => typeof path === 'string' && path !== '' && path !== '*') as string[];
+        .filter((path) => typeof path === 'string' && path !== '' && path !== '*')
+        .filter(Boolean) as string[];
 
       // Verify each path uses kebab-case (only lowercase, numbers, and hyphens)
       paths.forEach((path) => {
@@ -116,14 +117,15 @@ describe('Route Configuration', () => {
       const whiteLabelRoute = wlRoutes.find((route) => route.path === ':whiteLabel');
       expect(whiteLabelRoute).toBeDefined();
 
-      const paths = whiteLabelRoute!.children
+      const paths = (whiteLabelRoute!.children
         ?.map((route) => route.path)
-        .filter((path): path is string =>
+        .filter((path) =>
           typeof path === 'string' &&
           path !== '' &&
           !path.startsWith(':') &&
           !path.includes('*')
-        ) || [];
+        )
+        .filter(Boolean) || []) as string[];
 
       // Verify each path uses kebab-case
       paths.forEach((path) => {
