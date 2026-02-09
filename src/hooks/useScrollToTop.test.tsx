@@ -1,6 +1,7 @@
-import { renderHook } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { useScrollToTop } from './useScrollToTop';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { act } from '@testing-library/react';
 
 describe('useScrollToTop', () => {
   const mockScrollTo = jest.fn();
@@ -10,27 +11,47 @@ describe('useScrollToTop', () => {
     window.scrollTo = mockScrollTo;
   });
 
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <MemoryRouter initialEntries={['/']}>
-      {children}
-    </MemoryRouter>
-  );
-
   it('should scroll to top on mount', () => {
-    renderHook(() => useScrollToTop(), { wrapper });
+    const TestComponent = () => {
+      useScrollToTop();
+      return null;
+    };
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <TestComponent />
+      </MemoryRouter>
+    );
 
     expect(mockScrollTo).toHaveBeenCalledWith(0, 0);
   });
 
   it('should scroll to top when location changes', () => {
-    const { rerender } = renderHook(() => useScrollToTop(), { wrapper });
+    let navigateFn: ReturnType<typeof useNavigate>;
+
+    const TestComponent = () => {
+      useScrollToTop();
+      navigateFn = useNavigate();
+      return null;
+    };
+
+    render(
+      <MemoryRouter initialEntries={['/page1']}>
+        <Routes>
+          <Route path="*" element={<TestComponent />} />
+        </Routes>
+      </MemoryRouter>
+    );
 
     expect(mockScrollTo).toHaveBeenCalledTimes(1);
+    expect(mockScrollTo).toHaveBeenCalledWith(0, 0);
 
-    // Rerender simulates location change
-    rerender();
+    // Navigate to a different route to trigger location change
+    act(() => {
+      navigateFn('/page2');
+    });
 
-    // Note: In a real scenario with navigation, this would be called again
-    // The test verifies the dependency array includes location
+    expect(mockScrollTo).toHaveBeenCalledTimes(2);
+    expect(mockScrollTo).toHaveBeenCalledWith(0, 0);
   });
 });
