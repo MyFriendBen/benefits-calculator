@@ -1,4 +1,4 @@
-import { Navigate, RouteObject } from 'react-router-dom';
+import { RouteObject } from 'react-router-dom';
 import Results from '../Components/Results/Results';
 
 /**
@@ -13,7 +13,6 @@ const resultsRoutes: RouteObject[] = [
   },
   { path: 'results/benefits/:programId', element: <Results type="program" /> },
   { path: 'results/more-help', element: <Results type="help" /> },
-  { path: 'results', element: <Navigate to="benefits" replace /> },
 ];
 
 export default resultsRoutes;
