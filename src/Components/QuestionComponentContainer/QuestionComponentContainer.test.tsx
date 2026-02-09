@@ -44,8 +44,9 @@ const renderWithRouter = (
       <MemoryRouter initialEntries={[`/co/test-uuid/step-${stepId}`]}>
         <Routes>
           <Route path="/co/:uuid">
-            <Route path="step-:id" element={<QuestionComponentContainer />} />
+            {/* Specific routes must come before parameterized routes */}
             <Route path="step-1" element={<div>Redirected to Step 1</div>} />
+            <Route path="step-:id" element={<QuestionComponentContainer />} />
           </Route>
         </Routes>
       </MemoryRouter>
