@@ -15,7 +15,7 @@ import EnergyCalculatorLandingPage from '../Components/EnergyCalculator/LandingP
 interface LandingPageConfig {
   path: string;
   whiteLabel: string; // The white label this landing page belongs to
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line
   component: ComponentType<any>;
   props?: { referrer?: string };
 }
