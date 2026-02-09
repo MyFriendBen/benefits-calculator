@@ -49,6 +49,7 @@ export const buildUUIDScopedRoute = ({
   }
 
   // Generic questionnaire step (catch-all for remaining steps)
+  // QuestionComponentContainer validates step number internally
   // TODO(MFB-642): Evaluate if key remounting is needed here or if component handles param changes
   children.push(
     { path: 'step-:id', element: <QuestionComponentContainer key={window.location.href} /> },

@@ -14,10 +14,14 @@ import EnergyCalculatorLandingPage from '../Components/EnergyCalculator/LandingP
 
 interface LandingPageConfig {
   path: string;
-  whiteLabel: string; // The white label this landing page belongs to
+  whiteLabel: string; // The white label this belongs to
+  // Note: Using 'any' here because landing pages have different prop requirements:
+  // - JeffcoLandingPage requires { referrer: string }
+  // - CcigLandingPage and EnergyCalculatorLandingPage take no props
   // eslint-disable-next-line
   component: ComponentType<any>;
-  props?: { referrer?: string };
+  // eslint-disable-next-line
+  props?: any;
 }
 
 export const CUSTOM_LANDING_PAGES: LandingPageConfig[] = [

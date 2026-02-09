@@ -56,5 +56,12 @@ export const buildWLScopedRoutes = ({
     ],
   };
 
+  // CRITICAL: Route order matters!
+  // React Router matches routes in the order they appear. Custom landing pages
+  // (e.g., 'co/jeffcohs') MUST come before the generic ':whiteLabel' route,
+  // otherwise all paths would match ':whiteLabel' first and custom pages would never render.
+  //
+  // Correct: ['co/jeffcohs', 'co/ccig', ':whiteLabel'] ✅
+  // Wrong:   [':whiteLabel', 'co/jeffcohs', 'co/ccig'] ❌ (custom pages unreachable)
   return [...customLandingPages, whiteLabelRoute];
 };
