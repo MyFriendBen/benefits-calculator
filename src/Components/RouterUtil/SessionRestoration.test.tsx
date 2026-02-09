@@ -176,19 +176,12 @@ describe('SessionRestoration - UUID Disambiguation', () => {
 
   it('should handle white label mismatch and preserve query params/hash', async () => {
     const testUuid = '550e8400-e29b-41d4-a716-446655440000';
-    const mockNavigate = jest.fn();
 
     // Mock API returns different white label than URL
     mockFetchScreen.mockResolvedValueOnce({
       white_label: 'nc', // API says 'nc'
       uuid: testUuid,
     });
-
-    // Mock useNavigate
-    jest.mock('react-router-dom', () => ({
-      ...jest.requireActual('react-router-dom'),
-      useNavigate: () => mockNavigate,
-    }));
 
     // Render with 'co' in URL but API will return 'nc'
     render(
