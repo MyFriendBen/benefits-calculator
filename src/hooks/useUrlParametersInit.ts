@@ -12,8 +12,7 @@ import { Context } from '../Components/Wrapper/Wrapper';
 export const useUrlParametersInit = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  const { formData, setFormData } = useContext(Context);
-  const urlSearchParams = location.search;
+  const { setFormData } = useContext(Context);
   const initializedRef = useRef(false);
 
   useEffect(() => {
@@ -21,6 +20,8 @@ export const useUrlParametersInit = () => {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
+    // Capture URL params at initialization time
+    const urlSearchParams = location.search;
     const referrerParam = searchParams.get('referrer');
     const utmParam = searchParams.get('utm_source');
     const testParam = searchParams.get('test') === 'true';
@@ -46,5 +47,6 @@ export const useUrlParametersInit = () => {
         urlSearchParams: urlSearchParams,
       };
     });
-  }, [searchParams, setFormData, urlSearchParams]); // Include dependencies
+  // eslint-disable-next-line
+  }, []); // Intentionally empty - this should only run once on mount
 };
