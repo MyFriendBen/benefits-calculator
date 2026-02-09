@@ -34,7 +34,7 @@ export function useEnergyFormData(
 }
 
 export function useIsEnergyCalculator() {
-  const { getReferrer } = useContext(Context);
+  const { whiteLabel } = useContext(Context);
 
-  return getReferrer('featureFlags').includes('energy_calculator');
+  return whiteLabel === 'co_energy_calculator';
 }
