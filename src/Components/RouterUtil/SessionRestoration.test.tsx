@@ -67,12 +67,12 @@ describe('SessionRestoration - UUID Disambiguation', () => {
       uuid: testUuid,
     });
 
-    // Render with /:uuid route pattern (no whiteLabel in URL)
+    // Render with /:whiteLabel route pattern (single segment where UUID is in whiteLabel position)
     render(
       <MemoryRouter initialEntries={[`/${testUuid}`]}>
         <Context.Provider value={defaultContextValue as any}>
           <Routes>
-            <Route path=":whiteLabel/:uuid" element={<SessionRestoration />} />
+            <Route path=":whiteLabel" element={<SessionRestoration />} />
           </Routes>
         </Context.Provider>
       </MemoryRouter>
