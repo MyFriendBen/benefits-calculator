@@ -27,7 +27,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       <CssBaseline />
       <FaviconManager />
       <BrandedHeader />
-      <Box component="main" className="main-max-width">
+      <Box className="main-max-width">
         {bannerMessages && bannerMessages.length > 0 && (
           <SystemBanner banners={bannerMessages} />
         )}
