@@ -265,9 +265,13 @@ export function useGetConfig(screenLoading: boolean, whiteLabel: string) {
             })
             .catch((err) => {
               console.error('Failed to load default config:', err);
+              // Set empty config on fallback failure to prevent downstream crashes
+              setConfigResponse({} as Config);
               setLoading(false);
             });
         } else {
+          // Set empty config when already on _default and it fails
+          setConfigResponse({} as Config);
           setLoading(false);
         }
       });
