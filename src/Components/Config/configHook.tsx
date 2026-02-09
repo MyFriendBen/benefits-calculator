@@ -230,9 +230,14 @@ export function useGetConfig(screenLoading: boolean, whiteLabel: string) {
           if (value !== undefined) {
             const transformedOutput: Config = transformConfigData(value);
             setConfigResponse(transformedOutput);
+          } else {
+            // Set empty config if value is undefined
+            setConfigResponse({} as Config);
           }
         } catch (e) {
-          console.error(e);
+          console.error('Failed to transform config data:', e);
+          // Set empty config on transformation error to prevent downstream crashes
+          setConfigResponse({} as Config);
         }
         setLoading(false);
       })
@@ -247,9 +252,14 @@ export function useGetConfig(screenLoading: boolean, whiteLabel: string) {
                 if (value !== undefined) {
                   const transformedOutput: Config = transformConfigData(value);
                   setConfigResponse(transformedOutput);
+                } else {
+                  // Set empty config if value is undefined
+                  setConfigResponse({} as Config);
                 }
               } catch (e) {
-                console.error('Failed to load default config:', e);
+                console.error('Failed to transform default config:', e);
+                // Set empty config on transformation error to prevent downstream crashes
+                setConfigResponse({} as Config);
               }
               setLoading(false);
             })

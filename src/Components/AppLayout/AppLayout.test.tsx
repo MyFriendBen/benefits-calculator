@@ -25,9 +25,9 @@ jest.mock('../Common/SystemBanner/SystemBanner', () => {
   };
 });
 
-jest.mock('../RouterUtil/ProgressBarRoutes', () => {
-  return function MockProgressBarRoutes({ totalSteps }: { totalSteps: number }) {
-    return <div data-testid="progress-bar-routes">Progress: {totalSteps} steps</div>;
+jest.mock('../RouterUtil/ProgressBarManager', () => {
+  return function MockProgressBarManager({ totalSteps }: { totalSteps: number }) {
+    return <div data-testid="progress-bar-manager">Progress: {totalSteps} steps</div>;
   };
 });
 
@@ -78,7 +78,7 @@ describe('AppLayout', () => {
 
     // When stepDirectory mock returns an array, it should be 3 + 2 = 5 steps
     // Currently the mock isn't working as expected, so it falls back to just STARTING_QUESTION_NUMBER
-    expect(screen.getByTestId('progress-bar-routes')).toHaveTextContent(/Progress: \d+ steps/);
+    expect(screen.getByTestId('progress-bar-manager')).toHaveTextContent(/Progress: \d+ steps/);
   });
 
   it('should render system banner when banner messages exist', () => {

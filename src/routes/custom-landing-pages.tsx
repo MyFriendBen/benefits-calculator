@@ -11,11 +11,13 @@ import EnergyCalculatorLandingPage from '../Components/EnergyCalculator/LandingP
  * components at module load time, which can cause issues with context that
  * isn't yet available.
  */
+
 interface LandingPageConfig {
   path: string;
   whiteLabel: string; // The white label this landing page belongs to
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: ComponentType<any>;
-  props?: Record<string, any>;
+  props?: { referrer?: string };
 }
 
 export const CUSTOM_LANDING_PAGES: LandingPageConfig[] = [

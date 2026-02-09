@@ -20,15 +20,16 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const { config } = useContext(Context);
   const stepDirectory = useStepDirectory();
   const totalSteps = stepDirectory ? stepDirectory.length + STARTING_QUESTION_NUMBER : STARTING_QUESTION_NUMBER;
+  const bannerMessages = config?.banner_messages as BannerMessage[] | undefined;
 
   return (
     <div className="app">
       <CssBaseline />
       <FaviconManager />
       <BrandedHeader />
-      <Box className="main-max-width">
-        {config?.banner_messages && (config.banner_messages as BannerMessage[]).length > 0 && (
-          <SystemBanner banners={config.banner_messages as BannerMessage[]} />
+      <Box component="main" className="main-max-width">
+        {bannerMessages && bannerMessages.length > 0 && (
+          <SystemBanner banners={bannerMessages} />
         )}
         <ProgressBarManager totalSteps={totalSteps} />
         {children}
