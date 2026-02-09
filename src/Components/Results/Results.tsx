@@ -45,7 +45,7 @@ type WrapperResultsContext = {
   isAdminView: boolean;
   validations: Validation[];
   setValidations: (validations: Validation[]) => void;
-  energyCalculatorRebateCategories: EnergyCalculatorRebateCategory[]; // NOTE: will be empty if not using the energy calculator
+  energyCalculatorRebateCategories: EnergyCalculatorRebateCategory[];
   policyEngineData: PolicyEngineData | undefined;
 };
 
@@ -157,6 +157,7 @@ const Results = ({ type }: ResultsProps) => {
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
   const [policyEngineData, setPolicyEngineData] = useState<PolicyEngineData>();
+  const isEnergyCalculator = whiteLabel === 'cesn';
 
   const filterPrograms = useMemo(
     () => filterProgramsGenerator(formData, filterState, isAdminView),
@@ -174,6 +175,12 @@ const Results = ({ type }: ResultsProps) => {
       return;
     }
 
+    // For energy calculator, wait for rebates to load before showing results
+    // This prevents the flash of empty rebates before they populate
+    if (isEnergyCalculator && energyCalculatorRebateCategories === undefined) {
+      return;
+    }
+
     setNeeds(apiResults.urgent_needs);
     setPrograms(filterPrograms(apiResults.programs));
     setProgramCategories(
@@ -188,7 +195,7 @@ const Results = ({ type }: ResultsProps) => {
     setValidations(apiResults.validations);
     setLoading(false);
     setPolicyEngineData(apiResults.pe_data);
-  }, [filterPrograms, apiResults]);
+  }, [filterPrograms, apiResults, isEnergyCalculator, energyCalculatorRebateCategories]);
 
   const ResultsContextProvider = ({ children }: PropsWithChildren) => {
     return (
@@ -203,7 +210,7 @@ const Results = ({ type }: ResultsProps) => {
           isAdminView,
           validations,
           setValidations,
-          energyCalculatorRebateCategories,
+          energyCalculatorRebateCategories: energyCalculatorRebateCategories ?? [],
           policyEngineData,
         }}
       >
@@ -273,7 +280,7 @@ const Results = ({ type }: ResultsProps) => {
       </ResultsContextProvider>
     );
   } else if (energyCalculatorRebateType !== undefined) {
-    const rebateCategory = energyCalculatorRebateCategories.find(
+    const rebateCategory = energyCalculatorRebateCategories?.find(
       (category) => category.type === energyCalculatorRebateType,
     );
 

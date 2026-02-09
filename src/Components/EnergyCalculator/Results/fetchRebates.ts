@@ -176,7 +176,7 @@ async function getRebates(formData: FormData, lang: Language) {
 
 export default function useFetchEnergyCalculatorRebates() {
   const { formData, locale } = useContext(Context);
-  const [rebates, setRebates] = useState<EnergyCalculatorRebateCategory[]>([]);
+  const [rebates, setRebates] = useState<EnergyCalculatorRebateCategory[] | undefined>(undefined);
   const isEnergyCalculator = useIsEnergyCalculator();
 
   useEffect(() => {
@@ -188,7 +188,7 @@ export default function useFetchEnergyCalculatorRebates() {
     getRebates(formData, locale).then((rebates) => {
       setRebates(rebates);
     });
-  }, [isEnergyCalculator, locale]);
+  }, [isEnergyCalculator, formData.energyCalculator, locale]);
 
   return rebates;
 }

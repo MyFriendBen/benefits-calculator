@@ -1,4 +1,4 @@
-import React, { useEffect, useState, PropsWithChildren } from 'react';
+import React, { useEffect, useState, useMemo, PropsWithChildren } from 'react';
 import useStyle from '../../Assets/styleController';
 import { IntlProvider } from 'react-intl';
 import { WrapperContext } from '../../Types/WrapperContext';
@@ -8,6 +8,7 @@ import useReferrer, { ReferrerData } from '../Referrer/referrerHook';
 import { useGetConfig } from '../Config/configHook';
 import { rightToLeftLanguages, Language } from '../../Assets/languageOptions';
 import { HtmlLangUpdater } from '../HtmlLangUpdater/HtmlLangUpdater';
+import { ALL_VALID_WHITE_LABELS, WhiteLabel } from '../../Types/WhiteLabel';
 
 const initialFormData: FormData = {
   isTest: false,
@@ -81,11 +82,29 @@ const initialFormData: FormData = {
     legalServices: false,
     savings: false,
   },
+  utm: null,
 };
 
 export const DEFAULT_WHITE_LABEL = '_default';
 
 export const Context = React.createContext<WrapperContext>({} as WrapperContext);
+
+// Extract white label from URL pathname (e.g., /co/uuid/step-1 -> 'co')
+// Validates against the list of known white labels for security
+function getWhiteLabelFromUrl(): string {
+  const pathname = window.location.pathname;
+  const parts = pathname.split('/').filter(Boolean);
+
+  if (parts.length > 0) {
+    const possibleWhiteLabel = parts[0];
+    // Validate against actual white label list (not just regex pattern)
+    if (ALL_VALID_WHITE_LABELS.includes(possibleWhiteLabel as WhiteLabel)) {
+      return possibleWhiteLabel;
+    }
+  }
+
+  return DEFAULT_WHITE_LABEL;
+}
 
 const Wrapper = (props: PropsWithChildren<{}>) => {
   const [staffToken, setStaffToken] = useState<string | undefined>(undefined);
@@ -97,7 +116,8 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
 
-  const [whiteLabel, setWhiteLabel] = useState(DEFAULT_WHITE_LABEL);
+  // Initialize white label from URL to ensure correct config loads
+  const [whiteLabel, setWhiteLabel] = useState(getWhiteLabelFromUrl);
 
   const { configLoading, configResponse: config } = useGetConfig(screenLoading, whiteLabel);
   const { language_options: languageOptions = {} } = config ?? {};
@@ -121,8 +141,18 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   let [translations, setTranslations] = useState<{ Language: { [key: string]: string } } | {}>({});
 
+  // Helper function to safely access localStorage
+  const getStoredLanguage = (): Language | null => {
+    try {
+      return localStorage.getItem('language') as Language;
+    } catch (e) {
+      console.warn('localStorage unavailable (private browsing or quota exceeded):', e);
+      return null;
+    }
+  };
+
   const initializeLocale = () => {
-    let defaultLanguage = localStorage.getItem('language') as Language;
+    let defaultLanguage = getStoredLanguage();
 
     const userLanguage = navigator.language.toLowerCase() as Language;
 
@@ -163,7 +193,13 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
   }, [locale]);
 
   useEffect(() => {
-    localStorage.setItem('language', locale);
+    // Safely persist language selection
+    try {
+      localStorage.setItem('language', locale);
+    } catch (e) {
+      console.warn('Failed to save language preference to localStorage:', e);
+      // Continue anyway - app will work, just won't persist preference
+    }
 
     if (!(locale in translations)) {
       setMessages({});
@@ -209,29 +245,52 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
     setLocale(newLocale as Language);
   };
 
+  // Memoize context value to prevent unnecessary re-renders of all consumers
+  const contextValue = useMemo(
+    () => ({
+      locale,
+      selectLanguage,
+      config,
+      configLoading,
+      formData,
+      setFormData,
+      theme,
+      setTheme,
+      styleOverride,
+      pageIsLoading,
+      setScreenLoading,
+      stepLoading,
+      setStepLoading,
+      staffToken,
+      setStaffToken,
+      getReferrer,
+      whiteLabel,
+      setWhiteLabel,
+    }),
+    [
+      locale,
+      selectLanguage,
+      config,
+      configLoading,
+      formData,
+      setFormData,
+      theme,
+      setTheme,
+      styleOverride,
+      pageIsLoading,
+      setScreenLoading,
+      stepLoading,
+      setStepLoading,
+      staffToken,
+      setStaffToken,
+      getReferrer,
+      whiteLabel,
+      setWhiteLabel,
+    ],
+  );
+
   return (
-    <Context.Provider
-      value={{
-        locale,
-        selectLanguage,
-        config,
-        configLoading,
-        formData,
-        setFormData,
-        theme,
-        setTheme,
-        styleOverride,
-        pageIsLoading,
-        setScreenLoading,
-        stepLoading,
-        setStepLoading,
-        staffToken,
-        setStaffToken,
-        getReferrer,
-        whiteLabel,
-        setWhiteLabel,
-      }}
-    >
+    <Context.Provider value={contextValue}>
       <IntlProvider locale={locale} messages={messages} defaultLocale={locale}>
         <HtmlLangUpdater />
         {props.children}
