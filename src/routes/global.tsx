@@ -12,9 +12,9 @@ interface GlobalRoutesOptions {
  */
 export const buildGlobalRoutes = ({ urlSearchParams }: GlobalRoutesOptions): RouteObject[] => {
   return [
-    { path: '', element: <Navigate to={`/step-1${urlSearchParams}`} replace /> },
+    { path: '', element: <Navigate to={`step-1${urlSearchParams}`} replace /> },
     { path: 'step-1', element: <SelectLanguagePage /> },
     { path: 'select-state', element: <SelectStatePage /> },
-    { path: '*', element: <Navigate to={`/step-1${urlSearchParams}`} replace /> },
+    { path: '*', element: <Navigate to={`step-1${urlSearchParams}`} replace /> },
   ];
 };

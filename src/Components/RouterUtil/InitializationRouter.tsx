@@ -39,7 +39,7 @@ const buildInitializationRouteElements = (): ReactElement[] => {
 
   // White-labeled current-benefits: Set white label from URL
   routes.push(
-    <Route key="current-benefits" path=":whiteLabel/current-benefits" element={<SessionInitializer />} />
+    <Route key="wl-current-benefits" path=":whiteLabel/current-benefits" element={<SessionInitializer />} />
   );
 
   // UUID routes: Restore session data from API

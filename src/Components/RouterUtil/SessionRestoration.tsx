@@ -43,15 +43,16 @@ const SessionRestoration = () => {
 
   const restoreSession = async () => {
     try {
-      const response = await fetchScreen();
+      // Pass the disambiguated UUID to fetchScreen
+      const response = await fetchScreen(uuid);
       if (response) {
         handleSessionResponse(response);
       }
     } catch (err) {
       console.error('Session restoration failed:', err);
-      // Preserve white label context in error redirect
+      // Preserve white label context, query params, and hash in error redirect
       const errorRedirect = whiteLabel ? `/${whiteLabel}/step-1` : '/step-1';
-      navigate(errorRedirect);
+      navigate(`${errorRedirect}${location.search}${location.hash}`);
       return;
     } finally {
       setScreenLoading(false);
@@ -65,15 +66,18 @@ const SessionRestoration = () => {
 
       // Redirect to URL with correct white label if needed
       if (whiteLabel === undefined) {
-        navigate(`/${response.white_label}${location.pathname}`);
+        navigate(`/${response.white_label}${location.pathname}${location.search}${location.hash}`);
       } else if (whiteLabel !== response.white_label) {
-        navigate(location.pathname.replace(whiteLabel, response.white_label));
+        // Replace only the first path segment (white label)
+        const pathSegments = location.pathname.split('/').filter(Boolean);
+        pathSegments[0] = response.white_label;
+        navigate(`/${pathSegments.join('/')}${location.search}${location.hash}`);
       }
     } else {
       // Invalid white label from API, redirect to step-1 with context preservation
       console.error(`Invalid white label from API: ${response.white_label}`);
       const errorRedirect = whiteLabel ? `/${whiteLabel}/step-1` : '/step-1';
-      navigate(errorRedirect);
+      navigate(`${errorRedirect}${location.search}${location.hash}`);
     }
   };
 
