@@ -26,7 +26,8 @@ const QuestionComponentContainer = () => {
   // Calculate step info for all cases
   const stepNumber = id ? +id : NaN;
   const maxStep = stepDirectory.length + STARTING_QUESTION_NUMBER;
-  const questionName = !isNaN(stepNumber) ? useStepName(stepNumber) : undefined;
+  const stepName = useStepName(stepNumber);
+  const questionName = !isNaN(stepNumber) ? stepName : undefined;
   const pageTitle = questionName ? QUESTION_TITLES[questionName] : '' as any;
 
   // Call usePageTitle hook unconditionally

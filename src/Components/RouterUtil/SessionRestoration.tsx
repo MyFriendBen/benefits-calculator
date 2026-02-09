@@ -1,4 +1,4 @@
-import { useEffect, useContext, useMemo, useCallback } from 'react';
+import { useEffect, useContext, useMemo, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Context } from '../Wrapper/Wrapper';
 import LoadingPage from '../LoadingPage/LoadingPage';
@@ -24,6 +24,7 @@ const SessionRestoration = () => {
   const navigate = useNavigate();
   const { uuid: rawUuid, whiteLabel: rawWhiteLabel } = useParams();
   const { fetchScreen } = useScreenApi();
+  const initializedRef = useRef(false);
 
   // Parse UUID and white label from params (handles both /:uuid and /:whiteLabel/:uuid)
   const { uuid, whiteLabel } = useMemo(() => {
@@ -97,8 +98,14 @@ const SessionRestoration = () => {
   }, [uuid, whiteLabel, location.search, location.hash, fetchScreen, handleSessionResponse, navigate, setScreenLoading]);
 
   useEffect(() => {
+    // Reset the ref when UUID changes
+    initializedRef.current = false;
+  }, [uuid]);
+
+  useEffect(() => {
     // Valid UUID, restore session from API
-    if (uuid !== undefined) {
+    if (uuid !== undefined && !initializedRef.current) {
+      initializedRef.current = true;
       restoreSession();
     }
   }, [uuid, restoreSession]);
