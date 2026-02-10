@@ -34,6 +34,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
         <ProgressBarManager totalSteps={totalSteps} />
         {children}
       </Box>
+      <Box sx={{ flexGrow: 1 }} />
       <BrandedFooter />
     </div>
   );
