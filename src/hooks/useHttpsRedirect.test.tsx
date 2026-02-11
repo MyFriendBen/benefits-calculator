@@ -30,7 +30,7 @@ describe('useHttpsRedirect', () => {
   it('should redirect to HTTPS when protocol is HTTP', () => {
     renderHook(() => useHttpsRedirect());
 
-    expect(sessionStorage.setItem).toHaveBeenCalledWith('https-redirect-attempted', 'true');
+    expect(sessionStorage.setItem).not.toHaveBeenCalled(); // Flag is only set on HTTPS
     expect(window.location.href).toBe('https://example.com/path?query=1#hash');
   });
 
@@ -40,7 +40,7 @@ describe('useHttpsRedirect', () => {
 
     renderHook(() => useHttpsRedirect());
 
-    expect(sessionStorage.setItem).not.toHaveBeenCalled();
+    expect(sessionStorage.setItem).toHaveBeenCalledWith('https-redirect-attempted', 'true');
   });
 
   it('should not redirect on localhost', () => {
@@ -71,5 +71,38 @@ describe('useHttpsRedirect', () => {
     // Should check sessionStorage but not set it again
     expect(sessionStorage.getItem).toHaveBeenCalledWith('https-redirect-attempted');
     expect(window.location.href).toBe('http://example.com/path?query=1#hash'); // Should not change
+  });
+
+  it('should set flag when on HTTPS to prevent future redirects', () => {
+    // Simulate the full redirect flow: HTTP -> HTTPS -> flag set
+    mockLocation.protocol = 'https:';
+    mockLocation.href = 'https://example.com/path';
+
+    renderHook(() => useHttpsRedirect());
+
+    // When on HTTPS, should set the flag
+    expect(sessionStorage.setItem).toHaveBeenCalledWith('https-redirect-attempted', 'true');
+  });
+
+  it('should handle sessionStorage errors gracefully on HTTPS', () => {
+    mockLocation.protocol = 'https:';
+    mockLocation.href = 'https://example.com/path';
+    Storage.prototype.setItem = jest.fn(() => {
+      throw new Error('SecurityError');
+    });
+
+    // Should not throw
+    expect(() => renderHook(() => useHttpsRedirect())).not.toThrow();
+  });
+
+  it('should handle sessionStorage errors gracefully on HTTP', () => {
+    Storage.prototype.getItem = jest.fn(() => {
+      throw new Error('SecurityError');
+    });
+
+    renderHook(() => useHttpsRedirect());
+
+    // Should still redirect even if sessionStorage is unavailable
+    expect(window.location.href).toBe('https://example.com/path?query=1#hash');
   });
 });
