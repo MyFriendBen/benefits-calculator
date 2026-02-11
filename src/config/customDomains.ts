@@ -2,19 +2,19 @@ import { ALL_VALID_WHITE_LABELS } from '../Types/WhiteLabel';
 import customDomainsJson from './customDomains.json';
 
 /**
- * Custom Domain Configuration
+ * Custom Domain Client-Side Redirect (FALLBACK ONLY)
+ *
+ * ⚠️ PRIMARY REDIRECT MECHANISM: Cloudflare Page Rules (configured in Cloudflare dashboard)
+ * ⚠️ This code is a FALLBACK for cases where Cloudflare redirect fails
  *
  * Maps external domains to white-label routes. When a user visits a custom
- * domain, they are redirected to the corresponding white-label path.
- *
- * Configuration is shared between client and server via customDomains.json.
- * Server-side redirects (Express middleware) provide better SEO and performance.
- * Client-side redirects (this file) provide a fallback.
+ * domain, they should be redirected by Cloudflare at the edge. This client-side
+ * redirect only runs if that fails (e.g., local development, Cloudflare misconfiguration).
  *
  * @example
  * User visits: https://energysavings.colorado.gov/
- * Server redirects to: https://energysavings.colorado.gov/cesn/landing-page
- * (Or client-side redirect if server config fails)
+ * Cloudflare redirects (301): https://energysavings.colorado.gov/cesn
+ * If Cloudflare fails: This code redirects client-side
  *
  * @example
  * User visits: https://energysavings.colorado.gov/some/deep/path?lang=es#section
@@ -22,10 +22,14 @@ import customDomainsJson from './customDomains.json';
  *
  * ## Adding a New Custom Domain
  *
- * 1. Add an entry to customDomains.json
- * 2. Ensure the whiteLabel exists in ALL_VALID_WHITE_LABELS (src/Types/WhiteLabel.ts)
- * 3. Both www and non-www variants are handled automatically
- * 4. Server-side redirect happens automatically (see server/middleware/customDomainRedirect.js)
+ * 1. Add Cloudflare Page Rule (primary):
+ *    - URL: `yourdomain.com/*`
+ *    - Setting: Forwarding URL (301) → `https://yourdomain.com/your-white-label/$1`
+ *
+ * 2. Add fallback config to customDomains.json:
+ *    - Add entry: `"yourdomain.com": { "whiteLabel": "your-white-label", "defaultPath": "" }`
+ *    - Ensure whiteLabel exists in ALL_VALID_WHITE_LABELS (src/Types/WhiteLabel.ts)
+ *    - Both www and non-www variants are handled automatically
  *
  * ## Testing Locally
  *
@@ -71,18 +75,18 @@ function normalizeHostname(hostname: string): string {
 }
 
 /**
- * Handles custom domain redirects to white-label routes.
- * Runs at app initialization before React Router to avoid conflicts.
+ * FALLBACK: Handles custom domain redirects client-side.
  *
+ * This should rarely run in production - Cloudflare Page Rules handle redirects at the edge.
+ * This exists as a safety net for local development and edge cases.
+ *
+ * Runs at app initialization before React Router to avoid conflicts.
  * Automatically handles both www and non-www variants of configured domains.
  *
  * @example
- * Visiting https://energysavings.colorado.gov/some-path?lang=es
- * → Redirects to https://energysavings.colorado.gov/cesn/some-path?lang=es
- *
- * @example
- * Visiting https://www.energysavings.colorado.gov/some-path
- * → Also redirects to https://www.energysavings.colorado.gov/cesn/some-path
+ * If Cloudflare redirect fails:
+ * https://energysavings.colorado.gov/some-path?lang=es
+ * → https://energysavings.colorado.gov/cesn/some-path?lang=es
  */
 export function handleCustomDomainRedirect(): void {
   const normalizedHostname = normalizeHostname(window.location.hostname);
