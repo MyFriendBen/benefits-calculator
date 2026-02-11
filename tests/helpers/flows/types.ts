@@ -66,7 +66,7 @@ export interface ApplicationData {
 /**
  * White label identifiers as union type for type safety
  */
-export type WhiteLabel = 'nc' | 'co' | 'ma' | 'co_energy_calculator';
+export type WhiteLabel = 'nc' | 'co' | 'ma' | 'cesn';
 
 /**
  * Referrer identifiers as union type for type safety

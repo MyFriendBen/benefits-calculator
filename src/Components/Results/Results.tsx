@@ -157,7 +157,7 @@ const Results = ({ type }: ResultsProps) => {
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
   const [policyEngineData, setPolicyEngineData] = useState<PolicyEngineData>();
-  const isEnergyCalculator = whiteLabel === 'co_energy_calculator';
+  const isEnergyCalculator = whiteLabel === 'cesn';
 
   const filterPrograms = useMemo(
     () => filterProgramsGenerator(formData, filterState, isAdminView),

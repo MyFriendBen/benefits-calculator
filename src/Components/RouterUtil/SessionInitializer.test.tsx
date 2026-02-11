@@ -110,7 +110,7 @@ describe('SessionInitializer', () => {
     });
 
     it('should handle all valid white labels from URL', () => {
-      const validLabels = ['co', 'nc', 'ma', 'il', 'tx', 'co_energy_calculator'];
+      const validLabels = ['co', 'nc', 'ma', 'il', 'tx', 'cesn'];
 
       validLabels.forEach((label) => {
         jest.clearAllMocks();
