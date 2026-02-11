@@ -8,7 +8,7 @@ const whiteLabels = [
   { name: 'North Carolina', path: 'nc' },
   { name: 'Colorado', path: 'co' },
   { name: 'Massachusetts', path: 'ma', skip: true }, // skipping MA for now - has [PLACEHOLDER] content in CI
-  { name: 'Colorado Energy Calculators', path: 'co_energy_calculator' },
+  { name: 'Colorado Energy Calculators', path: 'cesn' },
   { name: 'Illinois', path: 'il' },
   { name: 'Texas', path: 'tx' },
 ];

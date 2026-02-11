@@ -139,7 +139,7 @@ describe('ValidateWhiteLabel', () => {
     // Spot-check that key white labels are present
     expect(ALL_VALID_WHITE_LABELS).toContain('co');
     expect(ALL_VALID_WHITE_LABELS).toContain('nc');
-    expect(ALL_VALID_WHITE_LABELS).toContain('co_energy_calculator');
+    expect(ALL_VALID_WHITE_LABELS).toContain('cesn');
 
     // Ensure all white labels are strings with valid format
     ALL_VALID_WHITE_LABELS.forEach((wl) => {
@@ -155,7 +155,7 @@ describe('ValidateWhiteLabel', () => {
           <Route path="landing-page" element={<div data-testid="landing">Landing Page</div>} />
         </Route>
       </Routes>,
-      { initialRoute: '/co_energy_calculator/landing-page' }
+      { initialRoute: '/cesn/landing-page' }
     );
 
     expect(screen.getByTestId('landing')).toBeInTheDocument();

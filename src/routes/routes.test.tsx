@@ -36,9 +36,9 @@ describe('Route Configuration', () => {
       expect(jeffcoPages.length).toBeGreaterThan(0);
     });
 
-    it('should have co_energy_calculator landing page', () => {
+    it('should have cesn landing page', () => {
       const energyCalcPage = CUSTOM_LANDING_PAGES.find((page) =>
-        page.path.includes('co_energy_calculator')
+        page.path.includes('cesn')
       );
       expect(energyCalcPage).toBeDefined();
     });
@@ -47,7 +47,7 @@ describe('Route Configuration', () => {
   describe('White Label Routes', () => {
     it('should support all valid white labels', () => {
       // Verify all white labels from the config are supported
-      const expectedLabels = ['co', 'nc', 'co_energy_calculator', 'ma', 'il', 'tx'];
+      const expectedLabels = ['co', 'nc', 'cesn', 'ma', 'il', 'tx'];
       expect(ALL_VALID_WHITE_LABELS).toEqual(expectedLabels);
     });
 
