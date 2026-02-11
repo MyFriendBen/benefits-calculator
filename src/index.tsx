@@ -5,8 +5,14 @@ import { BrowserRouter } from 'react-router-dom';
 import Wrapper from './Components/Wrapper/Wrapper';
 import './index.css';
 import { initializeGTM } from './Assets/analytics';
+import { handleHttpsRedirect } from './utils/httpsRedirect';
+import { handleCustomDomainRedirect } from './config/customDomains';
 
 initializeGTM();
+// CRITICAL: HTTPS redirect must run BEFORE custom domain redirect
+// to avoid double redirects (http → https, then domain redirect)
+handleHttpsRedirect();
+handleCustomDomainRedirect();
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(

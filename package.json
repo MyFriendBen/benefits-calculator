@@ -24,6 +24,7 @@
     "@types/react-dom": "^18.2.6",
     "@types/react-gtm-module": "^2.0.3",
     "@uiw/react-json-view": "^2.0.0-alpha.37",
+    "express": "^5.2.1",
     "libphonenumber-js": "^1.12.31",
     "nepali-number": "^1.0.3",
     "prettier": "^2.8.8",
@@ -43,7 +44,7 @@
   },
   "scripts": {
     "dev": "react-scripts start",
-    "start": "serve -s build",
+    "start": "node server.js",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
@@ -82,6 +83,7 @@
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0"
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "supertest": "^7.2.2"
   }
 }
