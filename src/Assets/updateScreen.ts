@@ -241,11 +241,12 @@ export default function useScreenApi() {
   const updateFormData = useUpdateFormData();
 
   return {
-    fetchScreen: async () => {
-      if (uuid === undefined) {
+    fetchScreen: async (overrideUuid?: string) => {
+      const targetUuid = overrideUuid ?? uuid;
+      if (targetUuid === undefined) {
         return;
       }
-      const response = await getScreen(uuid);
+      const response = await getScreen(targetUuid);
       updateFormData(response);
       return response;
     },

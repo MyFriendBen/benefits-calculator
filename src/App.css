@@ -24,6 +24,8 @@
 
 .app {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 @media only screen and (max-device-width: 600px) {
@@ -106,6 +108,7 @@
 .main-max-width {
   max-width: var(--main-max-width);
   margin: 0 auto;
+  width: 100%;
 }
 
 .secondary-heading {

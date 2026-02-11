@@ -16,7 +16,7 @@
     "@mui/x-data-grid": "^5.17.3",
     "@mui/x-data-grid-pro": "^5.17.5",
     "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.0.1",
+    "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.2",
