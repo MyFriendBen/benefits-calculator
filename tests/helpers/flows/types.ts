@@ -5,6 +5,8 @@
  * to ensure type safety across the test suite.
  */
 
+import type { WhiteLabel } from '../../../src/Types/WhiteLabel';
+
 /**
  * User personal information
  */
@@ -62,11 +64,6 @@ export interface ApplicationData {
   needs: string[];
   referralSource: string;
 }
-
-/**
- * White label identifiers as union type for type safety
- */
-export type WhiteLabel = 'nc' | 'co' | 'ma' | 'cesn';
 
 /**
  * Referrer identifiers as union type for type safety

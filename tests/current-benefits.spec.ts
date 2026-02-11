@@ -1,17 +1,39 @@
 import { test, expect } from '@playwright/test';
+import { ALL_VALID_WHITE_LABELS, WhiteLabel } from '../src/Types/WhiteLabel';
 
 /**
  * Test for current-benefits pages across all white-label instances
  */
 
-const whiteLabels = [
-  { name: 'North Carolina', path: 'nc' },
-  { name: 'Colorado', path: 'co' },
-  { name: 'Massachusetts', path: 'ma', skip: true }, // skipping MA for now - has [PLACEHOLDER] content in CI
-  { name: 'Colorado Energy Calculators', path: 'cesn' },
-  { name: 'Illinois', path: 'il' },
-  { name: 'Texas', path: 'tx' },
-];
+// Test-specific configuration: display names and skip flags
+// NOTE: TypeScript enforces that this stays in sync with ALL_VALID_WHITE_LABELS
+const TEST_CONFIG: Record<WhiteLabel, { name: string; skip?: boolean; skipReason?: string }> = {
+  nc: { name: 'North Carolina' },
+  co: { name: 'Colorado' },
+  ma: { name: 'Massachusetts', skip: true, skipReason: 'has [PLACEHOLDER] content in CI' },
+  cesn: { name: 'Colorado Energy Savings Navigator' },
+  il: { name: 'Illinois' },
+  tx: { name: 'Texas' },
+};
+
+// Validate that TEST_CONFIG is in sync with ALL_VALID_WHITE_LABELS
+const configuredLabels = Object.keys(TEST_CONFIG).sort();
+const allLabels = [...ALL_VALID_WHITE_LABELS].sort();
+if (JSON.stringify(configuredLabels) !== JSON.stringify(allLabels)) {
+  throw new Error(
+    `TEST_CONFIG is out of sync with ALL_VALID_WHITE_LABELS!\n` +
+      `Configured: ${configuredLabels.join(', ')}\n` +
+      `Expected: ${allLabels.join(', ')}`
+  );
+}
+
+// Generate test cases from single source of truth
+const whiteLabels = ALL_VALID_WHITE_LABELS.map((path) => ({
+  path,
+  name: TEST_CONFIG[path].name,
+  skip: TEST_CONFIG[path].skip ?? false,
+  skipReason: TEST_CONFIG[path].skipReason,
+}));
 
 test.describe('Current Benefits Pages Test', () => {
   for (const whiteLabel of whiteLabels) {
