@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 import NPSFloating from './NPSFloating';
 import * as apiCalls from '../../apiCalls';
 
@@ -23,13 +24,13 @@ describe('NPSFloating', () => {
   });
 
   it('renders nothing initially before delay', () => {
-    const { container } = render(<NPSFloating uuid="test-uuid" />);
+    const { container } = render(<IntlProvider locale="en"><NPSFloating uuid="test-uuid" /></IntlProvider>);
 
     expect(container.firstChild).toBeNull();
   });
 
   it('renders score buttons after 5 second delay', () => {
-    render(<NPSFloating uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSFloating uuid="test-uuid" /></IntlProvider>);
 
     act(() => {
       jest.advanceTimersByTime(5000);
@@ -41,7 +42,7 @@ describe('NPSFloating', () => {
   });
 
   it('renders dismiss button when visible', () => {
-    render(<NPSFloating uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSFloating uuid="test-uuid" /></IntlProvider>);
 
     act(() => {
       jest.advanceTimersByTime(5000);
@@ -51,7 +52,7 @@ describe('NPSFloating', () => {
   });
 
   it('hides when dismiss is clicked', () => {
-    const { container } = render(<NPSFloating uuid="test-uuid" />);
+    const { container } = render(<IntlProvider locale="en"><NPSFloating uuid="test-uuid" /></IntlProvider>);
 
     act(() => {
       jest.advanceTimersByTime(5000);
@@ -63,7 +64,7 @@ describe('NPSFloating', () => {
   });
 
   it('shows followup textarea after selecting a score', () => {
-    render(<NPSFloating uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSFloating uuid="test-uuid" /></IntlProvider>);
 
     act(() => {
       jest.advanceTimersByTime(5000);
@@ -78,7 +79,7 @@ describe('NPSFloating', () => {
   });
 
   it('does not show thank you immediately after selecting a score', () => {
-    render(<NPSFloating uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSFloating uuid="test-uuid" /></IntlProvider>);
 
     act(() => {
       jest.advanceTimersByTime(5000);
@@ -90,7 +91,7 @@ describe('NPSFloating', () => {
   });
 
   it('shows thank you after submitting reason', () => {
-    render(<NPSFloating uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSFloating uuid="test-uuid" /></IntlProvider>);
 
     act(() => {
       jest.advanceTimersByTime(5000);
@@ -107,7 +108,7 @@ describe('NPSFloating', () => {
   });
 
   it('shows thank you after skipping reason', () => {
-    render(<NPSFloating uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSFloating uuid="test-uuid" /></IntlProvider>);
 
     act(() => {
       jest.advanceTimersByTime(5000);
@@ -120,7 +121,7 @@ describe('NPSFloating', () => {
   });
 
   it('can dismiss during followup step', () => {
-    const { container } = render(<NPSFloating uuid="test-uuid" />);
+    const { container } = render(<IntlProvider locale="en"><NPSFloating uuid="test-uuid" /></IntlProvider>);
 
     act(() => {
       jest.advanceTimersByTime(5000);
@@ -133,7 +134,7 @@ describe('NPSFloating', () => {
   });
 
   it('hides when close is clicked on thank you screen', () => {
-    const { container } = render(<NPSFloating uuid="test-uuid" />);
+    const { container } = render(<IntlProvider locale="en"><NPSFloating uuid="test-uuid" /></IntlProvider>);
 
     act(() => {
       jest.advanceTimersByTime(5000);

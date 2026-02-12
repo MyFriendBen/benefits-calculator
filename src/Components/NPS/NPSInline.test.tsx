@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 import NPSInline from './NPSInline';
 import * as apiCalls from '../../apiCalls';
 
@@ -18,7 +19,7 @@ describe('NPSInline', () => {
   });
 
   it('renders score buttons initially', () => {
-    render(<NPSInline uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSInline uuid="test-uuid" /></IntlProvider>);
 
     expect(screen.getByText('How likely are you to recommend MyFriendBen to a friend?')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '1' })).toBeInTheDocument();
@@ -26,7 +27,7 @@ describe('NPSInline', () => {
   });
 
   it('shows followup textarea after selecting a score', () => {
-    render(<NPSInline uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSInline uuid="test-uuid" /></IntlProvider>);
 
     fireEvent.click(screen.getByRole('button', { name: '9' }));
 
@@ -37,7 +38,7 @@ describe('NPSInline', () => {
   });
 
   it('does not show thank you immediately after selecting a score', () => {
-    render(<NPSInline uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSInline uuid="test-uuid" /></IntlProvider>);
 
     fireEvent.click(screen.getByRole('button', { name: '9' }));
 
@@ -45,7 +46,7 @@ describe('NPSInline', () => {
   });
 
   it('shows thank you after submitting reason', () => {
-    render(<NPSInline uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSInline uuid="test-uuid" /></IntlProvider>);
 
     fireEvent.click(screen.getByRole('button', { name: '9' }));
     fireEvent.change(screen.getByPlaceholderText('Share your thoughts...'), {
@@ -57,7 +58,7 @@ describe('NPSInline', () => {
   });
 
   it('shows thank you after skipping reason', () => {
-    render(<NPSInline uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSInline uuid="test-uuid" /></IntlProvider>);
 
     fireEvent.click(screen.getByRole('button', { name: '9' }));
     fireEvent.click(screen.getByRole('button', { name: 'Skip' }));
@@ -66,7 +67,7 @@ describe('NPSInline', () => {
   });
 
   it('calls postNPSScore when score is selected', () => {
-    render(<NPSInline uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSInline uuid="test-uuid" /></IntlProvider>);
 
     fireEvent.click(screen.getByRole('button', { name: '7' }));
 
@@ -78,7 +79,7 @@ describe('NPSInline', () => {
   });
 
   it('calls patchNPSReason when reason is submitted', () => {
-    render(<NPSInline uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSInline uuid="test-uuid" /></IntlProvider>);
 
     fireEvent.click(screen.getByRole('button', { name: '7' }));
     fireEvent.change(screen.getByPlaceholderText('Share your thoughts...'), {
@@ -93,7 +94,7 @@ describe('NPSInline', () => {
   });
 
   it('does not call patchNPSReason when skip is clicked', () => {
-    render(<NPSInline uuid="test-uuid" />);
+    render(<IntlProvider locale="en"><NPSInline uuid="test-uuid" /></IntlProvider>);
 
     fireEvent.click(screen.getByRole('button', { name: '7' }));
     fireEvent.click(screen.getByRole('button', { name: 'Skip' }));
