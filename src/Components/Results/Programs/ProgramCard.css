@@ -186,7 +186,7 @@ h1.header-text-bottom {
 
   .result-program-header-row .result-program-more-info {
     width: auto;
-    padding-bottom: 0;
+    padding-bottom: 0.25rem;
   }
 
   .result-program-details-row {
@@ -200,7 +200,7 @@ h1.header-text-bottom {
     width: auto;
     font-weight: 400;
     white-space: nowrap;
-    padding-top: 0;
+    padding-top: 0.25rem;
     padding-left: 1.5rem;
   }
 
