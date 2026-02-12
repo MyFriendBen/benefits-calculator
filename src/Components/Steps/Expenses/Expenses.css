@@ -1,11 +1,11 @@
 .expense-section-container {
   position: relative;
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .first-expense-q-padding {
-  padding-top: 2rem;
+  padding-top: 1rem;
 }
 
 .expense-section:before {
