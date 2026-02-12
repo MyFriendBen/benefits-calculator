@@ -85,16 +85,10 @@ describe('NPSFollowup', () => {
     expect(mockSetReason).toHaveBeenCalledWith('Helpful resources');
   });
 
-  it('does not call setReason when input exceeds 500 characters', () => {
-    const mockSetReason = jest.fn();
-    render(<NPSFollowup {...defaultProps} setReason={mockSetReason} />);
-
-    const longText = 'a'.repeat(501);
-    fireEvent.change(screen.getByPlaceholderText('Share your thoughts...'), {
-      target: { value: longText },
-    });
-
-    expect(mockSetReason).not.toHaveBeenCalled();
+  it('has maxLength attribute set to 500 on textarea', () => {
+    render(<NPSFollowup {...defaultProps} />);
+    const textarea = screen.getByPlaceholderText('Share your thoughts...') as HTMLTextAreaElement;
+    expect(textarea).toHaveAttribute('maxLength', '500');
   });
 
   it('shows character count', () => {

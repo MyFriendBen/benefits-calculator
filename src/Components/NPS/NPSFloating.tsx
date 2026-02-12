@@ -31,40 +31,29 @@ export default function NPSFloating({ uuid }: NPSFloatingProps) {
     return null;
   }
 
-  if (isFullySubmitted) {
-    return (
-      <div className="nps-floating">
-        <div className="nps-floating-content">
-          <p>Thank you for your feedback!</p>
-          <button onClick={() => setIsDismissed(true)} className="nps-close-btn">
-            Close
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (isScoreSubmitted) {
-    return (
-      <div className="nps-floating">
+  return (
+    <div className="nps-floating">
+      {!isFullySubmitted && (
         <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label="Dismiss">
           &times;
         </button>
-        <div className="nps-floating-content">
-          <NPSFollowup selectedScore={selectedScore!} reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="nps-floating">
-      <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label="Dismiss">
-        &times;
-      </button>
+      )}
       <div className="nps-floating-content">
-        <p>How likely are you to recommend MyFriendBen to a friend?</p>
-        <NPSScoreButtons selectedScore={selectedScore} onScoreClick={submitScore} />
+        {isFullySubmitted ? (
+          <>
+            <p>Thank you for your feedback!</p>
+            <button onClick={() => setIsDismissed(true)} className="nps-close-btn">
+              Close
+            </button>
+          </>
+        ) : isScoreSubmitted ? (
+          <NPSFollowup selectedScore={selectedScore!} reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} />
+        ) : (
+          <>
+            <p>How likely are you to recommend MyFriendBen to a friend?</p>
+            <NPSScoreButtons selectedScore={selectedScore} onScoreClick={submitScore} />
+          </>
+        )}
       </div>
     </div>
   );

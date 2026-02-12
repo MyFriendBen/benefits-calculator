@@ -22,10 +22,7 @@ function getPromptForScore(score: number): string {
  */
 export default function NPSFollowup({ selectedScore, reason, setReason, onSubmit, onSkip }: NPSFollowupProps) {
   const handleReasonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    if (value.length <= MAX_REASON_LENGTH) {
-      setReason(value);
-    }
+    setReason(e.target.value);
   };
 
   return (
