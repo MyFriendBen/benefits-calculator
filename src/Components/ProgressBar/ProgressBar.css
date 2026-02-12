@@ -2,5 +2,9 @@
   padding: 1rem;
   max-width: 900px;
   margin: 0 auto;
+}
+
+.progress-bar-wrapper {
   background-color: #ffffff;
+  margin-bottom: 1.5rem;
 }
