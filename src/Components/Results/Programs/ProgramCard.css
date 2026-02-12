@@ -164,6 +164,8 @@ h1.header-text-bottom {
 
   .result-program-container {
     position: relative;
+    display: flex;
+    flex-direction: column;
   }
 
   .result-program-container hr {
@@ -174,6 +176,7 @@ h1.header-text-bottom {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
     padding-right: 1.5rem;
   }
 
@@ -189,10 +192,11 @@ h1.header-text-bottom {
   .result-program-details-row {
     display: flex;
     align-items: flex-start;
+    width: 100%;
     border-top: 2px solid var(--secondary-color);
   }
 
-  .result-program-details-row .result-program-details {
+  .result-program-details-row > .result-program-details {
     flex: 1;
     width: auto;
     font-weight: 400;
