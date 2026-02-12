@@ -116,14 +116,14 @@ export function ResultsCard({
         </>
       ) : (
         <>
+          <div className="result-program-more-info-button">
+            <Link to={link} data-testid="more-info-link">
+              <FormattedMessage id="more-info" defaultMessage="More Info" />
+            </Link>
+          </div>
           <div className="result-program-header-row">
             <div className="result-program-more-info">
               <Link to={link}>{name}</Link>
-            </div>
-            <div className="result-program-more-info-button">
-              <Link to={link} data-testid="more-info-link">
-                <FormattedMessage id="more-info" defaultMessage="More Info" />
-              </Link>
             </div>
           </div>
           <div className="result-program-details-row">

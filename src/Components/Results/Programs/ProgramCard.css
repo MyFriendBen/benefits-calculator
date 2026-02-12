@@ -166,27 +166,27 @@ h1.header-text-bottom {
     position: relative;
     display: flex;
     flex-direction: column;
+    padding-right: 7rem;
   }
 
   .result-program-container hr {
     display: none;
   }
 
+  .result-program-more-info-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 1.5rem;
+  }
+
   .result-program-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     width: 100%;
-    padding-right: 1.5rem;
   }
 
   .result-program-header-row .result-program-more-info {
-    flex: 1;
     width: auto;
-  }
-
-  .result-program-header-row .result-program-more-info-button {
-    flex-shrink: 0;
+    padding-bottom: 0;
   }
 
   .result-program-details-row {
@@ -200,6 +200,7 @@ h1.header-text-bottom {
     width: auto;
     font-weight: 400;
     white-space: nowrap;
+    padding-top: 0;
   }
 
   .result-program-details-row > .result-program-eligible-column {
