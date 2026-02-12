@@ -167,27 +167,29 @@ h1.header-text-bottom {
     position: relative;
     display: flex;
     flex-direction: column;
-    padding-right: 7rem;
   }
 
   .result-program-container hr {
     display: none;
   }
 
-  .result-program-more-info-button {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    right: 1.5rem;
-  }
-
   .result-program-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
+    padding-right: 1.5rem;
   }
 
   .result-program-header-row .result-program-more-info {
+    flex: 1;
     width: auto;
     padding-bottom: 0;
+    font-size: 1.25rem;
+  }
+
+  .result-program-header-row .result-program-more-info-button {
+    flex-shrink: 0;
   }
 
   .result-program-details-row {
@@ -201,6 +203,7 @@ h1.header-text-bottom {
   .result-program-details-row > .result-program-details {
     flex: 1;
     width: auto;
+    font-size: 0.8rem;
     font-weight: 400;
     white-space: nowrap;
     padding-top: 0.5rem;
@@ -219,7 +222,7 @@ h1.header-text-bottom {
   }
 
   .result-program-details-row .eligible-members-label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 400;
     color: inherit;
     margin-bottom: 0.375rem;
@@ -236,7 +239,7 @@ h1.header-text-bottom {
 
   .result-program-details strong {
     display: block;
-    font-size: 1.05rem;
+    font-size: 0.95rem;
   }
 }
 
