@@ -72,7 +72,7 @@ describe('NPSFloating', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '8' }));
 
-    expect(screen.getByText("What's the main reason?")).toBeInTheDocument();
+    expect(screen.getByText("What's behind your score?")).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Share your thoughts...')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Skip' })).toBeInTheDocument();
