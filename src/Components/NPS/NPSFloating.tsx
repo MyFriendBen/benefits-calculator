@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNPSState } from './useNPSState';
 import NPSScoreButtons from './NPSScoreButtons';
+import NPSFollowup from './NPSFollowup';
 import './NPS.css';
 
 type NPSFloatingProps = {
@@ -15,7 +16,8 @@ const SHOW_DELAY_MS = 5000; // 5 seconds
 export default function NPSFloating({ uuid }: NPSFloatingProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
-  const { selectedScore, isSubmitted, submitScore } = useNPSState('floating', uuid);
+  const { selectedScore, isScoreSubmitted, isFullySubmitted, reason, setReason, submitScore, submitReason, skipReason } =
+    useNPSState('floating', uuid);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -29,7 +31,7 @@ export default function NPSFloating({ uuid }: NPSFloatingProps) {
     return null;
   }
 
-  if (isSubmitted) {
+  if (isFullySubmitted) {
     return (
       <div className="nps-floating">
         <div className="nps-floating-content">
@@ -42,10 +44,23 @@ export default function NPSFloating({ uuid }: NPSFloatingProps) {
     );
   }
 
+  if (isScoreSubmitted) {
+    return (
+      <div className="nps-floating">
+        <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label="Dismiss">
+          &times;
+        </button>
+        <div className="nps-floating-content">
+          <NPSFollowup reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="nps-floating">
       <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label="Dismiss">
-        ×
+        &times;
       </button>
       <div className="nps-floating-content">
         <p>How likely are you to recommend MyFriendBen to a friend?</p>

@@ -221,9 +221,27 @@ type NPSScoreData = {
   variant: 'floating' | 'inline';
 };
 
+type NPSReasonData = {
+  uuid: string;
+  score_reason: string;
+};
+
 const postNPSScore = async (data: NPSScoreData) => {
   return fetch(npsEndpoint, {
     method: 'POST',
+    body: JSON.stringify(data),
+    headers: header,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json();
+  });
+};
+
+const patchNPSReason = async (data: NPSReasonData) => {
+  return fetch(npsEndpoint, {
+    method: 'PATCH',
     body: JSON.stringify(data),
     headers: header,
   }).then((response) => {
@@ -270,4 +288,5 @@ export {
   deleteValidation,
   getAuthToken,
   postNPSScore,
+  patchNPSReason,
 };

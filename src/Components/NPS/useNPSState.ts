@@ -1,27 +1,35 @@
 import { useState } from 'react';
-import { postNPSScore } from '../../apiCalls';
+import { postNPSScore, patchNPSReason } from '../../apiCalls';
 
 export type NPSVariantType = 'floating' | 'inline';
 
 type UseNPSStateReturn = {
   selectedScore: number | null;
-  isSubmitted: boolean;
+  isScoreSubmitted: boolean;
+  isFullySubmitted: boolean;
+  reason: string;
+  setReason: (reason: string) => void;
   submitScore: (score: number) => void;
+  submitReason: () => void;
+  skipReason: () => void;
 };
 
 /**
  * Shared hook for NPS state management across variants.
- * Handles score selection, submission state, and API calls.
+ * Handles score selection, followup reason, and API calls.
+ *
+ * Flow: select score (POST) → enter reason → submit reason (PATCH) → thank you
  */
 export function useNPSState(variant: NPSVariantType, uuid?: string): UseNPSStateReturn {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isScoreSubmitted, setIsScoreSubmitted] = useState(false);
+  const [isFullySubmitted, setIsFullySubmitted] = useState(false);
+  const [reason, setReason] = useState('');
 
   const submitScore = (score: number) => {
     setSelectedScore(score);
-    setIsSubmitted(true);
+    setIsScoreSubmitted(true);
 
-    // Fire-and-forget API call - don't block the thank you message
     if (uuid) {
       postNPSScore({ uuid, score, variant }).catch((error) => {
         console.error('Failed to submit NPS score:', error);
@@ -29,5 +37,28 @@ export function useNPSState(variant: NPSVariantType, uuid?: string): UseNPSState
     }
   };
 
-  return { selectedScore, isSubmitted, submitScore };
+  const submitReason = () => {
+    setIsFullySubmitted(true);
+
+    if (uuid && reason.trim()) {
+      patchNPSReason({ uuid, score_reason: reason.trim() }).catch((error) => {
+        console.error('Failed to submit NPS reason:', error);
+      });
+    }
+  };
+
+  const skipReason = () => {
+    setIsFullySubmitted(true);
+  };
+
+  return {
+    selectedScore,
+    isScoreSubmitted,
+    isFullySubmitted,
+    reason,
+    setReason,
+    submitScore,
+    submitReason,
+    skipReason,
+  };
 }

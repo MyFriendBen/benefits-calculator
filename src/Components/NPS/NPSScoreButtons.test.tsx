@@ -8,12 +8,13 @@ describe('NPSScoreButtons', () => {
     jest.clearAllMocks();
   });
 
-  it('renders all 11 score buttons (0-10)', () => {
+  it('renders all 10 score buttons (1-10)', () => {
     render(<NPSScoreButtons selectedScore={null} onScoreClick={mockOnScoreClick} />);
 
-    for (let i = 0; i <= 10; i++) {
+    for (let i = 1; i <= 10; i++) {
       expect(screen.getByRole('button', { name: String(i) })).toBeInTheDocument();
     }
+    expect(screen.queryByRole('button', { name: '0' })).not.toBeInTheDocument();
   });
 
   it('renders labels', () => {
@@ -31,12 +32,12 @@ describe('NPSScoreButtons', () => {
     expect(mockOnScoreClick).toHaveBeenCalledWith(8);
   });
 
-  it('calls onScoreClick with 0 when first button is clicked', () => {
+  it('calls onScoreClick with 1 when first button is clicked', () => {
     render(<NPSScoreButtons selectedScore={null} onScoreClick={mockOnScoreClick} />);
 
-    fireEvent.click(screen.getByRole('button', { name: '0' }));
+    fireEvent.click(screen.getByRole('button', { name: '1' }));
 
-    expect(mockOnScoreClick).toHaveBeenCalledWith(0);
+    expect(mockOnScoreClick).toHaveBeenCalledWith(1);
   });
 
   it('calls onScoreClick with 10 when last button is clicked', () => {

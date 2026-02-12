@@ -1,6 +1,6 @@
 import './NPS.css';
 
-const NPS_SCORES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+const NPS_SCORES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 type NPSScoreButtonsProps = {
   selectedScore: number | null;
@@ -8,7 +8,7 @@ type NPSScoreButtonsProps = {
 };
 
 /**
- * Reusable NPS score button row (0-10) with labels.
+ * Reusable NPS score button row (1-10) with labels.
  */
 export default function NPSScoreButtons({ selectedScore, onScoreClick }: NPSScoreButtonsProps) {
   return (
