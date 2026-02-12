@@ -47,7 +47,7 @@
 .result-program-details-wrapper {
   display: flex;
   justify-content: space-between;
-  width: 45%;
+  width: 50%;
   gap: 0.5rem;
 }
 
@@ -166,18 +166,18 @@ h1.header-text-bottom {
     position: relative;
     display: flex;
     align-items: center;
-    padding-right: 6rem;
+    padding-right: 5rem;
   }
 
   .result-program-more-info {
-    width: 45%;
+    width: 40%;
     vertical-align: top;
     line-height: normal;
   }
 
   .result-program-details {
     font-weight: 400;
-    width: 20%;
+    white-space: nowrap;
     vertical-align: text-bottom;
   }
 
