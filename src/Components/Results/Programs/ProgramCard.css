@@ -216,6 +216,8 @@ h1.header-text-bottom {
 
   .result-program-details-row .eligible-members-label {
     font-size: 0.85rem;
+    font-weight: 400;
+    color: inherit;
     margin-bottom: 0.25rem;
   }
 
