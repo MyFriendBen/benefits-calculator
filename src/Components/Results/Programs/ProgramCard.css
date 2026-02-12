@@ -164,32 +164,43 @@ h1.header-text-bottom {
 
   .result-program-container {
     position: relative;
-    display: flex;
-    align-items: center;
-    padding-right: 5rem;
-  }
-
-  .result-program-more-info {
-    width: 40%;
-    vertical-align: top;
-    line-height: normal;
-  }
-
-  .result-program-details {
-    font-weight: 400;
-    white-space: nowrap;
-    vertical-align: text-bottom;
   }
 
   .result-program-container hr {
     display: none;
   }
 
-  .result-program-more-info-button {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    right: 1.5rem;
+  .result-program-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 1.5rem;
+  }
+
+  .result-program-header-row .result-program-more-info {
+    flex: 1;
+    width: auto;
+  }
+
+  .result-program-header-row .result-program-more-info-button {
+    flex-shrink: 0;
+  }
+
+  .result-program-details-row {
+    display: flex;
+    align-items: flex-start;
+    border-top: 2px solid var(--secondary-color);
+  }
+
+  .result-program-details-row .result-program-details {
+    flex: 1;
+    width: auto;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  .result-program-details-row .eligible-members-container {
+    margin-top: 0;
   }
 
   .result-program-more-info-button a,
@@ -198,7 +209,7 @@ h1.header-text-bottom {
   }
 
   .result-program-details strong {
-    display: inline-block;
+    display: block;
     font-size: 1.05rem;
   }
 }

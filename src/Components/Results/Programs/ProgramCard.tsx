@@ -94,8 +94,29 @@ export function ResultsCard({
         })}
       </div>
       {isMobile ? (
-        <div className="result-program-mobile-header">
-          <div className="result-program-more-info-wrapper">
+        <>
+          <div className="result-program-mobile-header">
+            <div className="result-program-more-info-wrapper">
+              <div className="result-program-more-info">
+                <Link to={link}>{name}</Link>
+              </div>
+              <div className="result-program-more-info-button">
+                <Link to={link} data-testid="more-info-link">
+                  <FormattedMessage id="more-info" defaultMessage="More Info" />
+                </Link>
+              </div>
+            </div>
+            <EligibleMemberTags members={eligibleMembers} />
+          </div>
+          <hr />
+          <div className="result-program-details-wrapper">
+            <ResultsCardDetail {...detail1} />
+            {detail2 !== undefined && <ResultsCardDetail {...detail2} />}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="result-program-header-row">
             <div className="result-program-more-info">
               <Link to={link}>{name}</Link>
             </div>
@@ -105,25 +126,14 @@ export function ResultsCard({
               </Link>
             </div>
           </div>
-          <EligibleMemberTags members={eligibleMembers} />
-        </div>
-      ) : (
-        <div className="result-program-more-info">
-          <Link to={link}>{name}</Link>
-          <EligibleMemberTags members={eligibleMembers} />
-        </div>
-      )}
-      <hr />
-      <div className="result-program-details-wrapper">
-        <ResultsCardDetail {...detail1} />
-        {detail2 !== undefined && <ResultsCardDetail {...detail2} />}
-      </div>
-      {!isMobile && (
-        <div className="result-program-more-info-button">
-          <Link to={link} data-testid="more-info-link">
-            <FormattedMessage id="more-info" defaultMessage="More Info" />
-          </Link>
-        </div>
+          <div className="result-program-details-row">
+            <div className="result-program-details">
+              <EligibleMemberTags members={eligibleMembers} />
+            </div>
+            <ResultsCardDetail {...detail1} />
+            {detail2 !== undefined && <ResultsCardDetail {...detail2} />}
+          </div>
+        </>
       )}
     </div>
   );
