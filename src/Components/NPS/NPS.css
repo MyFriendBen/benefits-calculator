@@ -84,8 +84,9 @@
 }
 
 .nps-followup-textarea:focus {
-  outline: none;
-  border-color: var(--secondary-color);
+  outline: 2px solid #0e8a7e;
+  outline-offset: 1px;
+  border-color: #0e8a7e;
 }
 
 .nps-followup-textarea::placeholder {

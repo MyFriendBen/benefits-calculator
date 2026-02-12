@@ -49,7 +49,7 @@ export default function NPSFollowup({ selectedScore, reason, setReason, onSubmit
           values={{ score: selectedScore }}
         />
       </span>
-      <p className="nps-followup-prompt">
+      <p id="nps-followup-prompt" className="nps-followup-prompt">
         <FormattedMessage
           id={getPromptMessageId(selectedScore)}
           defaultMessage={getDefaultPrompt(selectedScore)}
@@ -57,6 +57,7 @@ export default function NPSFollowup({ selectedScore, reason, setReason, onSubmit
       </p>
       <textarea
         className="nps-followup-textarea"
+        aria-labelledby="nps-followup-prompt"
         value={reason}
         onChange={handleReasonChange}
         placeholder={placeholderText}
