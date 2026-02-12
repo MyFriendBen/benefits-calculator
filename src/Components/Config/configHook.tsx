@@ -193,9 +193,14 @@ function transformConfigData(configData: ConfigApiResponse[]): Config {
     transformedConfig[name] = transformItem(configOptions);
   });
 
-  const featureFlags: FeatureFlags | undefined = configData[0]?.feature_flags;
-  if (featureFlags) {
-    transformedConfig._feature_flags = featureFlags;
+  const mergedFlags: FeatureFlags = {};
+  for (const item of configData) {
+    if (item.feature_flags) {
+      Object.assign(mergedFlags, item.feature_flags);
+    }
+  }
+  if (Object.keys(mergedFlags).length > 0) {
+    transformedConfig._feature_flags = mergedFlags;
   }
 
   return transformedConfig;
