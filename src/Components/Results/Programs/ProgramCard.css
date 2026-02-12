@@ -37,17 +37,18 @@
 
 .result-program-details {
   flex: 0.5 0.5;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 100;
   line-height: normal;
   width: 50%;
-  padding: 0.5rem 1rem;
+  padding: 1rem 1rem;
 }
 
 .result-program-details-wrapper {
   display: flex;
   justify-content: space-between;
-  width: 40%;
+  width: 45%;
+  gap: 0.5rem;
 }
 
 .result-program-details:only-child {
@@ -61,7 +62,7 @@
   font-family: 'Roboto Slab', serif;
   font-weight: 700;
   font-size: 1.1rem;
-  padding: 0.75rem 1.5rem;
+  padding: 1.25rem 1.5rem;
 }
 
 .result-program-more-info a {
@@ -117,6 +118,7 @@
 
 .result-program-details strong {
   display: block;
+  font-size: 0.85rem;
   margin-top: 0.5rem;
 }
 
@@ -249,7 +251,7 @@ h1.header-text-bottom {
   }
 
   .result-program-details strong {
-    font-size: 1rem;
+    font-size: 0.9rem;
     padding-top: 0.3rem;
   }
 }
