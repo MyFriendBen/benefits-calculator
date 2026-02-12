@@ -84,9 +84,9 @@
 }
 
 .nps-followup-textarea:focus {
-  outline: 2px solid #0e8a7e;
+  outline: 2px solid var(--primary-color);
   outline-offset: 1px;
-  border-color: #0e8a7e;
+  border-color: var(--primary-color);
 }
 
 .nps-followup-textarea::placeholder {
@@ -96,7 +96,7 @@
 .nps-followup-meta {
   display: flex;
   justify-content: space-between;
-  margin-top: 0;
+  margin-top: 4px;
   font-family: 'Open Sans', sans-serif;
   font-size: 12px;
   color: #999;
