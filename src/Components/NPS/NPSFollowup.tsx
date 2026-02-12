@@ -40,7 +40,7 @@ export default function NPSFollowup({ selectedScore, reason, setReason, onSubmit
       <p id="nps-followup-prompt" className="nps-followup-prompt">
         <FormattedMessage
           id="nps.followup-prompt"
-          defaultMessage="What's the main reason for your score?"
+          defaultMessage="What's the main reason?"
         />
       </p>
       <textarea

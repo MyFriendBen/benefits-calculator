@@ -24,7 +24,7 @@ describe('NPSFollowup', () => {
 
   it('shows the followup prompt', () => {
     renderFollowup();
-    expect(screen.getByText("What's the main reason for your score?")).toBeInTheDocument();
+    expect(screen.getByText("What's the main reason?")).toBeInTheDocument();
   });
 
   describe('score pill', () => {
