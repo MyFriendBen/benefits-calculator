@@ -219,7 +219,7 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   });
 
   return (
-    <main className="program-page-container">
+    <main className="benefits-form program-page-container">
       <section className="back-to-results-button-container">
         <BackAndSaveButtons
           navigateToLink={backLink}

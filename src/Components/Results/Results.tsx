@@ -221,7 +221,7 @@ const Results = ({ type }: ResultsProps) => {
 
   if (loading) {
     return (
-      <main>
+      <main className="benefits-form">
         <div className="results-loading-container">
           <Loading />
         </div>
@@ -231,7 +231,7 @@ const Results = ({ type }: ResultsProps) => {
     return <ResultsError />;
   } else if (programId === undefined && type === 'help') {
     return (
-      <main>
+      <main className="benefits-form">
         <Grid container>
           <Grid item xs={12}>
             <BackAndSaveButtons
@@ -247,7 +247,7 @@ const Results = ({ type }: ResultsProps) => {
     );
   } else if (programId === undefined && (type === 'program' || type === 'need')) {
     return (
-      <main>
+      <main className="benefits-form">
         <ResultsContextProvider>
           <ResultsHeader type={type} />
           <ResultsTabs />
