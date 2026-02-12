@@ -25,7 +25,7 @@ export default function NPSInline({ uuid }: NPSInlineProps) {
   if (isScoreSubmitted) {
     return (
       <div className="nps-inline">
-        <NPSFollowup reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} />
+        <NPSFollowup selectedScore={selectedScore!} reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} />
       </div>
     );
   }

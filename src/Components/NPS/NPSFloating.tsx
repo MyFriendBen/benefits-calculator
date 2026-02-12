@@ -51,7 +51,7 @@ export default function NPSFloating({ uuid }: NPSFloatingProps) {
           &times;
         </button>
         <div className="nps-floating-content">
-          <NPSFollowup reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} />
+          <NPSFollowup selectedScore={selectedScore!} reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} />
         </div>
       </div>
     );

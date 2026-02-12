@@ -30,8 +30,8 @@ describe('NPSInline', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '9' }));
 
-    expect(screen.getByText('What is the main reason for your score?')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Tell us more (optional)')).toBeInTheDocument();
+    expect(screen.getByText('What did we do well?')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('(optional) Share your thoughts...')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Skip' })).toBeInTheDocument();
   });
@@ -48,7 +48,7 @@ describe('NPSInline', () => {
     render(<NPSInline uuid="test-uuid" />);
 
     fireEvent.click(screen.getByRole('button', { name: '9' }));
-    fireEvent.change(screen.getByPlaceholderText('Tell us more (optional)'), {
+    fireEvent.change(screen.getByPlaceholderText('(optional) Share your thoughts...'), {
       target: { value: 'Very helpful!' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -81,7 +81,7 @@ describe('NPSInline', () => {
     render(<NPSInline uuid="test-uuid" />);
 
     fireEvent.click(screen.getByRole('button', { name: '7' }));
-    fireEvent.change(screen.getByPlaceholderText('Tell us more (optional)'), {
+    fireEvent.change(screen.getByPlaceholderText('(optional) Share your thoughts...'), {
       target: { value: 'Good info' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
