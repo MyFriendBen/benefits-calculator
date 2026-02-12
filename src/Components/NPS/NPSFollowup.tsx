@@ -36,7 +36,7 @@ export default function NPSFollowup({ selectedScore, reason, setReason, onSubmit
         className="nps-followup-textarea"
         value={reason}
         onChange={handleReasonChange}
-        placeholder="(optional) Share your thoughts..."
+        placeholder="Share your thoughts..."
         rows={4}
         maxLength={MAX_REASON_LENGTH}
       />

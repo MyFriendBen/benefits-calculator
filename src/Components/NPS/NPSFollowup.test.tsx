@@ -55,7 +55,7 @@ describe('NPSFollowup', () => {
 
   it('renders a textarea', () => {
     render(<NPSFollowup {...defaultProps} />);
-    expect(screen.getByPlaceholderText('(optional) Share your thoughts...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Share your thoughts...')).toBeInTheDocument();
   });
 
   it('renders submit button', () => {
@@ -70,7 +70,7 @@ describe('NPSFollowup', () => {
 
   it('displays the reason value in the textarea', () => {
     render(<NPSFollowup {...defaultProps} reason="Great tool!" />);
-    const textarea = screen.getByPlaceholderText('(optional) Share your thoughts...') as HTMLTextAreaElement;
+    const textarea = screen.getByPlaceholderText('Share your thoughts...') as HTMLTextAreaElement;
     expect(textarea.value).toBe('Great tool!');
   });
 
@@ -78,7 +78,7 @@ describe('NPSFollowup', () => {
     const mockSetReason = jest.fn();
     render(<NPSFollowup {...defaultProps} setReason={mockSetReason} />);
 
-    fireEvent.change(screen.getByPlaceholderText('(optional) Share your thoughts...'), {
+    fireEvent.change(screen.getByPlaceholderText('Share your thoughts...'), {
       target: { value: 'Helpful resources' },
     });
 
@@ -90,7 +90,7 @@ describe('NPSFollowup', () => {
     render(<NPSFollowup {...defaultProps} setReason={mockSetReason} />);
 
     const longText = 'a'.repeat(501);
-    fireEvent.change(screen.getByPlaceholderText('(optional) Share your thoughts...'), {
+    fireEvent.change(screen.getByPlaceholderText('Share your thoughts...'), {
       target: { value: longText },
     });
 
