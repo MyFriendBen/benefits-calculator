@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { Context } from '../Wrapper/Wrapper';
 import { configEndpoint, header } from '../../apiCalls';
-import { ConfigApiResponse, ConfigValue } from '../../Types/Config';
+import { ConfigApiResponse, ConfigValue, FeatureFlags } from '../../Types/Config';
 import { Config } from '../../Types/Config';
 import { FormattedMessage } from 'react-intl';
 import { ReactComponent as Student } from '../../Assets/icons/General/OptionCard/Conditions/student.svg';
@@ -193,6 +193,12 @@ function transformConfigData(configData: ConfigApiResponse[]): Config {
     transformedConfig[name] = transformItem(configOptions);
   });
 
+  // Extract feature flags from the first config item (same for all items in a WhiteLabel)
+  const featureFlags = configData[0]?.feature_flags;
+  if (featureFlags) {
+    transformedConfig._feature_flags = featureFlags;
+  }
+
   return transformedConfig;
 }
 
@@ -294,6 +300,11 @@ export function useConfig<T>(name: string, defaultValue?: T): T {
   }
 
   return config[name] as T;
+}
+
+export function useFeatureFlag(flag: string): boolean {
+  const { config } = useContext(Context);
+  return config?._feature_flags?.[flag] ?? false;
 }
 
 export function useLocalizedLink(configKey: 'privacy_policy' | 'consent_to_contact') {

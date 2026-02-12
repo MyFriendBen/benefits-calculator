@@ -1,14 +1,17 @@
 import { ApiIncome } from './ApiFormData';
 
+export type FeatureFlags = Record<string, boolean>;
+
 export interface ConfigApiResponse {
   id: number;
   name: string;
   data: Record<string, any>; // defining as 'any' for now. should be redefined once API response model is finalized
   active: boolean;
+  feature_flags?: FeatureFlags;
 }
 
 export type ConfigValue = Record<string, any>;
-export type Config = Record<string, ConfigValue>;
+export type Config = Record<string, ConfigValue> & { _feature_flags?: FeatureFlags };
 
 export type FooterDataConfig = {
   address_one: string;

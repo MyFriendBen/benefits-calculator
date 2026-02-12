@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Program } from '../../../Types/Results';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import { useFormatDisplayValue } from '../FormattedValue';
 import ResultsTranslate from '../Translate/Translate';
 import { useContext, useMemo } from 'react';
@@ -10,7 +10,7 @@ import { findMemberEligibilityMember, findValidationForProgram, useResultsContex
 import { FormattedMessageType } from '../../../Types/Questions';
 import { BREAKPOINTS } from '../../../utils/breakpoints';
 import { Context } from '../../Wrapper/Wrapper';
-import { useConfig } from '../../Config/configHook';
+import { useConfig, useFeatureFlag } from '../../Config/configHook';
 import { calcAge } from '../../../Assets/age';
 
 type ResultsCardDetail = {
@@ -133,10 +133,6 @@ type ProgramCardProps = {
   program: Program;
 };
 
-type Features = {
-  show_eligible_member_tags?: boolean;
-};
-
 const ProgramCard = ({ program }: ProgramCardProps) => {
   const estimatedAppTime = program.estimated_application_time;
   const programName = program.name;
@@ -144,8 +140,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
   const { validations, isAdminView } = useResultsContext();
   const { formData } = useContext(Context);
   const relationshipOptions = useConfig<{ [key: string]: FormattedMessageType }>('relationship_options');
-  const features = useConfig<Features>('features');
-  const { formatMessage } = useIntl();
+  const showEligibilityTags = useFeatureFlag('eligibility_tags');
 
   const containerClass = useMemo(() => {
     const classNames = [];
@@ -187,8 +182,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
   }, [program.new, program.low_confidence]);
 
   const eligibleMembers = useMemo(() => {
-    // Check if feature is enabled (default to true if not specified)
-    if (features.show_eligible_member_tags === false) {
+    if (!showEligibilityTags) {
       return [];
     }
 
@@ -259,7 +253,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
         ),
       };
     });
-  }, [program.members, program.eligible, formData, relationshipOptions, formatMessage, features.show_eligible_member_tags]);
+  }, [program.members, program.eligible, formData, relationshipOptions, showEligibilityTags]);
 
   const programPageLink = useResultsLink(`results/benefits/${programId}`);
   const value = useFormatDisplayValue(program);
