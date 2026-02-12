@@ -196,6 +196,17 @@ function transformConfigData(configData: ConfigApiResponse[]): Config {
   const mergedFlags: FeatureFlags = {};
   for (const item of configData) {
     if (item.feature_flags) {
+      // Warn in development if a flag is being overridden
+      if (process.env.NODE_ENV === 'development') {
+        for (const [key, value] of Object.entries(item.feature_flags)) {
+          if (key in mergedFlags && mergedFlags[key] !== value) {
+            console.warn(
+              `Feature flag '${key}' is defined in multiple config items with different values. ` +
+              `Previous: ${mergedFlags[key]}, Current: ${value}. Using current value from config '${item.name}'.`
+            );
+          }
+        }
+      }
       Object.assign(mergedFlags, item.feature_flags);
     }
   }

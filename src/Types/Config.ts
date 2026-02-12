@@ -10,8 +10,17 @@ export interface ConfigApiResponse {
   feature_flags?: FeatureFlags;
 }
 
+export type ExperimentConfig = {
+  variants: string[];
+};
+
+export type ExperimentsConfig = Record<string, ExperimentConfig>;
+
 export type ConfigValue = Record<string, any>;
-export type Config = Record<string, ConfigValue> & { _feature_flags?: FeatureFlags };
+export type Config = Record<string, ConfigValue> & {
+  _feature_flags?: FeatureFlags;
+  experiments?: ExperimentsConfig;
+};
 
 export type FooterDataConfig = {
   address_one: string;

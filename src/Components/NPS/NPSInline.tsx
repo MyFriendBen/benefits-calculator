@@ -1,3 +1,4 @@
+import { FormattedMessage } from 'react-intl';
 import { useNPSState } from './useNPSState';
 import NPSScoreButtons from './NPSScoreButtons';
 import NPSFollowup from './NPSFollowup';
@@ -11,13 +12,15 @@ type NPSInlineProps = {
  * Inline NPS section - full-width section at bottom of results page
  */
 export default function NPSInline({ uuid }: NPSInlineProps) {
-  const { selectedScore, isScoreSubmitted, isFullySubmitted, reason, setReason, submitScore, submitReason, skipReason } =
+  const { selectedScore, isScoreSubmitted, isFullySubmitted, isSubmitting, reason, setReason, submitScore, submitReason, skipReason } =
     useNPSState('inline', uuid);
 
   if (isFullySubmitted) {
     return (
       <div className="nps-inline">
-        <p className="nps-thank-you">Thank you for your feedback!</p>
+        <p className="nps-thank-you">
+          <FormattedMessage id="nps.thank-you" defaultMessage="Thank you for your feedback!" />
+        </p>
       </div>
     );
   }
@@ -25,14 +28,16 @@ export default function NPSInline({ uuid }: NPSInlineProps) {
   if (isScoreSubmitted) {
     return (
       <div className="nps-inline">
-        <NPSFollowup selectedScore={selectedScore!} reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} />
+        <NPSFollowup selectedScore={selectedScore!} reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} isSubmitting={isSubmitting} />
       </div>
     );
   }
 
   return (
     <div className="nps-inline">
-      <h3 className="nps-inline-title">How likely are you to recommend MyFriendBen to a friend?</h3>
+      <h3 className="nps-inline-title">
+        <FormattedMessage id="nps.prompt" defaultMessage="How likely are you to recommend MyFriendBen to a friend?" />
+      </h3>
       <NPSScoreButtons selectedScore={selectedScore} onScoreClick={submitScore} />
     </div>
   );

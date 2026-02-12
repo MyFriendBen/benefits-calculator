@@ -2,12 +2,6 @@ import { useContext, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Context } from '../Components/Wrapper/Wrapper';
 
-type ExperimentConfig = {
-  variants: string[];
-};
-
-type ExperimentsConfig = Record<string, ExperimentConfig>;
-
 const STORAGE_PREFIX = 'experiment_override_';
 
 /**
@@ -47,8 +41,7 @@ export function useExperiment(experimentName: string, seed?: string): string | n
   const [searchParams] = useSearchParams();
 
   return useMemo(() => {
-    const experiments = config?.experiments as ExperimentsConfig | undefined;
-    const variants = experiments?.[experimentName]?.variants;
+    const variants = config?.experiments?.[experimentName]?.variants;
 
     // 1. URL parameter override (highest priority)
     const urlOverride = searchParams.get(experimentName);

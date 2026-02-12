@@ -7,6 +7,7 @@ type UseNPSStateReturn = {
   selectedScore: number | null;
   isScoreSubmitted: boolean;
   isFullySubmitted: boolean;
+  isSubmitting: boolean;
   reason: string;
   setReason: (reason: string) => void;
   submitScore: (score: number) => void;
@@ -24,6 +25,7 @@ export function useNPSState(variant: NPSVariantType, uuid?: string): UseNPSState
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
   const [isScoreSubmitted, setIsScoreSubmitted] = useState(false);
   const [isFullySubmitted, setIsFullySubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [reason, setReason] = useState('');
 
   const submitScore = (score: number) => {
@@ -38,23 +40,36 @@ export function useNPSState(variant: NPSVariantType, uuid?: string): UseNPSState
   };
 
   const submitReason = () => {
+    if (isSubmitting) return; // Prevent double submission
+
+    setIsSubmitting(true);
     setIsFullySubmitted(true);
 
     if (uuid && reason.trim()) {
-      patchNPSReason({ uuid, score_reason: reason.trim() }).catch((error) => {
-        console.error('Failed to submit NPS reason:', error);
-      });
+      patchNPSReason({ uuid, score_reason: reason.trim() })
+        .catch((error) => {
+          console.error('Failed to submit NPS reason:', error);
+        })
+        .finally(() => {
+          setIsSubmitting(false);
+        });
+    } else {
+      setIsSubmitting(false);
     }
   };
 
   const skipReason = () => {
+    if (isSubmitting) return; // Prevent double submission
+    setIsSubmitting(true);
     setIsFullySubmitted(true);
+    setIsSubmitting(false);
   };
 
   return {
     selectedScore,
     isScoreSubmitted,
     isFullySubmitted,
+    isSubmitting,
     reason,
     setReason,
     submitScore,

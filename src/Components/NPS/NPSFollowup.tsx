@@ -1,3 +1,4 @@
+import { FormattedMessage, useIntl } from 'react-intl';
 import './NPS.css';
 
 const MAX_REASON_LENGTH = 500;
@@ -8,9 +9,16 @@ type NPSFollowupProps = {
   setReason: (reason: string) => void;
   onSubmit: () => void;
   onSkip: () => void;
+  isSubmitting?: boolean;
 };
 
-function getPromptForScore(score: number): string {
+function getPromptMessageId(score: number): string {
+  if (score >= 9) return 'nps.followup-prompt-promoter';
+  if (score >= 7) return 'nps.followup-prompt-passive';
+  return 'nps.followup-prompt-detractor';
+}
+
+function getDefaultPrompt(score: number): string {
   if (score >= 9) return 'What did we do well?';
   if (score >= 7) return 'What could we improve?';
   return 'What disappointed you?';
@@ -20,33 +28,54 @@ function getPromptForScore(score: number): string {
  * Followup textarea shown after a user selects an NPS score.
  * Used by both floating and inline variants.
  */
-export default function NPSFollowup({ selectedScore, reason, setReason, onSubmit, onSkip }: NPSFollowupProps) {
+export default function NPSFollowup({ selectedScore, reason, setReason, onSubmit, onSkip, isSubmitting = false }: NPSFollowupProps) {
+  const intl = useIntl();
+
   const handleReasonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setReason(e.target.value);
   };
 
+  const placeholderText = intl.formatMessage({
+    id: 'nps.followup-placeholder',
+    defaultMessage: 'Share your thoughts...'
+  });
+
   return (
     <div className="nps-followup">
-      <span className="nps-score-pill">You selected: {selectedScore}</span>
-      <p className="nps-followup-prompt">{getPromptForScore(selectedScore)}</p>
+      <span className="nps-score-pill">
+        <FormattedMessage
+          id="nps.score-pill"
+          defaultMessage="You selected: {score}"
+          values={{ score: selectedScore }}
+        />
+      </span>
+      <p className="nps-followup-prompt">
+        <FormattedMessage
+          id={getPromptMessageId(selectedScore)}
+          defaultMessage={getDefaultPrompt(selectedScore)}
+        />
+      </p>
       <textarea
         className="nps-followup-textarea"
         value={reason}
         onChange={handleReasonChange}
-        placeholder="Share your thoughts..."
+        placeholder={placeholderText}
         rows={4}
         maxLength={MAX_REASON_LENGTH}
+        disabled={isSubmitting}
       />
       <div className="nps-followup-meta">
         <span className="nps-char-count">{reason.length}/{MAX_REASON_LENGTH}</span>
-        <span className="nps-optional-label">(optional)</span>
+        <span className="nps-optional-label">
+          <FormattedMessage id="nps.optional-label" defaultMessage="(optional)" />
+        </span>
       </div>
       <div className="nps-followup-actions">
-        <button onClick={onSkip} className="nps-skip-btn">
-          Skip
+        <button onClick={onSkip} className="nps-skip-btn" disabled={isSubmitting}>
+          <FormattedMessage id="nps.skip-button" defaultMessage="Skip" />
         </button>
-        <button onClick={onSubmit} className="nps-submit-btn">
-          Submit
+        <button onClick={onSubmit} className="nps-submit-btn" disabled={isSubmitting}>
+          <FormattedMessage id="nps.submit-button" defaultMessage="Submit" />
         </button>
       </div>
     </div>

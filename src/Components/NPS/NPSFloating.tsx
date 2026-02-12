@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FormattedMessage } from 'react-intl';
 import { useNPSState } from './useNPSState';
 import NPSScoreButtons from './NPSScoreButtons';
 import NPSFollowup from './NPSFollowup';
@@ -16,7 +17,7 @@ const SHOW_DELAY_MS = 5000; // 5 seconds
 export default function NPSFloating({ uuid }: NPSFloatingProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
-  const { selectedScore, isScoreSubmitted, isFullySubmitted, reason, setReason, submitScore, submitReason, skipReason } =
+  const { selectedScore, isScoreSubmitted, isFullySubmitted, isSubmitting, reason, setReason, submitScore, submitReason, skipReason } =
     useNPSState('floating', uuid);
 
   useEffect(() => {
@@ -41,16 +42,20 @@ export default function NPSFloating({ uuid }: NPSFloatingProps) {
       <div className="nps-floating-content">
         {isFullySubmitted ? (
           <>
-            <p>Thank you for your feedback!</p>
+            <p>
+              <FormattedMessage id="nps.thank-you" defaultMessage="Thank you for your feedback!" />
+            </p>
             <button onClick={() => setIsDismissed(true)} className="nps-close-btn">
-              Close
+              <FormattedMessage id="nps.close-button" defaultMessage="Close" />
             </button>
           </>
         ) : isScoreSubmitted ? (
-          <NPSFollowup selectedScore={selectedScore!} reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} />
+          <NPSFollowup selectedScore={selectedScore!} reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} isSubmitting={isSubmitting} />
         ) : (
           <>
-            <p>How likely are you to recommend MyFriendBen to a friend?</p>
+            <p>
+              <FormattedMessage id="nps.prompt" defaultMessage="How likely are you to recommend MyFriendBen to a friend?" />
+            </p>
             <NPSScoreButtons selectedScore={selectedScore} onScoreClick={submitScore} />
           </>
         )}
