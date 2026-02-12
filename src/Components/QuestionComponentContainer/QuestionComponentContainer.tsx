@@ -1,11 +1,10 @@
-import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Navigate, useLocation } from 'react-router-dom';
 import { Zipcode } from '../Steps/Zipcode';
 import Expenses from '../Steps/Expenses/Expenses';
-import HouseholdSize from '../Steps/HouseholdSize';
-import { useStepName } from '../../Assets/stepDirectory';
+import HouseholdSize from '../Steps/HouseholdSize/HouseholdSize';
+import { useStepName, useStepDirectory, STARTING_QUESTION_NUMBER } from '../../Assets/stepDirectory';
 import ReferralSourceStep from '../Steps/Referrer';
-import { OTHER_PAGE_TITLES, QUESTION_TITLES } from '../../Assets/pageTitleTags';
+import { QUESTION_TITLES } from '../../Assets/pageTitleTags';
 import AlreadyHasBenefits from '../Steps/AlreadyHasBenefits';
 import ImmediateNeeds from '../Steps/ImmediateNeeds';
 import SignUp from '../Steps/SignUp/SignUp';
@@ -19,15 +18,32 @@ import './QuestionComponentContainer.css';
 import { usePageTitle } from '../Common/usePageTitle';
 
 const QuestionComponentContainer = () => {
+  // ALL HOOKS MUST BE CALLED FIRST - before any conditional returns
   let { id } = useParams();
+  const location = useLocation();
+  const stepDirectory = useStepDirectory();
 
+  // Calculate step info for all cases
+  const stepNumber = id ? +id : NaN;
+  const maxStep = stepDirectory.length + STARTING_QUESTION_NUMBER;
+  const stepName = useStepName(stepNumber);
+  const questionName = !isNaN(stepNumber) ? stepName : undefined;
+  const pageTitle = questionName ? QUESTION_TITLES[questionName] : '' as any;
+
+  // Call usePageTitle hook unconditionally
+  usePageTitle(pageTitle);
+
+  // NOW we can do conditional logic and returns
   if (id === undefined) {
     throw new Error('steps must have a step-[id]');
   }
-  const questionName = useStepName(+id);
 
-  const pageTitle = questionName === undefined ? OTHER_PAGE_TITLES.default : QUESTION_TITLES[questionName];
-  usePageTitle(pageTitle)
+  // Validate step number and redirect if needed
+  const isInvalidStep = isNaN(stepNumber) || stepNumber < 1 || stepNumber > maxStep || questionName === undefined;
+
+  if (isInvalidStep) {
+    return <Navigate to={`../step-1${location.search}${location.hash}`} replace />;
+  }
 
   switch (questionName) {
     case 'zipcode':

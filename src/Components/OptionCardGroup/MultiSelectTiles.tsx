@@ -22,7 +22,7 @@ function Tile<T extends string | number>({ option, selected, onClick }: TileProp
   const { getReferrer } = useContext(Context);
   const { formatMessage } = useIntl();
 
-  const featureFlags = getReferrer('featureFlags');
+  const uiOptions = getReferrer('uiOptions');
   const containerClass = useMemo(() => {
     let className = 'option-card';
 
@@ -30,12 +30,12 @@ function Tile<T extends string | number>({ option, selected, onClick }: TileProp
       className += ' selected-option-card';
     }
 
-    if (featureFlags.includes('white_multi_select_tile_icon')) {
+    if (uiOptions.includes('white_multi_select_tile_icon')) {
       className += ' white-icons';
     }
 
     return className;
-  }, [selected, featureFlags]);
+  }, [selected, uiOptions]);
 
   return (
     <CardActionArea sx={{ width: '15rem' }} className="card-action-area" onClick={onClick}>

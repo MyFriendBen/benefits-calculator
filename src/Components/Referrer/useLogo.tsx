@@ -8,8 +8,10 @@ export const useLogo = (src: keyof ReferrerData, alt: keyof ReferrerData, classN
   const { getReferrer } = useContext(Context);
   const intl = useIntl();
 
-  const logoSourceValue = getReferrer(src) as string;
-  const logoAlt = getReferrer(alt) as MessageDescriptor;
+  // Empty string triggers fallback to MFBDEFAULT logo in renderLogoSource
+  const logoSourceValue = getReferrer(src, '') as string;
+  // Use meaningful default alt text for accessibility during loading
+  const logoAlt = getReferrer(alt, { id: 'logo.alt.default', defaultMessage: 'Organization Logo' }) as MessageDescriptor;
 
   return renderLogoSource(logoSourceValue.trim(), intl.formatMessage(logoAlt), className);
 };

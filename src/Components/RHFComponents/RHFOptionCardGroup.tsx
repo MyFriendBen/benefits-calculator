@@ -67,7 +67,7 @@ const RHFOptionCardGroup = <T extends FieldValues>({
         containerClass += ' selected-option-card';
       }
 
-      if (getReferrer('featureFlags').includes('white_multi_select_tile_icon')) {
+      if (getReferrer('uiOptions').includes('white_multi_select_tile_icon')) {
         containerClass += ' white-icons';
       }
 

@@ -228,18 +228,58 @@ export function useGetConfig(screenLoading: boolean, whiteLabel: string) {
       return;
     }
 
-    getConfig(whiteLabel).then((value: ConfigApiResponse[]) => {
-      // get data and set loading to false
-      try {
-        if (value !== undefined) {
-          const transformedOutput: Config = transformConfigData(value);
-          setConfigResponse(transformedOutput);
+    getConfig(whiteLabel)
+      .then((value: ConfigApiResponse[]) => {
+        // get data and set loading to false
+        try {
+          if (value !== undefined) {
+            const transformedOutput: Config = transformConfigData(value);
+            setConfigResponse(transformedOutput);
+          } else {
+            // Set empty config if value is undefined
+            setConfigResponse({} as Config);
+          }
+        } catch (e) {
+          console.error('Failed to transform config data:', e);
+          // Set empty config on transformation error to prevent downstream crashes
+          setConfigResponse({} as Config);
         }
-      } catch (e) {
-        console.error(e);
-      }
-      setLoading(false);
-    });
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(`Failed to load config for white label '${whiteLabel}':`, error);
+        // Fallback to default config if white label config doesn't exist
+        if (whiteLabel !== '_default') {
+          console.log(`Falling back to _default config`);
+          getConfig('_default')
+            .then((value: ConfigApiResponse[]) => {
+              try {
+                if (value !== undefined) {
+                  const transformedOutput: Config = transformConfigData(value);
+                  setConfigResponse(transformedOutput);
+                } else {
+                  // Set empty config if value is undefined
+                  setConfigResponse({} as Config);
+                }
+              } catch (e) {
+                console.error('Failed to transform default config:', e);
+                // Set empty config on transformation error to prevent downstream crashes
+                setConfigResponse({} as Config);
+              }
+              setLoading(false);
+            })
+            .catch((err) => {
+              console.error('Failed to load default config:', err);
+              // Set empty config on fallback failure to prevent downstream crashes
+              setConfigResponse({} as Config);
+              setLoading(false);
+            });
+        } else {
+          // Set empty config when already on _default and it fails
+          setConfigResponse({} as Config);
+          setLoading(false);
+        }
+      });
   }, [screenLoading, whiteLabel]);
 
   return { configLoading, configResponse };
