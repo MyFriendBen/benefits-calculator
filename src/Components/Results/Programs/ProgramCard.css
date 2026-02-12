@@ -201,6 +201,7 @@ h1.header-text-bottom {
     font-weight: 400;
     white-space: nowrap;
     padding-top: 0;
+    padding-left: 1.5rem;
   }
 
   .result-program-details-row > .result-program-eligible-column {
