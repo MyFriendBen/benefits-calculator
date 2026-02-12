@@ -62,7 +62,7 @@
   font-family: 'Roboto Slab', serif;
   font-weight: 700;
   font-size: 1.1rem;
-  padding: 1.25rem 1.5rem;
+  padding: 1.25rem 1.5rem .5rem !important;
 }
 
 .result-program-more-info a {
@@ -84,6 +84,7 @@
   font-size: 0.8rem;
   font-weight: 400;
   color: #666;
+  margin-bottom: 0rem !important;
 }
 
 .eligible-members-tags {
