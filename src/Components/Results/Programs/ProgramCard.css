@@ -193,7 +193,6 @@ h1.header-text-bottom {
     display: flex;
     align-items: flex-start;
     width: 100%;
-    border-top: 2px solid var(--secondary-color);
   }
 
   .result-program-details-row > .result-program-details {
@@ -203,8 +202,24 @@ h1.header-text-bottom {
     white-space: nowrap;
   }
 
+  .result-program-details-row > .result-program-eligible-column {
+    flex: 2;
+    white-space: normal;
+  }
+
   .result-program-details-row .eligible-members-container {
     margin-top: 0;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .result-program-details-row .eligible-members-label {
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .result-program-details-row .eligible-members-tags {
+    flex-wrap: wrap;
   }
 
   .result-program-more-info-button a,

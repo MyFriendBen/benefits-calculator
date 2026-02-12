@@ -127,11 +127,11 @@ export function ResultsCard({
             </div>
           </div>
           <div className="result-program-details-row">
-            <div className="result-program-details">
-              <EligibleMemberTags members={eligibleMembers} />
-            </div>
             <ResultsCardDetail {...detail1} />
             {detail2 !== undefined && <ResultsCardDetail {...detail2} />}
+            <div className="result-program-details result-program-eligible-column">
+              <EligibleMemberTags members={eligibleMembers} />
+            </div>
           </div>
         </>
       )}
