@@ -22,36 +22,9 @@ describe('NPSFollowup', () => {
     jest.clearAllMocks();
   });
 
-  describe('score-based prompts', () => {
-    it('shows "What did we do well?" for score 9', () => {
-      renderFollowup({ selectedScore: 9 });
-      expect(screen.getByText('What did we do well?')).toBeInTheDocument();
-    });
-
-    it('shows "What did we do well?" for score 10', () => {
-      renderFollowup({ selectedScore: 10 });
-      expect(screen.getByText('What did we do well?')).toBeInTheDocument();
-    });
-
-    it('shows "What could we improve?" for score 7', () => {
-      renderFollowup({ selectedScore: 7 });
-      expect(screen.getByText('What could we improve?')).toBeInTheDocument();
-    });
-
-    it('shows "What could we improve?" for score 8', () => {
-      renderFollowup({ selectedScore: 8 });
-      expect(screen.getByText('What could we improve?')).toBeInTheDocument();
-    });
-
-    it('shows "What disappointed you?" for score 6', () => {
-      renderFollowup({ selectedScore: 6 });
-      expect(screen.getByText('What disappointed you?')).toBeInTheDocument();
-    });
-
-    it('shows "What disappointed you?" for score 1', () => {
-      renderFollowup({ selectedScore: 1 });
-      expect(screen.getByText('What disappointed you?')).toBeInTheDocument();
-    });
+  it('shows the followup prompt', () => {
+    renderFollowup();
+    expect(screen.getByText("What's the main reason for your score?")).toBeInTheDocument();
   });
 
   describe('score pill', () => {

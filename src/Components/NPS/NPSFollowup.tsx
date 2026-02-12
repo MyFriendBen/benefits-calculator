@@ -12,18 +12,6 @@ type NPSFollowupProps = {
   isSubmitting?: boolean;
 };
 
-function getPromptMessageId(score: number): string {
-  if (score >= 9) return 'nps.followup-prompt-promoter';
-  if (score >= 7) return 'nps.followup-prompt-passive';
-  return 'nps.followup-prompt-detractor';
-}
-
-function getDefaultPrompt(score: number): string {
-  if (score >= 9) return 'What did we do well?';
-  if (score >= 7) return 'What could we improve?';
-  return 'What disappointed you?';
-}
-
 /**
  * Followup textarea shown after a user selects an NPS score.
  * Used by both floating and inline variants.
@@ -51,8 +39,8 @@ export default function NPSFollowup({ selectedScore, reason, setReason, onSubmit
       </span>
       <p id="nps-followup-prompt" className="nps-followup-prompt">
         <FormattedMessage
-          id={getPromptMessageId(selectedScore)}
-          defaultMessage={getDefaultPrompt(selectedScore)}
+          id="nps.followup-prompt"
+          defaultMessage="What's the main reason for your score?"
         />
       </p>
       <textarea
