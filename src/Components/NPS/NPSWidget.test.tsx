@@ -52,7 +52,7 @@ describe('NPSWidget', () => {
 
     it('calls useFeatureFlag with nps_survey', () => {
       mockUseFeatureFlag.mockReturnValue(false);
-      mockUseExperiment.mockReturnValue('off');
+      mockUseExperiment.mockReturnValue(null);
 
       render(<NPSWidget uuid="test-uuid" />);
 
@@ -61,9 +61,18 @@ describe('NPSWidget', () => {
   });
 
   describe('experiment variant routing', () => {
-    it('renders nothing when variant is off', () => {
+    it('renders nothing when variant is null (not configured)', () => {
       mockUseFeatureFlag.mockReturnValue(true);
-      mockUseExperiment.mockReturnValue('off');
+      mockUseExperiment.mockReturnValue(null);
+
+      const { container } = render(<NPSWidget uuid="test-uuid" />);
+
+      expect(container.firstChild).toBeNull();
+    });
+
+    it('renders nothing for unknown variant', () => {
+      mockUseFeatureFlag.mockReturnValue(true);
+      mockUseExperiment.mockReturnValue('unknown');
 
       const { container } = render(<NPSWidget uuid="test-uuid" />);
 
@@ -108,13 +117,13 @@ describe('NPSWidget', () => {
       expect(screen.getByText(/my-test-uuid/)).toBeInTheDocument();
     });
 
-    it('calls useExperiment with correct parameters', () => {
+    it('calls useExperiment with experiment name and uuid', () => {
       mockUseFeatureFlag.mockReturnValue(true);
-      mockUseExperiment.mockReturnValue('off');
+      mockUseExperiment.mockReturnValue(null);
 
       render(<NPSWidget uuid="test-uuid" />);
 
-      expect(mockUseExperiment).toHaveBeenCalledWith('npsVariant', 'off');
+      expect(mockUseExperiment).toHaveBeenCalledWith('npsVariant', 'test-uuid');
     });
   });
 });

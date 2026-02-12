@@ -12,20 +12,19 @@ type NPSWidgetProps = {
  *
  * Gating:
  * - Feature flag 'nps_survey' must be enabled (top-level kill switch)
- * - Experiment 'npsVariant' controls which UI variant to show
+ * - Experiment 'npsVariant' deterministically assigns a variant based on uuid
  *
  * Variants:
  * - 'floating': Bottom-right floating widget
  * - 'inline': Full-width section at bottom of results
- * - 'off': Don't show NPS (default, used by white labels that opt out)
  *
- * To test variants, add ?npsVariant=floating or ?npsVariant=inline to the URL
+ * To test a specific variant, add ?npsVariant=floating or ?npsVariant=inline to the URL
  */
 export default function NPSWidget({ uuid }: NPSWidgetProps) {
   const isNPSEnabled = useFeatureFlag('nps_survey');
-  const variant = useExperiment('npsVariant', 'off');
+  const variant = useExperiment('npsVariant', uuid);
 
-  if (!isNPSEnabled || variant === 'off') {
+  if (!isNPSEnabled || !variant) {
     return null;
   }
 
@@ -33,5 +32,9 @@ export default function NPSWidget({ uuid }: NPSWidgetProps) {
     return <NPSFloating uuid={uuid} />;
   }
 
-  return <NPSInline uuid={uuid} />;
+  if (variant === 'inline') {
+    return <NPSInline uuid={uuid} />;
+  }
+
+  return null;
 }

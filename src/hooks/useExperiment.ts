@@ -2,77 +2,89 @@ import { useContext, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Context } from '../Components/Wrapper/Wrapper';
 
-export type NPSVariant = 'floating' | 'inline' | 'off';
-
-type ExperimentsConfig = {
-  npsVariant?: {
-    default: NPSVariant;
-    [key: string]: NPSVariant | undefined;
-  };
+type ExperimentConfig = {
+  variants: string[];
 };
+
+type ExperimentsConfig = Record<string, ExperimentConfig>;
 
 const STORAGE_PREFIX = 'experiment_override_';
 
-const VALID_NPS_VARIANTS: NPSVariant[] = ['floating', 'inline', 'off'];
+/**
+ * Simple deterministic hash (djb2) for splitting users into variant buckets.
+ * Same input always produces the same output.
+ */
+function hashString(str: string): number {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 33) ^ str.charCodeAt(i);
+  }
+  return hash >>> 0; // unsigned 32-bit
+}
 
 /**
- * Hook for A/B test experiments with override support for testing.
+ * Hook for A/B test experiments with deterministic variant assignment.
  *
- * Priority order:
- * 1. URL parameter (e.g., ?npsVariant=floating)
- * 2. localStorage override (for persistent testing)
- * 3. Backend config via experiments config
+ * Uses a seed (typically uuid) to deterministically assign users to variants
+ * defined in backend config. Same seed always gets the same variant.
+ *
+ * Priority:
+ * 1. URL parameter override (e.g., ?npsVariant=floating)
+ * 2. localStorage override (for persistent dev/QA testing)
+ * 3. Backend config variants + seed-based deterministic assignment
+ *
+ * @param experimentName - The experiment key in backend config (e.g., 'npsVariant')
+ * @param seed - Stable identifier (e.g., uuid) for deterministic assignment
+ * @returns The assigned variant string, or null if not configured/assigned
  *
  * To test variants:
- * - URL: Add ?npsVariant=floating or ?npsVariant=inline to the URL
+ * - URL: ?npsVariant=floating or ?npsVariant=inline
  * - localStorage: localStorage.setItem('experiment_override_npsVariant', 'floating')
- * - Clear override: localStorage.removeItem('experiment_override_npsVariant')
+ * - Clear: localStorage.removeItem('experiment_override_npsVariant')
  */
-export function useExperiment(
-  experimentName: 'npsVariant',
-  defaultValue: NPSVariant,
-): NPSVariant {
+export function useExperiment(experimentName: string, seed?: string): string | null {
   const { config } = useContext(Context);
   const [searchParams] = useSearchParams();
 
-  const variant = useMemo(() => {
-    // 1. Check URL parameter first (highest priority)
+  return useMemo(() => {
+    const experiments = config?.experiments as ExperimentsConfig | undefined;
+    const variants = experiments?.[experimentName]?.variants;
+
+    // 1. URL parameter override (highest priority)
     const urlOverride = searchParams.get(experimentName);
-    if (urlOverride && VALID_NPS_VARIANTS.includes(urlOverride as NPSVariant)) {
-      return urlOverride as NPSVariant;
+    if (urlOverride) {
+      if (!variants || variants.includes(urlOverride)) {
+        return urlOverride;
+      }
     }
 
-    // 2. Check localStorage override
+    // 2. localStorage override
     try {
       const storageKey = `${STORAGE_PREFIX}${experimentName}`;
       const localOverride = localStorage.getItem(storageKey);
-      if (localOverride && VALID_NPS_VARIANTS.includes(localOverride as NPSVariant)) {
-        return localOverride as NPSVariant;
+      if (localOverride) {
+        if (!variants || variants.includes(localOverride)) {
+          return localOverride;
+        }
       }
     } catch {
       // localStorage may be unavailable in private browsing
     }
 
-    // 3. Fall back to backend experiments config
-    try {
-      const experiments = config?.experiments as ExperimentsConfig | undefined;
-      const experimentConfig = experiments?.[experimentName];
-      if (experimentConfig) {
-        return experimentConfig.default ?? defaultValue;
-      }
-      return defaultValue;
-    } catch {
-      return defaultValue;
+    // 3. Backend config + seed-based deterministic assignment
+    if (variants && variants.length > 0 && seed) {
+      const index = hashString(seed) % variants.length;
+      return variants[index];
     }
-  }, [experimentName, defaultValue, config, searchParams]);
 
-  return variant;
+    return null;
+  }, [experimentName, seed, config, searchParams]);
 }
 
 /**
- * Helper to set a persistent experiment override (for dev/QA use)
+ * Helper to set a persistent experiment override (for dev/QA use).
  */
-export function setExperimentOverride(experimentName: 'npsVariant', value: NPSVariant): void {
+export function setExperimentOverride(experimentName: string, value: string): void {
   try {
     localStorage.setItem(`${STORAGE_PREFIX}${experimentName}`, value);
   } catch {
@@ -81,9 +93,9 @@ export function setExperimentOverride(experimentName: 'npsVariant', value: NPSVa
 }
 
 /**
- * Helper to clear an experiment override
+ * Helper to clear an experiment override.
  */
-export function clearExperimentOverride(experimentName: 'npsVariant'): void {
+export function clearExperimentOverride(experimentName: string): void {
   try {
     localStorage.removeItem(`${STORAGE_PREFIX}${experimentName}`);
   } catch {
