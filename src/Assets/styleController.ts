@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export type ThemeName = 'default' | 'twoOneOne' | 'twoOneOneNC' | 'co_energy' | 'nc_lanc';
 
@@ -385,6 +385,14 @@ function generateMuiOverides(theme: ITheme) {
           },
         },
       },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            fontSize: '0.875rem',
+            fontFamily: 'var(--font-body)',
+          },
+        },
+      },
       MuiSelect: {
         styleOverrides: {
           select: {
@@ -402,9 +410,11 @@ export default function useStyle(initialStyle: ThemeName): ThemeReturnType {
 
   const theme = themes[themeName];
 
-  for (const [key, value] of Object.entries(theme.cssVariables)) {
-    document.documentElement.style.setProperty(key, value);
-  }
+  useEffect(() => {
+    for (const [key, value] of Object.entries(theme.cssVariables)) {
+      document.documentElement.style.setProperty(key, value);
+    }
+  }, [themeName]);
 
   const styleOverrides = generateMuiOverides(theme);
 

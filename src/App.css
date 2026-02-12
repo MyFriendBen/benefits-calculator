@@ -26,6 +26,16 @@
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+@media (max-width: 767px) {
+  .benefits-form {
+    background-color: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 1rem;
+    margin-bottom: 0;
+  }
+}
+
 .app {
   flex: 1;
   display: flex;
@@ -80,19 +90,6 @@
   color: var(--primary-color);
 }
 
-/* text input and select font sizing */
-.MuiInputBase-root,
-.MuiInputBase-input,
-.MuiSelect-select {
-  font-size: 0.875rem !important;
-  font-family: var(--font-body) !important;
-}
-
-.MuiInputLabel-root {
-  font-size: 0.875rem !important;
-  font-family: var(--font-body) !important;
-}
-
 /* text input outline in a focus state */
 .MuiOutlinedInput-root.MuiInputBase-formControl.Mui-focused
   .MuiOutlinedInput-notchedOutline.MuiOutlinedInput-notchedOutline {
@@ -127,12 +124,6 @@
   margin: 0;
 }
 
-.content-max-width {
-  max-width: 900px;
-  margin: 0 auto;
-  width: 100%;
-}
-
 .secondary-heading {
   font-family: var(--font-body);
   color: black;
@@ -140,14 +131,9 @@
 
 /* Mobile responsive typography */
 @media (max-width: 767px) {
-
   .sub-header,
   h1.sub-header {
     font-size: 1.25rem;
-  }
-
-  .question-label {
-    font-size: 1rem;
   }
 }
 
