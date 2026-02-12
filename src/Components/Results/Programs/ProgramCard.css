@@ -193,6 +193,7 @@ h1.header-text-bottom {
     display: flex;
     align-items: flex-start;
     width: 100%;
+    background-color: var(--secondary-background-color);
   }
 
   .result-program-details-row > .result-program-details {
