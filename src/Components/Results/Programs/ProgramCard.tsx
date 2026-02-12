@@ -217,18 +217,8 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
       const age = calcAge(member);
 
       if (memberIndex === 0) {
-        // Head of household
         return {
-          label: (
-            <FormattedMessage
-              id="programCard.eligibleMember.yourself"
-              defaultMessage="{relationship}, {age}"
-              values={{
-                relationship: <FormattedMessage id="relationshipOptions.yourself" defaultMessage="Yourself" />,
-                age,
-              }}
-            />
-          ),
+          label: <FormattedMessage id="programCard.eligibleMember.you" defaultMessage="You" />,
         };
       }
 

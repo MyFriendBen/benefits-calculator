@@ -191,8 +191,8 @@ describe('ProgramCard - Eligibility Tags', () => {
 
       renderProgramCard(program, configWithFlag(true), twoMemberFormData);
       expect(screen.getByText('Eligible:')).toBeInTheDocument();
-      // Should show "Yourself" tag for head of household
-      expect(screen.getByText(/Yourself/)).toBeInTheDocument();
+      // Should show "You" tag for head of household
+      expect(screen.getByText('You')).toBeInTheDocument();
     });
 
     it('should show tags for all eligible members when all are eligible', () => {
@@ -205,7 +205,7 @@ describe('ProgramCard - Eligibility Tags', () => {
 
       renderProgramCard(program, configWithFlag(true), twoMemberFormData);
       expect(screen.getByText('Eligible:')).toBeInTheDocument();
-      expect(screen.getByText(/Yourself/)).toBeInTheDocument();
+      expect(screen.getByText('You')).toBeInTheDocument();
       expect(screen.getByText(/Child/)).toBeInTheDocument();
     });
 
