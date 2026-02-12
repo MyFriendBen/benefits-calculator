@@ -57,7 +57,7 @@
   font-family: 'Open Sans', sans-serif;
   font-size: 13px;
   font-weight: 500;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
 }
 
 .nps-followup-prompt {
@@ -69,8 +69,9 @@
 }
 
 .nps-followup-textarea {
+  display: block;
   width: 100%;
-  margin-top: 8px;
+  margin: 8px 0 0;
   padding: 10px 12px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
