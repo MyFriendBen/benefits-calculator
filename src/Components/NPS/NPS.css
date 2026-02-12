@@ -127,7 +127,7 @@
   background: var(--secondary-background-color, #FBF9FC);
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-  z-index: 1000;
+  z-index: 900;
   border-top: 4px solid var(--secondary-color, #B85A27);
   animation: npsSlideIn 0.3s ease-out;
 }
