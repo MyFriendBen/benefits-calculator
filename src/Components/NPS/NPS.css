@@ -163,13 +163,13 @@
   width: 320px;
   background: var(--secondary-background-color, #FBF9FC);
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 25%);
   z-index: 900;
   border-top: 4px solid var(--secondary-color, #B85A27);
-  animation: npsSlideIn 0.3s ease-out;
+  animation: nps-slide-in 0.3s ease-out;
 }
 
-@keyframes npsSlideIn {
+@keyframes nps-slide-in {
   from {
     opacity: 0;
     transform: translateY(20px);
@@ -257,7 +257,7 @@
 }
 
 /* Responsive */
-@media (max-width: 600px) {
+@media (width <= 600px) {
   .nps-floating {
     width: calc(100% - 32px);
     right: 16px;
