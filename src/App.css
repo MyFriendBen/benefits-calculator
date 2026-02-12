@@ -122,9 +122,6 @@
 .main-max-width {
   max-width: 100%;
   margin: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
 }
 
 .secondary-heading {
