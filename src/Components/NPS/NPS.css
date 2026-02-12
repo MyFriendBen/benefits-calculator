@@ -61,7 +61,7 @@
 }
 
 .nps-followup-prompt {
-  margin: 0 0 12px;
+  margin: 0;
   font-family: 'Open Sans', sans-serif;
   font-size: 16px;
   color: var(--primary-color, #1a1a2e);
@@ -70,6 +70,7 @@
 
 .nps-followup-textarea {
   width: 100%;
+  margin-top: 8px;
   padding: 10px 12px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
