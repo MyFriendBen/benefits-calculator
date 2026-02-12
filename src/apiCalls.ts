@@ -25,7 +25,7 @@ export const configEndpoint = `${domain}/api/configuration/`;
 const eligibilityEndpoint = `${domain}/api/eligibility/`;
 const validationEndpoint = `${domain}/api/validations/`;
 const authTokenEndpoint = `${domain}/api/auth-token/`;
-const npsEndpoint = `${domain}/api/nps/`;
+const getNpsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/nps/`;
 
 export type ScreenApiResponse = ApiFormDataReadOnly & ApiFormData;
 
@@ -227,9 +227,10 @@ type NPSReasonData = {
 };
 
 const postNPSScore = async (data: NPSScoreData) => {
-  return fetch(npsEndpoint, {
+  const { uuid, ...body } = data;
+  return fetch(getNpsEndpoint(uuid), {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify(body),
     headers: header,
   }).then((response) => {
     if (!response.ok) {
@@ -240,9 +241,10 @@ const postNPSScore = async (data: NPSScoreData) => {
 };
 
 const patchNPSReason = async (data: NPSReasonData) => {
-  return fetch(npsEndpoint, {
+  const { uuid, ...body } = data;
+  return fetch(getNpsEndpoint(uuid), {
     method: 'PATCH',
-    body: JSON.stringify(data),
+    body: JSON.stringify(body),
     headers: header,
   }).then((response) => {
     if (!response.ok) {
