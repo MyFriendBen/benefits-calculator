@@ -68,6 +68,9 @@ export type ApiHouseholdMember = {
   relationship: string | null;
   student: boolean | null;
   student_full_time?: boolean | null;
+  student_job_training_program?: boolean | null;
+  student_has_work_study?: boolean | null;
+  student_works_20_plus_hrs?: boolean | null;
   pregnant: boolean | null;
   unemployed?: boolean | null;
   worked_in_last_18_mos?: boolean | null;
