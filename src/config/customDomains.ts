@@ -44,7 +44,7 @@ import customDomainsJson from './customDomains.json';
 type CustomDomainConfig = {
   /** The white label identifier (must exist in ALL_VALID_WHITE_LABELS) */
   whiteLabel: string;
-  /** The default path to append when visiting the root. Empty string means use WHITE_LABEL_DEFAULT_PATH. */
+  /** The default path to append when visiting the root. Empty string redirects to the white label root (e.g., /cesn), which then uses WhiteLabelRouter's default path logic. */
   defaultPath: string;
 };
 
@@ -57,7 +57,7 @@ const CUSTOM_DOMAINS: Record<string, CustomDomainConfig> = customDomainsJson;
  */
 function validateCustomDomains(): void {
   Object.entries(CUSTOM_DOMAINS).forEach(([domain, config]) => {
-    if (!ALL_VALID_WHITE_LABELS.includes(config.whiteLabel as any)) {
+    if (!(ALL_VALID_WHITE_LABELS as readonly string[]).includes(config.whiteLabel)) {
       console.error(
         `[customDomains] Invalid white label "${config.whiteLabel}" for domain "${domain}". ` +
           `Valid white labels: ${ALL_VALID_WHITE_LABELS.join(', ')}`

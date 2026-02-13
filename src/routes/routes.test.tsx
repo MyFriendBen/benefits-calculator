@@ -99,7 +99,6 @@ describe('Route Configuration', () => {
       const paths = globalRoutes
         .map((route) => route.path)
         .filter((path) => typeof path === 'string' && path !== '' && path !== '*')
-        .filter((path) => !path.startsWith('co_energy_calculator')) // legacy redirect route
         .filter(Boolean) as string[];
 
       // Verify each path uses kebab-case (only lowercase, numbers, and hyphens)
