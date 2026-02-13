@@ -7,7 +7,7 @@
 .button211 {
   display: flex;
   background-color: var(--primary-color);
-  border-radius: 1.8rem;
+  border-radius: 0.75rem;
   color: white;
   font-family: 'Roboto Slab', serif;
   font-weight: 700;

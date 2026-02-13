@@ -88,7 +88,7 @@
 
 .citizenship-option-button.MuiButton-root {
   padding: 0.375rem 0.625rem;
-  border-radius: 1.5625rem; /* Oval/pill shape */
+  border-radius: 0.75rem;
   border: 1px solid var(--primary-color);
   background-color: #ffffff;
   color: var(--primary-color);
@@ -172,7 +172,7 @@
 }
 
 .citizenship-dropdown .MuiOutlinedInput-root {
-  border-radius: 1.5625rem; /* Oval/pill shape */
+  border-radius: 0.75rem;
   border: 1px solid var(--primary-color);
 }
 
