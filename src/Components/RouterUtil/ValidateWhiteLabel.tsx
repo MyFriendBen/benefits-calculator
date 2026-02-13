@@ -13,10 +13,13 @@ export default function ValidateWhiteLabel() {
   const location = useLocation();
 
   // Redirect legacy white label paths (e.g., /co_energy_calculator/* → /cesn/*)
+  // Uses window.location.replace() instead of <Navigate> to force a full page reload,
+  // ensuring the app initializes fresh with the correct white label config.
   if (whiteLabel && whiteLabel in LEGACY_WHITE_LABEL_REDIRECTS) {
     const newWhiteLabel = LEGACY_WHITE_LABEL_REDIRECTS[whiteLabel];
     const newPath = location.pathname.replace(new RegExp(`^/${whiteLabel}`), `/${newWhiteLabel}`);
-    return <Navigate to={`${newPath}${location.search}${location.hash}`} replace />;
+    window.location.replace(`${newPath}${location.search}${location.hash}`);
+    return null;
   }
 
   if (whiteLabel === undefined || !ALL_VALID_WHITE_LABELS.includes(whiteLabel as WhiteLabel)) {
