@@ -27,7 +27,6 @@ if (JSON.stringify(configuredLabels) !== JSON.stringify(allLabels)) {
   );
 }
 
-
 // Generate test cases from single source of truth
 const whiteLabels = ALL_VALID_WHITE_LABELS.map((path) => ({
   path,
