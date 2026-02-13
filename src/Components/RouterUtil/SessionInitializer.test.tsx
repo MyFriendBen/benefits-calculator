@@ -12,6 +12,7 @@ import { render } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import SessionInitializer from './SessionInitializer';
 import { Context } from '../Wrapper/Wrapper';
+import { ALL_VALID_WHITE_LABELS } from '../../Types/WhiteLabel';
 
 describe('SessionInitializer', () => {
   const mockSetWhiteLabel = jest.fn();
@@ -110,9 +111,7 @@ describe('SessionInitializer', () => {
     });
 
     it('should handle all valid white labels from URL', () => {
-      const validLabels = ['co', 'nc', 'ma', 'il', 'tx', 'co_energy_calculator'];
-
-      validLabels.forEach((label) => {
+      ALL_VALID_WHITE_LABELS.forEach((label) => {
         jest.clearAllMocks();
 
         render(

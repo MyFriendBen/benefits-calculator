@@ -5,13 +5,13 @@
  * across different tests to ensure consistency.
  */
 
-import { WHITE_LABELS, REFERRERS, STATES } from './constants';
+import { REFERRERS, STATES } from './constants';
 
 /**
  * Test user data by white label and referrer
  */
 export const testUsers = {
-  [WHITE_LABELS.NC]: {
+  nc: {
     zipCode: '27704',
     county: 'Durham County',
     householdSize: '2',
@@ -41,7 +41,7 @@ export const testUsers = {
   },
 
   // Template for CO white label
-  [WHITE_LABELS.CO]: {
+  co: {
     zipCode: '80401',
     county: 'Jefferson County',
     householdSize: '2',
