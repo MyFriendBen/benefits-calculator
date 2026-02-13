@@ -26,16 +26,6 @@ export const URL_PATTERNS = {
 };
 
 /**
- * White label identifiers - these identify the actual application instances
- */
-export const WHITE_LABELS = {
-  NC: 'nc',
-  CO: 'co',
-  MA: 'ma',
-  CO_ENERGY_CALCULATOR: 'cesn',
-};
-
-/**
  * Referrer identifiers - these identify referral sources, not white labels
  */
 export const REFERRERS = {
