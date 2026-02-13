@@ -4,41 +4,15 @@ import customDomainsJson from './customDomains.json';
 /**
  * Custom Domain Client-Side Redirect (FALLBACK ONLY)
  *
- * ⚠️ PRIMARY REDIRECT MECHANISM: Cloudflare Page Rules (configured in Cloudflare dashboard)
- * ⚠️ This code is a FALLBACK for cases where Cloudflare redirect fails
+ * Primary redirect mechanism is Cloudflare Page Rules (configured in Cloudflare dashboard).
+ * This code is a fallback for cases where Cloudflare redirect fails
+ * (e.g., local development, Cloudflare misconfiguration).
  *
- * Maps external domains to white-label routes. When a user visits a custom
- * domain, they should be redirected by Cloudflare at the edge. This client-side
- * redirect only runs if that fails (e.g., local development, Cloudflare misconfiguration).
+ * Maps external domains to white-label routes. Preserves path, query params, and hash.
+ * Handles both www and non-www variants automatically.
  *
- * @example
- * User visits: https://energysavings.colorado.gov/
- * Cloudflare redirects (301): https://energysavings.colorado.gov/cesn
- * If Cloudflare fails: This code redirects client-side
- *
- * @example
- * User visits: https://energysavings.colorado.gov/some/deep/path?lang=es#section
- * Redirects to: https://energysavings.colorado.gov/cesn/some/deep/path?lang=es#section
- *
- * ## Adding a New Custom Domain
- *
- * 1. Add Cloudflare Page Rule (primary):
- *    - URL: `yourdomain.com/*`
- *    - Setting: Forwarding URL (301) → `https://yourdomain.com/your-white-label/$1`
- *
- * 2. Add fallback config to customDomains.json:
- *    - Add entry: `"yourdomain.com": { "whiteLabel": "your-white-label", "defaultPath": "" }`
- *    - Ensure whiteLabel exists in ALL_VALID_WHITE_LABELS (src/Types/WhiteLabel.ts)
- *    - Both www and non-www variants are handled automatically
- *
- * ## Testing Locally
- *
- * To test custom domains locally, modify your `/etc/hosts` file:
- * ```
- * 127.0.0.1  energysavings.colorado.gov
- * 127.0.0.1  www.energysavings.colorado.gov
- * ```
- * Then visit http://energysavings.colorado.gov:3000 in your browser.
+ * @see customDomains.json for domain configuration
+ * @see PR #2052 for setup instructions (Cloudflare Page Rules, DNS, local testing)
  */
 
 type CustomDomainConfig = {
