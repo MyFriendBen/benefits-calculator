@@ -14,7 +14,7 @@
   margin-right: 1rem;
   display: flex;
   align-items: center;
-  border-radius: 0.5rem;
+  border-radius: 0.2rem;
   border: 2px solid var(--primary-color);
 }
 

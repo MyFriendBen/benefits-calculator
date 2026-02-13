@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { Context } from '../Wrapper/Wrapper';
 import { configEndpoint, header } from '../../apiCalls';
-import { ConfigApiResponse, ConfigValue } from '../../Types/Config';
+import { ConfigApiResponse, ConfigValue, FeatureFlags } from '../../Types/Config';
 import { Config } from '../../Types/Config';
 import { FormattedMessage } from 'react-intl';
 import { ReactComponent as Student } from '../../Assets/icons/General/OptionCard/Conditions/student.svg';
@@ -193,6 +193,27 @@ function transformConfigData(configData: ConfigApiResponse[]): Config {
     transformedConfig[name] = transformItem(configOptions);
   });
 
+  const mergedFlags: FeatureFlags = {};
+  for (const item of configData) {
+    if (item.feature_flags) {
+      // Warn in development if a flag is being overridden
+      if (process.env.NODE_ENV === 'development') {
+        for (const [key, value] of Object.entries(item.feature_flags)) {
+          if (key in mergedFlags && mergedFlags[key] !== value) {
+            console.warn(
+              `Feature flag '${key}' is defined in multiple config items with different values. ` +
+              `Previous: ${mergedFlags[key]}, Current: ${value}. Using current value from config '${item.name}'.`
+            );
+          }
+        }
+      }
+      Object.assign(mergedFlags, item.feature_flags);
+    }
+  }
+  if (Object.keys(mergedFlags).length > 0) {
+    transformedConfig._feature_flags = mergedFlags;
+  }
+
   return transformedConfig;
 }
 
@@ -294,6 +315,11 @@ export function useConfig<T>(name: string, defaultValue?: T): T {
   }
 
   return config[name] as T;
+}
+
+export function useFeatureFlag(flag: string): boolean {
+  const { config } = useContext(Context);
+  return config?._feature_flags?.[flag] ?? false;
 }
 
 export function useLocalizedLink(configKey: 'privacy_policy' | 'consent_to_contact') {

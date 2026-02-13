@@ -41,13 +41,13 @@
   font-weight: 100;
   line-height: normal;
   width: 50%;
-  padding: 1rem 2rem;
+  padding: 1.25rem 2rem;
 }
 
 .result-program-details-wrapper {
   display: flex;
   justify-content: space-between;
-  width: 45%;
+  width: 40%;
 }
 
 .result-program-details:only-child {
@@ -60,13 +60,49 @@
   line-height: normal;
   font-family: 'Roboto Slab', serif;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   padding: 1.25rem 2rem;
 }
 
 .result-program-more-info a {
   text-decoration: none;
   color: inherit;
+}
+
+/* Eligible member tags */
+.eligible-members-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.eligible-members-label {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #666;
+}
+
+.eligible-members-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.eligible-member-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--primary-color);
+  background-color: #e6e7e8;
+  border: none;
+  border-radius: 1rem;
+  white-space: nowrap;
 }
 
 .result-program-more-info-button a,
@@ -81,6 +117,7 @@
 
 .result-program-details strong {
   display: block;
+  margin-top: 0.5rem;
 }
 
 .result-program-subheader {
@@ -127,10 +164,11 @@ h1.header-text-bottom {
     position: relative;
     display: flex;
     align-items: center;
+    padding-right: 3.5rem;
   }
 
   .result-program-more-info {
-    width: 40%;
+    width: 45%;
     vertical-align: top;
     line-height: normal;
   }
@@ -148,8 +186,8 @@ h1.header-text-bottom {
   .result-program-more-info-button {
     position: absolute;
     top: 50%;
-    right: 1.5rem;
     transform: translateY(-50%);
+    right: 1.5rem;
   }
 
   .result-program-more-info-button a,
@@ -159,6 +197,7 @@ h1.header-text-bottom {
 
   .result-program-details strong {
     display: inline-block;
+    font-size: 1.05rem;
   }
 }
 
@@ -172,11 +211,15 @@ h1.header-text-bottom {
     margin-left: 0;
   }
 
+  .result-program-mobile-header {
+    padding: 1rem;
+  }
+
   .result-program-more-info-wrapper {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
+    align-items: flex-start;
+    padding: 0;
   }
 
   .result-program-more-info {
@@ -189,10 +232,15 @@ h1.header-text-bottom {
   .result-program-more-info-button {
     flex-shrink: 0;
     margin-left: 1rem;
+    margin-top: 0.1rem;
   }
 
   .result-program-more-info-button a {
     display: inline-block;
+  }
+
+  .result-program-mobile-header .eligible-members-container {
+    margin-top: 0.75rem;
   }
 
   .result-program-details {
