@@ -1,4 +1,4 @@
-import { useParams } from 'react-router';
+import { useParams, useLocation } from 'react-router';
 import { FormattedMessage, useIntl } from 'react-intl';
 import LinearProgress from '@mui/material/LinearProgress';
 import { STARTING_QUESTION_NUMBER, useStepDirectory } from '../../Assets/stepDirectory';
@@ -17,7 +17,9 @@ const ProgressBar = ({ step }: ProgressBarProps) => {
   const stepDirectory = useStepDirectory();
   const totalSteps = stepDirectory.length + STARTING_QUESTION_NUMBER;
   const { id, uuid } = useParams();
+  const location = useLocation();
   const intl = useIntl();
+  const translateNumber = useTranslateNumber();
 
   const progressBarTranslatedAL = {
     id: 'progressBar.ariaLabel',
@@ -28,7 +30,29 @@ const ProgressBar = ({ step }: ProgressBarProps) => {
     dataLayerPush({ event: 'config', user_id: uuid });
   }, [uuid]);
 
-  let stepValue = step ?? id ?? 0;
+  // Extract step number from URL pathname (e.g., /step-1, /step-3, etc.)
+  const getStepFromPath = () => {
+    const match = location.pathname.match(/step-(\d+)/);
+    return match ? Number(match[1]) : null;
+  };
+
+  let stepValue = step ?? id ?? getStepFromPath() ?? 0;
+
+  const stepText = useReorderLanguage(
+    [
+      <FormattedMessage id="confirmation.return-stepLabel" defaultMessage="Step " key="0" />,
+      translateNumber(stepValue),
+      <FormattedMessage id="confirmation.return-ofLabel" defaultMessage=" of " key="1" />,
+      translateNumber(totalSteps),
+    ],
+    { my: [0, 3, 2, 1] },
+  );
+
+  // Don't render progress bar if we're not on a valid step page
+  if (!stepValue || Number(stepValue) <= 0) {
+    return null;
+  }
+
   let progressPercentage: number = ((Number(stepValue) - 1) / (totalSteps - 1)) * 100;
 
   const progressBarStyles = {
@@ -41,17 +65,6 @@ const ProgressBar = ({ step }: ProgressBarProps) => {
       borderRadius: '500rem;',
     },
   };
-
-  const translateNumber = useTranslateNumber();
-  const stepText = useReorderLanguage(
-    [
-      <FormattedMessage id="confirmation.return-stepLabel" defaultMessage="Step " key="0" />,
-      translateNumber(stepValue),
-      <FormattedMessage id="confirmation.return-ofLabel" defaultMessage=" of " key="1" />,
-      translateNumber(totalSteps),
-    ],
-    { my: [0, 3, 2, 1] },
-  );
 
   return (
     <aside className="progress-bar-container">

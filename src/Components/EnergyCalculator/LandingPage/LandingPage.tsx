@@ -11,7 +11,7 @@ import { usePageTitle } from '../../Common/usePageTitle';
 
 const LandingPage = () => {
 
-  usePageTitle(OTHER_PAGE_TITLES.energyCalculatorLandingPage, 'co_energy_calculator');
+  usePageTitle(OTHER_PAGE_TITLES.energyCalculatorLandingPage, 'cesn');
 
   const homeownerQueryString = useQueryString({ path: null });
   const renterQueryString = useQueryString({ path: 'renter' });
@@ -59,7 +59,7 @@ const LandingPage = () => {
           key="homeownerCard"
           sx={{ width: '15rem' }}
           className="card-action-area"
-          href={`/co_energy_calculator/step-1${homeownerQueryString}`}
+          href={`/cesn/step-1${homeownerQueryString}`}
         >
           <Card className="option-card">
             <Stack direction="column" justifyContent="center" sx={{ flex: 1 }}>
@@ -76,7 +76,7 @@ const LandingPage = () => {
           key="renterCard"
           sx={{ width: '15rem' }}
           className="card-action-area"
-          href={`/co_energy_calculator/step-1${renterQueryString}`}
+          href={`/cesn/step-1${renterQueryString}`}
         >
           <Card className="option-card">
             <Stack direction="column" justifyContent="center" sx={{ flex: 1 }}>

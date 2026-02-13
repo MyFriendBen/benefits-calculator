@@ -162,6 +162,13 @@ const themes: Themes = {
   },
 };
 
+// Dynamically generate valid theme names from the themes object
+export const VALID_THEMES = Object.keys(themes) as ThemeName[];
+
+export const isValidTheme = (theme: string): theme is ThemeName => {
+  return VALID_THEMES.includes(theme as ThemeName);
+};
+
 type ThemeReturnType = [ITheme, React.Dispatch<React.SetStateAction<ThemeName>>, any];
 
 function generateMuiOverides(theme: ITheme) {
