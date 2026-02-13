@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { EnergyCalculatorMember, FormData } from '../Types/FormData';
+import { EnergyCalculatorMember, FormData, StudentEligibility } from '../Types/FormData';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { ScreenApiResponse } from '../apiCalls';
 
@@ -170,6 +170,16 @@ export function useUpdateFormData() {
         };
       }
 
+      let studentEligibility: StudentEligibility | undefined = undefined;
+      if (member.student) {
+        studentEligibility = {
+          studentFullTime: member.student_full_time ?? false,
+          studentJobTrainingProgram: member.student_job_training_program ?? false,
+          studentHasWorkStudy: member.student_has_work_study ?? false,
+          studentWorks20PlusHrs: member.student_works_20_plus_hrs ?? false,
+        };
+      }
+
       updatedFormData.householdData.push({
         id: member.id,
         frontendId: member.frontend_id,
@@ -184,6 +194,7 @@ export function useUpdateFormData() {
           disabled: member.disabled ?? false,
           longTermDisability: member.long_term_disability ?? false,
         },
+        studentEligibility: studentEligibility,
         hasIncome: member.has_income ?? false,
         incomeStreams: incomes,
         energyCalculator: energyCalculator,

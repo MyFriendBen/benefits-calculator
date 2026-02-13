@@ -16,6 +16,17 @@ const TEST_CONFIG: Record<WhiteLabel, { name: string; skip?: boolean; skipReason
   tx: { name: 'Texas' },
 };
 
+// Validate that TEST_CONFIG is in sync with ALL_VALID_WHITE_LABELS
+const configuredLabels = Object.keys(TEST_CONFIG).sort();
+const allLabels = [...ALL_VALID_WHITE_LABELS].sort();
+if (JSON.stringify(configuredLabels) !== JSON.stringify(allLabels)) {
+  throw new Error(
+    `TEST_CONFIG is out of sync with ALL_VALID_WHITE_LABELS!\n` +
+      `Configured: ${configuredLabels.join(', ')}\n` +
+      `Expected: ${allLabels.join(', ')}`
+  );
+}
+
 // Generate test cases from single source of truth
 const whiteLabels = ALL_VALID_WHITE_LABELS.map((path) => ({
   path,
