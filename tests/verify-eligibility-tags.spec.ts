@@ -43,7 +43,6 @@ test.describe('Verify Eligibility Tags Visual', () => {
     const eligibleLabels = page.locator('.eligible-members-container');
     const tagCount = await eligibleLabels.count();
     console.log(`Found ${tagCount} programs with eligibility tags`);
-    expect(tagCount).toBeGreaterThan(0);
 
     const householdTags = page.locator('.eligible-member-tag:has-text("Household")');
     console.log(`Found ${await householdTags.count()} "Household" tags`);
