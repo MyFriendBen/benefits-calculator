@@ -609,7 +609,7 @@ const HouseholdMemberForm = () => {
   const displayHealthInsuranceBlock = () => {
     return (
       <div className="section-container">
-        <Stack className="section">
+        <Stack sx={{ padding: 0 }} className="section">
           {displayHealthCareQuestion()}
           <QuestionDescription>
             <FormattedMessage id="insurance.chooseAllThatApply" defaultMessage="Choose all that apply." />
