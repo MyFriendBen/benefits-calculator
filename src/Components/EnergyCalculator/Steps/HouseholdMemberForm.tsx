@@ -434,7 +434,7 @@ const ECHouseholdMemberForm = () => {
 
     return (
       <div className="section-container">
-        <Stack sx={{ padding: '3rem 0' }} className="section">
+        <Stack className="section">
           <QuestionQuestion>
             <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
           </QuestionQuestion>
