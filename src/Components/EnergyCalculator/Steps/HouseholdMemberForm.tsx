@@ -546,7 +546,7 @@ const ECHouseholdMemberForm = () => {
     // Get age status to conditionally show income disclaimer for 16+ users
     const { isUnder16 } = calculateCurrentAgeStatus();
     return (
-      <Box className="section-container" sx={{ padding: '3rem 0' }}>
+      <Box className="section-container">
         <div>
           <QuestionQuestion>
             <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
@@ -968,7 +968,7 @@ const ECHouseholdMemberForm = () => {
         {pageNumber !== 1 && createHOfHRelationQuestion()}
         {displayConditionsQuestion()}
         <div>
-          <Stack sx={{ margin: '3rem 0' }}>
+          <Stack sx={{ margin: '1.5rem 0' }}>
             {createIncomeRadioQuestion()}
             {fields.map((field, index) => {
               const selectedIncomeStreamSource = watch('incomeStreams')[index].incomeStreamName;
