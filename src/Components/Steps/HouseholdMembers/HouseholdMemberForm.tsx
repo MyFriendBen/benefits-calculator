@@ -609,7 +609,7 @@ const HouseholdMemberForm = () => {
   const displayHealthInsuranceBlock = () => {
     return (
       <div className="section-container">
-        <Stack sx={{ padding: '3rem 0' }} className="section">
+        <Stack className="section">
           {displayHealthCareQuestion()}
           <QuestionDescription>
             <FormattedMessage id="insurance.chooseAllThatApply" defaultMessage="Choose all that apply." />
@@ -641,7 +641,7 @@ const HouseholdMemberForm = () => {
       pageNumber === 1 ? 'Do any of these apply to you?' : 'Do any of these apply to them?';
 
     return (
-      <Box sx={{ margin: '3rem 0' }}>
+      <Box>
         <QuestionQuestion>
           <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
         </QuestionQuestion>
