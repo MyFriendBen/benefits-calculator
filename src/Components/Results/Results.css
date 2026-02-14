@@ -8,6 +8,29 @@
   flex: 1;
 }
 
+.results-back-save-strip {
+  background-color: #ffffff;
+  width: 100%;
+}
+
+.results-back-save-strip .results-back-save-btn-container {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+.results-card-wrapper {
+  max-width: var(--content-max-width);
+  width: 100%;
+  margin: 0 auto 1.5rem auto;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+}
+
+.benefits-form.results-card-body {
+  margin: 0;
+  padding: 0 1rem 1.5rem 1rem;
+  box-shadow: none;
+}
+
 .results-tab-container {
   background-color: var(--primary-color);
   padding: 1rem 1rem 0 1rem;
@@ -15,7 +38,7 @@
 
 .results-tab {
   color: var(--primary-color);
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   border-left: 2px solid var(--primary-color);
   border-right: 2px solid var(--primary-color);
   font-weight: bold;
@@ -34,13 +57,19 @@
   border-radius: 1rem 1rem 0 0;
 }
 
-.results-tab a h1 {
+.results-tab a .results-tab-label {
+  display: block;
   font-size: 1rem;
   margin: 0;
 }
 
 .results-tab a.active {
   background-color: white;
+}
+
+.results-tab a:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: -3px;
 }
 
 .info-circle {
@@ -111,7 +140,7 @@
   display: inline-flex;
   margin-left: 0.25rem;
   align-self: center;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   color: var(--secondary-color);
   font-size: 1.3rem;
@@ -150,7 +179,7 @@
   display: flex;
   justify-content: center;
   font-size: xxx-large;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-weight: 700;
 }
 
@@ -158,7 +187,7 @@
   display: flex;
   width: 8rem;
   font-size: large;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 400;
   margin: auto;
   margin-top: -0.5rem;
@@ -175,7 +204,7 @@
 
 .result-program-more-info-button {
   line-height: normal;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.1rem;
   margin: auto;
@@ -203,7 +232,7 @@
 }
 
 .result-program-subheader {
-  font: Open Sans, sans-serif;
+  font-family: var(--font-body);
 }
 
 .results-category-description {
@@ -226,6 +255,12 @@
   border-radius: 0.75rem;
 }
 
+.result-program-more-info-button a:focus-visible,
+.result-program-learn-more-button a:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
 /* DESKTOP - 768px and above (matches BREAKPOINTS.desktop in src/utils/breakpoints.ts) */
 @media (min-width: 768px) {
   .results-header-programs-count-text {
@@ -233,7 +268,7 @@
     border-radius: 0.2rem;
     background-color: var(--primary-color);
     color: white;
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--font-body);
     font-weight: 400;
     padding-left: 1rem;
     padding-right: 1rem;
@@ -244,7 +279,7 @@
 
   .results-data-cell {
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     margin: 0.5rem 1rem;
   }
 
@@ -264,25 +299,27 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0;
-    font-family: 'Roboto Slab', serif;
+    font-family: var(--font-heading);
     display: flex;
     margin-right: 0.5rem;
     align-items: center;
   }
 
   .results-header-values {
-    font-family: 'Roboto Slab', serif;
+    font-family: var(--font-heading);
     font-weight: 700;
+    font-size: 1.25rem;
     color: var(--primary-color);
-    border-top: 1.5px solid var(--primary-color);
     display: flex;
     justify-content: space-between;
   }
 
   .results-header-label {
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--font-body);
     font-weight: 400;
+    font-size: 0.85rem;
     color: var(--primary-color);
+    border-bottom: 1.5px solid var(--primary-color);
   }
 
   .result-program-container {
@@ -309,7 +346,7 @@
     height: 7rem;
     background-color: var(--primary-color);
     color: white;
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--font-body);
     font-weight: 400;
     text-align: center;
     padding-top: 0.75rem;
@@ -336,7 +373,7 @@
   .results-header-programs-count {
     font-size: 2.5rem !important;
     font-weight: 700;
-    font-family: 'Roboto Slab', serif;
+    font-family: var(--font-heading);
   }
 
   .results-header-programs-count-text > div:not(.results-header-programs-count) {
@@ -346,20 +383,20 @@
   }
 
   .results-header-values {
-    font-family: 'Roboto Slab', serif;
+    font-family: var(--font-heading);
     font-weight: 700;
     color: var(--primary-color);
-    border-bottom: 1.5px solid var(--primary-color);
     display: flex;
     justify-content: space-between;
     font-size: 1.35rem;
   }
 
   .results-header-label {
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--font-body);
     font-weight: 400;
     color: var(--primary-color);
     font-size: 0.75rem;
+    border-bottom: 1.5px solid var(--primary-color);
   }
 
   .category-heading-text-style {
@@ -388,7 +425,7 @@
     padding: 0.5rem 0.25rem;
   }
 
-  .results-tab a h1 {
+  .results-tab a .results-tab-label {
     font-size: .9rem;
     margin: 0;
   }

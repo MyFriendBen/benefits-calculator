@@ -609,7 +609,7 @@ const HouseholdMemberForm = () => {
   const displayHealthInsuranceBlock = () => {
     return (
       <div className="section-container">
-        <Stack sx={{ padding: '3rem 0' }} className="section">
+        <Stack sx={{ padding: 0 }} className="section">
           {displayHealthCareQuestion()}
           <QuestionDescription>
             <FormattedMessage id="insurance.chooseAllThatApply" defaultMessage="Choose all that apply." />
@@ -641,7 +641,7 @@ const HouseholdMemberForm = () => {
       pageNumber === 1 ? 'Do any of these apply to you?' : 'Do any of these apply to them?';
 
     return (
-      <Box sx={{ margin: '3rem 0' }}>
+      <Box sx={{ marginTop: '1.5rem' }}>
         <QuestionQuestion>
           <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
         </QuestionQuestion>
@@ -794,7 +794,7 @@ const HouseholdMemberForm = () => {
     const { isUnder16 } = calculateCurrentAgeStatus();
     
     return (
-      <Box className="section-container" sx={{ paddingTop: '3rem' }}>
+      <Box className="section-container">
         <div className="section">
           <QuestionQuestion>
             <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
@@ -1184,7 +1184,7 @@ const HouseholdMemberForm = () => {
         {displayHealthInsuranceBlock()}
         {displayConditionsQuestion()}
         <div>
-          <Stack sx={{ margin: '3rem 0' }}>
+          <Stack sx={{ margin: '1.5rem 0' }}>
             {createIncomeRadioQuestion()}
             {fields.map((field, index) => {
               const selectedIncomeStreamSource = watch('incomeStreams')[index].incomeStreamName;

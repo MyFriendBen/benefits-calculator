@@ -42,7 +42,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
             aria-label={`${intl.formatMessage(categoryImageAriaLabelProps)} ${iconTranslation}`}
             role="img"
           >
-            <IconComponent />
+            <IconComponent aria-hidden="true" />
           </div>
           <h2 className="category-heading-text-style">
             <ResultsTranslate translation={category.name} />

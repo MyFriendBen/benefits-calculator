@@ -9,7 +9,7 @@
   background-color: var(--primary-color);
   border-radius: 0.75rem;
   color: white;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.25rem;
   text-decoration: none;
@@ -34,13 +34,13 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-bottom: 3rem;
+  margin: 1.5rem 0;
 }
 
 .help-text-for-211-button-font {
   display: flex;
   justify-content: center;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 400;
   font-size: 1.75rem;
   margin-bottom: 0.5rem;

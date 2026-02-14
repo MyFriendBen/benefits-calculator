@@ -219,13 +219,14 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   });
 
   return (
-    <main className="program-page-container">
-      <section className="back-to-results-button-container">
+    <>
+      <div className="results-back-save-strip">
         <BackAndSaveButtons
           navigateToLink={backLink}
           BackToThisPageText={<FormattedMessage id="results.back-to-results-btn" defaultMessage="BACK TO RESULTS" />}
         />
-      </section>
+      </div>
+      <main className="benefits-form program-page-container">
       <div className="icon-header-est-values">
         {displayIconAndHeader(program)}
         {displayEstimatedValueAndTime(program)}
@@ -423,6 +424,7 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
         )}
       </div>
     </main>
+    </>
   );
 };
 

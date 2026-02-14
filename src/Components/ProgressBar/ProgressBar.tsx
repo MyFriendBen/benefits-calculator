@@ -67,16 +67,18 @@ const ProgressBar = ({ step }: ProgressBarProps) => {
   };
 
   return (
-    <aside className="progress-bar-container">
-      <LinearProgress
-        sx={progressBarStyles}
-        variant="determinate"
-        value={progressPercentage}
-        className="progress-bar rtl-mirror"
-        aria-label={intl.formatMessage(progressBarTranslatedAL)}
-      />
-      <p className="step-progress-title">{stepText}</p>
-    </aside>
+    <div className="progress-bar-wrapper">
+      <aside className="progress-bar-container">
+        <LinearProgress
+          sx={progressBarStyles}
+          variant="determinate"
+          value={progressPercentage}
+          className="progress-bar rtl-mirror"
+          aria-label={intl.formatMessage(progressBarTranslatedAL)}
+        />
+        <p className="step-progress-title">{stepText}</p>
+      </aside>
+    </div>
   );
 };
 

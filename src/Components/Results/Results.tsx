@@ -221,7 +221,7 @@ const Results = ({ type }: ResultsProps) => {
 
   if (loading) {
     return (
-      <main>
+      <main className="benefits-form">
         <div className="results-loading-container">
           <Loading />
         </div>
@@ -231,7 +231,7 @@ const Results = ({ type }: ResultsProps) => {
     return <ResultsError />;
   } else if (programId === undefined && type === 'help') {
     return (
-      <main>
+      <main className="benefits-form">
         <Grid container>
           <Grid item xs={12}>
             <BackAndSaveButtons
@@ -247,19 +247,23 @@ const Results = ({ type }: ResultsProps) => {
     );
   } else if (programId === undefined && (type === 'program' || type === 'need')) {
     return (
-      <main>
-        <ResultsContextProvider>
+      <ResultsContextProvider>
+        <main>
           <ResultsHeader type={type} />
-          <ResultsTabs />
-          {type === 'program' && <UrgentNeedBanner />}
-          <Grid container sx={{ p: { xs: '1rem', sm: '1rem' } }}>
-            <Grid item xs={12}>
-              {type === 'need' ? <Needs /> : <Programs />}
-            </Grid>
-          </Grid>
-          {!noHelpButton && <HelpButton />}
-        </ResultsContextProvider>
-      </main>
+          <div className="results-card-wrapper">
+            <ResultsTabs />
+            <div id="results-tabpanel" role="tabpanel" className="benefits-form results-card-body">
+              {type === 'program' && <UrgentNeedBanner />}
+              <Grid container sx={{ pt: '1rem' }}>
+                <Grid item xs={12}>
+                  {type === 'need' ? <Needs /> : <Programs />}
+                </Grid>
+              </Grid>
+              {!noHelpButton && <HelpButton />}
+            </div>
+          </div>
+        </main>
+      </ResultsContextProvider>
     );
   }
 
