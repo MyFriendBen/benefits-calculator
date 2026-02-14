@@ -26,10 +26,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 2.5rem;
-  width: 2.5rem;
+  height: 3rem;
+  width: 3rem;
   margin-right: 0.75rem;
   flex-shrink: 0;
+}
+
+.multi-select-icon svg,
+.multi-select-icon .option-card-icon,
+.multi-select-icon .option-card-lucide-icon {
+  height: 3rem;
+  width: 3rem;
 }
 
 
