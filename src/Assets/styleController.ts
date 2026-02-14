@@ -387,8 +387,17 @@ export default function useStyle(initialStyle: ThemeName): ThemeReturnType {
   const theme = themes[themeName];
 
   useEffect(() => {
+    // Clear all custom properties to prevent stale vars when switching themes
+    const style = document.documentElement.style;
+    for (let i = style.length - 1; i >= 0; i--) {
+      const prop = style[i];
+      if (prop.startsWith('--')) {
+        style.removeProperty(prop);
+      }
+    }
+
     for (const [key, value] of Object.entries(theme.cssVariables)) {
-      document.documentElement.style.setProperty(key, value);
+      style.setProperty(key, value);
     }
   }, [themeName]);
 

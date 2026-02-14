@@ -85,7 +85,7 @@
 }
 
 .eligible-members-label {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.8rem;
   font-weight: 400;
   color: #666;
@@ -101,7 +101,7 @@
   display: inline-flex;
   align-items: center;
   padding: 0.25rem 0.625rem;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--primary-color);
@@ -183,6 +183,8 @@ h1.header-text-bottom {
   .result-program-details {
     font-weight: 400;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     vertical-align: text-bottom;
   }
 

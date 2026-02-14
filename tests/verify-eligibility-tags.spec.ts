@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { runNcEndToEndTest, waitForResultsPageLoad, TEST_TIMEOUTS, VIEWPORTS } from './helpers';
 import { testUsers } from './helpers/utils/test-data';
-import { WHITE_LABELS, URL_PATTERNS } from './helpers/utils/constants';
+import { URL_PATTERNS } from './helpers/utils/constants';
 
 test.describe('Verify Eligibility Tags Visual', () => {
   test.setTimeout(TEST_TIMEOUTS.END_TO_END);
@@ -10,7 +10,7 @@ test.describe('Verify Eligibility Tags Visual', () => {
     await page.setViewportSize(VIEWPORTS.DESKTOP);
 
     // Complete the NC flow (2-member household: adult + child)
-    const result = await runNcEndToEndTest(page, testUsers[WHITE_LABELS.NC]);
+    const result = await runNcEndToEndTest(page, testUsers.nc);
     expect(result.success, `Failed at: ${result.step}`).toBeTruthy();
 
     // Make sure we're on the results page and it's fully loaded
@@ -31,6 +31,7 @@ test.describe('Verify Eligibility Tags Visual', () => {
     const programCards = page.locator('.result-program-container');
     const cardCount = await programCards.count();
     console.log(`Found ${cardCount} program cards`);
+    expect(cardCount).toBeGreaterThan(0);
 
     for (let i = 0; i < Math.min(cardCount, 4); i++) {
       await programCards.nth(i).screenshot({
@@ -42,6 +43,7 @@ test.describe('Verify Eligibility Tags Visual', () => {
     const eligibleLabels = page.locator('.eligible-members-container');
     const tagCount = await eligibleLabels.count();
     console.log(`Found ${tagCount} programs with eligibility tags`);
+    expect(tagCount).toBeGreaterThan(0);
 
     const householdTags = page.locator('.eligible-member-tag:has-text("Household")');
     console.log(`Found ${await householdTags.count()} "Household" tags`);
