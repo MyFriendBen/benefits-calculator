@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useMemo, useState } from 'react';
 
 export type ThemeName = 'default' | 'twoOneOne' | 'twoOneOneNC' | 'co_energy' | 'nc_lanc';
 
@@ -386,7 +386,7 @@ export default function useStyle(initialStyle: ThemeName): ThemeReturnType {
 
   const theme = themes[themeName];
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // Clear all custom properties to prevent stale vars when switching themes
     const style = document.documentElement.style;
     for (let i = style.length - 1; i >= 0; i--) {
@@ -401,7 +401,7 @@ export default function useStyle(initialStyle: ThemeName): ThemeReturnType {
     }
   }, [themeName]);
 
-  const styleOverrides = generateMuiOverides(theme);
+  const styleOverrides = useMemo(() => generateMuiOverides(theme), [themeName]);
 
   return [theme, setTheme, styleOverrides];
 }

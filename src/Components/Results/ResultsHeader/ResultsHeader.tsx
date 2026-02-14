@@ -74,7 +74,7 @@ const NeedsHeader = () => {
 
   return (
     <div className="results-needs-header-background">
-      <div className="results-needs-header" role="banner">
+      <div className="results-needs-header">
         <div className="results-needs-header-programs">{needs.length}</div>
         <div className="results-needs-header-programs-text">
           <FormattedMessage id="results.needHeader" defaultMessage="Resources Found" />

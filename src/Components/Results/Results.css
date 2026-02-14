@@ -38,7 +38,7 @@
 
 .results-tab {
   color: var(--primary-color);
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   border-left: 2px solid var(--primary-color);
   border-right: 2px solid var(--primary-color);
   font-weight: bold;
@@ -140,7 +140,7 @@
   display: inline-flex;
   margin-left: 0.25rem;
   align-self: center;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   color: var(--secondary-color);
   font-size: 1.3rem;
@@ -179,7 +179,7 @@
   display: flex;
   justify-content: center;
   font-size: xxx-large;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-weight: 700;
 }
 
@@ -187,7 +187,7 @@
   display: flex;
   width: 8rem;
   font-size: large;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 400;
   margin: auto;
   margin-top: -0.5rem;
@@ -204,7 +204,7 @@
 
 .result-program-more-info-button {
   line-height: normal;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.1rem;
   margin: auto;
@@ -232,7 +232,7 @@
 }
 
 .result-program-subheader {
-  font: Open Sans, sans-serif;
+  font-family: var(--font-body);
 }
 
 .results-category-description {
@@ -268,7 +268,7 @@
     border-radius: 0.2rem;
     background-color: var(--primary-color);
     color: white;
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--font-body);
     font-weight: 400;
     padding-left: 1rem;
     padding-right: 1rem;
@@ -299,14 +299,14 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0;
-    font-family: 'Roboto Slab', serif;
+    font-family: var(--font-heading);
     display: flex;
     margin-right: 0.5rem;
     align-items: center;
   }
 
   .results-header-values {
-    font-family: 'Roboto Slab', serif;
+    font-family: var(--font-heading);
     font-weight: 700;
     font-size: 1.25rem;
     color: var(--primary-color);
@@ -315,7 +315,7 @@
   }
 
   .results-header-label {
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--font-body);
     font-weight: 400;
     font-size: 0.85rem;
     color: var(--primary-color);
@@ -346,7 +346,7 @@
     height: 7rem;
     background-color: var(--primary-color);
     color: white;
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--font-body);
     font-weight: 400;
     text-align: center;
     padding-top: 0.75rem;
@@ -373,7 +373,7 @@
   .results-header-programs-count {
     font-size: 2.5rem !important;
     font-weight: 700;
-    font-family: 'Roboto Slab', serif;
+    font-family: var(--font-heading);
   }
 
   .results-header-programs-count-text > div:not(.results-header-programs-count) {
@@ -383,7 +383,7 @@
   }
 
   .results-header-values {
-    font-family: 'Roboto Slab', serif;
+    font-family: var(--font-heading);
     font-weight: 700;
     color: var(--primary-color);
     display: flex;
@@ -392,7 +392,7 @@
   }
 
   .results-header-label {
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--font-body);
     font-weight: 400;
     color: var(--primary-color);
     font-size: 0.75rem;

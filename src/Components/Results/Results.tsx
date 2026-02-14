@@ -248,19 +248,21 @@ const Results = ({ type }: ResultsProps) => {
   } else if (programId === undefined && (type === 'program' || type === 'need')) {
     return (
       <ResultsContextProvider>
-        <ResultsHeader type={type} />
-        <div className="results-card-wrapper">
-          <ResultsTabs />
-          <main className="benefits-form results-card-body">
-            {type === 'program' && <UrgentNeedBanner />}
-            <Grid container sx={{ pt: '1rem' }}>
-              <Grid item xs={12}>
-                {type === 'need' ? <Needs /> : <Programs />}
+        <main>
+          <ResultsHeader type={type} />
+          <div className="results-card-wrapper">
+            <ResultsTabs />
+            <div id="results-tabpanel" role="tabpanel" className="benefits-form results-card-body">
+              {type === 'program' && <UrgentNeedBanner />}
+              <Grid container sx={{ pt: '1rem' }}>
+                <Grid item xs={12}>
+                  {type === 'need' ? <Needs /> : <Programs />}
+                </Grid>
               </Grid>
-            </Grid>
-            {!noHelpButton && <HelpButton />}
-          </main>
-        </div>
+              {!noHelpButton && <HelpButton />}
+            </div>
+          </div>
+        </main>
       </ResultsContextProvider>
     );
   }

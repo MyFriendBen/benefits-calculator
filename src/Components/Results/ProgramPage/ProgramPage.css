@@ -3,7 +3,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
 }
 
 .program-icon-and-header {
@@ -53,7 +53,7 @@
 }
 
 .header-text-top {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   align-items: center;
   color: var(--secondary-color);
   height: 30%;
@@ -157,7 +157,7 @@
   text-align: left;
   list-style-type: none;
   font-size: 1rem;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   padding: 0 1rem;
 }
@@ -169,11 +169,11 @@ li.apply-info {
 .address-info {
   display: block;
   font-weight: 400;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
 }
 
 .address-info a {
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   color: var(--midBlue-color);
 }
 
@@ -195,7 +195,7 @@ li.apply-info {
   padding-top: 0.5rem;
   font-size: 1rem;
   font-weight: 400;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
 }
 
 .required-docs-link {
@@ -243,7 +243,7 @@ li.apply-info {
 }
 
 .navigator-name {
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   color: #293457;
 }

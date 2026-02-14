@@ -6,7 +6,7 @@ import ResultsTranslate from '../Translate/Translate';
 import { useContext, useMemo } from 'react';
 import { useMediaQuery } from '@mui/material';
 import './ProgramCard.css';
-import { findMemberEligibilityMember, findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
+import { findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
 import { FormattedMessageType } from '../../../Types/Questions';
 import { BREAKPOINTS } from '../../../utils/breakpoints';
 import { Context } from '../../Wrapper/Wrapper';
@@ -90,7 +90,7 @@ export function ResultsCard({
 
   return (
     <article className={containerClass}>
-      <div className="result-program-flags-container" aria-hidden="true">
+      <div className="result-program-flags-container">
         {flags.map((flag, i) => {
           return (
             <div className={flag.className} key={i}>
