@@ -1,8 +1,9 @@
 .progress-bar-container {
-  padding: 1rem 0;
+  padding: 1rem;
   max-width: var(--content-max-width);
   width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .progress-bar-wrapper {
