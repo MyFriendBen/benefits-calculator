@@ -46,15 +46,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 2rem;
-  width: 2rem;
+  height: 2.5rem;
+  width: 2.5rem;
   margin-right: 0.75rem;
   flex-shrink: 0;
 }
 
 .flat-rectangle-icon svg {
-  height: 3rem;
-  width: 3rem;
+  height: 3.5rem;
+  width: 3.5rem;
 }
 
 .flat-rectangle-card-text {
