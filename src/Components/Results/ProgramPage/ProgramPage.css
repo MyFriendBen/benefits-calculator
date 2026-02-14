@@ -1,9 +1,10 @@
-.program-page-container {
+.benefits-form.program-page-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-family: 'Roboto Slab', serif;
+  max-width: var(--main-max-width);
 }
 
 .program-icon-and-header {
