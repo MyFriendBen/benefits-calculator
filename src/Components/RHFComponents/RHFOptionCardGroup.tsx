@@ -1,7 +1,5 @@
 import { useIntl } from 'react-intl';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import { CardActionArea, Typography, Stack, Box } from '@mui/material';
+import { Card, CardActionArea } from '@mui/material';
 import { FieldValues, Path, PathValue, UseFormTrigger, UseFormSetValue, UseFormClearErrors } from 'react-hook-form';
 import '../OptionCardGroup/OptionCardGroup.css';
 import { Context } from '../Wrapper/Wrapper';
@@ -106,55 +104,12 @@ const RHFOptionCardGroup = <T extends FieldValues>({
           }}
         >
           <Card className={containerClass}>
-            <Stack
-              sx={{
-                flex: 1,
-                height: '100%',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                '@media (max-width: 38.125rem)': {
-                  flexDirection: 'row',
-                  justifyContent: 'flex-start',
-                  width: '100%',
-                },
-              }}
-            >
-              <CardContent
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: 0,
-                  '&:last-child': { paddingBottom: 0 },
-                  '@media (max-width: 38.125rem)': {
-                    flexDirection: 'row',
-                    width: '100%',
-                    padding: '0 0.3rem',
-                  },
-                }}
-              >
-                <Box className="option-card-icon">{options[optionKey].icon}</Box>
-                <Typography
-                  className={isSelected ? 'option-card-text' : ''}
-                  sx={{
-                    textAlign: 'center',
-                    fontSize: '0.875rem',
-                    margin: 0,
-                    padding: 0,
-                    '@media (max-width: 38.125rem)': {
-                      textAlign: 'left',
-                      fontSize: '1rem',
-                      lineHeight: 1.3,
-                      flex: 1,
-                    },
-                  }}
-                >
-                  {translatedAriaLabel}
-                </Typography>
-              </CardContent>
-            </Stack>
+            <div className="option-card-content">
+              <div className="option-card-icon">{options[optionKey].icon}</div>
+              <span className={`option-card-label ${isSelected ? 'option-card-text' : ''}`}>
+                {translatedAriaLabel}
+              </span>
+            </div>
           </Card>
         </CardActionArea>
       );
@@ -163,7 +118,7 @@ const RHFOptionCardGroup = <T extends FieldValues>({
     return <div className={finalClassname}>{optionCards}</div>;
   };
 
-  return <Stack sx={{ alignItems: 'center' }}>{fields && displayOptionCards(options, name, fields)}</Stack>;
+  return <div className="option-cards-wrapper">{fields && displayOptionCards(options, name, fields)}</div>;
 };
 
 export default RHFOptionCardGroup;
