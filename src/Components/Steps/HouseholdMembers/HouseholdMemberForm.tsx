@@ -794,7 +794,7 @@ const HouseholdMemberForm = () => {
     const { isUnder16 } = calculateCurrentAgeStatus();
     
     return (
-      <Box className="section-container" sx={{ paddingTop: '3rem' }}>
+      <Box className="section-container" sx={{ paddingTop: '1.5rem' }}>
         <div className="section">
           <QuestionQuestion>
             <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
