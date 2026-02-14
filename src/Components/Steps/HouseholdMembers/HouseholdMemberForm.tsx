@@ -641,7 +641,7 @@ const HouseholdMemberForm = () => {
       pageNumber === 1 ? 'Do any of these apply to you?' : 'Do any of these apply to them?';
 
     return (
-      <Box>
+      <Box sx={{ marginTop: '1.5rem' }}>
         <QuestionQuestion>
           <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
         </QuestionQuestion>
