@@ -10,7 +10,7 @@ import { ALL_VALID_WHITE_LABELS, WhiteLabel } from '../src/Types/WhiteLabel';
 const TEST_CONFIG: Record<WhiteLabel, { name: string; skip?: boolean; skipReason?: string }> = {
   nc: { name: 'North Carolina' },
   co: { name: 'Colorado' },
-  ma: { name: 'Massachusetts', skip: true, skipReason: 'has [PLACEHOLDER] content in CI' },
+  ma: { name: 'Massachusetts' },
   cesn: { name: 'Colorado Energy Savings Navigator' },
   il: { name: 'Illinois' },
   tx: { name: 'Texas' },
