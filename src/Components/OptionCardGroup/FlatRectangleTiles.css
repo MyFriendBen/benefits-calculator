@@ -46,15 +46,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 2.5rem;
-  width: 2.5rem;
+  height: 3rem;
+  width: 3rem;
   margin-right: 0.75rem;
   flex-shrink: 0;
 }
 
-.flat-rectangle-icon svg {
-  height: 3.5rem;
-  width: 3.5rem;
+.flat-rectangle-icon svg,
+.flat-rectangle-icon .option-card-icon,
+.flat-rectangle-icon .option-card-lucide-icon {
+  height: 3rem;
+  width: 3rem;
 }
 
 .flat-rectangle-card-text {
