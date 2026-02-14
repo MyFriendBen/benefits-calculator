@@ -1184,7 +1184,7 @@ const HouseholdMemberForm = () => {
         {displayHealthInsuranceBlock()}
         {displayConditionsQuestion()}
         <div>
-          <Stack sx={{ margin: '3rem 0' }}>
+          <Stack sx={{ margin: '1.5rem 0' }}>
             {createIncomeRadioQuestion()}
             {fields.map((field, index) => {
               const selectedIncomeStreamSource = watch('incomeStreams')[index].incomeStreamName;
