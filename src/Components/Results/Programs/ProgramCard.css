@@ -37,17 +37,18 @@
 
 .result-program-details {
   flex: 0.5 0.5;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 100;
   line-height: normal;
   width: 50%;
-  padding: 1.25rem 2rem;
+  padding: 1rem 0.5rem 1rem 1rem;
 }
 
 .result-program-details-wrapper {
   display: flex;
   justify-content: space-between;
-  width: 40%;
+  width: 45%;
+  gap: 0.5rem;
 }
 
 .result-program-details:only-child {
@@ -60,13 +61,18 @@
   line-height: normal;
   font-family: 'Roboto Slab', serif;
   font-weight: 700;
-  font-size: 1.15rem;
-  padding: 1.25rem 2rem;
+  font-size: 1.1rem;
+  padding: 1.25rem 1rem 1.25rem 1.5rem;
 }
 
 .result-program-more-info a {
   text-decoration: none;
   color: inherit;
+}
+
+.result-program-more-info a:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 /* Eligible member tags */
@@ -99,7 +105,7 @@
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--primary-color);
-  background-color: #e6e7e8;
+  background-color: #EFEFEF;
   border: none;
   border-radius: 1rem;
   white-space: nowrap;
@@ -117,6 +123,7 @@
 
 .result-program-details strong {
   display: block;
+  font-size: 1.05rem;
   margin-top: 0.5rem;
 }
 
@@ -164,7 +171,7 @@ h1.header-text-bottom {
     position: relative;
     display: flex;
     align-items: center;
-    padding-right: 3.5rem;
+    padding-right: 5rem;
   }
 
   .result-program-more-info {
@@ -175,7 +182,7 @@ h1.header-text-bottom {
 
   .result-program-details {
     font-weight: 400;
-    width: 20%;
+    white-space: nowrap;
     vertical-align: text-bottom;
   }
 
@@ -218,7 +225,7 @@ h1.header-text-bottom {
   .result-program-more-info-wrapper {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     padding: 0;
   }
 
@@ -244,12 +251,13 @@ h1.header-text-bottom {
   }
 
   .result-program-details {
-    padding: 0.75rem 1rem;
+    padding: 1rem 1rem;
     font-size: 0.85rem;
   }
 
   .result-program-details strong {
-    font-size: 1rem;
-    padding-top: 0.3rem;
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+    padding-top: 0;
   }
 }
