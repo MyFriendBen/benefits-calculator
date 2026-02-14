@@ -17,6 +17,7 @@ import { ICON_OPTIONS_MAP, LUCIDE_ICONS } from '../Results/helpers';
 export type Program = {
   name: Translation;
   description: Translation;
+  link?: Translation;
 };
 
 export type Category = {
@@ -101,11 +102,31 @@ const CurrentBenefits = () => {
   }, []);
 
   const displayProgramSection = (program: Program, index: number) => {
+    const linkURL = program.link
+      ? intl.formatMessage({
+        id: program.link.label,
+        defaultMessage: program.link.default_message,
+      })
+      : '';
+    // If the URL is invalid (e.g. contains "placeholder" from translations) - it is not rendered it as a link.
+    const isValidLink = linkURL && !linkURL.toLowerCase().includes('placeholder');
+
     return (
       <div className="bottom-margin" key={index}>
-        <p className="program-name">
-          <ResultsTranslate translation={program.name} />
-        </p>
+        {isValidLink ? (
+          <a
+            className="program-name"
+            href={linkURL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ResultsTranslate translation={program.name} />
+          </a>
+        ) : (
+          <p className="program-name">
+            <ResultsTranslate translation={program.name} />
+          </p>
+        )}
         <p>
           <ResultsTranslate translation={program.description} />
         </p>
@@ -120,7 +141,7 @@ const CurrentBenefits = () => {
       const iconKey = icon.toLowerCase();
       const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'default';
       const CategoryIcon = ICON_OPTIONS_MAP[actualIconKey];
-      
+
       const isLucideIcon = LUCIDE_ICONS.includes(actualIconKey);
       const iconClassName = isLucideIcon ? 'category-heading-icon category-lucide-icon' : 'category-heading-icon';
 

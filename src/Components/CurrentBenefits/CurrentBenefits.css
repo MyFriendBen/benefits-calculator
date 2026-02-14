@@ -24,6 +24,16 @@
   font-size: 1.25rem;
 }
 
+a.program-name {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a.program-name:hover {
+  text-decoration: underline;
+}
+
 .category-section-container {
   margin-bottom: 3rem;
 }
