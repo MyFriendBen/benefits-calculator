@@ -373,4 +373,8 @@ li.apply-info {
   .pe-request-button {
     font-size: 1rem;
   }
+
+  .content-width {
+    padding: 0 1rem;
+  }
 }
