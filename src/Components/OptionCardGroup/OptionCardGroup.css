@@ -118,13 +118,17 @@
 }
 
 .option-cards-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   max-width: 85%;
   margin-top: 0.5rem;
   margin-bottom: 1rem;
-  align-items: stretch;
+  justify-content: center;
+}
+
+.option-cards-container > .card-action-area {
+  flex: 0 1 calc((100% - 2rem) / 3);
 }
 
 .two-columns {
@@ -133,13 +137,16 @@
 
 @media (max-width: 38.125rem) {
   div.option-cards-container {
-    grid-template-columns: 1fr;
     gap: 0.75rem;
     margin-top: .75rem;
     margin-bottom: 1.5rem;
     max-width: 100%;
     width: 100%;
     padding: 0;
+  }
+
+  .option-cards-container > .card-action-area {
+    flex: 0 0 100%;
   }
 
   .card-action-area.MuiButtonBase-root {
