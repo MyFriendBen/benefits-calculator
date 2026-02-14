@@ -1,17 +1,17 @@
 import { Card, CardActionArea } from '@mui/material';
 import { ReactNode, useContext, useMemo } from 'react';
 import { FormattedMessageType } from '../../Types/Questions';
-import './MultiSelectTiles.css';
+import './FlatRectangleTiles.css';
 import { Context } from '../Wrapper/Wrapper';
 
-export type MultiSelectTileOption<T extends string | number> = {
+export type FlatRectangleTileOption<T extends string | number> = {
   value: T;
   text: FormattedMessageType;
   icon: ReactNode;
 };
 
 type TileProps<T extends string | number> = {
-  option: MultiSelectTileOption<T>;
+  option: FlatRectangleTileOption<T>;
   selected: boolean;
   onClick: () => void;
 };
@@ -21,10 +21,10 @@ function Tile<T extends string | number>({ option, selected, onClick }: TileProp
 
   const uiOptions = getReferrer('uiOptions');
   const containerClass = useMemo(() => {
-    let className = 'option-card';
+    let className = 'flat-rectangle-card';
 
     if (selected) {
-      className += ' selected-option-card';
+      className += ' selected-flat-rectangle-card';
     }
 
     if (uiOptions.includes('white_multi_select_tile_icon')) {
@@ -35,26 +35,26 @@ function Tile<T extends string | number>({ option, selected, onClick }: TileProp
   }, [selected, uiOptions]);
 
   return (
-    <CardActionArea className="card-action-area" onClick={onClick}>
+    <CardActionArea className="flat-rectangle-action-area" onClick={onClick}>
       <Card className={containerClass}>
-        <div className="multi-select-card-container">
-          <div className="multi-select-icon">{option.icon}</div>
-          <div className={selected ? 'option-card-text' : ''}>{option.text}</div>
+        <div className="flat-rectangle-card-container">
+          <div className="flat-rectangle-icon">{option.icon}</div>
+          <div className={selected ? 'flat-rectangle-card-text' : ''}>{option.text}</div>
         </div>
       </Card>
     </CardActionArea>
   );
 }
 
-type MultiSelectTilesProps<T extends string | number> = {
-  options: MultiSelectTileOption<T>[];
+type FlatRectangleTilesProps<T extends string | number> = {
+  options: FlatRectangleTileOption<T>[];
   values: Record<T, boolean>;
   onChange: (value: Record<T, boolean>) => void;
 };
 
-function MultiSelectTiles<T extends string | number>({ options, values, onChange }: MultiSelectTilesProps<T>) {
+function FlatRectangleTiles<T extends string | number>({ options, values, onChange }: FlatRectangleTilesProps<T>) {
   return (
-    <div className="multiselect-tiles-container">
+    <div className="flat-rectangle-tiles-container">
       {options.map((option, index) => {
         const onClick = () => {
           let newValues: Record<T, boolean> = { ...values };
@@ -71,4 +71,4 @@ function MultiSelectTiles<T extends string | number>({ options, values, onChange
   );
 }
 
-export default MultiSelectTiles;
+export default FlatRectangleTiles;
