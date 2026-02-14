@@ -4,7 +4,6 @@
   align-items: center;
   justify-content: center;
   font-family: 'Roboto Slab', serif;
-  max-width: var(--main-max-width);
 }
 
 .program-icon-and-header {
@@ -226,7 +225,7 @@ li.apply-info {
 }
 
 .content-width {
-  width: 75%;
+  width: 100%;
 }
 
 .content-header {
