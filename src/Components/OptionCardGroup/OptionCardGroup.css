@@ -1,12 +1,12 @@
 .option-card.MuiPaper-root {
   position: relative;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   border: 0.05px solid #6d6e71;
   box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
-  min-height: 4rem;
+  aspect-ratio: 1;
   height: 100%;
   width: 100%;
   padding: 1rem;
@@ -24,16 +24,15 @@
 
 .option-card-text {
   color: #ffffff;
-  text-align: left;
+  text-align: center;
   line-height: 1.2;
   margin: 0;
   padding: 0;
 }
 
 .option-card-icon {
-  height: 2.5rem;
-  width: 2.5rem;
-  margin-right: 0.75rem;
+  height: 4rem;
+  width: 4rem;
   flex-shrink: 0;
 }
 .option-card-icon.youth-development-icon {
@@ -99,9 +98,9 @@
 
 .option-cards-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  max-width: 50rem;
+  max-width: 85%;
   margin-top: 0.5rem;
   margin-bottom: 1rem;
   align-items: stretch;
@@ -129,8 +128,32 @@
   .option-card.MuiPaper-root,
   .selected-option-card.MuiPaper-root {
     width: 100%;
-    min-height: 4rem;
+    min-height: auto;
+    aspect-ratio: unset;
     padding: 1rem;
+  }
+
+  /* Change to horizontal layout on mobile */
+  .option-card.MuiPaper-root {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .option-card-icon {
+    height: 2rem;
+    width: 2rem;
+    min-width: 2rem;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .option-card-icon svg {
+    height: 2.75rem !important;
+    width: 2.75rem !important;
   }
 
   .option-card-image {
