@@ -42,7 +42,7 @@ export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePag
   const { formData } = useContext(Context);
 
   return (
-    <main>
+    <main className="benefits-form">
       <section className="back-to-results-button-container">
         <BackAndSaveButtons
           navigateToLink={backLink}

@@ -9,6 +9,7 @@
   min-height: 100svh;
   display: flex;
   flex-direction: column;
+  background-color: var(--secondary-background-color);
 }
 
 [dir='rtl'] .rtl-mirror {
@@ -16,10 +17,22 @@
 }
 
 .benefits-form {
-  margin: 0 auto 20px auto;
-  justify-content: center;
-  padding: 1rem;
-  max-width: var(--main-max-width);
+  margin: 1.5rem auto;
+  padding: 1.5rem 1rem;
+  max-width: var(--content-max-width);
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 0;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 767px) {
+  .benefits-form {
+    background-color: transparent;
+    box-shadow: none;
+    padding: 1rem;
+    margin-bottom: 0;
+  }
 }
 
 .app {
@@ -40,22 +53,22 @@
 }
 
 .sub-header {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   line-height: normal;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   color: var(--secondary-color);
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .main-paragraph {
-  font-family: 'Open Sans';
+  font-family: var(--font-body);
   font-weight: 400;
   font-size: 1.1rem;
 }
 
 .sub-header-language-select {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   color: black;
   margin-bottom: 1rem;
 }
@@ -106,14 +119,21 @@
 }
 
 .main-max-width {
-  max-width: var(--main-max-width);
-  margin: 0 auto;
-  width: 100%;
+  max-width: 100%;
+  margin: 0;
 }
 
 .secondary-heading {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   color: black;
+}
+
+/* Mobile responsive typography */
+@media (max-width: 767px) {
+  .sub-header,
+  h1.sub-header {
+    font-size: 1.25rem;
+  }
 }
 
 /* the following section classes are needed in order to extend the background to the edges of the screen */
@@ -128,6 +148,6 @@
   top: 0;
   left: -100vw;
   width: 300vw;
-  background: var(--secondary-background-color);
+  background: transparent;
   z-index: -1;
 }
