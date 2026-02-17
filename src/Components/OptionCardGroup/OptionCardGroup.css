@@ -21,7 +21,7 @@
   background-color: var(--primary-color);
 }
 
-.option-card-text {
+.option-card-selected-text {
   color: #ffffff;
   line-height: 1.2;
   margin: 0;
@@ -226,7 +226,7 @@
    ============================================ */
 @media (max-width: 38.125rem) {
   /* Square container: full-width, 1-col */
-  div.option-cards-container {
+  .option-cards-container {
     gap: 0.75rem;
     margin-top: .75rem;
     margin-bottom: 1.5rem;

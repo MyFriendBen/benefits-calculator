@@ -41,7 +41,7 @@ function Tile<T extends string | number>({ option, selected, onClick, variant }:
       <Card className={containerClass}>
         <div className="option-card-content">
           <div className="option-card-icon">{option.icon}</div>
-          <span className={`option-card-label ${selected ? 'option-card-text' : ''}`}>{option.text}</span>
+          <span className={`option-card-label ${selected ? 'option-card-selected-text' : ''}`}>{option.text}</span>
         </div>
       </Card>
     </CardActionArea>
@@ -68,7 +68,7 @@ function MultiSelectTiles<T extends string | number>({ options, values, onChange
 
     const selected = values[option.value];
 
-    return <Tile option={option} onClick={onClick} key={index} selected={selected} variant={variant} />;
+    return <Tile option={option} onClick={onClick} key={option.value} selected={selected} variant={variant} />;
   });
 
   if (variant === 'square') {
