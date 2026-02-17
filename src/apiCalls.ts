@@ -25,6 +25,7 @@ export const configEndpoint = `${domain}/api/configuration/`;
 const eligibilityEndpoint = `${domain}/api/eligibility/`;
 const validationEndpoint = `${domain}/api/validations/`;
 const authTokenEndpoint = `${domain}/api/auth-token/`;
+const getNpsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/nps/`;
 
 export type ScreenApiResponse = ApiFormDataReadOnly & ApiFormData;
 
@@ -214,6 +215,45 @@ const deleteValidation = async (validationid: number, key: string) => {
   });
 };
 
+type NPSScoreData = {
+  uuid: string;
+  score: number;
+  variant: 'floating' | 'inline';
+};
+
+type NPSReasonData = {
+  uuid: string;
+  score_reason: string;
+};
+
+const postNPSScore = async (data: NPSScoreData) => {
+  const { uuid, ...body } = data;
+  return fetch(getNpsEndpoint(uuid), {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: header,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json();
+  });
+};
+
+const patchNPSReason = async (data: NPSReasonData) => {
+  const { uuid, ...body } = data;
+  return fetch(getNpsEndpoint(uuid), {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+    headers: header,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json();
+  });
+};
+
 const getAuthToken = async (email: string, password: string) => {
   const header = {
     'Content-Type': 'application/json',
@@ -249,4 +289,6 @@ export {
   postValidation,
   deleteValidation,
   getAuthToken,
+  postNPSScore,
+  patchNPSReason,
 };
