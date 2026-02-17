@@ -110,6 +110,7 @@ const Utilities = () => {
       </QuestionDescription>
       <form onSubmit={handleSubmit(formSubmitHandler)}>
         <MultiSelectTiles
+          variant="square"
           options={Object.entries(utilityStatusOptions).map(([key, option]) => ({
             value: key,
             text: option.text,
