@@ -352,6 +352,11 @@ li.apply-info {
     padding: 1rem;
   }
 
+  .header-icon-box {
+    height: 4rem;
+    width: 4rem;
+  }
+
   .header-text {
     width: fit-content;
   }
