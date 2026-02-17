@@ -34,6 +34,9 @@
   height: 4rem;
   width: 4rem;
   flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .option-card-icon.youth-development-icon {
   height: 7rem;
@@ -107,7 +110,6 @@
   align-items: center;
   justify-content: center;
   flex: 1;
-  height: 100%;
 }
 
 .option-card-label {
