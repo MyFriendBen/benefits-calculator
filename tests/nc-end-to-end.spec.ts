@@ -11,7 +11,7 @@ import {
   VIEWPORTS,
 } from './helpers';
 import { testUsers } from './helpers/utils/test-data';
-import { URL_PATTERNS, WHITE_LABELS } from './helpers/utils/constants';
+import { URL_PATTERNS } from './helpers/utils/constants';
 
 /**
  * NC Comprehensive Workflow Test
@@ -31,7 +31,7 @@ test.describe('NC Comprehensive Workflow', () => {
 
     // CHECKPOINT 1: Complete 12-Step Application Workflow
     console.log('Checkpoint 1: Complete NC application workflow');
-    const result = await runNcEndToEndTest(page, testUsers[WHITE_LABELS.NC]);
+    const result = await runNcEndToEndTest(page, testUsers.nc);
     expect(result.success, `NC application workflow failed at step: ${result.step}`).toBeTruthy();
 
     // CHECKPOINT 2: Results Page Validation

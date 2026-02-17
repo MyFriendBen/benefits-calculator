@@ -43,8 +43,8 @@ export const CUSTOM_LANDING_PAGES: LandingPageConfig[] = [
     component: CcigLandingPage,
   },
   {
-    path: 'co_energy_calculator/landing-page',
-    whiteLabel: 'co_energy_calculator',
+    path: 'cesn/landing-page',
+    whiteLabel: 'cesn',
     component: EnergyCalculatorLandingPage,
   },
 ];

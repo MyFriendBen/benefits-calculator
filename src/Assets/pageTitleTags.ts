@@ -48,6 +48,6 @@ export const APP_PREFIXES: Record<AppKey, string> = {
 };
 
 export const getAppPrefixedTitle = (whiteLabel: string | undefined, pageTitle: string) => {
-  const currentPrefix = whiteLabel === 'co_energy_calculator' ? APP_PREFIXES.cesn : APP_PREFIXES.mfb;
+  const currentPrefix = whiteLabel === 'cesn' ? APP_PREFIXES.cesn : APP_PREFIXES.mfb;
   return currentPrefix + pageTitle;
 };

@@ -45,7 +45,10 @@ const Share = forwardRef(function Share() {
     }),
   };
 
-  const shareUrl = getReferrer('shareLink') || 'default';
+  const configShareLink = getReferrer('shareLink') || 'default';
+  const shareUrl = configShareLink.startsWith('/')
+    ? window.location.origin + configShareLink
+    : configShareLink;
   const iconSize = { color: '#fff', fontSize: isMobile ? '1.5rem' : '2rem' };
 
   const copyLink = () => {

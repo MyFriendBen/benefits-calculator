@@ -3,7 +3,7 @@ import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import HHMSummaryCards from './HHMSummaryCards';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Context } from '../../Wrapper/Wrapper';
-import { ReactNode, useContext, useEffect, useMemo } from 'react';
+import { ReactNode, useContext, useEffect, useMemo, useRef } from 'react';
 import { Conditions, HealthInsurance, HouseholdData } from '../../../Types/FormData';
 import {
   Autocomplete,
@@ -12,6 +12,7 @@ import {
   FormControl,
   FormControlLabel,
   FormHelperText,
+  FormLabel,
   InputAdornment,
   InputLabel,
   MenuItem,
@@ -49,6 +50,7 @@ import {
   renderHoursWorkedHelperText,
   renderIncomeAmountHelperText,
   renderHealthInsNonePlusTheyHelperText,
+  renderStudentEligibilityErrorMessage,
 } from './HelperTextFunctions';
 import { DOLLARS, handleNumbersOnly, numberInputProps, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
 import useScreenApi from '../../../Assets/updateScreen';
@@ -60,6 +62,187 @@ import './PersonIncomeBlock.css';
 import { useShouldRedirectToConfirmation } from '../../QuestionComponents/questionHooks';
 import useStepForm from '../stepForm';
 import { usePageTitle } from '../../Common/usePageTitle';
+
+type StudentQuestion = {
+  name: 'studentFullTime' | 'studentJobTrainingProgram' | 'studentHasWorkStudy' | 'studentWorks20PlusHrs';
+  messageId: string;
+  defaultMessage: string;
+  ariaLabelId: string;
+  ariaLabelDefault: string;
+};
+
+const STUDENT_QUESTIONS: StudentQuestion[] = [
+  {
+    name: 'studentFullTime',
+    messageId: 'studentEligibility.enrolledHalfTime',
+    defaultMessage:
+      'Are {subject} enrolled half-time or more in a university, college, or community college as defined by the educational institution?',
+    ariaLabelId: 'studentEligibility.enrolledHalfTime-ariaLabel',
+    ariaLabelDefault: 'enrolled half-time or more',
+  },
+  {
+    name: 'studentJobTrainingProgram',
+    messageId: 'studentEligibility.jobTraining',
+    defaultMessage: 'Is the program that {subject} are enrolled in a job training program?',
+    ariaLabelId: 'studentEligibility.jobTraining-ariaLabel',
+    ariaLabelDefault: 'job training program',
+  },
+  {
+    name: 'studentHasWorkStudy',
+    messageId: 'studentEligibility.workStudy',
+    defaultMessage: 'Do {subject} have a federal or state work study program?',
+    ariaLabelId: 'studentEligibility.workStudy-ariaLabel',
+    ariaLabelDefault: 'work study program',
+  },
+  {
+    name: 'studentWorks20PlusHrs',
+    messageId: 'studentEligibility.works20Hours',
+    defaultMessage:
+      'Do {subject} work 20 or more hours per week in other employment, including self-employment? (If the hours {subject} work changes each week, do {subject} work at least 80 hours in a month?)',
+    ariaLabelId: 'studentEligibility.works20Hours-ariaLabel',
+    ariaLabelDefault: 'works 20 hours or more',
+  },
+];
+
+type GetFormSchemaParams = {
+  intl: ReturnType<typeof useIntl>;
+  pageNumber: number;
+  relationshipOptions: Record<string, FormattedMessageType>;
+  currentYear: number;
+  currentMonth: number;
+};
+
+const getFormSchema = ({
+  intl,
+  pageNumber,
+  relationshipOptions,
+  currentYear,
+  currentMonth,
+}: GetFormSchemaParams) => {
+  const oneOrMoreDigitsButNotAllZero = /^(?!0+$)\d+$/;
+  const incomeAmountRegex = /^\d{0,7}(?:\d\.\d{0,2})?$/;
+
+  const incomeSourcesSchema = z
+    .object({
+      incomeStreamName: z.string().min(1, { message: renderIncomeStreamNameHelperText(intl) }),
+      incomeFrequency: z.string().min(1, { message: renderIncomeFrequencyHelperText(intl) }),
+      hoursPerWeek: z.string().trim(),
+      incomeAmount: z
+        .string()
+        .trim()
+        .refine(
+          (value) => {
+            return incomeAmountRegex.test(value) && Number(value) > 0;
+          },
+          { message: renderIncomeAmountHelperText(intl) },
+        ),
+    })
+    .refine(
+      (data) => {
+        if (data.incomeFrequency === 'hourly') {
+          return oneOrMoreDigitsButNotAllZero.test(data.hoursPerWeek);
+        } else {
+          return true;
+        }
+      },
+      { message: renderHoursWorkedHelperText(intl), path: ['hoursPerWeek'] },
+    );
+
+  const incomeStreamsSchema = z.array(incomeSourcesSchema);
+  const hasIncomeSchema = z.string().regex(/^true|false$/);
+
+  let healthInsNonPlusHelperText = renderHealthInsNonePlusHelperText(intl);
+  if (pageNumber !== 1) {
+    healthInsNonPlusHelperText = renderHealthInsNonePlusTheyHelperText(intl);
+  }
+
+  return z
+    .object({
+      birthMonth: z.string().min(1, { message: renderMissingBirthMonthHelperText(intl) }),
+      birthYear: z
+        .string()
+        .trim()
+        .min(1, { message: renderBirthYearHelperText(intl) })
+        .refine((value) => {
+          const year = Number(value);
+          const age = currentYear - year;
+          return year <= currentYear && age < MAX_AGE;
+        }),
+      healthInsurance: z
+        .object({
+          none: z.boolean(),
+          employer: z.boolean().optional().default(false),
+          private: z.boolean().optional().default(false),
+          medicaid: z.boolean().optional().default(false),
+          medicare: z.boolean().optional().default(false),
+          chp: z.boolean().optional().default(false),
+          emergency_medicaid: z.boolean().optional().default(false),
+          family_planning: z.boolean().optional().default(false),
+          va: z.boolean().optional().default(false),
+          mass_health: z.boolean().optional().default(false),
+        })
+        .refine((insuranceOptions) => Object.values(insuranceOptions).some((option) => option === true), {
+          message: renderHealthInsSelectOneHelperText(intl),
+        })
+        .refine(
+          (insuranceOptions) => {
+            if (insuranceOptions.none) {
+              return Object.entries(insuranceOptions)
+                .filter(([key, _]) => key !== 'none')
+                .every(([_, value]) => value === false);
+            }
+            return true;
+          },
+          {
+            message: healthInsNonPlusHelperText,
+          },
+        ),
+      conditions: z.object({
+        student: z.boolean(),
+        pregnant: z.boolean(),
+        blindOrVisuallyImpaired: z.boolean(),
+        disabled: z.boolean(),
+        longTermDisability: z.boolean(),
+      }),
+      studentEligibility: z.object({
+        studentFullTime: z.union([z.boolean(), z.undefined()]),
+        studentJobTrainingProgram: z.union([z.boolean(), z.undefined()]),
+        studentHasWorkStudy: z.union([z.boolean(), z.undefined()]),
+        studentWorks20PlusHrs: z.union([z.boolean(), z.undefined()]),
+      }),
+      relationshipToHH: z
+        .string()
+        .refine((value) => [...Object.keys(relationshipOptions)].includes(value) || pageNumber === 1, {
+          message: renderRelationshipToHHHelperText(intl),
+        }),
+      hasIncome: hasIncomeSchema,
+      incomeStreams: incomeStreamsSchema,
+    })
+    .refine(
+      ({ birthMonth, birthYear }) => {
+        if (Number(birthYear) === currentYear) {
+          return Number(birthMonth) <= currentMonth;
+        }
+        return true;
+      },
+      { message: renderFutureBirthMonthHelperText(intl), path: ['birthMonth'] },
+    )
+    .superRefine(({ conditions, studentEligibility }, ctx) => {
+      if (conditions.student) {
+        const fields = STUDENT_QUESTIONS.map((q) => q.name);
+
+        fields.forEach((field) => {
+          if (studentEligibility[field] === undefined) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: renderStudentEligibilityErrorMessage(intl),
+              path: ['studentEligibility', field],
+            });
+          }
+        });
+      }
+    });
+};
 
 const HouseholdMemberForm = () => {
   const { formData } = useContext(Context);
@@ -131,114 +314,18 @@ const HouseholdMemberForm = () => {
     });
   }, [YEARS]);
 
-  const oneOrMoreDigitsButNotAllZero = /^(?!0+$)\d+$/;
-  const incomeAmountRegex = /^\d{0,7}(?:\d\.\d{0,2})?$/;
-  const incomeSourcesSchema = z
-    .object({
-      incomeStreamName: z.string().min(1, { message: renderIncomeStreamNameHelperText(intl) }),
-      incomeFrequency: z.string().min(1, { message: renderIncomeFrequencyHelperText(intl) }),
-      hoursPerWeek: z.string().trim(),
-      incomeAmount: z
-        .string()
-        .trim()
-        .refine(
-          (value) => {
-            return incomeAmountRegex.test(value) && Number(value) > 0;
-          },
-          { message: renderIncomeAmountHelperText(intl) },
-        ),
-    })
-    .refine(
-      (data) => {
-        if (data.incomeFrequency === 'hourly') {
-          return oneOrMoreDigitsButNotAllZero.test(data.hoursPerWeek);
-        } else {
-          return true;
-        }
-      },
-      { message: renderHoursWorkedHelperText(intl), path: ['hoursPerWeek'] },
-    );
-  const incomeStreamsSchema = z.array(incomeSourcesSchema);
-  const hasIncomeSchema = z.string().regex(/^true|false$/);
-
-  let healthInsNonPlusHelperText = renderHealthInsNonePlusHelperText(intl);
-  if (pageNumber !== 1) {
-    healthInsNonPlusHelperText = renderHealthInsNonePlusTheyHelperText(intl);
-  }
-
-  const formSchema = z
-    .object({
-      /*
-    z.string().min(1) validates that an option was selected.
-    The default value of birthMonth is '' when no option is selected.
-    The possible values that can be selected are '1', '2', ..., '12',
-    so if one of those options are selected,
-    then birthMonth would have a minimum string length of 1 which passes validation.
-    */
-      birthMonth: z.string().min(1, { message: renderMissingBirthMonthHelperText(intl) }),
-      birthYear: z
-        .string()
-        .trim()
-        .min(1, { message: renderBirthYearHelperText(intl) })
-        .refine((value) => {
-          const year = Number(value);
-          const age = CURRENT_YEAR - year;
-          return year <= CURRENT_YEAR && age < MAX_AGE;
-        }),
-      healthInsurance: z
-        .object({
-          none: z.boolean(),
-          employer: z.boolean().optional().default(false),
-          private: z.boolean().optional().default(false),
-          medicaid: z.boolean().optional().default(false),
-          medicare: z.boolean().optional().default(false),
-          chp: z.boolean().optional().default(false),
-          emergency_medicaid: z.boolean().optional().default(false),
-          family_planning: z.boolean().optional().default(false),
-          va: z.boolean().optional().default(false),
-          mass_health: z.boolean().optional().default(false),
-        })
-        .refine((insuranceOptions) => Object.values(insuranceOptions).some((option) => option === true), {
-          message: renderHealthInsSelectOneHelperText(intl),
-        })
-        .refine(
-          (insuranceOptions) => {
-            if (insuranceOptions.none) {
-              return Object.entries(insuranceOptions)
-                .filter(([key, _]) => key !== 'none')
-                .every(([_, value]) => value === false);
-            }
-            return true;
-          },
-          {
-            message: healthInsNonPlusHelperText,
-          },
-        ),
-      conditions: z.object({
-        student: z.boolean(),
-        pregnant: z.boolean(),
-        blindOrVisuallyImpaired: z.boolean(),
-        disabled: z.boolean(),
-        longTermDisability: z.boolean(),
+  const formSchema = useMemo(
+    () =>
+      getFormSchema({
+        intl,
+        pageNumber,
+        relationshipOptions,
+        currentYear: CURRENT_YEAR,
+        currentMonth: CURRENT_MONTH,
       }),
-      relationshipToHH: z
-        .string()
-        .refine((value) => [...Object.keys(relationshipOptions)].includes(value) || pageNumber === 1, {
-          message: renderRelationshipToHHHelperText(intl),
-        }),
-      hasIncome: hasIncomeSchema,
-      incomeStreams: incomeStreamsSchema,
-    })
-    .refine(
-      ({ birthMonth, birthYear }) => {
-        //this checks that the date they've selected is not in the future
-        if (Number(birthYear) === CURRENT_YEAR) {
-          return Number(birthMonth) <= CURRENT_MONTH;
-        }
-        return true;
-      },
-      { message: renderFutureBirthMonthHelperText(intl), path: ['birthMonth'] },
-    );
+    [intl, pageNumber, relationshipOptions, CURRENT_YEAR, CURRENT_MONTH],
+  );
+
   type FormSchema = z.infer<typeof formSchema>;
 
   usePageTitle(QUESTION_TITLES.householdData);
@@ -289,6 +376,7 @@ const HouseholdMemberForm = () => {
             emergency_medicaid: false,
             family_planning: false,
             va: false,
+            mass_health: false,
           },
       conditions: householdMemberFormData?.conditions
         ? householdMemberFormData.conditions
@@ -299,6 +387,12 @@ const HouseholdMemberForm = () => {
             disabled: false,
             longTermDisability: false,
           },
+      studentEligibility: {
+        studentFullTime: householdMemberFormData?.studentEligibility?.studentFullTime ?? undefined,
+        studentJobTrainingProgram: householdMemberFormData?.studentEligibility?.studentJobTrainingProgram ?? undefined,
+        studentHasWorkStudy: householdMemberFormData?.studentEligibility?.studentHasWorkStudy ?? undefined,
+        studentWorks20PlusHrs: householdMemberFormData?.studentEligibility?.studentWorks20PlusHrs ?? undefined,
+      },
       relationshipToHH: determineDefaultRelationshipToHH(),
       hasIncome: determineDefaultHasIncome(),
       incomeStreams: householdMemberFormData?.incomeStreams ?? [],
@@ -345,6 +439,25 @@ const HouseholdMemberForm = () => {
       setValue('hasIncome', 'false', { shouldDirty: true });
     }
   }, [watchBirthMonth, watchBirthYear, setValue, calculateCurrentAgeStatus, getValues]);
+
+  // Watch student condition to conditionally show student eligibility questions
+  const watchIsStudent = watch('conditions.student');
+
+  // Reset student eligibility fields when student condition is deselected
+  const prevIsStudent = useRef(watchIsStudent);
+
+  useEffect(() => {
+    // Only reset when explicitly deselecting student (was true, now false)
+    if (prevIsStudent.current && !watchIsStudent) {
+      setValue('studentEligibility', {
+        studentFullTime: undefined,
+        studentJobTrainingProgram: undefined,
+        studentHasWorkStudy: undefined,
+        studentWorks20PlusHrs: undefined,
+      }, { shouldValidate: false });
+    }
+    prevIsStudent.current = watchIsStudent;
+  }, [watchIsStudent]);
 
 
   const formSubmitHandler: SubmitHandler<FormSchema> = async (memberData) => {
@@ -544,6 +657,66 @@ const HouseholdMemberForm = () => {
           name="conditions"
           options={pageNumber === 1 ? conditionOptions.you : conditionOptions.them}
         />
+        {watchIsStudent && createStudentEligibilityQuestions()}
+      </Box>
+    );
+  };
+
+  const createStudentEligibilityQuestions = () => {
+    return (
+      <Box sx={{ mt: 2, pl: 2, borderLeft: '3px solid #e0e0e0', fontSize: '1.12rem', '& .question-label': { fontSize: '1.12rem' } }}>
+        <Box component="h4" sx={{ fontWeight: 700, mb: 2, mt: 0, fontSize: '1.13rem', color: 'text.primary' }}>
+          <FormattedMessage id="studentEligibility.sectionTitle" defaultMessage="Student Information" />
+        </Box>
+        {STUDENT_QUESTIONS.map(({ name, messageId, defaultMessage, ariaLabelId, ariaLabelDefault }) => (
+          <Box key={name} sx={{ pb: '1.5rem' }}>
+            <Controller
+              name={`studentEligibility.${name}`}
+              control={control}
+              render={({ field }) => (
+                <FormControl component="fieldset" error={!!errors.studentEligibility?.[name]}>
+                  <FormLabel component="legend" sx={{ fontWeight: 700, mb: 1 }}>
+                    <FormattedMessage
+                      id={messageId}
+                      defaultMessage={defaultMessage}
+                      values={{
+                        subject: pageNumber === 1 ? 'you' : 'they',
+                        possessive: pageNumber === 1 ? 'your' : 'their',
+                      }}
+                    />
+                  </FormLabel>
+                  <RadioGroup
+                    {...field}
+                    value={field.value === undefined ? '' : field.value ? 'true' : 'false'}
+                    onChange={(e) => field.onChange(e.target.value === 'true')}
+                    aria-label={intl.formatMessage({
+                      id: ariaLabelId,
+                      defaultMessage: ariaLabelDefault,
+                    })}
+                  >
+                    <FormControlLabel
+                      value="true"
+                      control={<Radio size="small" />}
+                      label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
+                    />
+                    <FormControlLabel
+                      value="false"
+                      control={<Radio size="small" />}
+                      label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
+                    />
+                  </RadioGroup>
+                  {errors.studentEligibility?.[name] && (
+                    <FormHelperText sx={{ ml: 0 }}>
+                      <ErrorMessageWrapper fontSize="1rem">
+                        {errors.studentEligibility[name]?.message}
+                      </ErrorMessageWrapper>
+                    </FormHelperText>
+                  )}
+                </FormControl>
+              )}
+            />
+          </Box>
+        ))}
       </Box>
     );
   };

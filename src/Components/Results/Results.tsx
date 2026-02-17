@@ -34,6 +34,7 @@ import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRe
 import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/rebateTypes';
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
 import { usePageTitle } from '../Common/usePageTitle';
+import { NPSWidget } from '../NPS';
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -157,7 +158,7 @@ const Results = ({ type }: ResultsProps) => {
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
   const [policyEngineData, setPolicyEngineData] = useState<PolicyEngineData>();
-  const isEnergyCalculator = whiteLabel === 'co_energy_calculator';
+  const isEnergyCalculator = whiteLabel === 'cesn';
 
   const filterPrograms = useMemo(
     () => filterProgramsGenerator(formData, filterState, isAdminView),
@@ -258,6 +259,7 @@ const Results = ({ type }: ResultsProps) => {
             </Grid>
           </Grid>
           {!noHelpButton && <HelpButton />}
+          <NPSWidget uuid={uuid} />
         </ResultsContextProvider>
       </main>
     );

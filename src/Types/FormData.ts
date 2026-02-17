@@ -44,6 +44,7 @@ export type HouseholdData = {
   birthMonth?: number;
   relationshipToHH: string;
   conditions: Conditions;
+  studentEligibility?: StudentEligibility;
   hasIncome: boolean;
   incomeStreams: IncomeStream[];
   energyCalculator?: EnergyCalculatorMember;
@@ -115,6 +116,13 @@ export type Conditions = {
   blindOrVisuallyImpaired?: boolean;
   disabled?: boolean;
   longTermDisability?: boolean;
+};
+
+export type StudentEligibility = {
+  studentFullTime?: boolean;
+  studentJobTrainingProgram?: boolean;
+  studentHasWorkStudy?: boolean;
+  studentWorks20PlusHrs?: boolean;
 };
 
 export const isCustomTypedLocationState = (
