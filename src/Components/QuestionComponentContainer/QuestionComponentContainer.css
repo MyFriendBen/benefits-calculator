@@ -21,7 +21,7 @@ p {
 }
 
 .question-label {
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 700;
   margin-bottom: 0.2rem;
   font-family: var(--font-body);
@@ -80,7 +80,7 @@ p {
 /* Mobile responsive typography */
 @media (max-width: 767px) {
   .question-label {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 
   .question-secondary-header {
