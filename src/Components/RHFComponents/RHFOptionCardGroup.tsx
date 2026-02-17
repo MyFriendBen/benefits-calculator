@@ -83,7 +83,7 @@ const RHFOptionCardGroup = <T extends FieldValues>({
       });
 
       const isSelected = values[optionKey];
-      let containerClass = 'option-card';
+      let containerClass = 'option-card tile-square';
       if (isSelected) {
         containerClass += ' selected-option-card';
       }

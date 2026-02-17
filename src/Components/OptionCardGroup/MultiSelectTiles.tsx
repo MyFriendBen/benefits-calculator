@@ -1,7 +1,6 @@
 import { Card, CardActionArea } from '@mui/material';
 import { ReactNode, useContext, useMemo } from 'react';
 import { FormattedMessageType } from '../../Types/Questions';
-import './MultiSelectTiles.css';
 import './OptionCardGroup.css';
 import { Context } from '../Wrapper/Wrapper';
 
@@ -24,6 +23,7 @@ function Tile<T extends string | number>({ option, selected, onClick, variant }:
   const uiOptions = getReferrer('uiOptions');
   const containerClass = useMemo(() => {
     let className = 'option-card';
+    className += variant === 'square' ? ' tile-square' : ' tile-flat';
 
     if (selected) {
       className += ' selected-option-card';
@@ -34,27 +34,14 @@ function Tile<T extends string | number>({ option, selected, onClick, variant }:
     }
 
     return className;
-  }, [selected, uiOptions]);
-
-  if (variant === 'square') {
-    return (
-      <CardActionArea className="card-action-area" onClick={onClick}>
-        <Card className={containerClass}>
-          <div className="option-card-content">
-            <div className="option-card-icon">{option.icon}</div>
-            <span className={`option-card-label ${selected ? 'option-card-text' : ''}`}>{option.text}</span>
-          </div>
-        </Card>
-      </CardActionArea>
-    );
-  }
+  }, [selected, uiOptions, variant]);
 
   return (
     <CardActionArea className="card-action-area" onClick={onClick}>
       <Card className={containerClass}>
-        <div className="multi-select-card-container">
-          <div className="multi-select-icon">{option.icon}</div>
-          <div className={selected ? 'option-card-text' : ''}>{option.text}</div>
+        <div className="option-card-content">
+          <div className="option-card-icon">{option.icon}</div>
+          <span className={`option-card-label ${selected ? 'option-card-text' : ''}`}>{option.text}</span>
         </div>
       </Card>
     </CardActionArea>
