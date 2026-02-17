@@ -20,7 +20,7 @@ p {
   color: var(--primary-color);
 }
 
-.question-label {
+h2.question-label {
   font-size: 1.125rem;
   font-weight: 700;
   margin-bottom: 0.2rem;
@@ -79,8 +79,8 @@ p {
 
 /* Mobile responsive typography */
 @media (max-width: 767px) {
-  .question-label {
-    font-size: 0.8rem;
+  h2.question-label {
+    font-size: 0.9rem;
   }
 
   .question-secondary-header {
