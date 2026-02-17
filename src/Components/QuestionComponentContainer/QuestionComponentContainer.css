@@ -80,7 +80,7 @@ p {
 /* Mobile responsive typography */
 @media (max-width: 767px) {
   .question-label {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
 
   .question-secondary-header {
