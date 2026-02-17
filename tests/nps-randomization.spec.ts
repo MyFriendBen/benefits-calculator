@@ -20,7 +20,6 @@ import {
   STATES,
 } from './helpers';
 import { testUsers } from './helpers/utils/test-data';
-import { WHITE_LABELS } from './helpers/utils/constants';
 import { ApplicationData, FlowResult } from './helpers/flows/types';
 
 async function runCoEndToEndTest(page: Page, data: ApplicationData): Promise<FlowResult> {
@@ -76,7 +75,7 @@ test.describe('NPS Randomization (CO)', () => {
 
   test('verify ~50/50 distribution across 10 screener submissions', async ({ page }) => {
     const results: { uuid: string; variant: string }[] = [];
-    const data = testUsers[WHITE_LABELS.CO];
+    const data = testUsers['co'];
 
     for (let i = 0; i < 10; i++) {
       console.log(`\n--- Run ${i + 1}/10 ---`);
