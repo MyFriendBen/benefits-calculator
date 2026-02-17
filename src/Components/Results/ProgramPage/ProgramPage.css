@@ -355,6 +355,7 @@ li.apply-info {
   .header-icon-box {
     height: 4rem;
     width: 4rem;
+    justify-content: center;
   }
 
   .header-text {
