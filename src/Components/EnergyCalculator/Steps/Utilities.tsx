@@ -2,7 +2,7 @@ import { FormattedMessage } from 'react-intl';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
 import QuestionDescription from '../../QuestionComponents/QuestionDescription';
-import MultiSelectTiles from '../../OptionCardGroup/MultiSelectTiles';
+import MultiSelectTiles from '../../SelectTiles/MultiSelectTiles';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler } from 'react-hook-form';

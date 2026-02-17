@@ -4,7 +4,7 @@ import CardContent from '@mui/material/CardContent';
 import { CardActionArea, Typography, Stack, Box } from '@mui/material';
 import { ReactComponent as Checkmark } from '../../Assets/icons/General/OptionCard/checkmark.svg';
 import { FieldValues, Path, PathValue, UseFormTrigger, UseFormSetValue } from 'react-hook-form';
-import '../OptionCardGroup/OptionCardGroup.css';
+import '../SelectTiles/SelectTiles.css';
 import { Context } from '../Wrapper/Wrapper';
 import { useContext } from 'react';
 
