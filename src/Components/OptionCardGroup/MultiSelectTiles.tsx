@@ -2,6 +2,7 @@ import { Card, CardActionArea } from '@mui/material';
 import { ReactNode, useContext, useMemo } from 'react';
 import { FormattedMessageType } from '../../Types/Questions';
 import './MultiSelectTiles.css';
+import './OptionCardGroup.css';
 import { Context } from '../Wrapper/Wrapper';
 
 export type MultiSelectTileOption<T extends string | number> = {
@@ -14,9 +15,10 @@ type TileProps<T extends string | number> = {
   option: MultiSelectTileOption<T>;
   selected: boolean;
   onClick: () => void;
+  variant: 'square' | 'flat';
 };
 
-function Tile<T extends string | number>({ option, selected, onClick }: TileProps<T>) {
+function Tile<T extends string | number>({ option, selected, onClick, variant }: TileProps<T>) {
   const { getReferrer } = useContext(Context);
 
   const uiOptions = getReferrer('uiOptions');
@@ -34,6 +36,19 @@ function Tile<T extends string | number>({ option, selected, onClick }: TileProp
     return className;
   }, [selected, uiOptions]);
 
+  if (variant === 'square') {
+    return (
+      <CardActionArea className="card-action-area" onClick={onClick}>
+        <Card className={containerClass}>
+          <div className="option-card-content">
+            <div className="option-card-icon">{option.icon}</div>
+            <span className={`option-card-label ${selected ? 'option-card-text' : ''}`}>{option.text}</span>
+          </div>
+        </Card>
+      </CardActionArea>
+    );
+  }
+
   return (
     <CardActionArea className="card-action-area" onClick={onClick}>
       <Card className={containerClass}>
@@ -50,25 +65,34 @@ type MultiSelectTilesProps<T extends string | number> = {
   options: MultiSelectTileOption<T>[];
   values: Record<T, boolean>;
   onChange: (value: Record<T, boolean>) => void;
+  variant?: 'square' | 'flat';
 };
 
-function MultiSelectTiles<T extends string | number>({ options, values, onChange }: MultiSelectTilesProps<T>) {
-  return (
-    <div className="multiselect-tiles-container">
-      {options.map((option, index) => {
-        const onClick = () => {
-          let newValues: Record<T, boolean> = { ...values };
-          newValues[option.value] = !newValues[option.value];
+function MultiSelectTiles<T extends string | number>({ options, values, onChange, variant = 'flat' }: MultiSelectTilesProps<T>) {
+  const containerClass = variant === 'square' ? 'option-cards-container' : 'multiselect-tiles-container';
 
-          onChange(newValues);
-        };
+  const tiles = options.map((option, index) => {
+    const onClick = () => {
+      let newValues: Record<T, boolean> = { ...values };
+      newValues[option.value] = !newValues[option.value];
 
-        const selected = values[option.value];
+      onChange(newValues);
+    };
 
-        return <Tile option={option} onClick={onClick} key={index} selected={selected} />;
-      })}
-    </div>
-  );
+    const selected = values[option.value];
+
+    return <Tile option={option} onClick={onClick} key={index} selected={selected} variant={variant} />;
+  });
+
+  if (variant === 'square') {
+    return (
+      <div className="option-cards-wrapper">
+        <div className={containerClass}>{tiles}</div>
+      </div>
+    );
+  }
+
+  return <div className={containerClass}>{tiles}</div>;
 }
 
 export default MultiSelectTiles;
