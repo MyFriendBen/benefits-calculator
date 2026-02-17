@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useResultsContext, useResultsLink } from '../Results';
 import { Grid } from '@mui/material';
@@ -17,7 +17,7 @@ const ResultsTabs = () => {
 
   const isBenefitsActive = location.pathname.includes('benefits');
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const tabLinks = [benefitsLink, needsLink];
+  const tabLinks = useMemo(() => [benefitsLink, needsLink], [benefitsLink, needsLink]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -27,7 +27,7 @@ const ResultsTabs = () => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
         nextIndex = (currentIndex + 1) % 2;
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        nextIndex = (currentIndex + 1) % 2;
+        nextIndex = (currentIndex - 1 + 2) % 2;
       } else if (e.key === 'Home') {
         nextIndex = 0;
       } else if (e.key === 'End') {
