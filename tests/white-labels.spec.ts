@@ -69,7 +69,7 @@ const whiteLabels = {
   },
   ma: {
     state: 'Massachusetts',
-    zipcode: '',
+    zipcode: '01001',
     county: '',
     householdSize: 1,
     dobMonth: 'February',
@@ -112,8 +112,7 @@ const energyCalculators = {
 };
 test.describe('Basic e2e tests for each white label', () => {
   for (const [whiteLabel, config] of Object.entries(whiteLabels)) {
-    const skip = whiteLabel === 'ma'; // skipping MA for now
-    const runner = skip ? test.skip : test;
+    const runner = test;
 
     runner(`${whiteLabel.toUpperCase()} white label`, async ({ page }) => {
       await navigateHomePage(page);
