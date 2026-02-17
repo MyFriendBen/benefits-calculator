@@ -7,7 +7,11 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { useGetConfig } from './configHook';
+import { useGetConfig, useFeatureFlag } from './configHook';
+import { Context } from '../Wrapper/Wrapper';
+import { WrapperContext } from '../../Types/WrapperContext';
+import { PropsWithChildren } from 'react';
+import { Config } from '../../Types/Config';
 
 // Mock the API endpoint
 jest.mock('../../apiCalls', () => ({
@@ -228,5 +232,143 @@ describe('useGetConfig - Error Handling', () => {
       // Clean up to prevent memory leaks
       unmount();
     });
+  });
+
+  describe('Feature Flags Extraction', () => {
+    it('should extract feature_flags from the API response into _feature_flags', async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([
+          {
+            name: 'test_config',
+            data: JSON.stringify({ key: 'value' }),
+            feature_flags: { eligibility_tags: true, nps_survey: false },
+          },
+        ]),
+      });
+
+      const { result } = renderHook(() => useGetConfig(false, 'co'));
+
+      await waitFor(() => {
+        expect(result.current.configLoading).toBe(false);
+      });
+
+      expect(result.current.configResponse?._feature_flags).toEqual({
+        eligibility_tags: true,
+        nps_survey: false,
+      });
+    });
+
+    it('should merge feature_flags from multiple config items', async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([
+          {
+            name: 'config_without_flags',
+            data: JSON.stringify({ key: 'value' }),
+          },
+          {
+            name: 'config_with_flags',
+            data: JSON.stringify({ key2: 'value2' }),
+            feature_flags: { eligibility_tags: true },
+          },
+          {
+            name: 'config_with_more_flags',
+            data: JSON.stringify({ key3: 'value3' }),
+            feature_flags: { nps_survey: true },
+          },
+        ]),
+      });
+
+      const { result } = renderHook(() => useGetConfig(false, 'co'));
+
+      await waitFor(() => {
+        expect(result.current.configLoading).toBe(false);
+      });
+
+      expect(result.current.configResponse?._feature_flags).toEqual({
+        eligibility_tags: true,
+        nps_survey: true,
+      });
+    });
+
+    it('should handle missing feature_flags in API response', async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([
+          {
+            name: 'test_config',
+            data: JSON.stringify({ key: 'value' }),
+          },
+        ]),
+      });
+
+      const { result } = renderHook(() => useGetConfig(false, 'co'));
+
+      await waitFor(() => {
+        expect(result.current.configLoading).toBe(false);
+      });
+
+      expect(result.current.configResponse?._feature_flags).toBeUndefined();
+    });
+  });
+});
+
+describe('useFeatureFlag', () => {
+  const createWrapper = (config: Config | undefined) => {
+    const contextValue = {
+      config,
+      configLoading: false,
+      formData: {} as any,
+      setFormData: jest.fn(),
+      locale: 'en-us' as any,
+      selectLanguage: jest.fn(),
+      getReferrer: jest.fn(() => '') as any,
+      theme: {} as any,
+      setTheme: jest.fn(),
+      styleOverride: undefined,
+      stepLoading: false,
+      setStepLoading: jest.fn(),
+      pageIsLoading: false,
+      setScreenLoading: jest.fn(),
+      staffToken: undefined,
+      setStaffToken: jest.fn(),
+      whiteLabel: '',
+      setWhiteLabel: jest.fn(),
+    } as WrapperContext;
+
+    return ({ children }: PropsWithChildren) => (
+      <Context.Provider value={contextValue}>{children}</Context.Provider>
+    );
+  };
+
+  it('should return true when feature flag is enabled', () => {
+    const wrapper = createWrapper({ _feature_flags: { eligibility_tags: true } });
+    const { result } = renderHook(() => useFeatureFlag('eligibility_tags'), { wrapper });
+    expect(result.current).toBe(true);
+  });
+
+  it('should return false when feature flag is disabled', () => {
+    const wrapper = createWrapper({ _feature_flags: { eligibility_tags: false } });
+    const { result } = renderHook(() => useFeatureFlag('eligibility_tags'), { wrapper });
+    expect(result.current).toBe(false);
+  });
+
+  it('should return false when feature flag does not exist', () => {
+    const wrapper = createWrapper({ _feature_flags: { nps_survey: true } });
+    const { result } = renderHook(() => useFeatureFlag('eligibility_tags'), { wrapper });
+    expect(result.current).toBe(false);
+  });
+
+  it('should return false when _feature_flags is not present in config', () => {
+    const wrapper = createWrapper({});
+    const { result } = renderHook(() => useFeatureFlag('eligibility_tags'), { wrapper });
+    expect(result.current).toBe(false);
+  });
+
+  it('should return false when config is undefined', () => {
+    const wrapper = createWrapper(undefined);
+    const { result } = renderHook(() => useFeatureFlag('eligibility_tags'), { wrapper });
+    expect(result.current).toBe(false);
   });
 });

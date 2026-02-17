@@ -39,11 +39,11 @@ const Disclaimer = () => {
   const { createScreen, updateScreen } = useScreenApi();
   const backNavigationFunction = () => {
     if (uuid !== undefined) {
-      navigate(`/co_energy_calculator/${uuid}/step-1${queryString}`);
+      navigate(`/cesn/${uuid}/step-1${queryString}`);
       return;
     }
 
-    navigate(`/co_energy_calculator/step-1${queryString}`);
+    navigate(`/cesn/step-1${queryString}`);
   };
 
   usePageTitle(OTHER_PAGE_TITLES.disclaimer);
@@ -94,7 +94,7 @@ const Disclaimer = () => {
 
   const startScreen = async (uuid: string) => {
     setStepLoading(false);
-    navigate(`/co_energy_calculator/${uuid}/step-${STARTING_QUESTION_NUMBER}`);
+    navigate(`/cesn/${uuid}/step-${STARTING_QUESTION_NUMBER}`);
   };
 
   const renderDisclaimerText = () => {

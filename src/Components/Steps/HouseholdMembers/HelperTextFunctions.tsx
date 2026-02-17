@@ -49,6 +49,13 @@ export const renderRelationshipToHHHelperText = (intlHook: IntlShape) => {
   });
 };
 
+export const renderStudentEligibilityErrorMessage = (intlHook: IntlShape) => {
+  return intlHook.formatMessage({
+    id: `studentEligibility-question-errorMessage`,
+    defaultMessage: 'Please select Yes or No.',
+  });
+};
+
 export const renderIncomeStreamNameHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
     id: 'errorMessage-incomeType',

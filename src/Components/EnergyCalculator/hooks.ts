@@ -36,5 +36,5 @@ export function useEnergyFormData(
 export function useIsEnergyCalculator() {
   const { whiteLabel } = useContext(Context);
 
-  return whiteLabel === 'co_energy_calculator';
+  return whiteLabel === 'cesn';
 }

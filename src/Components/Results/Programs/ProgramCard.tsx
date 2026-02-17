@@ -3,12 +3,15 @@ import { Program } from '../../../Types/Results';
 import { FormattedMessage } from 'react-intl';
 import { useFormatDisplayValue } from '../FormattedValue';
 import ResultsTranslate from '../Translate/Translate';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { useMediaQuery } from '@mui/material';
 import './ProgramCard.css';
 import { findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
 import { FormattedMessageType } from '../../../Types/Questions';
 import { BREAKPOINTS } from '../../../utils/breakpoints';
+import { Context } from '../../Wrapper/Wrapper';
+import { useConfig, useFeatureFlag } from '../../Config/configHook';
+import { calcAge } from '../../../Assets/age';
 
 type ResultsCardDetail = {
   title: FormattedMessageType;
@@ -31,6 +34,10 @@ type ResultsCardFlag = {
   className: string;
 };
 
+type EligibleMemberTag = {
+  label: FormattedMessageType;
+};
+
 type ResultsCardProps = {
   name: FormattedMessageType;
   detail1: ResultsCardDetail;
@@ -38,9 +45,39 @@ type ResultsCardProps = {
   link: string;
   flags?: ResultsCardFlag[];
   containerClassNames?: string[];
+  eligibleMembers?: EligibleMemberTag[];
 };
 
-export function ResultsCard({ name, detail1, detail2, link, flags = [], containerClassNames = [] }: ResultsCardProps) {
+function EligibleMemberTags({ members }: { members: EligibleMemberTag[] }) {
+  if (members.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="eligible-members-container">
+      <span className="eligible-members-label">
+        <FormattedMessage id="programCard.eligible-label" defaultMessage="Eligible:" />
+      </span>
+      <div className="eligible-members-tags">
+        {members.map((member, i) => (
+          <span key={i} className="eligible-member-tag">
+            {member.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function ResultsCard({
+  name,
+  detail1,
+  detail2,
+  link,
+  flags = [],
+  containerClassNames = [],
+  eligibleMembers = [],
+}: ResultsCardProps) {
   // Mobile is below desktop breakpoint (0-767px)
   const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.desktop - 1}px)`);
   const containerClass = 'result-program-container ' + containerClassNames.join(' ');
@@ -57,19 +94,23 @@ export function ResultsCard({ name, detail1, detail2, link, flags = [], containe
         })}
       </div>
       {isMobile ? (
-        <div className="result-program-more-info-wrapper">
-          <div className="result-program-more-info">
-            <Link to={link}>{name}</Link>
+        <div className="result-program-mobile-header">
+          <div className="result-program-more-info-wrapper">
+            <div className="result-program-more-info">
+              <Link to={link}>{name}</Link>
+            </div>
+            <div className="result-program-more-info-button">
+              <Link to={link} data-testid="more-info-link">
+                <FormattedMessage id="more-info" defaultMessage="More Info" />
+              </Link>
+            </div>
           </div>
-          <div className="result-program-more-info-button">
-            <Link to={link} data-testid="more-info-link">
-              <FormattedMessage id="more-info" defaultMessage="More Info" />
-            </Link>
-          </div>
+          <EligibleMemberTags members={eligibleMembers} />
         </div>
       ) : (
         <div className="result-program-more-info">
           <Link to={link}>{name}</Link>
+          <EligibleMemberTags members={eligibleMembers} />
         </div>
       )}
       <hr />
@@ -97,6 +138,9 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
   const programName = program.name;
   const programId = program.program_id;
   const { validations, isAdminView } = useResultsContext();
+  const { formData } = useContext(Context);
+  const relationshipOptions = useConfig<{ [key: string]: FormattedMessageType }>('relationship_options');
+  const showEligibilityTags = useFeatureFlag('eligibility_tags');
 
   const containerClass = useMemo(() => {
     const classNames = [];
@@ -115,7 +159,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
     }
 
     return classNames;
-  }, [isAdminView, validations]);
+  }, [isAdminView, validations, program]);
 
   const flags = useMemo(() => {
     const flags: ResultsCardFlag[] = [];
@@ -137,6 +181,71 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
     return flags;
   }, [program.new, program.low_confidence]);
 
+  const eligibleMembers = useMemo(() => {
+    if (!showEligibilityTags) {
+      return [];
+    }
+
+    const totalMembers = formData.householdData.length;
+
+    // Only show eligible member tags if household has more than 1 member
+    if (totalMembers <= 1) {
+      return [];
+    }
+
+    const eligibleMembersList = program.members.filter((m) => m.eligible);
+
+    // If program is eligible but no individual members are marked eligible,
+    // it's a household-level program (e.g. SNAP)
+    if (program.eligible && eligibleMembersList.length === 0) {
+      return [
+        {
+          label: <FormattedMessage id="programCard.household" defaultMessage="Household" />,
+        },
+      ];
+    }
+
+    // If no members are eligible (and program isn't eligible), show nothing
+    if (eligibleMembersList.length === 0) {
+      return [];
+    }
+
+    // Show individual eligible members (even if all are eligible)
+    return eligibleMembersList.flatMap((memberEligibility) => {
+      const member = formData.householdData.find(({ frontendId }) => frontendId === memberEligibility.frontend_id);
+      if (!member) return [];
+      const memberIndex = formData.householdData.indexOf(member);
+      const age = calcAge(member);
+
+      if (memberIndex === 0) {
+        return {
+          label: <FormattedMessage id="programCard.eligibleMember.you" defaultMessage="You" />,
+        };
+      }
+
+      const relationOption = relationshipOptions[member.relationshipToHH];
+      const relationshipLabel =
+        relationOption && typeof relationOption === 'object' && 'props' in relationOption ? (
+          <FormattedMessage {...relationOption.props} />
+        ) : (
+          member.relationshipToHH
+        );
+
+      return {
+        label: (
+          <FormattedMessage
+            id="programCard.eligibleMember"
+            defaultMessage="{relationship}, {age}"
+            values={{
+              relationship: relationshipLabel,
+              age,
+            }}
+          />
+        ),
+      };
+    });
+  }, [program.members, program.eligible, formData, relationshipOptions, showEligibilityTags]);
+
   const programPageLink = useResultsLink(`results/benefits/${programId}`);
   const value = useFormatDisplayValue(program);
 
@@ -154,6 +263,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
       flags={flags}
       link={programPageLink}
       containerClassNames={containerClass}
+      eligibleMembers={eligibleMembers}
     />
   );
 };
