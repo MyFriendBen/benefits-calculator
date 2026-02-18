@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
+import { OverrideableTranslation } from '../../Assets/languageOptions';
 import { useNPSState } from './useNPSState';
 import NPSScoreButtons from './NPSScoreButtons';
 import NPSFollowup from './NPSFollowup';
@@ -54,7 +55,7 @@ export default function NPSFloating({ uuid }: NPSFloatingProps) {
         ) : (
           <>
             <p>
-              <FormattedMessage id="nps.prompt" defaultMessage="How likely are you to recommend MyFriendBen to a friend?" />
+              <OverrideableTranslation id="nps.prompt" defaultMessage="How likely are you to recommend MyFriendBen to a friend?" />
             </p>
             <NPSScoreButtons selectedScore={selectedScore} onScoreClick={submitScore} />
           </>
