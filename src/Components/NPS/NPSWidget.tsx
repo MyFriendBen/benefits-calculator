@@ -12,7 +12,7 @@ type NPSWidgetProps = {
  *
  * Gating:
  * - Feature flag 'nps_survey' must be enabled (top-level kill switch)
- * - Experiment 'npsVariant' deterministically assigns a variant based on uuid
+ * - Experiment 'npsvariant' deterministically assigns a variant based on uuid
  *
  * Variants:
  * - 'floating': Bottom-right floating widget
@@ -22,7 +22,7 @@ type NPSWidgetProps = {
  */
 export default function NPSWidget({ uuid }: NPSWidgetProps) {
   const isNPSEnabled = useFeatureFlag('nps_survey');
-  const variant = useExperiment('npsVariant', uuid);
+  const variant = useExperiment('npsvariant', uuid);
 
   if (!isNPSEnabled || !variant) {
     return null;
