@@ -181,16 +181,18 @@
 }
 
 .nps-dismiss-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
   background: none;
   border: none;
   color: #666;
   font-size: 20px;
   cursor: pointer;
-  padding: 0px 4px;
+  padding: 4px;
   line-height: 1;
   opacity: 0.6;
   transition: opacity 0.2s;
-  flex-shrink: 0;
 }
 
 .nps-dismiss-btn:hover {
@@ -198,28 +200,11 @@
 }
 
 .nps-floating-content {
-  padding: 16px;
+  padding: 32px 16px 16px;
 }
 
 .nps-floating-content > p {
   margin: 0 0 8px;
-  text-align: center;
-  font-family: 'Open Sans', sans-serif;
-  font-size: 14px;
-  color: #333;
-}
-
-.nps-prompt-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 8px;
-  padding-left: calc(20px + 8px); /* mirror dismiss btn width + gap */
-}
-
-.nps-prompt-row > p {
-  flex: 1;
-  margin: 0;
   text-align: center;
   font-family: 'Open Sans', sans-serif;
   font-size: 14px;

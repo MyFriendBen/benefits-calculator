@@ -36,6 +36,9 @@ export default function NPSFloating({ uuid }: NPSFloatingProps) {
 
   return (
     <div className="nps-floating">
+      <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label={intl.formatMessage({ id: 'nps.dismiss-button', defaultMessage: 'Dismiss' })}>
+        &times;
+      </button>
       <div className="nps-floating-content">
         {isFullySubmitted ? (
           <>
@@ -47,25 +50,12 @@ export default function NPSFloating({ uuid }: NPSFloatingProps) {
             </button>
           </>
         ) : isScoreSubmitted ? (
-          <>
-            <div className="nps-prompt-row">
-              <div />
-              <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label={intl.formatMessage({ id: 'nps.dismiss-button', defaultMessage: 'Dismiss' })}>
-                &times;
-              </button>
-            </div>
-            <NPSFollowup selectedScore={selectedScore!} reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} isSubmitting={isSubmitting} />
-          </>
+          <NPSFollowup selectedScore={selectedScore!} reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} isSubmitting={isSubmitting} />
         ) : (
           <>
-            <div className="nps-prompt-row">
-              <p>
-                <OverrideableTranslation id="nps.prompt" defaultMessage="How likely are you to recommend MyFriendBen to a friend?" />
-              </p>
-              <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label={intl.formatMessage({ id: 'nps.dismiss-button', defaultMessage: 'Dismiss' })}>
-                &times;
-              </button>
-            </div>
+            <p>
+              <OverrideableTranslation id="nps.prompt" defaultMessage="How likely are you to recommend MyFriendBen to a friend?" />
+            </p>
             <NPSScoreButtons selectedScore={selectedScore} onScoreClick={submitScore} />
           </>
         )}
