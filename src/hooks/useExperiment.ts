@@ -23,18 +23,18 @@ function hashString(str: string): number {
  * defined in backend config. Same seed always gets the same variant.
  *
  * Priority:
- * 1. URL parameter override (e.g., ?npsvariant=floating)
+ * 1. URL parameter override (e.g., ?npsVariant=floating)
  * 2. localStorage override (for persistent dev/QA testing)
  * 3. Backend config variants + seed-based deterministic assignment
  *
- * @param experimentName - The experiment key in backend config (e.g., 'npsvariant')
+ * @param experimentName - The experiment key in backend config (e.g., 'npsVariant')
  * @param seed - Stable identifier (e.g., uuid) for deterministic assignment
  * @returns The assigned variant string, or null if not configured/assigned
  *
  * To test variants:
  * - URL: ?npsvariant=floating or ?npsvariant=inline
- * - localStorage: localStorage.setItem('experiment_override_npsvariant', 'floating')
- * - Clear: localStorage.removeItem('experiment_override_npsvariant')
+ * - localStorage: localStorage.setItem('experiment_override_npsVariant', 'floating')
+ * - Clear: localStorage.removeItem('experiment_override_npsVariant')
  */
 export function useExperiment(experimentName: string, seed?: string): string | null {
   const { config } = useContext(Context);
@@ -44,7 +44,7 @@ export function useExperiment(experimentName: string, seed?: string): string | n
     const variants = config?.experiments?.[experimentName]?.variants;
 
     // 1. URL parameter override (highest priority)
-    const urlOverride = searchParams.get(experimentName);
+    const urlOverride = searchParams.get(experimentName.toLowerCase());
     if (urlOverride) {
       if (!variants || variants.includes(urlOverride)) {
         return urlOverride;

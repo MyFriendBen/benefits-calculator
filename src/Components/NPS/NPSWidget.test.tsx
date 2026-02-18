@@ -123,7 +123,7 @@ describe('NPSWidget', () => {
 
       render(<NPSWidget uuid="test-uuid" />);
 
-      expect(mockUseExperiment).toHaveBeenCalledWith('npsvariant', 'test-uuid');
+      expect(mockUseExperiment).toHaveBeenCalledWith('npsVariant', 'test-uuid');
     });
   });
 });
