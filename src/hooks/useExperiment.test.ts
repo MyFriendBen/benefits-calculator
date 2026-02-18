@@ -110,19 +110,19 @@ describe('useExperiment', () => {
 
   describe('URL parameter override', () => {
     it('returns URL param value over hash assignment', () => {
-      const result = renderHook('npsVariant', 'seed-123', '/?npsVariant=inline', {
+      const result = renderHook('npsVariant', 'seed-123', '/?npsvariant=inline', {
         npsVariant: { variants: ['floating', 'inline'] },
       });
       expect(result.current).toBe('inline');
     });
 
     it('accepts URL param even without backend config', () => {
-      const result = renderHook('npsVariant', 'seed-123', '/?npsVariant=floating');
+      const result = renderHook('npsVariant', 'seed-123', '/?npsvariant=floating');
       expect(result.current).toBe('floating');
     });
 
     it('ignores URL param not in variants list', () => {
-      const result = renderHook('npsVariant', 'seed-123', '/?npsVariant=invalid', {
+      const result = renderHook('npsVariant', 'seed-123', '/?npsvariant=invalid', {
         npsVariant: { variants: ['floating', 'inline'] },
       });
       // Falls through to hash assignment
@@ -153,7 +153,7 @@ describe('useExperiment', () => {
     it('URL param takes priority over localStorage', () => {
       localStorage.setItem(STORAGE_KEY, 'inline');
 
-      const result = renderHook('npsVariant', 'seed-123', '/?npsVariant=floating', {
+      const result = renderHook('npsVariant', 'seed-123', '/?npsvariant=floating', {
         npsVariant: { variants: ['floating', 'inline'] },
       });
       expect(result.current).toBe('floating');

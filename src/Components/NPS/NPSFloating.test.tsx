@@ -124,17 +124,16 @@ describe('NPSFloating', () => {
     expect(screen.getByText('Thank you for your feedback!')).toBeInTheDocument();
   });
 
-  it('can dismiss during followup step', () => {
-    const { container } = render(<IntlProvider locale="en"><NPSFloating uuid="test-uuid" /></IntlProvider>);
+  it('does not show dismiss button during followup step', () => {
+    render(<IntlProvider locale="en"><NPSFloating uuid="test-uuid" /></IntlProvider>);
 
     act(() => {
       jest.advanceTimersByTime(5000);
     });
 
     fireEvent.click(screen.getByRole('button', { name: '8' }));
-    fireEvent.click(screen.getByLabelText('Dismiss'));
 
-    expect(container.firstChild).toBeNull();
+    expect(screen.queryByLabelText('Dismiss')).not.toBeInTheDocument();
   });
 
   it('hides when close is clicked on thank you screen', () => {
