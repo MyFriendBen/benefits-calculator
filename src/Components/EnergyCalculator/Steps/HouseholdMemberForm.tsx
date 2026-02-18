@@ -445,6 +445,7 @@ const ECHouseholdMemberForm = () => {
             />
           </QuestionDescription>
           <MultiSelectTiles
+            variant="square"
             options={Object.entries(pageNumber === 1 ? conditionOptions.you : conditionOptions.them).map(
               ([key, option]) => ({
                 value: key,

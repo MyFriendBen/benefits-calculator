@@ -30,7 +30,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { MONTHS } from './MONTHS';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
-import RHFOptionCardGroup from '../../RHFComponents/RHFOptionCardGroup';
+import MultiSelectTiles from '../../SelectTiles/MultiSelectTiles';
 import { useConfig } from '../../Config/configHook';
 import QuestionDescription from '../../QuestionComponents/QuestionDescription';
 import { FormattedMessageType } from '../../../Types/Questions';
@@ -184,6 +184,8 @@ const getFormSchema = ({
         .refine((insuranceOptions) => Object.values(insuranceOptions).some((option) => option === true), {
           message: renderHealthInsSelectOneHelperText(intl),
         })
+        // The UI's exclusiveValues prop already enforces "none" mutual exclusivity,
+        // but we keep this Zod refinement as a validation safety net.
         .refine(
           (insuranceOptions) => {
             if (insuranceOptions.none) {
@@ -242,6 +244,26 @@ const getFormSchema = ({
         });
       }
     });
+};
+
+const FIELD_TO_SCROLL_ID: Record<string, string> = {
+  relationshipToHH: 'field-relationshipToHH',
+  birthMonth: 'field-birthMonth',
+  birthYear: 'field-birthMonth',
+  healthInsurance: 'field-healthInsurance',
+  studentEligibility: 'field-studentEligibility',
+  hasIncome: 'field-hasIncome',
+  incomeStreams: 'field-hasIncome',
+};
+
+const scrollToFirstError = (errors: Record<string, unknown>) => {
+  const firstErrorField = Object.keys(FIELD_TO_SCROLL_ID).find((field) => field in errors);
+  const el = firstErrorField && document.getElementById(FIELD_TO_SCROLL_ID[firstErrorField]);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    window.scroll({ top: 0, left: 0, behavior: 'smooth' });
+  }
 };
 
 const HouseholdMemberForm = () => {
@@ -359,6 +381,7 @@ const HouseholdMemberForm = () => {
     setValue,
     getValues,
     trigger,
+    clearErrors,
   } = useStepForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -480,7 +503,7 @@ const HouseholdMemberForm = () => {
 
   const createAgeQuestion = () => {
     return (
-      <Box sx={{ marginBottom: '1.5rem' }}>
+      <Box id="field-birthMonth" sx={{ marginBottom: '1.5rem' }}>
         <QuestionQuestion>
           {pageNumber === 1 ? (
             <FormattedMessage
@@ -607,25 +630,35 @@ const HouseholdMemberForm = () => {
   };
 
   const displayHealthInsuranceBlock = () => {
+    const insuranceSource = pageNumber === 1 ? healthInsuranceOptions.you : healthInsuranceOptions.them;
+    const insuranceTileOptions = Object.entries(insuranceSource).map(([key, option]) => ({
+      value: key,
+      text: option.text,
+      icon: option.icon,
+    }));
+
     return (
-      <div className="section-container">
+      <div id="field-healthInsurance" className="section-container">
         <Stack sx={{ padding: 0 }} className="section">
           {displayHealthCareQuestion()}
           <QuestionDescription>
             <FormattedMessage id="insurance.chooseAllThatApply" defaultMessage="Choose all that apply." />
           </QuestionDescription>
-          <RHFOptionCardGroup
-            fields={watch('healthInsurance')}
-            setValue={setValue as unknown as (name: string, value: unknown, config?: Object) => void}
-            name="healthInsurance"
-            options={pageNumber === 1 ? healthInsuranceOptions.you : healthInsuranceOptions.them}
-            triggerValidation={trigger}
-          />
           {errors.healthInsurance !== undefined && (
             <FormHelperText sx={{ ml: 0 }}>
               <ErrorMessageWrapper fontSize="1rem">{errors.healthInsurance.message}</ErrorMessageWrapper>
             </FormHelperText>
           )}
+          <MultiSelectTiles
+            variant="square"
+            exclusiveValues={['none']}
+            options={insuranceTileOptions}
+            values={watch('healthInsurance')}
+            onChange={(values) => {
+              setValue('healthInsurance', values as HealthInsurance, { shouldValidate: false, shouldDirty: true });
+              clearErrors('healthInsurance');
+            }}
+          />
         </Stack>
       </div>
     );
@@ -640,8 +673,15 @@ const HouseholdMemberForm = () => {
     const formattedMsgDefaultMsg =
       pageNumber === 1 ? 'Do any of these apply to you?' : 'Do any of these apply to them?';
 
+    const conditionSource = pageNumber === 1 ? conditionOptions.you : conditionOptions.them;
+    const conditionTileOptions = Object.entries(conditionSource).map(([key, option]) => ({
+      value: key,
+      text: option.text,
+      icon: option.icon,
+    }));
+
     return (
-      <Box sx={{ marginTop: '1.5rem' }}>
+      <Box id="field-studentEligibility" sx={{ marginTop: '1.5rem' }}>
         <QuestionQuestion>
           <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
         </QuestionQuestion>
@@ -651,11 +691,13 @@ const HouseholdMemberForm = () => {
             defaultMessage="Choose all that apply. If none apply, skip this question."
           />
         </QuestionDescription>
-        <RHFOptionCardGroup
-          fields={watch('conditions')}
-          setValue={setValue as unknown as (name: string, value: unknown, config?: Object) => void}
-          name="conditions"
-          options={pageNumber === 1 ? conditionOptions.you : conditionOptions.them}
+        <MultiSelectTiles
+          variant="square"
+          options={conditionTileOptions}
+          values={watch('conditions')}
+          onChange={(values) => {
+            setValue('conditions', values as Conditions, { shouldDirty: true });
+          }}
         />
         {watchIsStudent && createStudentEligibilityQuestions()}
       </Box>
@@ -723,7 +765,7 @@ const HouseholdMemberForm = () => {
 
   const createHOfHRelationQuestion = () => {
     return (
-      <Box sx={{ marginBottom: '1.5rem' }}>
+      <Box id="field-relationshipToHH" sx={{ marginBottom: '1.5rem' }}>
         <QuestionQuestion>
           <FormattedMessage
             id="householdDataBlock.createHOfHRelationQuestion-relation"
@@ -794,7 +836,7 @@ const HouseholdMemberForm = () => {
     const { isUnder16 } = calculateCurrentAgeStatus();
     
     return (
-      <Box className="section-container">
+      <Box id="field-hasIncome" className="section-container">
         <div className="section">
           <QuestionQuestion>
             <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
@@ -1175,9 +1217,7 @@ const HouseholdMemberForm = () => {
       )}
 
       <form
-        onSubmit={handleSubmit(formSubmitHandler, () => {
-          window.scroll({ top: 0, left: 0, behavior: 'smooth' });
-        })}
+        onSubmit={handleSubmit(formSubmitHandler, scrollToFirstError)}
       >
         {pageNumber !== 1 && createHOfHRelationQuestion()}
         {createAgeQuestion()}

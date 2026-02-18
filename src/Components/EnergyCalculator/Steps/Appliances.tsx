@@ -96,6 +96,7 @@ const Appliances = () => {
       </QuestionDescription>
       <form onSubmit={handleSubmit(formSubmitHandler)}>
         <MultiSelectTiles
+          variant="square"
           options={Object.entries(applianceStatusOptions).map(([key, option]) => ({
             value: key,
             text: option.text,

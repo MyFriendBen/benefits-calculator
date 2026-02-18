@@ -127,6 +127,7 @@ export default function EnergyCalculatorExpenses() {
       </QuestionDescription>
       <form onSubmit={handleSubmit(formSubmitHandler)}>
         <MultiSelectTiles
+          variant="square"
           values={watch('expenses')}
           onChange={(values) => {
             setValue('expenses', values);
