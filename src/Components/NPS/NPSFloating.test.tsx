@@ -132,7 +132,7 @@ describe('NPSFloating', () => {
     });
 
     fireEvent.click(screen.getByRole('button', { name: '8' }));
-    fireEvent.click(screen.getByLabelText('Dismiss'));
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
 
     expect(container.firstChild).toBeNull();
   });
