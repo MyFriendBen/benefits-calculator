@@ -23,8 +23,8 @@ describe('NPSScoreButtons', () => {
   it('renders labels', () => {
     renderWithIntl(<NPSScoreButtons selectedScore={null} onScoreClick={mockOnScoreClick} />);
 
-    expect(screen.getByText('Not at all likely')).toBeInTheDocument();
-    expect(screen.getByText('Extremely likely')).toBeInTheDocument();
+    expect(screen.getByText('Very Unlikely')).toBeInTheDocument();
+    expect(screen.getByText('Very likely')).toBeInTheDocument();
   });
 
   it('calls onScoreClick when a button is clicked', () => {
