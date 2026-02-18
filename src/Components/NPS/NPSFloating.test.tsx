@@ -8,6 +8,10 @@ jest.mock('../../apiCalls', () => ({
   patchNPSReason: jest.fn(),
 }));
 
+jest.mock('../Config/configHook', () => ({
+  useConfig: () => ({}),
+}));
+
 const mockPostNPSScore = apiCalls.postNPSScore as jest.MockedFunction<typeof apiCalls.postNPSScore>;
 const mockPatchNPSReason = apiCalls.patchNPSReason as jest.MockedFunction<typeof apiCalls.patchNPSReason>;
 
