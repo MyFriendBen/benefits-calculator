@@ -44,7 +44,7 @@ export function useExperiment(experimentName: string, seed?: string): string | n
     const variants = config?.experiments?.[experimentName]?.variants;
 
     // 1. URL parameter override (highest priority)
-    const urlOverride = searchParams.get(experimentName.toLowerCase());
+    const urlOverride = searchParams.get(experimentName);
     if (urlOverride) {
       if (!variants || variants.includes(urlOverride)) {
         return urlOverride;
