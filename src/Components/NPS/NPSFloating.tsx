@@ -35,11 +35,6 @@ export default function NPSFloating({ uuid }: NPSFloatingProps) {
 
   return (
     <div className="nps-floating">
-      {!isFullySubmitted && (
-        <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label="Dismiss">
-          &times;
-        </button>
-      )}
       <div className="nps-floating-content">
         {isFullySubmitted ? (
           <>
@@ -54,9 +49,14 @@ export default function NPSFloating({ uuid }: NPSFloatingProps) {
           <NPSFollowup selectedScore={selectedScore!} reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} isSubmitting={isSubmitting} />
         ) : (
           <>
-            <p>
-              <OverrideableTranslation id="nps.prompt" defaultMessage="How likely are you to recommend MyFriendBen to a friend?" />
-            </p>
+            <div className="nps-prompt-row">
+              <p>
+                <OverrideableTranslation id="nps.prompt" defaultMessage="How likely are you to recommend MyFriendBen to a friend?" />
+              </p>
+              <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label="Dismiss">
+                &times;
+              </button>
+            </div>
             <NPSScoreButtons selectedScore={selectedScore} onScoreClick={submitScore} />
           </>
         )}

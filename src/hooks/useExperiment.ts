@@ -32,7 +32,7 @@ function hashString(str: string): number {
  * @returns The assigned variant string, or null if not configured/assigned
  *
  * To test variants:
- * - URL: ?npsVariant=floating or ?npsVariant=inline
+ * - URL: ?npsvariant=floating or ?npsvariant=inline
  * - localStorage: localStorage.setItem('experiment_override_npsVariant', 'floating')
  * - Clear: localStorage.removeItem('experiment_override_npsVariant')
  */
@@ -44,7 +44,7 @@ export function useExperiment(experimentName: string, seed?: string): string | n
     const variants = config?.experiments?.[experimentName]?.variants;
 
     // 1. URL parameter override (highest priority)
-    const urlOverride = searchParams.get(experimentName);
+    const urlOverride = searchParams.get(experimentName.toLowerCase());
     if (urlOverride) {
       if (!variants || variants.includes(urlOverride)) {
         return urlOverride;
