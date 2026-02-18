@@ -18,7 +18,7 @@ type NPSWidgetProps = {
  * - 'floating': Bottom-right floating widget
  * - 'inline': Full-width section at bottom of results
  *
- * To test a specific variant, add ?npsvariant=floating or ?npsvariant=inline to the URL
+ * To test a specific variant, add ?npsVariant=floating or ?npsVariant=inline to the URL
  */
 export default function NPSWidget({ uuid }: NPSWidgetProps) {
   const isNPSEnabled = useFeatureFlag('nps_survey');

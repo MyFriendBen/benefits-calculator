@@ -32,7 +32,7 @@ function hashString(str: string): number {
  * @returns The assigned variant string, or null if not configured/assigned
  *
  * To test variants:
- * - URL: ?npsvariant=floating or ?npsvariant=inline
+ * - URL: ?npsVariant=floating or ?npsVariant=inline
  * - localStorage: localStorage.setItem('experiment_override_npsVariant', 'floating')
  * - Clear: localStorage.removeItem('experiment_override_npsVariant')
  */
