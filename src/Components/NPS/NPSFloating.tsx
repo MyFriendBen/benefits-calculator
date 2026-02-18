@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { OverrideableTranslation } from '../../Assets/languageOptions';
 import { useNPSState } from './useNPSState';
 import NPSScoreButtons from './NPSScoreButtons';
@@ -16,6 +16,7 @@ const SHOW_DELAY_MS = 5000; // 5 seconds
  * Floating NPS widget - appears in bottom-right corner after a delay
  */
 export default function NPSFloating({ uuid }: NPSFloatingProps) {
+  const intl = useIntl();
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const { selectedScore, isScoreSubmitted, isFullySubmitted, isSubmitting, reason, setReason, submitScore, submitReason, skipReason } =
@@ -49,7 +50,7 @@ export default function NPSFloating({ uuid }: NPSFloatingProps) {
           <>
             <div className="nps-prompt-row">
               <div />
-              <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label="Dismiss">
+              <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label={intl.formatMessage({ id: 'nps.dismiss-button', defaultMessage: 'Dismiss' })}>
                 &times;
               </button>
             </div>
@@ -61,7 +62,7 @@ export default function NPSFloating({ uuid }: NPSFloatingProps) {
               <p>
                 <OverrideableTranslation id="nps.prompt" defaultMessage="How likely are you to recommend MyFriendBen to a friend?" />
               </p>
-              <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label="Dismiss">
+              <button onClick={() => setIsDismissed(true)} className="nps-dismiss-btn" aria-label={intl.formatMessage({ id: 'nps.dismiss-button', defaultMessage: 'Dismiss' })}>
                 &times;
               </button>
             </div>
