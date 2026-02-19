@@ -1,4 +1,5 @@
 import { FormattedMessage } from 'react-intl';
+import { OverrideableTranslation } from '../../Assets/languageOptions';
 import { useNPSState } from './useNPSState';
 import NPSScoreButtons from './NPSScoreButtons';
 import NPSFollowup from './NPSFollowup';
@@ -36,7 +37,7 @@ export default function NPSInline({ uuid }: NPSInlineProps) {
   return (
     <div className="nps-inline">
       <h3 className="nps-inline-title">
-        <FormattedMessage id="nps.prompt" defaultMessage="How likely are you to recommend MyFriendBen to a friend?" />
+        <OverrideableTranslation id="nps.prompt" defaultMessage="How likely are you to recommend MyFriendBen to a friend?" />
       </h3>
       <NPSScoreButtons selectedScore={selectedScore} onScoreClick={submitScore} />
     </div>
