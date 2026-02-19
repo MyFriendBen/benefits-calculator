@@ -2,14 +2,14 @@ import { UtmParameters } from '../Components/CampaignAnalytics/useUtmParameters'
 
 export type Expense = {
   expenseSourceName: string;
-  expenseAmount: string;
+  expenseAmount: number;
 };
 
 export type IncomeStream = {
   incomeStreamName: string;
-  incomeAmount: string;
+  incomeAmount: number;
   incomeFrequency: string;
-  hoursPerWeek: string;
+  hoursPerWeek: number;
 };
 
 export type EnergyCalculatorFormData = {

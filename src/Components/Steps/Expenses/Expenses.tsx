@@ -31,7 +31,8 @@ import { FormattedMessageType } from '../../../Types/Questions';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import CloseButton from '../../CloseButton/CloseButton';
 import AddIcon from '@mui/icons-material/Add';
-import { NUM_PAD_PROPS, handleNumbersOnly } from '../../../Assets/numInputHelpers';
+import { NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
+import { NumericFormat } from 'react-number-format';
 import useScreenApi from '../../../Assets/updateScreen';
 import { helperText } from '../../HelperText/HelperText';
 import './Expenses.css';
@@ -49,7 +50,6 @@ const Expenses = () => {
   const backNavigationFunction = useDefaultBackNavigationFunction('hasExpenses');
   const expenseOptions = useConfig('expense_options') as Record<string, FormattedMessageType>;
 
-  const oneOrMoreDigitsButNotAllZero = /^(?!0+$)\d+$/;
   const expenseSourceSchema = z.object({
     expenseSourceName: z
       .string(
@@ -59,16 +59,16 @@ const Expenses = () => {
       )
       .min(1),
     expenseAmount: z
-      .string(
-        helperText(
+      .number({
+        ...helperText(
           intl.formatMessage({
             id: 'errorMessage-greaterThanZero',
             defaultMessage: 'Please enter a number greater than 0',
           }),
         ),
-      )
-      .trim()
-      .regex(oneOrMoreDigitsButNotAllZero),
+      })
+      .int()
+      .min(1),
   });
   const expenseSourcesSchema = z.array(expenseSourceSchema);
   const hasExpensesSchema = z.string().regex(/^true|false$/);
@@ -105,7 +105,7 @@ const Expenses = () => {
     if (hasTruthyExpenses && noExpensesAreListed) {
       append({
         expenseSourceName: '',
-        expenseAmount: '',
+        expenseAmount: 0,
       });
     }
 
@@ -270,8 +270,13 @@ const Expenses = () => {
                     control={control}
                     render={({ field }) => (
                       <>
-                        <TextField
-                          {...field}
+                        <NumericFormat
+                          value={field.value || ''}
+                          onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                          thousandSeparator
+                          allowNegative={false}
+                          decimalScale={0}
+                          customInput={TextField}
                           label={
                             <FormattedMessage
                               id="expenseBlock.createExpenseAmountTextfield-amountLabel"
@@ -280,7 +285,6 @@ const Expenses = () => {
                           }
                           variant="outlined"
                           inputProps={NUM_PAD_PROPS}
-                          onChange={handleNumbersOnly(field.onChange)}
                           sx={{ backgroundColor: '#fff' }}
                           error={!!errors.expenses?.[index]?.expenseAmount}
                           InputProps={{
@@ -309,7 +313,7 @@ const Expenses = () => {
             onClick={() =>
               append({
                 expenseSourceName: '',
-                expenseAmount: '',
+                expenseAmount: 0,
               })
             }
             startIcon={<AddIcon />}

@@ -97,7 +97,7 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
           <strong>
             <FormattedMessage id="householdDataBlock.member-income" defaultMessage="Income: " />
           </strong>
-          {translateNumber(formatToUSD(Number(income)))}
+          {translateNumber(formatToUSD(income))}
           <FormattedMessage id="displayAnnualIncome.annual" defaultMessage=" annually" />
         </div>
       </article>

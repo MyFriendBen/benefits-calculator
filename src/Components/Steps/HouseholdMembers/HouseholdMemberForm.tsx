@@ -52,7 +52,8 @@ import {
   renderHealthInsNonePlusTheyHelperText,
   renderStudentEligibilityErrorMessage,
 } from './HelperTextFunctions';
-import { DOLLARS, handleNumbersOnly, numberInputProps, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
+import { numberInputProps, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
+import { NumericFormat } from 'react-number-format';
 import useScreenApi from '../../../Assets/updateScreen';
 import { QUESTION_TITLES } from '../../../Assets/pageTitleTags';
 import { getCurrentMonthYear, YEARS, MAX_AGE } from '../../../Assets/age';
@@ -119,28 +120,20 @@ const getFormSchema = ({
   currentYear,
   currentMonth,
 }: GetFormSchemaParams) => {
-  const oneOrMoreDigitsButNotAllZero = /^(?!0+$)\d+$/;
-  const incomeAmountRegex = /^\d{0,7}(?:\d\.\d{0,2})?$/;
-
   const incomeSourcesSchema = z
     .object({
       incomeStreamName: z.string().min(1, { message: renderIncomeStreamNameHelperText(intl) }),
       incomeFrequency: z.string().min(1, { message: renderIncomeFrequencyHelperText(intl) }),
-      hoursPerWeek: z.string().trim(),
+      hoursPerWeek: z.number().int().min(0),
       incomeAmount: z
-        .string()
-        .trim()
-        .refine(
-          (value) => {
-            return incomeAmountRegex.test(value) && Number(value) > 0;
-          },
-          { message: renderIncomeAmountHelperText(intl) },
-        ),
+        .number({ invalid_type_error: renderIncomeAmountHelperText(intl) })
+        .int()
+        .min(1, { message: renderIncomeAmountHelperText(intl) }),
     })
     .refine(
       (data) => {
         if (data.incomeFrequency === 'hourly') {
-          return oneOrMoreDigitsButNotAllZero.test(data.hoursPerWeek);
+          return data.hoursPerWeek > 0;
         } else {
           return true;
         }
@@ -436,9 +429,9 @@ const HouseholdMemberForm = () => {
     if (hasTruthyIncome && noIncomeStreamsAreListed) {
       append({
         incomeStreamName: '',
-        incomeAmount: '',
+        incomeAmount: 0,
         incomeFrequency: '',
-        hoursPerWeek: '',
+        hoursPerWeek: 0,
       });
     }
 
@@ -1047,14 +1040,17 @@ const HouseholdMemberForm = () => {
           rules={{ required: true }}
           render={({ field }) => (
             <>
-              <TextField
-                {...field}
+              <NumericFormat
+                value={field.value || ''}
+                onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                allowNegative={false}
+                decimalScale={0}
+                customInput={TextField}
                 label={
                   <FormattedMessage id="incomeBlock.createHoursWorkedTextfield-amountLabel" defaultMessage="Hours" />
                 }
                 variant="outlined"
                 inputProps={NUM_PAD_PROPS}
-                onChange={handleNumbersOnly(field.onChange)}
                 sx={{ backgroundColor: '#fff' }}
                 error={errors.incomeStreams?.[index]?.hoursPerWeek !== undefined}
               />
@@ -1117,8 +1113,13 @@ const HouseholdMemberForm = () => {
           rules={{ required: true }}
           render={({ field }) => (
             <>
-              <TextField
-                {...field}
+              <NumericFormat
+                value={field.value || ''}
+                onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                thousandSeparator
+                allowNegative={false}
+                decimalScale={0}
+                customInput={TextField}
                 label={
                   <FormattedMessage
                     id="personIncomeBlock.createIncomeAmountTextfield-amountLabel"
@@ -1127,7 +1128,6 @@ const HouseholdMemberForm = () => {
                 }
                 variant="outlined"
                 inputProps={NUM_PAD_PROPS}
-                onChange={handleNumbersOnly(field.onChange, DOLLARS)}
                 sx={{ backgroundColor: '#fff' }}
                 error={errors.incomeStreams?.[index]?.incomeAmount !== undefined}
                 InputProps={{
@@ -1262,9 +1262,9 @@ const HouseholdMemberForm = () => {
                   onClick={() =>
                     append({
                       incomeStreamName: '',
-                      incomeAmount: '',
+                      incomeAmount: 0,
                       incomeFrequency: '',
-                      hoursPerWeek: '',
+                      hoursPerWeek: 0,
                     })
                   }
                   startIcon={<AddIcon />}

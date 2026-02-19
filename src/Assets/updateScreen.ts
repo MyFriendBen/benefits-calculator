@@ -205,9 +205,9 @@ const getIncomeStreamsBodies = (householdMemberData: HouseholdData): ApiIncome[]
   return householdMemberData.incomeStreams.map((incomeStream) => {
     return {
       type: incomeStream.incomeStreamName,
-      amount: Number(incomeStream.incomeAmount),
+      amount: incomeStream.incomeAmount,
       frequency: incomeStream.incomeFrequency,
-      hours_worked: Number(incomeStream.hoursPerWeek) ?? null,
+      hours_worked: incomeStream.hoursPerWeek || null,
     };
   });
 };
@@ -216,7 +216,7 @@ const getExpensesBodies = (formData: FormData): ApiExpense[] => {
   return formData.expenses.map((expense) => {
     return {
       type: expense.expenseSourceName,
-      amount: expense.expenseAmount === '' ? 0 : Number(expense.expenseAmount),
+      amount: expense.expenseAmount,
       frequency: 'monthly',
     };
   });

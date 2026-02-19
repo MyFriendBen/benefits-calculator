@@ -87,7 +87,7 @@ export default function EnergyCalculatorExpenses() {
   const createExpense = (expenseName: string): Expense => {
     return {
       expenseSourceName: expenseName,
-      expenseAmount: '1',
+      expenseAmount: 1,
     };
   };
 
