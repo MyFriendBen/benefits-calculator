@@ -154,6 +154,7 @@ export function useUpdateFormData() {
       const incomes = [];
       for (const income of member.income_streams) {
         incomes.push({
+          incomeCategory: '',
           incomeStreamName: income.type ?? '',
           incomeAmount: String(income.amount) ?? '',
           incomeFrequency: income.frequency ?? '',

@@ -83,3 +83,10 @@ export const renderIncomeAmountHelperText = (intlHook: IntlShape) => {
     defaultMessage: 'Please enter a number greater than 0.',
   });
 };
+
+export const renderIncomeCategoryHelperText = (intlHook: IntlShape) => {
+  return intlHook.formatMessage({
+    id: 'errorMessage-incomeCategory',
+    defaultMessage: 'Please select an income category',
+  });
+};

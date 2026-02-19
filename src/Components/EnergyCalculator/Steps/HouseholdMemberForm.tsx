@@ -127,6 +127,7 @@ const ECHouseholdMemberForm = () => {
   const incomeAmountRegex = /^\d{0,7}(?:\d\.\d{0,2})?$/;
   const incomeSourcesSchema = z
     .object({
+      incomeCategory: z.string().optional().default(''),
       incomeStreamName: z.string().min(1, { message: renderIncomeStreamNameHelperText(intl) }),
       incomeFrequency: z.string().min(1, { message: renderIncomeFrequencyHelperText(intl) }),
       hoursPerWeek: z.string().trim(),
@@ -235,7 +236,10 @@ const ECHouseholdMemberForm = () => {
       receivesSsi: householdMemberFormData?.energyCalculator?.receivesSsi ? 'true' : 'false',
       relationshipToHH: determineDefaultRelationshipToHH(),
       hasIncome: determineDefaultHasIncome(),
-      incomeStreams: householdMemberFormData?.incomeStreams ?? [],
+      incomeStreams: (householdMemberFormData?.incomeStreams ?? []).map((stream) => ({
+        ...stream,
+        incomeCategory: stream.incomeCategory ?? '',
+      })),
     },
     questionName: 'energyCalculatorHouseholdData',
     onSubmitSuccessfulOverride: () => nextStep(uuid, currentStepId, pageNumber),
@@ -252,6 +256,7 @@ const ECHouseholdMemberForm = () => {
     const noIncomeStreamsAreListed = getValues('incomeStreams').length === 0;
     if (hasTruthyIncome && noIncomeStreamsAreListed) {
       append({
+        incomeCategory: '',
         incomeStreamName: '',
         incomeAmount: '',
         incomeFrequency: '',
@@ -1002,6 +1007,7 @@ const ECHouseholdMemberForm = () => {
                   variant="outlined"
                   onClick={() =>
                     append({
+                      incomeCategory: '',
                       incomeStreamName: '',
                       incomeAmount: '',
                       incomeFrequency: '',
