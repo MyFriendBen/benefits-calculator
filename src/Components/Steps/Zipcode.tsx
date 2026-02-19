@@ -14,7 +14,6 @@ import QuestionLeadText from '../QuestionComponents/QuestionLeadText';
 import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
 import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useDefaultBackNavigationFunction } from '../QuestionComponents/questionHooks';
-import { handleNumbersOnly, NUM_PAD_PROPS } from '../../Assets/numInputHelpers';
 import useScreenApi from '../../Assets/updateScreen';
 import { OverrideableTranslation } from '../../Assets/languageOptions';
 import QuestionDescription from '../QuestionComponents/QuestionDescription';
@@ -195,8 +194,7 @@ export const Zipcode = () => {
               {...field}
               label={<FormattedMessage id="questions.zipcode-inputLabel" defaultMessage="Zip Code" />}
               variant="outlined"
-              inputProps={NUM_PAD_PROPS}
-              onChange={handleNumbersOnly(field.onChange)}
+              inputProps={{ inputMode: 'numeric' }}
               error={errors.zipcode !== undefined}
               helperText={
                 errors.zipcode !== undefined && (

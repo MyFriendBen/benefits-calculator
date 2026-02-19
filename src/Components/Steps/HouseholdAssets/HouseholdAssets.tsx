@@ -12,7 +12,7 @@ import { useDefaultBackNavigationFunction } from '../../QuestionComponents/quest
 import useScreenApi from '../../../Assets/updateScreen';
 import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
+
 import { NumericFormat } from 'react-number-format';
 import useStepForm from '../stepForm';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
@@ -100,7 +100,7 @@ const HouseholdAssets = () => {
                 startAdornment: <InputAdornment position="start">$</InputAdornment>,
                 sx: { backgroundColor: '#FFFFFF' },
               }}
-              inputProps={NUM_PAD_PROPS}
+              inputProps={{ inputMode: 'decimal' }}
               onFocus={(e) => {
                 e.target.select();
               }}

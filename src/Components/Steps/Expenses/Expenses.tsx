@@ -31,7 +31,7 @@ import { FormattedMessageType } from '../../../Types/Questions';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import CloseButton from '../../CloseButton/CloseButton';
 import AddIcon from '@mui/icons-material/Add';
-import { NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
+
 import { NumericFormat } from 'react-number-format';
 import useScreenApi from '../../../Assets/updateScreen';
 import { helperText } from '../../HelperText/HelperText';
@@ -284,7 +284,7 @@ const Expenses = () => {
                             />
                           }
                           variant="outlined"
-                          inputProps={NUM_PAD_PROPS}
+                          inputProps={{ inputMode: 'decimal' }}
                           sx={{ backgroundColor: '#fff' }}
                           error={!!errors.expenses?.[index]?.expenseAmount}
                           InputProps={{

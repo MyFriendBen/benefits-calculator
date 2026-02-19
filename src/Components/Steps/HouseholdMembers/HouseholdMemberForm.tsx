@@ -52,7 +52,6 @@ import {
   renderHealthInsNonePlusTheyHelperText,
   renderStudentEligibilityErrorMessage,
 } from './HelperTextFunctions';
-import { numberInputProps, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
 import { NumericFormat } from 'react-number-format';
 import useScreenApi from '../../../Assets/updateScreen';
 import { QUESTION_TITLES } from '../../../Assets/pageTitleTags';
@@ -580,7 +579,7 @@ const HouseholdMemberForm = () => {
                         label={<FormattedMessage id="ageInput.year.label" defaultMessage="Birth Year" />}
                         inputProps={{
                           ...params.inputProps,
-                          ...numberInputProps(params.inputProps.onChange),
+                          inputMode: 'numeric',
                         }}
                         error={errors.birthYear !== undefined}
                       />
@@ -1050,7 +1049,7 @@ const HouseholdMemberForm = () => {
                   <FormattedMessage id="incomeBlock.createHoursWorkedTextfield-amountLabel" defaultMessage="Hours" />
                 }
                 variant="outlined"
-                inputProps={NUM_PAD_PROPS}
+                inputProps={{ inputMode: 'decimal' }}
                 sx={{ backgroundColor: '#fff' }}
                 error={errors.incomeStreams?.[index]?.hoursPerWeek !== undefined}
               />
@@ -1127,7 +1126,7 @@ const HouseholdMemberForm = () => {
                   />
                 }
                 variant="outlined"
-                inputProps={NUM_PAD_PROPS}
+                inputProps={{ inputMode: 'decimal' }}
                 sx={{ backgroundColor: '#fff' }}
                 error={errors.incomeStreams?.[index]?.incomeAmount !== undefined}
                 InputProps={{
