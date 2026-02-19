@@ -12,7 +12,6 @@ import { useDefaultBackNavigationFunction } from '../../QuestionComponents/quest
 import useScreenApi from '../../../Assets/updateScreen';
 import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
-
 import { NumericFormat } from 'react-number-format';
 import useStepForm from '../stepForm';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
@@ -88,7 +87,7 @@ const HouseholdAssets = () => {
           rules={{ required: true }}
           render={({ field }) => (
             <NumericFormat
-              value={field.value || ''}
+              value={field.value === 0 ? '' : field.value}
               onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
               thousandSeparator
               allowNegative={false}
@@ -100,7 +99,7 @@ const HouseholdAssets = () => {
                 startAdornment: <InputAdornment position="start">$</InputAdornment>,
                 sx: { backgroundColor: '#FFFFFF' },
               }}
-              inputProps={{ inputMode: 'decimal' }}
+              inputProps={{ inputMode: 'numeric' }}
               onFocus={(e) => {
                 e.target.select();
               }}

@@ -31,7 +31,6 @@ import { FormattedMessageType } from '../../../Types/Questions';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import CloseButton from '../../CloseButton/CloseButton';
 import AddIcon from '@mui/icons-material/Add';
-
 import { NumericFormat } from 'react-number-format';
 import useScreenApi from '../../../Assets/updateScreen';
 import { helperText } from '../../HelperText/HelperText';
@@ -60,15 +59,18 @@ const Expenses = () => {
       .min(1),
     expenseAmount: z
       .number({
-        ...helperText(
-          intl.formatMessage({
-            id: 'errorMessage-greaterThanZero',
-            defaultMessage: 'Please enter a number greater than 0',
-          }),
-        ),
+        invalid_type_error: intl.formatMessage({
+          id: 'errorMessage-greaterThanZero',
+          defaultMessage: 'Please enter a number greater than 0',
+        }),
       })
       .int()
-      .min(1),
+      .min(1, {
+        message: intl.formatMessage({
+          id: 'errorMessage-greaterThanZero',
+          defaultMessage: 'Please enter a number greater than 0',
+        }),
+      }),
   });
   const expenseSourcesSchema = z.array(expenseSourceSchema);
   const hasExpensesSchema = z.string().regex(/^true|false$/);
@@ -271,7 +273,7 @@ const Expenses = () => {
                     render={({ field }) => (
                       <>
                         <NumericFormat
-                          value={field.value || ''}
+                          value={field.value === 0 ? '' : field.value}
                           onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
                           thousandSeparator
                           allowNegative={false}
@@ -284,7 +286,7 @@ const Expenses = () => {
                             />
                           }
                           variant="outlined"
-                          inputProps={{ inputMode: 'decimal' }}
+                          inputProps={{ inputMode: 'numeric' }}
                           sx={{ backgroundColor: '#fff' }}
                           error={!!errors.expenses?.[index]?.expenseAmount}
                           InputProps={{

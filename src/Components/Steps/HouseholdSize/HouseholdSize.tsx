@@ -142,7 +142,7 @@ const HouseholdSize = () => {
           rules={{ required: true }}
           render={({ field }) => (
             <NumericFormat
-              value={field.value || ''}
+              value={field.value === 0 ? '' : field.value}
               onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
               allowNegative={false}
               decimalScale={0}

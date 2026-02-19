@@ -1040,7 +1040,7 @@ const HouseholdMemberForm = () => {
           render={({ field }) => (
             <>
               <NumericFormat
-                value={field.value || ''}
+                value={field.value === 0 ? '' : field.value}
                 onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
                 allowNegative={false}
                 decimalScale={0}
@@ -1049,7 +1049,7 @@ const HouseholdMemberForm = () => {
                   <FormattedMessage id="incomeBlock.createHoursWorkedTextfield-amountLabel" defaultMessage="Hours" />
                 }
                 variant="outlined"
-                inputProps={{ inputMode: 'decimal' }}
+                inputProps={{ inputMode: 'numeric' }}
                 sx={{ backgroundColor: '#fff' }}
                 error={errors.incomeStreams?.[index]?.hoursPerWeek !== undefined}
               />
@@ -1113,7 +1113,7 @@ const HouseholdMemberForm = () => {
           render={({ field }) => (
             <>
               <NumericFormat
-                value={field.value || ''}
+                value={field.value === 0 ? '' : field.value}
                 onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
                 thousandSeparator
                 allowNegative={false}
@@ -1126,7 +1126,7 @@ const HouseholdMemberForm = () => {
                   />
                 }
                 variant="outlined"
-                inputProps={{ inputMode: 'decimal' }}
+                inputProps={{ inputMode: 'numeric' }}
                 sx={{ backgroundColor: '#fff' }}
                 error={errors.incomeStreams?.[index]?.incomeAmount !== undefined}
                 InputProps={{

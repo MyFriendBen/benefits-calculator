@@ -207,7 +207,7 @@ const getIncomeStreamsBodies = (householdMemberData: HouseholdData): ApiIncome[]
       type: incomeStream.incomeStreamName,
       amount: incomeStream.incomeAmount,
       frequency: incomeStream.incomeFrequency,
-      hours_worked: incomeStream.hoursPerWeek || null,
+      hours_worked: incomeStream.hoursPerWeek === 0 ? null : incomeStream.hoursPerWeek,
     };
   });
 };
