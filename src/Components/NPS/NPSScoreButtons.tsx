@@ -1,3 +1,4 @@
+import { FormattedMessage } from 'react-intl';
 import './NPS.css';
 
 const NPS_SCORES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
@@ -25,8 +26,8 @@ export default function NPSScoreButtons({ selectedScore, onScoreClick }: NPSScor
         ))}
       </div>
       <div className="nps-labels">
-        <span>Not at all likely</span>
-        <span>Extremely likely</span>
+        <span><FormattedMessage id="nps.label.veryUnlikely" defaultMessage="Very Unlikely" /></span>
+        <span><FormattedMessage id="nps.label.veryLikely" defaultMessage="Very likely" /></span>
       </div>
     </>
   );
