@@ -44,7 +44,7 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
   };
 
   const formatToUSD = (num: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
   };
 
   const createMemberCard = (

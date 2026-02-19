@@ -62,7 +62,7 @@ export function ConfirmationItem({ label, value }: ConfirmationItemParams) {
   );
 }
 
-export function formatToUSD(num: number, significantFigures: number = 2) {
+export function formatToUSD(num: number, significantFigures: number = 0) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
