@@ -4,6 +4,7 @@ import { useResultsContext, useResultsLink } from '../Results';
 import NeedCard from './NeedCard';
 import { ResultsMessageForNeeds } from '../../Referrer/Referrer';
 import InformationalText from '../../Common/InformationalText/InformationalText';
+import NcLink211Message from '../NcLink211Message';
 
 const Needs = () => {
   const { needs } = useResultsContext();
@@ -22,6 +23,7 @@ const Needs = () => {
   return (
     <div data-testid="needs-section">
       <ResultsMessageForNeeds />
+      <NcLink211Message />
       <InformationalText>
         <FormattedMessage
           id="nearTermBenefits.editSelections"
