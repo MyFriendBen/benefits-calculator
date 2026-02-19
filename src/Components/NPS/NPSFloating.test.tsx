@@ -8,6 +8,10 @@ jest.mock('../../apiCalls', () => ({
   patchNPSReason: jest.fn(),
 }));
 
+jest.mock('../Config/configHook', () => ({
+  useConfig: () => ({}),
+}));
+
 const mockPostNPSScore = apiCalls.postNPSScore as jest.MockedFunction<typeof apiCalls.postNPSScore>;
 const mockPatchNPSReason = apiCalls.patchNPSReason as jest.MockedFunction<typeof apiCalls.patchNPSReason>;
 
@@ -128,7 +132,7 @@ describe('NPSFloating', () => {
     });
 
     fireEvent.click(screen.getByRole('button', { name: '8' }));
-    fireEvent.click(screen.getByLabelText('Dismiss'));
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
 
     expect(container.firstChild).toBeNull();
   });
