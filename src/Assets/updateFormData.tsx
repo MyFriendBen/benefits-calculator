@@ -80,6 +80,7 @@ export function useUpdateFormData() {
         ma_dhsp_afterschool: response.has_ma_dhsp_afterschool ?? false,
         ma_door_to_door: response.has_ma_door_to_door ?? false,
         ma_cpp: response.has_ma_cpp ?? false,
+        ma_cmsp: response.has_ma_cmsp ?? false,
         head_start: response.has_head_start ?? false,
         early_head_start: response.has_early_head_start ?? false,
         co_andso: response.has_co_andso ?? false,
