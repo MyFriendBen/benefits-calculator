@@ -140,8 +140,16 @@
   top: 2px !important;
 }
 
-#select-language:focus-visible {
-  outline: -webkit-focus-ring-color auto 1px;
+#select-language:focus-visible,
+#select-language .MuiSelect-select:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.white-header #select-language:focus-visible,
+.white-header #select-language .MuiSelect-select:focus-visible {
+  outline: 2px solid var(--primary-color);
 }
 
 .header-frozen-message-container {

@@ -294,6 +294,10 @@ function generateMuiOverides(theme: ITheme) {
                 backgroundColor: lavenderColor,
                 color: deepBlueColor,
               },
+              ':focus-visible': {
+                outline: '3px solid ' + deepBlueColor,
+                outlineOffset: '3px',
+              },
             },
           },
           {
@@ -309,6 +313,10 @@ function generateMuiOverides(theme: ITheme) {
                 backgroundColor: theme.outlineHoverBackgroundColor,
                 color: theme.outlineHoverColor,
                 border: 'none',
+              },
+              ':focus-visible': {
+                outline: '3px solid ' + midBlue,
+                outlineOffset: '3px',
               },
             },
           },
@@ -374,6 +382,11 @@ function generateMuiOverides(theme: ITheme) {
           select: {
             fontSize: '0.875rem',
             fontFamily: 'var(--font-body)',
+            '&:focus-visible': {
+              outline: '2px solid ' + deepBlueColor,
+              outlineOffset: '2px',
+              borderRadius: '4px',
+            },
           },
         },
       },
