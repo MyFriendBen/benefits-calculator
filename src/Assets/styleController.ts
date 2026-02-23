@@ -329,6 +329,27 @@ function generateMuiOverides(theme: ITheme) {
           },
         },
       },
+      MuiIconButton: {
+        styleOverrides: {
+          root: {
+            '&:focus-visible': {
+              outline: '3px solid ' + deepBlueColor,
+              outlineOffset: '2px',
+            },
+          },
+        },
+      },
+      MuiCardActionArea: {
+        styleOverrides: {
+          root: {
+            '&:focus-visible': {
+              outline: '3px solid ' + deepBlueColor,
+              outlineOffset: '2px',
+              borderRadius: '4px',
+            },
+          },
+        },
+      },
       MuiCheckbox: {
         styleOverrides: {
           root: {
@@ -366,6 +387,11 @@ function generateMuiOverides(theme: ITheme) {
           input: {
             fontSize: '0.875rem',
             fontFamily: 'var(--font-body)',
+            '&:focus-visible': {
+              outline: '2px solid ' + deepBlueColor,
+              outlineOffset: '2px',
+              borderRadius: '4px',
+            },
           },
         },
       },
