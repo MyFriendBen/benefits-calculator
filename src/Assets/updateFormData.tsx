@@ -79,6 +79,7 @@ export function useUpdateFormData() {
         ma_homebridge: response.has_ma_homebridge ?? false,
         ma_dhsp_afterschool: response.has_ma_dhsp_afterschool ?? false,
         ma_door_to_door: response.has_ma_door_to_door ?? false,
+        ma_taxi_discount: response.has_ma_taxi_discount ?? false,
         ma_cpp: response.has_ma_cpp ?? false,
         ma_cmsp: response.has_ma_cmsp ?? false,
         head_start: response.has_head_start ?? false,

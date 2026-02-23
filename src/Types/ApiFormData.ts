@@ -207,6 +207,7 @@ export type ApiFormData = {
   has_ma_homebridge: boolean | null;
   has_ma_dhsp_afterschool: boolean | null;
   has_ma_door_to_door: boolean | null;
+  has_ma_taxi_discount: boolean | null;
   has_ma_cpp: boolean | null;
   has_ma_cmsp: boolean | null;
   has_head_start: boolean | null;
