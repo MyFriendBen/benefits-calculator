@@ -11,7 +11,7 @@ const ResultsError = () => {
   const navigate = useNavigate();
 
   return (
-    <main>
+    <main className="benefits-form">
       <div className="error-container">
         <ErrorIcon className="error-icon" />
         <h1 className="error-header">
