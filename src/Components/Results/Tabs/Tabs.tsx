@@ -55,6 +55,7 @@ const ResultsTabs = () => {
             ref={(el) => { tabRefs.current[0] = el; }}
             to={benefitsLink}
             className={({ isActive }) => (isActive ? 'active' : '')}
+            id="long-term-benefits-tab"
             data-testid="long-term-benefits-tab"
             role="tab"
             aria-selected={isBenefitsActive}
@@ -72,6 +73,7 @@ const ResultsTabs = () => {
             ref={(el) => { tabRefs.current[1] = el; }}
             to={needsLink}
             className={({ isActive }) => (isActive ? 'active' : '')}
+            id="near-term-benefits-tab"
             data-testid="near-term-benefits-tab"
             role="tab"
             aria-selected={!isBenefitsActive}

@@ -294,6 +294,10 @@ function generateMuiOverides(theme: ITheme) {
                 backgroundColor: lavenderColor,
                 color: deepBlueColor,
               },
+              ':focus-visible': {
+                outline: '3px solid ' + deepBlueColor,
+                outlineOffset: '3px',
+              },
             },
           },
           {
@@ -310,6 +314,10 @@ function generateMuiOverides(theme: ITheme) {
                 color: theme.outlineHoverColor,
                 border: 'none',
               },
+              ':focus-visible': {
+                outline: '3px solid ' + midBlue,
+                outlineOffset: '3px',
+              },
             },
           },
         ],
@@ -318,6 +326,27 @@ function generateMuiOverides(theme: ITheme) {
         styleOverrides: {
           root: {
             backgroundColor: blackColor,
+          },
+        },
+      },
+      MuiIconButton: {
+        styleOverrides: {
+          root: {
+            '&:focus-visible': {
+              outline: '3px solid ' + deepBlueColor,
+              outlineOffset: '2px',
+            },
+          },
+        },
+      },
+      MuiCardActionArea: {
+        styleOverrides: {
+          root: {
+            '&:focus-visible': {
+              outline: '3px solid ' + deepBlueColor,
+              outlineOffset: '2px',
+              borderRadius: '4px',
+            },
           },
         },
       },
@@ -387,12 +416,12 @@ export default function useStyle(initialStyle: ThemeName): ThemeReturnType {
   const theme = themes[themeName];
 
   useLayoutEffect(() => {
-    // Clear all custom properties to prevent stale vars when switching themes
+    // Clear only CSS custom properties (--*) to prevent stale vars when switching themes,
+    // without touching unrelated inline styles (e.g. scroll locks from third-party libraries)
     const style = document.documentElement.style;
     for (let i = style.length - 1; i >= 0; i--) {
-      const prop = style[i];
-      if (prop.startsWith('--')) {
-        style.removeProperty(prop);
+      if (style[i].startsWith('--')) {
+        style.removeProperty(style[i]);
       }
     }
 

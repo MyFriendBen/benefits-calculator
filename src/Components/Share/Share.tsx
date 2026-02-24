@@ -35,6 +35,22 @@ const Share = forwardRef(function Share() {
       id: 'results.share-emailAL',
       defaultMessage: 'Email',
     }),
+    facebook: intl.formatMessage({
+      id: 'results.share-facebookAL',
+      defaultMessage: 'Share on Facebook',
+    }),
+    twitter: intl.formatMessage({
+      id: 'results.share-twitterAL',
+      defaultMessage: 'Share on X (Twitter)',
+    }),
+    whatsapp: intl.formatMessage({
+      id: 'results.share-whatsappAL',
+      defaultMessage: 'Share on WhatsApp',
+    }),
+    linkedin: intl.formatMessage({
+      id: 'results.share-linkedinAL',
+      defaultMessage: 'Share on LinkedIn',
+    }),
     copyLink: intl.formatMessage({
       id: 'results.share-copyLinkAL',
       defaultMessage: 'Copy Link',
@@ -89,22 +105,22 @@ const Share = forwardRef(function Share() {
         </p>
       </div>
       <div className="row-group">
-        <FacebookShareButton url={shareUrl} onClick={trackOutboundLinks('Share to Facebook')}>
+        <FacebookShareButton url={shareUrl} onClick={trackOutboundLinks('Share to Facebook')} aria-label={labels.facebook}>
           <Icon name="facebook">
             <FacebookIcon sx={iconSize} />
           </Icon>
         </FacebookShareButton>
-        <TwitterShareButton url={shareUrl} onClick={trackOutboundLinks('Share to Twitter')}>
+        <TwitterShareButton url={shareUrl} onClick={trackOutboundLinks('Share to Twitter')} aria-label={labels.twitter}>
           <Icon name="twitter">
             <XIcon sx={iconSize} />
           </Icon>
         </TwitterShareButton>
-        <WhatsappShareButton url={shareUrl} onClick={trackOutboundLinks('Share With WhatsApp')}>
+        <WhatsappShareButton url={shareUrl} onClick={trackOutboundLinks('Share With WhatsApp')} aria-label={labels.whatsapp}>
           <Icon name="whatsApp">
             <WhatsAppIcon sx={iconSize} />
           </Icon>
         </WhatsappShareButton>
-        <LinkedinShareButton url={shareUrl} onClick={trackOutboundLinks('Share With LinkedIn')}>
+        <LinkedinShareButton url={shareUrl} onClick={trackOutboundLinks('Share With LinkedIn')} aria-label={labels.linkedin}>
           <Icon name="linkedIn">
             <LinkedInIcon sx={iconSize} />
           </Icon>

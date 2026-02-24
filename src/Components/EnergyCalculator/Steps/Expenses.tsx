@@ -6,7 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
 import useScreenApi from '../../../Assets/updateScreen';
 import { Expense, FormData } from '../../../Types/FormData';
-import MultiSelectTiles, { MultiSelectTileOption } from '../../OptionCardGroup/MultiSelectTiles';
+import MultiSelectTiles, { MultiSelectTileOption } from '../../SelectTiles/MultiSelectTiles';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import { useDefaultBackNavigationFunction } from '../../QuestionComponents/questionHooks';
@@ -127,6 +127,7 @@ export default function EnergyCalculatorExpenses() {
       </QuestionDescription>
       <form onSubmit={handleSubmit(formSubmitHandler)}>
         <MultiSelectTiles
+          variant="square"
           values={watch('expenses')}
           onChange={(values) => {
             setValue('expenses', values);

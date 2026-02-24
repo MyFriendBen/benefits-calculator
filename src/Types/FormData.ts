@@ -111,11 +111,11 @@ export type FormData = {
 };
 
 export type Conditions = {
-  student?: boolean;
-  pregnant?: boolean;
-  blindOrVisuallyImpaired?: boolean;
-  disabled?: boolean;
-  longTermDisability?: boolean;
+  student: boolean;
+  pregnant: boolean;
+  blindOrVisuallyImpaired: boolean;
+  disabled: boolean;
+  longTermDisability: boolean;
 };
 
 export type StudentEligibility = {
