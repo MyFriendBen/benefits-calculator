@@ -421,10 +421,13 @@ export default function useStyle(initialStyle: ThemeName): ThemeReturnType {
   const theme = themes[themeName];
 
   useLayoutEffect(() => {
-    // Clear all inline style properties to prevent stale vars when switching themes
+    // Clear only CSS custom properties (--*) to prevent stale vars when switching themes,
+    // without touching unrelated inline styles (e.g. scroll locks from third-party libraries)
     const style = document.documentElement.style;
     for (let i = style.length - 1; i >= 0; i--) {
-      style.removeProperty(style[i]);
+      if (style[i].startsWith('--')) {
+        style.removeProperty(style[i]);
+      }
     }
 
     for (const [key, value] of Object.entries(theme.cssVariables)) {

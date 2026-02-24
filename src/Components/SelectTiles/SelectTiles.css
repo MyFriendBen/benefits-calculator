@@ -169,7 +169,7 @@
 
 /* This css rule targets the svg class of the milk carton fill */
 .food-icon {
-  stroke: var(--icon-color);
+  stroke: var(--icon-color) !important;
   stroke-miterlimit: 10;
   stroke-width: 0.313rem;
 }

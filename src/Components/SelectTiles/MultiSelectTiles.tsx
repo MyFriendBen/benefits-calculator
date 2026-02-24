@@ -42,7 +42,7 @@ function Tile<T extends string | number>({ option, selected, onClick, variant }:
 type MultiSelectTilesProps<T extends string | number> = {
   options: MultiSelectTileOption<T>[];
   values: Partial<Record<T, boolean>>;
-  onChange: (value: Record<T, boolean>) => void;
+  onChange: (value: Partial<Record<T, boolean>>) => void;
   variant?: 'square' | 'flat';
   exclusiveValues?: T[];
 };
