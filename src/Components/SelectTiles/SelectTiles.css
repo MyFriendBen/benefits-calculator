@@ -12,7 +12,8 @@
   background-color: #ffffff;
 }
 
-.option-card:hover {
+.option-card:hover,
+.card-action-area:focus-visible .option-card {
   background-color: var(--hover-color);
   color: var(--option-card-hover-font-color);
 }
@@ -204,9 +205,6 @@
   flex: 0 1 calc((100% - 2rem) / 3);
 }
 
-.two-columns {
-  max-width: 32rem;
-}
 
 .multiselect-tiles-container {
   display: grid;
@@ -267,6 +265,7 @@
     width: 2rem;
     min-width: 2rem;
     margin-right: 0.75rem;
+    overflow: hidden;
   }
 
   .tile-square .option-card-icon svg {
