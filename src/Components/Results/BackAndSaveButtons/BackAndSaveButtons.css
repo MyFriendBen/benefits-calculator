@@ -23,6 +23,11 @@
   cursor: pointer;
 }
 
+.results-back-save-buttons:focus-visible {
+  outline: 3px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+
 .results-back-save-btn-container {
   display: flex;
   justify-content: space-between;

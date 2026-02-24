@@ -2,7 +2,7 @@
   margin: 1rem 0;
   padding-left: 1.5rem;
   font-family: 'Open Sans', serif;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 400;
   color: #333;
 }
@@ -24,7 +24,7 @@
   text-decoration: none;
   text-align: left;
   margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
   gap: 0.25rem;

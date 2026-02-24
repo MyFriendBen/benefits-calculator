@@ -17,7 +17,7 @@ const LandingPage = () => {
   const renterQueryString = useQueryString({ path: 'renter' });
 
   return (
-    <main className="energy-calculator-container">
+    <main className="benefits-form energy-calculator-container">
       <QuestionHeader>
         <FormattedMessage
           id="energyCalculator-landingPage.qHeader"
