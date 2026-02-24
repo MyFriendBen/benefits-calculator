@@ -4,7 +4,7 @@
 .option-card.MuiPaper-root {
   position: relative;
   display: flex;
-  border: 0.05px solid #6d6e71;
+  border: 1px solid #6d6e71;
   box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
   height: 100%;
   width: 100%;
@@ -146,7 +146,7 @@
 
 .option-card-lucide-icon * {
   fill: white !important;
-  stroke: var(--icon-color);
+  stroke: var(--icon-color) !important;
 }
 
 .option-card-lucide-icon.car-icon-scaled {

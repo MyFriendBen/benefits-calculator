@@ -26,7 +26,7 @@ function Tile<T extends string | number>({ option, selected, onClick, variant }:
     .join(' ');
 
   return (
-    <CardActionArea className="card-action-area" onClick={onClick}>
+    <CardActionArea className="card-action-area" onClick={onClick} aria-pressed={selected}>
       <Card className={containerClass}>
         <div className="option-card-content">
           <div className="option-card-icon">{option.icon}</div>

@@ -421,13 +421,10 @@ export default function useStyle(initialStyle: ThemeName): ThemeReturnType {
   const theme = themes[themeName];
 
   useLayoutEffect(() => {
-    // Clear all custom properties to prevent stale vars when switching themes
+    // Clear all inline style properties to prevent stale vars when switching themes
     const style = document.documentElement.style;
     for (let i = style.length - 1; i >= 0; i--) {
-      const prop = style[i];
-      if (prop.startsWith('--')) {
-        style.removeProperty(prop);
-      }
+      style.removeProperty(style[i]);
     }
 
     for (const [key, value] of Object.entries(theme.cssVariables)) {

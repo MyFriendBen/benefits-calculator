@@ -246,7 +246,7 @@ describe('Filter Component', () => {
           {
             frontendId: 'member1',
             age: 25,
-            conditions: { pregnant: true },
+            conditions: { student: false, pregnant: true, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false },
           } as any,
         ],
       });
