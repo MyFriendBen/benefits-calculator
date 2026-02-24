@@ -25,7 +25,7 @@ const Footer = () => {
 
   return (
     <footer>
-      <Paper elevation={0} sx={{ width: '100%', backgroundColor: theme.footerColor }} square={true}>
+      <Paper elevation={0} sx={{ width: '100%', backgroundColor: theme.footerColor, color: '#ffffff' }} square={true}>
         <div className="footer-content-container">
           <div>
             {useLogo('logoFooterSource', 'logoFooterAlt', logoClassName)}

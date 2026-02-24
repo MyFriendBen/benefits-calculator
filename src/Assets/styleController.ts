@@ -387,11 +387,6 @@ function generateMuiOverides(theme: ITheme) {
           input: {
             fontSize: '1rem',
             fontFamily: 'var(--font-body)',
-            '&:focus-visible': {
-              outline: '2px solid ' + deepBlueColor,
-              outlineOffset: '2px',
-              borderRadius: '4px',
-            },
           },
         },
       },
