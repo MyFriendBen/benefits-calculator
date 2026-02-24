@@ -631,7 +631,9 @@ const HouseholdMemberForm = () => {
 
   const displayHealthInsuranceBlock = () => {
     const insuranceSource = pageNumber === 1 ? healthInsuranceOptions.you : healthInsuranceOptions.them;
-    const insuranceTileOptions = Object.entries(insuranceSource).map(([key, option]) => ({
+    const insuranceTileOptions = (
+      Object.entries(insuranceSource) as [keyof HealthInsurance, { text: FormattedMessageType; icon: ReactNode }][]
+    ).map(([key, option]) => ({
       value: key,
       text: option.text,
       icon: option.icon,
@@ -655,7 +657,7 @@ const HouseholdMemberForm = () => {
             options={insuranceTileOptions}
             values={watch('healthInsurance')}
             onChange={(values) => {
-              setValue('healthInsurance', values as HealthInsurance, { shouldValidate: false, shouldDirty: true });
+              setValue('healthInsurance', values, { shouldValidate: false, shouldDirty: true });
               clearErrors('healthInsurance');
             }}
           />
@@ -674,7 +676,9 @@ const HouseholdMemberForm = () => {
       pageNumber === 1 ? 'Do any of these apply to you?' : 'Do any of these apply to them?';
 
     const conditionSource = pageNumber === 1 ? conditionOptions.you : conditionOptions.them;
-    const conditionTileOptions = Object.entries(conditionSource).map(([key, option]) => ({
+    const conditionTileOptions = (
+      Object.entries(conditionSource) as [keyof Conditions, { text: FormattedMessageType; icon: ReactNode }][]
+    ).map(([key, option]) => ({
       value: key,
       text: option.text,
       icon: option.icon,
@@ -696,7 +700,7 @@ const HouseholdMemberForm = () => {
           options={conditionTileOptions}
           values={watch('conditions')}
           onChange={(values) => {
-            setValue('conditions', values as Conditions, { shouldDirty: true });
+            setValue('conditions', values, { shouldDirty: true });
           }}
         />
         {watchIsStudent && createStudentEligibilityQuestions()}
