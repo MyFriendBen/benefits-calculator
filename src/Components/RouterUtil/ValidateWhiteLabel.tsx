@@ -1,10 +1,6 @@
 import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
-import { ALL_VALID_WHITE_LABELS, WhiteLabel } from '../../Types/WhiteLabel';
+import { ALL_VALID_WHITE_LABELS, LEGACY_WHITE_LABEL_REDIRECTS, WhiteLabel } from '../../Types/WhiteLabel';
 import { useQueryString } from '../QuestionComponents/questionHooks';
-
-const LEGACY_WHITE_LABEL_REDIRECTS: Record<string, string> = {
-  co_energy_calculator: 'cesn',
-};
 
 // Layout route that validates the whiteLabel param before rendering child routes
 export default function ValidateWhiteLabel() {
