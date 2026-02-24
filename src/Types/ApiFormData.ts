@@ -209,6 +209,7 @@ export type ApiFormData = {
   has_ma_door_to_door: boolean | null;
   has_ma_taxi_discount: boolean | null;
   has_ma_cpp: boolean | null;
+  has_ma_cmsp: boolean | null;
   has_head_start: boolean | null;
   has_early_head_start: boolean | null;
   has_co_andso: boolean | null;
