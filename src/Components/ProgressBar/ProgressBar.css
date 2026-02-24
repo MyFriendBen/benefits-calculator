@@ -1,5 +1,22 @@
 .progress-bar-container {
-  padding: 1rem 1rem 0 1rem;
-  max-width: var(--main-max-width);
-  margin: auto;
+  padding: 1rem .1rem;
+  max-width: var(--content-max-width);
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.step-progress-title {
+  padding: 0rem .4rem;
+}
+
+@media (max-width: 767px) {
+  .progress-bar-container {
+    padding: 1rem;
+  }
+}
+
+.progress-bar-wrapper {
+  background-color: #ffffff;
+  overflow: hidden;
 }

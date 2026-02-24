@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Program } from '../../../Types/Results';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { useFormatDisplayValue } from '../FormattedValue';
 import ResultsTranslate from '../Translate/Translate';
 import { useContext, useMemo } from 'react';
@@ -40,6 +40,7 @@ type EligibleMemberTag = {
 
 type ResultsCardProps = {
   name: FormattedMessageType;
+  nameString?: string;
   detail1: ResultsCardDetail;
   detail2?: ResultsCardDetail;
   link: string;
@@ -71,6 +72,7 @@ function EligibleMemberTags({ members }: { members: EligibleMemberTag[] }) {
 
 export function ResultsCard({
   name,
+  nameString,
   detail1,
   detail2,
   link,
@@ -81,9 +83,13 @@ export function ResultsCard({
   // Mobile is below desktop breakpoint (0-767px)
   const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.desktop - 1}px)`);
   const containerClass = 'result-program-container ' + containerClassNames.join(' ');
+  const intl = useIntl();
+  const moreInfoLabel = nameString
+    ? intl.formatMessage({ id: 'more-info-aria', defaultMessage: 'More info about {program}' }, { program: nameString })
+    : undefined;
 
   return (
-    <div className={containerClass}>
+    <article className={containerClass}>
       <div className="result-program-flags-container">
         {flags.map((flag, i) => {
           return (
@@ -100,7 +106,7 @@ export function ResultsCard({
               <Link to={link}>{name}</Link>
             </div>
             <div className="result-program-more-info-button">
-              <Link to={link} data-testid="more-info-link">
+              <Link to={link} data-testid="more-info-link" aria-label={moreInfoLabel}>
                 <FormattedMessage id="more-info" defaultMessage="More Info" />
               </Link>
             </div>
@@ -113,19 +119,19 @@ export function ResultsCard({
           <EligibleMemberTags members={eligibleMembers} />
         </div>
       )}
-      <hr />
+      <hr aria-hidden="true" />
       <div className="result-program-details-wrapper">
         <ResultsCardDetail {...detail1} />
         {detail2 !== undefined && <ResultsCardDetail {...detail2} />}
       </div>
       {!isMobile && (
         <div className="result-program-more-info-button">
-          <Link to={link} data-testid="more-info-link">
+          <Link to={link} data-testid="more-info-link" aria-label={moreInfoLabel}>
             <FormattedMessage id="more-info" defaultMessage="More Info" />
           </Link>
         </div>
       )}
-    </div>
+    </article>
   );
 }
 
@@ -134,6 +140,7 @@ type ProgramCardProps = {
 };
 
 const ProgramCard = ({ program }: ProgramCardProps) => {
+  const intl = useIntl();
   const estimatedAppTime = program.estimated_application_time;
   const programName = program.name;
   const programId = program.program_id;
@@ -249,9 +256,12 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
   const programPageLink = useResultsLink(`results/benefits/${programId}`);
   const value = useFormatDisplayValue(program);
 
+  const nameString = intl.formatMessage({ id: programName.label, defaultMessage: programName.default_message });
+
   return (
     <ResultsCard
       name={<ResultsTranslate translation={programName} />}
+      nameString={nameString}
       detail1={{
         title: <FormattedMessage id="results.estimated_application_time" defaultMessage="Application Time: " />,
         value: <ResultsTranslate translation={estimatedAppTime} />,

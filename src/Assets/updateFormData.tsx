@@ -82,6 +82,7 @@ export function useUpdateFormData() {
         ma_taxi_discount: response.has_ma_taxi_discount ?? false,
         ma_cpp: response.has_ma_cpp ?? false,
         ma_middle_income_rental: response.has_ma_middle_income_rental ?? false,
+        ma_cmsp: response.has_ma_cmsp ?? false,
         head_start: response.has_head_start ?? false,
         early_head_start: response.has_early_head_start ?? false,
         co_andso: response.has_co_andso ?? false,
