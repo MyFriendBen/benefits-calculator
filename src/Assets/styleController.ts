@@ -381,11 +381,11 @@ function generateMuiOverides(theme: ITheme) {
       MuiInputBase: {
         styleOverrides: {
           root: {
-            fontSize: '1rem',
+            fontSize: '0.875rem',
             fontFamily: 'var(--font-body)',
           },
           input: {
-            fontSize: '1rem',
+            fontSize: '0.875rem',
             fontFamily: 'var(--font-body)',
           },
         },
@@ -393,7 +393,7 @@ function generateMuiOverides(theme: ITheme) {
       MuiInputLabel: {
         styleOverrides: {
           root: {
-            fontSize: '1rem',
+            fontSize: '0.875rem',
             fontFamily: 'var(--font-body)',
           },
         },
@@ -401,7 +401,7 @@ function generateMuiOverides(theme: ITheme) {
       MuiSelect: {
         styleOverrides: {
           select: {
-            fontSize: '1rem',
+            fontSize: '0.875rem',
             fontFamily: 'var(--font-body)',
             '&:focus-visible': {
               outline: '2px solid ' + deepBlueColor,
