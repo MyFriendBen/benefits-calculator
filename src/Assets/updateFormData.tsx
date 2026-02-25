@@ -159,7 +159,7 @@ export function useUpdateFormData() {
       for (const income of member.income_streams) {
         incomes.push({
           incomeStreamName: income.type ?? '',
-          incomeAmount: Number(income.amount ?? 0),
+          incomeAmount: parseFloat(String(income.amount ?? 0)) || 0,
           incomeFrequency: income.frequency ?? '',
           hoursPerWeek: income.hours_worked ?? 0,
         });
@@ -210,7 +210,7 @@ export function useUpdateFormData() {
     for (const expense of response.expenses) {
       updatedFormData.expenses.push({
         expenseSourceName: expense.type ?? '',
-        expenseAmount: Number(expense.amount ?? 0),
+        expenseAmount: Math.round(parseFloat(String(expense.amount ?? 0)) || 0),
       });
     }
 

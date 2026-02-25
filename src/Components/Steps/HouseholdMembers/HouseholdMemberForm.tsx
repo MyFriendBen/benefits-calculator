@@ -367,7 +367,7 @@ const HouseholdMemberForm = () => {
     mode: 'onTouched',
     defaultValues: {
       birthMonth: householdMemberFormData?.birthMonth ? String(householdMemberFormData.birthMonth) : '',
-      birthYear: householdMemberFormData?.birthYear ?? 0,
+      birthYear: householdMemberFormData?.birthYear ?? undefined,
       healthInsurance: householdMemberFormData?.healthInsurance
         ? householdMemberFormData.healthInsurance
         : {
@@ -543,12 +543,14 @@ const HouseholdMemberForm = () => {
               render={({ field }) => (
                 <>
                   <NumericFormat
-                    value={field.value === 0 ? '' : field.value}
-                    onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                    value={field.value ?? ''}
+                    onValueChange={({ floatValue }) => field.onChange(floatValue ?? undefined)}
+                    getInputRef={field.ref}
                     allowNegative={false}
                     decimalScale={0}
                     customInput={TextField}
                     label={<FormattedMessage id="ageInput.year.label" defaultMessage="Birth Year" />}
+                    placeholder="YYYY"
                     variant="outlined"
                     inputProps={{ inputMode: 'numeric' }}
                     error={errors.birthYear !== undefined}
@@ -1010,6 +1012,7 @@ const HouseholdMemberForm = () => {
               <NumericFormat
                 value={field.value === 0 ? '' : field.value}
                 onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                getInputRef={field.ref}
                 allowNegative={false}
                 decimalScale={0}
                 customInput={TextField}
@@ -1083,6 +1086,7 @@ const HouseholdMemberForm = () => {
               <NumericFormat
                 value={field.value === 0 ? '' : field.value}
                 onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                getInputRef={field.ref}
                 thousandSeparator
                 allowNegative={false}
                 decimalScale={2}

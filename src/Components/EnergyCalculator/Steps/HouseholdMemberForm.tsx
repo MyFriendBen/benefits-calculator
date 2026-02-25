@@ -208,7 +208,7 @@ const ECHouseholdMemberForm = () => {
     mode: 'onTouched',
     defaultValues: {
       birthMonth: householdMemberFormData?.birthMonth ? String(householdMemberFormData.birthMonth) : '',
-      birthYear: householdMemberFormData?.birthYear ?? 0,
+      birthYear: householdMemberFormData?.birthYear ?? undefined,
       conditions: {
         survivingSpouse: householdMemberFormData?.energyCalculator?.survivingSpouse ?? false,
         disabled: householdMemberFormData?.conditions.disabled ?? false,
@@ -360,12 +360,14 @@ const ECHouseholdMemberForm = () => {
               render={({ field }) => (
                 <>
                   <NumericFormat
-                    value={field.value === 0 ? '' : field.value}
-                    onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                    value={field.value ?? ''}
+                    onValueChange={({ floatValue }) => field.onChange(floatValue ?? undefined)}
+                    getInputRef={field.ref}
                     allowNegative={false}
                     decimalScale={0}
                     customInput={TextField}
                     label={<FormattedMessage id="ageInput.year.label" defaultMessage="Birth Year" />}
+                    placeholder="YYYY"
                     variant="outlined"
                     inputProps={{ inputMode: 'numeric' }}
                     error={errors.birthYear !== undefined}
@@ -716,6 +718,7 @@ const ECHouseholdMemberForm = () => {
               <NumericFormat
                 value={field.value === 0 ? '' : field.value}
                 onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                getInputRef={field.ref}
                 allowNegative={false}
                 decimalScale={0}
                 customInput={TextField}
@@ -789,6 +792,7 @@ const ECHouseholdMemberForm = () => {
               <NumericFormat
                 value={field.value === 0 ? '' : field.value}
                 onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                getInputRef={field.ref}
                 thousandSeparator
                 allowNegative={false}
                 decimalScale={2}

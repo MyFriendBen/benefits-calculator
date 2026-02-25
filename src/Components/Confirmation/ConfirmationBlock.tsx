@@ -66,6 +66,7 @@ export function formatToUSD(num: number, significantFigures: number = Number.isI
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
+    minimumFractionDigits: significantFigures,
     maximumFractionDigits: significantFigures,
   }).format(num);
 }

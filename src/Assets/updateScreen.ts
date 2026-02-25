@@ -207,6 +207,7 @@ const getIncomeStreamsBodies = (householdMemberData: HouseholdData): ApiIncome[]
       type: incomeStream.incomeStreamName,
       amount: incomeStream.incomeAmount,
       frequency: incomeStream.incomeFrequency,
+      // 0 is the default for non-hourly streams; send null so the API ignores it
       hours_worked: incomeStream.hoursPerWeek === 0 ? null : incomeStream.hoursPerWeek,
     };
   });

@@ -87,7 +87,7 @@ const HouseholdAssets = () => {
           rules={{ required: true }}
           render={({ field }) => (
             <NumericFormat
-              value={field.value === 0 ? '' : field.value}
+              value={field.value}
               onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
               thousandSeparator
               allowNegative={false}
