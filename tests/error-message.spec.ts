@@ -102,7 +102,7 @@ test.describe('Error Messages Test', () => {
 
     expect(memberErrorMessages).toEqual([
       'Please enter a birth month.',
-      'Please enter a birth year.',
+      'Please enter a valid birth year.',
       'Please select at least one health insurance option.',
     ]);
 
