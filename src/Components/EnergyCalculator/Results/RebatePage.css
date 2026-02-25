@@ -102,6 +102,7 @@
 .category-description-article {
   /* width: 80%; */
   font-family: 'Roboto Slab', serif;
+  margin-bottom: 1rem;
 }
 
 .energy-calculator-expiration-badge {
