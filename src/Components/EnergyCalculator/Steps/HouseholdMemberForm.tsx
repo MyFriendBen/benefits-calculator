@@ -3,10 +3,9 @@ import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import HHMSummaryCards from '../../Steps/HouseholdMembers/HHMSummaryCards';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Context } from '../../Wrapper/Wrapper';
-import { ReactNode, useContext, useEffect, useMemo } from 'react';
+import { ReactNode, useContext, useEffect } from 'react';
 import { HouseholdData } from '../../../Types/FormData';
 import {
-  Autocomplete,
   Box,
   Button,
   FormControl,
@@ -41,6 +40,7 @@ import {
   renderMissingBirthMonthHelperText,
   renderFutureBirthMonthHelperText,
   renderBirthYearHelperText,
+  renderInvalidBirthYearHelperText,
   renderRelationshipToHHHelperText,
   renderIncomeStreamNameHelperText,
   renderIncomeFrequencyHelperText,
@@ -50,7 +50,7 @@ import {
 import { NumericFormat } from 'react-number-format';
 import useScreenApi from '../../../Assets/updateScreen';
 import { QUESTION_TITLES } from '../../../Assets/pageTitleTags';
-import { getCurrentMonthYear, YEARS, MAX_AGE } from '../../../Assets/age';
+import { getCurrentMonthYear, MAX_AGE } from '../../../Assets/age';
 import { useAgeCalculation } from '../../AgeCalculation/useAgeCalculation';
 import { determineDefaultIncomeByAge } from '../../AgeCalculation/AgeCalculation';
 import '../../../Components/Steps/HouseholdMembers/PersonIncomeBlock.css';
@@ -114,15 +114,6 @@ const ECHouseholdMemberForm = () => {
   };
 
   const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
-  // I added an empty string to the years array to fix the initial invalid Autocomplete value warning
-  const YEARS_AND_INITIAL_EMPTY_STR = ['', ...YEARS];
-
-  const autoCompleteOptions = useMemo(() => {
-    return YEARS_AND_INITIAL_EMPTY_STR.map((year) => {
-      return { label: year };
-    });
-  }, [YEARS]);
-
   const incomeSourcesSchema = z
     .object({
       incomeStreamName: z.string().min(1, { message: renderIncomeStreamNameHelperText(intl) }),
@@ -130,8 +121,7 @@ const ECHouseholdMemberForm = () => {
       hoursPerWeek: z.number().int().min(0),
       incomeAmount: z
         .number({ invalid_type_error: renderIncomeAmountHelperText(intl) })
-        .int()
-        .min(1, { message: renderIncomeAmountHelperText(intl) }),
+        .min(0.01, { message: renderIncomeAmountHelperText(intl) }),
     })
     .refine(
       (data) => {
@@ -142,7 +132,8 @@ const ECHouseholdMemberForm = () => {
         }
       },
       { message: renderHoursWorkedHelperText(intl), path: ['hoursPerWeek'] },
-    );
+    )
+    ;
   const incomeStreamsSchema = z.array(incomeSourcesSchema);
   const hasIncomeSchema = z.string().regex(/^true|false$/);
 
@@ -157,14 +148,10 @@ const ECHouseholdMemberForm = () => {
     */
       birthMonth: z.string().min(1, { message: renderMissingBirthMonthHelperText(intl) }),
       birthYear: z
-        .string()
-        .trim()
-        .min(1, { message: renderBirthYearHelperText(intl) })
-        .refine((value) => {
-          const year = Number(value);
-          const age = CURRENT_YEAR - year;
-          return year <= CURRENT_YEAR && age < MAX_AGE;
-        }),
+        .number({ invalid_type_error: renderBirthYearHelperText(intl) })
+        .int()
+        .min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
+        .max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
       conditions: z.object({
         survivingSpouse: z.boolean(),
         disabled: z.boolean(),
@@ -182,7 +169,7 @@ const ECHouseholdMemberForm = () => {
     .refine(
       ({ birthMonth, birthYear }) => {
         //this checks that the date they've selected is not in the future
-        if (Number(birthYear) === CURRENT_YEAR) {
+        if (birthYear === CURRENT_YEAR) {
           return Number(birthMonth) <= CURRENT_MONTH;
         }
         return true;
@@ -219,7 +206,7 @@ const ECHouseholdMemberForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       birthMonth: householdMemberFormData?.birthMonth ? String(householdMemberFormData.birthMonth) : '',
-      birthYear: householdMemberFormData?.birthYear ? String(householdMemberFormData.birthYear) : '',
+      birthYear: householdMemberFormData?.birthYear ?? 0,
       conditions: {
         survivingSpouse: householdMemberFormData?.energyCalculator?.survivingSpouse ?? false,
         disabled: householdMemberFormData?.conditions.disabled ?? false,
@@ -293,7 +280,7 @@ const ECHouseholdMemberForm = () => {
         ...memberData.conditions,
         disabled: memberData.conditions.disabled,
       },
-      birthYear: Number(memberData.birthYear),
+      birthYear: memberData.birthYear,
       birthMonth: Number(memberData.birthMonth),
       hasIncome: memberData.hasIncome === 'true',
 
@@ -370,37 +357,16 @@ const ECHouseholdMemberForm = () => {
               control={control}
               render={({ field }) => (
                 <>
-                  <Autocomplete
-                    {...field}
-                    selectOnFocus
-                    clearOnBlur
-                    handleHomeEndKeys
-                    isOptionEqualToValue={(option, value) => option.label === value.label}
-                    options={autoCompleteOptions}
-                    getOptionLabel={(option) => option.label ?? ''}
-                    value={{ label: field.value }}
-                    onChange={(_, newValue) => {
-                      field.onChange(newValue?.label);
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          if (YEARS.includes(value)) {
-                            // set value if the value is valid,
-                            // so the user does not need to select an option if they type the whole year.
-                            setValue('birthYear', value);
-                          }
-                        }}
-                        label={<FormattedMessage id="ageInput.year.label" defaultMessage="Birth Year" />}
-                        inputProps={{
-                          ...params.inputProps,
-                          inputMode: 'numeric',
-                        }}
-                        error={errors.birthYear !== undefined}
-                      />
-                    )}
+                  <NumericFormat
+                    value={field.value === 0 ? '' : field.value}
+                    onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                    allowNegative={false}
+                    decimalScale={0}
+                    customInput={TextField}
+                    label={<FormattedMessage id="ageInput.year.label" defaultMessage="Birth Year" />}
+                    variant="outlined"
+                    inputProps={{ inputMode: 'numeric' }}
+                    error={errors.birthYear !== undefined}
                   />
                   {errors.birthYear !== undefined && (
                     <FormHelperText sx={{ ml: 0 }}>
@@ -823,7 +789,7 @@ const ECHouseholdMemberForm = () => {
                 onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
                 thousandSeparator
                 allowNegative={false}
-                decimalScale={0}
+                decimalScale={2}
                 customInput={TextField}
                 label={
                   <FormattedMessage
@@ -832,7 +798,7 @@ const ECHouseholdMemberForm = () => {
                   />
                 }
                 variant="outlined"
-                inputProps={{ inputMode: 'numeric' }}
+                inputProps={{ inputMode: 'decimal' }}
                 sx={{ backgroundColor: '#fff' }}
                 error={errors.incomeStreams?.[index]?.incomeAmount !== undefined}
                 InputProps={{
@@ -953,7 +919,7 @@ const ECHouseholdMemberForm = () => {
           ...getValues(),
           id: formData.householdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
           frontendId: formData.householdData[currentMemberIndex]?.frontendId ?? crypto.randomUUID(),
-          birthYear: getValues().birthYear ? Number(getValues().birthYear) : undefined,
+          birthYear: getValues().birthYear || undefined,
           birthMonth: getValues().birthMonth ? Number(getValues().birthMonth) : undefined,
           hasIncome: Boolean(getValues().hasIncome),
         }}

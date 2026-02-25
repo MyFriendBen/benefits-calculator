@@ -21,6 +21,13 @@ export const renderBirthYearHelperText = (intlHook: IntlShape) => {
   });
 };
 
+export const renderInvalidBirthYearHelperText = (intlHook: IntlShape) => {
+  return intlHook.formatMessage({
+    id: 'ageInput.year.error.invalid',
+    defaultMessage: 'Please enter a valid birth year.',
+  });
+};
+
 export const renderHealthInsSelectOneHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
     id: 'validation-helperText.selectOneHealthIns',
