@@ -173,6 +173,8 @@
   color: white;
   text-align: center;
   line-height: normal;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
 }
 
 .results-needs-header-programs {

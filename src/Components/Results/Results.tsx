@@ -253,7 +253,7 @@ const Results = ({ type }: ResultsProps) => {
           <ResultsHeader type={type} />
           <div className="results-card-wrapper">
             <ResultsTabs />
-            <div id="results-tabpanel" role="tabpanel" className="benefits-form results-card-body">
+            <div id="results-tabpanel" role="tabpanel" aria-labelledby={type === 'program' ? 'long-term-benefits-tab' : 'near-term-benefits-tab'} className="benefits-form results-card-body">
               {type === 'program' && <UrgentNeedBanner />}
               <Grid container sx={{ pt: '1rem' }}>
                 <Grid item xs={12}>

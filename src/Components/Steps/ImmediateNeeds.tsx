@@ -6,7 +6,7 @@ import { z } from 'zod';
 import useScreenApi from '../../Assets/updateScreen';
 import { FormattedMessageType } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
-import MultiSelectTiles from '../OptionCardGroup/MultiSelectTiles';
+import MultiSelectTiles from '../SelectTiles/MultiSelectTiles';
 import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import { useDefaultBackNavigationFunction } from '../QuestionComponents/questionHooks';

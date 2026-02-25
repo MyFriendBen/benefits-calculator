@@ -29,7 +29,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { MONTHS } from '../../Steps/HouseholdMembers/MONTHS';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
-import MultiSelectTiles from '../../OptionCardGroup/MultiSelectTiles';
+import MultiSelectTiles from '../../SelectTiles/MultiSelectTiles';
 import { useConfig } from '../../Config/configHook';
 import QuestionDescription from '../../QuestionComponents/QuestionDescription';
 import { FormattedMessageType } from '../../../Types/Questions';
@@ -445,6 +445,7 @@ const ECHouseholdMemberForm = () => {
             />
           </QuestionDescription>
           <MultiSelectTiles
+            variant="square"
             options={Object.entries(pageNumber === 1 ? conditionOptions.you : conditionOptions.them).map(
               ([key, option]) => ({
                 value: key,

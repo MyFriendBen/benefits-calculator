@@ -42,7 +42,7 @@ const createMember = (overrides: Partial<HouseholdData> = {}): HouseholdData => 
   birthYear: 1990,
   birthMonth: 1,
   relationshipToHH: 'headOfHousehold',
-  conditions: {},
+  conditions: { student: false, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false },
   hasIncome: false,
   incomeStreams: [],
   ...overrides,
