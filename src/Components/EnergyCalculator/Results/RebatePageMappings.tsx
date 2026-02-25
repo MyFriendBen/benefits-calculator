@@ -607,7 +607,7 @@ export function EnergyCalculatorRebateCalculator({ rebate }: RebateComponentProp
           thousandSeparator
           allowNegative={false}
           decimalScale={0}
-          isAllowed={({ value }) => value.replace(/\D/g, '').length <= 10}
+          isAllowed={({ floatValue }) => floatValue === undefined || floatValue <= 9_999_999_999}
           customInput={TextField}
           inputProps={{ inputMode: 'numeric' }}
           sx={{ backgroundColor: '#fff', width: '18rem', maxWidth: '100%' }}
