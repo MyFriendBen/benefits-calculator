@@ -6,7 +6,7 @@
   border-radius: 0.5rem;
   background-color: var(--hover-color);
   align-items: center;
-  width: 75%;
+  width: 100%;
 }
 
 .warning-icon,
