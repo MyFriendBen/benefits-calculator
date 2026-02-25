@@ -1,4 +1,5 @@
 import { TextField } from '@mui/material';
+import { PatternFormat } from 'react-number-format';
 import { Controller, useForm } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
 import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
@@ -101,11 +102,17 @@ const PhoneTextfield = ({ setSnackbar }: PhoneTextfieldProps) => {
           control={control}
           rules={{ required: false }}
           render={({ field }) => (
-            <TextField
-              {...field}
-              inputProps={{ inputMode: 'numeric' }}
+            <PatternFormat
+              value={field.value}
+              onValueChange={({ value }) => field.onChange(value)}
+              name={field.name}
+              onBlur={field.onBlur}
+              format="(###) ###-####"
+              mask="_"
+              customInput={TextField}
               label={<FormattedMessage id="signUp.createPhoneTextfield-label" defaultMessage="Cell Phone" />}
               variant="outlined"
+              inputProps={{ inputMode: 'numeric' }}
               error={errors.phone !== undefined}
               helperText={
                 errors.phone !== undefined && (
