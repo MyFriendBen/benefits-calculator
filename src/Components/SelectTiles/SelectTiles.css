@@ -261,16 +261,16 @@
   }
 
   .tile-square .option-card-icon {
-    height: 2rem;
-    width: 2rem;
-    min-width: 2rem;
+    height: 3rem;
+    width: 3rem;
+    min-width: 3rem;
     margin-right: 0.75rem;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .tile-square .option-card-icon svg {
-    height: 2.75rem !important;
-    width: 2.75rem !important;
+    height: 3rem !important;
+    width: 3rem !important;
   }
 
   .tile-square .option-card-mui-icon {

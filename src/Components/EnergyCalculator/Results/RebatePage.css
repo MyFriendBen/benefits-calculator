@@ -147,5 +147,11 @@
 
   .energy-calculator-rebate-page-container section {
     align-self: center;
+    width: 100%;
+    padding: 0;
+  }
+
+  .energy-calculator-rebate-page-rebate-card {
+    padding: 1.25rem;
   }
 }
