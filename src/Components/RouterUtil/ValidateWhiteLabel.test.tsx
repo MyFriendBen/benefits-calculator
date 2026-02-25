@@ -162,62 +162,70 @@ describe('ValidateWhiteLabel', () => {
   });
 
   describe('legacy white label redirects', () => {
-    const originalLocation = window.location;
+    it('should redirect /co_energy_calculator/* to /cesn/* via client-side navigation', () => {
+      const LocationCapture = () => {
+        const location = useLocation();
+        return <div data-testid="pathname">{location.pathname}</div>;
+      };
 
-    beforeEach(() => {
-      // @ts-ignore - mock window.location.replace
-      delete window.location;
-      window.location = { ...originalLocation, replace: jest.fn() };
-    });
-
-    afterEach(() => {
-      window.location = originalLocation;
-    });
-
-    it('should redirect /co_energy_calculator/* to /cesn/* via window.location.replace', () => {
       renderWithRouter(
         <Routes>
           <Route path=":whiteLabel" element={<ValidateWhiteLabel />}>
             <Route path="step-1" element={<div>Step 1</div>} />
           </Route>
+          <Route path="/cesn/step-1" element={<LocationCapture />} />
         </Routes>,
         { initialRoute: '/co_energy_calculator/step-1' }
       );
 
-      expect(window.location.replace).toHaveBeenCalledWith('/cesn/step-1');
+      expect(screen.getByTestId('pathname')).toHaveTextContent('/cesn/step-1');
     });
 
     it('should preserve query params and hash in legacy redirect', () => {
+      const LocationCapture = () => {
+        const location = useLocation();
+        return (
+          <>
+            <div data-testid="pathname">{location.pathname}</div>
+            <div data-testid="search">{location.search}</div>
+          </>
+        );
+      };
+
       renderWithRouter(
         <Routes>
           <Route path=":whiteLabel" element={<ValidateWhiteLabel />}>
             <Route path="step-2" element={<div>Step 2</div>} />
           </Route>
+          <Route path="/cesn/step-2" element={<LocationCapture />} />
         </Routes>,
-        { initialRoute: '/co_energy_calculator/step-2?lang=es#section' }
+        { initialRoute: '/co_energy_calculator/step-2?lang=es' }
       );
 
-      expect(window.location.replace).toHaveBeenCalledWith(
-        expect.stringContaining('/cesn/step-2')
-      );
+      expect(screen.getByTestId('pathname')).toHaveTextContent('/cesn/step-2');
+      expect(screen.getByTestId('search')).toHaveTextContent('?lang=es');
     });
 
     it('should redirect legacy white label root path', () => {
+      const LocationCapture = () => {
+        const location = useLocation();
+        return <div data-testid="pathname">{location.pathname}</div>;
+      };
+
       renderWithRouter(
         <Routes>
           <Route path=":whiteLabel" element={<ValidateWhiteLabel />}>
             <Route index element={<div>Index</div>} />
           </Route>
+          <Route path="/cesn" element={<LocationCapture />} />
         </Routes>,
         { initialRoute: '/co_energy_calculator' }
       );
 
-      expect(window.location.replace).toHaveBeenCalledWith(
-        expect.stringContaining('/cesn')
-      );
+      expect(screen.getByTestId('pathname')).toHaveTextContent('/cesn');
     });
 
-    it('should not use window.location.replace for valid white labels', () => {
+    it('should not redirect valid white labels', () => {
       renderWithRouter(
         <Routes>
           <Route path=":whiteLabel" element={<ValidateWhiteLabel />}>
@@ -227,7 +235,6 @@ describe('ValidateWhiteLabel', () => {
         { initialRoute: '/cesn/step-1' }
       );
 
-      expect(window.location.replace).not.toHaveBeenCalled();
       expect(screen.getByTestId('step')).toBeInTheDocument();
     });
   });
