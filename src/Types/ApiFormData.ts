@@ -25,7 +25,7 @@ export type ApiIncomeReadOnly = {
 
 export type ApiIncome = {
   type: string | null;
-  amount: number | null;
+  amount: string | null;
   frequency: string | null;
   hours_worked: number | null;
 };
@@ -94,7 +94,7 @@ export type ApiExpenseReadOnly = {
 
 export type ApiExpense = {
   type: string | null;
-  amount: number | null;
+  amount: string | null;
   frequency: string | null;
 };
 
@@ -142,7 +142,7 @@ export type ApiFormData = {
   referrer_code: string | null;
   path: string | null;
   household_size: number | null;
-  household_assets: number | null;
+  household_assets: string | null;
   housing_situation?: string | null;
   household_members: ApiHouseholdMember[];
   last_tax_filing_year?: string | null;
