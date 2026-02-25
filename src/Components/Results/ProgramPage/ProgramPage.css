@@ -347,6 +347,11 @@ li.apply-info {
     margin-top: 0;
   }
 
+  .results-program-page-warning-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
   .program-icon-and-header {
     justify-content: center;
     padding: 1rem;
