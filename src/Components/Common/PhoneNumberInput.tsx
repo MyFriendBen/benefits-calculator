@@ -12,13 +12,17 @@ type PhoneNumberInputProps = {
   error?: boolean;
   helperText?: React.ReactNode;
   sx?: object;
+  onAfterChange?: (value: string) => void;
 };
 
-const PhoneNumberInput = ({ value, onChange, onBlur, inputRef, name, label, error, helperText, sx }: PhoneNumberInputProps) => {
+const PhoneNumberInput = ({ value, onChange, onBlur, inputRef, name, label, error, helperText, sx, onAfterChange }: PhoneNumberInputProps) => {
   return (
     <PatternFormat
       value={value}
-      onValueChange={({ value }) => onChange(value)}
+      onValueChange={({ value }) => {
+        onChange(value);
+        onAfterChange?.(value);
+      }}
       getInputRef={inputRef}
       name={name}
       onBlur={onBlur}

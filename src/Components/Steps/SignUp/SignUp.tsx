@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Checkbox, FormControlLabel, TextField } from '@mui/material';
-import { PatternFormat } from 'react-number-format';
+import PhoneNumberInput from '../../Common/PhoneNumberInput';
 import { useContext, useEffect, useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
@@ -410,28 +410,24 @@ function SignUp() {
                 name="contactInfo.cell"
                 control={control}
                 render={({ field }) => (
-                  <PatternFormat
+                  <PhoneNumberInput
                     value={field.value}
-                    onValueChange={({ value }) => {
-                      field.onChange(value);
-                      if (isSubmitted) {
-                        trigger(['contactInfo.cell', 'contactInfo.email', 'contactInfo.tcpa']);
-                      }
-                    }}
-                    name={field.name}
+                    onChange={field.onChange}
                     onBlur={field.onBlur}
-                    format="(###) ###-####"
-                    mask="_"
-                    customInput={TextField}
+                    inputRef={field.ref}
+                    name={field.name}
                     label={<FormattedMessage id="signUp.createPhoneTextfield-label" defaultMessage="Cell Phone" />}
-                    variant="outlined"
-                    inputProps={{ inputMode: 'numeric' }}
                     error={errors.contactInfo?.cell !== undefined}
                     helperText={
                       errors.contactInfo?.cell !== undefined && (
                         <ErrorMessageWrapper fontSize="1rem">{errors.contactInfo.cell.message}</ErrorMessageWrapper>
                       )
                     }
+                    onAfterChange={() => {
+                      if (isSubmitted) {
+                        trigger(['contactInfo.cell', 'contactInfo.email', 'contactInfo.tcpa']);
+                      }
+                    }}
                   />
                 )}
               />

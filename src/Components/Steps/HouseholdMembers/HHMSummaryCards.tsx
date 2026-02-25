@@ -13,6 +13,7 @@ import { useStepNumber } from '../../../Assets/stepDirectory';
 import { Context } from '../../Wrapper/Wrapper';
 import './HHMSummaryCards.css';
 import { calcMemberYearlyIncome } from '../../../Assets/income';
+import { formatToUSD } from '../../Confirmation/ConfirmationBlock';
 
 type HHMSummariesProps = {
   activeMemberData: HouseholdData;
@@ -41,10 +42,6 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
     if (isValid) {
       navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`);
     }
-  };
-
-  const formatToUSD = (num: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
   };
 
   const createMemberCard = (
