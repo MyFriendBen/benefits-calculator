@@ -205,6 +205,7 @@ const ECHouseholdMemberForm = () => {
     trigger,
   } = useStepForm<FormSchema>({
     resolver: zodResolver(formSchema),
+    mode: 'onTouched',
     defaultValues: {
       birthMonth: householdMemberFormData?.birthMonth ? String(householdMemberFormData.birthMonth) : '',
       birthYear: householdMemberFormData?.birthYear ?? 0,
