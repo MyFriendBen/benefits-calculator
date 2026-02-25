@@ -208,7 +208,7 @@ const ECHouseholdMemberForm = () => {
     mode: 'onTouched',
     defaultValues: {
       birthMonth: householdMemberFormData?.birthMonth ? String(householdMemberFormData.birthMonth) : '',
-      birthYear: householdMemberFormData?.birthYear ?? undefined,
+      birthYear: householdMemberFormData?.birthYear ?? 0,
       conditions: {
         survivingSpouse: householdMemberFormData?.energyCalculator?.survivingSpouse ?? false,
         disabled: householdMemberFormData?.conditions.disabled ?? false,
@@ -360,8 +360,8 @@ const ECHouseholdMemberForm = () => {
               render={({ field }) => (
                 <>
                   <NumericFormat
-                    value={field.value ?? ''}
-                    onValueChange={({ floatValue }) => field.onChange(floatValue ?? undefined)}
+                    value={field.value || ''}
+                    onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
                     getInputRef={field.ref}
                     allowNegative={false}
                     decimalScale={0}
@@ -796,6 +796,7 @@ const ECHouseholdMemberForm = () => {
                 thousandSeparator
                 allowNegative={false}
                 decimalScale={2}
+                fixedDecimalScale
                 customInput={TextField}
                 label={
                   <FormattedMessage

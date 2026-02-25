@@ -367,7 +367,7 @@ const HouseholdMemberForm = () => {
     mode: 'onTouched',
     defaultValues: {
       birthMonth: householdMemberFormData?.birthMonth ? String(householdMemberFormData.birthMonth) : '',
-      birthYear: householdMemberFormData?.birthYear ?? undefined,
+      birthYear: householdMemberFormData?.birthYear ?? 0,
       healthInsurance: householdMemberFormData?.healthInsurance
         ? householdMemberFormData.healthInsurance
         : {
@@ -543,8 +543,8 @@ const HouseholdMemberForm = () => {
               render={({ field }) => (
                 <>
                   <NumericFormat
-                    value={field.value ?? ''}
-                    onValueChange={({ floatValue }) => field.onChange(floatValue ?? undefined)}
+                    value={field.value || ''}
+                    onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
                     getInputRef={field.ref}
                     allowNegative={false}
                     decimalScale={0}
@@ -1090,6 +1090,7 @@ const HouseholdMemberForm = () => {
                 thousandSeparator
                 allowNegative={false}
                 decimalScale={2}
+                fixedDecimalScale
                 customInput={TextField}
                 label={
                   <FormattedMessage

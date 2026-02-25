@@ -4,7 +4,7 @@ import { Controller } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField } from '@mui/material';
-import { NumericFormat } from 'react-number-format';
+import { PatternFormat } from 'react-number-format';
 import { FormattedMessageType } from '../../Types/Questions';
 import { Context } from '../Wrapper/Wrapper';
 import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
@@ -191,14 +191,14 @@ export const Zipcode = () => {
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
-            <NumericFormat
+            <PatternFormat
               value={field.value}
               onValueChange={({ value }) => field.onChange(value)}
+              getInputRef={field.ref}
               name={field.name}
               onBlur={field.onBlur}
               format="#####"
               mask="_"
-              allowNegative={false}
               customInput={TextField}
               label={<FormattedMessage id="questions.zipcode-inputLabel" defaultMessage="Zip Code" />}
               variant="outlined"
