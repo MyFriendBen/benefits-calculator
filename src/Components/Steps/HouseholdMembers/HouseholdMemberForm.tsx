@@ -1085,7 +1085,8 @@ const HouseholdMemberForm = () => {
             <>
               <NumericFormat
                 value={field.value === 0 ? '' : field.value}
-                onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                onValueChange={({ floatValue }: { floatValue: number | undefined }) => field.onChange(floatValue ?? 0)}
+                fixedDecimalScale
                 onBlur={field.onBlur}
                 getInputRef={field.ref}
                 thousandSeparator
