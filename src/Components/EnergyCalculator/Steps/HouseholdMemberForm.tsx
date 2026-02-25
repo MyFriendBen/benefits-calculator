@@ -792,12 +792,12 @@ const ECHouseholdMemberForm = () => {
               <NumericFormat
                 value={field.value === 0 ? '' : field.value}
                 onValueChange={({ floatValue }: { floatValue: number | undefined }) => field.onChange(floatValue ?? 0)}
-                fixedDecimalScale
+                fixedDecimalScale={selectedIncomeFrequency === 'hourly'}
                 onBlur={field.onBlur}
                 getInputRef={field.ref}
                 thousandSeparator
                 allowNegative={false}
-                decimalScale={2}
+                decimalScale={selectedIncomeFrequency === 'hourly' ? 2 : 0}
                 customInput={TextField}
                 label={
                   <FormattedMessage
@@ -806,7 +806,7 @@ const ECHouseholdMemberForm = () => {
                   />
                 }
                 variant="outlined"
-                inputProps={{ inputMode: 'decimal' }}
+                inputProps={{ inputMode: selectedIncomeFrequency === 'hourly' ? 'decimal' : 'numeric' }}
                 sx={{ backgroundColor: '#fff' }}
                 error={errors.incomeStreams?.[index]?.incomeAmount !== undefined}
                 InputProps={{
