@@ -132,8 +132,7 @@ const ECHouseholdMemberForm = () => {
         }
       },
       { message: renderHoursWorkedHelperText(intl), path: ['hoursPerWeek'] },
-    )
-    ;
+    );
   const incomeStreamsSchema = z.array(incomeSourcesSchema);
   const hasIncomeSchema = z.string().regex(/^true|false$/);
 
@@ -150,7 +149,6 @@ const ECHouseholdMemberForm = () => {
       birthYear: z
         .number({ invalid_type_error: renderBirthYearHelperText(intl) })
         .int()
-        .min(1, { message: renderBirthYearHelperText(intl) })
         .min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
         .max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
       conditions: z.object({
@@ -282,7 +280,7 @@ const ECHouseholdMemberForm = () => {
         ...memberData.conditions,
         disabled: memberData.conditions.disabled,
       },
-      birthYear: memberData.birthYear,
+      birthYear: memberData.birthYear > 0 ? memberData.birthYear : undefined,
       birthMonth: Number(memberData.birthMonth),
       hasIncome: memberData.hasIncome === 'true',
 
@@ -362,6 +360,7 @@ const ECHouseholdMemberForm = () => {
                   <NumericFormat
                     value={field.value || ''}
                     onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                    onBlur={field.onBlur}
                     getInputRef={field.ref}
                     allowNegative={false}
                     decimalScale={0}
@@ -718,6 +717,7 @@ const ECHouseholdMemberForm = () => {
               <NumericFormat
                 value={field.value === 0 ? '' : field.value}
                 onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                onBlur={field.onBlur}
                 getInputRef={field.ref}
                 allowNegative={false}
                 decimalScale={0}
@@ -792,11 +792,11 @@ const ECHouseholdMemberForm = () => {
               <NumericFormat
                 value={field.value === 0 ? '' : field.value}
                 onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                onBlur={field.onBlur}
                 getInputRef={field.ref}
                 thousandSeparator
                 allowNegative={false}
                 decimalScale={2}
-                fixedDecimalScale
                 customInput={TextField}
                 label={
                   <FormattedMessage
@@ -926,7 +926,7 @@ const ECHouseholdMemberForm = () => {
           ...getValues(),
           id: formData.householdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
           frontendId: formData.householdData[currentMemberIndex]?.frontendId ?? crypto.randomUUID(),
-          birthYear: getValues().birthYear || undefined,
+          birthYear: getValues().birthYear > 0 ? getValues().birthYear : undefined,
           birthMonth: getValues().birthMonth ? Number(getValues().birthMonth) : undefined,
           hasIncome: Boolean(getValues().hasIncome),
         }}

@@ -198,7 +198,6 @@ export const Zipcode = () => {
               name={field.name}
               onBlur={field.onBlur}
               format="#####"
-              mask="_"
               customInput={TextField}
               label={<FormattedMessage id="questions.zipcode-inputLabel" defaultMessage="Zip Code" />}
               variant="outlined"

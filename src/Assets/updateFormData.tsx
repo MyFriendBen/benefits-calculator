@@ -22,7 +22,7 @@ export function useUpdateFormData() {
       expenses: [],
       householdSize: Number(response.household_size ?? 0),
       householdData: [],
-      householdAssets: Math.round(response.household_assets ?? 0),
+      householdAssets: Math.round(Number(response.household_assets ?? 0)),
       hasBenefits: response.has_benefits ?? 'preferNotToAnswer',
       benefits: {
         acp: response.has_acp ?? false,
@@ -159,8 +159,10 @@ export function useUpdateFormData() {
       for (const income of member.income_streams) {
         incomes.push({
           incomeStreamName: income.type ?? '',
-          incomeAmount: parseFloat(String(income.amount ?? 0)) || 0,
+          // Django DecimalField returns a string; Number() handles null via the ?? fallback
+          incomeAmount: Number(income.amount ?? 0),
           incomeFrequency: income.frequency ?? '',
+          // API returns null for non-hourly streams; normalize to 0 as the default
           hoursPerWeek: income.hours_worked ?? 0,
         });
       }

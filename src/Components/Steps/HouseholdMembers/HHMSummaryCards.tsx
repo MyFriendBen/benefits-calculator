@@ -13,7 +13,7 @@ import { useStepNumber } from '../../../Assets/stepDirectory';
 import { Context } from '../../Wrapper/Wrapper';
 import './HHMSummaryCards.css';
 import { calcMemberYearlyIncome } from '../../../Assets/income';
-import { formatToUSD } from '../../Confirmation/ConfirmationBlock';
+import { formatToUSD } from '../../../utils/formatCurrency';
 
 type HHMSummariesProps = {
   activeMemberData: HouseholdData;

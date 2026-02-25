@@ -1,4 +1,5 @@
 import { TextField } from '@mui/material';
+import type { SxProps, Theme } from '@mui/material';
 import { PatternFormat } from 'react-number-format';
 import { RefCallBack } from 'react-hook-form';
 
@@ -11,7 +12,7 @@ type PhoneNumberInputProps = {
   label?: React.ReactNode;
   error?: boolean;
   helperText?: React.ReactNode;
-  sx?: object;
+  sx?: SxProps<Theme>;
   onAfterChange?: (value: string) => void;
 };
 
@@ -27,7 +28,6 @@ const PhoneNumberInput = ({ value, onChange, onBlur, inputRef, name, label, erro
       name={name}
       onBlur={onBlur}
       format="(###) ###-####"
-      mask="_"
       customInput={TextField}
       label={label}
       variant="outlined"
