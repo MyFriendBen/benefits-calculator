@@ -181,7 +181,7 @@ describe('ValidateWhiteLabel', () => {
       expect(screen.getByTestId('pathname')).toHaveTextContent('/cesn/step-1');
     });
 
-    it('should preserve query params and hash in legacy redirect', () => {
+    it('should preserve query params in legacy redirect', () => {
       const LocationCapture = () => {
         const location = useLocation();
         return (
