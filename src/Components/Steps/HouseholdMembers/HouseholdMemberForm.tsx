@@ -154,6 +154,7 @@ const getFormSchema = ({
       birthYear: z
         .number({ invalid_type_error: renderBirthYearHelperText(intl) })
         .int()
+        .min(1, { message: renderBirthYearHelperText(intl) })
         .min(currentYear - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
         .max(currentYear, { message: renderInvalidBirthYearHelperText(intl) }),
       healthInsurance: z

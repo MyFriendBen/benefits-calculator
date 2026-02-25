@@ -150,6 +150,7 @@ const ECHouseholdMemberForm = () => {
       birthYear: z
         .number({ invalid_type_error: renderBirthYearHelperText(intl) })
         .int()
+        .min(1, { message: renderBirthYearHelperText(intl) })
         .min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
         .max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
       conditions: z.object({
