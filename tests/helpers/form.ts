@@ -70,15 +70,34 @@ export async function UncheckCheckbox(page: Page, labelText: string): Promise<vo
  * @param year - Year to enter (e.g., '1990')
  */
 export async function selectDate(page: Page, month: string, year: string): Promise<void> {
-  const birthMonthButton = page.getByRole('button', { name: 'Birth Month' });
-  await birthMonthButton.waitFor({ state: 'visible' });
-  await birthMonthButton.click();
-  const listbox = page.locator('[role="listbox"]');
-  await listbox.waitFor({ state: 'visible' });
-  const monthOption = listbox.locator('[role="option"]').filter({ hasText: month });
-  await monthOption.waitFor({ state: 'visible' });
-  await page.waitForTimeout(300);
-  await monthOption.click();
+  const timeout = 20000;
+  const maxRetries = 3;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const birthMonthButton = page.getByRole('button', { name: 'Birth Month' });
+      await birthMonthButton.waitFor({ state: 'visible', timeout });
+      await birthMonthButton.click();
+
+      const listbox = page.locator('[role="listbox"]');
+      await listbox.waitFor({ state: 'visible', timeout });
+
+      const monthOption = listbox.locator('[role="option"]').filter({ hasText: month });
+      await monthOption.waitFor({ state: 'visible', timeout });
+
+      await page.waitForTimeout(300);
+      await monthOption.click({ timeout });
+
+      await listbox.waitFor({ state: 'hidden', timeout: 5000 });
+      break;
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw new Error(`Failed to select month ${month} after ${maxRetries} attempts: ${(error as Error).message}`);
+      }
+      await page.waitForTimeout(500);
+    }
+  }
+
   await page.getByRole('textbox', { name: 'Birth Year' }).fill(year);
 }
 /**
