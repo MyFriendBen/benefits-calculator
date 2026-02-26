@@ -70,34 +70,59 @@ export async function UncheckCheckbox(page: Page, labelText: string): Promise<vo
  * @param year - Year to enter (e.g., '1990')
  */
 export async function selectDate(page: Page, month: string, year: string): Promise<void> {
-  const timeout = 20000;
+  const isCI = process.env.CI === 'true';
+  const renderTimeout = isCI ? 20000 : 10000;
+  const optionTimeout = isCI ? 20000 : 10000;
   const maxRetries = 3;
+  const debugMode = process.env.PWDEBUG === '1' || process.env.DEBUG_TESTS === 'true';
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const birthMonthButton = page.getByRole('button', { name: 'Birth Month' });
-      await birthMonthButton.waitFor({ state: 'visible', timeout });
-      await birthMonthButton.click();
+  // Helper function to select dropdown option with retry logic
+  const selectDropdownOption = async (buttonName: string, optionText: string, context: string) => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        if (debugMode && attempt > 1) {
+          console.log(`[FORM] ${context} selection attempt ${attempt}/${maxRetries}`);
+        }
 
-      const listbox = page.locator('[role="listbox"]');
-      await listbox.waitFor({ state: 'visible', timeout });
+        const button = page.getByRole('button', { name: buttonName });
+        await button.waitFor({ state: 'visible', timeout: renderTimeout });
+        await button.click();
 
-      const monthOption = listbox.locator('[role="option"]').filter({ hasText: month });
-      await monthOption.waitFor({ state: 'visible', timeout });
+        // Wait for listbox to appear
+        const listbox = page.locator('[role="listbox"]');
+        await listbox.waitFor({ state: 'visible', timeout: renderTimeout });
 
-      await page.waitForTimeout(300);
-      await monthOption.click({ timeout });
+        // Wait for options to be available
+        await listbox.locator('[role="option"]').first().waitFor({ state: 'visible', timeout: renderTimeout });
 
-      await listbox.waitFor({ state: 'hidden', timeout: 5000 });
-      break;
-    } catch (error) {
-      if (attempt === maxRetries) {
-        throw new Error(`Failed to select month ${month} after ${maxRetries} attempts: ${(error as Error).message}`);
+        // Find and click the target option
+        const option = listbox.locator('[role="option"]').filter({ hasText: optionText }).first();
+        await option.waitFor({ state: 'visible', timeout: renderTimeout });
+
+        // Small delay for DOM stability (addresses the detachment issue)
+        await page.waitForTimeout(300);
+
+        await option.click({ timeout: optionTimeout });
+
+        // Verify selection by checking dropdown closes
+        await listbox.waitFor({ state: 'hidden', timeout: 5000 });
+
+        return; // Success
+      } catch (error) {
+        if (attempt === maxRetries) {
+          throw new Error(
+            `Failed to select ${optionText} from ${buttonName} after ${maxRetries} attempts: ${(error as Error).message}`,
+          );
+        }
+
+        // Brief pause before retry
+        await page.waitForTimeout(500);
       }
-      await page.waitForTimeout(500);
     }
-  }
+  };
 
+  // Select month; fill year via text input (birth year is now a NumericFormat text field)
+  await selectDropdownOption('Birth Month', month, 'Month');
   await page.getByRole('textbox', { name: 'Birth Year' }).fill(year);
 }
 /**
