@@ -70,7 +70,9 @@ export async function UncheckCheckbox(page: Page, labelText: string): Promise<vo
  * @param year - Year to enter (e.g., '1990')
  */
 export async function selectDate(page: Page, month: string, year: string): Promise<void> {
-  await page.getByRole('button', { name: 'Birth Month' }).click();
+  const birthMonthButton = page.getByRole('button', { name: 'Birth Month' });
+  await birthMonthButton.waitFor({ state: 'visible' });
+  await birthMonthButton.click();
   const listbox = page.locator('[role="listbox"]');
   await listbox.waitFor({ state: 'visible' });
   await listbox.locator('[role="option"]').first().waitFor({ state: 'visible' });
