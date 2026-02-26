@@ -214,13 +214,13 @@ const getIncomeStreamsBodies = (householdMemberData: HouseholdData): ApiIncome[]
 };
 
 const getExpensesBodies = (formData: FormData): ApiExpense[] => {
-  return formData.expenses.map((expense) => {
-    return {
+  return formData.expenses
+    .filter((expense) => expense.expenseAmount > 0)
+    .map((expense) => ({
       type: expense.expenseSourceName,
       amount: expense.expenseAmount,
-      frequency: 'monthly',
-    };
-  });
+      frequency: expense.expenseFrequency ?? 'monthly',
+    }));
 };
 
 type ApiUserBody = ApiUser & ApiUserWriteOnly;

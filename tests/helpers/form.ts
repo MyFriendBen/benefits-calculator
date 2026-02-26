@@ -144,13 +144,3 @@ export async function selectFrequency(page: Page, frequency: string): Promise<vo
   await page.getByRole('button', { name: 'Frequency' }).click();
   await page.getByRole(OPTION.byName(frequency).role, { name: OPTION.byName(frequency).name }).click();
 }
-
-/**
- * Selects an expense type
- * @param page - Playwright page instance
- * @param expenseType - Expense type to select
- */
-export async function selectExpenseType(page: Page, expenseType: string): Promise<void> {
-  await page.getByRole('button', { name: 'Expense Type' }).click();
-  await page.getByRole(OPTION.byName(expenseType).role, { name: OPTION.byName(expenseType).name }).click();
-}

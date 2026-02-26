@@ -3,6 +3,7 @@ import { UtmParameters } from '../Components/CampaignAnalytics/useUtmParameters'
 export type Expense = {
   expenseSourceName: string;
   expenseAmount: number;
+  expenseFrequency: string;
 };
 
 export type IncomeStream = {

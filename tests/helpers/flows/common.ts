@@ -15,7 +15,6 @@ import {
   selectDate,
   selectIncomeType,
   selectFrequency,
-  selectExpenseType,
 } from '../form';
 import { FORM_INPUTS, BUTTONS, DROPDOWN } from '../selectors';
 import { URL_PATTERNS } from '../utils/constants';
@@ -239,16 +238,10 @@ export async function completeExpenses(page: Page, expenseInfo: ExpenseInfo): Pr
     await verifyCurrentUrl(page, URL_PATTERNS.EXPENSES);
 
     if (expenseInfo.hasExpenses) {
-      await selectRadio(page, FORM_INPUTS.YES_RADIO.name);
-      await selectExpenseType(page, expenseInfo.type);
-      await fillTextField(page, FORM_INPUTS.AMOUNT.name, expenseInfo.amount);
-    } else {
-      // Handle the case where hasExpenses is false
-      const noRadio = page.getByRole('radio', { name: 'No' });
-      const isNoRadioVisible = await noRadio.isVisible().catch(() => false);
-      if (isNoRadioVisible) {
-        await selectRadio(page, 'No');
-      }
+      // Find the table row with the matching expense type label and fill in the amount
+      const row = page.locator('tr', { has: page.locator(`label:text("${expenseInfo.type}")`) });
+      const amountInput = row.locator('input[inputmode="numeric"]');
+      await amountInput.fill(expenseInfo.amount);
     }
 
     await clickContinue(page);

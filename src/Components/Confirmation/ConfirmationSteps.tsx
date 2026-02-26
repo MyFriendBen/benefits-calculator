@@ -1,4 +1,4 @@
-import { ReactNode, useContext } from 'react';
+import { ReactNode, useContext, useMemo } from 'react';
 import { Context } from '../Wrapper/Wrapper';
 import ConfirmationBlock, { ConfirmationItem, formatToUSD } from './ConfirmationBlock';
 import { ReactComponent as Residence } from '../../Assets/icons/General/residence.svg';
@@ -114,7 +114,11 @@ function Expenses() {
   const { formData } = useContext(Context);
   const { formatMessage } = useIntl();
   const translateNumber = useTranslateNumber();
-  const expenseOptions = useConfig<FormattedMessageMap>('expense_options');
+  const expenseOptionsByCategory = useConfig<Record<string, FormattedMessageMap>>('expense_options_by_category');
+  const expenseOptions = useMemo(
+    () => Object.assign({}, ...Object.values(expenseOptionsByCategory)) as FormattedMessageMap,
+    [expenseOptionsByCategory],
+  );
 
   const editExpensesAriaLabel = {
     id: 'confirmation.expense.edit-AL',
@@ -130,10 +134,14 @@ function Expenses() {
       return <ConfirmationItem value={<FormattedMessage id="confirmation.none" defaultMessage="None" />} />;
     }
     const mappedExpenses = formData.expenses.map((expense, i) => {
+      const frequencyLabel =
+        expense.expenseFrequency === 'yearly'
+          ? formatMessage({ id: 'confirmation.expense.perYear', defaultMessage: 'year' })
+          : formatMessage({ id: 'confirmation.expense.perMonth', defaultMessage: 'month' });
       return (
         <ConfirmationItem
           label={<>{expenseOptions[expense.expenseSourceName]}:</>}
-          value={translateNumber(formatToUSD(expense.expenseAmount))}
+          value={`${translateNumber(formatToUSD(expense.expenseAmount))} / ${frequencyLabel}`}
           key={i}
         />
       );
@@ -148,7 +156,7 @@ function Expenses() {
       title={
         <FormattedMessage
           id="confirmation.headOfHouseholdDataBlock-expensesLabel"
-          defaultMessage="Monthly Household Expenses"
+          defaultMessage="Household Expenses"
         />
       }
       editAriaLabel={editExpensesAriaLabel}
