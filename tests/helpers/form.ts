@@ -75,9 +75,10 @@ export async function selectDate(page: Page, month: string, year: string): Promi
   await birthMonthButton.click();
   const listbox = page.locator('[role="listbox"]');
   await listbox.waitFor({ state: 'visible' });
-  await listbox.locator('[role="option"]').first().waitFor({ state: 'visible' });
+  const monthOption = listbox.locator('[role="option"]').filter({ hasText: month });
+  await monthOption.waitFor({ state: 'visible' });
   await page.waitForTimeout(300);
-  await page.getByRole('option', { name: month }).click();
+  await monthOption.click();
   await page.getByRole('textbox', { name: 'Birth Year' }).fill(year);
 }
 /**
