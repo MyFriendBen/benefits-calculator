@@ -182,9 +182,6 @@ h1.header-text-bottom {
 
   .result-program-details {
     font-weight: 400;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     vertical-align: text-bottom;
   }
 
