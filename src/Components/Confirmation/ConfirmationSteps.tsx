@@ -116,7 +116,7 @@ function Expenses() {
   const translateNumber = useTranslateNumber();
   const expenseOptionsByCategory = useConfig<Record<string, FormattedMessageMap>>('expense_options_by_category');
   const expenseOptions = useMemo(
-    () => Object.assign({}, ...Object.values(expenseOptionsByCategory)) as FormattedMessageMap,
+    () => Object.fromEntries(Object.values(expenseOptionsByCategory).flatMap(Object.entries)) as FormattedMessageMap,
     [expenseOptionsByCategory],
   );
 

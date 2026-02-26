@@ -219,7 +219,7 @@ const getExpensesBodies = (formData: FormData): ApiExpense[] => {
     .map((expense) => ({
       type: expense.expenseSourceName,
       amount: expense.expenseAmount,
-      frequency: expense.expenseFrequency ?? 'monthly',
+      frequency: expense.expenseFrequency,
     }));
 };
 

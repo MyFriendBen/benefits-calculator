@@ -30,3 +30,8 @@
   background-color: var(--primary-color);
   opacity: 0.9;
 }
+
+.frequency-btn:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
