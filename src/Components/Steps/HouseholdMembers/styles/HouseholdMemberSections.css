@@ -16,8 +16,8 @@
   border: 1px solid #e0e0e0;
 }
 
-.previous-members-heading {
-  margin: 0 !important;
+.previous-members-section h2.question-label {
+  margin: 0;
 }
 
 .question-sub-label {

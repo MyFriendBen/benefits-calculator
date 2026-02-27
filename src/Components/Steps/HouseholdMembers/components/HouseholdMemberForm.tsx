@@ -173,7 +173,7 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
 
   const renderSummaryCards = () => (
     <section aria-label="Your household members" className="previous-members-section">
-      <h2 className="question-label previous-members-heading">
+      <h2 className="question-label">
         <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
       </h2>
       <p className="question-sub-label">
