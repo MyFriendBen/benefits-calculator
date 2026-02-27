@@ -1,8 +1,7 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { Box } from '@mui/material';
-import ConstructionIcon from '@mui/icons-material/Construction';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { calcAge } from '../../../../Assets/age';
+import { Box, IconButton } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import { calcAge, hasBirthMonthYear, useFormatBirthMonthYear } from '../../../../Assets/age';
 import { useConfig } from '../../../Config/configHook';
 import { useTranslateNumber } from '../../../../Assets/languageOptions';
 import { HouseholdData } from '../../../../Types/FormData';
@@ -13,6 +12,7 @@ import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { Context } from '../../../Wrapper/Wrapper';
 import '../styles/HouseholdMemberSummaryCards.css';
 import { calcMemberYearlyIncome } from '../../../../Assets/income';
+import { formatToUSD } from '../../../../utils/formatCurrency';
 
 type HHMSummariesProps = {
   questionName: QuestionName;
@@ -32,97 +32,66 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
     defaultMessage: 'edit household member',
   });
   const navigate = useNavigate();
+  const formatBirthMonthYear = useFormatBirthMonthYear();
 
-  const handleEditBtnSubmit = async (memberIndex: number) => {
-    // Navigate directly without validation when editing a member
-    // Validation will happen when they submit that member's form
-    // Pass state to indicate we're in edit mode and where to return
-    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, {
-      state: { isEditing: true, returnToPage: pageNumber }
-    });
-  };
-
-  const formatToUSD = (num: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num);
+  const handleEditBtnSubmit = (memberIndex: number) => {
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`);
   };
 
   const createMemberCard = (
     memberIndex: number,
-    memberData: HouseholdData | null,
+    memberData: HouseholdData,
     age: number,
-    income: number | null,
+    income: number,
     relationship_options: Record<string, FormattedMessageType>,
-    isCompleted: boolean,
   ) => {
-    const isCurrentMember = memberIndex + 1 === pageNumber;
+    const { relationshipToHH, birthYear, birthMonth } = memberData;
     const containerClassName = `member-added-container ${
-      isCompleted ? 'completed-household-member' : ''
-    } ${isCurrentMember ? 'current-household-member' : ''}`;
+      memberIndex + 1 === pageNumber ? 'current-household-member' : ''
+    }`;
 
-    let relationship;
-    if (memberData) {
-      const { relationshipToHH } = memberData;
-      relationship = relationship_options[relationshipToHH];
-      if (memberIndex === 0) {
-        relationship = <FormattedMessage id="relationshipOptions.yourself" defaultMessage="Yourself" />;
-      }
-    } else {
-      // For future members, show a generic label
-      relationship = <FormattedMessage id="householdDataBlock.householdMember" defaultMessage="Household Member" />;
+    let relationship = relationship_options[relationshipToHH];
+    if (memberIndex === 0) {
+      relationship = <FormattedMessage id="relationshipOptions.yourself" defaultMessage="Yourself" />;
     }
 
     return (
-      <article
-        className={containerClassName}
-        key={memberIndex}
-        onClick={isCompleted && !isCurrentMember ? () => handleEditBtnSubmit(memberIndex) : undefined}
-        role={isCompleted && !isCurrentMember ? "button" : undefined}
-        tabIndex={isCompleted && !isCurrentMember ? 0 : undefined}
-        aria-label={isCompleted && !isCurrentMember ? editHHMemberAriaLabel : undefined}
-      >
-        {isCurrentMember && (
-          <div className="household-member-status-icon">
-            <ConstructionIcon className="current-icon" sx={{ fontSize: '.9rem' }} />
-          </div>
-        )}
-        {isCompleted && !isCurrentMember && (
-          <div className="household-member-status-icon">
-            <CheckCircleIcon className="completed-icon" sx={{ fontSize: '.9rem' }} />
-          </div>
-        )}
+      <article className={containerClassName} key={memberIndex}>
         <div className="household-member-header">
-          <h3 className="member-added-relationship">
-            {relationship} ({translateNumber(age)})
-          </h3>
+          <h3 className="member-added-relationship">{relationship}:</h3>
+          <div className="household-member-edit-button">
+            <IconButton
+              onClick={() => handleEditBtnSubmit(memberIndex)}
+              aria-label={editHHMemberAriaLabel}
+              size="small"
+              sx={{ padding: 0 }}
+            >
+              <EditIcon />
+            </IconButton>
+          </div>
         </div>
-        {isCompleted && (
-          <div className="member-added-income">
+        <div className="member-added-age">
+          <strong>
+            <FormattedMessage id="questions.age-inputLabel" defaultMessage="Age: " />
+          </strong>
+          {translateNumber(age)}
+        </div>
+        {hasBirthMonthYear({ birthMonth, birthYear }) && (
+          <div className="member-added-age member-added-birth">
             <strong>
-              <FormattedMessage id="householdDataBlock.member-income" defaultMessage="Annual Income: " />
+              <FormattedMessage id="householdDataBlock.memberCard.birthYearMonth" defaultMessage="Birth Month/Year: " />
             </strong>
-            {translateNumber(formatToUSD(Number(income)))}
+            {formatBirthMonthYear({ birthMonth, birthYear })}
           </div>
         )}
-        {isCompleted && (
-          <div className="hover-edit-button">
-            <FormattedMessage id="householdDataBlock.edit" defaultMessage="Edit" />
-          </div>
-        )}
+        <div className="member-added-income">
+          <strong>
+            <FormattedMessage id="householdDataBlock.member-income" defaultMessage="Income: " />
+          </strong>
+          {translateNumber(formatToUSD(income))}
+          <FormattedMessage id="displayAnnualIncome.annual" defaultMessage=" annually" />
+        </div>
       </article>
-    );
-  };
-
-  const isMemberCompleted = (member: HouseholdData) => {
-    // A member is completed if they have basic info (birthYear, birthMonth, relationshipToHH)
-    // and have answered the health insurance question (at least one insurance type selected)
-    const hasAnsweredInsurance = member.healthInsurance &&
-      Object.values(member.healthInsurance).some((value) => value === true);
-
-    return Boolean(
-      member.birthYear &&
-      member.birthMonth &&
-      member.relationshipToHH &&
-      hasAnsweredInsurance
     );
   };
 
@@ -139,40 +108,20 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
       }
 
       const income = calcMemberYearlyIncome(member);
-      const isCompleted = isMemberCompleted(member);
 
-      return createMemberCard(memberIndex, member, age, income, relationship_options, isCompleted);
+      return createMemberCard(memberIndex, member, age, income, relationship_options);
     }
   };
 
-  // Create a placeholder card for members not yet entered
-  const createPlaceholderMemberCard = (
-    memberIndex: number,
-    relationship_options: Record<string, FormattedMessageType>,
-  ) => {
-    // Use a default age of 0 for placeholder cards
-    return createMemberCard(memberIndex, null, 0, null, relationship_options, false);
-  };
-
-  // Show all household members - both completed and pending
-  const allMemberCards = [];
-  for (let i = 0; i < formData.householdSize; i++) {
-    const memberData = formData.householdData[i];
-
-    if (memberData && memberData.birthYear && memberData.birthMonth) {
-      // Member has at least basic info - show their card
-      allMemberCards.push(createFormDataMemberCard(i, memberData, relationshipOptions));
-    } else {
-      // Member hasn't been entered yet - show placeholder
-      allMemberCards.push(createPlaceholderMemberCard(i, relationshipOptions));
-    }
-  }
+  const memberCards = formData.householdData.map((member, memberIndex) =>
+    createFormDataMemberCard(memberIndex, member, relationshipOptions),
+  );
 
   return (
     <article key={pageNumber}>
       {headOfHHInfoWasEntered && (
-        <Box sx={{ marginBottom: '0.5rem' }}>
-          <div className="household-members-grid">{allMemberCards}</div>
+        <Box sx={{ marginBottom: '0.25rem' }}>
+          <div>{memberCards}</div>
         </Box>
       )}
     </article>
