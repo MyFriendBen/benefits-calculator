@@ -262,14 +262,12 @@ describe('createEnergyCalculatorHouseholdMemberSchema', () => {
   });
 
   describe('birthMonth/birthYear validation', () => {
-    it('rejects future birth month in current year', () => {
-      const futureMonth = CURRENT_MONTH === 12 ? 1 : CURRENT_MONTH + 1;
-      // Only testable if CURRENT_MONTH < 12
-      if (CURRENT_MONTH < 12) {
-        const result = schema.safeParse({ ...validEcData, birthYear: CURRENT_YEAR, birthMonth: futureMonth });
-        expect(result.success).toBe(false);
-        expect(result.error?.issues.some(i => i.path.includes('birthMonth'))).toBe(true);
-      }
+    // In December there is no future month in the current year, so the test is skipped.
+    (CURRENT_MONTH === 12 ? it.skip : it)('rejects future birth month in current year', () => {
+      const futureMonth = CURRENT_MONTH + 1;
+      const result = schema.safeParse({ ...validEcData, birthYear: CURRENT_YEAR, birthMonth: futureMonth });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.includes('birthMonth'))).toBe(true);
     });
 
     it('accepts current month in current year', () => {
