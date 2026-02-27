@@ -238,8 +238,8 @@ export async function completeExpenses(page: Page, expenseInfo: ExpenseInfo): Pr
     await verifyCurrentUrl(page, URL_PATTERNS.EXPENSES);
 
     if (expenseInfo.amount !== '0' && expenseInfo.amount !== '') {
-      // Find the table row with the matching expense type label and fill in the amount
-      const row = page.locator('tr', { has: page.locator(`label:text("${expenseInfo.type}")`) });
+      // Find the expense row with the matching expense type label and fill in the amount
+      const row = page.locator('.expense-row', { has: page.locator(`label:text("${expenseInfo.type}")`) });
       const amountInput = row.locator('input[inputmode="numeric"]');
       await amountInput.fill(expenseInfo.amount);
 
