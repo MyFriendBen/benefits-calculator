@@ -35,9 +35,13 @@ describe('getDefaultFormItems', () => {
     expect(getDefaultFormItems([], true, true, template)).toEqual([]);
   });
 
-  it('seeds one empty template for eligible first-time visitors', () => {
+  it('seeds one empty template for eligible first-time visitors (undefined = never visited)', () => {
     expect(getDefaultFormItems(undefined, false, true, template)).toEqual([template]);
-    expect(getDefaultFormItems([], false, true, template)).toEqual([template]);
+  });
+
+  it('does not seed when existing is an empty array even on first visit (explicit clear)', () => {
+    // [] means data was saved; an empty saved state should not be re-seeded
+    expect(getDefaultFormItems([], false, true, template)).toEqual([]);
   });
 
   it('returns empty array for ineligible first-time visitors', () => {
@@ -176,7 +180,7 @@ describe('createHouseholdMemberData', () => {
       disabled: false,
     },
     healthInsurance: { none: true },
-  };
+  } as any;
 
   it('preserves existing id and frontendId', () => {
     const result = createHouseholdMemberData({
@@ -248,7 +252,7 @@ describe('createHouseholdMemberData', () => {
         disabled: true,
         medicalEquipment: false,
       },
-      receivesSsi: 'true',
+      receivesSsi: 'true' as 'true' | 'false',
     };
 
     it('builds energyCalculator sub-object from conditions', () => {

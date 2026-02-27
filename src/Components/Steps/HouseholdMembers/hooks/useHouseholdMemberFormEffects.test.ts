@@ -19,7 +19,7 @@ const makeParams = (overrides: Partial<Parameters<typeof useHouseholdMemberFormE
     isEnergyCalculator: false,
     questionName: 'householdData' as const,
     pageNumber: 1,
-    defaultValues: { birthMonth: 0, birthYear: '' },
+    defaultValues: { birthMonth: 0, birthYear: '', hasIncome: 'false' },
     setValue,
     getValues,
     reset,
@@ -106,31 +106,71 @@ describe('useHouseholdMemberFormEffects', () => {
   // ============================================================================
 
   describe('age-based income show/hide', () => {
-    it('sets hasIncome to "true" when user turns 16 with no streams and hasIncome is not already true', () => {
-      const params = makeParams({
-        watchBirthMonth: 6,
-        watchBirthYear: 2000,
-      });
+    it('does not auto-set hasIncome on initial mount', () => {
+      // The saved hasIncome from defaultValues is the source of truth on mount.
+      // The age effect only fires when the user changes their birth date.
+      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000 });
       params._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: true, isUnder16: false });
-      params._mocks.getValues
-        .mockReturnValueOnce([]) // incomeStreams check in hasIncome effect
-        .mockReturnValueOnce([]) // incomeStreams in age effect
-        .mockReturnValueOnce('false'); // hasIncome value
+      params._mocks.getValues.mockReturnValue([]);
       renderHook(() => useHouseholdMemberFormEffects(params));
-      expect(params._mocks.setValue).toHaveBeenCalledWith('hasIncome', 'true', { shouldDirty: true });
+      const hasIncomeSetCalls = params._mocks.setValue.mock.calls.filter(([field]: [string]) => field === 'hasIncome');
+      expect(hasIncomeSetCalls).toHaveLength(0);
     });
 
-    it('sets hasIncome to "false" when member is under 16', () => {
-      const params = makeParams({ watchBirthMonth: 1, watchBirthYear: 2020 });
-      params._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: false, isUnder16: true });
+    it('sets hasIncome to "true" when birth year changes to make user 16+', () => {
+      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2015, watchHasIncome: 'false' });
       params._mocks.getValues.mockReturnValue([]);
-      // getValues for hasIncome returns 'true' to trigger the else branch
-      params._mocks.getValues
-        .mockReturnValueOnce([]) // incomeStreams for hasIncome effect
-        .mockReturnValueOnce([]) // incomeStreams for age effect
-        .mockReturnValueOnce('true'); // current hasIncome value
-      renderHook(() => useHouseholdMemberFormEffects(params));
-      expect(params._mocks.setValue).toHaveBeenCalledWith('hasIncome', 'false', { shouldDirty: true });
+      const { rerender } = renderHook((p: any) => useHouseholdMemberFormEffects(p), { initialProps: params });
+
+      const updatedParams = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000, watchHasIncome: 'false' });
+      updatedParams._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: true, isUnder16: false });
+      updatedParams._mocks.getValues.mockReturnValue([]);
+      act(() => rerender(updatedParams));
+
+      expect(updatedParams._mocks.setValue).toHaveBeenCalledWith('hasIncome', 'true', { shouldDirty: true });
+    });
+
+    it('sets hasIncome to "false" when birth year changes to make user under 16 (with no streams)', () => {
+      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000, watchHasIncome: 'true' });
+      params._mocks.getValues.mockReturnValue([]);
+      const { rerender } = renderHook((p: any) => useHouseholdMemberFormEffects(p), { initialProps: params });
+
+      const updatedParams = makeParams({ watchBirthMonth: 6, watchBirthYear: 2015, watchHasIncome: 'true' });
+      updatedParams._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: false, isUnder16: true });
+      updatedParams._mocks.getValues.mockReturnValue([]);
+      act(() => rerender(updatedParams));
+
+      expect(updatedParams._mocks.setValue).toHaveBeenCalledWith('hasIncome', 'false', { shouldDirty: true });
+    });
+
+    it('does not clear hasIncome when under 16 but streams exist', () => {
+      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000, watchHasIncome: 'true' });
+      params._mocks.getValues.mockReturnValue([EMPTY_INCOME_STREAM]);
+      const { rerender } = renderHook((p: any) => useHouseholdMemberFormEffects(p), { initialProps: params });
+
+      const updatedParams = makeParams({ watchBirthMonth: 6, watchBirthYear: 2015, watchHasIncome: 'true' });
+      updatedParams._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: false, isUnder16: true });
+      updatedParams._mocks.getValues.mockReturnValue([EMPTY_INCOME_STREAM]);
+      act(() => rerender(updatedParams));
+
+      const hasIncomeSetCalls = updatedParams._mocks.setValue.mock.calls.filter(([field]: [string]) => field === 'hasIncome');
+      expect(hasIncomeSetCalls).toHaveLength(0);
+    });
+
+    it('does not fire when only unrelated props change (birth date unchanged)', () => {
+      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000, watchHasIncome: 'false' });
+      params._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: true, isUnder16: false });
+      params._mocks.getValues.mockReturnValue([]);
+      const { rerender } = renderHook((p: any) => useHouseholdMemberFormEffects(p), { initialProps: params });
+
+      // Only watchHasIncome changes — birth date stays the same
+      const updatedParams = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000, watchHasIncome: 'true' });
+      updatedParams._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: true, isUnder16: false });
+      updatedParams._mocks.getValues.mockReturnValue([]);
+      act(() => rerender(updatedParams));
+
+      const hasIncomeSetCalls = updatedParams._mocks.setValue.mock.calls.filter(([field]: [string]) => field === 'hasIncome');
+      expect(hasIncomeSetCalls).toHaveLength(0);
     });
   });
 

@@ -22,7 +22,7 @@ const Wrapper = ({
   return (
     <IntlProvider locale="en" messages={{}}>
       <BasicInfoSection
-        control={control}
+        control={control as any}
         errors={errors}
         isFirstMember={isFirstMember}
         relationshipOptions={relationshipOptions}

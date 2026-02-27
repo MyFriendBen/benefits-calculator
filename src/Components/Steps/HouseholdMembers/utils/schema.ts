@@ -176,6 +176,7 @@ export const createHouseholdMemberSchema = (
  * Type helper to infer the schema type
  */
 export type HouseholdMemberFormSchema = z.infer<ReturnType<typeof createHouseholdMemberSchema>>;
+export type EnergyCalculatorHouseholdMemberFormSchema = z.infer<ReturnType<typeof createEnergyCalculatorHouseholdMemberSchema>>;
 
 // ============================================================================
 // ENERGY CALCULATOR SCHEMA

@@ -72,13 +72,24 @@ export const useHouseholdMemberFormEffects = ({
     }
   }, [watchHasIncome, append, replace, getValues, hasTruthyIncome]);
 
-  // Shared: Auto-show income block for 16+ users when birth month/year changes
+  // Shared: Auto-set hasIncome based on age — but only when the user changes their birth
+  // date in the current session. The saved hasIncome value (loaded via defaultValues) is
+  // treated as the source of truth on mount; we only override it if they edit their DOB.
+  const prevBirthRef = useRef({ month: watchBirthMonth, year: watchBirthYear });
   useEffect(() => {
+    const birthChanged =
+      prevBirthRef.current.month !== watchBirthMonth ||
+      prevBirthRef.current.year !== watchBirthYear;
+    prevBirthRef.current = { month: watchBirthMonth, year: watchBirthYear };
+
+    if (!birthChanged) return;
+
     const { is16OrOlder } = calculateCurrentAgeStatus();
     const hasStreams = getValues('incomeStreams').length > 0;
-    if (is16OrOlder && !hasStreams && getValues('hasIncome') !== 'true') {
+
+    if (is16OrOlder) {
       setValue('hasIncome', 'true', { shouldDirty: true });
-    } else if (!is16OrOlder && getValues('hasIncome') !== 'false') {
+    } else if (!hasStreams) {
       setValue('hasIncome', 'false', { shouldDirty: true });
     }
   }, [watchBirthMonth, watchBirthYear, calculateCurrentAgeStatus, getValues, setValue]);

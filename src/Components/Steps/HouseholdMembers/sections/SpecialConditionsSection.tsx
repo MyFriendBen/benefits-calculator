@@ -8,15 +8,20 @@ import MultiSelectTiles from '../../../SelectTiles/MultiSelectTiles';
 import { ConditionOptions } from '../utils/types';
 import '../styles/HouseholdMemberSections.css';
 
-// Shared between main and EC workflows. The condition tiles shown are determined
-// by the `options` prop (which comes from config), so this component doesn't need
-// to know which workflow it's in for tile rendering.
-interface SpecialConditionsSectionProps {
-  control: Control<any>;
-  errors: FieldErrors<any>;
+// Minimal shape that covers both the main and EC conditions objects.
+// The tile options shown are driven by the `options` config prop, so both
+// workflows can use this same component.
+type ConditionsFormValues = {
   conditions: Record<string, boolean>;
-  setValue: UseFormSetValue<any>;
-  clearErrors: UseFormClearErrors<any>;
+  receivesSsi?: string;
+};
+
+interface SpecialConditionsSectionProps {
+  control: Control<ConditionsFormValues>;
+  errors: FieldErrors<ConditionsFormValues>;
+  conditions: Record<string, boolean>;
+  setValue: UseFormSetValue<ConditionsFormValues>;
+  clearErrors: UseFormClearErrors<ConditionsFormValues>;
   options: ConditionOptions;
   pageNumber: number;
   showReceivesSsi?: boolean;
@@ -63,7 +68,9 @@ const SpecialConditionsSection = ({
       </QuestionDescription>
       {errors.conditions && (
         <FormHelperText sx={{ ml: 0, mb: 1 }}>
-          <ErrorMessageWrapper fontSize="var(--error-message-font-size)">{errors.conditions.message as string}</ErrorMessageWrapper>
+          <ErrorMessageWrapper fontSize="var(--error-message-font-size)">
+            {(errors.conditions as unknown as { message: string }).message}
+          </ErrorMessageWrapper>
         </FormHelperText>
       )}
       <MultiSelectTiles
@@ -71,7 +78,7 @@ const SpecialConditionsSection = ({
         options={conditionTileOptions}
         values={conditions}
         onChange={(values) => {
-          setValue('conditions', values, { shouldValidate: true, shouldDirty: true });
+          setValue('conditions', values as Record<string, boolean>, { shouldValidate: true, shouldDirty: true });
           clearErrors('conditions');
         }}
       />

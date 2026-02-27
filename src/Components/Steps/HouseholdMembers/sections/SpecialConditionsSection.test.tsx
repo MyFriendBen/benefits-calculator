@@ -59,12 +59,11 @@ const Wrapper = ({
   return (
     <IntlProvider locale="en" messages={{}}>
       <SpecialConditionsSection
-        control={control}
+        control={control as any}
         errors={errors}
         conditions={conditions}
-        setValue={setValue}
+        setValue={setValue as any}
         clearErrors={clearErrors}
-        getValues={getValues}
         options={makeConditionOptions() as any}
         pageNumber={pageNumber}
         showReceivesSsi={showReceivesSsi}

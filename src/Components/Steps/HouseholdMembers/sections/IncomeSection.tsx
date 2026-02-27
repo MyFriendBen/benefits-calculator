@@ -23,19 +23,24 @@ import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
 import CloseButton from '../../../CloseButton/CloseButton';
 import { createMenuItems } from '../../SelectHelperFunctions/SelectHelperFunctions';
 import { FormattedMessageType } from '../../../../Types/Questions';
+import { IncomeStreamFormData } from '../utils/types';
 import { EMPTY_INCOME_STREAM } from '../utils/constants';
 import '../styles/HouseholdMemberSections.css';
 import '../styles/IncomeSection.css';
 
-// IncomeSection is shared between main and EC workflows. Both have identical incomeStreams
-// structure, so we use `any` for form types to accept either schema.
+// Both main and EC workflows share the same incomeStreams shape.
+type IncomeFormValues = {
+  hasIncome: string;
+  incomeStreams: IncomeStreamFormData[];
+};
+
 interface IncomeSectionProps {
-  control: Control<any>;
-  errors: FieldErrors<any>;
-  fields: FieldArrayWithId<any, 'incomeStreams', 'id'>[];
-  append: UseFieldArrayAppend<any, 'incomeStreams'>;
+  control: Control<IncomeFormValues>;
+  errors: FieldErrors<IncomeFormValues>;
+  fields: FieldArrayWithId<IncomeFormValues, 'incomeStreams', 'id'>[];
+  append: UseFieldArrayAppend<IncomeFormValues, 'incomeStreams'>;
   remove: UseFieldArrayRemove;
-  watch: UseFormWatch<any>;
+  watch: UseFormWatch<IncomeFormValues>;
   incomeOptions: Record<string, FormattedMessageType>;
   frequencyMenuItems: JSX.Element[];
   pageNumber: number;
@@ -58,9 +63,8 @@ const IncomeSection = ({
   const watchHasIncome = watch('hasIncome');
   const hasTruthyIncome = watchHasIncome === 'true';
 
-  const getIncomeStreamError = (index: number, fieldName: string) => {
-    const incomeStreamsErrors = errors.incomeStreams as any;
-    return incomeStreamsErrors?.[index]?.[fieldName];
+  const getIncomeStreamError = (index: number, fieldName: keyof IncomeStreamFormData) => {
+    return (errors.incomeStreams as FieldErrors<IncomeStreamFormData>[])?.[index]?.[fieldName];
   };
 
   const incomeStreamsMenuItems = createMenuItems(
@@ -226,8 +230,8 @@ const IncomeSection = ({
           render={({ field }) => (
             <>
               <NumericFormat
-                value={field.value === '' ? '' : field.value}
-                onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                value={field.value}
+                onValueChange={({ value }) => field.onChange(value)}
                 allowNegative={false}
                 decimalScale={0}
                 customInput={TextField}
@@ -294,8 +298,8 @@ const IncomeSection = ({
           render={({ field }) => (
             <>
               <NumericFormat
-                value={field.value === '' ? '' : field.value}
-                onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                value={field.value}
+                onValueChange={({ value }) => field.onChange(value)}
                 thousandSeparator
                 allowNegative={false}
                 decimalScale={0}
@@ -449,7 +453,7 @@ const IncomeSection = ({
             <div>
               <Button
                 variant="outlined"
-                onClick={() => append(EMPTY_INCOME_STREAM as any)}
+                onClick={() => append(EMPTY_INCOME_STREAM)}
                 startIcon={<AddIcon />}
                 type="button"
               >

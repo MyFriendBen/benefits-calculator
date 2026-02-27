@@ -138,8 +138,7 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
 
   const formSubmitHandler: SubmitHandler<any> = async (memberData) => {
     if (!uuid) {
-      console.error('UUID is undefined');
-      return;
+      throw new Error('uuid is undefined');
     }
 
     const updatedHouseholdData = [...formData.householdData];
@@ -219,7 +218,7 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
   const renderFormSections = () => (
     <>
       <BasicInfoSection
-        control={control}
+        control={control as any}
         errors={errors}
         isFirstMember={pageNumber === 1}
         relationshipOptions={relationshipOptions}
@@ -237,10 +236,10 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
       )}
 
       <SpecialConditionsSection
-        control={control}
+        control={control as any}
         errors={errors}
         conditions={watch('conditions')}
-        setValue={setValue}
+        setValue={setValue as any}
         clearErrors={clearErrors}
         options={conditionOptions}
         pageNumber={pageNumber}
@@ -256,12 +255,12 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
       )}
 
       <IncomeSection
-        control={control}
+        control={control as any}
         errors={errors}
-        fields={fields}
+        fields={fields as any}
         append={append}
         remove={remove}
-        watch={watch}
+        watch={watch as any}
         incomeOptions={incomeOptions}
         frequencyMenuItems={frequencyMenuItems}
         pageNumber={pageNumber}

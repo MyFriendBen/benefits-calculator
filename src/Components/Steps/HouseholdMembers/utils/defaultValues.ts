@@ -51,12 +51,17 @@ const isWorkingAge = (birthYear?: number, birthMonth?: number): boolean => {
  * Determines default income streams - auto-adds for working-age members on first visit
  */
 const getDefaultIncomeStreams = (data?: HouseholdData): any[] => {
-  return getDefaultFormItems(
+  const streams = getDefaultFormItems(
     data?.incomeStreams,
     hasProgressedThroughForm(data),
     isWorkingAge(data?.birthYear, data?.birthMonth),
     EMPTY_INCOME_STREAM as any
   );
+  return streams.map((stream: any) => ({
+    ...stream,
+    incomeAmount: stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
+    hoursPerWeek: stream.hoursPerWeek === 0 ? '' : String(stream.hoursPerWeek),
+  }));
 };
 
 /**
@@ -95,6 +100,19 @@ export const DEFAULT_STUDENT_ELIGIBILITY = {
 };
 
 /**
+ * Determines the default hasIncome string value.
+ * Priority:
+ * 1. Streams present → always 'true'
+ * 2. Saved hasIncome boolean → respect it (user made an explicit choice)
+ * 3. No saved data (first visit) → 'false' (age effect will auto-set if eligible)
+ */
+const getDefaultHasIncome = (data: HouseholdData | undefined, incomeStreams: any[]): string => {
+  if (incomeStreams.length > 0) return 'true';
+  if (data && typeof data.hasIncome === 'boolean') return data.hasIncome ? 'true' : 'false';
+  return 'false';
+};
+
+/**
  * Creates default form values for household member
  */
 export const createDefaultValues = (
@@ -118,7 +136,7 @@ export const createDefaultValues = (
     studentEligibility: householdMemberFormData?.studentEligibility
       ? { ...DEFAULT_STUDENT_ELIGIBILITY, ...householdMemberFormData.studentEligibility }
       : DEFAULT_STUDENT_ELIGIBILITY,
-    hasIncome: incomeStreams.length > 0 ? 'true' : 'false',
+    hasIncome: getDefaultHasIncome(householdMemberFormData, incomeStreams),
     incomeStreams,
   };
 };
@@ -157,6 +175,10 @@ export const createEnergyCalculatorDefaultValues = (
     relationshipToHH: householdMemberFormData?.relationshipToHH
       ?? (pageNumber === 1 ? 'headOfHousehold' : ''),
     hasIncome: determineDefaultIncomeByAge(householdMemberFormData),
-    incomeStreams: householdMemberFormData?.incomeStreams ?? [],
+    incomeStreams: (householdMemberFormData?.incomeStreams ?? []).map((stream: any) => ({
+      ...stream,
+      incomeAmount: stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
+      hoursPerWeek: stream.hoursPerWeek === 0 ? '' : String(stream.hoursPerWeek),
+    })),
   };
 };

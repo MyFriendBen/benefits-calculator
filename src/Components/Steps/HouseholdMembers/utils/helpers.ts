@@ -3,6 +3,7 @@ import { FormattedMessageType } from '../../../../Types/Questions';
 import { calcAge } from '../../../../Assets/age';
 import { FREQUENCY_ORDER, ERROR_SECTION_MAP, ENERGY_CALCULATOR_ERROR_SECTION_MAP } from './constants';
 import { WorkflowType } from './types';
+import { HouseholdMemberFormSchema, EnergyCalculatorHouseholdMemberFormSchema } from './schema';
 export { formatToUSD } from '../../../../utils/formatCurrency';
 
 // ============================================================================
@@ -12,14 +13,19 @@ export { formatToUSD } from '../../../../utils/formatCurrency';
 /**
  * Determines default form items (e.g., income streams) based on context.
  * Returns existing items if available, or seeds a single empty item for
- * eligible members on their first visit.
+ * eligible members on their absolute first visit.
  *
- * "Progressed" is proxied by whether a downstream field (e.g. health insurance)
- * has been answered — if the user has already submitted the form once, an empty
- * items array means they deliberately cleared it and that choice should be respected.
+ * Seeding logic:
+ * - If existingItems has entries → always return them (truth of record).
+ * - If existingItems is an explicit empty array [] → the user has been here before
+ *   and cleared it (or the member was saved with no streams). Respect that; don't seed.
+ * - If existingItems is undefined → member has never been to this page.
+ *   Seed one empty item if eligible and not yet progressed past this section.
+ * - If hasCompletedDownstreamField is true → user already submitted at least once;
+ *   an empty state means they deliberately cleared it. Respect that.
  *
- * @param existingItems - Current items from saved form data (may be undefined)
- * @param hasCompletedDownstreamField - Whether the user has already progressed past this section
+ * @param existingItems - Current items from saved form data (undefined = never visited)
+ * @param hasCompletedDownstreamField - Whether the user has already submitted the form before
  * @param isEligible - Whether member qualifies for a default item (e.g. working age)
  * @param emptyTemplate - The empty item to seed on first visit
  */
@@ -29,10 +35,17 @@ export function getDefaultFormItems<T>(
   isEligible: boolean,
   emptyTemplate: T,
 ): T[] {
+  // Existing items always win.
   if (existingItems && existingItems.length > 0) {
     return existingItems;
   }
+  // Explicit empty array: user has been here before and cleared it (or saved with none).
+  if (Array.isArray(existingItems)) {
+    return [];
+  }
+  // existingItems is undefined: first visit to this page.
   if (hasCompletedDownstreamField) {
+    // They submitted before but somehow have no items — treat as intentional.
     return [];
   }
   if (isEligible) {
@@ -74,48 +87,55 @@ export const calculateAge = (birthYear?: number, birthMonth?: number): number | 
 // FORM SUBMISSION HELPERS
 // ============================================================================
 
-interface CreateHouseholdMemberDataParams {
-  memberData: any;
+type MainMemberDataParams = {
+  memberData: HouseholdMemberFormSchema;
   currentMemberIndex: number;
   existingHouseholdData: HouseholdData[];
-  workflowType?: WorkflowType;
-}
+  workflowType?: 'main';
+};
+
+type EcMemberDataParams = {
+  memberData: EnergyCalculatorHouseholdMemberFormSchema;
+  currentMemberIndex: number;
+  existingHouseholdData: HouseholdData[];
+  workflowType: 'energyCalculator';
+};
+
+type CreateHouseholdMemberDataParams = MainMemberDataParams | EcMemberDataParams;
 
 /**
  * Creates updated household member data for form submission.
  * For EC workflow, also builds the energyCalculator sub-object from form conditions.
  */
-export const createHouseholdMemberData = ({
-  memberData,
-  currentMemberIndex,
-  existingHouseholdData,
-  workflowType = 'main',
-}: CreateHouseholdMemberDataParams): HouseholdData => {
-  const incomeStreams = memberData.incomeStreams || [];
+export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParams): HouseholdData => {
+  const { memberData, currentMemberIndex, existingHouseholdData } = params;
+
+  const incomeStreams = (memberData.incomeStreams || []).map((stream) => ({
+    ...stream,
+    incomeAmount: Number(stream.incomeAmount),
+    hoursPerWeek: stream.hoursPerWeek === '' ? 0 : Number(stream.hoursPerWeek),
+  }));
   const hasIncome = memberData.hasIncome === 'true' || incomeStreams.length > 0;
 
   const base = {
     ...memberData,
     id: existingHouseholdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
     frontendId: existingHouseholdData[currentMemberIndex]?.frontendId ?? crypto.randomUUID(),
-    birthYear: memberData.birthYear as number,
-    birthMonth: memberData.birthMonth as number,
-    relationshipToHH: memberData.relationshipToHH as string,
     hasIncome,
     incomeStreams,
   };
 
-  if (workflowType === 'energyCalculator') {
+  if (params.workflowType === 'energyCalculator') {
+    const ecData = params.memberData;
     return {
       ...base,
       conditions: {
-        ...memberData.conditions,
-        disabled: memberData.conditions.disabled,
+        disabled: ecData.conditions.disabled,
       },
       energyCalculator: {
-        survivingSpouse: memberData.conditions.survivingSpouse,
-        receivesSsi: memberData.receivesSsi === 'true',
-        medicalEquipment: memberData.conditions.medicalEquipment,
+        survivingSpouse: ecData.conditions.survivingSpouse,
+        receivesSsi: ecData.receivesSsi === 'true',
+        medicalEquipment: ecData.conditions.medicalEquipment,
       },
     } as HouseholdData;
   }

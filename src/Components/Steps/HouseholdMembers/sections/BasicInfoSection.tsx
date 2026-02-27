@@ -1,40 +1,33 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Box, FormControl, InputLabel, Select, TextField } from '@mui/material';
 import { NumericFormat } from 'react-number-format';
-import { Control, Controller, FieldErrors, FieldValues, Path } from 'react-hook-form';
+import { Control, Controller, FieldErrors } from 'react-hook-form';
 import QuestionQuestion from '../../../QuestionComponents/QuestionQuestion';
 import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
 import { createMenuItems } from '../../SelectHelperFunctions/SelectHelperFunctions';
 import { FormattedMessageType } from '../../../../Types/Questions';
 import { BASIC_INFO_GRID_STYLES } from '../utils/constants';
+import { HouseholdMemberFormSchema } from '../utils/schema';
 import '../styles/HouseholdMemberSections.css';
 
-// BasicInfoSection is generic over T so it can be embedded in single-member forms
-// (T = HouseholdMemberFormSchema) or in array-based forms (T = some outer schema).
-interface BasicInfoSectionProps<T extends FieldValues> {
-  control: Control<T>;
-  errors: FieldErrors<T>;
-  fieldPrefix?: string; // e.g., "members.0" or "" for root level
-  isFirstMember?: boolean; // Whether this is the head of household
+interface BasicInfoSectionProps {
+  control: Control<HouseholdMemberFormSchema>;
+  errors: FieldErrors<HouseholdMemberFormSchema>;
+  isFirstMember?: boolean;
   relationshipOptions: Record<string, FormattedMessageType>;
-  showSectionHeader?: boolean; // Whether to show the "Basic Information" header
+  showSectionHeader?: boolean;
 }
 
-/**
- * Reusable component for birth month, birth year, and relationship fields
- * Can be used standalone (in HouseholdMemberForm) or as part of an array (in HouseholdMemberBasicInfoPage)
- */
-function BasicInfoSection<T extends FieldValues>({
+const BasicInfoSection = ({
   control,
   errors,
-  fieldPrefix = '',
   isFirstMember = false,
   relationshipOptions,
   showSectionHeader = true,
-}: BasicInfoSectionProps<T>) {
+}: BasicInfoSectionProps) => {
   const intl = useIntl();
 
-  // Build inside component so FormattedMessage-style translations resolve via IntlProvider context
+  // Build inside component so translations resolve via IntlProvider context
   const months: Record<number, string> = {
     1: intl.formatMessage({ id: 'ageInput.months.january', defaultMessage: 'January' }),
     2: intl.formatMessage({ id: 'ageInput.months.february', defaultMessage: 'February' }),
@@ -55,25 +48,9 @@ function BasicInfoSection<T extends FieldValues>({
     <FormattedMessage id="ageInput.selectMonth" defaultMessage="Select Month" />
   );
 
-  // Helper to get nested error
-  const getError = (fieldName: string) => {
-    if (!fieldPrefix) return errors[fieldName];
-    const parts = fieldPrefix.split('.');
-    let error = errors as Record<string, any>;
-    for (const part of parts) {
-      error = error?.[part];
-    }
-    return error?.[fieldName];
-  };
-
-  // Helper to construct field name; cast is safe because the caller controls both prefix and fieldName
-  const getFieldName = (fieldName: string): Path<T> => {
-    return (fieldPrefix ? `${fieldPrefix}.${fieldName}` : fieldName) as Path<T>;
-  };
-
-  const birthMonthError = getError('birthMonth');
-  const birthYearError = getError('birthYear');
-  const relationshipError = getError('relationshipToHH');
+  const birthMonthError = errors.birthMonth;
+  const birthYearError = errors.birthYear;
+  const relationshipError = errors.relationshipToHH;
 
   const fieldsContent = (
     <>
@@ -83,7 +60,7 @@ function BasicInfoSection<T extends FieldValues>({
           <FormattedMessage id="ageInput.birthMonth" defaultMessage="Birth Month" />
         </InputLabel>
         <Controller
-          name={getFieldName('birthMonth')}
+          name="birthMonth"
           control={control}
           render={({ field }) => (
             <Select
@@ -107,7 +84,7 @@ function BasicInfoSection<T extends FieldValues>({
       {/* Birth Year */}
       <FormControl fullWidth error={!!birthYearError}>
         <Controller
-          name={getFieldName('birthYear')}
+          name="birthYear"
           control={control}
           render={({ field }) => (
             <NumericFormat
@@ -142,7 +119,7 @@ function BasicInfoSection<T extends FieldValues>({
             />
           </InputLabel>
           <Controller
-            name={getFieldName('relationshipToHH')}
+            name="relationshipToHH"
             control={control}
             render={({ field }) => (
               <Select {...field} label="Relationship to you">
@@ -166,12 +143,10 @@ function BasicInfoSection<T extends FieldValues>({
     </>
   );
 
-  // If no section header, just return the fields
   if (!showSectionHeader) {
     return <>{fieldsContent}</>;
   }
 
-  // With section header (for HouseholdMemberForm)
   return (
     <Box id="basic-info-section" className="section">
       <QuestionQuestion>
@@ -182,6 +157,6 @@ function BasicInfoSection<T extends FieldValues>({
       </Box>
     </Box>
   );
-}
+};
 
 export default BasicInfoSection;
