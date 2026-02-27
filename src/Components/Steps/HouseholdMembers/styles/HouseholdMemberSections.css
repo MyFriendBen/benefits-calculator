@@ -1,0 +1,31 @@
+/* Household Member Form Section Styles */
+
+.section {
+  margin: 0.75rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--divider-color);
+}
+
+/* HouseholdMemberForm specific styles */
+.previous-members-section {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem 0.25rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.previous-members-heading {
+  margin: 0 !important;
+}
+
+.question-sub-label {
+  font-size: 0.875rem;
+  margin: 0.15rem 0 0.5rem;
+  color: #666;
+}
+
+.summary-cards-container {
+  margin-bottom: 0;
+}

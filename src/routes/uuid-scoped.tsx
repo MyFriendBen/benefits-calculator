@@ -2,8 +2,7 @@ import { Navigate, RouteObject } from 'react-router-dom';
 import ValidateUuid from '../Components/RouterUtil/ValidateUuid';
 import SelectLanguagePage from '../Components/Steps/SelectLanguage';
 import Disclaimer from '../Components/Steps/Disclaimer/Disclaimer';
-import HouseholdMemberForm from '../Components/Steps/HouseholdMembers/HouseholdMemberForm';
-import EcHouseholdMemberForm from '../Components/EnergyCalculator/Steps/HouseholdMemberForm';
+import HouseholdMemberForm from '../Components/Steps/HouseholdMembers/components/HouseholdMemberForm';
 import QuestionComponentContainer from '../Components/QuestionComponentContainer/QuestionComponentContainer';
 import Confirmation from '../Components/Confirmation/Confirmation';
 import resultsRoutes from './results';
@@ -44,7 +43,7 @@ export const buildUUIDScopedRoute = ({
   if (energyCalcHouseholdMemberStepNumber > 0) {
     children.push({
       path: `step-${energyCalcHouseholdMemberStepNumber}/:page`,
-      element: <EcHouseholdMemberForm key={window.location.href} />,
+      element: <HouseholdMemberForm workflowType="energyCalculator" key={window.location.href} />,
     });
   }
 
