@@ -12,7 +12,7 @@ import { useDefaultBackNavigationFunction } from '../../QuestionComponents/quest
 import useScreenApi from '../../../Assets/updateScreen';
 import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { NUM_PAD_PROPS, handleNumbersOnly } from '../../../Assets/numInputHelpers';
+import { NumericFormat } from 'react-number-format';
 import useStepForm from '../stepForm';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 
@@ -24,7 +24,7 @@ const HouseholdAssets = () => {
   const { updateScreen } = useScreenApi();
 
   const formSchema = z.object({
-    householdAssets: z.coerce
+    householdAssets: z
       .number({
         errorMap: () => {
           return {
@@ -86,16 +86,20 @@ const HouseholdAssets = () => {
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
-            <TextField
-              {...field}
+            <NumericFormat
+              value={field.value}
+              onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+              thousandSeparator
+              allowNegative={false}
+              decimalScale={0}
+              customInput={TextField}
               label={<FormattedMessage id="questions.householdAssets-inputLabel" defaultMessage="Dollar Amount" />}
               variant="outlined"
               InputProps={{
                 startAdornment: <InputAdornment position="start">$</InputAdornment>,
                 sx: { backgroundColor: '#FFFFFF' },
               }}
-              inputProps={NUM_PAD_PROPS}
-              onChange={handleNumbersOnly(field.onChange)}
+              inputProps={{ inputMode: 'numeric' }}
               onFocus={(e) => {
                 e.target.select();
               }}

@@ -1,5 +1,5 @@
-import { TextField } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
+import PhoneNumberInput from '../Common/PhoneNumberInput';
 import { FormattedMessage, useIntl } from 'react-intl';
 import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
 import { useParams } from 'react-router-dom';
@@ -9,7 +9,6 @@ import { Context } from '../Wrapper/Wrapper';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { postMessage } from '../../apiCalls';
 import './SaveMyResultsModal.css';
-import { handleNumbersOnly, NUM_PAD_PROPS } from '../../Assets/numInputHelpers';
 
 type PhoneTextfieldProps = {
   setSnackbar: Dispatch<SetStateAction<{ open: boolean; message: string }>>;
@@ -102,12 +101,13 @@ const PhoneTextfield = ({ setSnackbar }: PhoneTextfieldProps) => {
           control={control}
           rules={{ required: false }}
           render={({ field }) => (
-            <TextField
-              {...field}
-              inputProps={NUM_PAD_PROPS}
-              onChange={handleNumbersOnly(field.onChange)}
+            <PhoneNumberInput
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              inputRef={field.ref}
+              name={field.name}
               label={<FormattedMessage id="signUp.createPhoneTextfield-label" defaultMessage="Cell Phone" />}
-              variant="outlined"
               error={errors.phone !== undefined}
               helperText={
                 errors.phone !== undefined && (

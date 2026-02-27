@@ -6,7 +6,6 @@ import { Context } from '../../Wrapper/Wrapper';
 import { ReactNode, useContext, useEffect, useMemo, useRef } from 'react';
 import { Conditions, HealthInsurance, HouseholdData } from '../../../Types/FormData';
 import {
-  Autocomplete,
   Box,
   Button,
   FormControl,
@@ -42,6 +41,7 @@ import {
   renderMissingBirthMonthHelperText,
   renderFutureBirthMonthHelperText,
   renderBirthYearHelperText,
+  renderInvalidBirthYearHelperText,
   renderHealthInsSelectOneHelperText,
   renderHealthInsNonePlusHelperText,
   renderRelationshipToHHHelperText,
@@ -52,10 +52,10 @@ import {
   renderHealthInsNonePlusTheyHelperText,
   renderStudentEligibilityErrorMessage,
 } from './HelperTextFunctions';
-import { DOLLARS, handleNumbersOnly, numberInputProps, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
+import { NumericFormat } from 'react-number-format';
 import useScreenApi from '../../../Assets/updateScreen';
 import { QUESTION_TITLES } from '../../../Assets/pageTitleTags';
-import { getCurrentMonthYear, YEARS, MAX_AGE } from '../../../Assets/age';
+import { getCurrentMonthYear, MAX_AGE } from '../../../Assets/age';
 import { useAgeCalculation } from '../../AgeCalculation/useAgeCalculation';
 import { determineDefaultIncomeByAge } from '../../AgeCalculation/AgeCalculation';
 import './PersonIncomeBlock.css';
@@ -119,28 +119,19 @@ const getFormSchema = ({
   currentYear,
   currentMonth,
 }: GetFormSchemaParams) => {
-  const oneOrMoreDigitsButNotAllZero = /^(?!0+$)\d+$/;
-  const incomeAmountRegex = /^\d{0,7}(?:\d\.\d{0,2})?$/;
-
   const incomeSourcesSchema = z
     .object({
       incomeStreamName: z.string().min(1, { message: renderIncomeStreamNameHelperText(intl) }),
       incomeFrequency: z.string().min(1, { message: renderIncomeFrequencyHelperText(intl) }),
-      hoursPerWeek: z.string().trim(),
+      hoursPerWeek: z.number().int().min(0),
       incomeAmount: z
-        .string()
-        .trim()
-        .refine(
-          (value) => {
-            return incomeAmountRegex.test(value) && Number(value) > 0;
-          },
-          { message: renderIncomeAmountHelperText(intl) },
-        ),
+        .number({ invalid_type_error: renderIncomeAmountHelperText(intl) })
+        .min(0.01, { message: renderIncomeAmountHelperText(intl) }),
     })
     .refine(
       (data) => {
         if (data.incomeFrequency === 'hourly') {
-          return oneOrMoreDigitsButNotAllZero.test(data.hoursPerWeek);
+          return data.hoursPerWeek > 0;
         } else {
           return true;
         }
@@ -160,14 +151,10 @@ const getFormSchema = ({
     .object({
       birthMonth: z.string().min(1, { message: renderMissingBirthMonthHelperText(intl) }),
       birthYear: z
-        .string()
-        .trim()
-        .min(1, { message: renderBirthYearHelperText(intl) })
-        .refine((value) => {
-          const year = Number(value);
-          const age = currentYear - year;
-          return year <= currentYear && age < MAX_AGE;
-        }),
+        .number({ invalid_type_error: renderBirthYearHelperText(intl) })
+        .int()
+        .min(currentYear - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
+        .max(currentYear, { message: renderInvalidBirthYearHelperText(intl) }),
       healthInsurance: z
         .object({
           none: z.boolean(),
@@ -222,7 +209,7 @@ const getFormSchema = ({
     })
     .refine(
       ({ birthMonth, birthYear }) => {
-        if (Number(birthYear) === currentYear) {
+        if (birthYear === currentYear) {
           return Number(birthMonth) <= currentMonth;
         }
         return true;
@@ -327,15 +314,6 @@ const HouseholdMemberForm = () => {
   };
 
   const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
-  // I added an empty string to the years array to fix the initial invalid Autocomplete value warning
-  const YEARS_AND_INITIAL_EMPTY_STR = ['', ...YEARS];
-
-  const autoCompleteOptions = useMemo(() => {
-    return YEARS_AND_INITIAL_EMPTY_STR.map((year) => {
-      return { label: year };
-    });
-  }, [YEARS]);
-
   const formSchema = useMemo(
     () =>
       getFormSchema({
@@ -384,9 +362,10 @@ const HouseholdMemberForm = () => {
     clearErrors,
   } = useStepForm<FormSchema>({
     resolver: zodResolver(formSchema),
+    mode: 'onTouched',
     defaultValues: {
       birthMonth: householdMemberFormData?.birthMonth ? String(householdMemberFormData.birthMonth) : '',
-      birthYear: householdMemberFormData?.birthYear ? String(householdMemberFormData.birthYear) : '',
+      birthYear: householdMemberFormData?.birthYear ?? 0,
       healthInsurance: householdMemberFormData?.healthInsurance
         ? householdMemberFormData.healthInsurance
         : {
@@ -436,9 +415,9 @@ const HouseholdMemberForm = () => {
     if (hasTruthyIncome && noIncomeStreamsAreListed) {
       append({
         incomeStreamName: '',
-        incomeAmount: '',
+        incomeAmount: 0,
         incomeFrequency: '',
-        hoursPerWeek: '',
+        hoursPerWeek: 0,
       });
     }
 
@@ -493,7 +472,7 @@ const HouseholdMemberForm = () => {
       ...memberData,
       id: formData.householdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
       frontendId: formData.householdData[currentMemberIndex]?.frontendId ?? crypto.randomUUID(),
-      birthYear: Number(memberData.birthYear),
+      birthYear: memberData.birthYear > 0 ? memberData.birthYear : undefined,
       birthMonth: Number(memberData.birthMonth),
       hasIncome: memberData.hasIncome === 'true',
     };
@@ -561,37 +540,19 @@ const HouseholdMemberForm = () => {
               control={control}
               render={({ field }) => (
                 <>
-                  <Autocomplete
-                    {...field}
-                    selectOnFocus
-                    clearOnBlur
-                    handleHomeEndKeys
-                    isOptionEqualToValue={(option, value) => option.label === value.label}
-                    options={autoCompleteOptions}
-                    getOptionLabel={(option) => option.label ?? ''}
-                    value={{ label: field.value }}
-                    onChange={(_, newValue) => {
-                      field.onChange(newValue?.label);
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          if (YEARS.includes(value)) {
-                            // set value if the value is valid,
-                            // so the user does not need to select an option if they type the whole year.
-                            setValue('birthYear', value);
-                          }
-                        }}
-                        label={<FormattedMessage id="ageInput.year.label" defaultMessage="Birth Year" />}
-                        inputProps={{
-                          ...params.inputProps,
-                          ...numberInputProps(params.inputProps.onChange),
-                        }}
-                        error={errors.birthYear !== undefined}
-                      />
-                    )}
+                  <NumericFormat
+                    value={field.value || ''}
+                    onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                    onBlur={field.onBlur}
+                    getInputRef={field.ref}
+                    allowNegative={false}
+                    decimalScale={0}
+                    customInput={TextField}
+                    label={<FormattedMessage id="ageInput.year.label" defaultMessage="Birth Year" />}
+                    placeholder="YYYY"
+                    variant="outlined"
+                    inputProps={{ inputMode: 'numeric' }}
+                    error={errors.birthYear !== undefined}
                   />
                   {errors.birthYear !== undefined && (
                     <FormHelperText sx={{ ml: 0 }}>
@@ -1047,14 +1008,19 @@ const HouseholdMemberForm = () => {
           rules={{ required: true }}
           render={({ field }) => (
             <>
-              <TextField
-                {...field}
+              <NumericFormat
+                value={field.value === 0 ? '' : field.value}
+                onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                onBlur={field.onBlur}
+                getInputRef={field.ref}
+                allowNegative={false}
+                decimalScale={0}
+                customInput={TextField}
                 label={
                   <FormattedMessage id="incomeBlock.createHoursWorkedTextfield-amountLabel" defaultMessage="Hours" />
                 }
                 variant="outlined"
-                inputProps={NUM_PAD_PROPS}
-                onChange={handleNumbersOnly(field.onChange)}
+                inputProps={{ inputMode: 'numeric' }}
                 sx={{ backgroundColor: '#fff' }}
                 error={errors.incomeStreams?.[index]?.hoursPerWeek !== undefined}
               />
@@ -1117,8 +1083,16 @@ const HouseholdMemberForm = () => {
           rules={{ required: true }}
           render={({ field }) => (
             <>
-              <TextField
-                {...field}
+              <NumericFormat
+                value={field.value === 0 ? '' : field.value}
+                onValueChange={({ floatValue }: { floatValue: number | undefined }) => field.onChange(floatValue ?? 0)}
+                fixedDecimalScale={selectedIncomeFrequency === 'hourly'}
+                onBlur={field.onBlur}
+                getInputRef={field.ref}
+                thousandSeparator
+                allowNegative={false}
+                decimalScale={selectedIncomeFrequency === 'hourly' ? 2 : 0}
+                customInput={TextField}
                 label={
                   <FormattedMessage
                     id="personIncomeBlock.createIncomeAmountTextfield-amountLabel"
@@ -1126,8 +1100,7 @@ const HouseholdMemberForm = () => {
                   />
                 }
                 variant="outlined"
-                inputProps={NUM_PAD_PROPS}
-                onChange={handleNumbersOnly(field.onChange, DOLLARS)}
+                inputProps={{ inputMode: selectedIncomeFrequency === 'hourly' ? 'decimal' : 'numeric' }}
                 sx={{ backgroundColor: '#fff' }}
                 error={errors.incomeStreams?.[index]?.incomeAmount !== undefined}
                 InputProps={{
@@ -1210,7 +1183,7 @@ const HouseholdMemberForm = () => {
               ...getValues(),
               id: formData.householdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
               frontendId: formData.householdData[currentMemberIndex]?.frontendId ?? crypto.randomUUID(),
-              birthYear: getValues().birthYear ? Number(getValues().birthYear) : undefined,
+              birthYear: getValues().birthYear > 0 ? getValues().birthYear : undefined,
               birthMonth: getValues().birthMonth ? Number(getValues().birthMonth) : undefined,
               hasIncome: Boolean(getValues().hasIncome),
             }}
@@ -1262,9 +1235,9 @@ const HouseholdMemberForm = () => {
                   onClick={() =>
                     append({
                       incomeStreamName: '',
-                      incomeAmount: '',
+                      incomeAmount: 0,
                       incomeFrequency: '',
-                      hoursPerWeek: '',
+                      hoursPerWeek: 0,
                     })
                   }
                   startIcon={<AddIcon />}

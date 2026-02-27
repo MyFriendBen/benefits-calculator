@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Checkbox, FormControlLabel, TextField } from '@mui/material';
+import PhoneNumberInput from '../../Common/PhoneNumberInput';
 import { useContext, useEffect, useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { z } from 'zod';
-import { handleNumbersOnly, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
 import useScreenApi from '../../../Assets/updateScreen';
 import { FormData } from '../../../Types/FormData';
 import { FormattedMessageType } from '../../../Types/Questions';
@@ -410,23 +410,24 @@ function SignUp() {
                 name="contactInfo.cell"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
+                  <PhoneNumberInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    inputRef={field.ref}
+                    name={field.name}
                     label={<FormattedMessage id="signUp.createPhoneTextfield-label" defaultMessage="Cell Phone" />}
-                    variant="outlined"
-                    inputProps={NUM_PAD_PROPS}
-                    onChange={handleNumbersOnly((...args) => {
-                      field.onChange(...args);
-                      if (isSubmitted) {
-                        trigger(['contactInfo.cell', 'contactInfo.email', 'contactInfo.tcpa']);
-                      }
-                    })}
                     error={errors.contactInfo?.cell !== undefined}
                     helperText={
                       errors.contactInfo?.cell !== undefined && (
                         <ErrorMessageWrapper fontSize="1rem">{errors.contactInfo.cell.message}</ErrorMessageWrapper>
                       )
                     }
+                    onAfterChange={() => {
+                      if (isSubmitted) {
+                        trigger(['contactInfo.cell', 'contactInfo.email', 'contactInfo.tcpa']);
+                      }
+                    }}
                   />
                 )}
               />

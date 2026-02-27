@@ -5,6 +5,7 @@ import { QuestionName } from '../../Types/Questions';
 import './Confirmation.css';
 import { useStepNumber } from '../../Assets/stepDirectory';
 import { MessageDescriptor, useIntl } from 'react-intl';
+export { formatToUSD } from '../../utils/formatCurrency';
 
 type ConfirmationBlockParams = PropsWithChildren<{
   icon: ReactNode;
@@ -62,11 +63,3 @@ export function ConfirmationItem({ label, value }: ConfirmationItemParams) {
   );
 }
 
-export function formatToUSD(num: number, significantFigures: number = 2) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    // minimumFractionDigits: 0,
-    maximumFractionDigits: significantFigures,
-  }).format(num);
-}

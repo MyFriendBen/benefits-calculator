@@ -133,7 +133,7 @@ function Expenses() {
       return (
         <ConfirmationItem
           label={<>{expenseOptions[expense.expenseSourceName]}:</>}
-          value={translateNumber(formatToUSD(Number(expense.expenseAmount)))}
+          value={translateNumber(formatToUSD(expense.expenseAmount))}
           key={i}
         />
       );

@@ -48,8 +48,7 @@ export async function fillHouseholdSize(page: Page, size: number) {
 export async function fillDateOfBirth(page: Page, month: string, year: string) {
   await page.getByRole('button', { name: 'Birth Month' }).click();
   await page.getByRole('option', { name: month }).click();
-  await page.getByRole('button', { name: 'Open' }).click();
-  await page.getByRole('option', { name: year }).click();
+  await page.getByRole('textbox', { name: 'Birth Year' }).fill(year);
 }
 
 export async function selectInsurance(page: Page, insuranceType: string) {

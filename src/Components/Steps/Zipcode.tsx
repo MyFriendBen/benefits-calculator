@@ -4,6 +4,7 @@ import { Controller } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { PatternFormat } from 'react-number-format';
 import { FormattedMessageType } from '../../Types/Questions';
 import { Context } from '../Wrapper/Wrapper';
 import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
@@ -14,7 +15,6 @@ import QuestionLeadText from '../QuestionComponents/QuestionLeadText';
 import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
 import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useDefaultBackNavigationFunction } from '../QuestionComponents/questionHooks';
-import { handleNumbersOnly, NUM_PAD_PROPS } from '../../Assets/numInputHelpers';
 import useScreenApi from '../../Assets/updateScreen';
 import { OverrideableTranslation } from '../../Assets/languageOptions';
 import QuestionDescription from '../QuestionComponents/QuestionDescription';
@@ -191,12 +191,17 @@ export const Zipcode = () => {
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
-            <TextField
-              {...field}
+            <PatternFormat
+              value={field.value}
+              onValueChange={({ value }) => field.onChange(value)}
+              getInputRef={field.ref}
+              name={field.name}
+              onBlur={field.onBlur}
+              format="#####"
+              customInput={TextField}
               label={<FormattedMessage id="questions.zipcode-inputLabel" defaultMessage="Zip Code" />}
               variant="outlined"
-              inputProps={NUM_PAD_PROPS}
-              onChange={handleNumbersOnly(field.onChange)}
+              inputProps={{ inputMode: 'numeric' }}
               error={errors.zipcode !== undefined}
               helperText={
                 errors.zipcode !== undefined && (

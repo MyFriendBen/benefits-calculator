@@ -9,7 +9,7 @@ import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useParams } from 'react-router-dom';
 import { useDefaultBackNavigationFunction, useGoToNextStep } from '../../QuestionComponents/questionHooks';
-import { handleNumbersOnly, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
+import { NumericFormat } from 'react-number-format';
 import useScreenApi from '../../../Assets/updateScreen';
 import { OverrideableTranslation } from '../../../Assets/languageOptions';
 import useStepForm from '../stepForm';
@@ -27,7 +27,7 @@ const HouseholdSize = () => {
   const [showRoommateInfo, setShowRoommateInfo] = useState(false);
 
   const formSchema = z.object({
-    householdSize: z.coerce
+    householdSize: z
       .number({
         errorMap: () => {
           return {
@@ -141,12 +141,15 @@ const HouseholdSize = () => {
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
-            <TextField
-              {...field}
+            <NumericFormat
+              value={field.value === 0 ? '' : field.value}
+              onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+              allowNegative={false}
+              decimalScale={0}
+              customInput={TextField}
               label={<FormattedMessage id="questions.householdSize-inputLabel" defaultMessage="Household Size" />}
               variant="outlined"
-              inputProps={NUM_PAD_PROPS}
-              onChange={handleNumbersOnly(field.onChange)}
+              inputProps={{ inputMode: 'numeric' }}
               onFocus={(e) => {
                 e.target.select();
               }}
