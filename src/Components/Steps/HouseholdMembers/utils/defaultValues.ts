@@ -51,9 +51,18 @@ const isWorkingAge = (birthYear?: number, birthMonth?: number): boolean => {
  * Determines default income streams - auto-adds for working-age members on first visit
  */
 const getDefaultIncomeStreams = (data?: HouseholdData): any[] => {
+  const progressed = hasProgressedThroughForm(data);
+  // Normalize [] to undefined when not yet progressed — the API always returns [] for
+  // brand-new members, but getDefaultFormItems needs undefined to distinguish
+  // "never visited" from "visited and intentionally cleared".
+  const existingStreams =
+    Array.isArray(data?.incomeStreams) && data!.incomeStreams.length === 0 && !progressed
+      ? undefined
+      : data?.incomeStreams;
+
   const streams = getDefaultFormItems(
-    data?.incomeStreams,
-    hasProgressedThroughForm(data),
+    existingStreams,
+    progressed,
     isWorkingAge(data?.birthYear, data?.birthMonth),
     EMPTY_INCOME_STREAM as any
   );
