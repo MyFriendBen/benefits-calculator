@@ -81,7 +81,7 @@ export const useHouseholdMemberFormEffects = ({
     } else if (!is16OrOlder && getValues('hasIncome') !== 'false') {
       setValue('hasIncome', 'false', { shouldDirty: true });
     }
-  }, [watchBirthMonth, watchBirthYear]);
+  }, [watchBirthMonth, watchBirthYear, calculateCurrentAgeStatus, getValues, setValue]);
 
   // EC-only: Reset receivesSsi when disabled is unchecked
   useEffect(() => {

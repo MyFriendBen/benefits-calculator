@@ -3,6 +3,7 @@ import { FormattedMessageType } from '../../../../Types/Questions';
 import { calcAge } from '../../../../Assets/age';
 import { FREQUENCY_ORDER, ERROR_SECTION_MAP, ENERGY_CALCULATOR_ERROR_SECTION_MAP } from './constants';
 import { WorkflowType } from './types';
+export { formatToUSD } from '../../../../utils/formatCurrency';
 
 // ============================================================================
 // GENERIC FORM HELPERS
@@ -67,18 +68,6 @@ export const sortFrequencyOptions = (
 export const calculateAge = (birthYear?: number, birthMonth?: number): number | null => {
   if (!birthYear || !birthMonth) return null;
   return calcAge({ birthYear, birthMonth } as HouseholdData);
-};
-
-/**
- * Formats a number as a USD currency string with no decimal places
- */
-export const formatToUSD = (num: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(num);
 };
 
 // ============================================================================

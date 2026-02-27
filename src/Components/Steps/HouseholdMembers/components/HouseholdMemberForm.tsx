@@ -191,11 +191,18 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
     if (pageNumber === 1) {
       headerContent = <FormattedMessage id="householdDataBlock.questionHeader" defaultMessage="Tell us about yourself." />;
     } else if (relationshipText) {
-      headerContent = (
-        <>
-          Tell us about your {String(relationshipText).toLowerCase()}
-          {age !== null && `, age ${age}`}
-        </>
+      headerContent = age !== null ? (
+        <FormattedMessage
+          id="householdDataBlock.questionHeader-relationship-age"
+          defaultMessage="Tell us about your {relationship}, age {age}"
+          values={{ relationship: String(relationshipText).toLowerCase(), age }}
+        />
+      ) : (
+        <FormattedMessage
+          id="householdDataBlock.questionHeader-relationship"
+          defaultMessage="Tell us about your {relationship}"
+          values={{ relationship: String(relationshipText).toLowerCase() }}
+        />
       );
     } else {
       headerContent = (
@@ -235,7 +242,6 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
         conditions={watch('conditions')}
         setValue={setValue}
         clearErrors={clearErrors}
-        getValues={getValues}
         options={conditionOptions}
         pageNumber={pageNumber}
         showReceivesSsi={isEnergyCalculator}

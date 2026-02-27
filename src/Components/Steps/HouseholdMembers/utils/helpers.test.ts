@@ -144,8 +144,8 @@ describe('formatToUSD', () => {
     expect(formatToUSD(0)).toBe('$0');
   });
 
-  it('rounds decimals and omits cents', () => {
-    expect(formatToUSD(1000.99)).toBe('$1,001');
+  it('formats decimals with 2 decimal places', () => {
+    expect(formatToUSD(1000.99)).toBe('$1,000.99');
   });
 
   it('handles large numbers with commas', () => {

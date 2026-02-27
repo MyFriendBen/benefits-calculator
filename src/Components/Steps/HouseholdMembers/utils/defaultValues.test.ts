@@ -43,10 +43,9 @@ describe('createDefaultValues', () => {
       expect(result.birthMonth).toBe(0);
     });
 
-    it('returns empty string for birthYear when no data', () => {
+    it('returns 0 for birthYear when no data', () => {
       const result = createDefaultValues(undefined);
-      // Cast as unknown since it's typed oddly
-      expect(result.birthYear as unknown as string).toBe('');
+      expect(result.birthYear).toBe(0);
     });
 
     it('returns empty string for relationshipToHH when not first member', () => {
@@ -195,7 +194,7 @@ describe('createDefaultValues', () => {
     it('treats birthYear of 0 as missing', () => {
       const member = memberWithHealthIns({ birthYear: 0 });
       const result = createDefaultValues(member);
-      expect(result.birthYear as unknown as string).toBe('');
+      expect(result.birthYear).toBe(0);
     });
   });
 });

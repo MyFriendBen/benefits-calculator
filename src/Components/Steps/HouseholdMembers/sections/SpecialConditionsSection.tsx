@@ -1,6 +1,6 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Box, FormControlLabel, FormHelperText, Radio, RadioGroup } from '@mui/material';
-import { Control, Controller, UseFormSetValue, UseFormClearErrors, UseFormGetValues, FieldErrors } from 'react-hook-form';
+import { Control, Controller, UseFormSetValue, UseFormClearErrors, FieldErrors } from 'react-hook-form';
 import QuestionQuestion from '../../../QuestionComponents/QuestionQuestion';
 import QuestionDescription from '../../../QuestionComponents/QuestionDescription';
 import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
@@ -17,7 +17,6 @@ interface SpecialConditionsSectionProps {
   conditions: Record<string, boolean>;
   setValue: UseFormSetValue<any>;
   clearErrors: UseFormClearErrors<any>;
-  getValues: UseFormGetValues<any>;
   options: ConditionOptions;
   pageNumber: number;
   showReceivesSsi?: boolean;
@@ -29,7 +28,6 @@ const SpecialConditionsSection = ({
   conditions,
   setValue,
   clearErrors,
-  getValues,
   options,
   pageNumber,
   showReceivesSsi = false,
@@ -79,7 +77,7 @@ const SpecialConditionsSection = ({
       />
 
       {/* SSI question - shown for EC workflow when disabled is selected */}
-      {showReceivesSsi && getValues('conditions.disabled') && (
+      {showReceivesSsi && conditions.disabled && (
         <Box sx={{ pb: '2rem', pt: '1rem' }}>
           <QuestionQuestion>
             <FormattedMessage
