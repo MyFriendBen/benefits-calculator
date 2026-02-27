@@ -1,12 +1,11 @@
-/* Table layout */
-.expenses-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 0.5rem;
+/* Column widths shared between the header and every expense row */
+.expenses-list {
+  --expense-amount-col: 10.5rem;   /* $ input (9rem) + 0.75rem padding each side */
+  --expense-frequency-col: 11rem;  /* two freq buttons + 0.75rem padding each side */
   margin-top: 0;
 }
 
-/* Visually hidden but accessible table headers */
+/* Visually hidden but announced to screen readers */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -19,28 +18,27 @@
   border: 0;
 }
 
-/* Category header rows */
-.expense-category-row {
-  border: none;
-}
 
-.expense-category-label {
-  padding: 1.25rem 0 0.25rem 0;
-  font-size: 1.0625rem;
-  font-weight: 700;
-  text-align: left;
+/* Category header: label | amount header | frequency header */
+.expense-category-header {
+  display: grid;
+  grid-template-columns: 1fr var(--expense-amount-col) var(--expense-frequency-col);
+  align-items: flex-end;
   border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
+  padding-top: .5rem;
 }
 
-.expense-category-row:first-child .expense-category-label {
+.expense-category:first-child .expense-category-header {
   padding-top: 0;
 }
 
-/* Visible column headers under each category */
-.expense-column-headers th {
-  padding: 0.5rem 0.5rem 0;
-  border: none;
-  font-weight: normal;
+.expense-category-label {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  text-align: left;
+  margin: 0;
 }
 
 .expense-col-header {
@@ -49,58 +47,44 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #666;
-}
-
-.expense-col-header-amount,
-.expense-col-header-frequency {
   text-align: center;
 }
 
-/* Expense rows - card/box styling */
-.expense-row td {
-  padding: 0.75rem 0.75rem;
-  vertical-align: middle;
+/* Each expense row: label | amount input | frequency toggle */
+.expense-row {
+  display: grid;
+  grid-template-columns: 1fr var(--expense-amount-col) var(--expense-frequency-col);
+  align-items: center;
   background-color: #ffffff;
   border: 1px solid #ddd;
-  border-left: none;
-  border-right: none;
+  border-radius: 0.375rem;
+  margin-bottom: 0.5rem;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.expense-row td:first-child {
-  border-left: 1px solid #ddd;
-  border-radius: 0.375rem 0 0 0.375rem;
-}
-
-.expense-row td:last-child {
-  border-right: 1px solid #ddd;
-  border-radius: 0 0.375rem 0.375rem 0;
-}
-
-/* Highlight row when a non-zero amount is entered.
-   Class is applied via React (watch) so it works cross-browser
-   and doesn't depend on DOM attribute reflection. */
-.expense-row--active td {
-  background-color: var(--secondary-background-color);
+.expense-row--active {
+  background-color: #E6E7E8;
   border-color: var(--primary-color);
 }
 
 .expense-name-cell {
-  padding-right: 1rem;
+  padding: 0.75rem 1rem 0.75rem 0.75rem;
   font-size: 0.9375rem;
-}
-
-.expense-name-cell label {
   cursor: pointer;
 }
 
-.expense-amount-cell,
-.expense-frequency-cell {
+.expense-amount-cell {
+  padding: 0.5rem 0.75rem;
   white-space: nowrap;
+  display: flex;
+  justify-content: center;
 }
 
 .expense-frequency-cell {
-  text-align: right;
+  padding: 0.5rem 0.75rem;
+  white-space: nowrap;
+  display: flex;
+  justify-content: center;
 }
 
 .expense-amount-cell .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
@@ -109,64 +93,34 @@
 
 /* Mobile responsive */
 @media (max-width: 600px) {
-  .expenses-table {
-    border-spacing: 0;
-    margin-top: 0.5rem;
+  .expense-category-header {
+    grid-template-columns: 1fr;
   }
 
-  .expense-column-headers {
+  .expense-col-header {
     display: none;
   }
 
-  .expense-category-row + .expense-column-headers + .expense-row,
-  .expense-category-row + .expense-row {
-    margin-top: 0.5rem;
-  }
-
   .expense-row {
-    display: block;
-    margin-bottom: 0.5rem;
+    grid-template-columns: 1fr;
+    margin-bottom: 0.75rem;
   }
 
-  .expense-row td {
-    display: block;
-    border: none;
-    border-left: 1px solid #ddd;
-    border-right: 1px solid #ddd;
-    border-radius: 0;
-    padding: 0.4rem 0.75rem;
-  }
-
-  .expense-row td:first-child {
-    border-top: 1px solid #ddd;
-    border-radius: 0.375rem 0.375rem 0 0;
-    padding-top: 0.75rem;
-  }
-
-  .expense-row td:last-child {
+  .expense-name-cell {
     border-bottom: 1px solid #ddd;
-    border-radius: 0 0 0.375rem 0.375rem;
-    padding-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
   }
 
-  .expense-row--active td {
-    border-left-color: var(--primary-color);
-    border-right-color: var(--primary-color);
-  }
-
-  .expense-row--active td:first-child {
-    border-top-color: var(--primary-color);
-  }
-
-  .expense-row--active td:last-child {
-    border-bottom-color: var(--primary-color);
+  .expense-amount-cell,
+  .expense-frequency-cell {
+    justify-content: flex-start;
   }
 
   .expense-amount-cell .MuiTextField-root {
     width: 100% !important;
   }
 
-  .expense-frequency-cell {
-    text-align: left;
+  .expense-row--active .expense-name-cell {
+    border-bottom-color: var(--primary-color);
   }
 }

@@ -122,100 +122,66 @@ const Expenses = () => {
         />
       </QuestionDescription>
       <form onSubmit={handleSubmit(formSubmitHandler)}>
-        <table
-          className="expenses-table"
-          aria-label={intl.formatMessage({
-            id: 'expenses.table.ariaLabel',
-            defaultMessage: 'Household expenses',
-          })}
-        >
-          {/* Screen-reader-only column headers — the visible sub-headers per category
-              are aria-hidden to avoid announcing the same column names twice. */}
-          <thead className="sr-only">
-            <tr>
-              <th scope="col">
-                <FormattedMessage id="expenses.header.type" defaultMessage="Expense Type" />
-              </th>
-              <th scope="col">
-                <FormattedMessage id="expenses.header.amount" defaultMessage="Amount" />
-              </th>
-              <th scope="col">
-                <FormattedMessage id="expenses.header.frequency" defaultMessage="Frequency" />
-              </th>
-            </tr>
-          </thead>
+        <div className="expenses-list">
           {categorizedExpenses.map(({ categoryKey, categoryLabel, options }) => (
-            // One <tbody> per category so VoiceOver announces the category name
-            // when entering each group ("group, Housing" etc.).
-            <tbody key={categoryKey} aria-label={categoryLabel}>
-              <tr className="expense-category-row" aria-hidden="true">
-                <th colSpan={3} scope="colgroup" className="expense-category-label">
-                  {categoryLabel}
-                </th>
-              </tr>
-              {/* Visible column labels repeated per category for sighted users; hidden from AT
-                  since the <thead> above already provides column structure to screen readers. */}
-              <tr className="expense-column-headers" aria-hidden="true">
-                <th scope="col" className="expense-col-header">
-                  <FormattedMessage id="expenses.header.type" defaultMessage="Expense Type" />
-                </th>
-                <th scope="col" className="expense-col-header expense-col-header-amount">
+            <div key={categoryKey} className="expense-category">
+              <div className="expense-category-header">
+                <h3 className="expense-category-label">{categoryLabel}</h3>
+                <span className="expense-col-header" aria-hidden="true">
                   <FormattedMessage id="expenses.header.amount" defaultMessage="Amount" />
-                </th>
-                <th scope="col" className="expense-col-header expense-col-header-frequency">
+                </span>
+                <span className="expense-col-header" aria-hidden="true">
                   <FormattedMessage id="expenses.header.frequency" defaultMessage="Frequency" />
-                </th>
-              </tr>
+                </span>
+              </div>
               {options.map(({ expenseKey, label, plainName }) => {
-                  const index = expenseIndexMap.get(expenseKey)!; // always defined — map is built from same keys
-                  const amount = watch(`expenses.${index}.expenseAmount`);
-                  return (
-                    <tr key={expenseKey} className={`expense-row${amount > 0 ? ' expense-row--active' : ''}`}>
-                      <td className="expense-name-cell">
-                        <label htmlFor={`expense-amount-${expenseKey}`}>{label}</label>
-                      </td>
-                      <td className="expense-amount-cell">
-                        <Controller
-                          name={`expenses.${index}.expenseAmount`}
-                          control={control}
-                          render={({ field }) => (
-                            <NumericFormat
-                              value={field.value === 0 ? '' : field.value}
-                              onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
-                              thousandSeparator
-                              allowNegative={false}
-                              decimalScale={0}
-                              customInput={TextField}
-                              id={`expense-amount-${expenseKey}`}
-                              inputProps={{ inputMode: 'numeric' }}
-                              size="small"
-                              placeholder="0"
-                              InputProps={{
-                                startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                                sx: { backgroundColor: '#ffffff' },
-                              }}
-                              error={!!errors.expenses?.[index]?.expenseAmount}
-                              helperText={errors.expenses?.[index]?.expenseAmount?.message}
-                              sx={{ width: '9rem' }}
-                            />
-                          )}
-                        />
-                      </td>
-                      <td className="expense-frequency-cell">
-                        <Controller
-                          name={`expenses.${index}.expenseFrequency`}
-                          control={control}
-                          render={({ field }) => (
-                            <FrequencySelector value={field.value} onChange={field.onChange} expenseName={plainName} />
-                          )}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-            </tbody>
+                const index = expenseIndexMap.get(expenseKey)!; // always defined — map is built from same keys
+                const amount = watch(`expenses.${index}.expenseAmount`);
+                return (
+                  <div key={expenseKey} className={`expense-row${amount > 0 ? ' expense-row--active' : ''}`}>
+                    <label htmlFor={`expense-amount-${expenseKey}`} className="expense-name-cell">{label}</label>
+                    <div className="expense-amount-cell">
+                      <Controller
+                        name={`expenses.${index}.expenseAmount`}
+                        control={control}
+                        render={({ field }) => (
+                          <NumericFormat
+                            value={field.value === 0 ? '' : field.value}
+                            onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                            thousandSeparator
+                            allowNegative={false}
+                            decimalScale={0}
+                            customInput={TextField}
+                            id={`expense-amount-${expenseKey}`}
+                            inputProps={{ inputMode: 'numeric' }}
+                            size="small"
+                            placeholder="0"
+                            InputProps={{
+                              startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                              sx: { backgroundColor: '#ffffff' },
+                            }}
+                            error={!!errors.expenses?.[index]?.expenseAmount}
+                            helperText={errors.expenses?.[index]?.expenseAmount?.message}
+                            sx={{ width: '9rem' }}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="expense-frequency-cell">
+                      <Controller
+                        name={`expenses.${index}.expenseFrequency`}
+                        control={control}
+                        render={({ field }) => (
+                          <FrequencySelector value={field.value} onChange={field.onChange} expenseName={plainName} />
+                        )}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           ))}
-        </table>
+        </div>
         <PrevAndContinueButtons backNavigationFunction={backNavigationFunction} />
       </form>
     </div>

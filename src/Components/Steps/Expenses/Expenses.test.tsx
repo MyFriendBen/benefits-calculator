@@ -93,9 +93,9 @@ function renderExpenses(formDataOverrides: Partial<FormData> = {}) {
   );
 }
 
-/** Returns the <tr> containing a specific expense label (scoped to <label> to avoid matching category headers). */
+/** Returns the .expense-row div containing a specific expense label. */
 function getExpenseRow(labelText: string | RegExp) {
-  return screen.getByText(labelText, { selector: 'label' }).closest('tr')!;
+  return screen.getByText(labelText, { selector: 'label' }).closest('.expense-row')!;
 }
 
 /** Returns the amount input for a given expense row. */
@@ -132,10 +132,10 @@ describe('Expenses', () => {
       expect(screen.getByText('Child Care', { selector: 'label' })).toBeInTheDocument();
     });
 
-    it('renders category headers derived from config keys', () => {
+    it('renders category headers as h3 elements', () => {
       renderExpenses();
-      expect(screen.getByText('Housing')).toBeInTheDocument();
-      expect(screen.getByText('Child Care', { selector: 'th' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Housing', level: 3 })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Child Care', level: 3 })).toBeInTheDocument();
     });
 
     it('renders amount inputs with $ adornment and placeholder 0', () => {
@@ -322,11 +322,6 @@ describe('Expenses', () => {
   });
 
   describe('Accessibility', () => {
-    it('has a table with an accessible label', () => {
-      renderExpenses();
-      expect(screen.getByRole('table', { name: /household expenses/i })).toBeInTheDocument();
-    });
-
     it('amount inputs are linked to their expense label via htmlFor/id', () => {
       renderExpenses();
       // getByRole('textbox') scoped inside the row confirms the label→input linkage
@@ -340,6 +335,19 @@ describe('Expenses', () => {
       expect(screen.getByRole('radiogroup', { name: /frequency for rent/i })).toBeInTheDocument();
       expect(screen.getByRole('radiogroup', { name: /frequency for mortgage/i })).toBeInTheDocument();
       expect(screen.getByRole('radiogroup', { name: /frequency for child care/i })).toBeInTheDocument();
+    });
+
+    it('category labels are visible to screen readers (not aria-hidden)', () => {
+      renderExpenses();
+      // Category label spans must not be aria-hidden so VO navigation reads them
+      expect(screen.getByRole('heading', { name: 'Housing', level: 3 })).not.toHaveAttribute('aria-hidden');
+    });
+
+    it('column headers are hidden from screen readers (redundant with field labels)', () => {
+      renderExpenses();
+      screen.getAllByText(/^amount$/i).forEach((el) => {
+        expect(el).toHaveAttribute('aria-hidden', 'true');
+      });
     });
   });
 });
