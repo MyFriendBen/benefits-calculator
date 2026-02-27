@@ -1,5 +1,5 @@
 import { HouseholdData } from '../../../../Types/FormData';
-import { calculateAgeStatus, determineDefaultIncomeByAge } from '../../../AgeCalculation/AgeCalculation';
+import { calculateAgeStatus } from '../../../AgeCalculation/AgeCalculation';
 import { EMPTY_INCOME_STREAM } from './constants';
 import { getDefaultFormItems } from './helpers';
 
@@ -159,6 +159,12 @@ export const createEnergyCalculatorDefaultValues = (
   householdMemberFormData: HouseholdData | undefined,
   pageNumber: number,
 ) => {
+  const incomeStreams = (householdMemberFormData?.incomeStreams ?? []).map((stream: any) => ({
+    ...stream,
+    incomeAmount: stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
+    hoursPerWeek: stream.hoursPerWeek === 0 ? '' : String(stream.hoursPerWeek),
+  }));
+
   return {
     birthMonth: householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
       ? householdMemberFormData.birthMonth
@@ -174,11 +180,7 @@ export const createEnergyCalculatorDefaultValues = (
     receivesSsi: householdMemberFormData?.energyCalculator?.receivesSsi ? 'true' : 'false',
     relationshipToHH: householdMemberFormData?.relationshipToHH
       ?? (pageNumber === 1 ? 'headOfHousehold' : ''),
-    hasIncome: determineDefaultIncomeByAge(householdMemberFormData),
-    incomeStreams: (householdMemberFormData?.incomeStreams ?? []).map((stream: any) => ({
-      ...stream,
-      incomeAmount: stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
-      hoursPerWeek: stream.hoursPerWeek === 0 ? '' : String(stream.hoursPerWeek),
-    })),
+    hasIncome: getDefaultHasIncome(householdMemberFormData, incomeStreams),
+    incomeStreams,
   };
 };

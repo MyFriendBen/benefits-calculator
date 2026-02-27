@@ -1,15 +1,12 @@
 import { createDefaultValues, createEnergyCalculatorDefaultValues, DEFAULT_HEALTH_INSURANCE, DEFAULT_SPECIAL_CONDITIONS, DEFAULT_STUDENT_ELIGIBILITY } from './defaultValues';
 import { HouseholdData } from '../../../../Types/FormData';
 import { calculateAgeStatus } from '../../../AgeCalculation/AgeCalculation';
-import { determineDefaultIncomeByAge } from '../../../AgeCalculation/AgeCalculation';
 
 jest.mock('../../../AgeCalculation/AgeCalculation', () => ({
   calculateAgeStatus: jest.fn(),
-  determineDefaultIncomeByAge: jest.fn(),
 }));
 
 const mockCalculateAgeStatus = calculateAgeStatus as jest.MockedFunction<typeof calculateAgeStatus>;
-const mockDetermineDefaultIncomeByAge = determineDefaultIncomeByAge as jest.MockedFunction<typeof determineDefaultIncomeByAge>;
 
 // Helper to make a member that "has progressed" (has a health insurance selection)
 const memberWithHealthIns = (overrides: Partial<HouseholdData> = {}): HouseholdData => ({
@@ -182,6 +179,28 @@ describe('createDefaultValues', () => {
       // No seeding because member has progressed (has health insurance selection)
       expect(result.incomeStreams).toHaveLength(0);
     });
+
+    it('respects saved hasIncome=false even for a working-age member', () => {
+      // User explicitly said "no income" — the saved boolean wins over age-based inference.
+      // The age effect on the form will NOT override on mount (prevBirthRef guards it).
+      mockCalculateAgeStatus.mockReturnValue(workingAgeStatus());
+      const member = memberWithHealthIns({ incomeStreams: [], hasIncome: false });
+      const result = createDefaultValues(member);
+      expect(result.hasIncome).toBe('false');
+    });
+
+    it('respects saved hasIncome=true even with no streams', () => {
+      const member = memberWithHealthIns({ incomeStreams: [], hasIncome: true });
+      const result = createDefaultValues(member);
+      expect(result.hasIncome).toBe('true');
+    });
+
+    it('returns "true" when streams are present regardless of saved hasIncome', () => {
+      const stream = { incomeStreamName: 'wages', incomeAmount: '1000', incomeFrequency: 'monthly', hoursPerWeek: '' };
+      const member = memberWithHealthIns({ incomeStreams: [stream as any], hasIncome: false });
+      const result = createDefaultValues(member);
+      expect(result.hasIncome).toBe('true');
+    });
   });
 
   describe('edge cases', () => {
@@ -202,7 +221,6 @@ describe('createDefaultValues', () => {
 describe('createEnergyCalculatorDefaultValues', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockDetermineDefaultIncomeByAge.mockReturnValue('false');
   });
 
   it('returns 0 for birthMonth when no data', () => {
@@ -282,11 +300,31 @@ describe('createEnergyCalculatorDefaultValues', () => {
     expect(result.incomeStreams).toEqual([]);
   });
 
-  it('delegates hasIncome to determineDefaultIncomeByAge', () => {
-    mockDetermineDefaultIncomeByAge.mockReturnValue('true');
-    const member = { birthYear: 1990, birthMonth: 6 } as any;
-    const result = createEnergyCalculatorDefaultValues(member, 1);
-    expect(mockDetermineDefaultIncomeByAge).toHaveBeenCalledWith(member);
-    expect(result.hasIncome).toBe('true');
+  describe('hasIncome default (same rules as main workflow)', () => {
+    it('returns "false" when no data', () => {
+      const result = createEnergyCalculatorDefaultValues(undefined, 1);
+      expect(result.hasIncome).toBe('false');
+    });
+
+    it('returns "true" when income streams are present', () => {
+      const member = {
+        incomeStreams: [{ incomeStreamName: 'wages', incomeAmount: '500', incomeFrequency: 'monthly', hoursPerWeek: '' }],
+        hasIncome: false,
+      } as any;
+      const result = createEnergyCalculatorDefaultValues(member, 1);
+      expect(result.hasIncome).toBe('true');
+    });
+
+    it('respects saved hasIncome=true even with no streams', () => {
+      const member = { incomeStreams: [], hasIncome: true } as any;
+      const result = createEnergyCalculatorDefaultValues(member, 1);
+      expect(result.hasIncome).toBe('true');
+    });
+
+    it('respects saved hasIncome=false (user explicitly said no income)', () => {
+      const member = { incomeStreams: [], hasIncome: false } as any;
+      const result = createEnergyCalculatorDefaultValues(member, 1);
+      expect(result.hasIncome).toBe('false');
+    });
   });
 });

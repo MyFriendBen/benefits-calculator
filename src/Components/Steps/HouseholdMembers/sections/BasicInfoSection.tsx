@@ -1,4 +1,5 @@
 import { FormattedMessage, useIntl } from 'react-intl';
+import { useMemo } from 'react';
 import { Box, FormControl, InputLabel, Select, TextField } from '@mui/material';
 import { NumericFormat } from 'react-number-format';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
@@ -27,26 +28,28 @@ const BasicInfoSection = ({
 }: BasicInfoSectionProps) => {
   const intl = useIntl();
 
-  // Build inside component so translations resolve via IntlProvider context
-  const months: Record<number, string> = {
-    1: intl.formatMessage({ id: 'ageInput.months.january', defaultMessage: 'January' }),
-    2: intl.formatMessage({ id: 'ageInput.months.february', defaultMessage: 'February' }),
-    3: intl.formatMessage({ id: 'ageInput.months.march', defaultMessage: 'March' }),
-    4: intl.formatMessage({ id: 'ageInput.months.april', defaultMessage: 'April' }),
-    5: intl.formatMessage({ id: 'ageInput.months.may', defaultMessage: 'May' }),
-    6: intl.formatMessage({ id: 'ageInput.months.june', defaultMessage: 'June' }),
-    7: intl.formatMessage({ id: 'ageInput.months.july', defaultMessage: 'July' }),
-    8: intl.formatMessage({ id: 'ageInput.months.august', defaultMessage: 'August' }),
-    9: intl.formatMessage({ id: 'ageInput.months.september', defaultMessage: 'September' }),
-    10: intl.formatMessage({ id: 'ageInput.months.october', defaultMessage: 'October' }),
-    11: intl.formatMessage({ id: 'ageInput.months.november', defaultMessage: 'November' }),
-    12: intl.formatMessage({ id: 'ageInput.months.december', defaultMessage: 'December' }),
-  };
-
-  const monthMenuItems = createMenuItems(
-    months,
-    <FormattedMessage id="ageInput.selectMonth" defaultMessage="Select Month" />
-  );
+  // Memoized so the object and menu items are not rebuilt on every render.
+  // The locale is the only dependency — rebuilds only when language changes.
+  const monthMenuItems = useMemo(() => {
+    const months: Record<number, string> = {
+      1: intl.formatMessage({ id: 'ageInput.months.january', defaultMessage: 'January' }),
+      2: intl.formatMessage({ id: 'ageInput.months.february', defaultMessage: 'February' }),
+      3: intl.formatMessage({ id: 'ageInput.months.march', defaultMessage: 'March' }),
+      4: intl.formatMessage({ id: 'ageInput.months.april', defaultMessage: 'April' }),
+      5: intl.formatMessage({ id: 'ageInput.months.may', defaultMessage: 'May' }),
+      6: intl.formatMessage({ id: 'ageInput.months.june', defaultMessage: 'June' }),
+      7: intl.formatMessage({ id: 'ageInput.months.july', defaultMessage: 'July' }),
+      8: intl.formatMessage({ id: 'ageInput.months.august', defaultMessage: 'August' }),
+      9: intl.formatMessage({ id: 'ageInput.months.september', defaultMessage: 'September' }),
+      10: intl.formatMessage({ id: 'ageInput.months.october', defaultMessage: 'October' }),
+      11: intl.formatMessage({ id: 'ageInput.months.november', defaultMessage: 'November' }),
+      12: intl.formatMessage({ id: 'ageInput.months.december', defaultMessage: 'December' }),
+    };
+    return createMenuItems(
+      months,
+      <FormattedMessage id="ageInput.selectMonth" defaultMessage="Select Month" />,
+    );
+  }, [intl]);
 
   const birthMonthError = errors.birthMonth;
   const birthYearError = errors.birthYear;
