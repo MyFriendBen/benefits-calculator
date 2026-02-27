@@ -107,7 +107,6 @@
   }
 
   .expense-name-cell {
-    border-bottom: 1px solid #ddd;
     padding-bottom: 0.5rem;
   }
 
@@ -118,9 +117,5 @@
 
   .expense-amount-cell .MuiTextField-root {
     width: 100% !important;
-  }
-
-  .expense-row--active .expense-name-cell {
-    border-bottom-color: var(--primary-color);
   }
 }
