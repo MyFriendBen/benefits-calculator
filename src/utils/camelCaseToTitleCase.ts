@@ -6,5 +6,6 @@
 export function camelCaseToTitleCase(str: string): string {
   return str
     .replace(/([A-Z])/g, ' $1')
+    .trimStart()
     .replace(/^./, (s) => s.toUpperCase());
 }
