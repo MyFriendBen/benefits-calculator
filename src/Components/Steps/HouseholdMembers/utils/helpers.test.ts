@@ -39,9 +39,9 @@ describe('getDefaultFormItems', () => {
     expect(getDefaultFormItems(undefined, false, true, template)).toEqual([template]);
   });
 
-  it('does not seed when existing is an empty array even on first visit (explicit clear)', () => {
-    // [] means data was saved; an empty saved state should not be re-seeded
-    expect(getDefaultFormItems([], false, true, template)).toEqual([]);
+  it('seeds when existing is an empty array and user has not yet progressed (API returns [] for new member)', () => {
+    // API returns [] for a brand-new member; without downstream progress this is a first visit, seed it
+    expect(getDefaultFormItems([], false, true, template)).toEqual([template]);
   });
 
   it('returns empty array for ineligible first-time visitors', () => {

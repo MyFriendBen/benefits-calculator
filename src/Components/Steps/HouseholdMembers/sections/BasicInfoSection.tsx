@@ -125,7 +125,7 @@ const BasicInfoSection = ({
             name="relationshipToHH"
             control={control}
             render={({ field }) => (
-              <Select {...field} label="Relationship to you">
+              <Select {...field} label="Relationship to you" displayEmpty>
                 {createMenuItems(
                   relationshipOptions,
                   <FormattedMessage

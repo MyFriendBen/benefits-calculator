@@ -139,7 +139,7 @@ export const createHouseholdMemberSchema = (
 ) => {
   const incomeSourcesSchema = createIncomeSourceSchema(intl);
   const incomeStreamsSchema = z.array(incomeSourcesSchema);
-  const hasIncomeSchema = z.string().regex(/^true|false$/);
+  const hasIncomeSchema = z.enum(['true', 'false']);
 
   const studentEligibilitySchema = z.object({
     studentFullTime: z.union([z.boolean(), z.undefined()]),
@@ -151,7 +151,7 @@ export const createHouseholdMemberSchema = (
   return z.object({
     birthMonth: z.number().min(1, { message: renderMissingBirthMonthHelperText(intl) }).max(12, { message: renderMissingBirthMonthHelperText(intl) }),
     birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl) }).int().min(new Date().getFullYear() - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) }).max(new Date().getFullYear(), { message: renderInvalidBirthYearHelperText(intl) }),
-    relationshipToHH: z.string().min(1, { message: 'Please select a relationship' }),
+    relationshipToHH: z.string().min(1, { message: renderRelationshipToHHHelperText(intl) }),
     healthInsurance: createHealthInsuranceSchema(intl, pageNumber),
     conditions: createSpecialConditionsSchema(intl),
     studentEligibility: studentEligibilitySchema,
@@ -195,7 +195,7 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
   const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
   const incomeSourcesSchema = createIncomeSourceSchema(intl);
   const incomeStreamsSchema = z.array(incomeSourcesSchema);
-  const hasIncomeSchema = z.string().regex(/^true|false$/);
+  const hasIncomeSchema = z.enum(['true', 'false']);
 
   return z
     .object({

@@ -17,12 +17,9 @@ export { formatToUSD } from '../../../../utils/formatCurrency';
  *
  * Seeding logic:
  * - If existingItems has entries → always return them (truth of record).
- * - If existingItems is an explicit empty array [] → the user has been here before
- *   and cleared it (or the member was saved with no streams). Respect that; don't seed.
- * - If existingItems is undefined → member has never been to this page.
- *   Seed one empty item if eligible and not yet progressed past this section.
- * - If hasCompletedDownstreamField is true → user already submitted at least once;
- *   an empty state means they deliberately cleared it. Respect that.
+ * - If hasCompletedDownstreamField is true → user already submitted once;
+ *   an empty state ([] or undefined) means they deliberately cleared it. Respect that.
+ * - Otherwise (no downstream progress) → first visit: seed one item if eligible.
  *
  * @param existingItems - Current items from saved form data (undefined = never visited)
  * @param hasCompletedDownstreamField - Whether the user has already submitted the form before
@@ -39,15 +36,11 @@ export function getDefaultFormItems<T>(
   if (existingItems && existingItems.length > 0) {
     return existingItems;
   }
-  // Explicit empty array: user has been here before and cleared it (or saved with none).
-  if (Array.isArray(existingItems)) {
-    return [];
-  }
-  // existingItems is undefined: first visit to this page.
+  // User has progressed past this section — an empty state is intentional.
   if (hasCompletedDownstreamField) {
-    // They submitted before but somehow have no items — treat as intentional.
     return [];
   }
+  // First visit (no downstream progress): seed one item if eligible.
   if (isEligible) {
     return [emptyTemplate];
   }

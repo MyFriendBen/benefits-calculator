@@ -127,12 +127,11 @@ describe('HealthInsuranceSection', () => {
   });
 
   describe('onChange behavior', () => {
-    it('calls setValue when a tile is clicked', async () => {
-      const user = userEvent.setup();
+    it('calls setValue when a tile is clicked', () => {
       // Use a controlled version to verify setValue is called
       let capturedSetValue: any;
       const ControlledWrapper = () => {
-        const { setValue, clearErrors } = useForm({
+        const { clearErrors } = useForm({
           defaultValues: { healthInsurance: defaultHealthInsurance },
         });
         capturedSetValue = jest.fn();
@@ -151,7 +150,7 @@ describe('HealthInsuranceSection', () => {
       };
 
       render(<ControlledWrapper />);
-      await user.click(screen.getByTestId('tile-employer'));
+      userEvent.click(screen.getByTestId('tile-employer'));
 
       expect(capturedSetValue).toHaveBeenCalledWith(
         'healthInsurance',

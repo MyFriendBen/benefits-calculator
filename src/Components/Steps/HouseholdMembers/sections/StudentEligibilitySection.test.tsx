@@ -95,19 +95,17 @@ describe('StudentEligibilitySection', () => {
   });
 
   describe('interaction', () => {
-    it('selects Yes when clicked', async () => {
-      const user = userEvent.setup();
+    it('selects Yes when clicked', () => {
       render(<Wrapper />);
       const firstYes = screen.getAllByRole('radio', { name: /yes/i })[0] as HTMLInputElement;
-      await user.click(firstYes);
+      userEvent.click(firstYes);
       expect(firstYes.checked).toBe(true);
     });
 
-    it('selects No when clicked', async () => {
-      const user = userEvent.setup();
+    it('selects No when clicked', () => {
       render(<Wrapper />);
       const firstNo = screen.getAllByRole('radio', { name: /no/i })[0] as HTMLInputElement;
-      await user.click(firstNo);
+      userEvent.click(firstNo);
       expect(firstNo.checked).toBe(true);
     });
   });

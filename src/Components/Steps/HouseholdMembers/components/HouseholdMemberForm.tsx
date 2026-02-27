@@ -140,6 +140,9 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
     if (!uuid) {
       throw new Error('uuid is undefined');
     }
+    if (currentMemberIndex < 0 || currentMemberIndex > formData.householdData.length) {
+      throw new Error(`Invalid page number: ${pageNumber}`);
+    }
 
     const updatedHouseholdData = [...formData.householdData];
     updatedHouseholdData[currentMemberIndex] = createHouseholdMemberData({
