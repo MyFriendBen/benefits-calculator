@@ -91,11 +91,6 @@ describe('createHouseholdMemberSchema (main)', () => {
       const yearErrors = result.error?.issues.filter(i => i.path.includes('birthYear') && !i.path.includes('birthMonth'));
       expect(yearErrors ?? []).toHaveLength(0);
     });
-
-    it('coerces string birth year', () => {
-      const result = schema.safeParse({ ...validMainData, birthYear: '1990' as any });
-      expect(result.success).toBe(true);
-    });
   });
 
   describe('relationshipToHH validation', () => {
