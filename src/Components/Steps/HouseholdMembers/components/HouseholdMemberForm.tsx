@@ -195,13 +195,13 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
         <FormattedMessage
           id="householdDataBlock.questionHeader-relationship-age"
           defaultMessage="Tell us about your {relationship}, age {age}"
-          values={{ relationship: String(relationshipText).toLowerCase(), age }}
+          values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span>, age }}
         />
       ) : (
         <FormattedMessage
           id="householdDataBlock.questionHeader-relationship"
           defaultMessage="Tell us about your {relationship}"
-          values={{ relationship: String(relationshipText).toLowerCase() }}
+          values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span> }}
         />
       );
     } else {
