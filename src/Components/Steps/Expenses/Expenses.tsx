@@ -1,4 +1,4 @@
-import { Fragment, useContext, useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -144,28 +144,29 @@ const Expenses = () => {
               </th>
             </tr>
           </thead>
-          <tbody>
-            {categorizedExpenses.map(({ categoryKey, categoryLabel, options }) => (
-              <Fragment key={categoryKey}>
-                <tr className="expense-category-row">
-                  <th colSpan={3} scope="colgroup" className="expense-category-label">
-                    {categoryLabel}
-                  </th>
-                </tr>
-                {/* Visible column labels repeated per category for sighted users; hidden from AT
-                    since the <thead> above already provides this structure to screen readers. */}
-                <tr className="expense-column-headers" aria-hidden="true">
-                  <th scope="col" className="expense-col-header">
-                    <FormattedMessage id="expenses.header.type" defaultMessage="Expense Type" />
-                  </th>
-                  <th scope="col" className="expense-col-header expense-col-header-amount">
-                    <FormattedMessage id="expenses.header.amount" defaultMessage="Amount" />
-                  </th>
-                  <th scope="col" className="expense-col-header expense-col-header-frequency">
-                    <FormattedMessage id="expenses.header.frequency" defaultMessage="Frequency" />
-                  </th>
-                </tr>
-                {options.map(({ expenseKey, label, plainName }) => {
+          {categorizedExpenses.map(({ categoryKey, categoryLabel, options }) => (
+            // One <tbody> per category so VoiceOver announces the category name
+            // when entering each group ("group, Housing" etc.).
+            <tbody key={categoryKey} aria-label={categoryLabel}>
+              <tr className="expense-category-row" aria-hidden="true">
+                <th colSpan={3} scope="colgroup" className="expense-category-label">
+                  {categoryLabel}
+                </th>
+              </tr>
+              {/* Visible column labels repeated per category for sighted users; hidden from AT
+                  since the <thead> above already provides column structure to screen readers. */}
+              <tr className="expense-column-headers" aria-hidden="true">
+                <th scope="col" className="expense-col-header">
+                  <FormattedMessage id="expenses.header.type" defaultMessage="Expense Type" />
+                </th>
+                <th scope="col" className="expense-col-header expense-col-header-amount">
+                  <FormattedMessage id="expenses.header.amount" defaultMessage="Amount" />
+                </th>
+                <th scope="col" className="expense-col-header expense-col-header-frequency">
+                  <FormattedMessage id="expenses.header.frequency" defaultMessage="Frequency" />
+                </th>
+              </tr>
+              {options.map(({ expenseKey, label, plainName }) => {
                   const index = expenseIndexMap.get(expenseKey)!; // always defined — map is built from same keys
                   const amount = watch(`expenses.${index}.expenseAmount`);
                   return (
@@ -212,9 +213,8 @@ const Expenses = () => {
                     </tr>
                   );
                 })}
-              </Fragment>
-            ))}
-          </tbody>
+            </tbody>
+          ))}
         </table>
         <PrevAndContinueButtons backNavigationFunction={backNavigationFunction} />
       </form>
