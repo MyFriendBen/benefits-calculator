@@ -1,63 +1,17 @@
-import { Paper, Stack, Typography, Link } from '@mui/material';
+import { Paper, Typography, Link } from '@mui/material';
 import Box from '@mui/material/Box';
-import dialIcon from '../../../Assets/States/CO/WhiteLabels/TwoOneOneAssets/dialIcon.png';
 import { FormattedMessage, useIntl } from 'react-intl';
 import './LancFooter.css';
 import { useLocalizedLink } from '../../Config/configHook';
+import Footer from '../../Footer/Footer';
 
 const LancFooter = () => {
   const intl = useIntl();
   const privacyPolicyLink = useLocalizedLink('privacy_policy');
 
-  const lancDialALProps = {
-    id: 'lancFooter.dialAL',
-    defaultMsg: 'LANC dial link',
-  };
-  const lancApplyALProps = {
-    id: 'lancFooter.applyAL',
-    defaultMsg: 'LANC apply online link',
-  };
   const lancTOSALProps = {
     id: 'lancFooter.termsOfSvcAL',
     defaultMsg: 'LANC terms of service',
-  };
-
-  const displayDialStack = () => {
-    return (
-      <Stack direction="row" gap="2rem">
-        <img src={dialIcon} className="lanc-footer-icon" alt="talk to a LANC navigator via phone or apply online" />
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography>
-            <FormattedMessage id="footer-dial-text-lanc" defaultMessage="Call the Helpline at " />
-          </Typography>
-          <Link
-            href="tel:866-219-5262"
-            underline="none"
-            target="_blank"
-            aria-label={intl.formatMessage(lancDialALProps)}
-            color="primary"
-          >
-            1-866-219-LANC (5262)
-          </Link>
-          <Typography>
-            <FormattedMessage id="footer-or-text-nc" defaultMessage=" or" />
-            &nbsp;
-          </Typography>
-          <Typography>
-            <FormattedMessage id="footer-apply-text-lanc" defaultMessage="Apply online at " />
-          </Typography>
-          <Link
-            href="https://legalaidnc.org/apply"
-            underline="none"
-            target="_blank"
-            aria-label={intl.formatMessage(lancApplyALProps)}
-            color="primary"
-          >
-            https://legalaidnc.org/apply
-          </Link>
-        </Box>
-      </Stack>
-    );
   };
 
   const displayFirstParagraph = () => {
@@ -115,17 +69,11 @@ const LancFooter = () => {
 
   return (
     <footer>
-      <Paper elevation={0} sx={{ width: '100%', backgroundColor: '#efefef' }} className="paper-container" square={true}>
-        <Box className="lanc-font flex-row get-help-text">
-          <FormattedMessage
-            id="footer-header-lanc"
-            defaultMessage="To apply for help from Legal Aid of North Carolina:"
-          />
-        </Box>
-        <Box className="flex-row icon-section">{displayDialStack()}</Box>
-      </Paper>
-      <Box className="flex-row footer-paragraph first-paragraph">{displayFirstParagraph()}</Box>
-      <Box className="flex-row footer-paragraph second-paragraph">{displaySecondParagraph()}</Box>
+      <>
+        <Box className="flex-row footer-paragraph first-paragraph">{displayFirstParagraph()}</Box>
+        <Box className="flex-row footer-paragraph second-paragraph">{displaySecondParagraph()}</Box>
+        <Footer hideServiceLinks={true} />
+      </>
       <Paper elevation={0} sx={{ width: '100%', backgroundColor: '#efefef', padding: '1rem 1rem' }} square={true}>
         {displayCopyrightPolicySection()}
       </Paper>
