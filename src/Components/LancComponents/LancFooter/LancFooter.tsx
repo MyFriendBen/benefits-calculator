@@ -68,16 +68,14 @@ const LancFooter = () => {
   };
 
   return (
-    <footer>
-      <>
-        <Box className="flex-row footer-paragraph first-paragraph">{displayFirstParagraph()}</Box>
-        <Box className="flex-row footer-paragraph second-paragraph">{displaySecondParagraph()}</Box>
-        <Footer hideServiceLinks={true} />
-      </>
+    <>
+      <Box className="flex-row footer-paragraph first-paragraph">{displayFirstParagraph()}</Box>
+      <Box className="flex-row footer-paragraph second-paragraph">{displaySecondParagraph()}</Box>
+      <Footer hideServiceLinks={true} />
       <Paper elevation={0} sx={{ width: '100%', backgroundColor: '#efefef', padding: '1rem 1rem' }} square={true}>
         {displayCopyrightPolicySection()}
       </Paper>
-    </footer>
+    </>
   );
 };
 
