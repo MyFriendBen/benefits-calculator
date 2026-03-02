@@ -3,6 +3,7 @@ import { UseFormSetValue, UseFormGetValues, UseFormReset } from 'react-hook-form
 import { QuestionName } from '../../../../Types/Questions';
 import { QUESTION_TITLES } from '../../../../Assets/pageTitleTags';
 import { EMPTY_INCOME_STREAM } from '../utils/constants';
+import { MAX_AGE } from '../../../../Assets/age';
 
 interface UseHouseholdMemberFormEffectsParams {
   isEnergyCalculator: boolean;
@@ -83,6 +84,14 @@ export const useHouseholdMemberFormEffects = ({
     prevBirthRef.current = { month: watchBirthMonth, year: watchBirthYear };
 
     if (!birthChanged) return;
+
+    const currentYear = new Date().getFullYear();
+    const yearIsComplete =
+      watchBirthYear !== undefined &&
+      watchBirthYear !== null &&
+      watchBirthYear >= currentYear - MAX_AGE + 1 &&
+      watchBirthYear <= currentYear;
+    if (!yearIsComplete) return;
 
     const { is16OrOlder } = calculateCurrentAgeStatus();
     const hasStreams = getValues('incomeStreams').length > 0;
