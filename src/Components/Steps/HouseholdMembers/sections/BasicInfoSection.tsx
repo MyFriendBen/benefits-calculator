@@ -115,7 +115,7 @@ const BasicInfoSection = ({
       {/* Relationship */}
       {!isFirstMember && (
         <FormControl fullWidth error={!!relationshipError}>
-          <InputLabel>
+          <InputLabel id="relationship-to-hh-label">
             <FormattedMessage
               id="householdDataBlock.relationshipToYou"
               defaultMessage="Relationship to you"
@@ -125,7 +125,7 @@ const BasicInfoSection = ({
             name="relationshipToHH"
             control={control}
             render={({ field }) => (
-              <Select {...field} id="relationship-to-hh-select" label="Relationship to you" displayEmpty>
+              <Select {...field} id="relationship-to-hh-select" labelId="relationship-to-hh-label" label="Relationship to you" displayEmpty>
                 {createMenuItems(
                   relationshipOptions,
                   <FormattedMessage
