@@ -147,15 +147,13 @@ const BasicInfoSection = ({
     </>
   );
 
-  if (!showSectionHeader) {
-    return <>{fieldsContent}</>;
-  }
-
   return (
     <Box id="basic-info-section" className="section">
-      <QuestionQuestion>
-        <FormattedMessage id="householdDataBlock.basicInfo" defaultMessage="Basic Information" />
-      </QuestionQuestion>
+      {showSectionHeader && (
+        <QuestionQuestion>
+          <FormattedMessage id="householdDataBlock.basicInfo" defaultMessage="Basic Information" />
+        </QuestionQuestion>
+      )}
       <Box sx={BASIC_INFO_GRID_STYLES}>
         {fieldsContent}
       </Box>

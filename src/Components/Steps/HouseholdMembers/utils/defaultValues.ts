@@ -68,8 +68,8 @@ const getDefaultIncomeStreams = (data?: HouseholdData): any[] => {
   );
   return streams.map((stream: any) => ({
     ...stream,
-    incomeAmount: stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
-    hoursPerWeek: stream.hoursPerWeek === 0 ? '' : String(stream.hoursPerWeek),
+    incomeAmount: stream.incomeAmount == null || stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
+    hoursPerWeek: stream.hoursPerWeek == null || stream.hoursPerWeek === 0 ? '' : String(stream.hoursPerWeek),
   }));
 };
 
@@ -170,8 +170,8 @@ export const createEnergyCalculatorDefaultValues = (
 ) => {
   const incomeStreams = (householdMemberFormData?.incomeStreams ?? []).map((stream: any) => ({
     ...stream,
-    incomeAmount: stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
-    hoursPerWeek: stream.hoursPerWeek === 0 ? '' : String(stream.hoursPerWeek),
+    incomeAmount: stream.incomeAmount == null || stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
+    hoursPerWeek: stream.hoursPerWeek == null || stream.hoursPerWeek === 0 ? '' : String(stream.hoursPerWeek),
   }));
 
   return {

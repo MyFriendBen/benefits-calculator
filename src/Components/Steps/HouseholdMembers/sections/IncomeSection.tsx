@@ -262,8 +262,9 @@ const IncomeSection = ({
     selectedIncomeFrequency: string,
     selectedIncomeStreamSource: string,
   ) => {
+    const isHourly = selectedIncomeFrequency === 'hourly';
     let questionHeader;
-    if (selectedIncomeFrequency === 'hourly') {
+    if (isHourly) {
       let hourlyFormattedMsgId = 'incomeBlock.createIncomeAmountTextfield-hourly-questionLabel';
       let hourlyFormattedMsgDefaultMsg = 'What is your hourly rate ';
       if (pageNumber !== 1) {
@@ -302,7 +303,8 @@ const IncomeSection = ({
                 onValueChange={({ value }) => field.onChange(value)}
                 thousandSeparator
                 allowNegative={false}
-                decimalScale={0}
+                decimalScale={isHourly ? 2 : 0}
+                fixedDecimalScale={isHourly}
                 customInput={TextField}
                 label={
                   <FormattedMessage
@@ -311,7 +313,7 @@ const IncomeSection = ({
                   />
                 }
                 variant="outlined"
-                inputProps={{ inputMode: 'numeric' }}
+                inputProps={{ inputMode: isHourly ? 'decimal' : 'numeric' }}
                 sx={{ backgroundColor: '#fff' }}
                 error={getIncomeStreamError(index, 'incomeAmount') !== undefined}
                 InputProps={{

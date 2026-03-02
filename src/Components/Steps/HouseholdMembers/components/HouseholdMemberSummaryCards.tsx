@@ -119,7 +119,7 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
 
   return (
     <article key={pageNumber}>
-      {headOfHHInfoWasEntered && (
+      {headOfHHInfoWasEntered && memberCards.some(Boolean) && (
         <Box sx={{ marginBottom: '0.25rem' }}>
           <div>{memberCards}</div>
         </Box>
