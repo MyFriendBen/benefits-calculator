@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { useForm } from 'react-hook-form';
 import BasicInfoSection from './BasicInfoSection';
@@ -52,11 +53,17 @@ describe('BasicInfoSection', () => {
       expect(screen.getAllByText('Birth Month').length).toBeGreaterThan(0);
     });
 
-    it('renders a select control for birth month', () => {
+    it('renders a select control for birth month accessible by role and name', () => {
       render(<Wrapper />);
-      // MUI renders each Select as a div[role=button][aria-haspopup=listbox]
-      const selects = screen.getAllByRole('button').filter(el => el.getAttribute('aria-haspopup') === 'listbox');
-      expect(selects.length).toBeGreaterThan(0);
+      // Playwright E2E uses getByRole('button', { name: 'Birth Month' }) — verify this works
+      expect(screen.getByRole('button', { name: /birth month/i })).toBeInTheDocument();
+    });
+
+    it('renders month options with numeric values', () => {
+      render(<Wrapper />);
+      userEvent.click(screen.getByRole('button', { name: /birth month/i }));
+      const januaryOption = screen.getByRole('option', { name: 'January' });
+      expect(januaryOption).toHaveAttribute('data-value', '1');
     });
 
     it('shows birth month error message when error is present', () => {

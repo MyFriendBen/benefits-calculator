@@ -1,6 +1,6 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useMemo } from 'react';
-import { Box, FormControl, InputLabel, Select, TextField } from '@mui/material';
+import { Box, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { NumericFormat } from 'react-number-format';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
 import QuestionQuestion from '../../../QuestionComponents/QuestionQuestion';
@@ -45,10 +45,14 @@ const BasicInfoSection = ({
       11: intl.formatMessage({ id: 'ageInput.months.november', defaultMessage: 'November' }),
       12: intl.formatMessage({ id: 'ageInput.months.december', defaultMessage: 'December' }),
     };
-    return createMenuItems(
-      months,
-      <FormattedMessage id="ageInput.selectMonth" defaultMessage="Select Month" />,
-    );
+    return [
+      <MenuItem value="" key="disabled-select-value" disabled>
+        <FormattedMessage id="ageInput.selectMonth" defaultMessage="Select Month" />
+      </MenuItem>,
+      ...Object.entries(months).map(([key, label]) => (
+        <MenuItem value={Number(key)} key={key}>{label}</MenuItem>
+      )),
+    ];
   }, [intl]);
 
   const birthMonthError = errors.birthMonth;
@@ -59,7 +63,7 @@ const BasicInfoSection = ({
     <>
       {/* Birth Month */}
       <FormControl fullWidth error={!!birthMonthError}>
-        <InputLabel>
+        <InputLabel id="birth-month-label">
           <FormattedMessage id="ageInput.birthMonth" defaultMessage="Birth Month" />
         </InputLabel>
         <Controller
@@ -68,6 +72,7 @@ const BasicInfoSection = ({
           render={({ field }) => (
             <Select
               {...field}
+              labelId="birth-month-label"
               label="Birth Month"
               value={field.value || ''}
               onChange={(e) => field.onChange(Number(e.target.value) || 0)}
