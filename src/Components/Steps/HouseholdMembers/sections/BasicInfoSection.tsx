@@ -45,14 +45,9 @@ const BasicInfoSection = ({
       11: intl.formatMessage({ id: 'ageInput.months.november', defaultMessage: 'November' }),
       12: intl.formatMessage({ id: 'ageInput.months.december', defaultMessage: 'December' }),
     };
-    return [
-      <MenuItem value="" key="disabled-select-value" disabled>
-        <FormattedMessage id="ageInput.selectMonth" defaultMessage="Select Month" />
-      </MenuItem>,
-      ...Object.entries(months).map(([key, label]) => (
-        <MenuItem value={Number(key)} key={key}>{label}</MenuItem>
-      )),
-    ];
+    return Object.entries(months).map(([key, label]) => (
+      <MenuItem value={Number(key)} key={key}>{label}</MenuItem>
+    ));
   }, [intl]);
 
   const birthMonthError = errors.birthMonth;
@@ -76,7 +71,6 @@ const BasicInfoSection = ({
               label="Birth Month"
               value={field.value || ''}
               onChange={(e) => field.onChange(Number(e.target.value) || 0)}
-              displayEmpty
             >
               {monthMenuItems}
             </Select>
@@ -131,7 +125,7 @@ const BasicInfoSection = ({
             name="relationshipToHH"
             control={control}
             render={({ field }) => (
-              <Select {...field} label="Relationship to you" displayEmpty>
+              <Select {...field} id="relationship-to-hh-select" label="Relationship to you" displayEmpty>
                 {createMenuItems(
                   relationshipOptions,
                   <FormattedMessage
