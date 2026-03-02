@@ -102,6 +102,7 @@ const BasicInfoSection = ({
               placeholder="YYYY"
               variant="outlined"
               inputProps={{ inputMode: 'numeric' }}
+              error={!!birthYearError}
             />
           )}
         />
