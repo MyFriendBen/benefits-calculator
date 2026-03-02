@@ -35,9 +35,8 @@ const HealthInsuranceSection = ({
   }));
 
   return (
-    <div id="health-insurance-section" className="section-container">
-      <Box className="section">
-        <QuestionQuestion>
+    <Box id="health-insurance-section" className="section">
+      <QuestionQuestion>
           {pageNumber === 1 ? (
             <FormattedMessage
               id="questions.healthInsurance-you"
@@ -68,8 +67,7 @@ const HealthInsuranceSection = ({
             clearErrors('healthInsurance');
           }}
         />
-      </Box>
-    </div>
+    </Box>
   );
 };
 

@@ -1,5 +1,9 @@
 /* Household Member Form Section Styles */
 
+:root {
+  --divider-color: #e0e0e0;
+}
+
 .section {
   margin: 0.75rem 0;
   padding-bottom: 0.75rem;
