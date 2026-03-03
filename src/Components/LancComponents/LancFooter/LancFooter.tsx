@@ -54,6 +54,7 @@ const LancFooter = () => {
           href="https://legalaidnc.org/privacy-policy-2/"
           underline="none"
           target="_blank"
+          rel="noopener noreferrer"
           aria-label={intl.formatMessage(lancPrivacyPolicyALProps)}
           className="privacy-policy-links"
         >
@@ -65,6 +66,7 @@ const LancFooter = () => {
             href={privacyPolicyLink}
             underline="none"
             target="_blank"
+            rel="noopener noreferrer"
             aria-label={intl.formatMessage(mfbPrivacyPolicyALProps)}
             className="privacy-policy-links"
           >
@@ -74,6 +76,7 @@ const LancFooter = () => {
             href={termsAndConditionsLink}
             underline="none"
             target="_blank"
+            rel="noopener noreferrer"
             aria-label={intl.formatMessage(mfbTermsALProps)}
             className="privacy-policy-links"
           >
