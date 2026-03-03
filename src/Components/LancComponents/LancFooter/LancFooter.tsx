@@ -8,6 +8,7 @@ import Footer from '../../Footer/Footer';
 const LancFooter = () => {
   const intl = useIntl();
   const privacyPolicyLink = useLocalizedLink('privacy_policy');
+  const termsAndConditionsLink = useLocalizedLink('consent_to_contact');
 
   const lancTOSALProps = {
     id: 'lancFooter.termsOfSvcAL',
@@ -39,20 +40,17 @@ const LancFooter = () => {
   const displayCopyrightPolicySection = () => {
     return (
       <Box className="lanc-font flex-row copyright-container">
-        <Typography className="privacy-policy-links">
-          <FormattedMessage id="footer-copyright-lanc" defaultMessage="© Copyright LANC North Carolina" />
-        </Typography>
+        <Link
+          href="https://legalaidnc.org/privacy-policy-2/"
+          underline="none"
+          target="_blank"
+          aria-label={intl.formatMessage(lancTOSALProps)}
+          className="privacy-policy-links"
+        >
+          <FormattedMessage id="footer-lanc-privacy" defaultMessage="LANC Privacy Policy" />
+          &nbsp;
+        </Link>
         <Box className="flex-row-links">
-          <Link
-            href="https://legalaidnc.org/privacy-policy-2/"
-            underline="none"
-            target="_blank"
-            aria-label={intl.formatMessage(lancTOSALProps)}
-            className="privacy-policy-links"
-          >
-            <FormattedMessage id="footer-lanc-privacy" defaultMessage="LANC Privacy Policy |" />
-            &nbsp;
-          </Link>
           <Link
             href={privacyPolicyLink}
             underline="none"
@@ -60,7 +58,16 @@ const LancFooter = () => {
             aria-label={intl.formatMessage(lancTOSALProps)}
             className="privacy-policy-links"
           >
-            <FormattedMessage id="footer-lanc-mfb" defaultMessage="MyFriendBen Privacy Policy" />
+            <FormattedMessage id="footer-lanc-mfb" defaultMessage="MyFriendBen Privacy Policy |" />
+          </Link>
+          <Link
+            href={termsAndConditionsLink}
+            underline="none"
+            target="_blank"
+            aria-label={intl.formatMessage(lancTOSALProps)}
+            className="privacy-policy-links"
+          >
+            <FormattedMessage id="footer-lanc-mfb-terms" defaultMessage="&nbsp;MyFriendBenTerms & Conditions" />
           </Link>
         </Box>
       </Box>
