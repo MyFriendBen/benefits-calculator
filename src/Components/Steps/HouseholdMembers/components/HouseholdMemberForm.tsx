@@ -1,5 +1,5 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
 import { useContext } from 'react';
 import { HouseholdData } from '../../../../Types/FormData';
@@ -37,9 +37,13 @@ const HouseholdMemberForm = () => {
   // CONTEXT & ROUTING
   const { formData } = useContext(Context);
   const { uuid, page, whiteLabel } = useParams<{ uuid: string; page: string; whiteLabel: string }>();
+  const location = useLocation();
   const { updateScreen } = useScreenApi();
   const intl = useIntl();
   const pageNumber = Number(page);
+  const locationState = location.state as { isEditing?: boolean; routedFromConfirmationPg?: boolean } | null;
+  const isEditing = !!locationState?.isEditing || !!locationState?.routedFromConfirmationPg;
+  const showBasicInfoSection = formData.householdSize === 1 || isEditing;
 
   // CURRENT MEMBER DATA
   const currentMemberIndex = pageNumber - 1;
@@ -65,7 +69,6 @@ const HouseholdMemberForm = () => {
     whiteLabel,
     currentStepId,
     pageNumber,
-    householdSize: formData.householdSize,
     redirectToConfirmationPage: redirectToConfirmationPage ?? false,
   });
 
@@ -219,12 +222,14 @@ const HouseholdMemberForm = () => {
 
   const renderFormSections = () => (
     <>
-      <BasicInfoSection
-        control={control as any}
-        errors={errors}
-        isFirstMember={pageNumber === 1}
-        relationshipOptions={relationshipOptions}
-      />
+      {showBasicInfoSection && (
+        <BasicInfoSection
+          control={control as any}
+          errors={errors}
+          isFirstMember={pageNumber === 1}
+          relationshipOptions={relationshipOptions}
+        />
+      )}
 
       {!isEnergyCalculator && (
         <HealthInsuranceSection

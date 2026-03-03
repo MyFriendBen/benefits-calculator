@@ -175,7 +175,7 @@ const HouseholdMemberBasicInfoPage = () => {
       <Typography className="household-basic-info-page__subheader">
         <FormattedMessage
           id="householdDataBlock.basicInfo.subheader"
-          defaultMessage="We'll ask about their birth date and relationship to you"
+          defaultMessage="Enter each member's birth date. For members other than yourself, select their relationship to you."
         />
       </Typography>
 

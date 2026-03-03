@@ -35,7 +35,7 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   const formatBirthMonthYear = useFormatBirthMonthYear();
 
   const handleEditBtnSubmit = (memberIndex: number) => {
-    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`);
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, { state: { isEditing: true } });
   };
 
   const createMemberCard = (
