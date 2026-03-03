@@ -43,10 +43,9 @@ const HouseholdMemberForm = () => {
   const pageNumber = Number(page);
   const locationState = location.state as { isEditing?: boolean; routedFromConfirmationPg?: boolean } | null;
   const isEditing = !!locationState?.isEditing || !!locationState?.routedFromConfirmationPg;
-  // Don't show BasicInfoSection if basic info was already collected on page 0
-  // (indicated by member 0 already having a birthYear saved)
-  const basicInfoAlreadyEntered = !!formData.householdData[0]?.birthYear;
-  const showBasicInfoSection = (!basicInfoAlreadyEntered && formData.householdSize === 1) || isEditing;
+  // Show BasicInfoSection when householdSize === 1 (page 0 was skipped, so basic info wasn't collected there)
+  // or when editing a member. When householdSize > 1, basic info was collected on page 0.
+  const showBasicInfoSection = formData.householdSize === 1 || isEditing;
 
   // CURRENT MEMBER DATA
   const currentMemberIndex = pageNumber - 1;
