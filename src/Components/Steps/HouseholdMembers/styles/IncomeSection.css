@@ -15,7 +15,108 @@
   margin: 1rem 0;
 }
 
-.income-block-container {
-  padding: 0 0 1rem;
-  margin-bottom: 0.5rem;
+.income-field-specific-type {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.income-field-amount {
+  flex: 1 1 150px;
+  min-width: 0;
+}
+
+.income-field-frequency {
+  flex: 1 1 150px;
+  min-width: 0;
+  position: relative;
+}
+
+.income-field-hours {
+  flex: 1 1 120px;
+  min-width: 0;
+}
+
+.income-category-container .MuiSelect-select,
+.income-field-specific-type .MuiSelect-select {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.income-delete-button {
+  margin-top: 0;
+  padding: 4px;
+}
+
+.form-field-label {
+  font-size: 0.875rem;
+  font-weight: 400;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+.income-fields-row .form-field-label {
+  margin-bottom: 0.25rem;
+}
+
+.income-frequency-label-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 0.25rem;
+}
+
+.income-frequency-label-row .form-field-label {
+  margin-bottom: 0;
+}
+
+.income-add-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 8px;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  background-color: var(--secondary-color);
+  color: #ffffff;
+  border: 1px solid transparent;
+}
+
+.income-add-button:hover {
+  background-color: var(--hover-color);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.income-field-frequency .MuiIconButton-root {
+  padding: 0;
+  margin-top: -4px;
+}
+
+/* More specific selector (element + class chain) avoids needing !important to override MUI's default SVG sizing */
+.income-field-frequency .MuiIconButton-root .MuiSvgIcon-root,
+.income-field-frequency .MuiIconButton-root svg {
+  width: 18px;
+  height: 18px;
+}
+
+.income-field-frequency .help-text {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  z-index: 10;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  margin: 0;
+  width: max-content;
+  max-width: 280px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
