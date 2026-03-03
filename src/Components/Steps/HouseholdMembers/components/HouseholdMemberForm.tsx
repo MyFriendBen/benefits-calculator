@@ -182,7 +182,7 @@ const HouseholdMemberForm = () => {
         <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
       </h2>
       <p className="question-sub-label">
-        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="Click any completed member to edit" />
+        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="Click any completed member to edit." />
       </p>
       <Box className="summary-cards-container">
         <HouseholdMemberSummaryCards questionName={questionName} />
@@ -276,8 +276,8 @@ const HouseholdMemberForm = () => {
     </>
   );
 
-  // Show summary cards whenever household size > 1
-  const showSummaryCards = formData.householdSize > 1;
+  // Show summary cards only when on member 2+
+  const showSummaryCards = pageNumber > 1;
 
   return (
     <main className="benefits-form">

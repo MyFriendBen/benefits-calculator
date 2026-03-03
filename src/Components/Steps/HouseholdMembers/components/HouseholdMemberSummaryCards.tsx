@@ -113,9 +113,9 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
     }
   };
 
-  const memberCards = formData.householdData.map((member, memberIndex) =>
-    createFormDataMemberCard(memberIndex, member, relationshipOptions),
-  );
+  const memberCards = formData.householdData
+    .slice(0, pageNumber - 1)
+    .map((member, memberIndex) => createFormDataMemberCard(memberIndex, member, relationshipOptions));
 
   return (
     <article key={pageNumber}>
