@@ -1,12 +1,26 @@
 import { renderHook, act } from '@testing-library/react';
 import { useNavigate } from 'react-router-dom';
 import { useHouseholdMembersNavigation } from './useHouseholdMembersNavigation';
+import { Context } from '../../../Wrapper/Wrapper';
+
+const mockNavigate = jest.fn();
+const mockLocationState: Record<string, unknown> = {};
 
 jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
+  useLocation: jest.fn(() => ({ state: mockLocationState })),
 }));
 
-const mockNavigate = jest.fn();
+// Default context: householdSize=3
+const mockFormData = { householdSize: 3 };
+jest.mock('react', () => ({
+  ...jest.requireActual('react'),
+  useContext: (ctx: unknown) => {
+    if (ctx === Context) return { formData: mockFormData };
+    return jest.requireActual('react').useContext(ctx);
+  },
+}));
+
 (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
 
 const defaultParams = {
@@ -14,7 +28,6 @@ const defaultParams = {
   whiteLabel: 'default',
   currentStepId: 3,
   pageNumber: 1,
-  householdSize: 3,
   redirectToConfirmationPage: false,
 };
 
@@ -22,6 +35,8 @@ describe('useHouseholdMembersNavigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
+    mockFormData.householdSize = 3;
+    Object.keys(mockLocationState).forEach((k) => delete mockLocationState[k]);
   });
 
   // ============================================================================
@@ -29,7 +44,14 @@ describe('useHouseholdMembersNavigation', () => {
   // ============================================================================
 
   describe('navigateBack', () => {
-    it('navigates to previous step when on page 1', () => {
+    it('navigates to page 0 when on page 1 with householdSize > 1', () => {
+      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1 }));
+      act(() => result.current.navigateBack());
+      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/0');
+    });
+
+    it('navigates to previous step when on page 1 with householdSize === 1', () => {
+      mockFormData.householdSize = 1;
       const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1 }));
       act(() => result.current.navigateBack());
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-2');
@@ -47,15 +69,19 @@ describe('useHouseholdMembersNavigation', () => {
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/2');
     });
 
-    it('throws when uuid is undefined', () => {
+    it('logs error and does not navigate when uuid is undefined', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, uuid: undefined }));
-      expect(() => act(() => result.current.navigateBack())).toThrow('uuid is undefined');
+      act(() => result.current.navigateBack());
+      expect(consoleSpy).toHaveBeenCalledWith('UUID is undefined');
+      expect(mockNavigate).not.toHaveBeenCalled();
+      consoleSpy.mockRestore();
     });
 
-    it('includes whiteLabel as empty string in path when whiteLabel is undefined', () => {
+    it('includes whiteLabel in path when whiteLabel is undefined', () => {
       const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1, whiteLabel: undefined }));
       act(() => result.current.navigateBack());
-      expect(mockNavigate).toHaveBeenCalledWith('/undefined/test-uuid/step-2');
+      expect(mockNavigate).toHaveBeenCalledWith('/undefined/test-uuid/step-3/0');
     });
   });
 
@@ -65,13 +91,14 @@ describe('useHouseholdMembersNavigation', () => {
 
   describe('navigateNext', () => {
     it('navigates to next page when more members remain', () => {
-      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1, householdSize: 3 }));
+      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1 }));
       act(() => result.current.navigateNext());
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/2');
     });
 
     it('navigates to next step when last member is complete', () => {
-      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 3, householdSize: 3 }));
+      mockFormData.householdSize = 3;
+      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 3 }));
       act(() => result.current.navigateNext());
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-4');
     });
@@ -83,30 +110,43 @@ describe('useHouseholdMembersNavigation', () => {
     });
 
     it('confirmation redirect takes priority over page navigation', () => {
-      // Even when on page 1 of 3, redirect to confirmation if flag is set
       const { result } = renderHook(() =>
-        useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1, householdSize: 3, redirectToConfirmationPage: true })
+        useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1, redirectToConfirmationPage: true })
       );
       act(() => result.current.navigateNext());
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/confirm-information');
       expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringContaining('/step-3/2'));
     });
 
-    it('throws when uuid is undefined', () => {
+    it('logs error and does not navigate when uuid is undefined', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, uuid: undefined }));
-      expect(() => act(() => result.current.navigateNext())).toThrow('uuid is undefined');
+      act(() => result.current.navigateNext());
+      expect(consoleSpy).toHaveBeenCalledWith('UUID is undefined');
+      expect(mockNavigate).not.toHaveBeenCalled();
+      consoleSpy.mockRestore();
     });
 
     it('navigates to next step for single-member household', () => {
-      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1, householdSize: 1 }));
+      mockFormData.householdSize = 1;
+      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1 }));
       act(() => result.current.navigateNext());
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-4');
     });
 
     it('navigates to next step when pageNumber equals householdSize exactly', () => {
-      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 2, householdSize: 2 }));
+      mockFormData.householdSize = 2;
+      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 2 }));
       act(() => result.current.navigateNext());
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-4');
+    });
+
+    it('returns to returnToPage when isEditing is set on location state', () => {
+      mockLocationState.isEditing = true;
+      mockLocationState.returnToPage = 3;
+      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1 }));
+      act(() => result.current.navigateNext());
+      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/3');
     });
   });
 
@@ -116,12 +156,13 @@ describe('useHouseholdMembersNavigation', () => {
 
   describe('edge cases', () => {
     it('correctly builds path without whiteLabel prefix when whiteLabel is empty string', () => {
-      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, whiteLabel: '', pageNumber: 1 }));
+      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, whiteLabel: '', pageNumber: 2 }));
       act(() => result.current.navigateBack());
-      expect(mockNavigate).toHaveBeenCalledWith('//test-uuid/step-2');
+      expect(mockNavigate).toHaveBeenCalledWith('//test-uuid/step-3/1');
     });
 
-    it('handles step 1 back navigation correctly (goes to step 0)', () => {
+    it('handles step 1 back navigation correctly (goes to step 0) for single member', () => {
+      mockFormData.householdSize = 1;
       const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, currentStepId: 1, pageNumber: 1 }));
       act(() => result.current.navigateBack());
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-0');
