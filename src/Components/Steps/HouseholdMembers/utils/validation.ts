@@ -61,7 +61,7 @@ export const renderMissingBirthMonthHelperText = (intlHook: IntlShape) => {
 export const renderFutureBirthMonthHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
     id: 'hhmform.invalidBirthMonth',
-    defaultMessage: 'This birth month is in the future',
+    defaultMessage: 'This birth month is in the future.',
   });
 };
 
@@ -96,7 +96,7 @@ export const renderHealthInsNonePlusHelperText = (intlHook: IntlShape) => {
 export const renderHealthInsNonePlusTheyHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
     id: 'validation-helperText.hhMemberInsuranceNone-they',
-    defaultMessage: 'Please do not select any other options if they do not have health insurance',
+    defaultMessage: 'Please do not select any other options if they do not have health insurance.',
   });
 };
 
@@ -138,7 +138,7 @@ export const renderIncomeAmountHelperText = (intlHook: IntlShape) => {
 export const renderIncomeCategoryHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
     id: 'errorMessage-incomeCategory',
-    defaultMessage: 'Please select an income category',
+    defaultMessage: 'Please select an income category.',
   });
 };
 
