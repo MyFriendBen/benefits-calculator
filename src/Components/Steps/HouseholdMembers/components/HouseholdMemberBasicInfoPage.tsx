@@ -1,8 +1,10 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useFieldArray, SubmitHandler } from 'react-hook-form';
-import { Typography } from '@mui/material';
+import { Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Context } from '../../../Wrapper/Wrapper';
@@ -15,8 +17,11 @@ import { useConfig } from '../../../Config/configHook';
 import { getCurrentMonthYear, MAX_AGE } from '../../../../Assets/age';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { ReactComponent as PersonIcon } from '../../../../Assets/icons/General/head.svg';
-import BasicInfoSection from '../sections/BasicInfoSection';
+import { BASIC_INFO_GRID_STYLES } from '../utils/constants';
+import BasicInfoFields from '../sections/BasicInfoFields';
 import '../styles/HouseholdMemberBasicInfoPage.css';
+
+const MAX_HOUSEHOLD_SIZE = 8;
 
 const HouseholdMemberBasicInfoPage = () => {
   const { formData } = useContext(Context);
@@ -25,6 +30,7 @@ const HouseholdMemberBasicInfoPage = () => {
   const intl = useIntl();
   const { updateScreen } = useScreenApi();
   const currentStepId = useStepNumber('householdData');
+  const [deleteConfirmIndex, setDeleteConfirmIndex] = useState<number | null>(null);
 
   const relationshipOptions = useConfig<Record<string, FormattedMessageType>>('relationship_options');
   const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
@@ -109,7 +115,7 @@ const HouseholdMemberBasicInfoPage = () => {
     questionName: 'householdData',
   });
 
-  const { fields } = useFieldArray({
+  const { fields, remove, append } = useFieldArray({
     control,
     name: 'members',
   });
@@ -154,6 +160,7 @@ const HouseholdMemberBasicInfoPage = () => {
 
     const updatedFormData = {
       ...formData,
+      householdSize: members.length,
       householdData: updatedHouseholdData,
     };
 
@@ -163,6 +170,19 @@ const HouseholdMemberBasicInfoPage = () => {
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/1`);
   };
 
+  const handleDeleteConfirm = () => {
+    if (deleteConfirmIndex === null) return;
+    remove(deleteConfirmIndex);
+    setDeleteConfirmIndex(null);
+  };
+
+  const handleAddMember = () => {
+    append({
+      birthMonth: 0,
+      birthYear: '' as unknown as number,
+      relationshipToHH: '',
+    });
+  };
 
   return (
     <main className="benefits-form">
@@ -181,39 +201,88 @@ const HouseholdMemberBasicInfoPage = () => {
 
       <form onSubmit={handleSubmit(formSubmitHandler)}>
         <div className="household-basic-info-page__form-container">
-          {fields.map((field, index) => (
-            <div key={field.id} className="household-basic-info-page__person-card">
-              <div className="household-basic-info-page__person-header">
-                <PersonIcon className="household-basic-info-page__person-icon" />
-                <Typography className="household-basic-info-page__person-title">
-                  {index === 0 ? (
-                    <FormattedMessage id="householdDataBlock.basicInfo.you" defaultMessage="You" />
-                  ) : (
-                    <FormattedMessage
-                      id="householdDataBlock.basicInfo.person"
-                      defaultMessage="Person {number}"
-                      values={{ number: index + 1 }}
-                    />
+          {fields.map((field, index) => {
+            const memberErrors = errors.members?.[index];
+            const isFirstMember = index === 0;
+            return (
+              <div key={field.id} className="household-basic-info-page__person-card">
+                <div className="household-basic-info-page__person-header">
+                  <PersonIcon className="household-basic-info-page__person-icon" />
+                  <Typography className="household-basic-info-page__person-title">
+                    {isFirstMember ? (
+                      <FormattedMessage id="householdDataBlock.basicInfo.you" defaultMessage="You" />
+                    ) : (
+                      <FormattedMessage
+                        id="householdDataBlock.basicInfo.person"
+                        defaultMessage="Person {number}"
+                        values={{ number: index + 1 }}
+                      />
+                    )}
+                  </Typography>
+                  {!isFirstMember && (
+                    <IconButton
+                      onClick={() => setDeleteConfirmIndex(index)}
+                      aria-label="delete household member"
+                      size="small"
+                      className="household-basic-info-page__delete-button"
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
                   )}
-                </Typography>
-              </div>
+                </div>
 
-              <div className="household-basic-info-page__fields-grid">
-                <BasicInfoSection
-                  control={control}
-                  errors={errors}
-                  fieldPrefix={`members.${index}`}
-                  isFirstMember={index === 0}
-                  relationshipOptions={relationshipOptions}
-                  showSectionHeader={false}
-                />
+                <Box sx={BASIC_INFO_GRID_STYLES}>
+                  <BasicInfoFields
+                    control={control}
+                    namePrefix={`members.${index}`}
+                    birthMonthError={memberErrors?.birthMonth}
+                    birthYearError={memberErrors?.birthYear}
+                    relationshipError={memberErrors?.relationshipToHH}
+                    isFirstMember={isFirstMember}
+                    relationshipOptions={relationshipOptions}
+                  />
+                </Box>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+
+        {fields.length < MAX_HOUSEHOLD_SIZE && (
+          <Box sx={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
+            <button type="button" onClick={handleAddMember} className="household-basic-info-page__add-button">
+              <AddIcon fontSize="small" />
+              <strong>
+                <FormattedMessage
+                  id="householdDataBlock.basicInfo.addMember"
+                  defaultMessage="Add a Household Member"
+                />
+              </strong>
+            </button>
+          </Box>
+        )}
 
         <PrevAndContinueButtons backNavigationFunction={backNavigationFunction} />
       </form>
+
+      <Dialog open={deleteConfirmIndex !== null} onClose={() => setDeleteConfirmIndex(null)}>
+        <DialogTitle>
+          <FormattedMessage id="householdDataBlock.basicInfo.deleteTitle" defaultMessage="Remove household member?" />
+        </DialogTitle>
+        <DialogContent>
+          <FormattedMessage
+            id="householdDataBlock.basicInfo.deleteConfirm"
+            defaultMessage="Are you sure you want to remove this person from your household?"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmIndex(null)}>
+            <FormattedMessage id="householdDataBlock.basicInfo.deleteCancel" defaultMessage="Cancel" />
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            <FormattedMessage id="householdDataBlock.basicInfo.deleteConfirmButton" defaultMessage="Remove" />
+          </Button>
+        </DialogActions>
+      </Dialog>
     </main>
   );
 };
