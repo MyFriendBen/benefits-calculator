@@ -122,6 +122,9 @@ export const useHouseholdMemberFormEffects = ({
     if (prevPageRef.current !== pageNumber) {
       reset(defaultValues);
       prevPageRef.current = pageNumber;
+      // Sync prevBirthRef to the new page's default values so the birth-change
+      // effect doesn't mistake the reset as a user-initiated birth date change
+      prevBirthRef.current = { month: defaultValues.birthMonth, year: defaultValues.birthYear };
     }
   }, [pageNumber, reset, defaultValues]);
 

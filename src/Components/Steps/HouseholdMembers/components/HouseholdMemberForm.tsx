@@ -43,7 +43,10 @@ const HouseholdMemberForm = () => {
   const pageNumber = Number(page);
   const locationState = location.state as { isEditing?: boolean; routedFromConfirmationPg?: boolean } | null;
   const isEditing = !!locationState?.isEditing || !!locationState?.routedFromConfirmationPg;
-  const showBasicInfoSection = formData.householdSize === 1 || isEditing;
+  // Don't show BasicInfoSection if basic info was already collected on page 0
+  // (indicated by member 0 already having a birthYear saved)
+  const basicInfoAlreadyEntered = !!formData.householdData[0]?.birthYear;
+  const showBasicInfoSection = (!basicInfoAlreadyEntered && formData.householdSize === 1) || isEditing;
 
   // CURRENT MEMBER DATA
   const currentMemberIndex = pageNumber - 1;
@@ -182,7 +185,7 @@ const HouseholdMemberForm = () => {
         <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
       </h2>
       <p className="question-sub-label">
-        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="You may edit or delete any completed members below." />
+        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="You may edit or delete completed members below." />
       </p>
       <Box className="summary-cards-container">
         <HouseholdMemberSummaryCards questionName={questionName} />
@@ -280,7 +283,7 @@ const HouseholdMemberForm = () => {
   const showSummaryCards = pageNumber > 1;
 
   return (
-    <main className="benefits-form">
+    <main key={pageNumber} className="benefits-form">
       {showSummaryCards && renderSummaryCards()}
 
       {renderHeader()}

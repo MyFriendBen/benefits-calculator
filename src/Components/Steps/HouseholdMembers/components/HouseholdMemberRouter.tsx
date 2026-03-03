@@ -14,8 +14,8 @@ const HouseholdMemberRouter = () => {
   const { page } = useParams<{ page: string }>();
   const pageNumber = Number(page);
 
-  // Show basic info page for all members when household size > 1 and on page 0
-  if (pageNumber === 0 && formData.householdSize > 1) {
+  // Show basic info page when on page 0
+  if (pageNumber === 0) {
     return <HouseholdMemberBasicInfoPage />;
   }
 
