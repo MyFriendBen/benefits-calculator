@@ -10,9 +10,19 @@ const LancFooter = () => {
   const privacyPolicyLink = useLocalizedLink('privacy_policy');
   const termsAndConditionsLink = useLocalizedLink('consent_to_contact');
 
-  const lancTOSALProps = {
-    id: 'lancFooter.termsOfSvcAL',
-    defaultMsg: 'LANC terms of service',
+  const lancPrivacyPolicyALProps = {
+    id: 'lancFooter.lancPrivacyPolicyAL',
+    defaultMessage: 'LANC Privacy Policy',
+  };
+
+  const mfbPrivacyPolicyALProps = {
+    id: 'lancFooter.mfbPrivacyPolicyAL',
+    defaultMessage: 'MyFriendBen Privacy Policy',
+  };
+
+  const mfbTermsALProps = {
+    id: 'lancFooter.mfbTermsAL',
+    defaultMessage: 'MyFriendBen Terms & Conditions',
   };
 
   const displayFirstParagraph = () => {
@@ -44,7 +54,7 @@ const LancFooter = () => {
           href="https://legalaidnc.org/privacy-policy-2/"
           underline="none"
           target="_blank"
-          aria-label={intl.formatMessage(lancTOSALProps)}
+          aria-label={intl.formatMessage(lancPrivacyPolicyALProps)}
           className="privacy-policy-links"
         >
           <FormattedMessage id="footer-lanc-privacy" defaultMessage="LANC Privacy Policy" />
@@ -55,7 +65,7 @@ const LancFooter = () => {
             href={privacyPolicyLink}
             underline="none"
             target="_blank"
-            aria-label={intl.formatMessage(lancTOSALProps)}
+            aria-label={intl.formatMessage(mfbPrivacyPolicyALProps)}
             className="privacy-policy-links"
           >
             <FormattedMessage id="footer-lanc-mfb" defaultMessage="MyFriendBen Privacy Policy |" />
@@ -64,7 +74,7 @@ const LancFooter = () => {
             href={termsAndConditionsLink}
             underline="none"
             target="_blank"
-            aria-label={intl.formatMessage(lancTOSALProps)}
+            aria-label={intl.formatMessage(mfbTermsALProps)}
             className="privacy-policy-links"
           >
             <FormattedMessage id="footer-lanc-mfb-terms" defaultMessage="&nbsp;MyFriendBen Terms & Conditions" />
