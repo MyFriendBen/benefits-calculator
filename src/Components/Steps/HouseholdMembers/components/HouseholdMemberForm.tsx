@@ -276,8 +276,8 @@ const HouseholdMemberForm = () => {
     </>
   );
 
-  // Show summary cards only when there are multiple members
-  const showSummaryCards = pageNumber > 1;
+  // Show summary cards whenever household size > 1
+  const showSummaryCards = formData.householdSize > 1;
 
   return (
     <main className="benefits-form">

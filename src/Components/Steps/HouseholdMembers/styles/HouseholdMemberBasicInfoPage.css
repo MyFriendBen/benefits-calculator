@@ -7,7 +7,6 @@
 p.household-basic-info-page__subheader.MuiTypography-root {
   margin-bottom: 1rem;
   font-size: 1rem;
-  color: #666;
 }
 
 .household-basic-info-page__form-container {
@@ -21,6 +20,11 @@ p.household-basic-info-page__subheader.MuiTypography-root {
   background-color: var(--secondary-background-color);
   border-radius: 8px;
   border: 1px solid #e0e0e0;
+}
+
+.household-basic-info-page__person-card .MuiOutlinedInput-root,
+.household-basic-info-page__person-card .MuiInputBase-root {
+  background-color: #fff;
 }
 
 .household-basic-info-page__person-header {
