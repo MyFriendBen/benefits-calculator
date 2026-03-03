@@ -68,7 +68,7 @@ const LancFooter = () => {
             aria-label={intl.formatMessage(mfbPrivacyPolicyALProps)}
             className="privacy-policy-links"
           >
-            <FormattedMessage id="footer-lanc-mfb" defaultMessage="MyFriendBen Privacy Policy |" />
+            <FormattedMessage id="footer-lanc-mfb" defaultMessage="MyFriendBen Privacy Policy" />
           </Link>
           <Link
             href={termsAndConditionsLink}
@@ -77,7 +77,7 @@ const LancFooter = () => {
             aria-label={intl.formatMessage(mfbTermsALProps)}
             className="privacy-policy-links"
           >
-            <FormattedMessage id="footer-lanc-mfb-terms" defaultMessage="&nbsp;MyFriendBen Terms & Conditions" />
+            <FormattedMessage id="footer-lanc-mfb-terms" defaultMessage={'\u00A0| MyFriendBen Terms & Conditions'} />
           </Link>
         </Box>
       </Box>
