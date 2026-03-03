@@ -170,8 +170,14 @@ const HouseholdMemberBasicInfoPage = () => {
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/1`);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (deleteConfirmIndex === null) return;
+    const updatedHouseholdData = formData.householdData.filter((_, i) => i !== deleteConfirmIndex);
+    await updateScreen({
+      ...formData,
+      householdSize: updatedHouseholdData.length,
+      householdData: updatedHouseholdData,
+    });
     remove(deleteConfirmIndex);
     setDeleteConfirmIndex(null);
   };
