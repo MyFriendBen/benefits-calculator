@@ -182,7 +182,7 @@ const HouseholdMemberForm = () => {
         <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
       </h2>
       <p className="question-sub-label">
-        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="Click any completed member to edit." />
+        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="You may edit or delete any completed members below." />
       </p>
       <Box className="summary-cards-container">
         <HouseholdMemberSummaryCards questionName={questionName} />

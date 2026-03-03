@@ -4,10 +4,6 @@
   /* Main container styles if needed */
 }
 
-p.household-basic-info-page__subheader.MuiTypography-root {
-  margin-bottom: 1rem;
-  font-size: 1rem;
-}
 
 .household-basic-info-page__form-container {
   display: flex;
@@ -16,7 +12,7 @@ p.household-basic-info-page__subheader.MuiTypography-root {
 }
 
 .household-basic-info-page__person-card {
-  padding: 1rem;
+  padding: .75rem;
   background-color: #f5f5f5;
   border-radius: 8px;
   border: 1px solid #e0e0e0;
@@ -42,7 +38,10 @@ p.household-basic-info-page__subheader.MuiTypography-root {
 .household-basic-info-page__person-icon {
   width: 2rem;
   height: 2rem;
-  fill: var(--primary-color);
+}
+
+.household-basic-info-page__person-icon path {
+  fill: var(--secondary-color);
 }
 
 .household-basic-info-page__person-title {
@@ -67,6 +66,20 @@ p.household-basic-info-page__subheader.MuiTypography-root {
   .household-basic-info-page__fields-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+.household-basic-info-page__delete-popover {
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 180px;
+}
+
+.household-basic-info-page__delete-popover-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .household-basic-info-page__error-text {

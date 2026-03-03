@@ -2,13 +2,14 @@ import { useContext, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useFieldArray, SubmitHandler } from 'react-hook-form';
-import { Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton } from '@mui/material';
+import { Box, Typography, Popover, Button, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Context } from '../../../Wrapper/Wrapper';
 import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
+import QuestionDescription from '../../../QuestionComponents/QuestionDescription';
 import PrevAndContinueButtons from '../../../PrevAndContinueButtons/PrevAndContinueButtons';
 import useScreenApi from '../../../../Assets/updateScreen';
 import useStepForm from '../../stepForm';
@@ -23,6 +24,8 @@ import '../styles/HouseholdMemberBasicInfoPage.css';
 
 const MAX_HOUSEHOLD_SIZE = 8;
 
+type DeletePopoverState = { index: number; anchorEl: HTMLElement } | null;
+
 const HouseholdMemberBasicInfoPage = () => {
   const { formData } = useContext(Context);
   const { uuid, whiteLabel } = useParams();
@@ -30,7 +33,7 @@ const HouseholdMemberBasicInfoPage = () => {
   const intl = useIntl();
   const { updateScreen } = useScreenApi();
   const currentStepId = useStepNumber('householdData');
-  const [deleteConfirmIndex, setDeleteConfirmIndex] = useState<number | null>(null);
+  const [deletePopover, setDeletePopover] = useState<DeletePopoverState>(null);
 
   const relationshipOptions = useConfig<Record<string, FormattedMessageType>>('relationship_options');
   const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
@@ -171,15 +174,15 @@ const HouseholdMemberBasicInfoPage = () => {
   };
 
   const handleDeleteConfirm = async () => {
-    if (deleteConfirmIndex === null) return;
-    const updatedHouseholdData = formData.householdData.filter((_, i) => i !== deleteConfirmIndex);
+    if (deletePopover === null) return;
+    const updatedHouseholdData = formData.householdData.filter((_, i) => i !== deletePopover.index);
     await updateScreen({
       ...formData,
       householdSize: updatedHouseholdData.length,
       householdData: updatedHouseholdData,
     });
-    remove(deleteConfirmIndex);
-    setDeleteConfirmIndex(null);
+    remove(deletePopover.index);
+    setDeletePopover(null);
   };
 
   const handleAddMember = () => {
@@ -198,12 +201,12 @@ const HouseholdMemberBasicInfoPage = () => {
           defaultMessage="Tell us about each household member"
         />
       </QuestionHeader>
-      <Typography className="household-basic-info-page__subheader">
+      <QuestionDescription>
         <FormattedMessage
           id="householdDataBlock.basicInfo.subheader"
           defaultMessage="Enter each member's birth date. For members other than yourself, select their relationship to you."
         />
-      </Typography>
+      </QuestionDescription>
 
       <form onSubmit={handleSubmit(formSubmitHandler)}>
         <div className="household-basic-info-page__form-container">
@@ -227,7 +230,7 @@ const HouseholdMemberBasicInfoPage = () => {
                   </Typography>
                   {!isFirstMember && (
                     <IconButton
-                      onClick={() => setDeleteConfirmIndex(index)}
+                      onClick={(e) => setDeletePopover({ index, anchorEl: e.currentTarget })}
                       aria-label="delete household member"
                       size="small"
                       className="household-basic-info-page__delete-button"
@@ -270,25 +273,30 @@ const HouseholdMemberBasicInfoPage = () => {
         <PrevAndContinueButtons backNavigationFunction={backNavigationFunction} />
       </form>
 
-      <Dialog open={deleteConfirmIndex !== null} onClose={() => setDeleteConfirmIndex(null)}>
-        <DialogTitle>
-          <FormattedMessage id="householdDataBlock.basicInfo.deleteTitle" defaultMessage="Remove household member?" />
-        </DialogTitle>
-        <DialogContent>
-          <FormattedMessage
-            id="householdDataBlock.basicInfo.deleteConfirm"
-            defaultMessage="Are you sure you want to remove this person from your household?"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteConfirmIndex(null)}>
-            <FormattedMessage id="householdDataBlock.basicInfo.deleteCancel" defaultMessage="Cancel" />
-          </Button>
-          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-            <FormattedMessage id="householdDataBlock.basicInfo.deleteConfirmButton" defaultMessage="Remove" />
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Popover
+        open={deletePopover !== null}
+        anchorEl={deletePopover?.anchorEl}
+        onClose={() => setDeletePopover(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Box className="household-basic-info-page__delete-popover">
+          <Typography variant="body2">
+            <FormattedMessage
+              id="householdDataBlock.basicInfo.deleteConfirm"
+              defaultMessage="Remove this member?"
+            />
+          </Typography>
+          <Box className="household-basic-info-page__delete-popover-actions">
+            <Button size="small" variant="outlined" onClick={() => setDeletePopover(null)}>
+              <FormattedMessage id="householdDataBlock.basicInfo.deleteCancel" defaultMessage="Cancel" />
+            </Button>
+            <Button size="small" color="error" variant="contained" onClick={handleDeleteConfirm}>
+              <FormattedMessage id="householdDataBlock.basicInfo.deleteConfirmButton" defaultMessage="Remove" />
+            </Button>
+          </Box>
+        </Box>
+      </Popover>
     </main>
   );
 };
