@@ -67,7 +67,7 @@ const LancFooter = () => {
             aria-label={intl.formatMessage(lancTOSALProps)}
             className="privacy-policy-links"
           >
-            <FormattedMessage id="footer-lanc-mfb-terms" defaultMessage="&nbsp;MyFriendBenTerms & Conditions" />
+            <FormattedMessage id="footer-lanc-mfb-terms" defaultMessage="&nbsp;MyFriendBen Terms & Conditions" />
           </Link>
         </Box>
       </Box>
