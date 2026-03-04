@@ -48,15 +48,22 @@ const SpecialConditionsSection = ({
   return (
     <Box id="conditions-section" className="section">
       <QuestionQuestion>
-        <FormattedMessage
-            id="householdDataBlock.specialConditionsQuestion"
-            defaultMessage="Special Circumstances"
+        {pageNumber === 1 ? (
+          <FormattedMessage
+            id="householdDataBlock.createConditionsQuestion-do-these-apply-to-you"
+            defaultMessage="Do any of these apply to you?"
           />
+        ) : (
+          <FormattedMessage
+            id="householdDataBlock.createConditionsQuestion-do-these-apply"
+            defaultMessage="Do any of these apply to them?"
+          />
+        )}
       </QuestionQuestion>
       <QuestionDescription>
         <FormattedMessage
           id="householdDataBlock.createConditionsQuestion-pick"
-          defaultMessage="Select all that apply. If none apply, skip this question."
+          defaultMessage="Choose all that apply. If none apply, skip this question."
         />
       </QuestionDescription>
       {errors.conditions && (

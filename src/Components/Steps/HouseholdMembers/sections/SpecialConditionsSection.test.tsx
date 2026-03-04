@@ -74,9 +74,14 @@ const Wrapper = ({
 
 describe('SpecialConditionsSection', () => {
   describe('question header', () => {
-    it('renders "Special Circumstances" heading', () => {
+    it('shows "Do any of these apply to you?" for page 1', () => {
       render(<Wrapper pageNumber={1} />);
-      expect(screen.getByText(/special circumstances/i)).toBeInTheDocument();
+      expect(screen.getByText(/do any of these apply to you/i)).toBeInTheDocument();
+    });
+
+    it('shows "Do any of these apply to them?" for page > 1', () => {
+      render(<Wrapper pageNumber={2} />);
+      expect(screen.getByText(/do any of these apply to them/i)).toBeInTheDocument();
     });
   });
 
