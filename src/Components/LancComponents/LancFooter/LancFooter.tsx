@@ -8,10 +8,21 @@ import Footer from '../../Footer/Footer';
 const LancFooter = () => {
   const intl = useIntl();
   const privacyPolicyLink = useLocalizedLink('privacy_policy');
+  const termsAndConditionsLink = useLocalizedLink('consent_to_contact');
 
-  const lancTOSALProps = {
-    id: 'lancFooter.termsOfSvcAL',
-    defaultMsg: 'LANC terms of service',
+  const lancPrivacyPolicyALProps = {
+    id: 'lancFooter.lancPrivacyPolicyAL',
+    defaultMessage: 'LANC Privacy Policy',
+  };
+
+  const mfbPrivacyPolicyALProps = {
+    id: 'lancFooter.mfbPrivacyPolicyAL',
+    defaultMessage: 'MyFriendBen Privacy Policy',
+  };
+
+  const mfbTermsALProps = {
+    id: 'lancFooter.mfbTermsAL',
+    defaultMessage: 'MyFriendBen Terms & Conditions',
   };
 
   const displayFirstParagraph = () => {
@@ -39,28 +50,37 @@ const LancFooter = () => {
   const displayCopyrightPolicySection = () => {
     return (
       <Box className="lanc-font flex-row copyright-container">
-        <Typography className="privacy-policy-links">
-          <FormattedMessage id="footer-copyright-lanc" defaultMessage="© Copyright LANC North Carolina" />
-        </Typography>
+        <Link
+          href="https://legalaidnc.org/privacy-policy-2/"
+          underline="none"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={intl.formatMessage(lancPrivacyPolicyALProps)}
+          className="privacy-policy-links"
+        >
+          <FormattedMessage id="footer-lanc-privacy" defaultMessage="LANC Privacy Policy" />
+          &nbsp;
+        </Link>
         <Box className="flex-row-links">
-          <Link
-            href="https://legalaidnc.org/privacy-policy-2/"
-            underline="none"
-            target="_blank"
-            aria-label={intl.formatMessage(lancTOSALProps)}
-            className="privacy-policy-links"
-          >
-            <FormattedMessage id="footer-lanc-privacy" defaultMessage="LANC Privacy Policy |" />
-            &nbsp;
-          </Link>
           <Link
             href={privacyPolicyLink}
             underline="none"
             target="_blank"
-            aria-label={intl.formatMessage(lancTOSALProps)}
+            rel="noopener noreferrer"
+            aria-label={intl.formatMessage(mfbPrivacyPolicyALProps)}
             className="privacy-policy-links"
           >
             <FormattedMessage id="footer-lanc-mfb" defaultMessage="MyFriendBen Privacy Policy" />
+          </Link>
+          <Link
+            href={termsAndConditionsLink}
+            underline="none"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={intl.formatMessage(mfbTermsALProps)}
+            className="privacy-policy-links"
+          >
+            <FormattedMessage id="footer-lanc-mfb-terms" defaultMessage={'\u00A0| MyFriendBen Terms & Conditions'} />
           </Link>
         </Box>
       </Box>
