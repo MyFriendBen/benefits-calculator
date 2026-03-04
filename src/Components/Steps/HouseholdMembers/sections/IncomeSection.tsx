@@ -74,16 +74,11 @@ const IncomeSection = ({
 
   const translatedAriaLabel = intl.formatMessage({
     id: 'householdDataBlock.createIncomeRadioQuestion-ariaLabel',
-    defaultMessage: 'has an income',
+    defaultMessage: 'Income Sources',
   });
 
-  const formattedMsgId =
-    pageNumber === 1 ? 'questions.hasIncome' : 'householdDataBlock.createIncomeRadioQuestion-questionLabel';
-
-  const formattedMsgDefaultMsg =
-    pageNumber === 1
-      ? 'Do you have an income?'
-      : 'Does this individual in your household have significant income you have not already included?';
+  const formattedMsgId = 'householdDataBlock.createIncomeRadioQuestion-questionLabel';
+  const formattedMsgDefaultMsg = 'Income Sources';
 
   const getIncomeStreamSourceLabel = (incomeStreamName: string) => {
     if (incomeStreamName) {
