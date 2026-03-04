@@ -118,7 +118,7 @@ const Expenses = () => {
       <QuestionDescription>
         <FormattedMessage
           id="expenses.header.description"
-          defaultMessage="These are the expenses that can affect your benefits. Enter whole dollar amounts for any expenses your household has."
+          defaultMessage="These are the expenses that can affect your benefits. Enter whole dollar amounts for any expenses your household has. If you're unsure of the exact amount, enter an estimate rather than leaving it as $0."
         />
       </QuestionDescription>
       <form onSubmit={handleSubmit(formSubmitHandler)}>
