@@ -137,6 +137,7 @@ export const createHouseholdMemberSchema = (
   intl: IntlShape,
   pageNumber: number
 ) => {
+  const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
   const incomeSourcesSchema = createIncomeSourceSchema(intl);
   const incomeStreamsSchema = z.array(incomeSourcesSchema);
   const hasIncomeSchema = z.enum(['true', 'false']);
@@ -150,14 +151,21 @@ export const createHouseholdMemberSchema = (
 
   return z.object({
     birthMonth: z.number().min(1, { message: renderMissingBirthMonthHelperText(intl) }).max(12, { message: renderMissingBirthMonthHelperText(intl) }),
-    birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl) }).int().min(new Date().getFullYear() - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) }).max(new Date().getFullYear(), { message: renderInvalidBirthYearHelperText(intl) }),
+    birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl) }).int().min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) }).max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
     relationshipToHH: z.string().min(1, { message: renderRelationshipToHHHelperText(intl) }),
     healthInsurance: createHealthInsuranceSchema(intl, pageNumber),
     conditions: createSpecialConditionsSchema(intl),
     studentEligibility: studentEligibilitySchema,
     hasIncome: hasIncomeSchema,
     incomeStreams: incomeStreamsSchema,
-  }).superRefine(({ conditions, studentEligibility }, ctx) => {
+  }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility }, ctx) => {
+    if (birthYear === CURRENT_YEAR && birthMonth > CURRENT_MONTH) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: renderFutureBirthMonthHelperText(intl),
+        path: ['birthMonth'],
+      });
+    }
     if (conditions.student) {
       STUDENT_QUESTIONS.forEach(({ name }) => {
         if (studentEligibility[name] === undefined) {
