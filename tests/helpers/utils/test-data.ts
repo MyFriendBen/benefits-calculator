@@ -31,7 +31,6 @@ export const testUsers = {
       relationship: 'Child', // Using exact matching to avoid selecting similar options like 'Foster Child', 'Step-Child', etc.
     },
     expenses: {
-      hasExpenses: true,
       type: 'Rent',
       amount: '2500',
     },
@@ -61,7 +60,6 @@ export const testUsers = {
       relationship: 'Child',
     },
     expenses: {
-      hasExpenses: true,
       type: 'Rent',
       amount: '2500',
     },
@@ -91,7 +89,6 @@ export const testUsers = {
       relationship: 'Child',
     },
     expenses: {
-      hasExpenses: true,
       type: 'Rent',
       amount: '2500',
     },
@@ -121,7 +118,6 @@ export const testUsers = {
       relationship: 'Child',
     },
     expenses: {
-      hasExpenses: true,
       type: 'Rent',
       amount: '2800',
     },

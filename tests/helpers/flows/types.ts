@@ -42,12 +42,13 @@ export interface HouseholdMemberInfo extends PersonInfo {
 }
 
 /**
- * Expense information
+ * Expense information.
+ * hasExpenses is derived from whether amount > 0 — just omit the expense entry if there are none.
  */
 export interface ExpenseInfo {
-  hasExpenses: boolean;
   type: string;
   amount: string;
+  frequency?: 'monthly' | 'yearly';
 }
 
 /**

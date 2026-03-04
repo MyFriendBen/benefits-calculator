@@ -213,6 +213,7 @@ export function useUpdateFormData() {
       updatedFormData.expenses.push({
         expenseSourceName: expense.type ?? '',
         expenseAmount: Math.round(parseFloat(String(expense.amount ?? 0)) || 0),
+        expenseFrequency: (expense.frequency === 'yearly' ? 'yearly' : 'monthly'),
       });
     }
 

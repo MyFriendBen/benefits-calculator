@@ -1,8 +1,11 @@
 import { UtmParameters } from '../Components/CampaignAnalytics/useUtmParameters';
 
+export type ExpenseFrequency = 'monthly' | 'yearly';
+
 export type Expense = {
   expenseSourceName: string;
   expenseAmount: number;
+  expenseFrequency: ExpenseFrequency;
 };
 
 export type IncomeStream = {

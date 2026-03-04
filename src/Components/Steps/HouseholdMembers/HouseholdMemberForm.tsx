@@ -618,7 +618,7 @@ const HouseholdMemberForm = () => {
             options={insuranceTileOptions}
             values={watch('healthInsurance')}
             onChange={(values) => {
-              setValue('healthInsurance', values, { shouldValidate: false, shouldDirty: true });
+              setValue('healthInsurance', values as HealthInsurance, { shouldValidate: false, shouldDirty: true });
               clearErrors('healthInsurance');
             }}
           />
@@ -661,7 +661,7 @@ const HouseholdMemberForm = () => {
           options={conditionTileOptions}
           values={watch('conditions')}
           onChange={(values) => {
-            setValue('conditions', values, { shouldDirty: true });
+            setValue('conditions', values as Conditions, { shouldDirty: true });
           }}
         />
         {watchIsStudent && createStudentEligibilityQuestions()}
