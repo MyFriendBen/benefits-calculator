@@ -9,7 +9,6 @@ import {
   selectRadio,
   selectIncomeType,
   selectFrequency,
-  selectExpenseType,
   checkCheckbox,
   UncheckCheckbox,
   clickGetStarted,
@@ -128,19 +127,8 @@ test.describe('Error Messages Test', () => {
 
     await clickContinue(page);
 
-    // Verify expenses error message
+    // Expenses page - table layout, no required fields, just continue
     await verifyCurrentUrl(page, URL_PATTERNS.EXPENSES);
-
-    await selectRadio(page, FORM_INPUTS.YES_RADIO.name);
-
-    await clickContinue(page);
-
-    const expenseErrorMessages = await page.locator('span.error-message').allTextContents();
-
-    expect(expenseErrorMessages).toEqual(['Please select an expense type', 'Please enter a number greater than 0']);
-
-    await selectExpenseType(page, userInfo.expenseType);
-    await fillTextField(page, FORM_INPUTS.AMOUNT.name, userInfo.expenseAmount);
 
     await clickContinue(page);
 

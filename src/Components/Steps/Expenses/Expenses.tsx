@@ -1,152 +1,110 @@
+import { useContext, useMemo } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import QuestionHeader from '../../QuestionComponents/QuestionHeader';
-import HelpButton from '../../HelpBubbleIcon/HelpButton';
-import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
-import QuestionDescription from '../../QuestionComponents/QuestionDescription';
-import {
-  Box,
-  Button,
-  FormControl,
-  FormControlLabel,
-  FormHelperText,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Radio,
-  RadioGroup,
-  Select,
-  Stack,
-  TextField,
-} from '@mui/material';
-import { Context } from '../../Wrapper/Wrapper';
-import { useContext, useEffect } from 'react';
-import { useForm, Controller, SubmitHandler, useFieldArray } from 'react-hook-form';
+import { Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { InputAdornment } from '@mui/material';
+import QuestionHeader from '../../QuestionComponents/QuestionHeader';
+import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
+import QuestionDescription from '../../QuestionComponents/QuestionDescription';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
+import FrequencySelector from './FrequencySelector';
+import { Context } from '../../Wrapper/Wrapper';
 import { useParams } from 'react-router-dom';
-import { useDefaultBackNavigationFunction, useGoToNextStep } from '../../QuestionComponents/questionHooks';
+import { useDefaultBackNavigationFunction } from '../../QuestionComponents/questionHooks';
 import { useConfig } from '../../Config/configHook';
 import { FormattedMessageType } from '../../../Types/Questions';
-import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
-import CloseButton from '../../CloseButton/CloseButton';
-import AddIcon from '@mui/icons-material/Add';
+import { ExpenseFrequency } from '../../../Types/FormData';
 import { NumericFormat } from 'react-number-format';
+import TextField from '@mui/material/TextField';
 import useScreenApi from '../../../Assets/updateScreen';
-import { helperText } from '../../HelperText/HelperText';
-import './Expenses.css';
 import useStepForm from '../stepForm';
+import { camelCaseToTitleCase } from '../../../utils/camelCaseToTitleCase';
+import './Expenses.css';
+
+// Schemas are stable and don't depend on component state — defined at module scope
+// to avoid recreating them on every render.
+const expenseRowSchema = z.object({
+  expenseSourceName: z.string(),
+  expenseAmount: z.number().int().min(0),
+  expenseFrequency: z.enum(['monthly', 'yearly']),
+});
+const formSchema = z.object({
+  expenses: z.array(expenseRowSchema),
+});
+type FormSchema = z.infer<typeof formSchema>;
 
 const Expenses = () => {
   const { formData } = useContext(Context);
   const { uuid } = useParams();
   const intl = useIntl();
-  const translatedAriaLabel = intl.formatMessage({
-    id: 'questions.hasExpenses-ariaLabel',
-    defaultMessage: 'has expenses',
-  });
   const { updateScreen } = useScreenApi();
   const backNavigationFunction = useDefaultBackNavigationFunction('hasExpenses');
-  const expenseOptions = useConfig('expense_options') as Record<string, FormattedMessageType>;
+  const expenseOptionsByCategory = useConfig('expense_options_by_category') as Record<
+    string,
+    Record<string, FormattedMessageType>
+  >;
 
-  const expenseSourceSchema = z.object({
-    expenseSourceName: z
-      .string(
-        helperText(
-          intl.formatMessage({ id: 'errorMessage-expenseType', defaultMessage: 'Please select an expense type' }),
+  // Pre-build the flat key list, index map, and per-row plain names in one pass.
+  // expenseIndexMap keys are the same keys being iterated in the JSX below,
+  // so expenseIndexMap.get(expenseKey) is always defined — the ! assertion is safe.
+  const { expenseKeys, expenseIndexMap, categorizedExpenses } = useMemo(() => {
+    const categories = Object.entries(expenseOptionsByCategory).filter(([, options]) => Object.keys(options).length > 0);
+    const keys = categories.flatMap(([, options]) => Object.keys(options));
+    return {
+      expenseKeys: keys,
+      expenseIndexMap: new Map(keys.map((key, i) => [key, i])),
+      categorizedExpenses: categories.map(([categoryKey, options]) => ({
+        categoryKey,
+        options: Object.entries(options).map(([expenseKey, label]) => ({
+          expenseKey,
+          label,
+          // Pre-compute the plain-text name used for the frequency toggle aria-label.
+          plainName: intl.formatMessage(
+            { id: `expenseOptions.${expenseKey}`, defaultMessage: camelCaseToTitleCase(expenseKey) },
+          ),
+        })),
+        categoryLabel: intl.formatMessage(
+          { id: `expenses.category.${categoryKey}`, defaultMessage: camelCaseToTitleCase(categoryKey) },
         ),
-      )
-      .min(1),
-    expenseAmount: z
-      .number({
-        invalid_type_error: intl.formatMessage({
-          id: 'errorMessage-greaterThanZero',
-          defaultMessage: 'Please enter a number greater than 0',
-        }),
-      })
-      .int()
-      .min(1, {
-        message: intl.formatMessage({
-          id: 'errorMessage-greaterThanZero',
-          defaultMessage: 'Please enter a number greater than 0',
-        }),
-      }),
-  });
-  const expenseSourcesSchema = z.array(expenseSourceSchema);
-  const hasExpensesSchema = z.string().regex(/^true|false$/);
-  const formSchema = z.object({
-    hasExpenses: hasExpensesSchema,
-    expenses: expenseSourcesSchema,
-  });
-  type FormSchema = z.infer<typeof formSchema>;
+      })),
+    };
+  }, [expenseOptionsByCategory, intl]);
 
   const {
     control,
     formState: { errors },
     handleSubmit,
     watch,
-    getValues,
   } = useStepForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      hasExpenses: formData.hasExpenses ?? 'false',
-      expenses: formData.expenses ?? [],
+      expenses: expenseKeys.map((key) => {
+        const saved = formData.expenses.find((e) => e.expenseSourceName === key);
+        return {
+          expenseSourceName: key,
+          expenseAmount: saved?.expenseAmount ?? 0,
+          expenseFrequency: (saved?.expenseFrequency ?? 'monthly') as ExpenseFrequency,
+        };
+      }),
     },
     questionName: 'hasExpenses',
   });
 
-  const watchHasExpenses = watch('hasExpenses');
-  const hasTruthyExpenses = watchHasExpenses === 'true';
-  const { fields, append, remove, replace } = useFieldArray({
-    control,
-    name: 'expenses',
-  });
-
-  useEffect(() => {
-    const noExpensesAreListed = Number(getValues('expenses').length) === 0;
-    if (hasTruthyExpenses && noExpensesAreListed) {
-      append({
-        expenseSourceName: '',
-        expenseAmount: 0,
-      });
-    }
-
-    if (!hasTruthyExpenses) {
-      replace([]);
-    }
-  }, [watchHasExpenses]);
-
-  const formSubmitHandler: SubmitHandler<FormSchema> = async (expensesObject) => {
+  const formSubmitHandler: SubmitHandler<FormSchema> = async (data) => {
     if (uuid === undefined) {
       throw new Error('uuid is not defined');
     }
 
-    const updatedFormData = { ...formData, ...expensesObject };
+    const nonZeroExpenses = data.expenses.filter((e) => e.expenseAmount > 0);
+
+    const updatedFormData = {
+      ...formData,
+      hasExpenses: nonZeroExpenses.length > 0 ? 'true' : 'false',
+      expenses: nonZeroExpenses,
+    };
+
     await updateScreen(updatedFormData);
-  };
-
-  const createExpenseMenuItems = (expenseOptions: Record<string, FormattedMessageType>) => {
-    const disabledSelectMenuItem = (
-      <MenuItem value="select" key="disabled-select-value" disabled>
-        <FormattedMessage id="expenseBlock.createExpenseMenuItems-disabledSelectMenuItemText" defaultMessage="Select" />
-      </MenuItem>
-    );
-
-    const menuItems = Object.entries(expenseOptions).map(([value, message]) => {
-      return (
-        <MenuItem value={value} key={value}>
-          {message}
-        </MenuItem>
-      );
-    });
-
-    return [disabledSelectMenuItem, menuItems];
-  };
-
-  const getExpenseSourceLabel = (expenseOptions: Record<string, FormattedMessageType>, expenseSourceName: string) => {
-    if (expenseSourceName) {
-      return <> ({expenseOptions[expenseSourceName]})</>;
-    }
   };
 
   return (
@@ -155,175 +113,75 @@ const Expenses = () => {
         <FormattedMessage id="qcc.about_household" defaultMessage="Tell us about your household" />
       </QuestionHeader>
       <QuestionQuestion>
-        <div className="expenses-q-and-help-button">
-          <FormattedMessage id="questions.hasExpenses" defaultMessage="Does your household have any expenses?" />
-          <HelpButton>
-            <FormattedMessage
-              id="questions.hasExpenses-description"
-              defaultMessage="Add up expenses for everyone who lives in your home. This includes costs like child care, child support, rent, medical expenses, heating bills, and more. We will ask only about expenses that may affect benefits. We will not ask about expenses such as food since grocery bills do not affect benefits."
-            />
-          </HelpButton>
-        </div>
+        <FormattedMessage id="expenses.header.question" defaultMessage="Which of the following expenses does your household have?" />
       </QuestionQuestion>
       <QuestionDescription>
         <FormattedMessage
-          id="questions.hasExpenses-description-additional"
-          defaultMessage="Expenses can affect benefits! We can be more accurate if you tell us key expenses like your rent or mortgage, utilities, and child care."
+          id="expenses.header.description"
+          defaultMessage="These are the expenses that can affect your benefits. Enter whole dollar amounts for any expenses your household has. If you're unsure of the exact amount, enter an estimate rather than leaving it as $0."
         />
       </QuestionDescription>
       <form onSubmit={handleSubmit(formSubmitHandler)}>
-        <Controller
-          name="hasExpenses"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <RadioGroup {...field} aria-label={translatedAriaLabel} className="expense-radiogroup-margin-bottom">
-              <FormControlLabel
-                value={'true'}
-                control={<Radio />}
-                label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
-              />
-              <FormControlLabel
-                value={'false'}
-                control={<Radio />}
-                label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
-              />
-            </RadioGroup>
-          )}
-        />
-        {fields.map((field, index) => {
-          const selectedExpenseSource = watch('expenses')[index].expenseSourceName;
-          return (
-            <Box className="expense-section-container" key={field.id}>
-              {index !== 0 && (
-                <div className="delete-button-container">
-                  <CloseButton handleClose={() => remove(index)} />
-                </div>
-              )}
-              <Stack className={index % 2 === 0 ? 'expense-section' : ''}>
-                <QuestionQuestion>
-                  {index === 0 ? (
-                    <div className="first-expense-q-padding">
-                      <FormattedMessage
-                        id="questions.hasExpenses-a"
-                        defaultMessage="What type of expense has your household had most recently?"
+        <div className="expenses-list">
+          {categorizedExpenses.map(({ categoryKey, categoryLabel, options }) => (
+            <div key={categoryKey} className="expense-category">
+              <div className="expense-category-header">
+                <h3 className="expense-category-label">{categoryLabel}</h3>
+                <span className="expense-col-header" aria-hidden="true">
+                  <FormattedMessage id="expenses.header.amount" defaultMessage="Amount" />
+                </span>
+                <span className="expense-col-header" aria-hidden="true">
+                  <FormattedMessage id="expenses.header.frequency" defaultMessage="Frequency" />
+                </span>
+              </div>
+              {options.map(({ expenseKey, label, plainName }) => {
+                const index = expenseIndexMap.get(expenseKey)!; // always defined — map is built from same keys
+                const amount = watch(`expenses.${index}.expenseAmount`);
+                return (
+                  <div key={expenseKey} className={`expense-row${amount > 0 ? ' expense-row--active' : ''}`}>
+                    <label htmlFor={`expense-amount-${expenseKey}`} className="expense-name-cell">{label}</label>
+                    <div className="expense-amount-cell">
+                      <Controller
+                        name={`expenses.${index}.expenseAmount`}
+                        control={control}
+                        render={({ field }) => (
+                          <NumericFormat
+                            value={field.value === 0 ? '' : field.value}
+                            onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+                            thousandSeparator
+                            allowNegative={false}
+                            decimalScale={0}
+                            customInput={TextField}
+                            id={`expense-amount-${expenseKey}`}
+                            inputProps={{ inputMode: 'numeric' }}
+                            size="small"
+                            placeholder="0"
+                            InputProps={{
+                              startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                              sx: { backgroundColor: '#ffffff' },
+                            }}
+                            error={!!errors.expenses?.[index]?.expenseAmount}
+                            helperText={errors.expenses?.[index]?.expenseAmount?.message}
+                            sx={{ width: '9rem' }}
+                          />
+                        )}
                       />
                     </div>
-                  ) : (
-                    <FormattedMessage
-                      id="expenseBlock.createExpenseBlockQuestions-questionLabel"
-                      defaultMessage="If you have another expense, select it below."
-                    />
-                  )}
-                </QuestionQuestion>
-              </Stack>
-              <FormControl
-                sx={{ m: 1, minWidth: '13.125rem', maxWidth: '100%' }}
-                error={!!errors.expenses?.[index]?.expenseSourceName}
-                className="expense-section-type"
-              >
-                <InputLabel id={`expense-type-label-${index}`}>
-                  <FormattedMessage
-                    id="expenseBlock.createExpenseDropdownMenu-expenseTypeInputLabel"
-                    defaultMessage="Expense Type"
-                  />
-                </InputLabel>
-                <Controller
-                  name={`expenses.${index}.expenseSourceName`}
-                  control={control}
-                  render={({ field }) => (
-                    <>
-                      <Select
-                        {...field}
-                        labelId={`expense-type-label-${index}`}
-                        id={`expenses.${index}.expenseSourceName`}
-                        label={
-                          <FormattedMessage
-                            id="expenseBlock.createExpenseDropdownMenu-expenseTypeSelectLabel"
-                            defaultMessage="Expense Type"
-                          />
-                        }
-                        sx={{ backgroundColor: '#fff' }}
-                      >
-                        {createExpenseMenuItems(expenseOptions)}
-                      </Select>
-                      {!!errors.expenses?.[index]?.expenseSourceName && (
-                        <FormHelperText sx={{ marginLeft: 0 }}>
-                          <ErrorMessageWrapper fontSize="1rem">
-                            {errors.expenses?.[index]?.expenseSourceName?.message}
-                          </ErrorMessageWrapper>
-                        </FormHelperText>
-                      )}
-                    </>
-                  )}
-                />
-              </FormControl>
-              <div className="expense-margin-bottom">
-                <QuestionQuestion>
-                  <FormattedMessage
-                    id="expenseBlock.createExpenseAmountTextfield-questionLabel"
-                    defaultMessage="How much is this expense every month?"
-                  />
-                  {getExpenseSourceLabel(expenseOptions, selectedExpenseSource)}
-                </QuestionQuestion>
-                <div className="expense-block-textfield">
-                  <Controller
-                    name={`expenses.${index}.expenseAmount`}
-                    control={control}
-                    render={({ field }) => (
-                      <>
-                        <NumericFormat
-                          value={field.value === 0 ? '' : field.value}
-                          onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
-                          thousandSeparator
-                          allowNegative={false}
-                          decimalScale={0}
-                          customInput={TextField}
-                          label={
-                            <FormattedMessage
-                              id="expenseBlock.createExpenseAmountTextfield-amountLabel"
-                              defaultMessage="Amount"
-                            />
-                          }
-                          variant="outlined"
-                          inputProps={{ inputMode: 'numeric' }}
-                          sx={{ backgroundColor: '#fff' }}
-                          error={!!errors.expenses?.[index]?.expenseAmount}
-                          InputProps={{
-                            startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                            sx: { backgroundColor: '#FFFFFF' },
-                          }}
-                        />
-                        {!!errors.expenses?.[index]?.expenseAmount && (
-                          <FormHelperText sx={{ marginLeft: 0 }}>
-                            <ErrorMessageWrapper fontSize="1rem">
-                              {errors.expenses?.[index]?.expenseAmount?.message}
-                            </ErrorMessageWrapper>
-                          </FormHelperText>
+                    <div className="expense-frequency-cell">
+                      <Controller
+                        name={`expenses.${index}.expenseFrequency`}
+                        control={control}
+                        render={({ field }) => (
+                          <FrequencySelector value={field.value} onChange={field.onChange} expenseName={plainName} />
                         )}
-                      </>
-                    )}
-                  />
-                </div>
-              </div>
-            </Box>
-          );
-        })}
-        {hasTruthyExpenses && (
-          <Button
-            variant="outlined"
-            onClick={() =>
-              append({
-                expenseSourceName: '',
-                expenseAmount: 0,
-              })
-            }
-            startIcon={<AddIcon />}
-            type="button"
-          >
-            <FormattedMessage id="expenseBlock.return-addExpenseButton" defaultMessage="Add another expense" />
-          </Button>
-        )}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
         <PrevAndContinueButtons backNavigationFunction={backNavigationFunction} />
       </form>
     </div>

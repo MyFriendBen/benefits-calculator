@@ -29,7 +29,7 @@ h2.question-label {
 }
 
 .question-description {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   font-family: var(--font-body);
   font-size: 0.875rem;
 }

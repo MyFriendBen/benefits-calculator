@@ -88,6 +88,7 @@ export default function EnergyCalculatorExpenses() {
     return {
       expenseSourceName: expenseName,
       expenseAmount: 1,
+      expenseFrequency: 'monthly',
     };
   };
 

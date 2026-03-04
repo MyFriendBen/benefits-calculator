@@ -170,7 +170,7 @@ const themes: Themes = {
     primaryColor: '#003863',
     secondaryColor: '#003863',
     midBlueColor: '#003863',
-    footerColor: '#FFFFFF',
+    footerColor: '#41528C',
     secondaryBackgroundColor: '#F7F7F7',
     hoverColor: '#FFFFFF',
     outlineHoverBackgroundColor: '#003863',
@@ -181,7 +181,7 @@ const themes: Themes = {
       '--primary-color': '#003863',
       '--secondary-color': '#003863',
       '--midBlue-color': '#003863',
-      '--footer-color': '#FFFFFF',
+      '--footer-color': '#41528C',
 
       // Colors - Background
       '--secondary-background-color': '#F7F7F7',
