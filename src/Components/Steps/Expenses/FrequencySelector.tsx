@@ -1,9 +1,10 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import './FrequencySelector.css';
+import { ExpenseFrequency } from '../../../Types/FormData';
 
 type FrequencySelectorProps = {
-  value: string;
-  onChange: (value: string) => void;
+  value: ExpenseFrequency;
+  onChange: (value: ExpenseFrequency) => void;
   expenseName: string;
 };
 
