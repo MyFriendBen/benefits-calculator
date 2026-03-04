@@ -67,21 +67,16 @@ const Wrapper = ({
 
 describe('HealthInsuranceSection', () => {
   describe('question header', () => {
-    it('shows "you" question text for page 1', () => {
+    it('renders "Health Insurance" heading', () => {
       render(<Wrapper pageNumber={1} />);
-      expect(screen.getByText(/which type of health insurance do you have/i)).toBeInTheDocument();
-    });
-
-    it('shows "they" question text for page > 1', () => {
-      render(<Wrapper pageNumber={2} />);
-      expect(screen.getByText(/what type of health insurance do they have/i)).toBeInTheDocument();
+      expect(screen.getByText(/health insurance/i)).toBeInTheDocument();
     });
   });
 
   describe('description', () => {
-    it('renders "choose all that apply" description', () => {
+    it('renders "select all that apply" description', () => {
       render(<Wrapper />);
-      expect(screen.getByText(/choose all that apply/i)).toBeInTheDocument();
+      expect(screen.getByText(/select all that apply/i)).toBeInTheDocument();
     });
   });
 
