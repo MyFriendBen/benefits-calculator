@@ -547,7 +547,7 @@ function SignUp() {
             </div>
             <div className="sign-up-server-error-container">
               {hasServerError && (
-                <ErrorMessageWrapper fontSize="1.5rem">
+                <ErrorMessageWrapper fontSize="1rem">
                   <FormattedMessage
                     id="validation-helperText.serverError"
                     defaultMessage="Please enter a valid email address and/or phone number. This error could also be caused by entering an email address that is already in our system. If the error persists, remember that this question is optional and will not impact your MyFriendBen results. You can skip this question by deselecting the boxes at the top of the page and pressing continue."
