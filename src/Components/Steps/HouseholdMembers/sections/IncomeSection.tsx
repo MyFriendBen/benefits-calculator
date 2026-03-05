@@ -336,26 +336,22 @@ const IncomeSection = ({
 
   return (
     <Box id="income-section">
-      <Box className="section-container">
-        <div className="section">
-          <QuestionQuestion>
-            <FormattedMessage id="householdDataBlock.createIncomeRadioQuestion-questionLabel" defaultMessage="Income Sources" />
-          </QuestionQuestion>
-          <QuestionDescription>
-            {pageNumber === 1 ? (
-              <FormattedMessage
-                id="householdDataBlock.incomeDescription-you"
-                defaultMessage="Start with your own income only. This includes wages, self-employment, current benefits, child support, and any other regular payments. You'll enter income for each household member separately."
-              />
-            ) : (
-              <FormattedMessage
-                id="householdDataBlock.incomeDescription-them"
-                defaultMessage="Include their wages, self-employment, current benefits, child support, and any other regular payments."
-              />
-            )}
-          </QuestionDescription>
-        </div>
-      </Box>
+      <QuestionQuestion>
+        <FormattedMessage id="householdDataBlock.createIncomeRadioQuestion-questionLabel" defaultMessage="Income Sources" />
+      </QuestionQuestion>
+      <QuestionDescription>
+        {pageNumber === 1 ? (
+          <FormattedMessage
+            id="householdDataBlock.incomeDescription-you"
+            defaultMessage="Start with your own income only. This includes wages, self-employment, current benefits, child support, and any other regular payments. You'll enter income for each household member separately."
+          />
+        ) : (
+          <FormattedMessage
+            id="householdDataBlock.incomeDescription-them"
+            defaultMessage="Include their wages, benefits, child support, and any other regular payments. If you don't know the exact amount, add your best estimate. It will help make your results more accurate."
+          />
+        )}
+      </QuestionDescription>
 
       <Stack spacing={2} className="income-streams-stack">
         {fields.map((field, index) => (
