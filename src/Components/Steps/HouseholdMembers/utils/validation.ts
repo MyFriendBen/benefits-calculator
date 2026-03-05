@@ -5,6 +5,7 @@ import { IntlShape } from 'react-intl';
 // ============================================================================
 
 export const ONE_OR_MORE_DIGITS_BUT_NOT_ALL_ZERO = /^(?!0+$)\d+$/;
+export const MAX_HOURS_PER_WEEK = 168;
 export const INCOME_AMOUNT_REGEX = /^\d{0,7}(?:\d\.\d{0,2})?$/;
 
 // ============================================================================
@@ -35,7 +36,7 @@ export const validateNoneExclusive = (options: Record<string, boolean>): boolean
  */
 export const validateHourlyIncome = (incomeFrequency: string, hoursPerWeek: string): boolean => {
   if (incomeFrequency === 'hourly') {
-    return ONE_OR_MORE_DIGITS_BUT_NOT_ALL_ZERO.test(hoursPerWeek);
+    return ONE_OR_MORE_DIGITS_BUT_NOT_ALL_ZERO.test(hoursPerWeek) && Number(hoursPerWeek) <= MAX_HOURS_PER_WEEK;
   }
   return true;
 };
@@ -61,7 +62,7 @@ export const renderMissingBirthMonthHelperText = (intlHook: IntlShape) => {
 export const renderFutureBirthMonthHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
     id: 'hhmform.invalidBirthMonth',
-    defaultMessage: 'This birth month is in the future',
+    defaultMessage: 'This birth month is in the future.',
   });
 };
 
@@ -96,7 +97,7 @@ export const renderHealthInsNonePlusHelperText = (intlHook: IntlShape) => {
 export const renderHealthInsNonePlusTheyHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
     id: 'validation-helperText.hhMemberInsuranceNone-they',
-    defaultMessage: 'Please do not select any other options if they do not have health insurance',
+    defaultMessage: 'Please do not select any other options if they do not have health insurance.',
   });
 };
 
@@ -109,8 +110,8 @@ export const renderRelationshipToHHHelperText = (intlHook: IntlShape) => {
 
 export const renderIncomeStreamNameHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
-    id: 'errorMessage-incomeType',
-    defaultMessage: 'Please select an income type.',
+    id: 'errorMessage-incomeSource',
+    defaultMessage: 'Please select an income source',
   });
 };
 
@@ -123,8 +124,8 @@ export const renderIncomeFrequencyHelperText = (intlHook: IntlShape) => {
 
 export const renderHoursWorkedHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
-    id: 'errorMessage-greaterThanZero',
-    defaultMessage: 'Please enter a number greater than 0.',
+    id: 'errorMessage-hoursPerWeek',
+    defaultMessage: 'Please enter a number between 1 and 168.',
   });
 };
 
@@ -135,10 +136,10 @@ export const renderIncomeAmountHelperText = (intlHook: IntlShape) => {
   });
 };
 
-export const renderIncomeCategoryHelperText = (intlHook: IntlShape) => {
+export const renderIncomeTypeHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
-    id: 'errorMessage-incomeCategory',
-    defaultMessage: 'Please select an income category',
+    id: 'errorMessage-incomeType',
+    defaultMessage: 'Please select an income type',
   });
 };
 

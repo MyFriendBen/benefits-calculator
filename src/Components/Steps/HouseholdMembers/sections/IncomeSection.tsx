@@ -1,26 +1,34 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import {
   Box,
-  Button,
   FormControl,
-  FormControlLabel,
   FormHelperText,
+  IconButton,
   InputAdornment,
-  InputLabel,
-  Radio,
-  RadioGroup,
   Select,
   Stack,
   TextField,
+  Tooltip,
+  Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { Control, Controller, UseFieldArrayAppend, UseFieldArrayRemove, FieldArrayWithId, FieldErrors, UseFormWatch } from 'react-hook-form';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Control,
+  Controller,
+  UseFormSetValue,
+  useWatch,
+  UseFieldArrayAppend,
+  UseFieldArrayRemove,
+  FieldArrayWithId,
+  FieldErrors,
+} from 'react-hook-form';
 import { NumericFormat } from 'react-number-format';
+import { ReactComponent as HelpBubble } from '../../../../Assets/icons/General/helpBubble.svg';
 import QuestionQuestion from '../../../QuestionComponents/QuestionQuestion';
 import QuestionDescription from '../../../QuestionComponents/QuestionDescription';
-import HelpButton from '../../../HelpBubbleIcon/HelpButton';
 import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
-import CloseButton from '../../../CloseButton/CloseButton';
 import { createMenuItems } from '../../SelectHelperFunctions/SelectHelperFunctions';
 import { FormattedMessageType } from '../../../../Types/Questions';
 import { IncomeStreamFormData } from '../utils/types';
@@ -30,7 +38,6 @@ import '../styles/IncomeSection.css';
 
 // Both main and EC workflows share the same incomeStreams shape.
 type IncomeFormValues = {
-  hasIncome: string;
   incomeStreams: IncomeStreamFormData[];
 };
 
@@ -40,12 +47,252 @@ interface IncomeSectionProps {
   fields: FieldArrayWithId<IncomeFormValues, 'incomeStreams', 'id'>[];
   append: UseFieldArrayAppend<IncomeFormValues, 'incomeStreams'>;
   remove: UseFieldArrayRemove;
-  watch: UseFormWatch<IncomeFormValues>;
-  incomeOptions: Record<string, FormattedMessageType>;
-  frequencyMenuItems: JSX.Element[];
+  setValue: UseFormSetValue<any>;
+  incomeCategories: Record<string, FormattedMessageType>;
+  incomeOptions: Record<string, Record<string, FormattedMessageType>>;
+  frequencyMenuItems: (JSX.Element | JSX.Element[])[];
   pageNumber: number;
-  isUnder16: boolean;
 }
+
+interface IncomeStreamRowProps {
+  index: number;
+  control: Control<IncomeFormValues>;
+  setValue: UseFormSetValue<any>;
+  remove: UseFieldArrayRemove;
+  getError: (index: number, fieldName: keyof IncomeStreamFormData) => unknown;
+  incomeCategoriesMenuItems: (JSX.Element | JSX.Element[])[];
+  incomeOptions: Record<string, Record<string, FormattedMessageType>>;
+  frequencyMenuItems: (JSX.Element | JSX.Element[])[];
+}
+
+const IncomeStreamRow = ({
+  index,
+  control,
+  setValue,
+  remove,
+  getError,
+  incomeCategoriesMenuItems,
+  incomeOptions,
+  frequencyMenuItems,
+}: IncomeStreamRowProps) => {
+  const [showFreqHelp, setShowFreqHelp] = useState(false);
+  const freqHelpRef = useRef<HTMLSpanElement>(null);
+  const intl = useIntl();
+
+  useEffect(() => {
+    if (!showFreqHelp) return;
+    const handler = (e: MouseEvent) => {
+      if (freqHelpRef.current && !freqHelpRef.current.contains(e.target as Node)) {
+        setShowFreqHelp(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showFreqHelp]);
+
+  // useWatch with a field-scoped name subscribes only this row to its own fields,
+  // avoiding re-renders of sibling rows when unrelated streams change.
+  const selectedType = useWatch({ control, name: `incomeStreams.${index}.incomeType` });
+  const isHourly = useWatch({ control, name: `incomeStreams.${index}.incomeFrequency` }) === 'hourly';
+  const sourceOptions = selectedType && incomeOptions[selectedType] ? incomeOptions[selectedType] : {};
+  const specificTypeMenuItems = createMenuItems(
+    sourceOptions,
+    <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectType" defaultMessage="Select type" />,
+  );
+
+  const incomeTypeError = getError(index, 'incomeType') as { message?: string } | undefined;
+  const incomeSourceError = getError(index, 'incomeSource') as { message?: string } | undefined;
+  const incomeFrequencyError = getError(index, 'incomeFrequency') as { message?: string } | undefined;
+  const hoursPerWeekError = getError(index, 'hoursPerWeek') as { message?: string } | undefined;
+  const incomeAmountError = getError(index, 'incomeAmount') as { message?: string } | undefined;
+
+  return (
+    <Box id={`income-stream-${index}`} className="income-box">
+      <Box className="income-fields-container">
+        {/* Income Type */}
+        <Box className="income-category-container">
+          <Typography className="form-field-label">
+            <FormattedMessage id="personIncomeBlock.incomeType" defaultMessage="Income Type" />
+          </Typography>
+          <FormControl fullWidth size="small" error={incomeTypeError !== undefined}>
+            <Controller
+              name={`incomeStreams.${index}.incomeType`}
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  displayEmpty
+                  sx={{ backgroundColor: '#fff' }}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setValue(`incomeStreams.${index}.incomeSource`, '');
+                  }}
+                >
+                  {incomeCategoriesMenuItems}
+                </Select>
+              )}
+            />
+            {incomeTypeError && (
+              <FormHelperText sx={{ ml: 0 }}>
+                <ErrorMessageWrapper fontSize="0.75rem">{incomeTypeError.message ?? ''}</ErrorMessageWrapper>
+              </FormHelperText>
+            )}
+          </FormControl>
+        </Box>
+
+        {/* Income Source, Frequency, Hours (if hourly), Amount */}
+        <Box className="income-fields-row">
+          <Box className="income-field-specific-type">
+            <Typography className="form-field-label">
+              <FormattedMessage id="personIncomeBlock.incomeSource" defaultMessage="Income Source" />
+            </Typography>
+            <FormControl fullWidth size="small" error={!!selectedType && incomeSourceError !== undefined}>
+              <Controller
+                name={`incomeStreams.${index}.incomeSource`}
+                control={control}
+                render={({ field }) => (
+                  // Tooltip needs a non-disabled span wrapper — disabled elements swallow pointer events
+                  <Tooltip
+                    title={selectedType ? '' : <FormattedMessage id="personIncomeBlock.specificType-tooltip" defaultMessage="Select an income type first" />}
+                    disableHoverListener={!!selectedType}
+                    disableFocusListener={!!selectedType}
+                    disableTouchListener={!!selectedType}
+                  >
+                    <span>
+                      <Select {...field} displayEmpty sx={{ backgroundColor: '#fff' }} disabled={!selectedType} fullWidth>
+                        {specificTypeMenuItems}
+                      </Select>
+                    </span>
+                  </Tooltip>
+                )}
+              />
+              {selectedType && incomeSourceError && (
+                <FormHelperText sx={{ ml: 0 }}>
+                  <ErrorMessageWrapper fontSize="0.75rem">{incomeSourceError.message ?? ''}</ErrorMessageWrapper>
+                </FormHelperText>
+              )}
+            </FormControl>
+          </Box>
+
+          <Box className="income-field-frequency">
+            <div className="income-frequency-label-row">
+              <Typography className="form-field-label">
+                <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
+              </Typography>
+              <span ref={freqHelpRef} style={{ display: 'contents' }}>
+                <IconButton
+                  onClick={() => setShowFreqHelp((v) => !v)}
+                  aria-label={intl.formatMessage({ id: 'helpButton.ariaText', defaultMessage: 'help button' })}
+                >
+                  <HelpBubble style={{ height: '20px', width: '20px' }} className="help-button-icon-color" />
+                </IconButton>
+                {showFreqHelp && (
+                  <p className="help-text income-freq-help-icon">
+                    <FormattedMessage
+                      id="personIncomeBlock.income-freq-help-text"
+                      defaultMessage='"Every 2 weeks" means you get paid every other week. "Twice a month" means you get paid two times a month on the same dates each month.'
+                    />
+                  </p>
+                )}
+              </span>
+            </div>
+            <FormControl fullWidth size="small" error={incomeFrequencyError !== undefined}>
+              <Controller
+                name={`incomeStreams.${index}.incomeFrequency`}
+                control={control}
+                render={({ field }) => (
+                  <Select {...field} displayEmpty sx={{ backgroundColor: '#fff' }}>
+                    {frequencyMenuItems}
+                  </Select>
+                )}
+              />
+              {incomeFrequencyError && (
+                <FormHelperText sx={{ ml: 0 }}>
+                  <ErrorMessageWrapper fontSize="0.75rem">{incomeFrequencyError.message ?? ''}</ErrorMessageWrapper>
+                </FormHelperText>
+              )}
+            </FormControl>
+          </Box>
+
+          {isHourly && (
+            <Box className="income-field-hours">
+              <Typography className="form-field-label">
+                <FormattedMessage id="personIncomeBlock.hoursPerWeek" defaultMessage="Hours per Week" />
+              </Typography>
+              <Controller
+                name={`incomeStreams.${index}.hoursPerWeek`}
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <NumericFormat
+                      value={field.value}
+                      onValueChange={({ value }) => field.onChange(value)}
+                      allowNegative={false}
+                      decimalScale={0}
+                      customInput={TextField}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      inputProps={{ inputMode: 'numeric' }}
+                      sx={{ backgroundColor: '#fff' }}
+                      error={hoursPerWeekError !== undefined}
+                    />
+                    {hoursPerWeekError && (
+                      <FormHelperText sx={{ ml: 0 }}>
+                        <ErrorMessageWrapper fontSize="0.75rem">{hoursPerWeekError.message ?? ''}</ErrorMessageWrapper>
+                      </FormHelperText>
+                    )}
+                  </>
+                )}
+              />
+            </Box>
+          )}
+
+          <Box className="income-field-amount">
+            <Typography className="form-field-label">
+              <FormattedMessage id="personIncomeBlock.preTaxAmount" defaultMessage="Pre-Tax Amount" />
+            </Typography>
+            <Controller
+              name={`incomeStreams.${index}.incomeAmount`}
+              control={control}
+              render={({ field }) => (
+                <>
+                  <NumericFormat
+                    value={field.value}
+                    onValueChange={({ value }) => field.onChange(value)}
+                    thousandSeparator
+                    allowNegative={false}
+                    decimalScale={isHourly ? 2 : 0}
+                    fixedDecimalScale={isHourly}
+                    customInput={TextField}
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    inputProps={{ inputMode: isHourly ? 'decimal' : 'numeric' }}
+                    sx={{ backgroundColor: '#fff' }}
+                    error={incomeAmountError !== undefined}
+                    InputProps={{
+                      startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                    }}
+                  />
+                  {incomeAmountError && (
+                    <FormHelperText sx={{ ml: 0 }}>
+                      <ErrorMessageWrapper fontSize="0.75rem">{incomeAmountError.message ?? ''}</ErrorMessageWrapper>
+                    </FormHelperText>
+                  )}
+                </>
+              )}
+            />
+          </Box>
+        </Box>
+      </Box>
+
+      <IconButton onClick={() => remove(index)} className="income-delete-button" aria-label="delete income source">
+        <DeleteIcon />
+      </IconButton>
+    </Box>
+  );
+};
 
 const IncomeSection = ({
   control,
@@ -53,418 +300,66 @@ const IncomeSection = ({
   fields,
   append,
   remove,
-  watch,
+  setValue,
+  incomeCategories,
   incomeOptions,
   frequencyMenuItems,
   pageNumber,
-  isUnder16,
 }: IncomeSectionProps) => {
-  const intl = useIntl();
-  const watchHasIncome = watch('hasIncome');
-  const hasTruthyIncome = watchHasIncome === 'true';
+  const incomeCategoriesMenuItems = createMenuItems(
+    incomeCategories,
+    <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectCategory" defaultMessage="Select category" />,
+  );
 
-  const getIncomeStreamError = (index: number, fieldName: keyof IncomeStreamFormData) => {
+  const getError = (index: number, fieldName: keyof IncomeStreamFormData) => {
     return (errors.incomeStreams as FieldErrors<IncomeStreamFormData>[])?.[index]?.[fieldName];
   };
 
-  const incomeStreamsMenuItems = createMenuItems(
-    incomeOptions,
-    <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectMenuItem" defaultMessage="Select" />,
-  );
-
-  const translatedAriaLabel = intl.formatMessage({
-    id: 'householdDataBlock.createIncomeRadioQuestion-ariaLabel',
-    defaultMessage: 'has an income',
-  });
-
-  const formattedMsgId =
-    pageNumber === 1 ? 'questions.hasIncome' : 'householdDataBlock.createIncomeRadioQuestion-questionLabel';
-
-  const formattedMsgDefaultMsg =
-    pageNumber === 1
-      ? 'Do you have an income?'
-      : 'Does this individual in your household have significant income you have not already included?';
-
-  const getIncomeStreamSourceLabel = (incomeStreamName: string) => {
-    if (incomeStreamName) {
-      return (
-        <>
-          {'('}
-          {incomeOptions[incomeStreamName]}
-          {')'}?
-        </>
-      );
-    }
-    return '?';
-  };
-
-  const renderIncomeStreamNameSelect = (index: number) => (
-    <FormControl
-      sx={{ minWidth: '13.125rem', maxWidth: '100%' }}
-      error={getIncomeStreamError(index, 'incomeStreamName') !== undefined}
-    >
-      <InputLabel id={`income-type-label-${index}`}>
-        <FormattedMessage
-          id="personIncomeBlock.createIncomeStreamsDropdownMenu-inputLabel"
-          defaultMessage="Income Type"
-        />
-      </InputLabel>
-      <Controller
-        name={`incomeStreams.${index}.incomeStreamName`}
-        control={control}
-        render={({ field }) => (
-          <>
-            <Select
-              {...field}
-              labelId={`income-type-label-${index}`}
-              id={`incomeStreams.${index}.incomeStreamName`}
-              label={
-                <FormattedMessage
-                  id="personIncomeBlock.createIncomeStreamsDropdownMenu-inputLabel"
-                  defaultMessage="Income Type"
-                />
-              }
-              sx={{ backgroundColor: '#fff' }}
-            >
-              {incomeStreamsMenuItems}
-            </Select>
-            {getIncomeStreamError(index, 'incomeStreamName') !== undefined && (
-              <FormHelperText sx={{ ml: 0 }}>
-                <ErrorMessageWrapper fontSize="1rem">
-                  {getIncomeStreamError(index, 'incomeStreamName')?.message ?? ''}
-                </ErrorMessageWrapper>
-              </FormHelperText>
-            )}
-          </>
-        )}
-      />
-    </FormControl>
-  );
-
-  const renderIncomeFrequencySelect = (selectedIncomeSource: string, index: number) => {
-    let formattedMsgId = 'personIncomeBlock.createIncomeStreamFrequencyDropdownMenu-youQLabel';
-    let formattedMsgDefaultMsg = 'How often are you paid this income ';
-    if (pageNumber !== 1) {
-      formattedMsgId = 'personIncomeBlock.createIncomeStreamFrequencyDropdownMenu-questionLabel';
-      formattedMsgDefaultMsg = 'How often are they paid this income ';
-    }
-
-    return (
-      <div>
-        <div className="income-margin-bottom">
-          <QuestionQuestion>
-            <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
-            {getIncomeStreamSourceLabel(selectedIncomeSource)}
-            <HelpButton>
-              <FormattedMessage
-                id="personIncomeBlock.income-freq-help-text"
-                defaultMessage='"Every 2 weeks" means you get paid every other week. "Twice a month" means you get paid two times a month on the same dates each month.'
-              />
-            </HelpButton>
-          </QuestionQuestion>
-        </div>
-        <FormControl
-          sx={{ minWidth: '13.125rem', maxWidth: '100%' }}
-          error={getIncomeStreamError(index, 'incomeFrequency') !== undefined}
-        >
-          <InputLabel id={`income-frequency-label-${index}`}>
-            <FormattedMessage
-              id="personIncomeBlock.createIncomeStreamFrequencyDropdownMenu-freqLabel"
-              defaultMessage="Frequency"
-            />
-          </InputLabel>
-          <Controller
-            name={`incomeStreams.${index}.incomeFrequency`}
-            control={control}
-            render={({ field }) => (
-              <>
-                <Select
-                  {...field}
-                  labelId={`income-frequency-label-${index}`}
-                  id={`incomeStreams.${index}.incomeFrequency`}
-                  label={
-                    <FormattedMessage
-                      id="personIncomeBlock.createIncomeStreamFrequencyDropdownMenu-freqLabel"
-                      defaultMessage="Frequency"
-                    />
-                  }
-                  sx={{ backgroundColor: '#fff' }}
-                >
-                  {frequencyMenuItems}
-                </Select>
-                {getIncomeStreamError(index, 'incomeFrequency') !== undefined && (
-                  <FormHelperText sx={{ ml: 0 }}>
-                    <ErrorMessageWrapper fontSize="1rem">
-                      {getIncomeStreamError(index, 'incomeFrequency')?.message ?? ''}
-                    </ErrorMessageWrapper>
-                  </FormHelperText>
-                )}
-              </>
-            )}
-          />
-        </FormControl>
-      </div>
-    );
-  };
-
-  const renderHoursPerWeekTextfield = (index: number, selectedIncomeSource: string) => {
-    let formattedMsgId = 'personIncomeBlock.createHoursWorkedTextfield-youQLabel';
-    let formattedMsgDefaultMsg = 'How many hours do you work per week ';
-    if (pageNumber !== 1) {
-      formattedMsgId = 'personIncomeBlock.createHoursWorkedTextfield-questionLabel';
-      formattedMsgDefaultMsg = 'How many hours do they work per week ';
-    }
-
-    return (
-      <>
-        <div className="income-margin-bottom">
-          <QuestionQuestion>
-            <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
-            {getIncomeStreamSourceLabel(selectedIncomeSource)}
-          </QuestionQuestion>
-        </div>
-        <Controller
-          name={`incomeStreams.${index}.hoursPerWeek`}
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <>
-              <NumericFormat
-                value={field.value}
-                onValueChange={({ value }) => field.onChange(value)}
-                allowNegative={false}
-                decimalScale={0}
-                customInput={TextField}
-                label={
-                  <FormattedMessage id="incomeBlock.createHoursWorkedTextfield-amountLabel" defaultMessage="Hours" />
-                }
-                variant="outlined"
-                inputProps={{ inputMode: 'numeric' }}
-                sx={{ backgroundColor: '#fff' }}
-                error={getIncomeStreamError(index, 'hoursPerWeek') !== undefined}
-              />
-              {getIncomeStreamError(index, 'hoursPerWeek') !== undefined && (
-                <FormHelperText sx={{ ml: 0 }}>
-                  <ErrorMessageWrapper fontSize="1rem">
-                    {getIncomeStreamError(index, 'hoursPerWeek')?.message ?? ''}
-                  </ErrorMessageWrapper>
-                </FormHelperText>
-              )}
-            </>
-          )}
-        />
-      </>
-    );
-  };
-
-  const renderIncomeAmountTextfield = (
-    index: number,
-    selectedIncomeFrequency: string,
-    selectedIncomeStreamSource: string,
-  ) => {
-    const isHourly = selectedIncomeFrequency === 'hourly';
-    let questionHeader;
-    if (isHourly) {
-      let hourlyFormattedMsgId = 'incomeBlock.createIncomeAmountTextfield-hourly-questionLabel';
-      let hourlyFormattedMsgDefaultMsg = 'What is your hourly rate ';
-      if (pageNumber !== 1) {
-        hourlyFormattedMsgId = 'personIncomeBlock.createIncomeAmountTextfield-hourly-questionLabel';
-        hourlyFormattedMsgDefaultMsg = 'What is their hourly rate ';
-      }
-      questionHeader = <FormattedMessage id={hourlyFormattedMsgId} defaultMessage={hourlyFormattedMsgDefaultMsg} />;
-    } else {
-      let payPeriodFormattedMsgId = 'incomeBlock.createIncomeAmountTextfield-questionLabel';
-      let payPeriodFormattedMsgDefaultMsg = 'How much do you receive before taxes each pay period for ';
-      if (pageNumber !== 1) {
-        payPeriodFormattedMsgId = 'personIncomeBlock.createIncomeAmountTextfield-questionLabel';
-        payPeriodFormattedMsgDefaultMsg = 'How much do they receive before taxes each pay period for ';
-      }
-      questionHeader = (
-        <FormattedMessage id={payPeriodFormattedMsgId} defaultMessage={payPeriodFormattedMsgDefaultMsg} />
-      );
-    }
-
-    return (
-      <div>
-        <div className="income-textfield-margin-bottom">
-          <QuestionQuestion>
-            {questionHeader}
-            {getIncomeStreamSourceLabel(selectedIncomeStreamSource)}
-          </QuestionQuestion>
-        </div>
-        <Controller
-          name={`incomeStreams.${index}.incomeAmount`}
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <>
-              <NumericFormat
-                value={field.value}
-                onValueChange={({ value }) => field.onChange(value)}
-                thousandSeparator
-                allowNegative={false}
-                decimalScale={isHourly ? 2 : 0}
-                fixedDecimalScale={isHourly}
-                customInput={TextField}
-                label={
-                  <FormattedMessage
-                    id="personIncomeBlock.createIncomeAmountTextfield-amountLabel"
-                    defaultMessage="Amount"
-                  />
-                }
-                variant="outlined"
-                inputProps={{ inputMode: isHourly ? 'decimal' : 'numeric' }}
-                sx={{ backgroundColor: '#fff' }}
-                error={getIncomeStreamError(index, 'incomeAmount') !== undefined}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                  sx: { backgroundColor: '#FFFFFF' },
-                }}
-              />
-              {getIncomeStreamError(index, 'incomeAmount') !== undefined && (
-                <FormHelperText sx={{ ml: 0 }}>
-                  <ErrorMessageWrapper fontSize="1rem">
-                    {getIncomeStreamError(index, 'incomeAmount')?.message ?? ''}
-                  </ErrorMessageWrapper>
-                </FormHelperText>
-              )}
-            </>
-          )}
-        />
-      </div>
-    );
-  };
-
   return (
-    <Box id="income-section" className="section-container">
-      <div className="section">
-        <QuestionQuestion>
-          <FormattedMessage id={formattedMsgId} defaultMessage={formattedMsgDefaultMsg} />
-          <HelpButton>
-            <FormattedMessage
-              id="householdDataBlock.createIncomeRadioQuestion-questionDescription"
-              defaultMessage="This includes money from jobs, alimony, investments, or gifts. Income is the money earned or received before deducting taxes"
-            />
-          </HelpButton>
-        </QuestionQuestion>
-        {pageNumber === 1 && (
+    <Box id="income-section">
+      <Box id="field-hasIncome" className="section-container">
+        <div className="section">
+          <QuestionQuestion>
+            <FormattedMessage id="householdDataBlock.createIncomeRadioQuestion-questionLabel" defaultMessage="Income Sources" />
+          </QuestionQuestion>
           <QuestionDescription>
-            <FormattedMessage
-              id="householdDataBlock.createIncomeRadioQuestion-questionDescription.you"
-              defaultMessage="Enter income for yourself. You can enter income for other household members later."
-            />
+            {pageNumber === 1 ? (
+              <FormattedMessage
+                id="householdDataBlock.incomeDescription-you"
+                defaultMessage="Start with your own income only. This includes wages, self-employment, current benefits, child support, and any other regular payments. You'll enter income for each household member separately."
+              />
+            ) : (
+              <FormattedMessage
+                id="householdDataBlock.incomeDescription-them"
+                defaultMessage="Include their wages, self-employment, current benefits, child support, and any other regular payments."
+              />
+            )}
           </QuestionDescription>
-        )}
-        <Controller
-          name="hasIncome"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <RadioGroup {...field} aria-label={translatedAriaLabel}>
-              <FormControlLabel
-                value={'true'}
-                control={<Radio />}
-                label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
-              />
-              <FormControlLabel
-                value={'false'}
-                control={<Radio />}
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <FormattedMessage id="radiofield.label-no" defaultMessage="No" />
-                    {watchHasIncome === 'false' && !isUnder16 && (
-                      <Box component="span" sx={{ fontSize: '0.875rem', color: 'text.secondary', ml: 1 }}>
-                        <FormattedMessage
-                          id="householdDataBlock.createIncomeRadioQuestion-noIncomeDisclaimer"
-                          defaultMessage="Income affects benefits. We can be more accurate if you tell us significant household income."
-                        />
-                      </Box>
-                    )}
-                  </Box>
-                }
-              />
-            </RadioGroup>
-          )}
-        />
+        </div>
+      </Box>
 
-        <Stack sx={{ margin: fields.length > 0 || hasTruthyIncome ? '1.5rem 0 0' : 0 }}>
-          {fields.map((field, index) => {
-            const selectedIncomeStreamSource = watch('incomeStreams')[index].incomeStreamName;
-            const selectedIncomeFrequency = watch('incomeStreams')[index].incomeFrequency;
+      <Stack spacing={2} className="income-streams-stack">
+        {fields.map((field, index) => (
+          <IncomeStreamRow
+            key={field.id}
+            index={index}
+            control={control}
+            setValue={setValue}
+            remove={remove}
+            getError={getError}
+            incomeCategoriesMenuItems={incomeCategoriesMenuItems}
+            incomeOptions={incomeOptions}
+            frequencyMenuItems={frequencyMenuItems}
+          />
+        ))}
 
-            return (
-              <div className="section-container income-block-container" key={field.id}>
-                <div className={index % 2 === 0 ? 'section' : ''}>
-                  {index !== 0 && (
-                    <div className="delete-button-container">
-                      <CloseButton handleClose={() => remove(index)} />
-                    </div>
-                  )}
-                  <div>
-                    {index === 0 && (
-                      <div className="income-margin-bottom">
-                        <QuestionQuestion>
-                          <FormattedMessage
-                            id={pageNumber === 1 ? 'questions.hasIncome-a' : 'personIncomeBlock.return-questionLabel'}
-                            defaultMessage={
-                              pageNumber === 1
-                                ? 'What type of income have you had most recently?'
-                                : 'What type of income have they had most recently?'
-                            }
-                          />
-                          <HelpButton>
-                            <FormattedMessage
-                              id="personIncomeBlock.return-questionDescription"
-                              defaultMessage="Answer the best you can. You will be able to include additional types of income. The more you include, the more accurate your results will be."
-                            />
-                          </HelpButton>
-                        </QuestionQuestion>
-                      </div>
-                    )}
-                    {index !== 0 && (
-                      <div className="income-margin-bottom">
-                        <QuestionQuestion>
-                          <span className="income-stream-q-padding">
-                            <FormattedMessage
-                              id={
-                                pageNumber === 1
-                                  ? 'incomeBlock.createIncomeBlockQuestions-questionLabel'
-                                  : 'personIncomeBlock.createIncomeBlockQuestions-questionLabel'
-                              }
-                              defaultMessage={
-                                pageNumber === 1
-                                  ? 'If you receive another type of income, select it below.'
-                                  : 'If they receive another type of income, select it below.'
-                              }
-                            />
-                          </span>
-                        </QuestionQuestion>
-                      </div>
-                    )}
-                    {renderIncomeStreamNameSelect(index)}
-                    {renderIncomeFrequencySelect(selectedIncomeStreamSource, index)}
-                    {selectedIncomeFrequency === 'hourly' &&
-                      renderHoursPerWeekTextfield(index, selectedIncomeStreamSource)}
-                    {renderIncomeAmountTextfield(index, selectedIncomeFrequency, selectedIncomeStreamSource)}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-          {hasTruthyIncome && (
-            <div>
-              <Button
-                variant="outlined"
-                onClick={() => append(EMPTY_INCOME_STREAM)}
-                startIcon={<AddIcon />}
-                type="button"
-              >
-                <FormattedMessage id="personIncomeBlock.return-addIncomeButton" defaultMessage="Add another income" />
-              </Button>
-            </div>
-          )}
-        </Stack>
-      </div>
+        <Box sx={{ paddingBottom: '1rem' }}>
+          <button onClick={() => append(EMPTY_INCOME_STREAM)} type="button" className="income-add-button">
+            <AddIcon fontSize="small" />
+            <strong><FormattedMessage id="personIncomeBlock.addIncomeSourceButton" defaultMessage="Add An Income Source" /></strong>
+          </button>
+        </Box>
+      </Stack>
     </Box>
   );
 };

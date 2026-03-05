@@ -16,7 +16,7 @@ import '../styles/IncomeSection.css';
 import { useShouldRedirectToConfirmation } from '../../../QuestionComponents/questionHooks';
 import useStepForm from '../../stepForm';
 import { WorkflowType } from '../utils/types';
-import { calculateAge, createHouseholdMemberData, scrollToFirstError } from '../utils/helpers';
+import { backfillIncomeTypes, calculateAge, createHouseholdMemberData, scrollToFirstError } from '../utils/helpers';
 import { useHouseholdMembersNavigation } from '../hooks/useHouseholdMembersNavigation';
 import { useHouseholdMemberConfig } from '../hooks/useHouseholdMemberConfig';
 import { useHouseholdMemberFormEffects } from '../hooks/useHouseholdMemberFormEffects';
@@ -50,6 +50,7 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
   const {
     healthInsuranceOptions,
     conditionOptions,
+    incomeCategories,
     incomeOptions,
     frequencyMenuItems,
     relationshipOptions,
@@ -78,9 +79,11 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
     ? createEnergyCalculatorHouseholdMemberSchema(intl, pageNumber, relationshipOptions)
     : createHouseholdMemberSchema(intl, pageNumber);
 
+  const memberDataWithTypes = backfillIncomeTypes(householdMemberFormData, incomeOptions);
+
   const defaultValues = isEnergyCalculator
-    ? createEnergyCalculatorDefaultValues(householdMemberFormData, pageNumber)
-    : createDefaultValues(householdMemberFormData, pageNumber === 1);
+    ? createEnergyCalculatorDefaultValues(memberDataWithTypes, pageNumber)
+    : createDefaultValues(memberDataWithTypes, pageNumber === 1);
 
   const {
     control,
@@ -99,7 +102,7 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
     onSubmitSuccessfulOverride: () => {},
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: 'incomeStreams',
   });
@@ -107,7 +110,6 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
   // AGE CALCULATION
   const { calculateCurrentAgeStatus } = useAgeCalculation(watch);
 
-  const watchHasIncome = useWatch({ control, name: 'hasIncome' });
   const watchBirthMonth = useWatch({ control, name: 'birthMonth' });
   const watchBirthYear = useWatch({ control, name: 'birthYear' });
   const watchIsStudent = useWatch({ control, name: 'conditions.student' });
@@ -123,9 +125,7 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
     getValues,
     reset,
     append,
-    replace,
     calculateCurrentAgeStatus,
-    watchHasIncome,
     watchBirthMonth,
     watchBirthYear,
     watchIsStudent,
@@ -263,11 +263,11 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
         fields={fields as any}
         append={append}
         remove={remove}
-        watch={watch as any}
+        setValue={setValue}
+        incomeCategories={incomeCategories}
         incomeOptions={incomeOptions}
         frequencyMenuItems={frequencyMenuItems}
         pageNumber={pageNumber}
-        isUnder16={calculateCurrentAgeStatus().isUnder16}
       />
     </>
   );

@@ -48,7 +48,7 @@ const Wrapper = ({
   conditions?: Record<string, boolean>;
   formValues?: Record<string, any>;
 }) => {
-  const { control, setValue, clearErrors } = useForm({
+  const { control, setValue, clearErrors, getValues } = useForm({
     defaultValues: {
       conditions,
       receivesSsi: 'false',

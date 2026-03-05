@@ -12,28 +12,25 @@ const makeParams = (overrides: Partial<Parameters<typeof useHouseholdMemberFormE
   const getValues = jest.fn().mockReturnValue([]);
   const reset = jest.fn();
   const append = jest.fn();
-  const replace = jest.fn();
   const calculateCurrentAgeStatus = jest.fn().mockReturnValue({ is16OrOlder: false, isUnder16: true });
 
   return {
     isEnergyCalculator: false,
     questionName: 'householdData' as const,
     pageNumber: 1,
-    defaultValues: { birthMonth: 0, birthYear: '', hasIncome: 'false' },
+    defaultValues: { birthMonth: 0, birthYear: '' },
     setValue,
     getValues,
     reset,
     append,
-    replace,
     calculateCurrentAgeStatus,
-    watchHasIncome: 'false',
     watchBirthMonth: 0,
     watchBirthYear: 0,
     watchIsStudent: false,
     watchIsDisabled: false,
     ...overrides,
     // Allow caller to override the mock fns themselves
-    _mocks: { setValue, getValues, reset, append, replace, calculateCurrentAgeStatus },
+    _mocks: { setValue, getValues, reset, append, calculateCurrentAgeStatus },
   };
 };
 
@@ -64,113 +61,62 @@ describe('useHouseholdMemberFormEffects', () => {
   });
 
   // ============================================================================
-  // Income stream effects
-  // ============================================================================
-
-  describe('income stream management', () => {
-    it('appends empty income stream when hasIncome becomes true with no streams', () => {
-      const params = makeParams({ watchHasIncome: 'true' });
-      params._mocks.getValues.mockReturnValue([]); // no streams
-      renderHook(() => useHouseholdMemberFormEffects(params));
-      expect(params._mocks.append).toHaveBeenCalledWith(EMPTY_INCOME_STREAM);
-    });
-
-    it('does not append when hasIncome is true but streams already exist', () => {
-      const params = makeParams({ watchHasIncome: 'true' });
-      params._mocks.getValues.mockReturnValue([EMPTY_INCOME_STREAM]); // already has one
-      renderHook(() => useHouseholdMemberFormEffects(params));
+  // Age-based income stream auto-append
+  // =====================================================================      renderHook(() => useHouseholdMemberFormEffects(params));
       expect(params._mocks.append).not.toHaveBeenCalled();
     });
 
-    it('clears income streams when hasIncome is false', () => {
-      const params = makeParams({ watchHasIncome: 'false' });
-      renderHook(() => useHouseholdMemberFormEffects(params));
-      expect(params._mocks.replace).toHaveBeenCalledWith([]);
-    });
-
-    it('re-runs when hasIncome changes from false to true', () => {
-      const params = makeParams({ watchHasIncome: 'false' });
+    it('appends one empty stream when birth changes to make user 16+ and no streams exist', () => {
+      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2015 });
       params._mocks.getValues.mockReturnValue([]);
       const { rerender } = renderHook((p: any) => useHouseholdMemberFormEffects(p), { initialProps: params });
 
-      const trueParams = makeParams({ watchHasIncome: 'true' });
-      trueParams._mocks.getValues.mockReturnValue([]);
-      act(() => rerender(trueParams));
-
-      expect(trueParams._mocks.append).toHaveBeenCalledWith(EMPTY_INCOME_STREAM);
-    });
-  });
-
-  // ============================================================================
-  // Age-based income effect
-  // ============================================================================
-
-  describe('age-based income show/hide', () => {
-    it('does not auto-set hasIncome on initial mount', () => {
-      // The saved hasIncome from defaultValues is the source of truth on mount.
-      // The age effect only fires when the user changes their birth date.
-      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000 });
-      params._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: true, isUnder16: false });
-      params._mocks.getValues.mockReturnValue([]);
-      renderHook(() => useHouseholdMemberFormEffects(params));
-      const hasIncomeSetCalls = params._mocks.setValue.mock.calls.filter(([field]: [string]) => field === 'hasIncome');
-      expect(hasIncomeSetCalls).toHaveLength(0);
-    });
-
-    it('sets hasIncome to "true" when birth year changes to make user 16+', () => {
-      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2015, watchHasIncome: 'false' });
-      params._mocks.getValues.mockReturnValue([]);
-      const { rerender } = renderHook((p: any) => useHouseholdMemberFormEffects(p), { initialProps: params });
-
-      const updatedParams = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000, watchHasIncome: 'false' });
+      const updatedParams = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000 });
       updatedParams._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: true, isUnder16: false });
       updatedParams._mocks.getValues.mockReturnValue([]);
       act(() => rerender(updatedParams));
 
-      expect(updatedParams._mocks.setValue).toHaveBeenCalledWith('hasIncome', 'true', { shouldDirty: true });
+      expect(updatedParams._mocks.append).toHaveBeenCalledWith(EMPTY_INCOME_STREAM);
     });
 
-    it('sets hasIncome to "false" when birth year changes to make user under 16 (with no streams)', () => {
-      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000, watchHasIncome: 'true' });
-      params._mocks.getValues.mockReturnValue([]);
-      const { rerender } = renderHook((p: any) => useHouseholdMemberFormEffects(p), { initialProps: params });
-
-      const updatedParams = makeParams({ watchBirthMonth: 6, watchBirthYear: 2015, watchHasIncome: 'true' });
-      updatedParams._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: false, isUnder16: true });
-      updatedParams._mocks.getValues.mockReturnValue([]);
-      act(() => rerender(updatedParams));
-
-      expect(updatedParams._mocks.setValue).toHaveBeenCalledWith('hasIncome', 'false', { shouldDirty: true });
-    });
-
-    it('does not clear hasIncome when under 16 but streams exist', () => {
-      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000, watchHasIncome: 'true' });
+    it('does not append when birth changes to 16+ but streams already exist', () => {
+      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2015 });
       params._mocks.getValues.mockReturnValue([EMPTY_INCOME_STREAM]);
       const { rerender } = renderHook((p: any) => useHouseholdMemberFormEffects(p), { initialProps: params });
 
-      const updatedParams = makeParams({ watchBirthMonth: 6, watchBirthYear: 2015, watchHasIncome: 'true' });
-      updatedParams._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: false, isUnder16: true });
+      const updatedParams = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000 });
+      updatedParams._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: true, isUnder16: false });
       updatedParams._mocks.getValues.mockReturnValue([EMPTY_INCOME_STREAM]);
       act(() => rerender(updatedParams));
 
-      const hasIncomeSetCalls = updatedParams._mocks.setValue.mock.calls.filter(([field]: [string]) => field === 'hasIncome');
-      expect(hasIncomeSetCalls).toHaveLength(0);
+      expect(updatedParams._mocks.append).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when birth changes to under 16', () => {
+      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000 });
+      params._mocks.getValues.mockReturnValue([]);
+      const { rerender } = renderHook((p: any) => useHouseholdMemberFormEffects(p), { initialProps: params });
+
+      const updatedParams = makeParams({ watchBirthMonth: 6, watchBirthYear: 2015 });
+      updatedParams._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: false, isUnder16: true });
+      updatedParams._mocks.getValues.mockReturnValue([]);
+      act(() => rerender(updatedParams));
+
+      expect(updatedParams._mocks.append).not.toHaveBeenCalled();
     });
 
     it('does not fire when only unrelated props change (birth date unchanged)', () => {
-      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000, watchHasIncome: 'false' });
+      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000 });
       params._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: true, isUnder16: false });
       params._mocks.getValues.mockReturnValue([]);
       const { rerender } = renderHook((p: any) => useHouseholdMemberFormEffects(p), { initialProps: params });
 
-      // Only watchHasIncome changes — birth date stays the same
-      const updatedParams = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000, watchHasIncome: 'true' });
+      const updatedParams = makeParams({ watchBirthMonth: 6, watchBirthYear: 2000, watchIsStudent: true });
       updatedParams._mocks.calculateCurrentAgeStatus.mockReturnValue({ is16OrOlder: true, isUnder16: false });
       updatedParams._mocks.getValues.mockReturnValue([]);
       act(() => rerender(updatedParams));
 
-      const hasIncomeSetCalls = updatedParams._mocks.setValue.mock.calls.filter(([field]: [string]) => field === 'hasIncome');
-      expect(hasIncomeSetCalls).toHaveLength(0);
+      expect(updatedParams._mocks.append).not.toHaveBeenCalled();
     });
   });
 
@@ -265,25 +211,6 @@ describe('useHouseholdMemberFormEffects', () => {
       act(() => rerender(samePageParams));
 
       expect(samePageParams._mocks.reset).not.toHaveBeenCalled();
-    });
-  });
-
-  // ============================================================================
-  // Return value
-  // ============================================================================
-
-  describe('return value', () => {
-    it('returns hasTruthyIncome=true when watchHasIncome is "true"', () => {
-      const params = makeParams({ watchHasIncome: 'true' });
-      params._mocks.getValues.mockReturnValue([EMPTY_INCOME_STREAM]);
-      const { result } = renderHook(() => useHouseholdMemberFormEffects(params));
-      expect(result.current.hasTruthyIncome).toBe(true);
-    });
-
-    it('returns hasTruthyIncome=false when watchHasIncome is "false"', () => {
-      const params = makeParams({ watchHasIncome: 'false' });
-      const { result } = renderHook(() => useHouseholdMemberFormEffects(params));
-      expect(result.current.hasTruthyIncome).toBe(false);
     });
   });
 });

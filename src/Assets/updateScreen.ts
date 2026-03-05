@@ -204,7 +204,8 @@ const getHouseholdMemberBody = (householdMemberData: HouseholdData): ApiHousehol
 const getIncomeStreamsBodies = (householdMemberData: HouseholdData): ApiIncome[] => {
   return householdMemberData.incomeStreams.map((incomeStream) => {
     return {
-      type: incomeStream.incomeStreamName,
+      type: incomeStream.incomeType,
+      source: incomeStream.incomeSource,
       amount: incomeStream.incomeAmount,
       frequency: incomeStream.incomeFrequency,
       // 0 is the default for non-hourly streams; send null so the API ignores it

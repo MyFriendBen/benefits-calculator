@@ -7,6 +7,46 @@ import { HouseholdMemberFormSchema, EnergyCalculatorHouseholdMemberFormSchema } 
 export { formatToUSD } from '../../../../utils/formatCurrency';
 
 // ============================================================================
+// RETURNING USER HELPERS
+// ============================================================================
+
+/**
+ * Ensures incomeType is populated on each income stream for returning users
+ * whose data was saved before incomeType was persisted to the backend.
+ *
+ * For new submissions incomeType is saved directly, so this is only needed
+ * as a fallback for older records that only have incomeSource.
+ *
+ * @param memberData - Saved household member data (may be undefined on first visit)
+ * @param incomeOptions - Nested config map: { [type]: { [source]: label } }.
+ *                        May be undefined while config is still loading.
+ */
+export function backfillIncomeTypes(
+  memberData: HouseholdData | undefined,
+  incomeOptions: Record<string, Record<string, FormattedMessageType>> | undefined,
+): HouseholdData | undefined {
+  if (!memberData) return undefined;
+
+  const streams = memberData.incomeStreams ?? [];
+  const backfilled = streams.map((stream) => {
+    if (stream.incomeType) return stream;
+
+    let incomeType = '';
+    if (stream.incomeSource && incomeOptions) {
+      for (const [type, options] of Object.entries(incomeOptions)) {
+        if (Object.hasOwn(options, stream.incomeSource)) {
+          incomeType = type;
+          break;
+        }
+      }
+    }
+    return { ...stream, incomeType };
+  });
+
+  return { ...memberData, incomeStreams: backfilled as HouseholdData['incomeStreams'] };
+}
+
+// ============================================================================
 // GENERIC FORM HELPERS
 // ============================================================================
 
@@ -108,7 +148,7 @@ export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParam
     incomeAmount: Number(stream.incomeAmount),
     hoursPerWeek: stream.hoursPerWeek === '' ? 0 : Number(stream.hoursPerWeek),
   }));
-  const hasIncome = memberData.hasIncome === 'true' || incomeStreams.length > 0;
+  const hasIncome = incomeStreams.length > 0;
 
   const base = {
     ...memberData,
@@ -130,7 +170,7 @@ export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParam
         receivesSsi: ecData.receivesSsi === 'true',
         medicalEquipment: ecData.conditions.medicalEquipment,
       },
-    } as HouseholdData;
+    } as unknown as HouseholdData;
   }
 
   return base as HouseholdData;
@@ -144,12 +184,23 @@ export const scrollToFirstError = (formErrors: Record<string, any>, workflowType
   const sectionMap = workflowType === 'energyCalculator' ? ENERGY_CALCULATOR_ERROR_SECTION_MAP : ERROR_SECTION_MAP;
 
   for (const section of sectionMap) {
-    if (formErrors[section.key]) {
-      const element = document.getElementById(section.id);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        return;
-      }
+    if (!formErrors[section.key]) continue;
+
+    // For array errors, find the first row element (e.g. income-stream-0)
+    // and scroll to it; otherwise fall back to the enclosing section container.
+    if (Array.isArray(formErrors[section.key])) {
+      const firstErrorIndex = (formErrors[section.key] as any[]).findIndex((row) => row != null);
+      const target =
+        (firstErrorIndex !== -1 && document.getElementById(`${section.id}-${firstErrorIndex}`)) ||
+        document.getElementById('income-section');
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    const element = document.getElementById(section.id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
     }
   }
 

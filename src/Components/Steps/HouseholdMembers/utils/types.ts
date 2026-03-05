@@ -19,7 +19,8 @@ export type ConditionOption = {
 export type ConditionOptions = Record<'you' | 'them', Record<keyof Conditions, ConditionOption>>;
 
 export type IncomeStreamFormData = {
-  incomeStreamName: string;
+  incomeType: string;
+  incomeSource: string;
   incomeAmount: string;
   incomeFrequency: string;
   hoursPerWeek: string;

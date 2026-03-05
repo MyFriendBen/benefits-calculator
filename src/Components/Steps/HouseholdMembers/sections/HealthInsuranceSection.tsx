@@ -37,20 +37,13 @@ const HealthInsuranceSection = ({
   return (
     <Box id="health-insurance-section" className="section">
       <QuestionQuestion>
-          {pageNumber === 1 ? (
-            <FormattedMessage
-              id="questions.healthInsurance-you"
-              defaultMessage="Which type of health insurance do you have?"
-            />
-          ) : (
-            <FormattedMessage
-              id="questions.healthInsurance-they"
-              defaultMessage="What type of health insurance do they have?"
-            />
-          )}
+          <FormattedMessage
+            id="questions.healthInsurance"
+            defaultMessage="Health Insurance"
+          />
         </QuestionQuestion>
         <QuestionDescription>
-          <FormattedMessage id="insurance.chooseAllThatApply" defaultMessage="Choose all that apply." />
+          <FormattedMessage id="insurance.selectAllThatApply" defaultMessage="Select all that apply." />
         </QuestionDescription>
         {errors.healthInsurance && (
           <FormHelperText sx={{ ml: 0, mb: 1 }}>

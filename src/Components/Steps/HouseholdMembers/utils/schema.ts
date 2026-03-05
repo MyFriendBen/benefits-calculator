@@ -6,7 +6,7 @@ import {
   renderHealthInsSelectOneHelperText,
   renderHealthInsNonePlusHelperText,
   renderHealthInsNonePlusTheyHelperText,
-  renderIncomeStreamNameHelperText,
+  renderIncomeSourceHelperText,
   renderIncomeFrequencyHelperText,
   renderHoursWorkedHelperText,
   renderIncomeAmountHelperText,
@@ -16,6 +16,7 @@ import {
   renderBirthYearHelperText,
   renderInvalidBirthYearHelperText,
   renderRelationshipToHHHelperText,
+  renderIncomeTypeHelperText,
   hasAtLeastOneTrue,
   validateNoneExclusive,
   validateHourlyIncome,
@@ -71,7 +72,8 @@ export const STUDENT_QUESTIONS: StudentQuestion[] = [
 const createIncomeSourceSchema = (intl: IntlShape) => {
   return z
     .object({
-      incomeStreamName: z.string().min(1, { message: renderIncomeStreamNameHelperText(intl) }),
+      incomeType: z.string().min(1, { message: renderIncomeTypeHelperText(intl) }),
+      incomeSource: z.string().min(1, { message: renderIncomeSourceHelperText(intl) }),
       incomeFrequency: z.string().min(1, { message: renderIncomeFrequencyHelperText(intl) }),
       hoursPerWeek: z.string().trim(),
       incomeAmount: z
@@ -137,10 +139,8 @@ export const createHouseholdMemberSchema = (
   intl: IntlShape,
   pageNumber: number
 ) => {
-  const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
   const incomeSourcesSchema = createIncomeSourceSchema(intl);
   const incomeStreamsSchema = z.array(incomeSourcesSchema);
-  const hasIncomeSchema = z.enum(['true', 'false']);
 
   const studentEligibilitySchema = z.object({
     studentFullTime: z.union([z.boolean(), z.undefined()]),
@@ -151,21 +151,13 @@ export const createHouseholdMemberSchema = (
 
   return z.object({
     birthMonth: z.number().min(1, { message: renderMissingBirthMonthHelperText(intl) }).max(12, { message: renderMissingBirthMonthHelperText(intl) }),
-    birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl) }).int().min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) }).max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
+    birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl) }).int().min(new Date().getFullYear() - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) }).max(new Date().getFullYear(), { message: renderInvalidBirthYearHelperText(intl) }),
     relationshipToHH: z.string().min(1, { message: renderRelationshipToHHHelperText(intl) }),
     healthInsurance: createHealthInsuranceSchema(intl, pageNumber),
     conditions: createSpecialConditionsSchema(intl),
     studentEligibility: studentEligibilitySchema,
-    hasIncome: hasIncomeSchema,
     incomeStreams: incomeStreamsSchema,
-  }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility }, ctx) => {
-    if (birthYear === CURRENT_YEAR && birthMonth > CURRENT_MONTH) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: renderFutureBirthMonthHelperText(intl),
-        path: ['birthMonth'],
-      });
-    }
+  }).superRefine(({ conditions, studentEligibility }, ctx) => {
     if (conditions.student) {
       STUDENT_QUESTIONS.forEach(({ name }) => {
         if (studentEligibility[name] === undefined) {
@@ -203,7 +195,6 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
   const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
   const incomeSourcesSchema = createIncomeSourceSchema(intl);
   const incomeStreamsSchema = z.array(incomeSourcesSchema);
-  const hasIncomeSchema = z.enum(['true', 'false']);
 
   return z
     .object({
@@ -221,7 +212,6 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
           (value) => [...Object.keys(relationshipOptions)].includes(value) || pageNumber === 1,
           { message: renderRelationshipToHHHelperText(intl) },
         ),
-      hasIncome: hasIncomeSchema,
       incomeStreams: incomeStreamsSchema,
     })
     .refine(
