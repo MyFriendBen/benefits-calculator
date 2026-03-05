@@ -189,7 +189,7 @@ const Disclaimer = () => {
                     label={createAgreeTTSCheckboxLabel()}
                   />
                   {errors.agreeToTermsOfService && (
-                    <ErrorMessageWrapper fontSize=".75rem">{errors.agreeToTermsOfService.message}</ErrorMessageWrapper>
+                    <ErrorMessageWrapper fontSize="1rem">{errors.agreeToTermsOfService.message}</ErrorMessageWrapper>
                   )}
                 </>
               )}
@@ -219,7 +219,7 @@ const Disclaimer = () => {
                     className="top-margin"
                   />
                   {errors.is13OrOlder && (
-                    <ErrorMessageWrapper fontSize=".75rem">{errors.is13OrOlder.message}</ErrorMessageWrapper>
+                    <ErrorMessageWrapper fontSize="1rem">{errors.is13OrOlder.message}</ErrorMessageWrapper>
                   )}
                 </>
               )}
