@@ -157,9 +157,9 @@ export async function completePrimaryUserInfo(page: Page, userInfo: PrimaryUserI
       await expect(frequencyDropdownLocator).toBeVisible();
       await selectFrequency(page, userInfo.income.frequency);
 
-      const amountInputLocator = page.getByRole(FORM_INPUTS.AMOUNT.role, { name: FORM_INPUTS.AMOUNT.name });
+      const amountInputLocator = page.locator(FORM_INPUTS.AMOUNT);
       await expect(amountInputLocator).toBeVisible();
-      await fillTextField(page, FORM_INPUTS.AMOUNT.name, userInfo.income.amount);
+      await amountInputLocator.fill(userInfo.income.amount);
     }
 
     const continueButtonLocator = page.getByRole(BUTTONS.CONTINUE.role, { name: BUTTONS.CONTINUE.name });
@@ -202,7 +202,7 @@ export async function completeHouseholdMemberInfo(page: Page, memberInfo: Househ
       await selectIncomeCategory(page, memberInfo.income.category);
       await selectIncomeType(page, memberInfo.income.type);
       await selectFrequency(page, memberInfo.income.frequency);
-      await fillTextField(page, FORM_INPUTS.AMOUNT.name, memberInfo.income.amount);
+      await page.locator(FORM_INPUTS.AMOUNT).fill(memberInfo.income.amount);
     }
 
     await clickContinue(page);

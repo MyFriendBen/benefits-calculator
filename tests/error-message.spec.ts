@@ -124,7 +124,7 @@ test.describe('Error Messages Test', () => {
     await selectIncomeCategory(page, userInfo.incomeCategory);
     await selectIncomeType(page, userInfo.incomeType);
     await selectFrequency(page, userInfo.incomeFrequency);
-    await fillTextField(page, FORM_INPUTS.AMOUNT.name, userInfo.incomeAmount);
+    await page.locator(FORM_INPUTS.AMOUNT).fill(userInfo.incomeAmount);
 
     await clickContinue(page);
 

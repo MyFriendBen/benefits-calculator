@@ -285,7 +285,7 @@ const IncomeStreamRow = ({
                     fullWidth
                     size="small"
                     variant="outlined"
-                    inputProps={{ inputMode: isHourly ? 'decimal' : 'numeric', 'aria-labelledby': `income-amount-label-${index}` }}
+                    inputProps={{ id: `income-amount-input-${index}`, inputMode: isHourly ? 'decimal' : 'numeric', 'aria-labelledby': `income-amount-label-${index}` }}
                     sx={{ backgroundColor: '#fff' }}
                     error={incomeAmountError !== undefined}
                     InputProps={{
