@@ -144,7 +144,6 @@ export async function completePrimaryUserInfo(page: Page, userInfo: PrimaryUserI
 
     // Handle income
     if (userInfo.income) {
-      await page.getByRole('button', { name: 'Add An Income Source' }).click();
       const incomeCategoryDropdownLocator = page.locator(DROPDOWN.INCOME_CATEGORY);
       await expect(incomeCategoryDropdownLocator).toBeVisible();
       await selectIncomeCategory(page, userInfo.income.category);
@@ -198,7 +197,6 @@ export async function completeHouseholdMemberInfo(page: Page, memberInfo: Househ
 
     // Handle income if applicable
     if (memberInfo.income) {
-      await page.getByRole('button', { name: 'Add An Income Source' }).click();
       await selectIncomeCategory(page, memberInfo.income.category);
       await selectIncomeType(page, memberInfo.income.type);
       await selectFrequency(page, memberInfo.income.frequency);
