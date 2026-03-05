@@ -6,7 +6,6 @@
  */
 
 import { Page } from '@playwright/test';
-import { OPTION } from './selectors';
 
 /**
  * Selects an option from a dropdown menu
@@ -126,13 +125,28 @@ export async function selectDate(page: Page, month: string, year: string): Promi
   await page.getByRole('textbox', { name: 'Birth Year' }).fill(year);
 }
 /**
+ * Clicks a MUI Select and waits for the listbox + desired option to appear before clicking.
+ */
+async function selectMuiOption(page: Page, selectId: string, optionText: string): Promise<void> {
+  const isCI = process.env.CI === 'true';
+  const timeout = isCI ? 20000 : 10000;
+
+  await page.locator(selectId).click();
+  const listbox = page.locator('[role="listbox"]');
+  await listbox.waitFor({ state: 'visible', timeout });
+  const option = listbox.locator('[role="option"]').filter({ hasText: optionText }).first();
+  await option.waitFor({ state: 'visible', timeout });
+  await option.click();
+  await listbox.waitFor({ state: 'hidden', timeout: 5000 });
+}
+
+/**
  * Selects an income category (the "Income Type" grouping dropdown)
  * @param page - Playwright page instance
  * @param incomeCategory - Category label to select (e.g. "Work & Self-Employment Income")
  */
 export async function selectIncomeCategory(page: Page, incomeCategory: string): Promise<void> {
-  await page.locator('#income-category-select-0').click();
-  await page.getByRole(OPTION.byName(incomeCategory).role, { name: OPTION.byName(incomeCategory).name }).click();
+  await selectMuiOption(page, '#income-category-select-0', incomeCategory);
 }
 
 /**
@@ -141,8 +155,7 @@ export async function selectIncomeCategory(page: Page, incomeCategory: string): 
  * @param incomeType - Income source label to select (e.g. "Wages, salaries, or tips")
  */
 export async function selectIncomeType(page: Page, incomeType: string): Promise<void> {
-  await page.locator('#income-source-select-0').click();
-  await page.getByRole(OPTION.byName(incomeType).role, { name: OPTION.byName(incomeType).name }).click();
+  await selectMuiOption(page, '#income-source-select-0', incomeType);
 }
 
 /**
@@ -151,6 +164,5 @@ export async function selectIncomeType(page: Page, incomeType: string): Promise<
  * @param frequency - Frequency to select
  */
 export async function selectFrequency(page: Page, frequency: string): Promise<void> {
-  await page.locator('#income-frequency-select-0').click();
-  await page.getByRole(OPTION.byName(frequency).role, { name: OPTION.byName(frequency).name }).click();
+  await selectMuiOption(page, '#income-frequency-select-0', frequency);
 }
