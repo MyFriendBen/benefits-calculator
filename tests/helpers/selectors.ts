@@ -27,7 +27,7 @@ export const FORM_INPUTS = {
   // Text inputs
   ZIP_CODE: { role: 'textbox' as const, name: 'Zip Code' },
   HOUSEHOLD_SIZE: { role: 'textbox' as const, name: 'Household Size' },
-  AMOUNT: { role: 'textbox' as const, name: 'Amount' },
+  AMOUNT: { role: 'textbox' as const, name: 'Pre-Tax Amount' },
   DOLLAR_AMOUNT: { role: 'textbox' as const, name: 'Dollar Amount' },
 
   // Checkboxes
