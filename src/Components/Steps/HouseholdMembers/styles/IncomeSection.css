@@ -39,6 +39,11 @@
   width: 100%;
 }
 
+.income-category-container .form-field-label {
+  margin-bottom: 0.25rem;
+  margin-top: 0;
+}
+
 .income-fields-row {
   display: flex;
   gap: 1rem;
