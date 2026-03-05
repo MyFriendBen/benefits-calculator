@@ -11,8 +11,8 @@ import {
   selectDropdownOption,
   fillTextField,
   checkCheckbox,
-  selectRadio,
   selectDate,
+  selectIncomeCategory,
   selectIncomeType,
   selectFrequency,
 } from '../form';
@@ -143,23 +143,23 @@ export async function completePrimaryUserInfo(page: Page, userInfo: PrimaryUserI
     await healthInsuranceButtonLocator.click();
 
     // Handle income
-    if (userInfo.hasIncome && userInfo.income) {
-      const yesRadioLocator = page.getByRole(FORM_INPUTS.YES_RADIO.role, { name: FORM_INPUTS.YES_RADIO.name });
-      await expect(yesRadioLocator).toBeVisible();
-      // selectRadio will perform the click, ensure it handles actionability.
-      await selectRadio(page, FORM_INPUTS.YES_RADIO.name);
+    if (userInfo.income) {
+      const incomeCategoryDropdownLocator = page.getByRole(DROPDOWN.INCOME_CATEGORY.role, {
+        name: DROPDOWN.INCOME_CATEGORY.name,
+      });
+      await expect(incomeCategoryDropdownLocator).toBeVisible();
+      await selectIncomeCategory(page, userInfo.income.category);
 
-      // Wait for dropdown triggers to be visible before calling helpers
-      const incomeTypeDropdownTriggerLocator = page.getByRole(DROPDOWN.INCOME_TYPE.role, {
+      const incomeTypeDropdownLocator = page.getByRole(DROPDOWN.INCOME_TYPE.role, {
         name: DROPDOWN.INCOME_TYPE.name,
       });
-      await expect(incomeTypeDropdownTriggerLocator).toBeVisible();
+      await expect(incomeTypeDropdownLocator).toBeVisible();
       await selectIncomeType(page, userInfo.income.type);
 
-      const frequencyDropdownTriggerLocator = page.getByRole(DROPDOWN.FREQUENCY.role, {
+      const frequencyDropdownLocator = page.getByRole(DROPDOWN.FREQUENCY.role, {
         name: DROPDOWN.FREQUENCY.name,
       });
-      await expect(frequencyDropdownTriggerLocator).toBeVisible();
+      await expect(frequencyDropdownLocator).toBeVisible();
       await selectFrequency(page, userInfo.income.frequency);
 
       const amountInputLocator = page.getByRole(FORM_INPUTS.AMOUNT.role, { name: FORM_INPUTS.AMOUNT.name });
@@ -202,18 +202,11 @@ export async function completeHouseholdMemberInfo(page: Page, memberInfo: Househ
     await page.getByRole('button', { name: "They don't have or know if" }).click();
 
     // Handle income if applicable
-    if (memberInfo.hasIncome && memberInfo.income) {
-      await selectRadio(page, FORM_INPUTS.YES_RADIO.name);
+    if (memberInfo.income) {
+      await selectIncomeCategory(page, memberInfo.income.category);
       await selectIncomeType(page, memberInfo.income.type);
       await selectFrequency(page, memberInfo.income.frequency);
       await fillTextField(page, FORM_INPUTS.AMOUNT.name, memberInfo.income.amount);
-    } else {
-      // Check if we need to select "No" for income
-      const noRadio = page.getByRole('radio', { name: 'No' });
-      const isNoRadioVisible = await noRadio.isVisible().catch(() => false);
-      if (isNoRadioVisible) {
-        await selectRadio(page, 'No');
-      }
     }
 
     await clickContinue(page);

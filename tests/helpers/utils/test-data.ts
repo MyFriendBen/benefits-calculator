@@ -20,7 +20,8 @@ export const testUsers = {
       birthYear: '1990',
       hasIncome: true,
       income: {
-        type: 'Wages, salaries, tips',
+        category: 'Work & Self-Employment Income',
+        type: 'Wages, salaries, or tips',
         frequency: 'every month',
         amount: '2200',
       },
@@ -49,7 +50,8 @@ export const testUsers = {
       birthYear: '1990',
       hasIncome: true,
       income: {
-        type: 'Wages, salaries, tips',
+        category: 'Work & Self-Employment Income',
+        type: 'Wages, salaries, or tips',
         frequency: 'every month',
         amount: '2400',
       },
@@ -78,7 +80,8 @@ export const testUsers = {
       birthYear: '1990',
       hasIncome: true,
       income: {
-        type: 'Wages, salaries, tips',
+        category: 'Work & Self-Employment Income',
+        type: 'Wages, salaries, or tips',
         frequency: 'every month',
         amount: '2200',
       },
@@ -107,7 +110,8 @@ export const testUsers = {
       birthYear: '1985',
       hasIncome: true,
       income: {
-        type: 'Wages, salaries, tips',
+        category: 'Work & Self-Employment Income',
+        type: 'Wages, salaries, or tips',
         frequency: 'every month',
         amount: '3000',
       },

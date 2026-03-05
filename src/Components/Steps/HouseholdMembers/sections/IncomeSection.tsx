@@ -97,7 +97,7 @@ const IncomeStreamRow = ({
   const sourceOptions = selectedType && incomeOptions[selectedType] ? incomeOptions[selectedType] : {};
   const specificTypeMenuItems = createMenuItems(
     sourceOptions,
-    <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectType" defaultMessage="Select type" />,
+    <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectType" defaultMessage="Select source" />,
   );
 
   const incomeCategoryError = getError(index, 'incomeCategory') as { message?: string } | undefined;
@@ -112,7 +112,7 @@ const IncomeStreamRow = ({
         {/* Income Type */}
         <Box className="income-category-container">
           <Typography id={`income-category-label-${index}`} className="form-field-label">
-            <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Type" />
+            <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Category" />
           </Typography>
           <FormControl fullWidth size="small" error={incomeCategoryError !== undefined}>
             <Controller
@@ -155,7 +155,7 @@ const IncomeStreamRow = ({
                 render={({ field }) => (
                   // Tooltip needs a non-disabled span wrapper — disabled elements swallow pointer events
                   <Tooltip
-                    title={selectedType ? '' : <FormattedMessage id="personIncomeBlock.specificType-tooltip" defaultMessage="Select an income type first" />}
+                    title={selectedType ? '' : <FormattedMessage id="personIncomeBlock.specificType-tooltip" defaultMessage="Select an income category first" />}
                     disableHoverListener={!!selectedType}
                     disableFocusListener={!!selectedType}
                     disableTouchListener={!!selectedType}

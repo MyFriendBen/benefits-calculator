@@ -126,12 +126,22 @@ export async function selectDate(page: Page, month: string, year: string): Promi
   await page.getByRole('textbox', { name: 'Birth Year' }).fill(year);
 }
 /**
- * Selects an income type
+ * Selects an income category (the "Income Type" grouping dropdown)
  * @param page - Playwright page instance
- * @param incomeType - Income type to select
+ * @param incomeCategory - Category label to select (e.g. "Work & Self-Employment Income")
+ */
+export async function selectIncomeCategory(page: Page, incomeCategory: string): Promise<void> {
+  await page.getByRole('button', { name: 'Income Type' }).click();
+  await page.getByRole(OPTION.byName(incomeCategory).role, { name: OPTION.byName(incomeCategory).name }).click();
+}
+
+/**
+ * Selects an income source (the "Income Source" dropdown, enabled after category is chosen)
+ * @param page - Playwright page instance
+ * @param incomeType - Income source label to select (e.g. "Wages, salaries, or tips")
  */
 export async function selectIncomeType(page: Page, incomeType: string): Promise<void> {
-  await page.getByRole('button', { name: 'Income Type' }).click();
+  await page.getByRole('button', { name: 'Income Source' }).click();
   await page.getByRole(OPTION.byName(incomeType).role, { name: OPTION.byName(incomeType).name }).click();
 }
 
