@@ -160,8 +160,9 @@
   padding: 0.5rem 0.75rem;
   font-size: 0.8rem;
   margin: 0;
-  width: max-content;
-  max-width: 280px;
+  max-width: min(280px, calc(100vw - 2rem));
+  white-space: normal;
+  word-wrap: break-word;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
