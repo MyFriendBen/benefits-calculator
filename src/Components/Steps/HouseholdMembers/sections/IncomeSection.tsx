@@ -47,7 +47,7 @@ interface IncomeSectionProps {
   fields: FieldArrayWithId<IncomeFormValues, 'incomeStreams', 'id'>[];
   append: UseFieldArrayAppend<IncomeFormValues, 'incomeStreams'>;
   remove: UseFieldArrayRemove;
-  setValue: UseFormSetValue<any>;
+  setValue: UseFormSetValue<IncomeFormValues>;
   incomeCategories: Record<string, FormattedMessageType>;
   incomeOptions: Record<string, Record<string, FormattedMessageType>>;
   frequencyMenuItems: (JSX.Element | JSX.Element[])[];
@@ -57,7 +57,7 @@ interface IncomeSectionProps {
 interface IncomeStreamRowProps {
   index: number;
   control: Control<IncomeFormValues>;
-  setValue: UseFormSetValue<any>;
+  setValue: UseFormSetValue<IncomeFormValues>;
   remove: UseFieldArrayRemove;
   getError: (index: number, fieldName: keyof IncomeStreamFormData) => unknown;
   incomeCategoriesMenuItems: (JSX.Element | JSX.Element[])[];
@@ -76,7 +76,7 @@ const IncomeStreamRow = ({
   frequencyMenuItems,
 }: IncomeStreamRowProps) => {
   const [showFreqHelp, setShowFreqHelp] = useState(false);
-  const freqHelpRef = useRef<HTMLSpanElement>(null);
+  const freqHelpRef = useRef<HTMLDivElement>(null);
   const intl = useIntl();
 
   useEffect(() => {
@@ -111,7 +111,7 @@ const IncomeStreamRow = ({
       <Box className="income-fields-container">
         {/* Income Type */}
         <Box className="income-category-container">
-          <Typography className="form-field-label">
+          <Typography id={`income-category-label-${index}`} className="form-field-label">
             <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Type" />
           </Typography>
           <FormControl fullWidth size="small" error={incomeCategoryError !== undefined}>
@@ -122,10 +122,12 @@ const IncomeStreamRow = ({
                 <Select
                   {...field}
                   displayEmpty
+                  inputProps={{ 'aria-labelledby': `income-category-label-${index}` }}
                   sx={{ backgroundColor: '#fff' }}
                   onChange={(e) => {
                     field.onChange(e);
-                    setValue(`incomeStreams.${index}.incomeStreamName`, '');
+                    // Dynamic indexed path — cast required since RHF can't narrow template literals
+                    setValue(`incomeStreams.${index}.incomeStreamName` as any, '');
                   }}
                 >
                   {incomeCategoriesMenuItems}
@@ -143,7 +145,7 @@ const IncomeStreamRow = ({
         {/* Income Source, Frequency, Hours (if hourly), Amount */}
         <Box className="income-fields-row">
           <Box className="income-field-specific-type">
-            <Typography className="form-field-label">
+            <Typography id={`income-source-label-${index}`} className="form-field-label">
               <FormattedMessage id="personIncomeBlock.incomeStreamName" defaultMessage="Income Source" />
             </Typography>
             <FormControl fullWidth size="small" error={!!selectedType && incomeStreamNameError !== undefined}>
@@ -159,7 +161,14 @@ const IncomeStreamRow = ({
                     disableTouchListener={!!selectedType}
                   >
                     <span>
-                      <Select {...field} displayEmpty sx={{ backgroundColor: '#fff' }} disabled={!selectedType} fullWidth>
+                      <Select
+                        {...field}
+                        displayEmpty
+                        inputProps={{ 'aria-labelledby': `income-source-label-${index}` }}
+                        sx={{ backgroundColor: '#fff' }}
+                        disabled={!selectedType}
+                        fullWidth
+                      >
                         {specificTypeMenuItems}
                       </Select>
                     </span>
@@ -176,10 +185,11 @@ const IncomeStreamRow = ({
 
           <Box className="income-field-frequency">
             <div className="income-frequency-label-row">
-              <Typography className="form-field-label">
+              <Typography id={`income-frequency-label-${index}`} className="form-field-label">
                 <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
               </Typography>
-              <span ref={freqHelpRef} style={{ display: 'contents' }}>
+              {/* A real box is needed so .contains() covers both the button and the popover */}
+              <div ref={freqHelpRef} style={{ display: 'inline-flex', alignItems: 'center', position: 'relative' }}>
                 <IconButton
                   onClick={() => setShowFreqHelp((v) => !v)}
                   aria-label={intl.formatMessage({ id: 'helpButton.ariaText', defaultMessage: 'help button' })}
@@ -194,14 +204,19 @@ const IncomeStreamRow = ({
                     />
                   </p>
                 )}
-              </span>
+              </div>
             </div>
             <FormControl fullWidth size="small" error={incomeFrequencyError !== undefined}>
               <Controller
                 name={`incomeStreams.${index}.incomeFrequency`}
                 control={control}
                 render={({ field }) => (
-                  <Select {...field} displayEmpty sx={{ backgroundColor: '#fff' }}>
+                  <Select
+                    {...field}
+                    displayEmpty
+                    inputProps={{ 'aria-labelledby': `income-frequency-label-${index}` }}
+                    sx={{ backgroundColor: '#fff' }}
+                  >
                     {frequencyMenuItems}
                   </Select>
                 )}
@@ -216,7 +231,7 @@ const IncomeStreamRow = ({
 
           {isHourly && (
             <Box className="income-field-hours">
-              <Typography className="form-field-label">
+              <Typography id={`income-hours-label-${index}`} className="form-field-label">
                 <FormattedMessage id="personIncomeBlock.hoursPerWeek" defaultMessage="Hours per Week" />
               </Typography>
               <Controller
@@ -233,7 +248,7 @@ const IncomeStreamRow = ({
                       fullWidth
                       size="small"
                       variant="outlined"
-                      inputProps={{ inputMode: 'numeric' }}
+                      inputProps={{ inputMode: 'numeric', 'aria-labelledby': `income-hours-label-${index}` }}
                       sx={{ backgroundColor: '#fff' }}
                       error={hoursPerWeekError !== undefined}
                     />
@@ -249,7 +264,7 @@ const IncomeStreamRow = ({
           )}
 
           <Box className="income-field-amount">
-            <Typography className="form-field-label">
+            <Typography id={`income-amount-label-${index}`} className="form-field-label">
               <FormattedMessage id="personIncomeBlock.preTaxAmount" defaultMessage="Pre-Tax Amount" />
             </Typography>
             <Controller
@@ -268,7 +283,7 @@ const IncomeStreamRow = ({
                     fullWidth
                     size="small"
                     variant="outlined"
-                    inputProps={{ inputMode: isHourly ? 'decimal' : 'numeric' }}
+                    inputProps={{ inputMode: isHourly ? 'decimal' : 'numeric', 'aria-labelledby': `income-amount-label-${index}` }}
                     sx={{ backgroundColor: '#fff' }}
                     error={incomeAmountError !== undefined}
                     InputProps={{
@@ -321,7 +336,7 @@ const IncomeSection = ({
 
   return (
     <Box id="income-section">
-      <Box id="field-hasIncome" className="section-container">
+      <Box className="section-container">
         <div className="section">
           <QuestionQuestion>
             <FormattedMessage id="householdDataBlock.createIncomeRadioQuestion-questionLabel" defaultMessage="Income Sources" />

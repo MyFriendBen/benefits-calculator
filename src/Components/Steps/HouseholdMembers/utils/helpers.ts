@@ -19,13 +19,18 @@ export { formatToUSD } from '../../../../utils/formatCurrency';
  *
  * @param memberData - Saved household member data (may be undefined on first visit)
  * @param incomeOptions - Nested config map: { [type]: { [source]: label } }.
- *                        May be undefined while config is still loading.
+ *                        May be empty ({}) while config is still loading — in that
+ *                        case we return undefined so the form defers initialization
+ *                        until the config is ready, rather than backfilling with
+ *                        empty strings that RHF would lock in as defaultValues.
  */
 export function backfillIncomeTypes(
   memberData: HouseholdData | undefined,
   incomeOptions: Record<string, Record<string, FormattedMessageType>> | undefined,
 ): HouseholdData | undefined {
   if (!memberData) return undefined;
+  // Config not yet loaded — defer so the form doesn't initialize with blank categories
+  if (!incomeOptions || Object.keys(incomeOptions).length === 0) return undefined;
 
   const streams = memberData.incomeStreams ?? [];
   const backfilled = streams.map((stream) => {
@@ -170,6 +175,8 @@ export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParam
         receivesSsi: ecData.receivesSsi === 'true',
         medicalEquipment: ecData.conditions.medicalEquipment,
       },
+    // EC adds `energyCalculator` which is not on the shared HouseholdData base type;
+    // the double cast avoids TS requiring every EC-only field to be on HouseholdData.
     } as unknown as HouseholdData;
   }
 
