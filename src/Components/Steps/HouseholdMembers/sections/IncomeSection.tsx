@@ -122,6 +122,7 @@ const IncomeStreamRow = ({
                 <Select
                   {...field}
                   displayEmpty
+                  id={`income-category-select-${index}`}
                   inputProps={{ 'aria-labelledby': `income-category-label-${index}` }}
                   sx={{ backgroundColor: '#fff' }}
                   onChange={(e) => {
@@ -164,6 +165,7 @@ const IncomeStreamRow = ({
                       <Select
                         {...field}
                         displayEmpty
+                        id={`income-source-select-${index}`}
                         inputProps={{ 'aria-labelledby': `income-source-label-${index}` }}
                         sx={{ backgroundColor: '#fff' }}
                         disabled={!selectedType}
@@ -213,6 +215,7 @@ const IncomeStreamRow = ({
                   <Select
                     {...field}
                     displayEmpty
+                    id={`income-frequency-select-${index}`}
                     inputProps={{ 'aria-labelledby': `income-frequency-label-${index}` }}
                     sx={{ backgroundColor: '#fff' }}
                   >
