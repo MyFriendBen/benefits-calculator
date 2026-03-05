@@ -61,10 +61,10 @@ export const OPTION = {
  * Common dropdown button selectors
  */
 export const DROPDOWN = {
-  INCOME_CATEGORY: '[aria-labelledby^="income-category-label"]',
-  INCOME_TYPE: '[aria-labelledby^="income-source-label"]',
+  INCOME_CATEGORY: '#income-stream-0 .income-category-container .MuiSelect-select',
+  INCOME_TYPE: '#income-stream-0 .income-field-specific-type .MuiSelect-select',
   EXPENSE_TYPE: { role: 'button' as const, name: 'Expense Type' },
-  FREQUENCY: '[aria-labelledby^="income-frequency-label"]',
+  FREQUENCY: '#income-stream-0 .income-field-frequency .MuiSelect-select',
 };
 
 /**
