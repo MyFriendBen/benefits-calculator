@@ -150,12 +150,17 @@
 }
 
 .income-field-frequency .help-text {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   font-size: 0.8rem;
-  margin: 0 0 0.5rem;
+  margin: 0;
+  max-width: min(280px, calc(100vw - 2rem));
   white-space: normal;
   overflow-wrap: break-word;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
