@@ -1,0 +1,21 @@
+.delete-button-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.income-stream-q-padding {
+  padding-right: 2em;
+}
+
+.income-margin-bottom {
+  margin: 0.5rem 0;
+}
+
+.income-textfield-margin-bottom {
+  margin: 1rem 0;
+}
+
+.income-block-container {
+  padding: 0 0 1rem;
+  margin-bottom: 0.5rem;
+}

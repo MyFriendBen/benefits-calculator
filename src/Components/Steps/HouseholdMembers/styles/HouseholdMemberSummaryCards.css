@@ -4,9 +4,10 @@
   flex-wrap: wrap;
   outline: 1px solid black;
   border-radius: 10px;
-  padding: 0.7rem;
-  margin: 0.5rem 1rem 0.5rem 0;
+  padding: 0.4rem 0.6rem;
+  margin: 0.25rem 0.5rem 0.25rem 0;
   position: relative;
+  font-size: 0.8rem;
 }
 
 .household-member-header {
@@ -49,6 +50,10 @@
 
   .member-added-age {
     display: block;
+  }
+
+  .member-added-birth {
+    display: none;
   }
 
   .member-added-income {

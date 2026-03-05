@@ -23,6 +23,7 @@ p {
 h2.question-label {
   font-size: 1.125rem;
   font-weight: 600;
+  margin-bottom: 0.2rem;
   font-family: var(--font-body);
   color: black;
 }

@@ -1,27 +1,24 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Box, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import { calcAge, hasBirthMonthYear, useFormatBirthMonthYear } from '../../../Assets/age';
-import { useConfig } from '../../Config/configHook';
-import { useTranslateNumber } from '../../../Assets/languageOptions';
-import { FormData, HouseholdData } from '../../../Types/FormData';
-import { FormattedMessageType, QuestionName } from '../../../Types/Questions';
+import { calcAge, hasBirthMonthYear, useFormatBirthMonthYear } from '../../../../Assets/age';
+import { useConfig } from '../../../Config/configHook';
+import { useTranslateNumber } from '../../../../Assets/languageOptions';
+import { HouseholdData } from '../../../../Types/FormData';
+import { FormattedMessageType, QuestionName } from '../../../../Types/Questions';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useContext } from 'react';
-import { WrapperContext } from '../../../Types/WrapperContext';
-import { useStepNumber } from '../../../Assets/stepDirectory';
-import { Context } from '../../Wrapper/Wrapper';
-import './HHMSummaryCards.css';
-import { calcMemberYearlyIncome } from '../../../Assets/income';
-import { formatToUSD } from '../../../utils/formatCurrency';
+import { useStepNumber } from '../../../../Assets/stepDirectory';
+import { Context } from '../../../Wrapper/Wrapper';
+import '../styles/HouseholdMemberSummaryCards.css';
+import { calcMemberYearlyIncome } from '../../../../Assets/income';
+import { formatToUSD } from '../../../../utils/formatCurrency';
 
 type HHMSummariesProps = {
-  activeMemberData: HouseholdData;
-  triggerValidation: () => Promise<boolean>;
   questionName: QuestionName;
 };
 
-const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHMSummariesProps) => {
+const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   const { formData, whiteLabel } = useContext(Context);
   const { uuid, page } = useParams();
   const pageNumber = Number(page);
@@ -37,11 +34,8 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
   const navigate = useNavigate();
   const formatBirthMonthYear = useFormatBirthMonthYear();
 
-  const handleEditBtnSubmit = async (memberIndex: number) => {
-    const isValid = await triggerValidation();
-    if (isValid) {
-      navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`);
-    }
+  const handleEditBtnSubmit = (memberIndex: number) => {
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`);
   };
 
   const createMemberCard = (
@@ -67,10 +61,10 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
           <h3 className="member-added-relationship">{relationship}:</h3>
           <div className="household-member-edit-button">
             <IconButton
-              onClick={() => {
-                handleEditBtnSubmit(memberIndex);
-              }}
+              onClick={() => handleEditBtnSubmit(memberIndex)}
               aria-label={editHHMemberAriaLabel}
+              size="small"
+              sx={{ padding: 0 }}
             >
               <EditIcon />
             </IconButton>
@@ -83,7 +77,7 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
           {translateNumber(age)}
         </div>
         {hasBirthMonthYear({ birthMonth, birthYear }) && (
-          <div className="member-added-age">
+          <div className="member-added-age member-added-birth">
             <strong>
               <FormattedMessage id="householdDataBlock.memberCard.birthYearMonth" defaultMessage="Birth Month/Year: " />
             </strong>
@@ -119,28 +113,19 @@ const HHMSummaries = ({ activeMemberData, triggerValidation, questionName }: HHM
     }
   };
 
-  //hHMemberSummaries will have the length of members that have already been saved to formData
-  //We want the active/current member's summary card to update synchronously as we change their information
-  //so we swap out the current one for the one we create using the memberData in state
-  const summariesWActiveMemberCard = [
-    ...formData.householdData.map((member, memberIndex) => {
-      if (memberIndex === pageNumber - 1) {
-        // Update the current member synchronously
-        return createFormDataMemberCard(memberIndex, activeMemberData, relationshipOptions);
-      }
-      return createFormDataMemberCard(memberIndex, member, relationshipOptions);
-    }),
-  ];
+  const memberCards = formData.householdData.map((member, memberIndex) =>
+    createFormDataMemberCard(memberIndex, member, relationshipOptions),
+  );
 
   return (
     <article key={pageNumber}>
-      {headOfHHInfoWasEntered && (
-        <Box sx={{ marginBottom: '1.5rem' }}>
-          <div>{summariesWActiveMemberCard}</div>
+      {headOfHHInfoWasEntered && memberCards.some(Boolean) && (
+        <Box sx={{ marginBottom: '0.25rem' }}>
+          <div>{memberCards}</div>
         </Box>
       )}
     </article>
   );
 };
 
-export default HHMSummaries;
+export default HouseholdMemberSummaryCards;
