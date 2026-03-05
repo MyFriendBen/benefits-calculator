@@ -131,7 +131,7 @@ export async function selectDate(page: Page, month: string, year: string): Promi
  * @param incomeCategory - Category label to select (e.g. "Work & Self-Employment Income")
  */
 export async function selectIncomeCategory(page: Page, incomeCategory: string): Promise<void> {
-  await page.getByRole('button', { name: 'Income Type' }).click();
+  await page.getByRole('button', { name: 'Income Category' }).click();
   await page.getByRole(OPTION.byName(incomeCategory).role, { name: OPTION.byName(incomeCategory).name }).click();
 }
 

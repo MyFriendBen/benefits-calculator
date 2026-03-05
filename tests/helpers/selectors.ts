@@ -61,7 +61,7 @@ export const OPTION = {
  * Common dropdown button selectors
  */
 export const DROPDOWN = {
-  INCOME_CATEGORY: { role: 'button' as const, name: 'Income Type' },
+  INCOME_CATEGORY: { role: 'button' as const, name: 'Income Category' },
   INCOME_TYPE: { role: 'button' as const, name: 'Income Source' },
   EXPENSE_TYPE: { role: 'button' as const, name: 'Expense Type' },
   FREQUENCY: { role: 'button' as const, name: 'Frequency' },
