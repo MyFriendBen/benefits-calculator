@@ -131,7 +131,7 @@ export async function selectDate(page: Page, month: string, year: string): Promi
  * @param incomeCategory - Category label to select (e.g. "Work & Self-Employment Income")
  */
 export async function selectIncomeCategory(page: Page, incomeCategory: string): Promise<void> {
-  await page.getByRole('button', { name: 'Income Category' }).click();
+  await page.locator('[aria-labelledby^="income-category-label"]').click();
   await page.getByRole(OPTION.byName(incomeCategory).role, { name: OPTION.byName(incomeCategory).name }).click();
 }
 
@@ -141,7 +141,7 @@ export async function selectIncomeCategory(page: Page, incomeCategory: string): 
  * @param incomeType - Income source label to select (e.g. "Wages, salaries, or tips")
  */
 export async function selectIncomeType(page: Page, incomeType: string): Promise<void> {
-  await page.getByRole('button', { name: 'Income Source' }).click();
+  await page.locator('[aria-labelledby^="income-source-label"]').click();
   await page.getByRole(OPTION.byName(incomeType).role, { name: OPTION.byName(incomeType).name }).click();
 }
 
@@ -151,6 +151,6 @@ export async function selectIncomeType(page: Page, incomeType: string): Promise<
  * @param frequency - Frequency to select
  */
 export async function selectFrequency(page: Page, frequency: string): Promise<void> {
-  await page.getByRole('button', { name: 'Frequency' }).click();
+  await page.locator('[aria-labelledby^="income-frequency-label"]').click();
   await page.getByRole(OPTION.byName(frequency).role, { name: OPTION.byName(frequency).name }).click();
 }

@@ -144,21 +144,15 @@ export async function completePrimaryUserInfo(page: Page, userInfo: PrimaryUserI
 
     // Handle income
     if (userInfo.income) {
-      const incomeCategoryDropdownLocator = page.getByRole(DROPDOWN.INCOME_CATEGORY.role, {
-        name: DROPDOWN.INCOME_CATEGORY.name,
-      });
+      const incomeCategoryDropdownLocator = page.locator(DROPDOWN.INCOME_CATEGORY);
       await expect(incomeCategoryDropdownLocator).toBeVisible();
       await selectIncomeCategory(page, userInfo.income.category);
 
-      const incomeTypeDropdownLocator = page.getByRole(DROPDOWN.INCOME_TYPE.role, {
-        name: DROPDOWN.INCOME_TYPE.name,
-      });
+      const incomeTypeDropdownLocator = page.locator(DROPDOWN.INCOME_TYPE);
       await expect(incomeTypeDropdownLocator).toBeVisible();
       await selectIncomeType(page, userInfo.income.type);
 
-      const frequencyDropdownLocator = page.getByRole(DROPDOWN.FREQUENCY.role, {
-        name: DROPDOWN.FREQUENCY.name,
-      });
+      const frequencyDropdownLocator = page.locator(DROPDOWN.FREQUENCY);
       await expect(frequencyDropdownLocator).toBeVisible();
       await selectFrequency(page, userInfo.income.frequency);
 

@@ -61,10 +61,10 @@ export const OPTION = {
  * Common dropdown button selectors
  */
 export const DROPDOWN = {
-  INCOME_CATEGORY: { role: 'button' as const, name: 'Income Category' },
-  INCOME_TYPE: { role: 'button' as const, name: 'Income Source' },
+  INCOME_CATEGORY: '[aria-labelledby^="income-category-label"]',
+  INCOME_TYPE: '[aria-labelledby^="income-source-label"]',
   EXPENSE_TYPE: { role: 'button' as const, name: 'Expense Type' },
-  FREQUENCY: { role: 'button' as const, name: 'Frequency' },
+  FREQUENCY: '[aria-labelledby^="income-frequency-label"]',
 };
 
 /**
