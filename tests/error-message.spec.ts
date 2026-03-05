@@ -117,8 +117,8 @@ test.describe('Error Messages Test', () => {
 
     expect(incomeErrorMessages).toEqual([
       'Please select an income type.',
-      'Please select a frequency',
-      'Please enter a number greater than 0',
+      'Please select a frequency.',
+      'Please enter a number greater than 0.',
     ]);
 
     await selectIncomeType(page, userInfo.incomeType);
