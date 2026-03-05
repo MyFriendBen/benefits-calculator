@@ -92,7 +92,7 @@ const IncomeStreamRow = ({
 
   // useWatch with a field-scoped name subscribes only this row to its own fields,
   // avoiding re-renders of sibling rows when unrelated streams change.
-  const selectedType = useWatch({ control, name: `incomeStreams.${index}.incomeType` });
+  const selectedType = useWatch({ control, name: `incomeStreams.${index}.incomeCategory` });
   const isHourly = useWatch({ control, name: `incomeStreams.${index}.incomeFrequency` }) === 'hourly';
   const sourceOptions = selectedType && incomeOptions[selectedType] ? incomeOptions[selectedType] : {};
   const specificTypeMenuItems = createMenuItems(
@@ -100,8 +100,8 @@ const IncomeStreamRow = ({
     <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectType" defaultMessage="Select type" />,
   );
 
-  const incomeTypeError = getError(index, 'incomeType') as { message?: string } | undefined;
-  const incomeSourceError = getError(index, 'incomeSource') as { message?: string } | undefined;
+  const incomeCategoryError = getError(index, 'incomeCategory') as { message?: string } | undefined;
+  const incomeStreamNameError = getError(index, 'incomeStreamName') as { message?: string } | undefined;
   const incomeFrequencyError = getError(index, 'incomeFrequency') as { message?: string } | undefined;
   const hoursPerWeekError = getError(index, 'hoursPerWeek') as { message?: string } | undefined;
   const incomeAmountError = getError(index, 'incomeAmount') as { message?: string } | undefined;
@@ -112,11 +112,11 @@ const IncomeStreamRow = ({
         {/* Income Type */}
         <Box className="income-category-container">
           <Typography className="form-field-label">
-            <FormattedMessage id="personIncomeBlock.incomeType" defaultMessage="Income Type" />
+            <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Type" />
           </Typography>
-          <FormControl fullWidth size="small" error={incomeTypeError !== undefined}>
+          <FormControl fullWidth size="small" error={incomeCategoryError !== undefined}>
             <Controller
-              name={`incomeStreams.${index}.incomeType`}
+              name={`incomeStreams.${index}.incomeCategory`}
               control={control}
               render={({ field }) => (
                 <Select
@@ -125,16 +125,16 @@ const IncomeStreamRow = ({
                   sx={{ backgroundColor: '#fff' }}
                   onChange={(e) => {
                     field.onChange(e);
-                    setValue(`incomeStreams.${index}.incomeSource`, '');
+                    setValue(`incomeStreams.${index}.incomeStreamName`, '');
                   }}
                 >
                   {incomeCategoriesMenuItems}
                 </Select>
               )}
             />
-            {incomeTypeError && (
+            {incomeCategoryError && (
               <FormHelperText sx={{ ml: 0 }}>
-                <ErrorMessageWrapper fontSize="0.75rem">{incomeTypeError.message ?? ''}</ErrorMessageWrapper>
+                <ErrorMessageWrapper fontSize="0.75rem">{incomeCategoryError.message ?? ''}</ErrorMessageWrapper>
               </FormHelperText>
             )}
           </FormControl>
@@ -144,11 +144,11 @@ const IncomeStreamRow = ({
         <Box className="income-fields-row">
           <Box className="income-field-specific-type">
             <Typography className="form-field-label">
-              <FormattedMessage id="personIncomeBlock.incomeSource" defaultMessage="Income Source" />
+              <FormattedMessage id="personIncomeBlock.incomeStreamName" defaultMessage="Income Source" />
             </Typography>
-            <FormControl fullWidth size="small" error={!!selectedType && incomeSourceError !== undefined}>
+            <FormControl fullWidth size="small" error={!!selectedType && incomeStreamNameError !== undefined}>
               <Controller
-                name={`incomeStreams.${index}.incomeSource`}
+                name={`incomeStreams.${index}.incomeStreamName`}
                 control={control}
                 render={({ field }) => (
                   // Tooltip needs a non-disabled span wrapper — disabled elements swallow pointer events
@@ -166,9 +166,9 @@ const IncomeStreamRow = ({
                   </Tooltip>
                 )}
               />
-              {selectedType && incomeSourceError && (
+              {selectedType && incomeStreamNameError && (
                 <FormHelperText sx={{ ml: 0 }}>
-                  <ErrorMessageWrapper fontSize="0.75rem">{incomeSourceError.message ?? ''}</ErrorMessageWrapper>
+                  <ErrorMessageWrapper fontSize="0.75rem">{incomeStreamNameError.message ?? ''}</ErrorMessageWrapper>
                 </FormHelperText>
               )}
             </FormControl>

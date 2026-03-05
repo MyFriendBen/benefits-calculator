@@ -11,11 +11,11 @@ export { formatToUSD } from '../../../../utils/formatCurrency';
 // ============================================================================
 
 /**
- * Ensures incomeType is populated on each income stream for returning users
- * whose data was saved before incomeType was persisted to the backend.
+ * Ensures incomeCategory is populated on each income stream for returning users
+ * whose data was saved before incomeCategory was persisted to the backend.
  *
- * For new submissions incomeType is saved directly, so this is only needed
- * as a fallback for older records that only have incomeSource.
+ * For new submissions incomeCategory is saved directly, so this is only needed
+ * as a fallback for older records that only have incomeStreamName.
  *
  * @param memberData - Saved household member data (may be undefined on first visit)
  * @param incomeOptions - Nested config map: { [type]: { [source]: label } }.
@@ -29,18 +29,18 @@ export function backfillIncomeTypes(
 
   const streams = memberData.incomeStreams ?? [];
   const backfilled = streams.map((stream) => {
-    if (stream.incomeType) return stream;
+    if (stream.incomeCategory) return stream;
 
-    let incomeType = '';
-    if (stream.incomeSource && incomeOptions) {
+    let incomeCategory = '';
+    if (stream.incomeStreamName && incomeOptions) {
       for (const [type, options] of Object.entries(incomeOptions)) {
-        if (Object.hasOwn(options, stream.incomeSource)) {
-          incomeType = type;
+        if (Object.hasOwn(options, stream.incomeStreamName)) {
+          incomeCategory = type;
           break;
         }
       }
     }
-    return { ...stream, incomeType };
+    return { ...stream, incomeCategory };
   });
 
   return { ...memberData, incomeStreams: backfilled as HouseholdData['incomeStreams'] };

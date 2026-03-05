@@ -9,8 +9,8 @@ export type Expense = {
 };
 
 export type IncomeStream = {
-  incomeType: string;
-  incomeSource: string;
+  incomeCategory: string;
+  incomeStreamName: string;
   incomeAmount: number;
   incomeFrequency: string;
   hoursPerWeek: number;

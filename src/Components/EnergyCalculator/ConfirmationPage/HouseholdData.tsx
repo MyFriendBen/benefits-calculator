@@ -27,7 +27,7 @@ const EnergyCalcConfirmationHHData = () => {
 
   const listAllIncomeStreams = (incomeStreams: IncomeStream[]) => {
     const mappedListItems = incomeStreams.map((incomeStream, index) => {
-      const incomeStreamName = incomeOptions[incomeStream.incomeSource];
+      const incomeStreamName = incomeOptions[incomeStream.incomeStreamName];
       const incomeAmount = formatToUSD(incomeStream.incomeAmount);
       const incomeFrequency = frequencyOptions[incomeStream.incomeFrequency];
       const hoursPerWeek = incomeStream.hoursPerWeek;

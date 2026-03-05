@@ -127,7 +127,7 @@ describe('createDefaultValues', () => {
     });
 
     it('returns existing income streams', () => {
-      const stream = { incomeType: 'employment', incomeSource: 'wages', incomeAmount: '1000', incomeFrequency: 'monthly', hoursPerWeek: '' };
+      const stream = { incomeCategory: 'employment', incomeStreamName: 'wages', incomeAmount: '1000', incomeFrequency: 'monthly', hoursPerWeek: '' };
       const member = memberWithHealthIns({ incomeStreams: [stream] as any });
       const result = createDefaultValues(member);
       expect(result.incomeStreams).toHaveLength(1);
@@ -263,7 +263,7 @@ describe('createEnergyCalculatorDefaultValues', () => {
   });
 
   it('uses existing incomeStreams', () => {
-    const stream = { incomeType: 'employment', incomeSource: 'wages', incomeAmount: '500', incomeFrequency: 'monthly', hoursPerWeek: '' };
+    const stream = { incomeCategory: 'employment', incomeStreamName: 'wages', incomeAmount: '500', incomeFrequency: 'monthly', hoursPerWeek: '' };
     const member = { incomeStreams: [stream] } as any;
     const result = createEnergyCalculatorDefaultValues(member, 1);
     expect(result.incomeStreams).toEqual([stream]);

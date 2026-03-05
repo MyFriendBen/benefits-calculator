@@ -180,7 +180,7 @@ describe('createHouseholdMemberSchema (main)', () => {
   });
 
   describe('income validation', () => {
-    const validStream = { incomeType: 'employment', incomeSource: 'wages', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '1000' };
+    const validStream = { incomeCategory: 'employment', incomeStreamName: 'wages', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '1000' };
 
     it('accepts empty incomeStreams', () => {
       expect(schema.safeParse({ ...validMainData, incomeStreams: [] }).success).toBe(true);
@@ -190,22 +190,22 @@ describe('createHouseholdMemberSchema (main)', () => {
       expect(schema.safeParse({ ...validMainData, incomeStreams: [validStream] }).success).toBe(true);
     });
 
-    it('rejects income stream with missing incomeType', () => {
+    it('rejects income stream with missing incomeCategory', () => {
       const result = schema.safeParse({
         ...validMainData,
-        incomeStreams: [{ ...validStream, incomeType: '' }],
+        incomeStreams: [{ ...validStream, incomeCategory: '' }],
       });
       expect(result.success).toBe(false);
-      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeType')).toBe(true);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeCategory')).toBe(true);
     });
 
-    it('rejects income stream with missing incomeSource', () => {
+    it('rejects income stream with missing incomeStreamName', () => {
       const result = schema.safeParse({
         ...validMainData,
-        incomeStreams: [{ ...validStream, incomeSource: '' }],
+        incomeStreams: [{ ...validStream, incomeStreamName: '' }],
       });
       expect(result.success).toBe(false);
-      expect(result.error?.issues.some(i => i.path.includes('incomeSource'))).toBe(true);
+      expect(result.error?.issues.some(i => i.path.includes('incomeStreamName'))).toBe(true);
     });
 
     it('rejects income stream with zero amount', () => {
@@ -239,11 +239,11 @@ describe('createHouseholdMemberSchema (main)', () => {
         ...validMainData,
         incomeStreams: [
           validStream,
-          { ...validStream, incomeSource: '' },
+          { ...validStream, incomeStreamName: '' },
         ],
       });
       expect(result.success).toBe(false);
-      expect(result.error?.issues.some(i => i.path[1] === 1 && i.path.includes('incomeSource'))).toBe(true);
+      expect(result.error?.issues.some(i => i.path[1] === 1 && i.path.includes('incomeStreamName'))).toBe(true);
     });
   });
 });

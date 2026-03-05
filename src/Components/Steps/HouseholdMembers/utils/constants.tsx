@@ -14,8 +14,8 @@ export const FREQUENCY_ORDER = ['once', 'yearly', 'monthly', 'semimonthly', 'biw
 
 // Empty income stream template
 export const EMPTY_INCOME_STREAM: IncomeStreamFormData = {
-  incomeType: '',
-  incomeSource: '',
+  incomeCategory: '',
+  incomeStreamName: '',
   incomeAmount: '',
   incomeFrequency: '',
   hoursPerWeek: '',

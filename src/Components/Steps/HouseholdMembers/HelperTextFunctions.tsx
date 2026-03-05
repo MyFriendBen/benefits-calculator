@@ -65,8 +65,8 @@ export const renderStudentEligibilityErrorMessage = (intlHook: IntlShape) => {
 
 export const renderIncomeStreamNameHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
-    id: 'errorMessage-incomeSource',
-    defaultMessage: 'Please select an income source',
+    id: 'errorMessage-incomeStreamName',
+    defaultMessage: 'Please select an income type.',
   });
 };
 

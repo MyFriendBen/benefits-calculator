@@ -25,7 +25,7 @@ export type ApiIncomeReadOnly = {
 
 export type ApiIncome = {
   type: string | null;
-  source: string | null;
+  category: string | null;
   // Django DecimalField serializes as string on read; we send number on write
   amount: number | string | null;
   frequency: string | null;

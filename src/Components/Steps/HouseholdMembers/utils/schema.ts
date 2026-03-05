@@ -6,7 +6,7 @@ import {
   renderHealthInsSelectOneHelperText,
   renderHealthInsNonePlusHelperText,
   renderHealthInsNonePlusTheyHelperText,
-  renderIncomeSourceHelperText,
+  renderIncomeStreamNameHelperText,
   renderIncomeFrequencyHelperText,
   renderHoursWorkedHelperText,
   renderIncomeAmountHelperText,
@@ -16,7 +16,7 @@ import {
   renderBirthYearHelperText,
   renderInvalidBirthYearHelperText,
   renderRelationshipToHHHelperText,
-  renderIncomeTypeHelperText,
+  renderIncomeCategoryHelperText,
   hasAtLeastOneTrue,
   validateNoneExclusive,
   validateHourlyIncome,
@@ -72,8 +72,8 @@ export const STUDENT_QUESTIONS: StudentQuestion[] = [
 const createIncomeSourceSchema = (intl: IntlShape) => {
   return z
     .object({
-      incomeType: z.string().min(1, { message: renderIncomeTypeHelperText(intl) }),
-      incomeSource: z.string().min(1, { message: renderIncomeSourceHelperText(intl) }),
+      incomeCategory: z.string().min(1, { message: renderIncomeCategoryHelperText(intl) }),
+      incomeStreamName: z.string().min(1, { message: renderIncomeStreamNameHelperText(intl) }),
       incomeFrequency: z.string().min(1, { message: renderIncomeFrequencyHelperText(intl) }),
       hoursPerWeek: z.string().trim(),
       incomeAmount: z

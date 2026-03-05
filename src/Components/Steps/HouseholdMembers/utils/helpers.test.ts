@@ -24,7 +24,7 @@ const mockCalcAge = jest.mocked(calcAge);
 // ============================================================================
 
 describe('getDefaultFormItems', () => {
-  const template = { incomeType: '', incomeSource: '', incomeAmount: '', incomeFrequency: '', hoursPerWeek: '' };
+  const template = { incomeCategory: '', incomeStreamName: '', incomeAmount: '', incomeFrequency: '', hoursPerWeek: '' };
 
   it('returns existing items when they are present', () => {
     const existing = [template, template];
@@ -208,7 +208,7 @@ describe('createHouseholdMemberData', () => {
     const result = createHouseholdMemberData({
       memberData: {
         ...baseMemberData,
-        incomeStreams: [{ incomeType: 'employment', incomeSource: 'wages', incomeAmount: '1000', incomeFrequency: 'monthly', hoursPerWeek: '' }],
+        incomeStreams: [{ incomeCategory: 'employment', incomeStreamName: 'wages', incomeAmount: '1000', incomeFrequency: 'monthly', hoursPerWeek: '' }],
       },
       currentMemberIndex: 0,
       existingHouseholdData: [],
@@ -378,7 +378,7 @@ describe('scrollToFirstError', () => {
       return id === 'income-stream-1' ? rowEl : null;
     });
 
-    scrollToFirstError({ incomeStreams: [null, { incomeSource: { message: 'required' } }] });
+    scrollToFirstError({ incomeStreams: [null, { incomeStreamName: { message: 'required' } }] });
 
     expect(getSpy).toHaveBeenCalledWith('income-stream-1');
     expect(mockScrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
@@ -391,7 +391,7 @@ describe('scrollToFirstError', () => {
       return id === 'income-section' ? sectionEl : null;
     });
 
-    scrollToFirstError({ incomeStreams: [{ incomeType: { message: 'required' } }] });
+    scrollToFirstError({ incomeStreams: [{ incomeCategory: { message: 'required' } }] });
 
     expect(mockScrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
   });
