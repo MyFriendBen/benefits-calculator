@@ -9,7 +9,6 @@ import resultsRoutes from './results';
 
 interface UUIDScopedRoutesOptions {
   householdMemberStepNumber: number;
-  energyCalcHouseholdMemberStepNumber: number;
 }
 
 /**
@@ -20,7 +19,6 @@ interface UUIDScopedRoutesOptions {
  */
 export const buildUUIDScopedRoute = ({
   householdMemberStepNumber,
-  energyCalcHouseholdMemberStepNumber,
 }: UUIDScopedRoutesOptions): RouteObject => {
   const children: RouteObject[] = [
     { index: true, element: <Navigate to="step-1" replace /> },
@@ -37,13 +35,6 @@ export const buildUUIDScopedRoute = ({
     children.push({
       path: `step-${householdMemberStepNumber}/:page`,
       element: <HouseholdMemberForm key={window.location.href} />,
-    });
-  }
-
-  if (energyCalcHouseholdMemberStepNumber > 0) {
-    children.push({
-      path: `step-${energyCalcHouseholdMemberStepNumber}/:page`,
-      element: <HouseholdMemberForm workflowType="energyCalculator" key={window.location.href} />,
     });
   }
 

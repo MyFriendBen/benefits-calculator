@@ -55,7 +55,7 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
     relationshipOptions,
   } = useHouseholdMemberConfig();
 
-  const questionName = isEnergyCalculator ? 'energyCalculatorHouseholdData' : 'householdData';
+  const questionName = 'householdData';
 
   const redirectToConfirmationPage = useShouldRedirectToConfirmation();
   const currentStepId = useStepNumber(questionName);

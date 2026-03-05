@@ -57,9 +57,9 @@ describe('useHouseholdMemberFormEffects', () => {
     it('updates title when questionName changes', () => {
       const params = makeParams({ questionName: 'householdData' });
       const { rerender } = renderHook((p: any) => useHouseholdMemberFormEffects(p), { initialProps: params });
-      const newParams = makeParams({ questionName: 'energyCalculatorHouseholdData' });
+      const newParams = makeParams({ questionName: 'householdData' });
       rerender(newParams);
-      expect(document.title).toBe(QUESTION_TITLES['energyCalculatorHouseholdData']);
+      expect(document.title).toBe(QUESTION_TITLES['householdData']);
     });
   });
 

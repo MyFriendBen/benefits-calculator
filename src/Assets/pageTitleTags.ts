@@ -12,7 +12,6 @@ export const QUESTION_TITLES: Record<QuestionName, string> = {
   referralSource: 'Referral',
   signUpInfo: 'Optional Sign Up',
   energyCalculatorApplianceStatus: 'Appliance Broken or Needs Replacement?',
-  energyCalculatorHouseholdData: 'Household Member',
   energyCalculatorUtilityStatus: 'Utility Service Status',
   energyCalculatorElectricityProvider: 'Electricity Provider',
   energyCalculatorGasProvider: 'Gas Provider',
