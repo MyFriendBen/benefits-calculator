@@ -7,51 +7,6 @@ import { HouseholdMemberFormSchema, EnergyCalculatorHouseholdMemberFormSchema } 
 export { formatToUSD } from '../../../../utils/formatCurrency';
 
 // ============================================================================
-// RETURNING USER HELPERS
-// ============================================================================
-
-/**
- * Ensures incomeCategory is populated on each income stream for returning users
- * whose data was saved before incomeCategory was persisted to the backend.
- *
- * For new submissions incomeCategory is saved directly, so this is only needed
- * as a fallback for older records that only have incomeStreamName.
- *
- * @param memberData - Saved household member data (may be undefined on first visit)
- * @param incomeOptions - Nested config map: { [type]: { [source]: label } }.
- *                        May be empty ({}) while config is still loading — in that
- *                        case we return undefined so the form defers initialization
- *                        until the config is ready, rather than backfilling with
- *                        empty strings that RHF would lock in as defaultValues.
- */
-export function backfillIncomeTypes(
-  memberData: HouseholdData | undefined,
-  incomeOptions: Record<string, Record<string, FormattedMessageType>> | undefined,
-): HouseholdData | undefined {
-  if (!memberData) return undefined;
-  // Config not yet loaded — defer so the form doesn't initialize with blank categories
-  if (!incomeOptions || Object.keys(incomeOptions).length === 0) return undefined;
-
-  const streams = memberData.incomeStreams ?? [];
-  const backfilled = streams.map((stream) => {
-    if (stream.incomeCategory) return stream;
-
-    let incomeCategory = '';
-    if (stream.incomeStreamName && incomeOptions) {
-      for (const [type, options] of Object.entries(incomeOptions)) {
-        if (Object.hasOwn(options, stream.incomeStreamName)) {
-          incomeCategory = type;
-          break;
-        }
-      }
-    }
-    return { ...stream, incomeCategory };
-  });
-
-  return { ...memberData, incomeStreams: backfilled as HouseholdData['incomeStreams'] };
-}
-
-// ============================================================================
 // GENERIC FORM HELPERS
 // ============================================================================
 

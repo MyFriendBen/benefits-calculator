@@ -1,4 +1,4 @@
-import { backfillIncomeTypes, getDefaultFormItems, sortFrequencyOptions, calculateAge, formatToUSD, createHouseholdMemberData, scrollToFirstError } from './helpers';
+import { getDefaultFormItems, sortFrequencyOptions, calculateAge, formatToUSD, createHouseholdMemberData, scrollToFirstError } from './helpers';
 import { FREQUENCY_ORDER } from './constants';
 import { calcAge } from '../../../../Assets/age';
 
@@ -393,61 +393,5 @@ describe('scrollToFirstError', () => {
     scrollToFirstError({ incomeStreams: [{ incomeCategory: { message: 'required' } }] });
 
     expect(mockScrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
-  });
-});
-
-// ============================================================================
-// backfillIncomeTypes
-// ============================================================================
-
-describe('backfillIncomeTypes', () => {
-  // FormattedMessageType is ReactElement; use `as any` so we can use plain strings in tests
-  const incomeOptions = {
-    employment: { wages: 'Wages', selfEmployed: 'Self-Employed' },
-    benefits: { ssi: 'SSI', snap: 'SNAP' },
-  } as any;
-
-  it('returns undefined when memberData is undefined', () => {
-    expect(backfillIncomeTypes(undefined, incomeOptions)).toBeUndefined();
-  });
-
-  it('returns undefined when incomeOptions is undefined (config not yet loaded)', () => {
-    const memberData = { incomeStreams: [{ incomeCategory: '', incomeStreamName: 'wages', incomeAmount: 1000, incomeFrequency: 'monthly', hoursPerWeek: 0 }] } as any;
-    expect(backfillIncomeTypes(memberData, undefined)).toBeUndefined();
-  });
-
-  it('returns undefined when incomeOptions is empty (config still loading — race condition guard)', () => {
-    const memberData = { incomeStreams: [{ incomeCategory: '', incomeStreamName: 'wages', incomeAmount: 1000, incomeFrequency: 'monthly', hoursPerWeek: 0 }] } as any;
-    expect(backfillIncomeTypes(memberData, {})).toBeUndefined();
-  });
-
-  it('derives incomeCategory from incomeStreamName for streams missing it', () => {
-    const memberData = {
-      incomeStreams: [{ incomeCategory: '', incomeStreamName: 'wages', incomeAmount: 1000, incomeFrequency: 'monthly', hoursPerWeek: 0 }],
-    } as any;
-    const result = backfillIncomeTypes(memberData, incomeOptions);
-    expect(result?.incomeStreams[0].incomeCategory).toBe('employment');
-  });
-
-  it('leaves incomeCategory unchanged when already populated', () => {
-    const memberData = {
-      incomeStreams: [{ incomeCategory: 'benefits', incomeStreamName: 'ssi', incomeAmount: 500, incomeFrequency: 'monthly', hoursPerWeek: 0 }],
-    } as any;
-    const result = backfillIncomeTypes(memberData, incomeOptions);
-    expect(result?.incomeStreams[0].incomeCategory).toBe('benefits');
-  });
-
-  it('leaves incomeCategory empty string when incomeStreamName is not found in any category', () => {
-    const memberData = {
-      incomeStreams: [{ incomeCategory: '', incomeStreamName: 'unknown_source', incomeAmount: 100, incomeFrequency: 'monthly', hoursPerWeek: 0 }],
-    } as any;
-    const result = backfillIncomeTypes(memberData, incomeOptions);
-    expect(result?.incomeStreams[0].incomeCategory).toBe('');
-  });
-
-  it('handles members with no income streams', () => {
-    const memberData = { incomeStreams: [] } as any;
-    const result = backfillIncomeTypes(memberData, incomeOptions);
-    expect(result?.incomeStreams).toEqual([]);
   });
 });

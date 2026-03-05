@@ -16,7 +16,7 @@ import '../styles/IncomeSection.css';
 import { useShouldRedirectToConfirmation } from '../../../QuestionComponents/questionHooks';
 import useStepForm from '../../stepForm';
 import { WorkflowType } from '../utils/types';
-import { backfillIncomeTypes, calculateAge, createHouseholdMemberData, scrollToFirstError } from '../utils/helpers';
+import { calculateAge, createHouseholdMemberData, scrollToFirstError } from '../utils/helpers';
 import { useHouseholdMembersNavigation } from '../hooks/useHouseholdMembersNavigation';
 import { useHouseholdMemberConfig } from '../hooks/useHouseholdMemberConfig';
 import { useHouseholdMemberFormEffects } from '../hooks/useHouseholdMemberFormEffects';
@@ -79,11 +79,9 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
     ? createEnergyCalculatorHouseholdMemberSchema(intl, pageNumber, relationshipOptions)
     : createHouseholdMemberSchema(intl, pageNumber);
 
-  const memberDataWithTypes = backfillIncomeTypes(householdMemberFormData, incomeOptions);
-
   const defaultValues = isEnergyCalculator
-    ? createEnergyCalculatorDefaultValues(memberDataWithTypes, pageNumber)
-    : createDefaultValues(memberDataWithTypes, pageNumber === 1);
+    ? createEnergyCalculatorDefaultValues(householdMemberFormData, pageNumber)
+    : createDefaultValues(householdMemberFormData, pageNumber === 1);
 
   const {
     control,
