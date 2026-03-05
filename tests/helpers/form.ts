@@ -155,6 +155,10 @@ export async function selectIncomeCategory(page: Page, incomeCategory: string): 
  * @param incomeType - Income source label to select (e.g. "Wages, salaries, or tips")
  */
 export async function selectIncomeType(page: Page, incomeType: string): Promise<void> {
+  const isCI = process.env.CI === 'true';
+  const timeout = isCI ? 20000 : 10000;
+  // Wait for the source dropdown to be enabled (it's disabled until a category is selected)
+  await page.locator('#income-source-select-0:not([aria-disabled="true"])').waitFor({ state: 'attached', timeout });
   await selectMuiOption(page, '#income-source-select-0', incomeType);
 }
 
