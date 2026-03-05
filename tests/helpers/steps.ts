@@ -59,9 +59,10 @@ export async function selectCondition(page: Page, condition: string) {
   await page.locator('.option-cards-container').last().getByRole('button', { name: condition }).click();
 }
 
-export async function selectIncome(page: Page, incomeType: string, frequency: string, amount: number) {
-  await page.getByRole('radio', { name: 'Yes' }).check();
-  await page.getByRole('button', { name: 'Income Type' }).click();
+export async function selectIncome(page: Page, incomeCategory: string, incomeType: string, frequency: string, amount: number) {
+  await page.getByRole('button', { name: 'Income Category' }).click();
+  await page.getByRole('option', { name: incomeCategory }).click();
+  await page.getByRole('button', { name: 'Income Source' }).click();
   await page.getByRole('option', { name: incomeType }).click();
   await page.getByRole('button', { name: 'Frequency' }).click();
   await page.getByRole('option', { name: frequency }).click();

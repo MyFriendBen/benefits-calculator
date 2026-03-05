@@ -30,10 +30,12 @@ export async function selectNoBenefit(page: Page) {
   await page.getByRole('radio', { name: 'No', exact: true }).check();
 }
 
-export async function selectECIncome(page: Page, incomeType: string, frequency: string, amount: number) {
+export async function selectECIncome(page: Page, incomeCategory: string, incomeType: string, frequency: string, amount: number) {
   // For energy calculator household member form, income radio is already set to 'Yes' for 16+ users
   // Just fill in the income details
-  await page.getByRole('button', { name: 'Income Type' }).click();
+  await page.getByRole('button', { name: 'Income Category' }).click();
+  await page.getByRole('option', { name: incomeCategory }).click();
+  await page.getByRole('button', { name: 'Income Source' }).click();
   await page.getByRole('option', { name: incomeType }).click();
   await page.getByRole('button', { name: 'Frequency' }).click();
   await page.getByRole('option', { name: frequency }).click();
