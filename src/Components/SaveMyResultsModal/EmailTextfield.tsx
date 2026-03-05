@@ -94,7 +94,7 @@ const EmailTextfield = ({ setSnackbar }: EmailTextfieldProps) => {
               error={errors.email !== undefined}
               helperText={
                 errors.email !== undefined && (
-                  <ErrorMessageWrapper fontSize="1rem">{errors.email.message}</ErrorMessageWrapper>
+                  <ErrorMessageWrapper>{errors.email.message}</ErrorMessageWrapper>
                 )
               }
               sx={{ mb: '1rem' }}

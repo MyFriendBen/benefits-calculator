@@ -111,7 +111,7 @@ const PhoneTextfield = ({ setSnackbar }: PhoneTextfieldProps) => {
               error={errors.phone !== undefined}
               helperText={
                 errors.phone !== undefined && (
-                  <ErrorMessageWrapper fontSize="1rem">{errors.phone.message}</ErrorMessageWrapper>
+                  <ErrorMessageWrapper>{errors.phone.message}</ErrorMessageWrapper>
                 )
               }
               sx={{ mb: '1rem' }}

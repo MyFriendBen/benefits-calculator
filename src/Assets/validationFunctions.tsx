@@ -37,7 +37,7 @@ const householdAssetsHasError: ValidationFunction<string> = (householdAssets) =>
 const displayHouseholdAssetsHelperText: MessageFunction<string> = (householdAssets) => {
   if (householdAssetsHasError(householdAssets)) {
     return (
-      <ErrorMessageWrapper fontSize="1rem">
+      <ErrorMessageWrapper>
         <FormattedMessage id="validation-helperText.assets" defaultMessage="Please enter 0 or a positive number." />
       </ErrorMessageWrapper>
     );
@@ -51,7 +51,7 @@ const emailHasError: ValidationFunction<string> = (email) => {
 const displayEmailHelperText: MessageFunction<string> = (email) => {
   if (emailHasError(email)) {
     return (
-      <ErrorMessageWrapper fontSize="1rem">
+      <ErrorMessageWrapper>
         <FormattedMessage id="validation-helperText.email" defaultMessage="Please enter a valid email address" />
       </ErrorMessageWrapper>
     );
@@ -65,7 +65,7 @@ const selectHasError: ValidationFunction<string> = (referralSource) => {
 const displayReferralSourceHelperText: MessageFunction<string> = (source) => {
   if (selectHasError(source)) {
     return (
-      <ErrorMessageWrapper fontSize="1rem">
+      <ErrorMessageWrapper>
         <FormattedMessage id="validation-helperText.referralSource" defaultMessage="Please select a referral source." />
       </ErrorMessageWrapper>
     );
@@ -75,7 +75,7 @@ const displayReferralSourceHelperText: MessageFunction<string> = (source) => {
 const displayMissingSelectHelperText: MessageFunction<string> = (source) => {
   if (selectHasError(source)) {
     return (
-      <ErrorMessageWrapper fontSize="1rem">
+      <ErrorMessageWrapper>
         <FormattedMessage id="validation-helperText.selectOption" defaultMessage="Please select an option." />
       </ErrorMessageWrapper>
     );
@@ -89,7 +89,7 @@ const nameHasError: ValidationFunction<string> = (name) => {
 const displayFirstNameHelperText: MessageFunction<string> = (firstName) => {
   if (nameHasError(firstName)) {
     return (
-      <ErrorMessageWrapper fontSize="1rem">
+      <ErrorMessageWrapper>
         <FormattedMessage id="validation-helperText.firstName" defaultMessage="Please enter your first name" />
       </ErrorMessageWrapper>
     );
@@ -99,7 +99,7 @@ const displayFirstNameHelperText: MessageFunction<string> = (firstName) => {
 const displayLastNameHelperText: MessageFunction<string> = (lastName) => {
   if (nameHasError(lastName)) {
     return (
-      <ErrorMessageWrapper fontSize="1rem">
+      <ErrorMessageWrapper>
         <FormattedMessage id="validation-helperText.lastName" defaultMessage="Please enter your last name" />
       </ErrorMessageWrapper>
     );
@@ -114,7 +114,7 @@ const phoneHasError: ValidationFunction<string> = (phoneNumber) => {
 const displayPhoneHasErrorHelperText: MessageFunction<string> = (phoneNumber) => {
   if (phoneHasError(phoneNumber)) {
     return (
-      <ErrorMessageWrapper fontSize="1rem">
+      <ErrorMessageWrapper>
         <FormattedMessage
           id="validation-helperText.phoneNumber"
           defaultMessage="Please enter a 10 digit phone number"
@@ -171,7 +171,7 @@ const signUpOptionsHaveError: ValidationFunction<SignUpInfo> = (signUpInfo) => {
 
 const otherReferalSourceHelperText: MessageFunction<string> = () => {
   return (
-    <ErrorMessageWrapper fontSize="1rem">
+    <ErrorMessageWrapper>
       <FormattedMessage id="errorMessage-otherReferralSource" defaultMessage="Please type in your referral source" />
     </ErrorMessageWrapper>
   );
@@ -183,7 +183,7 @@ const termsOfServiceHasError: ValidationFunction<boolean> = (isChecked) => {
 
 const displayAgreeToTermsErrorMessage: MessageFunction<null> = () => {
   return (
-    <ErrorMessageWrapper fontSize="1rem">
+    <ErrorMessageWrapper>
       <FormattedMessage id="disclaimer.error" defaultMessage="Please check the box to continue." />
     </ErrorMessageWrapper>
   );

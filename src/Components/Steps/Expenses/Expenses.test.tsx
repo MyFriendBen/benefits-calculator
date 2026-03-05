@@ -122,7 +122,7 @@ describe('Expenses', () => {
     it('renders the question header and description', () => {
       renderExpenses();
       expect(screen.getByText(/which of the following expenses/i)).toBeInTheDocument();
-      expect(screen.getByText(/enter whole dollar amounts/i)).toBeInTheDocument();
+      expect(screen.getByText(/enter an estimate instead of leaving it as \$0/i)).toBeInTheDocument();
     });
 
     it('renders all expense rows from config', () => {
