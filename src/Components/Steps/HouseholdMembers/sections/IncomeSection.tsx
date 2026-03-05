@@ -188,24 +188,23 @@ const IncomeStreamRow = ({
               <Typography id={`income-frequency-label-${index}`} className="form-field-label">
                 <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
               </Typography>
-              {/* A real box is needed so .contains() covers both the button and the popover */}
-              <div ref={freqHelpRef} style={{ display: 'inline-flex', alignItems: 'center', position: 'relative' }}>
+              <div ref={freqHelpRef} style={{ display: 'inline-flex', alignItems: 'center' }}>
                 <IconButton
                   onClick={() => setShowFreqHelp((v) => !v)}
                   aria-label={intl.formatMessage({ id: 'helpButton.ariaText', defaultMessage: 'help button' })}
                 >
                   <HelpBubble style={{ height: '20px', width: '20px' }} className="help-button-icon-color" />
                 </IconButton>
-                {showFreqHelp && (
-                  <p className="help-text income-freq-help-icon">
-                    <FormattedMessage
-                      id="personIncomeBlock.income-freq-help-text"
-                      defaultMessage='"Every 2 weeks" means you get paid every other week. "Twice a month" means you get paid two times a month on the same dates each month.'
-                    />
-                  </p>
-                )}
               </div>
             </div>
+            {showFreqHelp && (
+              <p className="help-text">
+                <FormattedMessage
+                  id="personIncomeBlock.income-freq-help-text"
+                  defaultMessage='"Every 2 weeks" means you get paid every other week. "Twice a month" means you get paid two times a month on the same dates each month.'
+                />
+              </p>
+            )}
             <FormControl fullWidth size="small" error={incomeFrequencyError !== undefined}>
               <Controller
                 name={`incomeStreams.${index}.incomeFrequency`}
