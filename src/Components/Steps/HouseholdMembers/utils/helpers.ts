@@ -193,8 +193,11 @@ export const scrollToFirstError = (formErrors: Record<string, any>, workflowType
       const target =
         (firstErrorIndex !== -1 && document.getElementById(`${section.id}-${firstErrorIndex}`)) ||
         document.getElementById('income-section');
-      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      continue;
     }
 
     const element = document.getElementById(section.id);

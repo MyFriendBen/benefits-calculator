@@ -287,7 +287,11 @@ const IncomeStreamRow = ({
         </Box>
       </Box>
 
-      <IconButton onClick={() => remove(index)} className="income-delete-button" aria-label="delete income source">
+      <IconButton
+        onClick={() => remove(index)}
+        className="income-delete-button"
+        aria-label={intl.formatMessage({ id: 'personIncomeBlock.deleteIncomeAria', defaultMessage: 'Delete income source' })}
+      >
         <DeleteIcon />
       </IconButton>
     </Box>

@@ -123,10 +123,13 @@ export const renderIncomeFrequencyHelperText = (intlHook: IntlShape) => {
 };
 
 export const renderHoursWorkedHelperText = (intlHook: IntlShape) => {
-  return intlHook.formatMessage({
-    id: 'errorMessage-hoursPerWeek',
-    defaultMessage: 'Please enter a number between 1 and 168.',
-  });
+  return intlHook.formatMessage(
+    {
+      id: 'errorMessage-hoursPerWeek',
+      defaultMessage: 'Please enter a number between 1 and {max}.',
+    },
+    { max: MAX_HOURS_PER_WEEK },
+  );
 };
 
 export const renderIncomeAmountHelperText = (intlHook: IntlShape) => {
@@ -139,7 +142,7 @@ export const renderIncomeAmountHelperText = (intlHook: IntlShape) => {
 export const renderIncomeCategoryHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
     id: 'errorMessage-incomeCategory',
-    defaultMessage: 'Please select an income type',
+    defaultMessage: 'Please select an income type.',
   });
 };
 

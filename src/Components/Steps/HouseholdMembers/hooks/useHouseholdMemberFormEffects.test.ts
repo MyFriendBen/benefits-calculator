@@ -62,7 +62,12 @@ describe('useHouseholdMemberFormEffects', () => {
 
   // ============================================================================
   // Age-based income stream auto-append
-  // =====================================================================      renderHook(() => useHouseholdMemberFormEffects(params));
+  // ============================================================================
+
+  describe('age-based income stream auto-append', () => {
+    it('does not append on initial mount', () => {
+      const params = makeParams({ watchBirthMonth: 6, watchBirthYear: 2015 });
+      renderHook(() => useHouseholdMemberFormEffects(params));
       expect(params._mocks.append).not.toHaveBeenCalled();
     });
 

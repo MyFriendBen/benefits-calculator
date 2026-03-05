@@ -157,7 +157,16 @@ export const createHouseholdMemberSchema = (
     conditions: createSpecialConditionsSchema(intl),
     studentEligibility: studentEligibilitySchema,
     incomeStreams: incomeStreamsSchema,
-  }).superRefine(({ conditions, studentEligibility }, ctx) => {
+  }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility }, ctx) => {
+    const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
+    if (birthYear === CURRENT_YEAR && birthMonth > CURRENT_MONTH) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: renderFutureBirthMonthHelperText(intl),
+        path: ['birthMonth'],
+      });
+    }
+
     if (conditions.student) {
       STUDENT_QUESTIONS.forEach(({ name }) => {
         if (studentEligibility[name] === undefined) {
