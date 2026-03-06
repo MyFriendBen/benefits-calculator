@@ -30,9 +30,8 @@ import IncomeSection from '../sections/IncomeSection';
 import BasicInfoSection from '../sections/BasicInfoSection';
 
 const HouseholdMemberForm = () => {
-  const isEnergyCalculatorWL = useIsEnergyCalculator();
-  const workflowType: WorkflowType = isEnergyCalculatorWL ? 'energyCalculator' : 'main';
-  const isEnergyCalculator = workflowType === 'energyCalculator';
+  const isEnergyCalculator = useIsEnergyCalculator();
+  const workflowType: WorkflowType = isEnergyCalculator ? 'energyCalculator' : 'main';
 
   // CONTEXT & ROUTING
   const { formData } = useContext(Context);
