@@ -3,13 +3,13 @@ import {
   Box,
   FormControl,
   FormHelperText,
+  FormLabel,
   IconButton,
   InputAdornment,
   Select,
   Stack,
   TextField,
   Tooltip,
-  Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -111,19 +111,18 @@ const IncomeStreamRow = ({
       <Box className="income-fields-container">
         {/* Income Type */}
         <Box className="income-category-container">
-          <Typography id={`income-category-label-${index}`} className="form-field-label">
-            <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Category" />
-          </Typography>
           <FormControl fullWidth size="small" error={incomeCategoryError !== undefined}>
+            <FormLabel sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
+              <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Category" />
+            </FormLabel>
             <Controller
               name={`incomeStreams.${index}.incomeCategory`}
               control={control}
               render={({ field }) => (
                 <Select
                   {...field}
-                  displayEmpty
+                  inputProps={{ 'aria-label': 'Income Category' }}
                   id={`income-category-select-${index}`}
-                  inputProps={{ 'aria-labelledby': `income-category-label-${index}` }}
                   sx={{ backgroundColor: '#fff' }}
                   onChange={(e) => {
                     field.onChange(e);
@@ -146,10 +145,10 @@ const IncomeStreamRow = ({
         {/* Income Source, Frequency, Hours (if hourly), Amount */}
         <Box className="income-fields-row">
           <Box className="income-field-specific-type">
-            <Typography id={`income-source-label-${index}`} className="form-field-label">
-              <FormattedMessage id="personIncomeBlock.incomeStreamName" defaultMessage="Income Source" />
-            </Typography>
             <FormControl fullWidth size="small" error={!!selectedType && incomeStreamNameError !== undefined}>
+              <FormLabel sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
+                <FormattedMessage id="personIncomeBlock.incomeStreamName" defaultMessage="Income Source" />
+              </FormLabel>
               <Controller
                 name={`incomeStreams.${index}.incomeStreamName`}
                 control={control}
@@ -164,9 +163,8 @@ const IncomeStreamRow = ({
                     <span>
                       <Select
                         {...field}
-                        displayEmpty
+                        inputProps={{ 'aria-label': 'Income Source' }}
                         id={`income-source-select-${index}`}
-                        inputProps={{ 'aria-labelledby': `income-source-label-${index}` }}
                         sx={{ backgroundColor: '#fff' }}
                         disabled={!selectedType}
                         fullWidth
@@ -186,18 +184,17 @@ const IncomeStreamRow = ({
           </Box>
 
           <Box className="income-field-frequency">
-            <div className="income-frequency-label-row">
-              <Typography id={`income-frequency-label-${index}`} className="form-field-label">
+            <div ref={freqHelpRef} className="income-frequency-label-row">
+              <FormLabel sx={{ fontSize: '0.875rem', fontWeight: 400, color: 'text.primary' }}>
                 <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
-              </Typography>
-              <div ref={freqHelpRef} style={{ display: 'inline-flex', alignItems: 'center' }}>
-                <IconButton
-                  onClick={() => setShowFreqHelp((v) => !v)}
-                  aria-label={intl.formatMessage({ id: 'helpButton.ariaText', defaultMessage: 'help button' })}
-                >
-                  <HelpBubble style={{ height: '20px', width: '20px' }} className="help-button-icon-color" />
-                </IconButton>
-              </div>
+              </FormLabel>
+              <IconButton
+                size="small"
+                onClick={() => setShowFreqHelp((v) => !v)}
+                aria-label={intl.formatMessage({ id: 'helpButton.ariaText', defaultMessage: 'help button' })}
+              >
+                <HelpBubble style={{ height: '16px', width: '16px' }} className="help-button-icon-color" />
+              </IconButton>
             </div>
             {showFreqHelp && (
               <p className="help-text">
@@ -214,9 +211,8 @@ const IncomeStreamRow = ({
                 render={({ field }) => (
                   <Select
                     {...field}
-                    displayEmpty
+                    inputProps={{ 'aria-label': 'Frequency' }}
                     id={`income-frequency-select-${index}`}
-                    inputProps={{ 'aria-labelledby': `income-frequency-label-${index}` }}
                     sx={{ backgroundColor: '#fff' }}
                   >
                     {frequencyMenuItems}
@@ -233,9 +229,9 @@ const IncomeStreamRow = ({
 
           {isHourly && (
             <Box className="income-field-hours">
-              <Typography id={`income-hours-label-${index}`} className="form-field-label">
+              <FormLabel sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary', display: 'block' }}>
                 <FormattedMessage id="personIncomeBlock.hoursPerWeek" defaultMessage="Hours per Week" />
-              </Typography>
+              </FormLabel>
               <Controller
                 name={`incomeStreams.${index}.hoursPerWeek`}
                 control={control}
@@ -250,7 +246,7 @@ const IncomeStreamRow = ({
                       fullWidth
                       size="small"
                       variant="outlined"
-                      inputProps={{ inputMode: 'numeric', 'aria-labelledby': `income-hours-label-${index}` }}
+                      inputProps={{ inputMode: 'numeric', 'aria-label': 'Hours per Week' }}
                       sx={{ backgroundColor: '#fff' }}
                       error={hoursPerWeekError !== undefined}
                     />
@@ -266,9 +262,9 @@ const IncomeStreamRow = ({
           )}
 
           <Box className="income-field-amount">
-            <Typography id={`income-amount-label-${index}`} className="form-field-label">
+            <FormLabel sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary', display: 'block' }}>
               <FormattedMessage id="personIncomeBlock.preTaxAmount" defaultMessage="Pre-Tax Amount" />
-            </Typography>
+            </FormLabel>
             <Controller
               name={`incomeStreams.${index}.incomeAmount`}
               control={control}
@@ -285,7 +281,7 @@ const IncomeStreamRow = ({
                     fullWidth
                     size="small"
                     variant="outlined"
-                    inputProps={{ id: `income-amount-input-${index}`, inputMode: isHourly ? 'decimal' : 'numeric', 'aria-labelledby': `income-amount-label-${index}` }}
+                    inputProps={{ id: `income-amount-input-${index}`, inputMode: isHourly ? 'decimal' : 'numeric', 'aria-label': 'Pre-Tax Amount' }}
                     sx={{ backgroundColor: '#fff' }}
                     error={incomeAmountError !== undefined}
                     InputProps={{

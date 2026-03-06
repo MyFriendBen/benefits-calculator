@@ -39,6 +39,5 @@ export async function selectECIncome(page: Page, incomeCategory: string, incomeT
   await page.getByRole('option', { name: incomeType }).click();
   await page.getByRole('button', { name: 'Frequency' }).click();
   await page.getByRole('option', { name: frequency }).click();
-  await page.getByRole('textbox', { name: 'Amount' }).click();
-  await page.getByRole('textbox', { name: 'Amount' }).fill(amount.toString());
+  await page.locator('#income-amount-input-0').fill(amount.toString());
 }

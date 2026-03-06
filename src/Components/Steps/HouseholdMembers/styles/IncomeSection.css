@@ -39,10 +39,6 @@
   width: 100%;
 }
 
-.income-category-container .form-field-label {
-  margin-bottom: 0.25rem;
-  margin-top: 0;
-}
 
 .income-fields-row {
   display: flex;
@@ -84,17 +80,6 @@
   padding: 4px;
 }
 
-.form-field-label {
-  font-size: 0.875rem;
-  font-weight: 400;
-  margin-bottom: 0.25rem;
-  display: block;
-}
-
-.income-fields-row .form-field-label {
-  margin-bottom: 0.25rem;
-}
-
 .income-frequency-label-row {
   display: flex;
   align-items: center;
@@ -102,9 +87,11 @@
   margin-bottom: 0.25rem;
 }
 
-.income-frequency-label-row .form-field-label {
-  margin-bottom: 0;
+.income-frequency-label-row .MuiIconButton-root {
+  padding: 2px;
 }
+
+
 
 .income-add-button {
   display: flex;
