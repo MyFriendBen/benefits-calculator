@@ -54,11 +54,9 @@ describe('useHouseholdMemberFormEffects', () => {
       expect(document.title).toBe(QUESTION_TITLES['householdData']);
     });
 
-    it('updates title when questionName changes', () => {
+    it('sets document title on mount', () => {
       const params = makeParams({ questionName: 'householdData' });
-      const { rerender } = renderHook((p: any) => useHouseholdMemberFormEffects(p), { initialProps: params });
-      const newParams = makeParams({ questionName: 'householdData' });
-      rerender(newParams);
+      renderHook(() => useHouseholdMemberFormEffects(params));
       expect(document.title).toBe(QUESTION_TITLES['householdData']);
     });
   });
