@@ -101,7 +101,7 @@ const IncomeStreamRow = ({
         {/* Income Type */}
         <Box className="income-category-container">
           <FormControl fullWidth size="small" error={incomeCategoryError !== undefined}>
-            <FormLabel sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
+            <FormLabel id={`income-category-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
               <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Category" />
             </FormLabel>
             <Controller
@@ -135,7 +135,7 @@ const IncomeStreamRow = ({
         <Box className="income-fields-row">
           <Box className="income-field-specific-type">
             <FormControl fullWidth size="small" error={!!selectedType && incomeStreamNameError !== undefined}>
-              <FormLabel sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
+              <FormLabel id={`income-source-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
                 <FormattedMessage id="personIncomeBlock.incomeStreamName" defaultMessage="Income Source" />
               </FormLabel>
               <Controller
@@ -175,7 +175,7 @@ const IncomeStreamRow = ({
           <ClickAwayListener onClickAway={() => setShowFreqHelp(false)}>
           <Box className="income-field-frequency">
             <div className="income-frequency-label-row">
-              <FormLabel sx={{ fontSize: '0.875rem', fontWeight: 400, color: 'text.primary' }}>
+              <FormLabel id={`income-frequency-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, color: 'text.primary' }}>
                 <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
               </FormLabel>
               <IconButton
@@ -253,7 +253,7 @@ const IncomeStreamRow = ({
           )}
 
           <Box className="income-field-amount">
-            <FormLabel sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary', display: 'block' }}>
+            <FormLabel id={`income-amount-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary', display: 'block' }}>
               <FormattedMessage id="personIncomeBlock.preTaxAmount" defaultMessage="Pre-Tax Amount" />
             </FormLabel>
             <Controller
