@@ -93,6 +93,16 @@ const renderPage = (formData: any) => {
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('HouseholdMemberBasicInfoPage', () => {
+  beforeAll(() => {
+    // Polyfill crypto.randomUUID for jsdom (used in submit handler)
+    if (!globalThis.crypto?.randomUUID) {
+      Object.defineProperty(globalThis, 'crypto', {
+        value: { randomUUID: () => 'test-uuid-' + Math.random().toString(36).slice(2) },
+        writable: true,
+      });
+    }
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -204,6 +214,24 @@ describe('HouseholdMemberBasicInfoPage', () => {
       renderPage(makeFormData(2));
       fireEvent.click(screen.getByRole('button', { name: /back/i }));
       expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-4');
+    });
+  });
+
+  describe('forward navigation (submit)', () => {
+    it('navigates to step-5/1 with basicInfoCollected state after successful submit', async () => {
+      // Pre-populate householdData so form default values are valid (pass Zod validation)
+      // Include id/frontendId so crypto.randomUUID() is not called during submit
+      const validHouseholdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+      ];
+      renderPage(makeFormData(2, validHouseholdData));
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/co/test-uuid/step-5/1',
+        { state: { basicInfoCollected: true } }
+      );
     });
   });
 });

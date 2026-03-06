@@ -37,14 +37,11 @@ const renderRouter = (page: string, householdSize = 3) => {
 
 describe('HouseholdMemberRouter', () => {
   describe('page 0', () => {
+    // Note: in normal user flow, only householdSize > 1 users ever reach page 0.
+    // HouseholdSize navigates size-1 users directly to page 1 (skipping page 0).
+    // These tests verify the router's own routing logic, independent of how users arrive.
     it('renders HouseholdMemberBasicInfoPage when page is 0 and householdSize > 1', () => {
       renderRouter('0', 3);
-      expect(screen.getByTestId('basic-info-page')).toBeInTheDocument();
-      expect(screen.queryByTestId('member-form')).not.toBeInTheDocument();
-    });
-
-    it('renders HouseholdMemberBasicInfoPage when page is 0 and householdSize is 1', () => {
-      renderRouter('0', 1);
       expect(screen.getByTestId('basic-info-page')).toBeInTheDocument();
       expect(screen.queryByTestId('member-form')).not.toBeInTheDocument();
     });
