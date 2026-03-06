@@ -115,8 +115,8 @@ test.describe('Error Messages Test', () => {
     const incomeErrorMessages = await page.locator('span.error-message').allTextContents();
 
     expect(incomeErrorMessages).toEqual([
-      'Please select an income type',
-      'Please select a frequency',
+      'Please select an income category.',
+      'Please select a frequency.',
       'Please enter a number greater than 0.',
     ]);
 
