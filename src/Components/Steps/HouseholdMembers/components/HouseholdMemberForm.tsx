@@ -41,11 +41,12 @@ const HouseholdMemberForm = () => {
   const { updateScreen } = useScreenApi();
   const intl = useIntl();
   const pageNumber = Number(page);
-  const locationState = location.state as { isEditing?: boolean; routedFromConfirmationPg?: boolean } | null;
+  const locationState = location.state as { isEditing?: boolean; routedFromConfirmationPg?: boolean; basicInfoCollected?: boolean } | null;
   const isEditing = !!locationState?.isEditing || !!locationState?.routedFromConfirmationPg;
-  // Show BasicInfoSection when householdSize === 1 (page 0 was skipped, so basic info wasn't collected there)
-  // or when editing a member. When householdSize > 1, basic info was collected on page 0.
-  const showBasicInfoSection = formData.householdSize === 1 || isEditing;
+  const basicInfoCollected = !!locationState?.basicInfoCollected;
+  // Show BasicInfoSection when householdSize === 1 and they came directly from step 4 (skipping page 0),
+  // or when editing a member. basicInfoCollected means they went through page 0 already.
+  const showBasicInfoSection = (formData.householdSize === 1 && !basicInfoCollected) || isEditing;
 
   // CURRENT MEMBER DATA
   const currentMemberIndex = pageNumber - 1;

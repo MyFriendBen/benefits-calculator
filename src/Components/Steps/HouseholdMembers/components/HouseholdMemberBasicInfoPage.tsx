@@ -116,6 +116,7 @@ const HouseholdMemberBasicInfoPage = () => {
       members: defaultMembers,
     },
     questionName: 'householdData',
+    onSubmitSuccessfulOverride: () => {},
   });
 
   const { fields, remove, append } = useFieldArray({
@@ -136,7 +137,7 @@ const HouseholdMemberBasicInfoPage = () => {
         birthMonth: member.birthMonth,
         birthYear: member.birthYear,
         relationshipToHH: member.relationshipToHH,
-        specialConditions: existingMember?.specialConditions ?? {
+        conditions: existingMember?.conditions ?? {
           student: false,
           pregnant: false,
           blindOrVisuallyImpaired: false,
@@ -169,8 +170,7 @@ const HouseholdMemberBasicInfoPage = () => {
 
     await updateScreen(updatedFormData);
 
-    // Navigate to first member's detail page
-    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/1`);
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/1`, { state: { basicInfoCollected: true } });
   };
 
   const handleDeleteConfirm = async () => {
