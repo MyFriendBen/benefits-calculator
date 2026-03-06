@@ -121,7 +121,7 @@ const IncomeStreamRow = ({
               render={({ field }) => (
                 <Select
                   {...field}
-                  inputProps={{ 'aria-label': 'Income Category' }}
+                  inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.incomeCategory', defaultMessage: 'Income Category' }) }}
                   id={`income-category-select-${index}`}
                   sx={{ backgroundColor: '#fff' }}
                   onChange={(e) => {
@@ -163,7 +163,7 @@ const IncomeStreamRow = ({
                     <span>
                       <Select
                         {...field}
-                        inputProps={{ 'aria-label': 'Income Source' }}
+                        inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.incomeStreamName', defaultMessage: 'Income Source' }) }}
                         id={`income-source-select-${index}`}
                         sx={{ backgroundColor: '#fff' }}
                         disabled={!selectedType}
@@ -211,7 +211,7 @@ const IncomeStreamRow = ({
                 render={({ field }) => (
                   <Select
                     {...field}
-                    inputProps={{ 'aria-label': 'Frequency' }}
+                    inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.frequency', defaultMessage: 'Frequency' }) }}
                     id={`income-frequency-select-${index}`}
                     sx={{ backgroundColor: '#fff' }}
                   >
@@ -246,7 +246,7 @@ const IncomeStreamRow = ({
                       fullWidth
                       size="small"
                       variant="outlined"
-                      inputProps={{ inputMode: 'numeric', 'aria-label': 'Hours per Week' }}
+                      inputProps={{ inputMode: 'numeric', 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.hoursPerWeek', defaultMessage: 'Hours per Week' }) }}
                       sx={{ backgroundColor: '#fff' }}
                       error={hoursPerWeekError !== undefined}
                     />
@@ -281,7 +281,7 @@ const IncomeStreamRow = ({
                     fullWidth
                     size="small"
                     variant="outlined"
-                    inputProps={{ id: `income-amount-input-${index}`, inputMode: isHourly ? 'decimal' : 'numeric', 'aria-label': 'Pre-Tax Amount' }}
+                    inputProps={{ id: `income-amount-input-${index}`, inputMode: isHourly ? 'decimal' : 'numeric', 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.preTaxAmount', defaultMessage: 'Pre-Tax Amount' }) }}
                     sx={{ backgroundColor: '#fff' }}
                     error={incomeAmountError !== undefined}
                     InputProps={{
