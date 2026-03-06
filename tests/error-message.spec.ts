@@ -32,7 +32,7 @@ const userInfo = {
   dobMonth: 'January',
   dobYear: '1989',
   insurance: "I don't have or know if I have health insurance",
-  incomeType: 'Wages, salaries, tips',
+  incomeType: 'Wages, salaries, or tips',
   incomeFrequency: 'every month',
   incomeAmount: '2000',
   expenseType: 'Rent',
