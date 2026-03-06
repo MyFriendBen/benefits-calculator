@@ -115,7 +115,6 @@ describe('Route Configuration', () => {
       const { buildWLScopedRoutes } = await import('./wl-scoped');
       const wlRoutes = buildWLScopedRoutes({
         householdMemberStepNumber: 3,
-        energyCalcHouseholdMemberStepNumber: 4,
       });
 
       // Extract paths from the white label route's children
@@ -153,7 +152,6 @@ describe('Route Configuration', () => {
       // Build routes to get actual parameter names used
       const wlRoutes = buildWLScopedRoutes({
         householdMemberStepNumber: 3,
-        energyCalcHouseholdMemberStepNumber: 4,
       });
 
       // Extract parameter names from paths
