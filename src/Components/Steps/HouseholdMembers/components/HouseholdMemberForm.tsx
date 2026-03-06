@@ -22,18 +22,16 @@ import { useHouseholdMemberConfig } from '../hooks/useHouseholdMemberConfig';
 import { useHouseholdMemberFormEffects } from '../hooks/useHouseholdMemberFormEffects';
 import { createHouseholdMemberSchema, createEnergyCalculatorHouseholdMemberSchema } from '../utils/schema';
 import { createDefaultValues, createEnergyCalculatorDefaultValues } from '../utils/defaultValues';
+import { useIsEnergyCalculator } from '../../../EnergyCalculator/hooks';
 import HealthInsuranceSection from '../sections/HealthInsuranceSection';
 import SpecialConditionsSection from '../sections/SpecialConditionsSection';
 import StudentEligibilitySection from '../sections/StudentEligibilitySection';
 import IncomeSection from '../sections/IncomeSection';
 import BasicInfoSection from '../sections/BasicInfoSection';
 
-interface HouseholdMemberFormProps {
-  workflowType?: WorkflowType;
-}
-
-const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps) => {
-  const isEnergyCalculator = workflowType === 'energyCalculator';
+const HouseholdMemberForm = () => {
+  const isEnergyCalculator = useIsEnergyCalculator();
+  const workflowType: WorkflowType = isEnergyCalculator ? 'energyCalculator' : 'main';
 
   // CONTEXT & ROUTING
   const { formData } = useContext(Context);
@@ -55,7 +53,7 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
     relationshipOptions,
   } = useHouseholdMemberConfig();
 
-  const questionName = isEnergyCalculator ? 'energyCalculatorHouseholdData' : 'householdData';
+  const questionName = 'householdData';
 
   const redirectToConfirmationPage = useShouldRedirectToConfirmation();
   const currentStepId = useStepNumber(questionName);

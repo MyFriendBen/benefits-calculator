@@ -13,7 +13,6 @@ import { useTranslateNumber } from '../../Assets/languageOptions';
 import { FormattedMessageType, QuestionName } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
 import DefaultConfirmationHHData from './ConfirmationHouseholdData';
-import EnergyCalcConfirmationHHData from '../EnergyCalculator/ConfirmationPage/HouseholdData';
 import { Benefits as BenefitsType } from '../../Types/FormData';
 import EnergyCalculatorElectricityProvider from '../EnergyCalculator/ConfirmationPage/ElectricityProvider';
 import EnergyCalculatorGasProvider from '../EnergyCalculator/ConfirmationPage/GasProvider';
@@ -372,7 +371,6 @@ function ReferralSource() {
 const STEP_CONFIRMATIONS: Record<QuestionName, ReactNode | null> = {
   zipcode: <ZipCode key="zipcode" />,
   householdSize: <HouseholdSize key="householdSize" />,
-  energyCalculatorHouseholdData: <EnergyCalcConfirmationHHData key="energyCalculatorHouseholdData" />,
   householdData: <DefaultConfirmationHHData key="householdData" />,
   hasExpenses: <Expenses key="hasExpenses" />,
   householdAssets: <Assets key="householdAssets" />,

@@ -11,7 +11,6 @@ import SessionInitializer from '../Components/RouterUtil/SessionInitializer';
 
 interface WLScopedRoutesOptions {
   householdMemberStepNumber: number;
-  energyCalcHouseholdMemberStepNumber: number;
 }
 
 /**
@@ -20,7 +19,6 @@ interface WLScopedRoutesOptions {
  */
 export const buildWLScopedRoutes = ({
   householdMemberStepNumber,
-  energyCalcHouseholdMemberStepNumber,
 }: WLScopedRoutesOptions): RouteObject[] => {
   // Custom landing pages - checked first before generic :whiteLabel pattern
   const customLandingPages: RouteObject[] = CUSTOM_LANDING_PAGES.map(
@@ -39,7 +37,6 @@ export const buildWLScopedRoutes = ({
   // Build UUID-scoped routes
   const uuidRoute = buildUUIDScopedRoute({
     householdMemberStepNumber,
-    energyCalcHouseholdMemberStepNumber,
   });
 
   // Generic :whiteLabel routes (matched after custom landing pages)
