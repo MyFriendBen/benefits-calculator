@@ -127,7 +127,7 @@ const SelectStatePage = () => {
                 </Select>
                 {errors.state !== undefined && (
                   <FormHelperText>
-                    <ErrorMessageWrapper fontSize="1rem">{errors.state.message}</ErrorMessageWrapper>
+                    <ErrorMessageWrapper>{errors.state.message}</ErrorMessageWrapper>
                   </FormHelperText>
                 )}
               </>

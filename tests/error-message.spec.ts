@@ -32,7 +32,7 @@ const userInfo = {
   dobMonth: 'January',
   dobYear: '1989',
   insurance: "I don't have or know if I have health insurance",
-  incomeType: 'Wages, salaries, tips',
+  incomeType: 'Wages, salaries, or tips',
   incomeFrequency: 'every month',
   incomeAmount: '2000',
   expenseType: 'Rent',
@@ -116,9 +116,9 @@ test.describe('Error Messages Test', () => {
     const incomeErrorMessages = await page.locator('span.error-message').allTextContents();
 
     expect(incomeErrorMessages).toEqual([
-      'Please select an income type',
-      'Please select a frequency',
-      'Please enter a number greater than 0',
+      'Please select an income type.',
+      'Please select a frequency.',
+      'Please enter a number greater than 0.',
     ]);
 
     await selectIncomeType(page, userInfo.incomeType);

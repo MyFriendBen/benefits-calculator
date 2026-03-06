@@ -130,7 +130,7 @@ const IncomeSection = ({
             </Select>
             {getIncomeStreamError(index, 'incomeStreamName') !== undefined && (
               <FormHelperText sx={{ ml: 0 }}>
-                <ErrorMessageWrapper fontSize="1rem">
+                <ErrorMessageWrapper>
                   {getIncomeStreamError(index, 'incomeStreamName')?.message ?? ''}
                 </ErrorMessageWrapper>
               </FormHelperText>
@@ -194,7 +194,7 @@ const IncomeSection = ({
                 </Select>
                 {getIncomeStreamError(index, 'incomeFrequency') !== undefined && (
                   <FormHelperText sx={{ ml: 0 }}>
-                    <ErrorMessageWrapper fontSize="1rem">
+                    <ErrorMessageWrapper>
                       {getIncomeStreamError(index, 'incomeFrequency')?.message ?? ''}
                     </ErrorMessageWrapper>
                   </FormHelperText>
@@ -245,7 +245,7 @@ const IncomeSection = ({
               />
               {getIncomeStreamError(index, 'hoursPerWeek') !== undefined && (
                 <FormHelperText sx={{ ml: 0 }}>
-                  <ErrorMessageWrapper fontSize="1rem">
+                  <ErrorMessageWrapper>
                     {getIncomeStreamError(index, 'hoursPerWeek')?.message ?? ''}
                   </ErrorMessageWrapper>
                 </FormHelperText>
@@ -323,7 +323,7 @@ const IncomeSection = ({
               />
               {getIncomeStreamError(index, 'incomeAmount') !== undefined && (
                 <FormHelperText sx={{ ml: 0 }}>
-                  <ErrorMessageWrapper fontSize="1rem">
+                  <ErrorMessageWrapper>
                     {getIncomeStreamError(index, 'incomeAmount')?.message ?? ''}
                   </ErrorMessageWrapper>
                 </FormHelperText>
