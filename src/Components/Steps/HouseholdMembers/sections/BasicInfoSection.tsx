@@ -77,7 +77,7 @@ const BasicInfoSection = ({
           )}
         />
         {birthMonthError && (
-          <ErrorMessageWrapper fontSize="0.75rem">
+          <ErrorMessageWrapper>
             {birthMonthError.message as string}
           </ErrorMessageWrapper>
         )}
@@ -106,7 +106,7 @@ const BasicInfoSection = ({
           )}
         />
         {birthYearError && (
-          <ErrorMessageWrapper fontSize="0.75rem">
+          <ErrorMessageWrapper>
             {birthYearError.message as string}
           </ErrorMessageWrapper>
         )}
@@ -137,7 +137,7 @@ const BasicInfoSection = ({
             )}
           />
           {relationshipError && (
-            <ErrorMessageWrapper fontSize="0.75rem">
+            <ErrorMessageWrapper>
               {relationshipError.message as string}
             </ErrorMessageWrapper>
           )}

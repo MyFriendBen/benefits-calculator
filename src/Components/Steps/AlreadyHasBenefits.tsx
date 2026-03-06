@@ -239,7 +239,7 @@ function AlreadyHasBenefits() {
               }
             />
             {errors.alreadyHasBenefits !== undefined && (
-              <ErrorMessageWrapper fontSize="1.5rem">
+              <ErrorMessageWrapper fontSize="1rem">
                 {errors.alreadyHasBenefits.message as ReactNode}
               </ErrorMessageWrapper>
             )}

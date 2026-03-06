@@ -161,7 +161,7 @@ export default function GasProvider() {
               } else if (errors.gasProvider !== undefined) {
                 errorMessage = (
                   <FormHelperText>
-                    <ErrorMessageWrapper fontSize="1rem">{errors.gasProvider.message}</ErrorMessageWrapper>
+                    <ErrorMessageWrapper>{errors.gasProvider.message}</ErrorMessageWrapper>
                   </FormHelperText>
                 );
               }
