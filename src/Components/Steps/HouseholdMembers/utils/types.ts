@@ -27,5 +27,7 @@ export type IncomeStreamFormData = {
 
 export type LocationState = {
   isEditing?: boolean;
+  routedFromConfirmationPg?: boolean;
+  basicInfoCollected?: boolean;
   returnToPage?: number;
 };

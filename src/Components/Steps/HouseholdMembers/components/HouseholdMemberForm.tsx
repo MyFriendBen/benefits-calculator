@@ -15,7 +15,7 @@ import useScreenApi from '../../../../Assets/updateScreen';
 import '../styles/IncomeSection.css';
 import { useShouldRedirectToConfirmation } from '../../../QuestionComponents/questionHooks';
 import useStepForm from '../../stepForm';
-import { WorkflowType } from '../utils/types';
+import { WorkflowType, LocationState } from '../utils/types';
 import { calculateAge, createHouseholdMemberData, scrollToFirstError } from '../utils/helpers';
 import { useHouseholdMembersNavigation } from '../hooks/useHouseholdMembersNavigation';
 import { useHouseholdMemberConfig } from '../hooks/useHouseholdMemberConfig';
@@ -41,7 +41,7 @@ const HouseholdMemberForm = () => {
   const { updateScreen } = useScreenApi();
   const intl = useIntl();
   const pageNumber = Number(page);
-  const locationState = location.state as { isEditing?: boolean; routedFromConfirmationPg?: boolean; basicInfoCollected?: boolean } | null;
+  const locationState = location.state as LocationState | null;
   const isEditing = !!locationState?.isEditing || !!locationState?.routedFromConfirmationPg;
   const basicInfoCollected = !!locationState?.basicInfoCollected;
   // Show BasicInfoSection when householdSize === 1 and they came directly from step 4 (skipping page 0),
