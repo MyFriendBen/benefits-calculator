@@ -1,6 +1,7 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import {
   Box,
+  ClickAwayListener,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -13,7 +14,7 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import {
   Control,
   Controller,
@@ -76,19 +77,7 @@ const IncomeStreamRow = ({
   frequencyMenuItems,
 }: IncomeStreamRowProps) => {
   const [showFreqHelp, setShowFreqHelp] = useState(false);
-  const freqHelpRef = useRef<HTMLDivElement>(null);
   const intl = useIntl();
-
-  useEffect(() => {
-    if (!showFreqHelp) return;
-    const handler = (e: MouseEvent) => {
-      if (freqHelpRef.current && !freqHelpRef.current.contains(e.target as Node)) {
-        setShowFreqHelp(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [showFreqHelp]);
 
   // useWatch with a field-scoped name subscribes only this row to its own fields,
   // avoiding re-renders of sibling rows when unrelated streams change.
@@ -183,8 +172,9 @@ const IncomeStreamRow = ({
             </FormControl>
           </Box>
 
+          <ClickAwayListener onClickAway={() => setShowFreqHelp(false)}>
           <Box className="income-field-frequency">
-            <div ref={freqHelpRef} className="income-frequency-label-row">
+            <div className="income-frequency-label-row">
               <FormLabel sx={{ fontSize: '0.875rem', fontWeight: 400, color: 'text.primary' }}>
                 <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
               </FormLabel>
@@ -226,6 +216,7 @@ const IncomeStreamRow = ({
               )}
             </FormControl>
           </Box>
+          </ClickAwayListener>
 
           {isHourly && (
             <Box className="income-field-hours">

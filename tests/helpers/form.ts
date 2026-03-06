@@ -144,9 +144,10 @@ async function selectMuiOption(page: Page, selectId: string, optionText: string)
  * Selects an income category (the "Income Type" grouping dropdown)
  * @param page - Playwright page instance
  * @param incomeCategory - Category label to select (e.g. "Work & Self-Employment Income")
+ * @param index - Index of the income stream row (default 0)
  */
-export async function selectIncomeCategory(page: Page, incomeCategory: string): Promise<void> {
-  await selectMuiOption(page, '#income-category-select-0', incomeCategory);
+export async function selectIncomeCategory(page: Page, incomeCategory: string, index = 0): Promise<void> {
+  await selectMuiOption(page, `#income-category-select-${index}`, incomeCategory);
 }
 
 /**
