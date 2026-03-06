@@ -22,17 +22,16 @@ import { useHouseholdMemberConfig } from '../hooks/useHouseholdMemberConfig';
 import { useHouseholdMemberFormEffects } from '../hooks/useHouseholdMemberFormEffects';
 import { createHouseholdMemberSchema, createEnergyCalculatorHouseholdMemberSchema } from '../utils/schema';
 import { createDefaultValues, createEnergyCalculatorDefaultValues } from '../utils/defaultValues';
+import { useIsEnergyCalculator } from '../../../EnergyCalculator/hooks';
 import HealthInsuranceSection from '../sections/HealthInsuranceSection';
 import SpecialConditionsSection from '../sections/SpecialConditionsSection';
 import StudentEligibilitySection from '../sections/StudentEligibilitySection';
 import IncomeSection from '../sections/IncomeSection';
 import BasicInfoSection from '../sections/BasicInfoSection';
 
-interface HouseholdMemberFormProps {
-  workflowType?: WorkflowType;
-}
-
-const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps) => {
+const HouseholdMemberForm = () => {
+  const isEnergyCalculatorWL = useIsEnergyCalculator();
+  const workflowType: WorkflowType = isEnergyCalculatorWL ? 'energyCalculator' : 'main';
   const isEnergyCalculator = workflowType === 'energyCalculator';
 
   // CONTEXT & ROUTING
