@@ -109,19 +109,6 @@ export const DEFAULT_STUDENT_ELIGIBILITY = {
 };
 
 /**
- * Determines the default hasIncome string value.
- * Priority:
- * 1. Streams present → always 'true'
- * 2. Saved hasIncome boolean → respect it (user made an explicit choice)
- * 3. No saved data (first visit) → 'false' (age effect will auto-set if eligible)
- */
-const getDefaultHasIncome = (data: HouseholdData | undefined, incomeStreams: any[]): string => {
-  if (incomeStreams.length > 0) return 'true';
-  if (data && typeof data.hasIncome === 'boolean') return data.hasIncome ? 'true' : 'false';
-  return 'false';
-};
-
-/**
  * Creates default form values for household member
  */
 export const createDefaultValues = (
@@ -145,7 +132,6 @@ export const createDefaultValues = (
     studentEligibility: householdMemberFormData?.studentEligibility
       ? { ...DEFAULT_STUDENT_ELIGIBILITY, ...householdMemberFormData.studentEligibility }
       : DEFAULT_STUDENT_ELIGIBILITY,
-    hasIncome: getDefaultHasIncome(householdMemberFormData, incomeStreams),
     incomeStreams,
   };
 };
@@ -189,7 +175,6 @@ export const createEnergyCalculatorDefaultValues = (
     receivesSsi: householdMemberFormData?.energyCalculator?.receivesSsi ? 'true' : 'false',
     relationshipToHH: householdMemberFormData?.relationshipToHH
       ?? (pageNumber === 1 ? 'headOfHousehold' : ''),
-    hasIncome: getDefaultHasIncome(householdMemberFormData, incomeStreams),
     incomeStreams,
   };
 };

@@ -7,6 +7,7 @@ import {
   FORM_INPUTS,
   selectDropdownOption,
   selectRadio,
+  selectIncomeCategory,
   selectIncomeType,
   selectFrequency,
   checkCheckbox,
@@ -109,21 +110,20 @@ test.describe('Error Messages Test', () => {
 
     await selectInsurance(page, userInfo.insurance);
 
-    await selectRadio(page, FORM_INPUTS.YES_RADIO.name);
-
     await clickContinue(page);
 
     const incomeErrorMessages = await page.locator('span.error-message').allTextContents();
 
     expect(incomeErrorMessages).toEqual([
-      'Please select an income type.',
+      'Please select an income category.',
       'Please select a frequency.',
       'Please enter a number greater than 0.',
     ]);
 
+    await selectIncomeCategory(page, userInfo.incomeCategory);
     await selectIncomeType(page, userInfo.incomeType);
     await selectFrequency(page, userInfo.incomeFrequency);
-    await fillTextField(page, FORM_INPUTS.AMOUNT.name, userInfo.incomeAmount);
+    await page.locator(FORM_INPUTS.AMOUNT).fill(userInfo.incomeAmount);
 
     await clickContinue(page);
 

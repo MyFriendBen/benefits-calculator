@@ -5,6 +5,7 @@ import { IntlShape } from 'react-intl';
 // ============================================================================
 
 export const ONE_OR_MORE_DIGITS_BUT_NOT_ALL_ZERO = /^(?!0+$)\d+$/;
+export const MAX_HOURS_PER_WEEK = 168;
 export const INCOME_AMOUNT_REGEX = /^\d{0,7}(?:\d\.\d{0,2})?$/;
 
 // ============================================================================
@@ -35,7 +36,7 @@ export const validateNoneExclusive = (options: Record<string, boolean>): boolean
  */
 export const validateHourlyIncome = (incomeFrequency: string, hoursPerWeek: string): boolean => {
   if (incomeFrequency === 'hourly') {
-    return ONE_OR_MORE_DIGITS_BUT_NOT_ALL_ZERO.test(hoursPerWeek);
+    return ONE_OR_MORE_DIGITS_BUT_NOT_ALL_ZERO.test(hoursPerWeek) && Number(hoursPerWeek) <= MAX_HOURS_PER_WEEK;
   }
   return true;
 };
@@ -109,8 +110,8 @@ export const renderRelationshipToHHHelperText = (intlHook: IntlShape) => {
 
 export const renderIncomeStreamNameHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
-    id: 'errorMessage-incomeType',
-    defaultMessage: 'Please select an income type.',
+    id: 'errorMessage-incomeStreamName',
+    defaultMessage: 'Please select an income source.',
   });
 };
 
@@ -122,10 +123,13 @@ export const renderIncomeFrequencyHelperText = (intlHook: IntlShape) => {
 };
 
 export const renderHoursWorkedHelperText = (intlHook: IntlShape) => {
-  return intlHook.formatMessage({
-    id: 'errorMessage-greaterThanZero',
-    defaultMessage: 'Please enter a number greater than 0.',
-  });
+  return intlHook.formatMessage(
+    {
+      id: 'errorMessage-hoursPerWeek',
+      defaultMessage: 'Please enter a number between 1 and {max}.',
+    },
+    { max: MAX_HOURS_PER_WEEK },
+  );
 };
 
 export const renderIncomeAmountHelperText = (intlHook: IntlShape) => {

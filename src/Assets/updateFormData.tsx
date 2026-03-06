@@ -159,6 +159,7 @@ export function useUpdateFormData() {
       for (const income of member.income_streams) {
         incomes.push({
           incomeStreamName: income.type ?? '',
+          incomeCategory: income.category ?? '',
           // Django DecimalField returns a string; Number() handles null via the ?? fallback
           incomeAmount: Number(income.amount ?? 0),
           incomeFrequency: income.frequency ?? '',

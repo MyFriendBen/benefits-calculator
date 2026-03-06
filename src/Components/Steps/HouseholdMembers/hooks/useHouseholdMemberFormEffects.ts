@@ -14,9 +14,7 @@ interface UseHouseholdMemberFormEffectsParams {
   getValues: UseFormGetValues<any>;
   reset: UseFormReset<any>;
   append: (value: any) => void;
-  replace: (value: any[]) => void;
   calculateCurrentAgeStatus: () => { is16OrOlder: boolean; isUnder16: boolean };
-  watchHasIncome: string;
   watchBirthMonth: number;
   watchBirthYear: number;
   watchIsStudent: boolean;
@@ -36,16 +34,12 @@ export const useHouseholdMemberFormEffects = ({
   getValues,
   reset,
   append,
-  replace,
   calculateCurrentAgeStatus,
-  watchHasIncome,
   watchBirthMonth,
   watchBirthYear,
   watchIsStudent,
   watchIsDisabled,
 }: UseHouseholdMemberFormEffectsParams) => {
-  const hasTruthyIncome = watchHasIncome === 'true';
-
   // Main-only: Reset student eligibility answers when the user deselects "student"
   const prevIsStudentRef = useRef(watchIsStudent);
   useEffect(() => {
@@ -61,21 +55,10 @@ export const useHouseholdMemberFormEffects = ({
     prevIsStudentRef.current = watchIsStudent;
   }, [watchIsStudent, setValue, isEnergyCalculator]);
 
-  // Shared: Auto-append first stream when hasIncome becomes true with no streams;
-  // clear streams when hasIncome becomes false
-  useEffect(() => {
-    const noIncomeStreamsAreListed = getValues('incomeStreams').length === 0;
-    if (hasTruthyIncome && noIncomeStreamsAreListed) {
-      append(EMPTY_INCOME_STREAM);
-    }
-    if (!hasTruthyIncome) {
-      replace([]);
-    }
-  }, [watchHasIncome, append, replace, getValues, hasTruthyIncome]);
-
-  // Shared: Auto-set hasIncome based on age — but only when the user changes their birth
-  // date in the current session. The saved hasIncome value (loaded via defaultValues) is
-  // treated as the source of truth on mount; we only override it if they edit their DOB.
+  // Shared: When the user changes their birth date and becomes 16+, auto-append one
+  // empty income stream if none exist. If they become under 16, do nothing — any
+  // streams they added intentionally are preserved, and empty state is fine too.
+  // On mount (no birth change) we do nothing — defaultValues already seeded correctly.
   const prevBirthRef = useRef({ month: watchBirthMonth, year: watchBirthYear });
   useEffect(() => {
     const birthChanged =
@@ -96,12 +79,10 @@ export const useHouseholdMemberFormEffects = ({
     const { is16OrOlder } = calculateCurrentAgeStatus();
     const hasStreams = getValues('incomeStreams').length > 0;
 
-    if (is16OrOlder) {
-      setValue('hasIncome', 'true', { shouldDirty: true });
-    } else if (!hasStreams) {
-      setValue('hasIncome', 'false', { shouldDirty: true });
+    if (is16OrOlder && !hasStreams) {
+      append(EMPTY_INCOME_STREAM);
     }
-  }, [watchBirthMonth, watchBirthYear, calculateCurrentAgeStatus, getValues, setValue]);
+  }, [watchBirthMonth, watchBirthYear, calculateCurrentAgeStatus, getValues, append]);
 
   // EC-only: Reset receivesSsi when disabled is unchecked
   useEffect(() => {
@@ -127,6 +108,4 @@ export const useHouseholdMemberFormEffects = ({
       prevBirthRef.current = { month: defaultValues.birthMonth, year: defaultValues.birthYear };
     }
   }, [pageNumber, reset, defaultValues]);
-
-  return { hasTruthyIncome };
 };

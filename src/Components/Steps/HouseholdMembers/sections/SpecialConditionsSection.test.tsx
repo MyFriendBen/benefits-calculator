@@ -48,7 +48,7 @@ const Wrapper = ({
   conditions?: Record<string, boolean>;
   formValues?: Record<string, any>;
 }) => {
-  const { control, setValue, clearErrors } = useForm({
+  const { control, setValue, clearErrors, getValues } = useForm({
     defaultValues: {
       conditions,
       receivesSsi: 'false',
@@ -74,21 +74,16 @@ const Wrapper = ({
 
 describe('SpecialConditionsSection', () => {
   describe('question header', () => {
-    it('shows "Do any of these apply to you?" for page 1', () => {
+    it('renders the section heading', () => {
       render(<Wrapper pageNumber={1} />);
-      expect(screen.getByText(/do any of these apply to you/i)).toBeInTheDocument();
-    });
-
-    it('shows "Do any of these apply to them?" for page > 1', () => {
-      render(<Wrapper pageNumber={2} />);
-      expect(screen.getByText(/do any of these apply to them/i)).toBeInTheDocument();
+      expect(screen.getByText(/special circumstances/i)).toBeInTheDocument();
     });
   });
 
   describe('description text', () => {
-    it('renders "if none apply, skip" description', () => {
+    it('renders "select all that apply" description', () => {
       render(<Wrapper />);
-      expect(screen.getByText(/if none apply, skip this question/i)).toBeInTheDocument();
+      expect(screen.getByText(/select all that apply/i)).toBeInTheDocument();
     });
   });
 
