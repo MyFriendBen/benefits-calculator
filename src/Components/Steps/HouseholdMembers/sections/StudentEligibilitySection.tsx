@@ -54,7 +54,7 @@ const StudentEligibilitySection = ({ control, errors, pageNumber }: StudentEligi
                 </RadioGroup>
                 {errors.studentEligibility?.[name] && (
                   <FormHelperText sx={{ ml: 0 }}>
-                    <ErrorMessageWrapper fontSize="1rem">
+                    <ErrorMessageWrapper>
                       {errors.studentEligibility[name]?.message}
                     </ErrorMessageWrapper>
                   </FormHelperText>
