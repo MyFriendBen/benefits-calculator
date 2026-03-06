@@ -115,7 +115,6 @@ describe('Route Configuration', () => {
       const { buildWLScopedRoutes } = await import('./wl-scoped');
       const wlRoutes = buildWLScopedRoutes({
         householdMemberStepNumber: 3,
-        energyCalcHouseholdMemberStepNumber: 4,
       });
 
       // Extract paths from the white label route's children
@@ -153,7 +152,6 @@ describe('Route Configuration', () => {
       // Build routes to get actual parameter names used
       const wlRoutes = buildWLScopedRoutes({
         householdMemberStepNumber: 3,
-        energyCalcHouseholdMemberStepNumber: 4,
       });
 
       // Extract parameter names from paths
@@ -202,7 +200,6 @@ describe('Route Configuration', () => {
       invalidStepNumbers.forEach((stepNum) => {
         const route = buildUUIDScopedRoute({
           householdMemberStepNumber: stepNum,
-          energyCalcHouseholdMemberStepNumber: 4, // Valid number for comparison
         });
 
         // Extract all paths from the route's children
@@ -230,7 +227,6 @@ describe('Route Configuration', () => {
       validStepNumbers.forEach((stepNum) => {
         const route = buildUUIDScopedRoute({
           householdMemberStepNumber: stepNum,
-          energyCalcHouseholdMemberStepNumber: -1, // Invalid number for comparison
         });
 
         // Extract all paths from the route's children
@@ -241,46 +237,18 @@ describe('Route Configuration', () => {
       });
     });
 
-    it('should handle both household member routes independently', async () => {
-      // Both householdMemberStepNumber and energyCalcHouseholdMemberStepNumber should be
-      // independently registered based on their validity
+    it('should register the household member route when step number is valid', async () => {
       const { buildUUIDScopedRoute } = await import('./uuid-scoped');
 
-      // Test case 1: Both valid
-      const bothValid = buildUUIDScopedRoute({
-        householdMemberStepNumber: 3,
-        energyCalcHouseholdMemberStepNumber: 4,
-      });
-      const bothValidPaths = bothValid.children?.map((child) => child.path) || [];
-      expect(bothValidPaths).toContain('step-3/:page');
-      expect(bothValidPaths).toContain('step-4/:page');
+      // Valid step number registers the route
+      const validRoute = buildUUIDScopedRoute({ householdMemberStepNumber: 3 });
+      const validPaths = validRoute.children?.map((child) => child.path) || [];
+      expect(validPaths).toContain('step-3/:page');
 
-      // Test case 2: First valid, second invalid
-      const firstValid = buildUUIDScopedRoute({
-        householdMemberStepNumber: 3,
-        energyCalcHouseholdMemberStepNumber: -1,
-      });
-      const firstValidPaths = firstValid.children?.map((child) => child.path) || [];
-      expect(firstValidPaths).toContain('step-3/:page');
-      expect(firstValidPaths).not.toContain('step--1/:page');
-
-      // Test case 3: First invalid, second valid
-      const secondValid = buildUUIDScopedRoute({
-        householdMemberStepNumber: 0,
-        energyCalcHouseholdMemberStepNumber: 4,
-      });
-      const secondValidPaths = secondValid.children?.map((child) => child.path) || [];
-      expect(secondValidPaths).not.toContain('step-0/:page');
-      expect(secondValidPaths).toContain('step-4/:page');
-
-      // Test case 4: Both invalid
-      const bothInvalid = buildUUIDScopedRoute({
-        householdMemberStepNumber: -1,
-        energyCalcHouseholdMemberStepNumber: 0,
-      });
-      const bothInvalidPaths = bothInvalid.children?.map((child) => child.path) || [];
-      expect(bothInvalidPaths).not.toContain('step--1/:page');
-      expect(bothInvalidPaths).not.toContain('step-0/:page');
+      // Invalid step number does not register the route
+      const invalidRoute = buildUUIDScopedRoute({ householdMemberStepNumber: -1 });
+      const invalidPaths = invalidRoute.children?.map((child) => child.path) || [];
+      expect(invalidPaths).not.toContain('step--1/:page');
     });
   });
 });

@@ -87,7 +87,7 @@ export function useQueryString(override?: Partial<Record<MainQueryParamName, str
   return queryString;
 }
 
-const MEMBER_QUESTIONS: QuestionName[] = ['householdData', 'energyCalculatorHouseholdData'];
+const MEMBER_QUESTIONS: QuestionName[] = ['householdData'];
 
 export function useDefaultBackNavigationFunction(questionName: QuestionName) {
   const { formData } = useContext(Context);
