@@ -35,7 +35,16 @@ export const DEFAULT_SPECIAL_CONDITIONS = {
  * Helper to check if user has health insurance selections (indicates they've progressed through form)
  */
 const hasProgressedThroughForm = (data?: HouseholdData): boolean => {
-  return !!data?.healthInsurance && Object.values(data.healthInsurance).some((v) => v === true);
+  // Main workflow: health insurance is filled in after first submission
+  if (data?.healthInsurance && Object.values(data.healthInsurance).some((v) => v === true)) {
+    return true;
+  }
+  // EC workflow (CESN): energyCalculator sub-object is only written on form submission,
+  // never pre-populated for brand-new members, so its presence means the form was submitted.
+  if (data?.energyCalculator !== undefined) {
+    return true;
+  }
+  return false;
 };
 
 /**
