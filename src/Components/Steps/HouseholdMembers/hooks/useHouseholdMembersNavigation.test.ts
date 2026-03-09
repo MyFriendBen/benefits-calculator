@@ -1,7 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useHouseholdMembersNavigation } from './useHouseholdMembersNavigation';
-import { Context } from '../../../Wrapper/Wrapper';
 
 const mockNavigate = jest.fn();
 const mockLocationState: Record<string, unknown> = {};
@@ -13,13 +12,17 @@ jest.mock('react-router-dom', () => ({
 
 // Default context: householdSize=3
 const mockFormData = { householdSize: 3 };
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  useContext: (ctx: unknown) => {
-    if (ctx === Context) return { formData: mockFormData };
-    return jest.requireActual('react').useContext(ctx);
-  },
-}));
+jest.mock('react', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const mockContext = require('../../../Wrapper/Wrapper').Context;
+  return {
+    ...jest.requireActual('react'),
+    useContext: (ctx: unknown) => {
+      if (ctx === mockContext) return { formData: mockFormData };
+      return jest.requireActual('react').useContext(ctx);
+    },
+  };
+});
 
 (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
 
@@ -35,6 +38,7 @@ describe('useHouseholdMembersNavigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
+    (useLocation as jest.Mock).mockReturnValue({ state: mockLocationState });
     mockFormData.householdSize = 3;
     Object.keys(mockLocationState).forEach((k) => delete mockLocationState[k]);
   });

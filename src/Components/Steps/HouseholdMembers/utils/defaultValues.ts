@@ -154,11 +154,7 @@ export const createEnergyCalculatorDefaultValues = (
   householdMemberFormData: HouseholdData | undefined,
   pageNumber: number,
 ) => {
-  const incomeStreams = (householdMemberFormData?.incomeStreams ?? []).map((stream: any) => ({
-    ...stream,
-    incomeAmount: stream.incomeAmount == null || stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
-    hoursPerWeek: stream.hoursPerWeek == null || stream.hoursPerWeek === 0 ? '' : String(stream.hoursPerWeek),
-  }));
+  const incomeStreams = getDefaultIncomeStreams(householdMemberFormData);
 
   return {
     birthMonth: householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
