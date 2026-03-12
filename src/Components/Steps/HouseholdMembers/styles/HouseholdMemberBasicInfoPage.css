@@ -41,13 +41,13 @@
 }
 
 .household-basic-info-page__person-icon path {
-  fill: var(--secondary-color);
+  fill: var(--primary-color);
 }
 
 .household-basic-info-page__person-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--secondary-color);
+  color: var(--primary-color);
   font-family: var(--font-heading);
 }
 
