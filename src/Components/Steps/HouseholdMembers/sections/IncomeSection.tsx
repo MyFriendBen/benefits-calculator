@@ -157,6 +157,7 @@ const IncomeStreamRow = ({
                         sx={{ backgroundColor: '#fff' }}
                         disabled={!selectedType}
                         fullWidth
+                        MenuProps={{ MenuListProps: { sx: { '& .MuiMenuItem-root': { whiteSpace: 'normal' } } } }}
                       >
                         {specificTypeMenuItems}
                       </Select>
