@@ -47,7 +47,7 @@
 .household-basic-info-page__person-title {
   font-size: 1.125rem;
   font-weight: 600;
-  font-color: var(--primary-color);
+  color: var(--primary-color);
   font-family: var(--font-heading);
 }
 
