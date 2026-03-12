@@ -332,12 +332,12 @@ const IncomeSection = ({
         {pageNumber === 1 ? (
           <FormattedMessage
             id="householdDataBlock.incomeDescription-you"
-            defaultMessage="Start with your own income only. This includes wages, self-employment, current benefits, child support, and any other regular payments. You'll enter income for each household member separately."
+            defaultMessage="Start with your own income only. Click '+ Add an Income Source' to add each income type you receive. This includes wages, self-employment, current benefits, child support, and any other regular payments. You'll enter income for each household member separately."
           />
         ) : (
           <FormattedMessage
             id="householdDataBlock.incomeDescription-them"
-            defaultMessage="Include their wages, benefits, child support, and any other regular payments. If you don't know the exact amount, add your best estimate. It will help make your results more accurate."
+            defaultMessage="Click '+ Add an Income Source' to add each income type they receive. Include their wages, benefits, child support, and any other regular payments. If you don't know the exact amount, add your best estimate. It will help make your results more accurate."
           />
         )}
       </QuestionDescription>
