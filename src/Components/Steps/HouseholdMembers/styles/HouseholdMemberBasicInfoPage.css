@@ -51,22 +51,6 @@
   font-family: var(--font-heading);
 }
 
-.household-basic-info-page__fields-grid {
-  display: grid;
-  gap: 1rem;
-}
-
-/* Mobile: 1 column */
-.household-basic-info-page__fields-grid {
-  grid-template-columns: 1fr;
-}
-
-/* Tablet and up: 3 columns */
-@media (min-width: 600px) {
-  .household-basic-info-page__fields-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
 
 .household-basic-info-page__delete-popover {
   padding: 0.75rem 1rem;

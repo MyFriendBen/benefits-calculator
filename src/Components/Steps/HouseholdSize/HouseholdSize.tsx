@@ -20,10 +20,9 @@ import './HouseholdSize.css';
 
 const HouseholdSize = () => {
   const { formData } = useContext(Context);
-  const { uuid } = useParams();
+  const { uuid, whiteLabel } = useParams();
   const backNavigationFunction = useDefaultBackNavigationFunction('householdSize');
   const navigate = useNavigate();
-  const { whiteLabel } = useParams();
   const householdDataStepNumber = useStepNumber('householdData', false);
   const intl = useIntl();
   const { updateScreen } = useScreenApi();

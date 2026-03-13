@@ -163,10 +163,6 @@ export const DEFAULT_ENERGY_CALCULATOR_CONDITIONS = {
 };
 
 /**
- * Creates default form values for the EC household member form.
- * Reads conditions from the energyCalculator sub-object.
- */
-/**
  * Creates a default HouseholdData object for a brand-new member on the basic info page.
  * Uses the existing DEFAULT_* constants so any future field additions propagate automatically.
  */

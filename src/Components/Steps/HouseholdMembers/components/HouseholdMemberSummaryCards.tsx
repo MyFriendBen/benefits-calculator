@@ -12,6 +12,7 @@ import { useContext, useState } from 'react';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { Context } from '../../../Wrapper/Wrapper';
 import '../styles/HouseholdMemberSummaryCards.css';
+import '../styles/HouseholdMemberBasicInfoPage.css';
 import { calcMemberYearlyIncome } from '../../../../Assets/income';
 import { formatToUSD } from '../../../../utils/formatCurrency';
 import useScreenApi from '../../../../Assets/updateScreen';
@@ -60,7 +61,7 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
     setDeletePopover(null);
     // If we deleted a member before or at the current page, navigate back one page
     if (deletedIndex < pageNumber) {
-      navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${pageNumber - 1}`);
+      navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${pageNumber - 1}`, { state: { basicInfoCollected: true } });
     }
   };
 

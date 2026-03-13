@@ -36,6 +36,10 @@ const HouseholdMemberBasicInfoPage = () => {
   const [deletePopover, setDeletePopover] = useState<DeletePopoverState>(null);
 
   const relationshipOptions = useConfig<Record<string, FormattedMessageType>>('relationship_options');
+  const deleteHHMemberAriaLabel = intl.formatMessage({
+    id: 'deleteHHMember.ariaText',
+    defaultMessage: 'delete household member',
+  });
 
   const navigate = useNavigate();
 
@@ -108,13 +112,17 @@ const HouseholdMemberBasicInfoPage = () => {
     const currentMembers = getValues('members');
     const updatedHouseholdData = formData.householdData
       .filter((_, i) => i !== deletedIndex)
-      .map((member, i) => ({
-        ...member,
-        // Overlay any form edits for members that weren't deleted
-        birthMonth: currentMembers[i]?.birthMonth ?? member.birthMonth,
-        birthYear: currentMembers[i]?.birthYear ?? member.birthYear,
-        relationshipToHH: currentMembers[i]?.relationshipToHH ?? member.relationshipToHH,
-      }));
+      .map((member, i) => {
+        // After filtering, index i corresponds to original index (i < deletedIndex ? i : i + 1)
+        const originalIndex = i < deletedIndex ? i : i + 1;
+        return {
+          ...member,
+          // Overlay any form edits for members that weren't deleted
+          birthMonth: currentMembers[originalIndex]?.birthMonth ?? member.birthMonth,
+          birthYear: currentMembers[originalIndex]?.birthYear ?? member.birthYear,
+          relationshipToHH: currentMembers[originalIndex]?.relationshipToHH ?? member.relationshipToHH,
+        };
+      });
 
     await updateScreen({
       ...formData,
@@ -174,7 +182,7 @@ const HouseholdMemberBasicInfoPage = () => {
                   {!isFirstMember && (
                     <IconButton
                       onClick={(e) => setDeletePopover({ index, anchorEl: e.currentTarget })}
-                      aria-label="delete household member"
+                      aria-label={deleteHHMemberAriaLabel}
                       size="small"
                       className="household-basic-info-page__delete-button"
                     >
