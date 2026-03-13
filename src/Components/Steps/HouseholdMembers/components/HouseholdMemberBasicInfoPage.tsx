@@ -1,5 +1,5 @@
 import { useContext, useState, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useFieldArray, SubmitHandler } from 'react-hook-form';
 import { Box, Typography, Popover, Button, IconButton } from '@mui/material';
@@ -37,7 +37,9 @@ const HouseholdMemberBasicInfoPage = () => {
 
   const relationshipOptions = useConfig<Record<string, FormattedMessageType>>('relationship_options');
 
-  const { navigateBack, navigateNext } = useHouseholdMembersNavigation({
+  const navigate = useNavigate();
+
+  const { navigateBack } = useHouseholdMembersNavigation({
     uuid,
     whiteLabel,
     currentStepId,
@@ -95,7 +97,7 @@ const HouseholdMemberBasicInfoPage = () => {
       householdData: updatedHouseholdData,
     });
 
-    navigateNext();
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/1`, { state: { basicInfoCollected: true } });
   };
 
   const handleDeleteConfirm = async () => {
