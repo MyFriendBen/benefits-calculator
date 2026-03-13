@@ -14,6 +14,7 @@ export const FREQUENCY_ORDER = ['once', 'yearly', 'monthly', 'semimonthly', 'biw
 
 // Empty income stream template
 export const EMPTY_INCOME_STREAM: IncomeStreamFormData = {
+  incomeCategory: '',
   incomeStreamName: '',
   incomeAmount: '',
   incomeFrequency: '',
@@ -28,8 +29,7 @@ export const ERROR_SECTION_MAP = [
   { key: 'healthInsurance', id: 'health-insurance-section' },
   { key: 'conditions', id: 'conditions-section' },
   { key: 'studentEligibility', id: 'student-eligibility-section' },
-  { key: 'hasIncome', id: 'income-section' },
-  { key: 'incomeStreams', id: 'income-section' },
+  { key: 'incomeStreams', id: 'income-stream' },
 ] as const;
 
 // Error section mapping for EC workflow (no health insurance or student eligibility)
@@ -39,6 +39,5 @@ export const ENERGY_CALCULATOR_ERROR_SECTION_MAP = [
   { key: 'relationshipToHH', id: 'basic-info-section' },
   { key: 'conditions', id: 'conditions-section' },
   { key: 'receivesSsi', id: 'conditions-section' },
-  { key: 'hasIncome', id: 'income-section' },
-  { key: 'incomeStreams', id: 'income-section' },
+  { key: 'incomeStreams', id: 'income-stream' },
 ] as const;
