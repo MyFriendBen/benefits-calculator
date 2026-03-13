@@ -19,6 +19,7 @@ export interface PersonInfo {
  * Income information
  */
 export interface IncomeInfo {
+  category: string;
   type: string;
   frequency: string;
   amount: string;

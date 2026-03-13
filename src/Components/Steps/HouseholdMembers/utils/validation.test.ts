@@ -92,6 +92,14 @@ describe('validateHourlyIncome', () => {
     // regex requires whole digits only
     expect(validateHourlyIncome('hourly', '40.5')).toBe(false);
   });
+
+  it('returns true for hourly with exactly 168 hours (max hours in a week)', () => {
+    expect(validateHourlyIncome('hourly', '168')).toBe(true);
+  });
+
+  it('returns false for hourly with more than 168 hours', () => {
+    expect(validateHourlyIncome('hourly', '169')).toBe(false);
+  });
 });
 
 describe('validateIncomeAmount', () => {

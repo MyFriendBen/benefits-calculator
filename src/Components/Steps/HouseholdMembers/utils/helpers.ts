@@ -108,7 +108,7 @@ export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParam
     incomeAmount: Number(stream.incomeAmount),
     hoursPerWeek: stream.hoursPerWeek === '' ? 0 : Number(stream.hoursPerWeek),
   }));
-  const hasIncome = memberData.hasIncome === 'true' || incomeStreams.length > 0;
+  const hasIncome = incomeStreams.length > 0;
 
   const base = {
     ...memberData,
@@ -130,7 +130,9 @@ export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParam
         receivesSsi: ecData.receivesSsi === 'true',
         medicalEquipment: ecData.conditions.medicalEquipment,
       },
-    } as HouseholdData;
+    // EC adds `energyCalculator` which is not on the shared HouseholdData base type;
+    // the double cast avoids TS requiring every EC-only field to be on HouseholdData.
+    } as unknown as HouseholdData;
   }
 
   return base as HouseholdData;
@@ -144,12 +146,26 @@ export const scrollToFirstError = (formErrors: Record<string, any>, workflowType
   const sectionMap = workflowType === 'energyCalculator' ? ENERGY_CALCULATOR_ERROR_SECTION_MAP : ERROR_SECTION_MAP;
 
   for (const section of sectionMap) {
-    if (formErrors[section.key]) {
-      const element = document.getElementById(section.id);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!formErrors[section.key]) continue;
+
+    // For array errors, find the first row element (e.g. income-stream-0)
+    // and scroll to it; otherwise fall back to the enclosing section container.
+    if (Array.isArray(formErrors[section.key])) {
+      const firstErrorIndex = (formErrors[section.key] as any[]).findIndex((row) => row != null);
+      const target =
+        (firstErrorIndex !== -1 && document.getElementById(`${section.id}-${firstErrorIndex}`)) ||
+        document.getElementById('income-section');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
+      continue;
+    }
+
+    const element = document.getElementById(section.id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
     }
   }
 
