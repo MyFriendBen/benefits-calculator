@@ -35,7 +35,16 @@ export const DEFAULT_SPECIAL_CONDITIONS = {
  * Helper to check if user has health insurance selections (indicates they've progressed through form)
  */
 const hasProgressedThroughForm = (data?: HouseholdData): boolean => {
-  return !!data?.healthInsurance && Object.values(data.healthInsurance).some((v) => v === true);
+  // Main workflow: health insurance is filled in after first submission
+  if (data?.healthInsurance && Object.values(data.healthInsurance).some((v) => v === true)) {
+    return true;
+  }
+  // EC workflow (CESN): energyCalculator sub-object is only written on form submission,
+  // never pre-populated for brand-new members, so its presence means the form was submitted.
+  if (data?.energyCalculator !== undefined) {
+    return true;
+  }
+  return false;
 };
 
 /**
@@ -109,19 +118,6 @@ export const DEFAULT_STUDENT_ELIGIBILITY = {
 };
 
 /**
- * Determines the default hasIncome string value.
- * Priority:
- * 1. Streams present → always 'true'
- * 2. Saved hasIncome boolean → respect it (user made an explicit choice)
- * 3. No saved data (first visit) → 'false' (age effect will auto-set if eligible)
- */
-const getDefaultHasIncome = (data: HouseholdData | undefined, incomeStreams: any[]): string => {
-  if (incomeStreams.length > 0) return 'true';
-  if (data && typeof data.hasIncome === 'boolean') return data.hasIncome ? 'true' : 'false';
-  return 'false';
-};
-
-/**
  * Creates default form values for household member
  */
 export const createDefaultValues = (
@@ -145,7 +141,6 @@ export const createDefaultValues = (
     studentEligibility: householdMemberFormData?.studentEligibility
       ? { ...DEFAULT_STUDENT_ELIGIBILITY, ...householdMemberFormData.studentEligibility }
       : DEFAULT_STUDENT_ELIGIBILITY,
-    hasIncome: getDefaultHasIncome(householdMemberFormData, incomeStreams),
     incomeStreams,
   };
 };
@@ -185,7 +180,6 @@ export const createEnergyCalculatorDefaultValues = (
     receivesSsi: householdMemberFormData?.energyCalculator?.receivesSsi ? 'true' : 'false',
     relationshipToHH: householdMemberFormData?.relationshipToHH
       ?? (pageNumber === 1 ? 'headOfHousehold' : ''),
-    hasIncome: getDefaultHasIncome(householdMemberFormData, incomeStreams),
     incomeStreams,
   };
 };

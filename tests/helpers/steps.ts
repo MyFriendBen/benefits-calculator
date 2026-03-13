@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import { selectIncomeCategory, selectIncomeType, selectFrequency } from './form';
 
 export async function navigateHomePage(page: Page, specificPath?: string) {
   await page.goto('/');
@@ -59,14 +60,11 @@ export async function selectCondition(page: Page, condition: string) {
   await page.locator('.option-cards-container').last().getByRole('button', { name: condition }).click();
 }
 
-export async function selectIncome(page: Page, incomeType: string, frequency: string, amount: number) {
-  await page.getByRole('radio', { name: 'Yes' }).check();
-  await page.getByRole('button', { name: 'Income Type' }).click();
-  await page.getByRole('option', { name: incomeType }).click();
-  await page.getByRole('button', { name: 'Frequency' }).click();
-  await page.getByRole('option', { name: frequency }).click();
-  await page.getByRole('textbox', { name: 'Amount' }).click();
-  await page.getByRole('textbox', { name: 'Amount' }).fill(amount.toString());
+export async function selectIncome(page: Page, incomeCategory: string, incomeType: string, frequency: string, amount: number) {
+  await selectIncomeCategory(page, incomeCategory);
+  await selectIncomeType(page, incomeType);
+  await selectFrequency(page, frequency);
+  await page.locator('#income-amount-input-0').fill(amount.toString());
 }
 
 export async function selectExpense(page: Page, expenseType: string, amount: number) {

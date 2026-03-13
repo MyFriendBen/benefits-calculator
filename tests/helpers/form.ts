@@ -6,7 +6,6 @@
  */
 
 import { Page } from '@playwright/test';
-import { OPTION } from './selectors';
 
 /**
  * Selects an option from a dropdown menu
@@ -126,13 +125,42 @@ export async function selectDate(page: Page, month: string, year: string): Promi
   await page.getByRole('textbox', { name: 'Birth Year' }).fill(year);
 }
 /**
- * Selects an income type
+ * Clicks a MUI Select and waits for the listbox + desired option to appear before clicking.
+ */
+async function selectMuiOption(page: Page, selectId: string, optionText: string): Promise<void> {
+  const isCI = process.env.CI === 'true';
+  const timeout = isCI ? 20000 : 10000;
+
+  await page.locator(selectId).click();
+  const listbox = page.locator('[role="listbox"]');
+  await listbox.waitFor({ state: 'visible', timeout });
+  const option = listbox.locator('[role="option"]').filter({ hasText: optionText }).first();
+  await option.waitFor({ state: 'visible', timeout });
+  await option.click();
+  await listbox.waitFor({ state: 'hidden', timeout: 5000 });
+}
+
+/**
+ * Selects an income category (the "Income Type" grouping dropdown)
  * @param page - Playwright page instance
- * @param incomeType - Income type to select
+ * @param incomeCategory - Category label to select (e.g. "Work & Self-Employment Income")
+ * @param index - Index of the income stream row (default 0)
+ */
+export async function selectIncomeCategory(page: Page, incomeCategory: string, index = 0): Promise<void> {
+  await selectMuiOption(page, `#income-category-select-${index}`, incomeCategory);
+}
+
+/**
+ * Selects an income source (the "Income Source" dropdown, enabled after category is chosen)
+ * @param page - Playwright page instance
+ * @param incomeType - Income source label to select (e.g. "Wages, salaries, or tips")
  */
 export async function selectIncomeType(page: Page, incomeType: string): Promise<void> {
-  await page.getByRole('button', { name: 'Income Type' }).click();
-  await page.getByRole(OPTION.byName(incomeType).role, { name: OPTION.byName(incomeType).name }).click();
+  const isCI = process.env.CI === 'true';
+  const timeout = isCI ? 20000 : 10000;
+  // Wait for the source dropdown to be enabled (it's disabled until a category is selected)
+  await page.locator('#income-source-select-0:not([aria-disabled="true"])').waitFor({ state: 'attached', timeout });
+  await selectMuiOption(page, '#income-source-select-0', incomeType);
 }
 
 /**
@@ -141,6 +169,5 @@ export async function selectIncomeType(page: Page, incomeType: string): Promise<
  * @param frequency - Frequency to select
  */
 export async function selectFrequency(page: Page, frequency: string): Promise<void> {
-  await page.getByRole('button', { name: 'Frequency' }).click();
-  await page.getByRole(OPTION.byName(frequency).role, { name: OPTION.byName(frequency).name }).click();
+  await selectMuiOption(page, '#income-frequency-select-0', frequency);
 }

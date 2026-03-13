@@ -14,7 +14,6 @@ const validMainData = {
   healthInsurance: { none: true, employer: false, private: false, medicaid: false, medicare: false, chp: false, emergency_medicaid: false, family_planning: false, va: false, mass_health: false },
   conditions: { student: false, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false },
   studentEligibility: { studentFullTime: undefined, studentJobTrainingProgram: undefined, studentHasWorkStudy: undefined, studentWorks20PlusHrs: undefined },
-  hasIncome: 'false',
   incomeStreams: [],
 };
 
@@ -24,7 +23,6 @@ const validEcData = {
   conditions: { survivingSpouse: false, disabled: false, medicalEquipment: false },
   receivesSsi: 'false' as const,
   relationshipToHH: 'spouse',
-  hasIncome: 'false',
   incomeStreams: [],
 };
 
@@ -182,21 +180,29 @@ describe('createHouseholdMemberSchema (main)', () => {
   });
 
   describe('income validation', () => {
-    it('rejects invalid hasIncome value', () => {
-      const result = schema.safeParse({ ...validMainData, hasIncome: 'yes' });
-      expect(result.success).toBe(false);
+    const validStream = { incomeCategory: 'employment', incomeStreamName: 'wages', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '1000' };
+
+    it('accepts empty incomeStreams', () => {
+      expect(schema.safeParse({ ...validMainData, incomeStreams: [] }).success).toBe(true);
     });
 
-    it('accepts hasIncome "true" or "false"', () => {
-      expect(schema.safeParse({ ...validMainData, hasIncome: 'true', incomeStreams: [{ incomeStreamName: 'wages', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '1000' }] }).success).toBe(true);
-      expect(schema.safeParse({ ...validMainData, hasIncome: 'false' }).success).toBe(true);
+    it('accepts valid income stream with type', () => {
+      expect(schema.safeParse({ ...validMainData, incomeStreams: [validStream] }).success).toBe(true);
+    });
+
+    it('rejects income stream with missing incomeCategory', () => {
+      const result = schema.safeParse({
+        ...validMainData,
+        incomeStreams: [{ ...validStream, incomeCategory: '' }],
+      });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeCategory')).toBe(true);
     });
 
     it('rejects income stream with missing incomeStreamName', () => {
       const result = schema.safeParse({
         ...validMainData,
-        hasIncome: 'true',
-        incomeStreams: [{ incomeStreamName: '', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '1000' }],
+        incomeStreams: [{ ...validStream, incomeStreamName: '' }],
       });
       expect(result.success).toBe(false);
       expect(result.error?.issues.some(i => i.path.includes('incomeStreamName'))).toBe(true);
@@ -205,8 +211,7 @@ describe('createHouseholdMemberSchema (main)', () => {
     it('rejects income stream with zero amount', () => {
       const result = schema.safeParse({
         ...validMainData,
-        hasIncome: 'true',
-        incomeStreams: [{ incomeStreamName: 'wages', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '0' }],
+        incomeStreams: [{ ...validStream, incomeAmount: '0' }],
       });
       expect(result.success).toBe(false);
       expect(result.error?.issues.some(i => i.path.includes('incomeAmount'))).toBe(true);
@@ -215,8 +220,7 @@ describe('createHouseholdMemberSchema (main)', () => {
     it('rejects hourly income without hoursPerWeek', () => {
       const result = schema.safeParse({
         ...validMainData,
-        hasIncome: 'true',
-        incomeStreams: [{ incomeStreamName: 'wages', incomeFrequency: 'hourly', hoursPerWeek: '', incomeAmount: '15' }],
+        incomeStreams: [{ ...validStream, incomeFrequency: 'hourly', hoursPerWeek: '', incomeAmount: '15' }],
       });
       expect(result.success).toBe(false);
       expect(result.error?.issues.some(i => i.path.includes('hoursPerWeek'))).toBe(true);
@@ -225,8 +229,7 @@ describe('createHouseholdMemberSchema (main)', () => {
     it('accepts hourly income with hoursPerWeek set', () => {
       const result = schema.safeParse({
         ...validMainData,
-        hasIncome: 'true',
-        incomeStreams: [{ incomeStreamName: 'wages', incomeFrequency: 'hourly', hoursPerWeek: '40', incomeAmount: '15' }],
+        incomeStreams: [{ ...validStream, incomeFrequency: 'hourly', hoursPerWeek: '40', incomeAmount: '15' }],
       });
       expect(result.success).toBe(true);
     });
@@ -234,14 +237,12 @@ describe('createHouseholdMemberSchema (main)', () => {
     it('validates multiple income streams independently', () => {
       const result = schema.safeParse({
         ...validMainData,
-        hasIncome: 'true',
         incomeStreams: [
-          { incomeStreamName: 'wages', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '1000' },
-          { incomeStreamName: '', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '500' },
+          validStream,
+          { ...validStream, incomeStreamName: '' },
         ],
       });
       expect(result.success).toBe(false);
-      // Error should be on the second stream
       expect(result.error?.issues.some(i => i.path[1] === 1 && i.path.includes('incomeStreamName'))).toBe(true);
     });
   });

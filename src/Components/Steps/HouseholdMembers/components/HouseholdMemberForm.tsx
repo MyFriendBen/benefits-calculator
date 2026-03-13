@@ -55,6 +55,7 @@ const HouseholdMemberForm = () => {
   const {
     healthInsuranceOptions,
     conditionOptions,
+    incomeCategories,
     incomeOptions,
     frequencyMenuItems,
     relationshipOptions,
@@ -103,7 +104,7 @@ const HouseholdMemberForm = () => {
     onSubmitSuccessfulOverride: () => {},
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: 'incomeStreams',
   });
@@ -111,7 +112,6 @@ const HouseholdMemberForm = () => {
   // AGE CALCULATION
   const { calculateCurrentAgeStatus } = useAgeCalculation(watch);
 
-  const watchHasIncome = useWatch({ control, name: 'hasIncome' });
   const watchBirthMonth = useWatch({ control, name: 'birthMonth' });
   const watchBirthYear = useWatch({ control, name: 'birthYear' });
   const watchIsStudent = useWatch({ control, name: 'conditions.student' });
@@ -127,9 +127,7 @@ const HouseholdMemberForm = () => {
     getValues,
     reset,
     append,
-    replace,
     calculateCurrentAgeStatus,
-    watchHasIncome,
     watchBirthMonth,
     watchBirthYear,
     watchIsStudent,
@@ -269,11 +267,11 @@ const HouseholdMemberForm = () => {
         fields={fields as any}
         append={append}
         remove={remove}
-        watch={watch as any}
+        setValue={setValue}
+        incomeCategories={incomeCategories}
         incomeOptions={incomeOptions}
         frequencyMenuItems={frequencyMenuItems}
         pageNumber={pageNumber}
-        isUnder16={calculateCurrentAgeStatus().isUnder16}
       />
     </>
   );
