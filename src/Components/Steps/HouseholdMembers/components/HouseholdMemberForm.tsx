@@ -1,7 +1,7 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useParams, useLocation } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
-import { useContext } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { HouseholdData } from '../../../../Types/FormData';
 import { Box } from '@mui/material';
 import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
@@ -279,8 +279,18 @@ const HouseholdMemberForm = () => {
   // Show summary cards only when on member 2+
   const showSummaryCards = pageNumber > 1;
 
+  // ANIMATION: re-trigger the CSS fade-in when navigating between member pages
+  const mainRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    el.classList.remove('benefits-form');
+    void el.offsetHeight; // force reflow so browser registers the class removal
+    el.classList.add('benefits-form');
+  }, [pageNumber]);
+
   return (
-    <main className="benefits-form">
+    <main ref={mainRef} className="benefits-form">
       {showSummaryCards && renderSummaryCards()}
 
       {renderHeader()}
