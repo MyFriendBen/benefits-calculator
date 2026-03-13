@@ -12,6 +12,7 @@ import {
   completeDisclaimer,
   completeLocationInfo,
   completeHouseholdSize,
+  completeBasicInfoPage,
   completePrimaryUserInfo,
   completeHouseholdMemberInfo,
   completeExpenses,
@@ -78,12 +79,23 @@ export async function completeNcFullApplication(page: Page, data: ApplicationDat
     const householdSizeResult = await completeHouseholdSize(page, data.householdSize);
     if (!householdSizeResult.success) return householdSizeResult;
 
-    // Complete primary user info
-    const primaryUserResult = await completePrimaryUserInfo(page, data.primaryUser);
+    // Complete basic info page (step-5/0) for multi-member households
+    if (parseInt(data.householdSize) > 1) {
+      const basicInfoMembers = [
+        { birthMonth: data.primaryUser.birthMonth, birthYear: data.primaryUser.birthYear },
+        { birthMonth: data.householdMember.birthMonth, birthYear: data.householdMember.birthYear, relationship: data.householdMember.relationship },
+      ];
+      const basicInfoResult = await completeBasicInfoPage(page, basicInfoMembers);
+      if (!basicInfoResult.success) return basicInfoResult;
+    }
+
+    // Complete primary user info — skip birth date if already collected on step-5/0
+    const skipBasicInfo = parseInt(data.householdSize) > 1;
+    const primaryUserResult = await completePrimaryUserInfo(page, data.primaryUser, skipBasicInfo);
     if (!primaryUserResult.success) return primaryUserResult;
 
-    // Complete household member info
-    const memberResult = await completeHouseholdMemberInfo(page, data.householdMember);
+    // Complete household member info — skip birth date/relationship if already collected on step-5/0
+    const memberResult = await completeHouseholdMemberInfo(page, data.householdMember, skipBasicInfo);
     if (!memberResult.success) return memberResult;
 
     // Complete expenses
