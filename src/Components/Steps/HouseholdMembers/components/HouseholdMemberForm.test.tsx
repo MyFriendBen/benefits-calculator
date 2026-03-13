@@ -195,4 +195,21 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
       expect(screen.getByTestId('basic-info-section')).toBeInTheDocument();
     });
   });
+
+  describe('summary cards visibility', () => {
+    it('does not show summary cards on page 1', () => {
+      renderForm(3, 1, {});
+      expect(screen.queryByTestId('summary-cards')).not.toBeInTheDocument();
+    });
+
+    it('shows summary cards on page 2', () => {
+      renderForm(3, 2, { basicInfoCollected: true });
+      expect(screen.getByTestId('summary-cards')).toBeInTheDocument();
+    });
+
+    it('shows summary cards on page 3', () => {
+      renderForm(3, 3, { basicInfoCollected: true });
+      expect(screen.getByTestId('summary-cards')).toBeInTheDocument();
+    });
+  });
 });

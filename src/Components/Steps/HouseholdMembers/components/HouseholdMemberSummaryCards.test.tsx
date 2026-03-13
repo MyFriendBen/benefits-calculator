@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
@@ -31,9 +31,10 @@ jest.mock('../../../../Assets/languageOptions', () => ({
   useTranslateNumber: jest.fn(),
 }));
 
+const mockSummaryUpdateScreen = jest.fn().mockResolvedValue(undefined);
 jest.mock('../../../../Assets/updateScreen', () => ({
   __esModule: true,
-  default: () => ({ updateScreen: jest.fn().mockResolvedValue(undefined) }),
+  default: () => ({ updateScreen: mockSummaryUpdateScreen }),
 }));
 
 const mockCalcAge = calcAge as jest.MockedFunction<typeof calcAge>;
@@ -98,6 +99,7 @@ const renderCards = (householdData: any[] = [], whiteLabel = 'default') => {
 describe('HouseholdMemberSummaryCards', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSummaryUpdateScreen.mockResolvedValue(undefined);
     mockUseStepNumber.mockReturnValue(3);
     mockUseConfig.mockReturnValue({ spouse: 'Spouse', child: 'Child' } as any);
     mockCalcAge.mockReturnValue(35);
@@ -267,6 +269,35 @@ describe('HouseholdMemberSummaryCards', () => {
       expect(screen.getByText('Remove this member?')).toBeInTheDocument();
       fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
       expect(screen.queryByText('Remove this member?')).not.toBeVisible();
+    });
+
+    it('navigates back one page when the deleted member is before the current page', async () => {
+      // page=3, deleting index=1 (< 3) should navigate to page 2
+      renderCards([
+        memberWithBirth(),
+        memberWithBirth({ birthMonth: 3 }),
+        memberWithBirth({ birthMonth: 4 }),
+      ]);
+      fireEvent.click(screen.getByRole('button', { name: /delete household member/i }));
+      fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
+      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/2');
+    });
+
+
+    it('calls updateScreen with the member removed', async () => {
+      const members = [
+        memberWithBirth({ id: 'mem-0' }),
+        memberWithBirth({ id: 'mem-1', birthMonth: 3 }),
+        memberWithBirth({ id: 'mem-2', birthMonth: 4 }),
+      ];
+      renderCards(members);
+      fireEvent.click(screen.getByRole('button', { name: /delete household member/i }));
+      fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
+      await waitFor(() => expect(mockSummaryUpdateScreen).toHaveBeenCalled());
+      const calledWith = mockSummaryUpdateScreen.mock.calls[0][0];
+      expect(calledWith.householdData).toHaveLength(2);
+      expect(calledWith.householdData.map((m: any) => m.id)).not.toContain('mem-1');
     });
   });
 

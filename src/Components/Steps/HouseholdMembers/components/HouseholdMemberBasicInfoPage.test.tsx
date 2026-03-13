@@ -20,6 +20,13 @@ jest.mock('../../../../Assets/updateScreen', () => ({
   default: () => ({ updateScreen: mockUpdateScreen }),
 }));
 
+// Mock the navigation hook so we can assert navigateBack/navigateNext calls
+const mockNavigateBack = jest.fn();
+const mockNavigateNext = jest.fn();
+jest.mock('../hooks/useHouseholdMembersNavigation', () => ({
+  useHouseholdMembersNavigation: () => ({ navigateBack: mockNavigateBack, navigateNext: mockNavigateNext }),
+}));
+
 jest.mock('../../../../Assets/stepDirectory', () => ({
   useStepNumber: () => 5,
 }));
@@ -105,6 +112,7 @@ describe('HouseholdMemberBasicInfoPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUpdateScreen.mockResolvedValue(undefined);
   });
 
   describe('header and subheader', () => {
@@ -210,28 +218,49 @@ describe('HouseholdMemberBasicInfoPage', () => {
   });
 
   describe('back navigation', () => {
-    it('navigates to previous step when Back is clicked', () => {
+    it('calls navigateBack when Back is clicked', () => {
       renderPage(makeFormData(2));
       fireEvent.click(screen.getByRole('button', { name: /back/i }));
-      expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-4');
+      expect(mockNavigateBack).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('forward navigation (submit)', () => {
-    it('navigates to step-5/1 with basicInfoCollected state after successful submit', async () => {
-      // Pre-populate householdData so form default values are valid (pass Zod validation)
-      // Include id/frontendId so crypto.randomUUID() is not called during submit
+    it('calls navigateNext and updateScreen after successful submit', async () => {
       const validHouseholdData = [
         { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
         { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
       ];
       renderPage(makeFormData(2, validHouseholdData));
       fireEvent.click(screen.getByRole('button', { name: /continue/i }));
-      await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
-      expect(mockNavigate).toHaveBeenCalledWith(
-        '/co/test-uuid/step-5/1',
-        { state: { basicInfoCollected: true } }
-      );
+      await waitFor(() => expect(mockNavigateNext).toHaveBeenCalled());
+      expect(mockUpdateScreen).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('delete — stale closure fix', () => {
+    it('calls updateScreen excluding the deleted member, not stale formData', async () => {
+      // householdData has 3 members pre-populated
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 1, birthYear: 1980, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 2, birthYear: 1985, relationshipToHH: 'spouse' },
+        { id: 'id-2', frontendId: 'fid-2', birthMonth: 3, birthYear: 1990, relationshipToHH: 'child' },
+      ];
+      renderPage(makeFormData(3, householdData));
+
+      // Delete Person 3 (index 2)
+      const deleteButtons = screen.getAllByRole('button', { name: /delete household member/i });
+      fireEvent.click(deleteButtons[1]); // second delete button = Person 3
+      fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
+
+      await waitFor(() => expect(mockUpdateScreen).toHaveBeenCalled());
+
+      const calledWith = mockUpdateScreen.mock.calls[0][0];
+      // updateScreen should be called with 2 members, not 3
+      expect(calledWith.householdSize).toBe(2);
+      expect(calledWith.householdData).toHaveLength(2);
+      // The deleted member (id-2) should not be present
+      expect(calledWith.householdData.map((m: any) => m.id)).not.toContain('id-2');
     });
   });
 });

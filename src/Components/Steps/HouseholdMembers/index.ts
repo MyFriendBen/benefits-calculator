@@ -6,6 +6,5 @@
  */
 
 export { default } from './components/HouseholdMemberRouter';
-export { default as HouseholdMemberRouter } from './components/HouseholdMemberRouter';
 export { default as HouseholdMemberForm } from './components/HouseholdMemberForm';
 export { default as HouseholdMemberBasicInfoPage } from './components/HouseholdMemberBasicInfoPage';

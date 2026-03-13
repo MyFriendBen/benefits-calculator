@@ -152,6 +152,15 @@ describe('useHouseholdMembersNavigation', () => {
       act(() => result.current.navigateNext());
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/3');
     });
+
+    it('falls through to normal next-page navigation when isEditing is true but returnToPage is undefined', () => {
+      mockLocationState.isEditing = true;
+      // returnToPage not set — falls through to standard pageNumber+1 logic
+      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1 }));
+      act(() => result.current.navigateNext());
+      // householdSize=3, pageNumber=1 → navigates to page 2
+      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/2');
+    });
   });
 
   // ============================================================================
