@@ -24,6 +24,14 @@
   background-color: #ffffff;
   border-radius: 0;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  /* Fade-in applies to every .benefits-form mount — intentionally global so all
+     step transitions (including household-member sub-pages) get the animation. */
+  animation: benefits-form-fadein 0.15s ease-in;
+}
+
+@keyframes benefits-form-fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @media (max-width: 767px) {

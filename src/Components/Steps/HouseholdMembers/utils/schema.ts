@@ -182,6 +182,40 @@ export const createHouseholdMemberSchema = (
 };
 
 /**
+ * Creates the basic info page schema (birth month, birth year, relationship)
+ * for all household members on the pre-detail page (page 0).
+ */
+export const createBasicInfoPageSchema = (intl: IntlShape) => {
+  const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
+
+  const memberSchema = z
+    .object({
+      birthMonth: z
+        .number()
+        .min(1, { message: renderMissingBirthMonthHelperText(intl) })
+        .max(12, { message: renderMissingBirthMonthHelperText(intl) }),
+      birthYear: z.coerce
+        .number()
+        .min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
+        .max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
+      relationshipToHH: z.string().min(1, { message: renderRelationshipToHHHelperText(intl) }),
+    })
+    .refine(
+      ({ birthMonth, birthYear }) => {
+        if (birthYear === CURRENT_YEAR) {
+          return birthMonth <= CURRENT_MONTH;
+        }
+        return true;
+      },
+      { message: renderFutureBirthMonthHelperText(intl), path: ['birthMonth'] },
+    );
+
+  return z.object({ members: z.array(memberSchema) });
+};
+
+export type BasicInfoPageSchema = z.infer<ReturnType<typeof createBasicInfoPageSchema>>;
+
+/**
  * Type helper to infer the schema type
  */
 export type HouseholdMemberFormSchema = z.infer<ReturnType<typeof createHouseholdMemberSchema>>;

@@ -7,8 +7,9 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
-import { useParams } from 'react-router-dom';
-import { useDefaultBackNavigationFunction, useGoToNextStep } from '../../QuestionComponents/questionHooks';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useDefaultBackNavigationFunction } from '../../QuestionComponents/questionHooks';
+import { useStepNumber } from '../../../Assets/stepDirectory';
 import { NumericFormat } from 'react-number-format';
 import useScreenApi from '../../../Assets/updateScreen';
 import { OverrideableTranslation } from '../../../Assets/languageOptions';
@@ -19,9 +20,10 @@ import './HouseholdSize.css';
 
 const HouseholdSize = () => {
   const { formData } = useContext(Context);
-  const { uuid } = useParams();
+  const { uuid, whiteLabel } = useParams();
   const backNavigationFunction = useDefaultBackNavigationFunction('householdSize');
-  const nextStep = useGoToNextStep('householdSize', '1');
+  const navigate = useNavigate();
+  const householdDataStepNumber = useStepNumber('householdData', false);
   const intl = useIntl();
   const { updateScreen } = useScreenApi();
   const [showRoommateInfo, setShowRoommateInfo] = useState(false);
@@ -55,7 +57,7 @@ const HouseholdSize = () => {
       householdSize: formData.householdSize || undefined,
     },
     questionName: 'householdSize',
-    onSubmitSuccessfulOverride: nextStep,
+    onSubmitSuccessfulOverride: () => {},
   });
 
   const formSubmitHandler: SubmitHandler<FormSchema> = async ({ householdSize }) => {
@@ -66,6 +68,8 @@ const HouseholdSize = () => {
         householdData: formData.householdData.slice(0, householdSize),
       };
       await updateScreen(updatedFormData);
+      const page = householdSize === 1 ? '1' : '0';
+      navigate(`/${whiteLabel}/${uuid}/step-${householdDataStepNumber}/${page}`);
     }
   };
 

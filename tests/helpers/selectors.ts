@@ -68,6 +68,17 @@ export const DROPDOWN = {
 };
 
 /**
+ * Basic info page (step-5/0) selectors — indexed by member position
+ */
+export const BASIC_INFO_PAGE = {
+  birthMonthSelect: (index: number) => `[aria-labelledby*="birth-month-label-members-${index}"]`,
+  birthYearInput: (index: number) => `input[placeholder="YYYY"] >> nth=${index}`,
+  relationshipSelect: (index: number) => `#relationship-select-members-${index}`,
+  deleteButton: (index: number) => `button[aria-label="delete household member"] >> nth=${index - 1}`,
+  addMemberButton: 'button:has-text("Add a Household Member")',
+};
+
+/**
  * NC 211 specific selectors
  */
 export const NC_211 = {

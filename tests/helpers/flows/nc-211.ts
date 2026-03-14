@@ -17,6 +17,7 @@ import {
   completeDisclaimer,
   completeLocationInfo,
   completeHouseholdSize,
+  completeBasicInfoPage,
   completePrimaryUserInfo,
   completeHouseholdMemberInfo,
   completeExpenses,
@@ -76,12 +77,21 @@ export async function setupNC211Session(page: Page): Promise<FlowResult> {
  */
 export async function completeNC211FullApplication(page: Page, data: ApplicationData): Promise<FlowResult> {
   try {
+    // Build basic info members array for step-5/0 (multi-member households only)
+    const basicInfoMembers = parseInt(data.householdSize) > 1
+      ? [
+          { birthMonth: data.primaryUser.birthMonth, birthYear: data.primaryUser.birthYear },
+          { birthMonth: data.householdMember.birthMonth, birthYear: data.householdMember.birthYear, relationship: data.householdMember.relationship },
+        ]
+      : [];
+
     // Complete all form steps using shared helpers
     const steps = [
       () => completeLocationInfo(page, data.zipCode, data.county),
       () => completeHouseholdSize(page, data.householdSize),
-      () => completePrimaryUserInfo(page, data.primaryUser),
-      () => completeHouseholdMemberInfo(page, data.householdMember),
+      ...(basicInfoMembers.length > 0 ? [() => completeBasicInfoPage(page, basicInfoMembers)] : []),
+      () => completePrimaryUserInfo(page, data.primaryUser, basicInfoMembers.length > 0),
+      () => completeHouseholdMemberInfo(page, data.householdMember, basicInfoMembers.length > 0),
       () => completeExpenses(page, data.expenses),
       () => completeAssets(page, data.assets),
       () => completePublicBenefits(page),

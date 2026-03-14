@@ -2,7 +2,7 @@ import { Navigate, RouteObject } from 'react-router-dom';
 import ValidateUuid from '../Components/RouterUtil/ValidateUuid';
 import SelectLanguagePage from '../Components/Steps/SelectLanguage';
 import Disclaimer from '../Components/Steps/Disclaimer/Disclaimer';
-import HouseholdMemberForm from '../Components/Steps/HouseholdMembers/components/HouseholdMemberForm';
+import HouseholdMemberRouter from '../Components/Steps/HouseholdMembers/components/HouseholdMemberRouter';
 import QuestionComponentContainer from '../Components/QuestionComponentContainer/QuestionComponentContainer';
 import Confirmation from '../Components/Confirmation/Confirmation';
 import resultsRoutes from './results';
@@ -28,13 +28,10 @@ export const buildUUIDScopedRoute = ({
 
   // Dynamic household member form routes
   // Only register routes if step exists (> 0). useStepNumber returns -1 when step doesn't exist.
-  // TODO(MFB-642): Remove key={window.location.href} anti-pattern. Currently forces full
-  // remount on navigation. Should be replaced with useEffect + form.reset() pattern when
-  // page param changes. See Linear ticket for implementation details and testing requirements.
   if (householdMemberStepNumber > 0) {
     children.push({
       path: `step-${householdMemberStepNumber}/:page`,
-      element: <HouseholdMemberForm key={window.location.href} />,
+      element: <HouseholdMemberRouter />,
     });
   }
 

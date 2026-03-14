@@ -176,7 +176,17 @@
   margin: 1rem 0;
 }
 
-.income-block-container {
-  padding: 0 0 1rem;
-  margin-bottom: 0.5rem;
+.form-field-label {
+  font-size: 0.875rem;
+  font-weight: 400;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+.income-fields-row .form-field-label {
+  margin-bottom: 0.25rem;
+}
+
+.income-frequency-label-row .form-field-label {
+  margin-bottom: 0;
 }
