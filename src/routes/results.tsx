@@ -1,10 +1,11 @@
-import { RouteObject } from 'react-router-dom';
+import { Navigate, RouteObject } from 'react-router-dom';
 import Results from '../Components/Results/Results';
 
 /**
  * Results page routes - terminal routes displaying calculation results.
  */
 const resultsRoutes: RouteObject[] = [
+  { path: 'results', element: <Navigate to="benefits" replace /> },
   { path: 'results/benefits', element: <Results type="program" /> },
   { path: 'results/near-term-needs', element: <Results type="need" /> },
   {
