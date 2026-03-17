@@ -22,6 +22,7 @@ import { UNSET_BIRTH_YEAR, createDefaultMember } from '../utils/defaultValues';
 import { useHouseholdMembersNavigation } from '../hooks/useHouseholdMembersNavigation';
 import BasicInfoFields from '../sections/BasicInfoFields';
 import '../styles/HouseholdMemberBasicInfoPage.css';
+import '../styles/popover.css';
 import type { DeletePopoverState } from '../utils/types';
 
 const MAX_HOUSEHOLD_SIZE = 8;

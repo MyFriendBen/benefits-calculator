@@ -281,7 +281,7 @@ describe('HouseholdMemberSummaryCards', () => {
       fireEvent.click(screen.getByRole('button', { name: /delete household member/i }));
       fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
       await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
-      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/2');
+      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/2', { state: { basicInfoCollected: true } });
     });
 
 
