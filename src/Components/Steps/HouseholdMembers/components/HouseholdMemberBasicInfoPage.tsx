@@ -65,7 +65,7 @@ const HouseholdMemberBasicInfoPage = () => {
         };
       }),
     // Intentionally only on mount — we don't want formData changes mid-flow to reset fields.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
     [],
   );
 
