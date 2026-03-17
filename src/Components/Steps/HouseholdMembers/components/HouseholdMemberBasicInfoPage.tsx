@@ -34,7 +34,6 @@ const HouseholdMemberBasicInfoPage = () => {
   const { updateScreen } = useScreenApi();
   const currentStepId = useStepNumber('householdData');
   const [deletePopover, setDeletePopover] = useState<DeletePopoverState>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const relationshipOptions = useConfig<Record<string, FormattedMessageType>>('relationship_options');
   const deleteHHMemberAriaLabel = intl.formatMessage({
@@ -74,7 +73,6 @@ const HouseholdMemberBasicInfoPage = () => {
     control,
     formState: { errors },
     handleSubmit,
-    getValues,
   } = useStepForm<BasicInfoPageSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: { members: defaultMembers },
@@ -105,39 +103,10 @@ const HouseholdMemberBasicInfoPage = () => {
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/1`, { state: { basicInfoCollected: true } });
   };
 
-  const handleDeleteConfirm = async () => {
+  const handleDeleteConfirm = () => {
     if (deletePopover === null) return;
-    const deletedIndex = deletePopover.index;
-
-    setIsDeleting(true);
-    try {
-      // Use the field array values as the source of truth — formData may not include members
-      // that were added on this page before submitting.
-      const currentMembers = getValues('members');
-      const updatedHouseholdData = currentMembers
-        .filter((_, i) => i !== deletedIndex)
-        .map((member, i) => {
-          const originalIndex = i < deletedIndex ? i : i + 1;
-          return createDefaultMember(originalIndex, {
-            // Carry over detail fields (income, insurance, etc.) for members already saved.
-            // formData.householdData[originalIndex] may be undefined for newly-added members.
-            ...formData.householdData[originalIndex],
-            birthMonth: member.birthMonth,
-            birthYear: member.birthYear,
-            relationshipToHH: member.relationshipToHH,
-          });
-        });
-
-      await updateScreen({
-        ...formData,
-        householdSize: updatedHouseholdData.length,
-        householdData: updatedHouseholdData,
-      });
-      remove(deletedIndex);
-    } finally {
-      setIsDeleting(false);
-      setDeletePopover(null);
-    }
+    remove(deletePopover.index);
+    setDeletePopover(null);
   };
 
   const handleAddMember = () => {
@@ -233,7 +202,7 @@ const HouseholdMemberBasicInfoPage = () => {
 
       <DeleteConfirmationPopover
         deletePopover={deletePopover}
-        isDeleting={isDeleting}
+        isDeleting={false}
         onClose={() => setDeletePopover(null)}
         onConfirm={handleDeleteConfirm}
       />
