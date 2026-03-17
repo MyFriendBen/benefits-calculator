@@ -241,6 +241,31 @@ describe('HouseholdMemberBasicInfoPage', () => {
   });
 
   describe('delete — stale closure fix', () => {
+    it('calls updateScreen with correct count after adding a member on page 0 then deleting', async () => {
+      // formData starts with 2 members (never submitted to page 0 yet)
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 1, birthYear: 1980, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 2, birthYear: 1985, relationshipToHH: 'spouse' },
+      ];
+      renderPage(makeFormData(2, householdData));
+
+      // Add a third member on page 0 — this member is NOT in formData.householdData
+      fireEvent.click(screen.getByText('Add a Household Member'));
+      expect(screen.getByText('Person 3')).toBeInTheDocument();
+
+      // Delete Person 3 (the newly-added member at index 2)
+      const deleteButtons = screen.getAllByRole('button', { name: /delete household member/i });
+      fireEvent.click(deleteButtons[1]); // second delete button = Person 3
+      fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
+
+      await waitFor(() => expect(mockUpdateScreen).toHaveBeenCalled());
+
+      const calledWith = mockUpdateScreen.mock.calls[0][0];
+      // Should call updateScreen with 2 members, not 3 — the new member was correctly removed
+      expect(calledWith.householdSize).toBe(2);
+      expect(calledWith.householdData).toHaveLength(2);
+    });
+
     it('calls updateScreen excluding the deleted member, not stale formData', async () => {
       // householdData has 3 members pre-populated
       const householdData = [

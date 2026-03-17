@@ -175,30 +175,20 @@ describe('HouseholdMemberSummaryCards', () => {
   });
 
   describe('current member highlighting', () => {
-    it('marks the member at pageNumber with current-household-member class', () => {
-      // page=3, memberIndex=2 (0-based) = page 3 → cards[1] is index 1 (page 2), cards[0] is index 0 (page 1)
-      // current page is 3 but only pages 1 and 2 are shown (slice 0..2)
-      // so neither shown card should be marked as current
+    it('never marks any shown card as current — the current member is always excluded from the slice', () => {
+      // slice(0, pageNumber-1) only renders indices 0..pageNumber-2.
+      // current-household-member requires memberIndex+1 === pageNumber (i.e. memberIndex === pageNumber-1),
+      // which is always outside the rendered slice, so no card should ever carry this class.
       renderCards([
         memberWithBirth(),
         memberWithBirth({ birthMonth: 3 }),
         memberWithBirth({ birthMonth: 4 }),
       ]);
-      const cards = screen.getAllByRole('article').filter(el => el.className.includes('member-added-container'));
-      expect(cards[0].className).not.toContain('current-household-member');
-      expect(cards[1].className).not.toContain('current-household-member');
-    });
-
-    it('marks a completed member as current when their page matches', () => {
-      // Use page=2 by overriding useParams for this case
-      // We test indirectly: with page=3, member at index 2 would be current but isn't shown in slice(0,2)
-      // Let's use a different approach: render with page mock returning '2'
-      // The global mock returns '3', so we can't easily change it per-test.
-      // Instead verify that when a member IS in the slice and matches pageNumber, it gets the class.
-      // With page=3: slice(0,2) shows indices 0 and 1. Neither is page 3.
-      // We can verify the class is applied by checking the memberIndex+1 === pageNumber condition.
-      // This is tested implicitly — pass if no assertion errors
-      expect(true).toBe(true);
+      const cards = screen.getAllByRole('article').filter((el) => el.className.includes('member-added-container'));
+      expect(cards).toHaveLength(2);
+      cards.forEach((card) => {
+        expect(card.className).not.toContain('current-household-member');
+      });
     });
   });
 

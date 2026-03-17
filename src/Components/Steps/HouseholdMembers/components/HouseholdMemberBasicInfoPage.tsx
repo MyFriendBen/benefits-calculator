@@ -2,7 +2,7 @@ import { useContext, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useFieldArray, SubmitHandler } from 'react-hook-form';
-import { Box, Typography, Popover, Button, IconButton } from '@mui/material';
+import { Box, Typography, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,8 +21,8 @@ import { createBasicInfoPageSchema, BasicInfoPageSchema } from '../utils/schema'
 import { UNSET_BIRTH_YEAR, createDefaultMember } from '../utils/defaultValues';
 import { useHouseholdMembersNavigation } from '../hooks/useHouseholdMembersNavigation';
 import BasicInfoFields from '../sections/BasicInfoFields';
+import DeleteConfirmationPopover from './DeleteConfirmationPopover';
 import '../styles/HouseholdMemberBasicInfoPage.css';
-import '../styles/popover.css';
 import type { DeletePopoverState } from '../utils/types';
 
 const MAX_HOUSEHOLD_SIZE = 8;
@@ -111,20 +111,21 @@ const HouseholdMemberBasicInfoPage = () => {
 
     setIsDeleting(true);
     try {
-      // Read current form values — not stale formData — so any unsaved edits aren't lost.
+      // Use the field array values as the source of truth — formData may not include members
+      // that were added on this page before submitting.
       const currentMembers = getValues('members');
-      const updatedHouseholdData = formData.householdData
+      const updatedHouseholdData = currentMembers
         .filter((_, i) => i !== deletedIndex)
         .map((member, i) => {
-          // After filtering, index i corresponds to original index (i < deletedIndex ? i : i + 1)
           const originalIndex = i < deletedIndex ? i : i + 1;
-          return {
-            ...member,
-            // Overlay any form edits for members that weren't deleted
-            birthMonth: currentMembers[originalIndex]?.birthMonth ?? member.birthMonth,
-            birthYear: currentMembers[originalIndex]?.birthYear ?? member.birthYear,
-            relationshipToHH: currentMembers[originalIndex]?.relationshipToHH ?? member.relationshipToHH,
-          };
+          return createDefaultMember(originalIndex, {
+            // Carry over detail fields (income, insurance, etc.) for members already saved.
+            // formData.householdData[originalIndex] may be undefined for newly-added members.
+            ...formData.householdData[originalIndex],
+            birthMonth: member.birthMonth,
+            birthYear: member.birthYear,
+            relationshipToHH: member.relationshipToHH,
+          });
         });
 
       await updateScreen({
@@ -230,30 +231,12 @@ const HouseholdMemberBasicInfoPage = () => {
         <PrevAndContinueButtons backNavigationFunction={navigateBack} />
       </form>
 
-      <Popover
-        open={deletePopover !== null}
-        anchorEl={deletePopover?.anchorEl}
+      <DeleteConfirmationPopover
+        deletePopover={deletePopover}
+        isDeleting={isDeleting}
         onClose={() => setDeletePopover(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Box className="household-basic-info-page__delete-popover">
-          <Typography variant="body2">
-            <FormattedMessage
-              id="householdDataBlock.basicInfo.deleteConfirm"
-              defaultMessage="Remove this member?"
-            />
-          </Typography>
-          <Box className="household-basic-info-page__delete-popover-actions">
-            <Button size="small" variant="outlined" onClick={() => setDeletePopover(null)}>
-              <FormattedMessage id="householdDataBlock.basicInfo.deleteCancel" defaultMessage="Cancel" />
-            </Button>
-            <Button size="small" color="error" variant="contained" onClick={handleDeleteConfirm} disabled={isDeleting}>
-              <FormattedMessage id="householdDataBlock.basicInfo.deleteConfirmButton" defaultMessage="Remove" />
-            </Button>
-          </Box>
-        </Box>
-      </Popover>
+        onConfirm={handleDeleteConfirm}
+      />
     </main>
   );
 };

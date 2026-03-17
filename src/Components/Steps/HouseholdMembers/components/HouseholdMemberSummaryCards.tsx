@@ -1,5 +1,5 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { Box, Button, IconButton, Popover, Typography } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { calcAge, hasBirthMonthYear, useFormatBirthMonthYear } from '../../../../Assets/age';
@@ -11,8 +11,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useContext, useState } from 'react';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { Context } from '../../../Wrapper/Wrapper';
+import DeleteConfirmationPopover from './DeleteConfirmationPopover';
 import '../styles/HouseholdMemberSummaryCards.css';
-import '../styles/popover.css';
 import { calcMemberYearlyIncome } from '../../../../Assets/income';
 import { formatToUSD } from '../../../../utils/formatCurrency';
 import useScreenApi from '../../../../Assets/updateScreen';
@@ -168,30 +168,12 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
         </Box>
       )}
 
-      <Popover
-        open={deletePopover !== null}
-        anchorEl={deletePopover?.anchorEl}
+      <DeleteConfirmationPopover
+        deletePopover={deletePopover}
+        isDeleting={isDeleting}
         onClose={() => setDeletePopover(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Box className="household-basic-info-page__delete-popover">
-          <Typography variant="body2">
-            <FormattedMessage
-              id="householdDataBlock.basicInfo.deleteConfirm"
-              defaultMessage="Remove this member?"
-            />
-          </Typography>
-          <Box className="household-basic-info-page__delete-popover-actions">
-            <Button size="small" variant="outlined" onClick={() => setDeletePopover(null)}>
-              <FormattedMessage id="householdDataBlock.basicInfo.deleteCancel" defaultMessage="Cancel" />
-            </Button>
-            <Button size="small" color="error" variant="contained" onClick={handleDeleteConfirm} disabled={isDeleting}>
-              <FormattedMessage id="householdDataBlock.basicInfo.deleteConfirmButton" defaultMessage="Remove" />
-            </Button>
-          </Box>
-        </Box>
-      </Popover>
+        onConfirm={handleDeleteConfirm}
+      />
     </article>
   );
 };
