@@ -281,12 +281,16 @@ const HouseholdMemberForm = () => {
 
   // ANIMATION: re-trigger the fade-in when navigating between member pages.
   // Toggling .animate-in (not .benefits-form) keeps layout styles stable.
+  // We set opacity:0 before the reflow so there's no visible flash during the
+  // brief gap between removing and re-adding the animation class.
   const mainRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const el = mainRef.current;
     if (!el) return;
+    el.style.opacity = '0';
     el.classList.remove('animate-in');
     void el.offsetHeight; // force reflow so browser registers the class removal
+    el.style.opacity = '';
     el.classList.add('animate-in');
   }, [pageNumber]);
 
