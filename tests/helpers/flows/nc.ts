@@ -79,8 +79,13 @@ export async function completeNcFullApplication(page: Page, data: ApplicationDat
     const householdSizeResult = await completeHouseholdSize(page, data.householdSize);
     if (!householdSizeResult.success) return householdSizeResult;
 
-    // Complete basic info page (step-5/0) for multi-member households
+    // Complete basic info page (step-5/0) for multi-member households.
+    // This flow supports exactly 2 members (primaryUser + householdMember).
+    // Tests using householdSize > 2 will fail on step-5/0 with incomplete cards.
     if (parseInt(data.householdSize) > 1) {
+      if (parseInt(data.householdSize) > 2) {
+        throw new Error(`completeNcFullApplication only supports householdSize <= 2, got ${data.householdSize}`);
+      }
       const basicInfoMembers = [
         { birthMonth: data.primaryUser.birthMonth, birthYear: data.primaryUser.birthYear },
         { birthMonth: data.householdMember.birthMonth, birthYear: data.householdMember.birthYear, relationship: data.householdMember.relationship },

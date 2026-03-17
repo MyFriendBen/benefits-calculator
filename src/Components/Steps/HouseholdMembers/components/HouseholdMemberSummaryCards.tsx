@@ -8,7 +8,7 @@ import { useTranslateNumber } from '../../../../Assets/languageOptions';
 import { HouseholdData } from '../../../../Types/FormData';
 import { FormattedMessageType, QuestionName } from '../../../../Types/Questions';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { Context } from '../../../Wrapper/Wrapper';
 import DeleteConfirmationPopover from './DeleteConfirmationPopover';
@@ -44,6 +44,11 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   const { updateScreen } = useScreenApi();
   const [deletePopover, setDeletePopover] = useState<DeletePopoverState>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   const handleEditBtnSubmit = (memberIndex: number) => {
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, {
@@ -68,8 +73,10 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
         navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${pageNumber - 1}`, { state: { basicInfoCollected: true } });
       }
     } finally {
-      setIsDeleting(false);
-      setDeletePopover(null);
+      if (isMountedRef.current) {
+        setIsDeleting(false);
+        setDeletePopover(null);
+      }
     }
   };
 
