@@ -103,8 +103,8 @@ describe('HouseholdMemberBasicInfoPage', () => {
   beforeAll(() => {
     // Polyfill crypto.randomUUID for jsdom (used in submit handler)
     if (!globalThis.crypto?.randomUUID) {
-      Object.defineProperty(globalThis, 'crypto', {
-        value: { randomUUID: () => 'test-uuid-' + Math.random().toString(36).slice(2) },
+      Object.defineProperty(globalThis.crypto, 'randomUUID', {
+        value: () => 'test-uuid-' + Math.random().toString(36).slice(2),
         writable: true,
       });
     }
@@ -198,12 +198,12 @@ describe('HouseholdMemberBasicInfoPage', () => {
       expect(screen.getByText('Remove this member?')).toBeInTheDocument();
     });
 
-    it('closes popover when Cancel is clicked', () => {
+    it('closes popover when Cancel is clicked', async () => {
       renderPage(makeFormData(2));
       fireEvent.click(screen.getByRole('button', { name: /delete household member/i }));
       expect(screen.getByText('Remove this member?')).toBeInTheDocument();
       fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
-      expect(screen.queryByText('Remove this member?')).not.toBeVisible();
+      await waitFor(() => expect(screen.queryByText('Remove this member?')).not.toBeInTheDocument());
     });
 
     it('removes the member card after confirming delete', async () => {

@@ -211,7 +211,7 @@ describe('HouseholdMemberSummaryCards', () => {
       ]);
       const editButtons = screen.getAllByRole('button', { name: /edit household member/i });
       fireEvent.click(editButtons[0]);
-      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/1', { state: { isEditing: true } });
+      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/1', { state: { isEditing: true, returnToPage: 3 } });
     });
 
     it('navigates to the correct member page for the second member', () => {
@@ -222,7 +222,7 @@ describe('HouseholdMemberSummaryCards', () => {
       ]);
       const editButtons = screen.getAllByRole('button', { name: /edit household member/i });
       fireEvent.click(editButtons[1]);
-      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/2', { state: { isEditing: true } });
+      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/2', { state: { isEditing: true, returnToPage: 3 } });
     });
   });
 
@@ -249,7 +249,7 @@ describe('HouseholdMemberSummaryCards', () => {
       expect(screen.getByText('Remove this member?')).toBeInTheDocument();
     });
 
-    it('closes popover when Cancel is clicked', () => {
+    it('closes popover when Cancel is clicked', async () => {
       renderCards([
         memberWithBirth(),
         memberWithBirth({ birthMonth: 3 }),
@@ -258,7 +258,7 @@ describe('HouseholdMemberSummaryCards', () => {
       fireEvent.click(screen.getByRole('button', { name: /delete household member/i }));
       expect(screen.getByText('Remove this member?')).toBeInTheDocument();
       fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
-      expect(screen.queryByText('Remove this member?')).not.toBeVisible();
+      await waitFor(() => expect(screen.queryByText('Remove this member?')).not.toBeInTheDocument());
     });
 
     it('navigates back one page when the deleted member is before the current page', async () => {

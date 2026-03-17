@@ -46,7 +46,9 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleEditBtnSubmit = (memberIndex: number) => {
-    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, { state: { isEditing: true } });
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, {
+      state: { isEditing: true, returnToPage: pageNumber },
+    });
   };
 
   const handleDeleteConfirm = async () => {
