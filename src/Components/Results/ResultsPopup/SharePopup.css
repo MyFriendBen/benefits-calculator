@@ -73,6 +73,11 @@
   line-height: 1.3;
 }
 
+/* Remove orange border from share modal */
+.share-popup-modal .MuiAlert-root {
+  border-color: #e0e0e0;
+}
+
 /* Narrow modal override for desktop */
 @media (min-width: 768px) {
   .share-popup-modal {
@@ -105,8 +110,8 @@
   align-items: center;
   gap: 0.875rem;
   width: 100%;
-  background: none;
-  border: 1px solid #e8e8e8;
+  background: var(--primary-color);
+  border: 1px solid var(--primary-color);
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
   cursor: pointer;
@@ -114,7 +119,7 @@
   font-family: 'Open Sans', sans-serif;
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--primary-color);
+  color: white;
   text-decoration: none;
   transition: background-color 0.15s ease, border-color 0.15s ease;
   box-sizing: border-box;
@@ -122,8 +127,8 @@
 
 .share-popup-option:hover,
 .share-popup-option:focus-visible {
-  background-color: var(--secondary-background-color, #f5f0eb);
-  border-color: var(--secondary-color);
+  background-color: var(--midBlue-color, #41528C);
+  border-color: var(--midBlue-color, #41528C);
   outline: none;
 }
 
@@ -140,7 +145,7 @@
 .share-popup-option-sublabel {
   font-weight: 400;
   font-size: 0.8rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.75);
   margin-top: 1px;
 }
 
@@ -159,9 +164,9 @@
 .share-popup-icon-circle--email,
 .share-popup-icon-circle--sms,
 .share-popup-icon-circle--link {
-  background-color: var(--secondary-background-color, #FBF9FC);
-  color: var(--midBlue-color, #41528C);
-  border: 1.5px solid var(--midBlue-color, #41528C);
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
 }
 
 /* "Copied!" feedback */
