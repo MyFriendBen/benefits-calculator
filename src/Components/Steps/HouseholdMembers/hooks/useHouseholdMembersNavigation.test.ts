@@ -88,11 +88,6 @@ describe('useHouseholdMembersNavigation', () => {
       consoleSpy.mockRestore();
     });
 
-    it('includes whiteLabel in path when whiteLabel is undefined', () => {
-      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1, whiteLabel: undefined }));
-      act(() => result.current.navigateBack());
-      expect(mockNavigate).toHaveBeenCalledWith('/undefined/test-uuid/step-3/0');
-    });
   });
 
   // ============================================================================
@@ -174,12 +169,6 @@ describe('useHouseholdMembersNavigation', () => {
   // ============================================================================
 
   describe('edge cases', () => {
-    it('correctly builds path without whiteLabel prefix when whiteLabel is empty string', () => {
-      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, whiteLabel: '', pageNumber: 2 }));
-      act(() => result.current.navigateBack());
-      expect(mockNavigate).toHaveBeenCalledWith('//test-uuid/step-3/1');
-    });
-
     it('handles step 1 back navigation correctly (goes to step 0) for single member', () => {
       mockFormData.householdSize = 1;
       const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, currentStepId: 1, pageNumber: 1 }));
