@@ -1,7 +1,7 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useParams, useLocation } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
-import { useContext, useEffect, useRef } from 'react';
+import { useContext } from 'react';
 import { HouseholdData } from '../../../../Types/FormData';
 import { Box } from '@mui/material';
 import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
@@ -279,31 +279,13 @@ const HouseholdMemberForm = () => {
   // Show summary cards only when on member 2+
   const showSummaryCards = pageNumber > 1;
 
-  // ANIMATION: re-trigger the fade-in when navigating between member pages.
-  // Toggling .animate-in (not .benefits-form) keeps layout styles stable.
-  // We set opacity:0 before the reflow so there's no visible flash during the
-  // brief gap between removing and re-adding the animation class.
-  const mainRef = useRef<HTMLElement>(null);
-  useEffect(() => {
-    const el = mainRef.current;
-    if (!el) return;
-    el.style.opacity = '0';
-    el.classList.remove('animate-in');
-    void el.offsetHeight; // force reflow so browser registers the class removal
-    el.style.opacity = '';
-    el.classList.add('animate-in');
-  }, [pageNumber]);
-
   return (
-    <main ref={mainRef} className="benefits-form">
+    <main className="benefits-form" key={pageNumber}>
       {showSummaryCards && renderSummaryCards()}
 
       {renderHeader()}
 
-      <form
-        key={`household-member-${pageNumber}`}
-        onSubmit={handleSubmit(formSubmitHandler, handleFormError)}
-      >
+      <form onSubmit={handleSubmit(formSubmitHandler, handleFormError)}>
         {renderFormSections()}
         <PrevAndContinueButtons backNavigationFunction={navigateBack} />
       </form>
