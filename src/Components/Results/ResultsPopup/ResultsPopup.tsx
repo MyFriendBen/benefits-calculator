@@ -1,7 +1,8 @@
-import { Alert, IconButton, Typography } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import { Typography } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
+import PopupMinimized from './shared/PopupMinimized';
+import PopupModal from './shared/PopupModal';
 import './ResultsPopup.css';
 
 // Default messages to avoid creating new elements on every render
@@ -56,128 +57,57 @@ const ResultsPopup = ({
   minimizedText = DEFAULT_MINIMIZED_TEXT,
   startMinimized = false,
 }: ResultsPopupProps) => {
-  const dialogRef = useRef<HTMLDivElement>(null);
-
   const [isMinimized, setIsMinimized] = useState(startMinimized);
   const [isDismissed, setIsDismissed] = useState(false);
 
-  const handleMinimize = useCallback(() => {
-    setIsMinimized(true);
-  }, []);
-
-  const handleRestore = useCallback(() => {
-    setIsMinimized(false);
-  }, []);
-
+  const handleMinimize = useCallback(() => setIsMinimized(true), []);
+  const handleRestore = useCallback(() => setIsMinimized(false), []);
   const handleDismiss = useCallback((e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent restore from triggering
     setIsDismissed(true);
   }, []);
 
-  // Focus management for accessibility
-  useEffect(() => {
-    if (!isMinimized && !isDismissed && shouldShow()) {
-      // Focus the dialog when it opens
-      dialogRef.current?.focus();
-    }
-  }, [isMinimized, isDismissed, shouldShow]);
-
   // Don't render if condition not met or completely dismissed
-  if (!shouldShow() || isDismissed) {
-    return null;
-  }
+  if (!shouldShow() || isDismissed) return null;
 
   // Minimized state - small box in bottom-right corner
   if (isMinimized) {
     return (
-      <div
+      <PopupMinimized
+        label={minimizedText}
+        onRestore={handleRestore}
+        onDismiss={handleDismiss}
+        ariaLabel="Restore survey popup"
         className="results-popup-minimized"
-        onClick={handleRestore}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleRestore();
-          }
-        }}
-        aria-label="Restore survey popup"
-      >
-        <Alert
-          severity="info"
-          icon={false}
-          action={
-            <IconButton
-              aria-label="Close popup"
-              color="inherit"
-              size="small"
-              onClick={handleDismiss}
-              className="results-popup-minimized-close-button"
-            >
-              <CloseIcon fontSize="inherit" />
-            </IconButton>
-          }
-        >
-          <Typography variant="body2">
-            {minimizedText}
-          </Typography>
-        </Alert>
-      </div>
+        closeButtonClassName="results-popup-minimized-close-button"
+      />
     );
   }
 
   // Full popup state - centered on screen
   return (
-    <>
-      {/* Backdrop overlay */}
-      <div
-        className="results-popup-backdrop"
-        onClick={handleMinimize}
-        aria-hidden="true"
-      />
-
-      {/* Popup content */}
-      <div
-        ref={dialogRef}
-        className="results-popup-container"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Survey invitation"
-        tabIndex={-1}
-      >
-        <Alert
-          severity="info"
-          icon={false}
-          action={
-            <IconButton
-              aria-label="Minimize popup"
-              color="inherit"
-              size="small"
-              onClick={handleMinimize}
-              className="results-popup-close-button"
-            >
-              <CloseIcon fontSize="inherit" />
-            </IconButton>
-          }
+    <PopupModal
+      onClose={handleMinimize}
+      ariaLabel="Survey invitation"
+      containerClassName="results-popup-container"
+      backdropClassName="results-popup-backdrop"
+      closeButtonClassName="results-popup-close-button"
+    >
+      <Typography variant="body1" className="results-popup-text">
+        {message}
+      </Typography>
+      {linkUrl && (
+        <a
+          href={linkUrl}
+          target="_blank"
+          rel="noopener"
+          className="results-popup-button"
+          onClick={handleMinimize}
         >
-          <Typography variant="body1" className="results-popup-text">
-            {message}
-          </Typography>
-
-          {linkUrl && (
-            <a
-              href={linkUrl}
-              target="_blank"
-              rel="noopener"
-              className="results-popup-button"
-              onClick={handleMinimize}
-            >
-              {linkText}
-            </a>
-          )}
-        </Alert>
-      </div>
-    </>
+          {linkText}
+        </a>
+      )}
+    </PopupModal>
   );
 };
 

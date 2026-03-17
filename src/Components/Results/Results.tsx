@@ -35,6 +35,7 @@ import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/reba
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
 import { usePageTitle } from '../Common/usePageTitle';
 import { NPSWidget } from '../NPS';
+import SharePopup from './ResultsPopup/SharePopup';
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -262,6 +263,7 @@ const Results = ({ type }: ResultsProps) => {
               </Grid>
               {!noHelpButton && <HelpButton />}
               <NPSWidget uuid={uuid} />
+              <SharePopup />
             </div>
           </div>
         </main>
