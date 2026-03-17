@@ -48,6 +48,12 @@ describe('useHouseholdMembersNavigation', () => {
   // ============================================================================
 
   describe('navigateBack', () => {
+    it('navigates to previous step when on page 0', () => {
+      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 0 }));
+      act(() => result.current.navigateBack());
+      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-2');
+    });
+
     it('navigates to page 0 when on page 1 with householdSize > 1', () => {
       const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1 }));
       act(() => result.current.navigateBack());

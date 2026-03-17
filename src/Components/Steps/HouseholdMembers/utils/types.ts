@@ -32,3 +32,5 @@ export type LocationState = {
   basicInfoCollected?: boolean;
   returnToPage?: number;
 };
+
+export type DeletePopoverState = { index: number; anchorEl: HTMLElement } | null;

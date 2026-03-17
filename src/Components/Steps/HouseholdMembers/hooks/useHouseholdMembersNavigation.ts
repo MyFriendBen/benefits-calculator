@@ -32,6 +32,7 @@ export const useHouseholdMembersNavigation = ({
 
   /**
    * Navigate to the previous page
+   * - From page 0: Goes to previous step
    * - From page 1: Goes to basic info page (page 0) if household size > 1, otherwise previous step
    * - From page 2+: Goes to previous member page
    */
@@ -41,7 +42,9 @@ export const useHouseholdMembersNavigation = ({
       return;
     }
 
-    if (pageNumber === 1) {
+    if (pageNumber === 0) {
+      navigate(`/${whiteLabel}/${uuid}/step-${currentStepId - 1}`);
+    } else if (pageNumber === 1) {
       if (formData.householdSize === 1) {
         navigate(`/${whiteLabel}/${uuid}/step-${currentStepId - 1}`);
       } else {

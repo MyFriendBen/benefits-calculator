@@ -29,6 +29,12 @@
   animation: benefits-form-fadein 0.15s ease-in;
 }
 
+/* Separate animation class for re-triggering fade-in without unmounting the component.
+   Add/remove this class (with a forced reflow between) to replay the animation in-place. */
+.animate-in {
+  animation: benefits-form-fadein 0.15s ease-in;
+}
+
 @keyframes benefits-form-fadein {
   from { opacity: 0; }
   to { opacity: 1; }

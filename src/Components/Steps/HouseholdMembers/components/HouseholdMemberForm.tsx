@@ -279,14 +279,15 @@ const HouseholdMemberForm = () => {
   // Show summary cards only when on member 2+
   const showSummaryCards = pageNumber > 1;
 
-  // ANIMATION: re-trigger the CSS fade-in when navigating between member pages
+  // ANIMATION: re-trigger the fade-in when navigating between member pages.
+  // Toggling .animate-in (not .benefits-form) keeps layout styles stable.
   const mainRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const el = mainRef.current;
     if (!el) return;
-    el.classList.remove('benefits-form');
+    el.classList.remove('animate-in');
     void el.offsetHeight; // force reflow so browser registers the class removal
-    el.classList.add('benefits-form');
+    el.classList.add('animate-in');
   }, [pageNumber]);
 
   return (

@@ -12,16 +12,15 @@ import { useContext, useState } from 'react';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { Context } from '../../../Wrapper/Wrapper';
 import '../styles/HouseholdMemberSummaryCards.css';
-import '../styles/HouseholdMemberBasicInfoPage.css';
+import '../styles/popover.css';
 import { calcMemberYearlyIncome } from '../../../../Assets/income';
 import { formatToUSD } from '../../../../utils/formatCurrency';
 import useScreenApi from '../../../../Assets/updateScreen';
+import type { DeletePopoverState } from '../utils/types';
 
 type HHMSummariesProps = {
   questionName: QuestionName;
 };
-
-type DeletePopoverState = { index: number; anchorEl: HTMLElement } | null;
 
 const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   const { formData, whiteLabel } = useContext(Context);
@@ -44,6 +43,7 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   const formatBirthMonthYear = useFormatBirthMonthYear();
   const { updateScreen } = useScreenApi();
   const [deletePopover, setDeletePopover] = useState<DeletePopoverState>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleEditBtnSubmit = (memberIndex: number) => {
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, { state: { isEditing: true } });
@@ -52,16 +52,22 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   const handleDeleteConfirm = async () => {
     if (deletePopover === null) return;
     const deletedIndex = deletePopover.index;
-    const updatedHouseholdData = formData.householdData.filter((_, i) => i !== deletedIndex);
-    await updateScreen({
-      ...formData,
-      householdSize: updatedHouseholdData.length,
-      householdData: updatedHouseholdData,
-    });
-    setDeletePopover(null);
-    // If we deleted a member before or at the current page, navigate back one page
-    if (deletedIndex < pageNumber) {
-      navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${pageNumber - 1}`, { state: { basicInfoCollected: true } });
+    setIsDeleting(true);
+    try {
+      const updatedHouseholdData = formData.householdData.filter((_, i) => i !== deletedIndex);
+      await updateScreen({
+        ...formData,
+        householdSize: updatedHouseholdData.length,
+        householdData: updatedHouseholdData,
+      });
+      // The delete button is hidden for the current member (memberIndex !== 0 guard + slice(0, pageNumber-1)),
+      // so deletedIndex will always be < pageNumber in practice. The +1 guard is a safeguard.
+      if (deletedIndex + 1 <= pageNumber) {
+        navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${pageNumber - 1}`, { state: { basicInfoCollected: true } });
+      }
+    } finally {
+      setIsDeleting(false);
+      setDeletePopover(null);
     }
   };
 
@@ -180,7 +186,7 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
             <Button size="small" variant="outlined" onClick={() => setDeletePopover(null)}>
               <FormattedMessage id="householdDataBlock.basicInfo.deleteCancel" defaultMessage="Cancel" />
             </Button>
-            <Button size="small" color="error" variant="contained" onClick={handleDeleteConfirm}>
+            <Button size="small" color="error" variant="contained" onClick={handleDeleteConfirm} disabled={isDeleting}>
               <FormattedMessage id="householdDataBlock.basicInfo.deleteConfirmButton" defaultMessage="Remove" />
             </Button>
           </Box>

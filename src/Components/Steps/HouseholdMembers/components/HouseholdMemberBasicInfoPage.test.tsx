@@ -226,14 +226,16 @@ describe('HouseholdMemberBasicInfoPage', () => {
   });
 
   describe('forward navigation (submit)', () => {
-    it('calls navigateNext and updateScreen after successful submit', async () => {
+    it('calls navigate with basicInfoCollected state and updateScreen after successful submit', async () => {
       const validHouseholdData = [
         { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
         { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
       ];
       renderPage(makeFormData(2, validHouseholdData));
       fireEvent.click(screen.getByRole('button', { name: /continue/i }));
-      await waitFor(() => expect(mockNavigateNext).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/1', { state: { basicInfoCollected: true } }),
+      );
       expect(mockUpdateScreen).toHaveBeenCalledTimes(1);
     });
   });

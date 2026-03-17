@@ -22,10 +22,9 @@ import { UNSET_BIRTH_YEAR, createDefaultMember } from '../utils/defaultValues';
 import { useHouseholdMembersNavigation } from '../hooks/useHouseholdMembersNavigation';
 import BasicInfoFields from '../sections/BasicInfoFields';
 import '../styles/HouseholdMemberBasicInfoPage.css';
+import type { DeletePopoverState } from '../utils/types';
 
 const MAX_HOUSEHOLD_SIZE = 8;
-
-type DeletePopoverState = { index: number; anchorEl: HTMLElement } | null;
 
 const HouseholdMemberBasicInfoPage = () => {
   const { formData } = useContext(Context);
@@ -34,6 +33,7 @@ const HouseholdMemberBasicInfoPage = () => {
   const { updateScreen } = useScreenApi();
   const currentStepId = useStepNumber('householdData');
   const [deletePopover, setDeletePopover] = useState<DeletePopoverState>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const relationshipOptions = useConfig<Record<string, FormattedMessageType>>('relationship_options');
   const deleteHHMemberAriaLabel = intl.formatMessage({
@@ -108,29 +108,34 @@ const HouseholdMemberBasicInfoPage = () => {
     if (deletePopover === null) return;
     const deletedIndex = deletePopover.index;
 
-    // Read current form values — not stale formData — so any unsaved edits aren't lost.
-    const currentMembers = getValues('members');
-    const updatedHouseholdData = formData.householdData
-      .filter((_, i) => i !== deletedIndex)
-      .map((member, i) => {
-        // After filtering, index i corresponds to original index (i < deletedIndex ? i : i + 1)
-        const originalIndex = i < deletedIndex ? i : i + 1;
-        return {
-          ...member,
-          // Overlay any form edits for members that weren't deleted
-          birthMonth: currentMembers[originalIndex]?.birthMonth ?? member.birthMonth,
-          birthYear: currentMembers[originalIndex]?.birthYear ?? member.birthYear,
-          relationshipToHH: currentMembers[originalIndex]?.relationshipToHH ?? member.relationshipToHH,
-        };
-      });
+    setIsDeleting(true);
+    try {
+      // Read current form values — not stale formData — so any unsaved edits aren't lost.
+      const currentMembers = getValues('members');
+      const updatedHouseholdData = formData.householdData
+        .filter((_, i) => i !== deletedIndex)
+        .map((member, i) => {
+          // After filtering, index i corresponds to original index (i < deletedIndex ? i : i + 1)
+          const originalIndex = i < deletedIndex ? i : i + 1;
+          return {
+            ...member,
+            // Overlay any form edits for members that weren't deleted
+            birthMonth: currentMembers[originalIndex]?.birthMonth ?? member.birthMonth,
+            birthYear: currentMembers[originalIndex]?.birthYear ?? member.birthYear,
+            relationshipToHH: currentMembers[originalIndex]?.relationshipToHH ?? member.relationshipToHH,
+          };
+        });
 
-    await updateScreen({
-      ...formData,
-      householdSize: updatedHouseholdData.length,
-      householdData: updatedHouseholdData,
-    });
-    remove(deletedIndex);
-    setDeletePopover(null);
+      await updateScreen({
+        ...formData,
+        householdSize: updatedHouseholdData.length,
+        householdData: updatedHouseholdData,
+      });
+      remove(deletedIndex);
+    } finally {
+      setIsDeleting(false);
+      setDeletePopover(null);
+    }
   };
 
   const handleAddMember = () => {
@@ -242,7 +247,7 @@ const HouseholdMemberBasicInfoPage = () => {
             <Button size="small" variant="outlined" onClick={() => setDeletePopover(null)}>
               <FormattedMessage id="householdDataBlock.basicInfo.deleteCancel" defaultMessage="Cancel" />
             </Button>
-            <Button size="small" color="error" variant="contained" onClick={handleDeleteConfirm}>
+            <Button size="small" color="error" variant="contained" onClick={handleDeleteConfirm} disabled={isDeleting}>
               <FormattedMessage id="householdDataBlock.basicInfo.deleteConfirmButton" defaultMessage="Remove" />
             </Button>
           </Box>
