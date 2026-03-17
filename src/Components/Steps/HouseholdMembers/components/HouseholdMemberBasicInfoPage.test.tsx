@@ -103,10 +103,14 @@ describe('HouseholdMemberBasicInfoPage', () => {
   beforeAll(() => {
     // Polyfill crypto.randomUUID for jsdom (used in submit handler)
     if (!globalThis.crypto?.randomUUID) {
-      Object.defineProperty(globalThis.crypto, 'randomUUID', {
+      const crypto = globalThis.crypto ?? {};
+      Object.defineProperty(crypto, 'randomUUID', {
         value: () => 'test-uuid-' + Math.random().toString(36).slice(2),
         writable: true,
       });
+      if (!globalThis.crypto) {
+        Object.defineProperty(globalThis, 'crypto', { value: crypto, writable: true });
+      }
     }
   });
 
@@ -240,9 +244,10 @@ describe('HouseholdMemberBasicInfoPage', () => {
     });
   });
 
-  describe('delete — stale closure fix', () => {
-    it('calls updateScreen with correct count after adding a member on page 0 then deleting', async () => {
-      // formData starts with 2 members (never submitted to page 0 yet)
+  describe('delete — local-only on page 0', () => {
+    it('removes the card without calling updateScreen when adding then deleting a member', async () => {
+      // Page 0 delete is local-only — members may have incomplete data not yet validated.
+      // updateScreen is deferred until form submit.
       const householdData = [
         { id: 'id-0', frontendId: 'fid-0', birthMonth: 1, birthYear: 1980, relationshipToHH: 'headOfHousehold' },
         { id: 'id-1', frontendId: 'fid-1', birthMonth: 2, birthYear: 1985, relationshipToHH: 'spouse' },
@@ -253,21 +258,16 @@ describe('HouseholdMemberBasicInfoPage', () => {
       fireEvent.click(screen.getByText('Add a Household Member'));
       expect(screen.getByText('Person 3')).toBeInTheDocument();
 
-      // Delete Person 3 (the newly-added member at index 2)
+      // Delete Person 3
       const deleteButtons = screen.getAllByRole('button', { name: /delete household member/i });
-      fireEvent.click(deleteButtons[1]); // second delete button = Person 3
+      fireEvent.click(deleteButtons[1]);
       fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
 
-      await waitFor(() => expect(mockUpdateScreen).toHaveBeenCalled());
-
-      const calledWith = mockUpdateScreen.mock.calls[0][0];
-      // Should call updateScreen with 2 members, not 3 — the new member was correctly removed
-      expect(calledWith.householdSize).toBe(2);
-      expect(calledWith.householdData).toHaveLength(2);
+      await waitFor(() => expect(screen.queryByText('Person 3')).not.toBeInTheDocument());
+      expect(mockUpdateScreen).not.toHaveBeenCalled();
     });
 
-    it('calls updateScreen excluding the deleted member, not stale formData', async () => {
-      // householdData has 3 members pre-populated
+    it('removes the card without calling updateScreen when deleting an existing member', async () => {
       const householdData = [
         { id: 'id-0', frontendId: 'fid-0', birthMonth: 1, birthYear: 1980, relationshipToHH: 'headOfHousehold' },
         { id: 'id-1', frontendId: 'fid-1', birthMonth: 2, birthYear: 1985, relationshipToHH: 'spouse' },
@@ -275,19 +275,13 @@ describe('HouseholdMemberBasicInfoPage', () => {
       ];
       renderPage(makeFormData(3, householdData));
 
-      // Delete Person 3 (index 2)
+      expect(screen.getByText('Person 3')).toBeInTheDocument();
       const deleteButtons = screen.getAllByRole('button', { name: /delete household member/i });
-      fireEvent.click(deleteButtons[1]); // second delete button = Person 3
+      fireEvent.click(deleteButtons[1]);
       fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
 
-      await waitFor(() => expect(mockUpdateScreen).toHaveBeenCalled());
-
-      const calledWith = mockUpdateScreen.mock.calls[0][0];
-      // updateScreen should be called with 2 members, not 3
-      expect(calledWith.householdSize).toBe(2);
-      expect(calledWith.householdData).toHaveLength(2);
-      // The deleted member (id-2) should not be present
-      expect(calledWith.householdData.map((m: any) => m.id)).not.toContain('id-2');
+      await waitFor(() => expect(screen.queryByText('Person 3')).not.toBeInTheDocument());
+      expect(mockUpdateScreen).not.toHaveBeenCalled();
     });
   });
 });
