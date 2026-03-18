@@ -1,16 +1,30 @@
-@import './Popup.css';
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInFromCenter {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes slideInFromBottomRight {
+  from { opacity: 0; transform: translateY(100px) scale(0.5); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 
 /* Backdrop overlay */
-.notification-popup-backdrop {
+.results-popup-backdrop {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 10001;
-  animation: popup-fade-in 0.3s ease-in;
+  animation: fadeIn 0.3s ease-in;
 }
 
 /* Full popup container */
-.notification-popup-container {
+.results-popup-container {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -19,24 +33,24 @@
   max-width: 800px;
   width: calc(100% - 2rem);
   padding: 1rem;
-  animation: popup-slide-in-center 0.3s ease-out;
+  animation: slideInFromCenter 0.3s ease-out;
 }
 
 /* Shared Alert styles */
-.notification-popup-container .MuiAlert-root,
-.notification-popup-minimized .MuiAlert-root {
+.results-popup-container .MuiAlert-root,
+.results-popup-minimized .MuiAlert-root {
   background-color: white;
   border: 2px solid var(--secondary-color);
   position: relative;
 }
 
 /* Full popup Alert */
-.notification-popup-container .MuiAlert-root {
+.results-popup-container .MuiAlert-root {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   padding: 1.75rem 1rem 1rem;
 }
 
-.notification-popup-container .MuiAlert-message {
+.results-popup-container .MuiAlert-message {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -46,14 +60,14 @@
   margin: 0;
 }
 
-.notification-popup-text {
+.results-popup-text {
   font-family: "Open Sans", sans-serif;
   line-height: 1.5;
   text-align: center;
 }
 
 /* Button styles */
-.notification-popup-container .notification-popup-button {
+.results-popup-container .results-popup-button {
   display: inline-block;
   color: white;
   font-size: 0.8rem;
@@ -70,21 +84,21 @@
   cursor: pointer;
 }
 
-.notification-popup-container .notification-popup-button:hover {
+.results-popup-container .results-popup-button:hover {
   background-color: white;
   color: var(--secondary-color);
   border-color: var(--secondary-color);
 }
 
 @media (min-width: 768px) {
-  .notification-popup-button {
+  .results-popup-button {
     padding: 0.5rem 1.5rem;
   }
 }
 
 /* Close button - full popup */
-.notification-popup-container .notification-popup-close-button,
-.notification-popup-container .notification-popup-close-button.MuiIconButton-root {
+.results-popup-container .results-popup-close-button,
+.results-popup-container .results-popup-close-button.MuiIconButton-root {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
@@ -92,7 +106,7 @@
 }
 
 /* Minimized popup */
-.notification-popup-minimized {
+.results-popup-minimized {
   position: fixed;
   bottom: 1rem;
   right: 1rem;
@@ -100,33 +114,33 @@
   max-width: 350px;
   cursor: pointer;
   transition: transform 0.2s ease;
-  animation: popup-slide-in-bottom-right 0.3s ease-out;
+  animation: slideInFromBottomRight 0.3s ease-out;
 }
 
-.notification-popup-minimized:hover {
+.results-popup-minimized:hover {
   transform: scale(1.05);
 }
 
-.notification-popup-minimized .MuiAlert-root {
+.results-popup-minimized .MuiAlert-root {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   padding: 0.75rem 1rem;
   cursor: pointer;
   margin: 0;
 }
 
-.notification-popup-minimized .MuiAlert-action {
+.results-popup-minimized .MuiAlert-action {
   padding-left: 4px;
   margin-left: 0;
 }
 
-.notification-popup-minimized .MuiTypography-root {
+.results-popup-minimized .MuiTypography-root {
   font-weight: bold;
   font-size: 0.85rem;
 }
 
 /* Close button - minimized */
-.notification-popup-minimized .notification-popup-minimized-close-button,
-.notification-popup-minimized .notification-popup-minimized-close-button.MuiIconButton-root {
+.results-popup-minimized .results-popup-minimized-close-button,
+.results-popup-minimized .results-popup-minimized-close-button.MuiIconButton-root {
   position: relative;
   z-index: 10;
   padding: 4px;
@@ -134,7 +148,7 @@
   margin-right: -4px;
 }
 
-.notification-popup-minimized .notification-popup-minimized-close-button:hover,
-.notification-popup-minimized .notification-popup-minimized-close-button.MuiIconButton-root:hover {
+.results-popup-minimized .results-popup-minimized-close-button:hover,
+.results-popup-minimized .results-popup-minimized-close-button.MuiIconButton-root:hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
