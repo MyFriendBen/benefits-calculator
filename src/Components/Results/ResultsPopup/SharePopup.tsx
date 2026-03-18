@@ -7,6 +7,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import CheckIcon from '@mui/icons-material/Check';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import SmsIcon from '@mui/icons-material/Sms';
 import { FormattedMessage } from 'react-intl';
 import { useFeatureFlag } from '../../Config/configHook';
 import PopupModal from './shared/PopupModal';
@@ -33,6 +34,14 @@ function yahooUrl() {
 
 function mailtoUrl() {
   return `mailto:?subject=${encodeURIComponent(SHARE_SUBJECT)}&body=${encodeURIComponent(`${SHARE_BODY}\n\n${SHARE_URL}`)}`;
+}
+
+function smsUrl() {
+  return `sms:?body=${encodeURIComponent(`${SHARE_BODY} ${SHARE_URL}`)}`;
+}
+
+function isMobile() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
 const EMAIL_PROVIDERS = [
@@ -215,6 +224,28 @@ const SharePopup = () => {
                 </span>
               </span>
             </button>
+
+            {/* SMS row — mobile only */}
+            {isMobile() && (
+              <a
+                href={smsUrl()}
+                className="share-popup-option"
+                onClick={handleMinimize}
+                aria-label="Share via text message"
+              >
+                <span className="share-popup-icon-circle" aria-hidden="true">
+                  <SmsIcon style={{ fontSize: '1.25rem' }} />
+                </span>
+                <span className="share-popup-option-text">
+                  <span className="share-popup-option-label">
+                    <FormattedMessage id="sharePopup.sms" defaultMessage="SMS" />
+                  </span>
+                  <span className="share-popup-option-sublabel">
+                    <FormattedMessage id="sharePopup.smsSublabel" defaultMessage="Share via text message" />
+                  </span>
+                </span>
+              </a>
+            )}
 
             {/* Copy link row */}
             <button
