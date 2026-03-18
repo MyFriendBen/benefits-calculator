@@ -35,7 +35,7 @@ import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/reba
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
 import { usePageTitle } from '../Common/usePageTitle';
 import { NPSWidget } from '../NPS';
-import SharePopup from './ResultsPopup/SharePopup';
+import SharePopup from './SharePopup/SharePopup';
 
 type WrapperResultsContext = {
   programs: Program[];

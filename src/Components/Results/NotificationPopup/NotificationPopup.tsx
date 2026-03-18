@@ -1,18 +1,18 @@
 import { Typography } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { useState, useCallback } from 'react';
-import PopupMinimized from './shared/PopupMinimized';
-import PopupModal from './shared/PopupModal';
-import './ResultsPopup.css';
+import PopupMinimized from './PopupMinimized';
+import PopupModal from './PopupModal';
+import './NotificationPopup.css';
 
 // Default messages to avoid creating new elements on every render
 const DEFAULT_LINK_TEXT = <FormattedMessage id="resultsPopup.button" defaultMessage="Learn More" />;
 const DEFAULT_MINIMIZED_TEXT = <FormattedMessage id="resultsPopup.minimized" defaultMessage="Click to learn more" />;
 
 /**
- * Props for the ResultsPopup component
+ * Props for the NotificationPopup component
  */
-type ResultsPopupProps = {
+type NotificationPopupProps = {
   /**
    * Condition function that determines whether to show the popup
    * @returns true to show the popup, false to hide it
@@ -46,17 +46,17 @@ type ResultsPopupProps = {
 };
 
 /**
- * ResultsPopup component displays a dismissible popup that can be minimized.
+ * NotificationPopup component displays a dismissible popup that can be minimized.
  * When minimized, it shows as a small box in the bottom-right corner.
  */
-const ResultsPopup = ({
+const NotificationPopup = ({
   shouldShow,
   message,
   linkUrl,
   linkText = DEFAULT_LINK_TEXT,
   minimizedText = DEFAULT_MINIMIZED_TEXT,
   startMinimized = false,
-}: ResultsPopupProps) => {
+}: NotificationPopupProps) => {
   const [isMinimized, setIsMinimized] = useState(startMinimized);
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -78,8 +78,8 @@ const ResultsPopup = ({
         onRestore={handleRestore}
         onDismiss={handleDismiss}
         ariaLabel="Restore survey popup"
-        className="results-popup-minimized"
-        closeButtonClassName="results-popup-minimized-close-button"
+        className="notification-popup-minimized"
+        closeButtonClassName="notification-popup-minimized-close-button"
       />
     );
   }
@@ -89,11 +89,11 @@ const ResultsPopup = ({
     <PopupModal
       onClose={handleMinimize}
       ariaLabel="Survey invitation"
-      containerClassName="results-popup-container"
-      backdropClassName="results-popup-backdrop"
-      closeButtonClassName="results-popup-close-button"
+      containerClassName="notification-popup-container"
+      backdropClassName="notification-popup-backdrop"
+      closeButtonClassName="notification-popup-close-button"
     >
-      <Typography variant="body1" className="results-popup-text">
+      <Typography variant="body1" className="notification-popup-text">
         {message}
       </Typography>
       {linkUrl && (
@@ -101,7 +101,7 @@ const ResultsPopup = ({
           href={linkUrl}
           target="_blank"
           rel="noopener"
-          className="results-popup-button"
+          className="notification-popup-button"
           onClick={handleMinimize}
         >
           {linkText}
@@ -111,4 +111,4 @@ const ResultsPopup = ({
   );
 };
 
-export default ResultsPopup;
+export default NotificationPopup;
