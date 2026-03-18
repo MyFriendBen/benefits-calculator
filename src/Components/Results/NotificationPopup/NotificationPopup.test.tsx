@@ -1,13 +1,13 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import ResultsPopup from './ResultsPopup';
+import NotificationPopup from './NotificationPopup';
 import React from 'react';
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(<IntlProvider locale="en" defaultLocale="en">{component}</IntlProvider>);
 };
 
-describe('ResultsPopup', () => {
+describe('NotificationPopup', () => {
   const mockMessage = 'Test popup message';
   const mockLinkUrl = 'https://example.com/survey';
   const mockLinkText = 'Take Survey';
@@ -16,13 +16,13 @@ describe('ResultsPopup', () => {
   describe('Rendering', () => {
     it('renders nothing when shouldShow returns false', () => {
       const { container } = renderWithIntl(
-        <ResultsPopup shouldShow={() => false} message={mockMessage} />
+        <NotificationPopup shouldShow={() => false} message={mockMessage} />
       );
       expect(container.firstChild).toBeNull();
     });
 
     it('renders full popup when shouldShow returns true', () => {
-      renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} />);
+      renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} />);
 
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       expect(screen.getByText(mockMessage)).toBeInTheDocument();
@@ -30,7 +30,7 @@ describe('ResultsPopup', () => {
 
     it('renders minimized popup when startMinimized is true', () => {
       renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           minimizedText={mockMinimizedText}
@@ -44,14 +44,14 @@ describe('ResultsPopup', () => {
     });
 
     it('renders with default link text when linkUrl provided but no linkText', () => {
-      renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} linkUrl={mockLinkUrl} />);
+      renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} linkUrl={mockLinkUrl} />);
 
       expect(screen.getByText('Learn More')).toBeInTheDocument();
     });
 
     it('renders with custom link text when provided', () => {
       renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           linkUrl={mockLinkUrl}
@@ -63,7 +63,7 @@ describe('ResultsPopup', () => {
     });
 
     it('does not render link button when linkUrl is not provided', () => {
-      renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} />);
+      renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} />);
 
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
     });
@@ -71,7 +71,7 @@ describe('ResultsPopup', () => {
 
   describe('Accessibility', () => {
     it('has proper ARIA attributes on dialog', () => {
-      renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} />);
+      renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} />);
 
       const dialog = screen.getByRole('dialog');
       expect(dialog).toHaveAttribute('aria-modal', 'true');
@@ -81,7 +81,7 @@ describe('ResultsPopup', () => {
 
     it('has proper ARIA attributes on minimized popup', () => {
       renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           minimizedText={mockMinimizedText}
@@ -94,14 +94,14 @@ describe('ResultsPopup', () => {
     });
 
     it('has close button with proper aria-label in full popup', () => {
-      renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} />);
+      renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} />);
 
       expect(screen.getByLabelText('Minimize popup')).toBeInTheDocument();
     });
 
     it('has close button with proper aria-label in minimized popup', () => {
       renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           minimizedText={mockMinimizedText}
@@ -114,7 +114,7 @@ describe('ResultsPopup', () => {
 
     it('link opens in new tab with security attributes', () => {
       renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           linkUrl={mockLinkUrl}
@@ -131,7 +131,7 @@ describe('ResultsPopup', () => {
 
   describe('User Interactions - Minimizing', () => {
     it('minimizes popup when backdrop is clicked', () => {
-      renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} />);
+      renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} />);
 
       const backdrop = screen.getByLabelText('Survey invitation').previousSibling as HTMLElement;
       fireEvent.click(backdrop);
@@ -141,7 +141,7 @@ describe('ResultsPopup', () => {
     });
 
     it('minimizes popup when close button is clicked', () => {
-      renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} />);
+      renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} />);
 
       const closeButton = screen.getByLabelText('Minimize popup');
       fireEvent.click(closeButton);
@@ -152,7 +152,7 @@ describe('ResultsPopup', () => {
 
     it('minimizes popup when link is clicked', () => {
       renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           linkUrl={mockLinkUrl}
@@ -171,7 +171,7 @@ describe('ResultsPopup', () => {
   describe('User Interactions - Restoring', () => {
     it('restores popup when minimized popup is clicked', () => {
       renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           minimizedText={mockMinimizedText}
@@ -188,7 +188,7 @@ describe('ResultsPopup', () => {
 
     it('restores popup when Enter key is pressed on minimized popup', () => {
       renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           minimizedText={mockMinimizedText}
@@ -204,7 +204,7 @@ describe('ResultsPopup', () => {
 
     it('restores popup when Space key is pressed on minimized popup', () => {
       renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           minimizedText={mockMinimizedText}
@@ -220,7 +220,7 @@ describe('ResultsPopup', () => {
 
     it('does not restore popup when other keys are pressed on minimized popup', () => {
       renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           minimizedText={mockMinimizedText}
@@ -238,7 +238,7 @@ describe('ResultsPopup', () => {
 
   describe('User Interactions - Dismissing', () => {
     it('dismisses popup completely when X is clicked', () => {
-      const { container } = renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} />);
+      const { container } = renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} />);
 
       const closeButton = screen.getByLabelText('Minimize popup');
       fireEvent.click(closeButton);
@@ -256,7 +256,7 @@ describe('ResultsPopup', () => {
 
     it('prevents event propagation when dismissing minimized popup', () => {
       const { container } = renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           minimizedText={mockMinimizedText}
@@ -273,7 +273,7 @@ describe('ResultsPopup', () => {
 
     it('remains dismissed even if shouldShow changes to true', () => {
       const { rerender, container } = renderWithIntl(
-        <ResultsPopup shouldShow={() => true} message={mockMessage} />
+        <NotificationPopup shouldShow={() => true} message={mockMessage} />
       );
 
       // Minimize and then dismiss
@@ -288,7 +288,7 @@ describe('ResultsPopup', () => {
       // Re-render with shouldShow still true
       rerender(
         <IntlProvider locale="en" defaultLocale="en">
-          <ResultsPopup shouldShow={() => true} message={mockMessage} />
+          <NotificationPopup shouldShow={() => true} message={mockMessage} />
         </IntlProvider>
       );
 
@@ -299,7 +299,7 @@ describe('ResultsPopup', () => {
 
   describe('Focus Management', () => {
     it('focuses dialog when it opens', async () => {
-      renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} />);
+      renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} />);
 
       const dialog = screen.getByRole('dialog');
 
@@ -310,7 +310,7 @@ describe('ResultsPopup', () => {
 
     it('focuses dialog when restored from minimized state', async () => {
       renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           minimizedText={mockMinimizedText}
@@ -330,7 +330,7 @@ describe('ResultsPopup', () => {
 
     it('does not focus when popup is minimized', () => {
       const { rerender } = renderWithIntl(
-        <ResultsPopup shouldShow={() => true} message={mockMessage} />
+        <NotificationPopup shouldShow={() => true} message={mockMessage} />
       );
 
       const closeButton = screen.getByLabelText('Minimize popup');
@@ -340,7 +340,7 @@ describe('ResultsPopup', () => {
 
       rerender(
         <IntlProvider locale="en" defaultLocale="en">
-          <ResultsPopup shouldShow={() => true} message={mockMessage} />
+          <NotificationPopup shouldShow={() => true} message={mockMessage} />
         </IntlProvider>
       );
 
@@ -357,14 +357,14 @@ describe('ResultsPopup', () => {
       };
 
       expect(() => {
-        renderWithIntl(<ResultsPopup shouldShow={shouldShowWithError} message={mockMessage} />);
+        renderWithIntl(<NotificationPopup shouldShow={shouldShowWithError} message={mockMessage} />);
       }).toThrow();
 
       consoleError.mockRestore();
     });
 
     it('handles undefined message gracefully', () => {
-      renderWithIntl(<ResultsPopup shouldShow={() => true} message={undefined as any} />);
+      renderWithIntl(<NotificationPopup shouldShow={() => true} message={undefined as any} />);
 
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
@@ -372,7 +372,7 @@ describe('ResultsPopup', () => {
     it('handles React elements as message', () => {
       const CustomMessage = () => <span>Custom React Element Message</span>;
 
-      renderWithIntl(<ResultsPopup shouldShow={() => true} message={<CustomMessage />} />);
+      renderWithIntl(<NotificationPopup shouldShow={() => true} message={<CustomMessage />} />);
 
       expect(screen.getByText('Custom React Element Message')).toBeInTheDocument();
     });
@@ -381,7 +381,7 @@ describe('ResultsPopup', () => {
       const CustomLinkText = () => <span>Custom Link</span>;
 
       renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           linkUrl={mockLinkUrl}
@@ -395,7 +395,7 @@ describe('ResultsPopup', () => {
 
   describe('State Management', () => {
     it('maintains separate state for minimized and dismissed', () => {
-      const { rerender } = renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} />);
+      const { rerender } = renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} />);
 
       // Minimize
       const closeButton = screen.getByLabelText('Minimize popup');
@@ -406,7 +406,7 @@ describe('ResultsPopup', () => {
       // Re-render
       rerender(
         <IntlProvider locale="en" defaultLocale="en">
-          <ResultsPopup shouldShow={() => true} message={mockMessage} />
+          <NotificationPopup shouldShow={() => true} message={mockMessage} />
         </IntlProvider>
       );
 
@@ -416,7 +416,7 @@ describe('ResultsPopup', () => {
 
     it('does not show popup when shouldShow becomes false', () => {
       const { rerender, container } = renderWithIntl(
-        <ResultsPopup shouldShow={() => true} message={mockMessage} />
+        <NotificationPopup shouldShow={() => true} message={mockMessage} />
       );
 
       expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -424,7 +424,7 @@ describe('ResultsPopup', () => {
       // Change shouldShow to false
       rerender(
         <IntlProvider locale="en" defaultLocale="en">
-          <ResultsPopup shouldShow={() => false} message={mockMessage} />
+          <NotificationPopup shouldShow={() => false} message={mockMessage} />
         </IntlProvider>
       );
 
@@ -434,13 +434,13 @@ describe('ResultsPopup', () => {
 
   describe('Default Props', () => {
     it('uses default minimized text when not provided', () => {
-      renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} startMinimized={true} />);
+      renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} startMinimized={true} />);
 
       expect(screen.getByText('Click to learn more')).toBeInTheDocument();
     });
 
     it('starts in full popup mode by default', () => {
-      renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} />);
+      renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} />);
 
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: /restore survey popup/i })).not.toBeInTheDocument();
@@ -449,32 +449,32 @@ describe('ResultsPopup', () => {
 
   describe('CSS Classes', () => {
     it('applies correct CSS classes to full popup', () => {
-      renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} />);
+      renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} />);
 
       const dialog = screen.getByRole('dialog');
-      expect(dialog).toHaveClass('results-popup-container');
+      expect(dialog).toHaveClass('notification-popup-container');
     });
 
     it('applies correct CSS classes to minimized popup', () => {
       const { container } = renderWithIntl(
-        <ResultsPopup shouldShow={() => true} message={mockMessage} startMinimized={true} />
+        <NotificationPopup shouldShow={() => true} message={mockMessage} startMinimized={true} />
       );
 
-      const minimizedContainer = container.querySelector('.results-popup-minimized');
+      const minimizedContainer = container.querySelector('.notification-popup-minimized');
       expect(minimizedContainer).toBeInTheDocument();
     });
 
     it('applies correct CSS classes to backdrop', () => {
-      const { container } = renderWithIntl(<ResultsPopup shouldShow={() => true} message={mockMessage} />);
+      const { container } = renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} />);
 
-      const backdrop = container.querySelector('.results-popup-backdrop');
+      const backdrop = container.querySelector('.notification-popup-backdrop');
       expect(backdrop).toBeInTheDocument();
       expect(backdrop).toHaveAttribute('aria-hidden', 'true');
     });
 
     it('applies correct CSS classes to buttons', () => {
       renderWithIntl(
-        <ResultsPopup
+        <NotificationPopup
           shouldShow={() => true}
           message={mockMessage}
           linkUrl={mockLinkUrl}
@@ -483,10 +483,10 @@ describe('ResultsPopup', () => {
       );
 
       const link = screen.getByRole('link', { name: mockLinkText });
-      expect(link).toHaveClass('results-popup-button');
+      expect(link).toHaveClass('notification-popup-button');
 
       const closeButton = screen.getByLabelText('Minimize popup');
-      expect(closeButton).toHaveClass('results-popup-close-button');
+      expect(closeButton).toHaveClass('notification-popup-close-button');
     });
   });
 });

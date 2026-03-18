@@ -2,16 +2,16 @@ import { Alert, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { FormattedMessage } from 'react-intl';
 import { useState, useCallback, useEffect, useRef } from 'react';
-import './ResultsPopup.css';
+import './NotificationPopup.css';
 
 // Default messages to avoid creating new elements on every render
 const DEFAULT_LINK_TEXT = <FormattedMessage id="resultsPopup.button" defaultMessage="Learn More" />;
 const DEFAULT_MINIMIZED_TEXT = <FormattedMessage id="resultsPopup.minimized" defaultMessage="Click to learn more" />;
 
 /**
- * Props for the ResultsPopup component
+ * Props for the NotificationPopup component
  */
-type ResultsPopupProps = {
+type NotificationPopupProps = {
   /**
    * Condition function that determines whether to show the popup
    * @returns true to show the popup, false to hide it
@@ -45,17 +45,17 @@ type ResultsPopupProps = {
 };
 
 /**
- * ResultsPopup component displays a dismissible popup that can be minimized.
+ * NotificationPopup component displays a dismissible popup that can be minimized.
  * When minimized, it shows as a small box in the bottom-right corner.
  */
-const ResultsPopup = ({
+const NotificationPopup = ({
   shouldShow,
   message,
   linkUrl,
   linkText = DEFAULT_LINK_TEXT,
   minimizedText = DEFAULT_MINIMIZED_TEXT,
   startMinimized = false,
-}: ResultsPopupProps) => {
+}: NotificationPopupProps) => {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   const [isMinimized, setIsMinimized] = useState(startMinimized);
@@ -91,7 +91,7 @@ const ResultsPopup = ({
   if (isMinimized) {
     return (
       <div
-        className="results-popup-minimized"
+        className="notification-popup-minimized"
         onClick={handleRestore}
         role="button"
         tabIndex={0}
@@ -112,7 +112,7 @@ const ResultsPopup = ({
               color="inherit"
               size="small"
               onClick={handleDismiss}
-              className="results-popup-minimized-close-button"
+              className="notification-popup-minimized-close-button"
             >
               <CloseIcon fontSize="inherit" />
             </IconButton>
@@ -131,7 +131,7 @@ const ResultsPopup = ({
     <>
       {/* Backdrop overlay */}
       <div
-        className="results-popup-backdrop"
+        className="notification-popup-backdrop"
         onClick={handleMinimize}
         aria-hidden="true"
       />
@@ -139,7 +139,7 @@ const ResultsPopup = ({
       {/* Popup content */}
       <div
         ref={dialogRef}
-        className="results-popup-container"
+        className="notification-popup-container"
         role="dialog"
         aria-modal="true"
         aria-label="Survey invitation"
@@ -154,13 +154,13 @@ const ResultsPopup = ({
               color="inherit"
               size="small"
               onClick={handleMinimize}
-              className="results-popup-close-button"
+              className="notification-popup-close-button"
             >
               <CloseIcon fontSize="inherit" />
             </IconButton>
           }
         >
-          <Typography variant="body1" className="results-popup-text">
+          <Typography variant="body1" className="notification-popup-text">
             {message}
           </Typography>
 
@@ -169,7 +169,7 @@ const ResultsPopup = ({
               href={linkUrl}
               target="_blank"
               rel="noopener"
-              className="results-popup-button"
+              className="notification-popup-button"
               onClick={handleMinimize}
             >
               {linkText}
@@ -181,4 +181,4 @@ const ResultsPopup = ({
   );
 };
 
-export default ResultsPopup;
+export default NotificationPopup;
