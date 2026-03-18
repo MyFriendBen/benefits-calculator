@@ -154,6 +154,7 @@
 
 .share-popup-header-icon-svg {
   font-size: 1.25rem !important;
+  margin-bottom: 2px;
 }
 
 /* =====================
@@ -195,7 +196,7 @@
   align-items: center;
   gap: 0.875rem;
   width: 100%;
-  background: white;
+  background-color: white;
   border: 1px solid #e0e0e0;
   border-radius: 0.75rem;
   padding: 0.875rem 1rem;
@@ -209,11 +210,14 @@
   box-sizing: border-box;
 }
 
-.share-popup-option:hover,
+.share-popup-option:hover {
+  background-color: var(--secondary-background-color);
+  border-color: var(--midBlue-color, #41528C);
+}
+
 .share-popup-option:focus-visible {
-  background-color: #f5f8fa;
-  border-color: var(--primary-color);
-  outline: none;
+  outline: 2px solid var(--midBlue-color, #41528C);
+  outline-offset: 2px;
 }
 
 .share-popup-option-text {
