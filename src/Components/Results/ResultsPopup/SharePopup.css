@@ -73,26 +73,68 @@
   line-height: 1.3;
 }
 
-/* Remove orange border from share modal */
+/* Override modal shape to match clean rounded card design */
 .share-popup-modal .MuiAlert-root {
-  border-color: #e0e0e0;
+  border: none;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18) !important;
+  padding: 2rem 1.5rem 1.5rem !important;
 }
 
-/* Narrow modal override for desktop */
+.share-popup-modal .MuiAlert-message {
+  gap: 0.375rem;
+  position: relative;
+}
+
+/* Remove outer container padding (card handles its own), narrow on desktop */
+.share-popup-modal.popup-modal-container {
+  padding: 0;
+}
+
 @media (min-width: 768px) {
   .share-popup-modal {
-    max-width: 420px;
+    max-width: 500px;
   }
+}
+
+/* Share icon header circle */
+.share-popup-header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background-color: transparent;
+  border: 2px solid var(--secondary-color, #B85A27);
+  color: var(--secondary-color, #B85A27);
+  margin-bottom: 0.25rem;
+  flex-shrink: 0;
+}
+
+.share-popup-header-icon-svg {
+  font-size: 1.25rem !important;
 }
 
 /* Modal title */
 .share-popup-title {
   font-family: 'Open Sans', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
   color: var(--primary-color);
   text-align: center;
-  margin: 0 0 0.25rem;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+  width: 100%;
+}
+
+/* Modal subtitle */
+.share-popup-subtitle {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.9rem !important;
+  color: #666;
+  text-align: center;
+  margin: 0 !important;
   width: 100%;
 }
 
@@ -100,26 +142,26 @@
 .share-popup-options {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: 0.5rem;
   width: 100%;
+  margin-top: 0.5rem;
 }
 
-/* Individual row — shared base for button and anchor variants */
+/* Individual row */
 .share-popup-option {
   display: flex;
   align-items: center;
   gap: 0.875rem;
   width: 100%;
-  background: var(--primary-color);
-  border: 1px solid var(--primary-color);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
   cursor: pointer;
   text-align: left;
   font-family: 'Open Sans', sans-serif;
   font-size: 0.95rem;
-  font-weight: 600;
-  color: white;
+  color: var(--primary-color);
   text-decoration: none;
   transition: background-color 0.15s ease, border-color 0.15s ease;
   box-sizing: border-box;
@@ -127,8 +169,8 @@
 
 .share-popup-option:hover,
 .share-popup-option:focus-visible {
-  background-color: var(--midBlue-color, #41528C);
-  border-color: var(--midBlue-color, #41528C);
+  background-color: #f5f8fa;
+  border-color: var(--primary-color);
   outline: none;
 }
 
@@ -138,18 +180,19 @@
 }
 
 .share-popup-option-label {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.95rem;
+  color: var(--primary-color);
 }
 
 .share-popup-option-sublabel {
   font-weight: 400;
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.75);
+  color: #666;
   margin-top: 1px;
 }
 
-/* Icon circle */
+/* Icon circle — navy, used on main share options */
 .share-popup-icon-circle {
   display: flex;
   align-items: center;
@@ -158,66 +201,45 @@
   height: 2.5rem;
   border-radius: 50%;
   flex-shrink: 0;
+  background-color: var(--primary-color);
   color: white;
 }
 
-.share-popup-icon-circle--email,
-.share-popup-icon-circle--sms,
-.share-popup-icon-circle--link {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: white;
-  border: 1.5px solid rgba(255, 255, 255, 0.4);
+/* Standalone provider icon — no circle background */
+.share-popup-provider-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  color: var(--primary-color);
+}
+
+/* Provider favicon */
+.share-popup-provider-favicon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 
 /* "Copied!" feedback */
 .share-popup-copied-label {
   color: var(--primary-color);
-  font-weight: 600;
+  font-weight: 700;
 }
 
-/* Email provider sub-menu */
-.share-popup-email-providers {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  width: 75%;
-  margin: 0 auto 0.125rem;
-}
-
-.share-popup-provider-logo {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.share-popup-email-provider-btn {
-  background: none;
-  border: 1px solid #e0e0e0;
-  border-radius: 0.375rem;
-  padding: 0.5rem 0.875rem;
-  font-family: 'Open Sans', sans-serif;
-  font-size: 0.875rem;
+/* Back button — offset to escape Alert padding and align with X close button */
+.share-popup-back-btn,
+.share-popup-back-btn.MuiIconButton-root {
+  position: absolute;
+  top: -1.5rem;
+  left: -1rem;
+  padding: 0.25rem;
   color: var(--primary-color);
-  cursor: pointer;
-  text-align: left;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.share-popup-email-provider-btn:hover,
-.share-popup-email-provider-btn:focus-visible {
-  background-color: var(--secondary-background-color, #f5f0eb);
-  border-color: var(--secondary-color);
-  outline: none;
-}
-
-/* SMS hidden on desktop, shown on mobile */
-@media (min-width: 768px) {
-  .share-popup-option--sms-desktop-hidden {
-    display: none;
-  }
+.share-popup-back-btn:hover,
+.share-popup-back-btn.MuiIconButton-root:hover {
+  background-color: rgba(3, 122, 147, 0.08);
 }
