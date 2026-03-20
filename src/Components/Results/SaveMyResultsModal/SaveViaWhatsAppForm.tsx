@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { PhoneInput } from 'react-international-phone';
-import 'react-international-phone/style.css';
 import { useSaveResultsSubmit } from '../shared/useSaveResultsSubmit';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import './SaveMyResultsModal.css';

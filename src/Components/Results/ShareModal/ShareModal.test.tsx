@@ -2,9 +2,9 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import ShareModal from './ShareModal';
 
-// Feature flag hook — default to enabled
+// Feature flag hook — mocked; implementation set in beforeEach to survive resetMocks
 jest.mock('../../Config/configHook', () => ({
-  useFeatureFlag: jest.fn(() => true),
+  useFeatureFlag: jest.fn(),
 }));
 
 // Stub CSS imports
@@ -18,9 +18,17 @@ const renderModal = () =>
     </IntlProvider>,
   );
 
+const advanceToVisible = () => {
+  act(() => {
+    jest.advanceTimersByTime(5000);
+  });
+};
+
 describe('ShareModal', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    const { useFeatureFlag } = require('../../Config/configHook');
+    useFeatureFlag.mockReturnValue(true);
+    jest.useFakeTimers({ legacyFakeTimers: true });
     Object.defineProperty(navigator, 'userAgent', {
       value: 'Mozilla/5.0 (Macintosh)',
       configurable: true,
@@ -38,21 +46,21 @@ describe('ShareModal', () => {
 
   it('shows the minimized chip after 5 seconds', () => {
     renderModal();
-    act(() => jest.advanceTimersByTime(5000));
+    advanceToVisible();
     expect(screen.getByRole('button', { name: /open share options/i })).toBeInTheDocument();
     expect(screen.getByText('Share MyFriendBen')).toBeInTheDocument();
   });
 
   it('dismisses the chip when the close button is clicked', () => {
     renderModal();
-    act(() => jest.advanceTimersByTime(5000));
+    advanceToVisible();
     fireEvent.click(screen.getByLabelText('Close share popup'));
     expect(screen.queryByText('Share MyFriendBen')).not.toBeInTheDocument();
   });
 
   it('expands to the modal when the chip is clicked', () => {
     renderModal();
-    act(() => jest.advanceTimersByTime(5000));
+    advanceToVisible();
     fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Email')).toBeInTheDocument();
@@ -61,7 +69,7 @@ describe('ShareModal', () => {
 
   it('shows email provider list when Email option is clicked', () => {
     renderModal();
-    act(() => jest.advanceTimersByTime(5000));
+    advanceToVisible();
     fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
     fireEvent.click(screen.getByText('Email'));
     expect(screen.getByText('Gmail')).toBeInTheDocument();
@@ -73,7 +81,7 @@ describe('ShareModal', () => {
 
   it('goes back to main options from email provider list', () => {
     renderModal();
-    act(() => jest.advanceTimersByTime(5000));
+    advanceToVisible();
     fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
     fireEvent.click(screen.getByText('Email'));
     fireEvent.click(screen.getByLabelText('Back'));
@@ -81,14 +89,16 @@ describe('ShareModal', () => {
     expect(screen.queryByText('Gmail')).not.toBeInTheDocument();
   });
 
-  it('shows "Copied!" feedback after clicking Copy Link', () => {
+  it('shows "Copied!" feedback after clicking Copy Link', async () => {
     Object.assign(navigator, {
       clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
     });
     renderModal();
-    act(() => jest.advanceTimersByTime(5000));
+    advanceToVisible();
     fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
-    fireEvent.click(screen.getByText('Copy Link'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Copy Link'));
+    });
     expect(screen.getByText('Copied!')).toBeInTheDocument();
   });
 
@@ -97,16 +107,18 @@ describe('ShareModal', () => {
       clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
     });
     renderModal();
-    act(() => jest.advanceTimersByTime(5000));
+    advanceToVisible();
     fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
     fireEvent.click(screen.getByText('Copy Link'));
-    act(() => jest.advanceTimersByTime(2000));
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
     expect(screen.getByText('Copy Link')).toBeInTheDocument();
   });
 
   it('does not show SMS option on desktop', () => {
     renderModal();
-    act(() => jest.advanceTimersByTime(5000));
+    advanceToVisible();
     fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
     expect(screen.queryByText('SMS')).not.toBeInTheDocument();
   });
@@ -117,14 +129,14 @@ describe('ShareModal', () => {
       configurable: true,
     });
     renderModal();
-    act(() => jest.advanceTimersByTime(5000));
+    advanceToVisible();
     fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
     expect(screen.getByText('SMS')).toBeInTheDocument();
   });
 
   it('minimizes when close button on modal is clicked', () => {
     renderModal();
-    act(() => jest.advanceTimersByTime(5000));
+    advanceToVisible();
     fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
     fireEvent.click(screen.getByLabelText('Close dialog'));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -135,8 +147,7 @@ describe('ShareModal', () => {
     const { useFeatureFlag } = require('../../Config/configHook');
     useFeatureFlag.mockReturnValue(false);
     renderModal();
-    act(() => jest.advanceTimersByTime(5000));
+    advanceToVisible();
     expect(screen.queryByText('Share MyFriendBen')).not.toBeInTheDocument();
-    useFeatureFlag.mockReturnValue(true);
   });
 });

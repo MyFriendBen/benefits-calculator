@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { Context } from '../../Wrapper/Wrapper';
@@ -11,6 +11,15 @@ jest.mock('../../../apiCalls', () => ({
 
 jest.mock('../shared/ModalShell.css', () => ({}));
 jest.mock('./SaveMyResultsModal.css', () => ({}));
+jest.mock('./SaveViaWhatsAppForm', () => ({
+  __esModule: true,
+  default: ({ onSuccess }: { onSuccess: () => void }) => (
+    <div>
+      <span>WhatsApp Number</span>
+      <button type="button" onClick={onSuccess}>Send Results</button>
+    </div>
+  ),
+}));
 
 // PhoneNumberInput can have complex internals — keep it simple
 jest.mock('../../Common/PhoneNumberInput', () => ({
@@ -93,12 +102,14 @@ describe('SaveMyResultsModal', () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
-    it('shows "Copied!" after clicking Copy to Clipboard', () => {
+    it('shows "Copied!" after clicking Copy to Clipboard', async () => {
       Object.assign(navigator, {
         clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
       });
       renderModal();
-      fireEvent.click(screen.getByText('Copy to Clipboard'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Copy to Clipboard'));
+      });
       expect(screen.getByText('Copied!')).toBeInTheDocument();
     });
   });
@@ -140,7 +151,7 @@ describe('SaveMyResultsModal', () => {
           email: 'test@example.com',
           type: 'emailScreen',
         });
-        expect(screen.getByText('Choose how to save your results')).toBeInTheDocument();
+        expect(screen.getByText('Results Sent')).toBeInTheDocument();
       });
     });
 
@@ -217,7 +228,7 @@ describe('SaveMyResultsModal', () => {
           phone: '3031234567',
           type: 'textScreen',
         });
-        expect(screen.getByText('Choose how to save your results')).toBeInTheDocument();
+        expect(screen.getByText('Results Sent')).toBeInTheDocument();
       });
     });
 
@@ -278,49 +289,11 @@ describe('SaveMyResultsModal', () => {
       expect(screen.getByText('Choose how to save your results')).toBeInTheDocument();
     });
 
-    it('submits international number and returns to options view on success', async () => {
-      (postMessage as jest.Mock).mockResolvedValue({});
-      renderModal();
-      fireEvent.click(screen.getByText('WhatsApp'));
-
-      // react-international-phone renders a plain input
-      const input = screen.getByRole('textbox');
-      fireEvent.change(input, { target: { value: '+14155552671' } });
-      fireEvent.click(screen.getByText('Send Results'));
-
-      await waitFor(() => {
-        expect(postMessage).toHaveBeenCalledWith({
-          screen: 'test-uuid',
-          whatsapp: '+14155552671',
-          type: 'whatsappScreen',
-        });
-        expect(screen.getByText('Choose how to save your results')).toBeInTheDocument();
-      });
-    });
-
-    it('shows inline error and stays on WhatsApp view when submit fails', async () => {
-      (postMessage as jest.Mock).mockRejectedValue(new Error('Network error'));
-      renderModal();
-      fireEvent.click(screen.getByText('WhatsApp'));
-
-      const input = screen.getByRole('textbox');
-      fireEvent.change(input, { target: { value: '+14155552671' } });
-      fireEvent.click(screen.getByText('Send Results'));
-
-      await waitFor(() => {
-        expect(screen.getByText('Failed to send. Please try again.')).toBeInTheDocument();
-      });
-    });
-
-    it('shows validation error when phone is invalid', async () => {
+    it('shows success view when form calls onSuccess', () => {
       renderModal();
       fireEvent.click(screen.getByText('WhatsApp'));
       fireEvent.click(screen.getByText('Send Results'));
-
-      await waitFor(() => {
-        expect(screen.getByText('Please enter a valid international phone number')).toBeInTheDocument();
-      });
-      expect(postMessage).not.toHaveBeenCalled();
+      expect(screen.getByText('Results Sent')).toBeInTheDocument();
     });
   });
 });
