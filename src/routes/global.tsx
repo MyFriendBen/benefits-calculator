@@ -1,7 +1,6 @@
 import { Navigate, RouteObject } from 'react-router-dom';
 import SelectLanguagePage from '../Components/Steps/SelectLanguage';
 import SelectStatePage from '../Components/Steps/SelectStatePage';
-import ShareRedirect from '../Components/RouterUtil/ShareRedirect';
 
 interface GlobalRoutesOptions {
   urlSearchParams: string;
@@ -16,7 +15,6 @@ export const buildGlobalRoutes = ({ urlSearchParams }: GlobalRoutesOptions): Rou
     { path: '', element: <Navigate to={`step-1${urlSearchParams}`} replace /> },
     { path: 'step-1', element: <SelectLanguagePage /> },
     { path: 'select-state', element: <SelectStatePage /> },
-    { path: 'share/:medium', element: <ShareRedirect /> },
     { path: '*', element: <Navigate to={`step-1${urlSearchParams}`} replace /> },
   ];
 };
