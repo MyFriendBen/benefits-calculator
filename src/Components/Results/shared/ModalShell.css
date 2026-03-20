@@ -188,6 +188,10 @@
   font-size: 1.25rem;
 }
 
+.modal-option-icon-circle svg {
+  font-size: inherit;
+}
+
 /* Provider icon — no circle background, used for email provider list */
 .modal-option-provider-icon {
   display: flex;

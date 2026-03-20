@@ -46,14 +46,14 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
       {view === 'options' && (
         <div className="modal-options-list">
           <ModalOption
-            icon={<span className="modal-option-icon-circle"><EmailIcon style={{ fontSize: '1.25rem' }} /></span>}
+            icon={<span className="modal-option-icon-circle"><EmailIcon /></span>}
             label={<FormattedMessage id="saveMyResults.email" defaultMessage="Email" />}
             sublabel={<FormattedMessage id="saveMyResults.emailSublabel" defaultMessage="Email a link to your results" />}
             onClick={() => setView('email')}
           />
 
           <ModalOption
-            icon={<span className="modal-option-icon-circle"><SmsIcon style={{ fontSize: '1.25rem' }} /></span>}
+            icon={<span className="modal-option-icon-circle"><SmsIcon /></span>}
             label={<FormattedMessage id="saveMyResults.sms" defaultMessage="SMS" />}
             sublabel={<FormattedMessage id="saveMyResults.smsSublabel" defaultMessage="Text a link to your results" />}
             onClick={() => setView('sms')}
@@ -62,7 +62,7 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
           <ModalOption
             icon={
               <span className="modal-option-icon-circle">
-                {copied ? <CheckIcon style={{ fontSize: '1.25rem' }} /> : <LinkIcon style={{ fontSize: '1.25rem' }} />}
+                {copied ? <CheckIcon /> : <LinkIcon />}
               </span>
             }
             label={

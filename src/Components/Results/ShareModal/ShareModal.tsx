@@ -203,7 +203,7 @@ const ShareModal = () => {
     >
       <div className="modal-options-list">
         <ModalOption
-          icon={<span className="modal-option-icon-circle"><EmailIcon style={{ fontSize: '1.25rem' }} /></span>}
+          icon={<span className="modal-option-icon-circle"><EmailIcon /></span>}
           label={<FormattedMessage id="sharePopup.email" defaultMessage="Email" />}
           sublabel={<FormattedMessage id="sharePopup.emailSublabel" defaultMessage="Share via email" />}
           onClick={() => setEmailExpanded(true)}
@@ -211,7 +211,7 @@ const ShareModal = () => {
 
         {isMobile() && (
           <ModalOption
-            icon={<span className="modal-option-icon-circle"><SmsIcon style={{ fontSize: '1.25rem' }} /></span>}
+            icon={<span className="modal-option-icon-circle"><SmsIcon /></span>}
             label={<FormattedMessage id="sharePopup.sms" defaultMessage="SMS" />}
             sublabel={<FormattedMessage id="sharePopup.smsSublabel" defaultMessage="Share via text message" />}
             href={smsUrl()}
@@ -222,7 +222,7 @@ const ShareModal = () => {
         <ModalOption
           icon={
             <span className="modal-option-icon-circle">
-              {copied ? <CheckIcon style={{ fontSize: '1.25rem' }} /> : <LinkIcon style={{ fontSize: '1.25rem' }} />}
+              {copied ? <CheckIcon /> : <LinkIcon />}
             </span>
           }
           label={
