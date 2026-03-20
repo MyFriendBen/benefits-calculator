@@ -168,7 +168,7 @@ const NotificationPopup = ({
             <a
               href={linkUrl}
               target="_blank"
-              rel="noopener"
+              rel="noopener noreferrer"
               className="notification-popup-button"
               onClick={handleMinimize}
             >

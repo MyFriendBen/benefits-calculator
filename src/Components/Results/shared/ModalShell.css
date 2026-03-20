@@ -215,3 +215,38 @@
   font-weight: 700;
   font-size: 0.95rem;
 }
+
+/* "Copy failed" feedback label */
+.modal-option-copy-error-label {
+  color: #d32f2f;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* =====================
+   Primary action button (success views, forms)
+   ===================== */
+.modal-primary-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.modal-primary-btn:hover:not(:disabled) {
+  background-color: var(--midBlue-color, #41528C);
+}
+
+.modal-primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

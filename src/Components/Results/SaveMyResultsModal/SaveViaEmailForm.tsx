@@ -1,12 +1,11 @@
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { TextField } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Context } from '../../Wrapper/Wrapper';
-import { postMessage } from '../../../apiCalls';
+import { useSaveResultsSubmit } from '../shared/useSaveResultsSubmit';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import './SaveMyResultsModal.css';
 
@@ -16,9 +15,7 @@ type SaveViaEmailFormProps = {
 
 const SaveViaEmailForm = ({ onSuccess }: SaveViaEmailFormProps) => {
   const { formData } = useContext(Context);
-  const { uuid } = useParams();
   const { formatMessage } = useIntl();
-  const [apiError, setApiError] = useState<string | null>(null);
 
   const schema = z.object({
     email: z
@@ -43,21 +40,10 @@ const SaveViaEmailForm = ({ onSuccess }: SaveViaEmailFormProps) => {
     defaultValues: { email: formData.signUpInfo.email ?? '' },
   });
 
-  const onSubmit = async (data: z.infer<typeof schema>) => {
-    if (uuid === undefined) throw new Error('uuid is not defined');
-    setApiError(null);
-    try {
-      await postMessage({ screen: uuid, email: data.email, type: 'emailScreen' });
-      onSuccess();
-    } catch {
-      setApiError(
-        formatMessage({
-          id: 'emailResults.error',
-          defaultMessage: 'Failed to send. Please try again.',
-        }),
-      );
-    }
-  };
+  const { apiError, isSubmitting, clearApiError, onSubmit } = useSaveResultsSubmit<z.infer<typeof schema>>({
+    buildPayload: (data) => ({ email: data.email, type: 'emailScreen' }),
+    onSuccess,
+  });
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="save-my-results-form">
@@ -70,15 +56,19 @@ const SaveViaEmailForm = ({ onSuccess }: SaveViaEmailFormProps) => {
         render={({ field }) => (
           <TextField
             {...field}
+            onChange={(e) => {
+              field.onChange(e);
+              clearApiError();
+            }}
             placeholder={formatMessage({ id: 'saveMyResults.emailPlaceholder', defaultMessage: 'your.email@example.com' })}
             variant="outlined"
             error={errors.email !== undefined || apiError !== null}
             helperText={
-              errors.email !== undefined
-                ? <ErrorMessageWrapper>{errors.email.message}</ErrorMessageWrapper>
-                : apiError !== null
-                  ? <ErrorMessageWrapper>{apiError}</ErrorMessageWrapper>
-                  : undefined
+              errors.email !== undefined ? (
+                <ErrorMessageWrapper>{errors.email.message}</ErrorMessageWrapper>
+              ) : apiError !== null ? (
+                <ErrorMessageWrapper>{apiError}</ErrorMessageWrapper>
+              ) : undefined
             }
             fullWidth
             InputProps={{ className: 'save-my-results-input' }}
@@ -86,7 +76,7 @@ const SaveViaEmailForm = ({ onSuccess }: SaveViaEmailFormProps) => {
         )}
       />
       <div className="save-my-results-form-actions">
-        <button type="submit" className="save-my-results-send-btn">
+        <button type="submit" className="modal-primary-btn" disabled={isSubmitting}>
           <FormattedMessage id="saveMyResults.sendResults" defaultMessage="Send Results" />
         </button>
       </div>

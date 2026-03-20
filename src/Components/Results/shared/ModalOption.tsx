@@ -19,7 +19,7 @@ type ModalOptionLinkProps = ModalOptionBaseProps & {
 
 type ModalOptionProps = ModalOptionButtonProps | ModalOptionLinkProps;
 
-const ModalOption = ({ icon, label, sublabel, onClick, href }: ModalOptionProps & { href?: string }) => {
+const ModalOption = ({ icon, label, sublabel, onClick, href }: ModalOptionProps) => {
   const content = (
     <>
       <span className="modal-option-icon" aria-hidden="true">

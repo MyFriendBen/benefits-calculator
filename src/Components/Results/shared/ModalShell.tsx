@@ -29,6 +29,7 @@ const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: 
         className="modal-shell-card"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="modal-shell-title"
         tabIndex={-1}
       >
         {onBack && (
@@ -55,7 +56,7 @@ const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: 
           {headerIcon}
         </div>
 
-        <Typography variant="h6" component="h2" className="modal-shell-title">
+        <Typography variant="h6" component="h2" id="modal-shell-title" className="modal-shell-title">
           {title}
         </Typography>
 

@@ -1,13 +1,11 @@
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
-import { postMessage } from '../../../apiCalls';
+import { useSaveResultsSubmit } from '../shared/useSaveResultsSubmit';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import './SaveMyResultsModal.css';
 
@@ -16,9 +14,7 @@ type SaveViaWhatsAppFormProps = {
 };
 
 const SaveViaWhatsAppForm = ({ onSuccess }: SaveViaWhatsAppFormProps) => {
-  const { uuid } = useParams();
   const { formatMessage } = useIntl();
-  const [apiError, setApiError] = useState<string | null>(null);
 
   const invalidMsg = formatMessage({
     id: 'validation-helperText.whatsappNumber',
@@ -48,25 +44,14 @@ const SaveViaWhatsAppForm = ({ onSuccess }: SaveViaWhatsAppFormProps) => {
     defaultValues: { phone: '' },
   });
 
+  const { apiError, isSubmitting, clearApiError, onSubmit } = useSaveResultsSubmit<z.infer<typeof schema>>({
+    // Send the full E.164 number (e.g. +447911123456) — backend uses it as-is for WhatsApp
+    buildPayload: (data) => ({ whatsapp: data.phone, type: 'whatsappScreen' }),
+    onSuccess,
+  });
+
   const phoneValue = watch('phone');
   const hasError = errors.phone !== undefined || apiError !== null;
-
-  const onSubmit = async (data: z.infer<typeof schema>) => {
-    if (uuid === undefined) throw new Error('uuid is not defined');
-    setApiError(null);
-    try {
-      // Send the full E.164 number (e.g. +447911123456) — backend uses it as-is for WhatsApp
-      await postMessage({ screen: uuid, whatsapp: data.phone, type: 'whatsappScreen' });
-      onSuccess();
-    } catch {
-      setApiError(
-        formatMessage({
-          id: 'emailResults.error',
-          defaultMessage: 'Failed to send. Please try again.',
-        }),
-      );
-    }
-  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="save-my-results-form">
@@ -76,7 +61,10 @@ const SaveViaWhatsAppForm = ({ onSuccess }: SaveViaWhatsAppFormProps) => {
       <div className={`save-my-results-intl-phone-wrapper${hasError ? ' save-my-results-intl-phone-wrapper--error' : ''}`}>
         <PhoneInput
           value={phoneValue}
-          onChange={(value) => setValue('phone', value, { shouldValidate: false })}
+          onChange={(value) => {
+            setValue('phone', value, { shouldValidate: false });
+            clearApiError();
+          }}
           defaultCountry="us"
         />
         {hasError && (
@@ -93,7 +81,7 @@ const SaveViaWhatsAppForm = ({ onSuccess }: SaveViaWhatsAppFormProps) => {
         )}
       </div>
       <div className="save-my-results-form-actions">
-        <button type="submit" className="save-my-results-send-btn">
+        <button type="submit" className="modal-primary-btn" disabled={isSubmitting}>
           <FormattedMessage id="saveMyResults.sendResults" defaultMessage="Send Results" />
         </button>
       </div>
