@@ -64,7 +64,7 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
             <ModalOption
               icon={<span className="modal-option-icon-circle"><EmailIcon style={{ fontSize: '1.25rem' }} /></span>}
               label={<FormattedMessage id="saveMyResults.email" defaultMessage="Email" />}
-              sublabel={<FormattedMessage id="saveMyResults.emailSublabel" defaultMessage="Send results to my email" />}
+              sublabel={<FormattedMessage id="saveMyResults.emailSublabel" defaultMessage="Email a link to your results" />}
               onClick={() => setView('email')}
             />
 
@@ -72,7 +72,7 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
               <ModalOption
                 icon={<span className="modal-option-icon-circle"><SmsIcon style={{ fontSize: '1.25rem' }} /></span>}
                 label={<FormattedMessage id="saveMyResults.sms" defaultMessage="SMS" />}
-                sublabel={<FormattedMessage id="saveMyResults.smsSublabel" defaultMessage="Text results to my phone" />}
+                sublabel={<FormattedMessage id="saveMyResults.smsSublabel" defaultMessage="Text a link to your results" />}
                 onClick={() => setView('sms')}
               />
             )}
@@ -88,7 +88,7 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
                   ? <span className="modal-option-copied-label"><FormattedMessage id="saveMyResults.copied" defaultMessage="Copied!" /></span>
                   : <FormattedMessage id="saveMyResults.copyLink" defaultMessage="Copy to Clipboard" />
               }
-              sublabel={copied ? undefined : <FormattedMessage id="saveMyResults.copyLinkSublabel" defaultMessage="Copy results summary" />}
+              sublabel={copied ? undefined : <FormattedMessage id="saveMyResults.copyLinkSublabel" defaultMessage="Copy a link to your results" />}
               onClick={handleCopyLink}
             />
           </div>

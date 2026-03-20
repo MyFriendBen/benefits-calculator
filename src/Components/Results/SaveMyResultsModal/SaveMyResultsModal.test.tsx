@@ -68,7 +68,9 @@ describe('SaveMyResultsModal', () => {
       expect(screen.getByText('Save My Results')).toBeInTheDocument();
       expect(screen.getByText('Choose how to save your results')).toBeInTheDocument();
       expect(screen.getByText('Email')).toBeInTheDocument();
+      expect(screen.getByText('Email a link to your results')).toBeInTheDocument();
       expect(screen.getByText('Copy to Clipboard')).toBeInTheDocument();
+      expect(screen.getByText('Copy a link to your results')).toBeInTheDocument();
     });
 
     it('does not show SMS on desktop', () => {
