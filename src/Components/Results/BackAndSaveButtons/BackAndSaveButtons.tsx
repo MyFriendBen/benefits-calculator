@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { ReactComponent as SaveIcon } from '../../../Assets/save.svg';
-import { Modal } from '@mui/material';
 import { FormattedMessageType } from '../../../Types/Questions';
-import SaveMyResultsModal from '../../SaveMyResultsModal/SaveMyResultsModal';
+import SaveMyResultsModal from '../SaveMyResultsModal/SaveMyResultsModal';
 import './BackAndSaveButtons.css';
 
 type BackAndSaveButtons = {
@@ -15,14 +14,9 @@ type BackAndSaveButtons = {
 
 const BackAndSaveButtons = ({ navigateToLink, BackToThisPageText }: BackAndSaveButtons) => {
   const navigate = useNavigate();
-  const { uuid: screenerId } = useParams();
   const intl = useIntl();
 
   const [openSaveModal, setOpenSaveModal] = useState(false);
-  let definedScreenerId = '';
-  if (screenerId) {
-    definedScreenerId = screenerId;
-  }
   const backBtnALProps = {
     id: 'backAndSaveBtns.backBtnAL',
     defaultMessage: 'back',
@@ -31,11 +25,6 @@ const BackAndSaveButtons = ({ navigateToLink, BackToThisPageText }: BackAndSaveB
     id: 'backAndSaveBtns.saveMyResultsBtnAL',
     defaultMessage: 'save my results',
   };
-  const emailResultsModalALProps = {
-    id: 'backAndSaveBtns.emailResultsModalAL',
-    defaultMessage: 'send me my results modal',
-  };
-
   return (
     <div className="results-back-save-btn-container">
       <button
@@ -61,9 +50,7 @@ const BackAndSaveButtons = ({ navigateToLink, BackToThisPageText }: BackAndSaveB
           <SaveIcon className="save-icon" />
         </div>
       </button>
-      <Modal open={openSaveModal} aria-label={intl.formatMessage(emailResultsModalALProps)}>
-        <SaveMyResultsModal close={() => setOpenSaveModal(!openSaveModal)} />
-      </Modal>
+      {openSaveModal && <SaveMyResultsModal onClose={() => setOpenSaveModal(false)} />}
     </div>
   );
 };
