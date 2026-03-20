@@ -18,10 +18,9 @@ import { useCopyFeedback } from '../shared/useCopyFeedback';
 import '../shared/ModalShell.css';
 import './ShareModal.css';
 
-const SHARE_BASE = 'https://screener.myfriendben.org?referrer=friend&utm_source=friend&utm_campaign=screener_share';
-const SHARE_URL_EMAIL = `${SHARE_BASE}&utm_medium=email`;
-const SHARE_URL_SMS = `${SHARE_BASE}&utm_medium=sms`;
-const SHARE_URL_WHATSAPP = `${SHARE_BASE}&utm_medium=whatsapp`;
+const SHARE_URL_EMAIL = 'https://screener.myfriendben.org/share/email';
+const SHARE_URL_SMS = 'https://screener.myfriendben.org/share/sms';
+const SHARE_URL_WHATSAPP = 'https://screener.myfriendben.org/share/whatsapp';
 const SHARE_URL_COPY = 'https://screener.myfriendben.org';
 
 // Evaluated once at module load — user agent doesn't change during a session
@@ -77,15 +76,19 @@ const ShareModal = () => {
     id: 'sharePopup.emailSubject',
     defaultMessage: 'Check out MyFriendBen',
   });
-  const shareBody = formatMessage({
-    id: 'sharePopup.shareBody',
-    defaultMessage:
-      "I just found out about programs I may be eligible for through MyFriendBen — it's a free, confidential screener that helps you discover benefits you qualify for. Check it out!",
-  });
+  const buildShareBody = (url: string) =>
+    formatMessage(
+      {
+        id: 'sharePopup.shareBody',
+        defaultMessage:
+          "Hey, wanted to share MyFriendBen. It's a free screener that takes about 6 minutes and shows you what benefits you're eligible for - things like tax credits, help with utility bills, and food assistance. And it doesn't ask for your name or any contact information. {url}",
+      },
+      { url },
+    );
 
-  const emailBody = `${shareBody}\n\n${SHARE_URL_EMAIL}`;
-  const smsBody = `${shareBody} ${SHARE_URL_SMS}`;
-  const whatsappBody = `${shareBody} ${SHARE_URL_WHATSAPP}`;
+  const emailBody = buildShareBody(SHARE_URL_EMAIL);
+  const smsBody = buildShareBody(SHARE_URL_SMS);
+  const whatsappBody = buildShareBody(SHARE_URL_WHATSAPP);
 
   const emailProviders = [
     {
