@@ -132,7 +132,7 @@ describe('SaveMyResultsModal', () => {
       expect(screen.getByText('Choose how to save your results')).toBeInTheDocument();
     });
 
-    it('submits email and shows snackbar on success', async () => {
+    it('submits email and returns to options view on success', async () => {
       (postMessage as jest.Mock).mockResolvedValue({});
       renderModal();
       fireEvent.click(screen.getByText('Email'));
@@ -148,10 +148,11 @@ describe('SaveMyResultsModal', () => {
           email: 'test@example.com',
           type: 'emailScreen',
         });
+        expect(screen.getByText('Choose how to save your results')).toBeInTheDocument();
       });
     });
 
-    it('shows error snackbar when email submit fails', async () => {
+    it('shows inline error and stays on email view when submit fails', async () => {
       (postMessage as jest.Mock).mockRejectedValue(new Error('Network error'));
       renderModal();
       fireEvent.click(screen.getByText('Email'));
@@ -162,8 +163,34 @@ describe('SaveMyResultsModal', () => {
       fireEvent.click(screen.getByText('Send Results'));
 
       await waitFor(() => {
-        expect(screen.getByText('An error occurred on our end, please try submitting again.')).toBeInTheDocument();
+        expect(screen.getByText('Failed to send. Please try again.')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('your.email@example.com')).toBeInTheDocument();
       });
+    });
+
+    it('shows validation error for invalid email', async () => {
+      renderModal();
+      fireEvent.click(screen.getByText('Email'));
+      fireEvent.change(screen.getByPlaceholderText('your.email@example.com'), {
+        target: { value: 'not-an-email' },
+      });
+      fireEvent.click(screen.getByText('Send Results'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
+      });
+      expect(postMessage).not.toHaveBeenCalled();
+    });
+
+    it('shows validation error when email is empty', async () => {
+      renderModal();
+      fireEvent.click(screen.getByText('Email'));
+      fireEvent.click(screen.getByText('Send Results'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
+      });
+      expect(postMessage).not.toHaveBeenCalled();
     });
   });
 
@@ -189,7 +216,7 @@ describe('SaveMyResultsModal', () => {
       expect(screen.getByText('Choose how to save your results')).toBeInTheDocument();
     });
 
-    it('submits phone and calls postMessage on success', async () => {
+    it('submits phone and returns to options view on success', async () => {
       (postMessage as jest.Mock).mockResolvedValue({});
       renderModal();
       fireEvent.click(screen.getByText('SMS'));
@@ -205,7 +232,49 @@ describe('SaveMyResultsModal', () => {
           phone: '3031234567',
           type: 'textScreen',
         });
+        expect(screen.getByText('Choose how to save your results')).toBeInTheDocument();
       });
+    });
+
+    it('shows inline error and stays on SMS view when submit fails', async () => {
+      (postMessage as jest.Mock).mockRejectedValue(new Error('Network error'));
+      renderModal();
+      fireEvent.click(screen.getByText('SMS'));
+
+      fireEvent.change(screen.getByTestId('phone-input'), {
+        target: { value: '3031234567' },
+      });
+      fireEvent.click(screen.getByText('Send Results'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Failed to send. Please try again.')).toBeInTheDocument();
+        expect(screen.getByTestId('phone-input')).toBeInTheDocument();
+      });
+    });
+
+    it('shows validation error for phone number that is too short', async () => {
+      renderModal();
+      fireEvent.click(screen.getByText('SMS'));
+      fireEvent.change(screen.getByTestId('phone-input'), {
+        target: { value: '123' },
+      });
+      fireEvent.click(screen.getByText('Send Results'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Please enter a 10 digit phone number')).toBeInTheDocument();
+      });
+      expect(postMessage).not.toHaveBeenCalled();
+    });
+
+    it('shows validation error when phone is empty', async () => {
+      renderModal();
+      fireEvent.click(screen.getByText('SMS'));
+      fireEvent.click(screen.getByText('Send Results'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Please enter a 10 digit phone number')).toBeInTheDocument();
+      });
+      expect(postMessage).not.toHaveBeenCalled();
     });
   });
 });

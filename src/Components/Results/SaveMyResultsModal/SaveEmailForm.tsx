@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { TextField } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
@@ -12,13 +12,13 @@ import './SaveMyResultsModal.css';
 
 type SaveEmailFormProps = {
   onSuccess: () => void;
-  onError: () => void;
 };
 
-const SaveEmailForm = ({ onSuccess, onError }: SaveEmailFormProps) => {
+const SaveEmailForm = ({ onSuccess }: SaveEmailFormProps) => {
   const { formData } = useContext(Context);
   const { uuid } = useParams();
   const { formatMessage } = useIntl();
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const schema = z.object({
     email: z
@@ -45,11 +45,17 @@ const SaveEmailForm = ({ onSuccess, onError }: SaveEmailFormProps) => {
 
   const onSubmit = async (data: z.infer<typeof schema>) => {
     if (uuid === undefined) throw new Error('uuid is not defined');
+    setApiError(null);
     try {
       await postMessage({ screen: uuid, email: data.email, type: 'emailScreen' });
       onSuccess();
     } catch {
-      onError();
+      setApiError(
+        formatMessage({
+          id: 'emailResults.error',
+          defaultMessage: 'Failed to send. Please try again.',
+        }),
+      );
     }
   };
 
@@ -66,8 +72,14 @@ const SaveEmailForm = ({ onSuccess, onError }: SaveEmailFormProps) => {
             {...field}
             placeholder={formatMessage({ id: 'saveMyResults.emailPlaceholder', defaultMessage: 'your.email@example.com' })}
             variant="outlined"
-            error={errors.email !== undefined}
-            helperText={errors.email !== undefined && <ErrorMessageWrapper>{errors.email.message}</ErrorMessageWrapper>}
+            error={errors.email !== undefined || apiError !== null}
+            helperText={
+              errors.email !== undefined
+                ? <ErrorMessageWrapper>{errors.email.message}</ErrorMessageWrapper>
+                : apiError !== null
+                  ? <ErrorMessageWrapper>{apiError}</ErrorMessageWrapper>
+                  : undefined
+            }
             fullWidth
             InputProps={{ className: 'save-my-results-input' }}
           />

@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
@@ -12,13 +12,13 @@ import './SaveMyResultsModal.css';
 
 type SavePhoneFormProps = {
   onSuccess: () => void;
-  onError: () => void;
 };
 
-const SavePhoneForm = ({ onSuccess, onError }: SavePhoneFormProps) => {
+const SavePhoneForm = ({ onSuccess }: SavePhoneFormProps) => {
   const { formData } = useContext(Context);
   const { uuid } = useParams();
   const { formatMessage } = useIntl();
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const schema = z.object({
     phone: z
@@ -51,11 +51,17 @@ const SavePhoneForm = ({ onSuccess, onError }: SavePhoneFormProps) => {
 
   const onSubmit = async (data: z.infer<typeof schema>) => {
     if (uuid === undefined) throw new Error('uuid is not defined');
+    setApiError(null);
     try {
       await postMessage({ screen: uuid, phone: data.phone, type: 'textScreen' });
       onSuccess();
     } catch {
-      onError();
+      setApiError(
+        formatMessage({
+          id: 'emailResults.error',
+          defaultMessage: 'Failed to send. Please try again.',
+        }),
+      );
     }
   };
 
@@ -74,12 +80,13 @@ const SavePhoneForm = ({ onSuccess, onError }: SavePhoneFormProps) => {
             onBlur={field.onBlur}
             inputRef={field.ref}
             name={field.name}
-            placeholder="1234567890"
-            error={errors.phone !== undefined}
+            error={errors.phone !== undefined || apiError !== null}
             helperText={
               errors.phone !== undefined
                 ? <ErrorMessageWrapper>{errors.phone.message}</ErrorMessageWrapper>
-                : <FormattedMessage id="saveMyResults.phoneHelper" defaultMessage="Enter 10-digit phone number without spaces or dashes" />
+                : apiError !== null
+                  ? <ErrorMessageWrapper>{apiError}</ErrorMessageWrapper>
+                  : <FormattedMessage id="saveMyResults.phoneHelper" defaultMessage="Enter 10-digit phone number without spaces or dashes" />
             }
             sx={{ mb: 0 }}
           />
