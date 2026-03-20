@@ -15,10 +15,11 @@ import ModalOption from '../shared/ModalOption';
 import '../shared/ModalShell.css';
 import './ShareModal.css';
 
-const SHARE_URL_EMAIL = 'https://screener.myfriendben.org?referrer=email';
-const SHARE_URL_SMS = 'https://screener.myfriendben.org?referrer=sms';
-const SHARE_URL_WHATSAPP = 'https://screener.myfriendben.org?referrer=whatsapp';
-const SHARE_URL_COPY = 'https://myfriendben.org';
+const SHARE_BASE = 'https://screener.myfriendben.org?referrer=friend&utm_source=friend&utm_campaign=screener_share';
+const SHARE_URL_EMAIL = `${SHARE_BASE}&utm_medium=email`;
+const SHARE_URL_SMS = `${SHARE_BASE}&utm_medium=sms`;
+const SHARE_URL_WHATSAPP = `${SHARE_BASE}&utm_medium=whatsapp`;
+const SHARE_URL_COPY = 'https://screener.myfriendben.org';
 const SHARE_SUBJECT = 'Check out MyFriendBen';
 const SHARE_BODY =
   "I just found out about programs I may be eligible for through MyFriendBen — it's a free, confidential screener that helps you discover benefits you qualify for. Check it out!";
@@ -128,7 +129,7 @@ const ShareModal = () => {
   }, []);
 
   const handleCopyLink = useCallback(() => {
-    navigator.clipboard.writeText(SHARE_URL_COPY).catch(() => {});
+    navigator.clipboard.writeText(SHARE_URL_COPY).catch(() => { });
     setCopied(true);
     setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
   }, []);
