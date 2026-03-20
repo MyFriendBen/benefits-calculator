@@ -116,6 +116,15 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
       {view === 'sms' && <SaveViaSMSForm onSuccess={() => setView('success')} />}
       {view === 'whatsapp' && <SaveViaWhatsAppForm onSuccess={() => setView('success')} />}
 
+      {(view === 'email' || view === 'sms' || view === 'whatsapp') && (
+        <p className="save-my-results-privacy-note">
+          <FormattedMessage
+            id="saveMyResults.privacy-note"
+            defaultMessage="*Your contact information will only be used to send your results. We will not store your email address or cell phone number."
+          />
+        </p>
+      )}
+
       {view === 'success' && (
         <div className="save-my-results-success">
           <button type="button" className="modal-primary-btn" onClick={onClose}>
