@@ -1,4 +1,4 @@
-import SaveIcon from '@mui/icons-material/Save';
+import SaveIcon from '@mui/icons-material/SaveOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import EmailIcon from '@mui/icons-material/Email';
 import SmsIcon from '@mui/icons-material/Sms';

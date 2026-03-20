@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
-import { ReactComponent as SaveIcon } from '../../../Assets/save.svg';
+import SaveIcon from '@mui/icons-material/SaveOutlined';
 import { FormattedMessageType } from '../../../Types/Questions';
 import SaveMyResultsModal from '../SaveMyResultsModal/SaveMyResultsModal';
 import './BackAndSaveButtons.css';
@@ -45,7 +45,7 @@ const BackAndSaveButtons = ({ navigateToLink, BackToThisPageText }: BackAndSaveB
         onClick={() => setOpenSaveModal(!openSaveModal)}
         aria-label={intl.formatMessage(saveMyResultsBtnALProps)}
       >
-        <div className="btn-icon-text-container padding-left">
+        <div className="btn-icon-text-container">
           <FormattedMessage id="results.save-results-btn" defaultMessage="SAVE MY RESULTS" />
           <SaveIcon className="save-icon" />
         </div>
