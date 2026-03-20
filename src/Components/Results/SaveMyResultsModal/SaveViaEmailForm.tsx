@@ -1,4 +1,5 @@
 import { useContext, useState } from 'react';
+import { TextField } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
@@ -6,38 +7,31 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Context } from '../../Wrapper/Wrapper';
 import { postMessage } from '../../../apiCalls';
-import PhoneNumberInput from '../../Common/PhoneNumberInput';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import './SaveMyResultsModal.css';
 
-type SavePhoneFormProps = {
+type SaveViaEmailFormProps = {
   onSuccess: () => void;
 };
 
-const SavePhoneForm = ({ onSuccess }: SavePhoneFormProps) => {
+const SaveViaEmailForm = ({ onSuccess }: SaveViaEmailFormProps) => {
   const { formData } = useContext(Context);
   const { uuid } = useParams();
   const { formatMessage } = useIntl();
   const [apiError, setApiError] = useState<string | null>(null);
 
   const schema = z.object({
-    phone: z
+    email: z
       .string({
         errorMap: () => ({
           message: formatMessage({
-            id: 'validation-helperText.phoneNumber',
-            defaultMessage: 'Please enter a 10 digit phone number',
+            id: 'validation-helperText.email',
+            defaultMessage: 'Please enter a valid email address',
           }),
         }),
       })
-      .trim()
-      .transform((value) => value.replace(/\D/g, ''))
-      .refine((value) => value.length === 10, {
-        message: formatMessage({
-          id: 'validation-helperText.phoneNumber',
-          defaultMessage: 'Please enter a 10 digit phone number',
-        }),
-      }),
+      .email()
+      .trim(),
   });
 
   const {
@@ -46,14 +40,14 @@ const SavePhoneForm = ({ onSuccess }: SavePhoneFormProps) => {
     handleSubmit,
   } = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
-    defaultValues: { phone: formData.signUpInfo.phone ?? '' },
+    defaultValues: { email: formData.signUpInfo.email ?? '' },
   });
 
   const onSubmit = async (data: z.infer<typeof schema>) => {
     if (uuid === undefined) throw new Error('uuid is not defined');
     setApiError(null);
     try {
-      await postMessage({ screen: uuid, phone: data.phone, type: 'textScreen' });
+      await postMessage({ screen: uuid, email: data.email, type: 'emailScreen' });
       onSuccess();
     } catch {
       setApiError(
@@ -68,27 +62,26 @@ const SavePhoneForm = ({ onSuccess }: SavePhoneFormProps) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="save-my-results-form">
       <label className="save-my-results-field-label">
-        <FormattedMessage id="saveMyResults.phoneLabel" defaultMessage="Phone Number" />
+        <FormattedMessage id="saveMyResults.emailLabel" defaultMessage="Email Address" />
       </label>
       <Controller
-        name="phone"
+        name="email"
         control={control}
         render={({ field }) => (
-          <PhoneNumberInput
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            inputRef={field.ref}
-            name={field.name}
-            error={errors.phone !== undefined || apiError !== null}
+          <TextField
+            {...field}
+            placeholder={formatMessage({ id: 'saveMyResults.emailPlaceholder', defaultMessage: 'your.email@example.com' })}
+            variant="outlined"
+            error={errors.email !== undefined || apiError !== null}
             helperText={
-              errors.phone !== undefined
-                ? <ErrorMessageWrapper>{errors.phone.message}</ErrorMessageWrapper>
+              errors.email !== undefined
+                ? <ErrorMessageWrapper>{errors.email.message}</ErrorMessageWrapper>
                 : apiError !== null
                   ? <ErrorMessageWrapper>{apiError}</ErrorMessageWrapper>
-                  : <FormattedMessage id="saveMyResults.phoneHelper" defaultMessage="Enter 10-digit phone number without spaces or dashes" />
+                  : undefined
             }
-            sx={{ mb: 0 }}
+            fullWidth
+            InputProps={{ className: 'save-my-results-input' }}
           />
         )}
       />
@@ -101,4 +94,4 @@ const SavePhoneForm = ({ onSuccess }: SavePhoneFormProps) => {
   );
 };
 
-export default SavePhoneForm;
+export default SaveViaEmailForm;

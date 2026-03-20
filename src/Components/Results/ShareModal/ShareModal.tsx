@@ -7,6 +7,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import CheckIcon from '@mui/icons-material/Check';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import SmsIcon from '@mui/icons-material/Sms';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { FormattedMessage } from 'react-intl';
 import { useFeatureFlag } from '../../Config/configHook';
 import ModalShell from '../shared/ModalShell';
@@ -16,6 +17,7 @@ import './ShareModal.css';
 
 const SHARE_URL_EMAIL = 'https://screener.myfriendben.org?referrer=email';
 const SHARE_URL_SMS = 'https://screener.myfriendben.org?referrer=sms';
+const SHARE_URL_WHATSAPP = 'https://screener.myfriendben.org?referrer=whatsapp';
 const SHARE_URL_COPY = 'https://myfriendben.org';
 const SHARE_SUBJECT = 'Check out MyFriendBen';
 const SHARE_BODY =
@@ -41,6 +43,10 @@ function mailtoUrl() {
 
 function smsUrl() {
   return `sms:?body=${encodeURIComponent(`${SHARE_BODY} ${SHARE_URL_SMS}`)}`;
+}
+
+function whatsappUrl() {
+  return `https://wa.me/?text=${encodeURIComponent(`${SHARE_BODY} ${SHARE_URL_WHATSAPP}`)}`;
 }
 
 function isMobile() {
@@ -202,13 +208,6 @@ const ShareModal = () => {
       onClose={handleMinimize}
     >
       <div className="modal-options-list">
-        <ModalOption
-          icon={<span className="modal-option-icon-circle"><EmailIcon /></span>}
-          label={<FormattedMessage id="sharePopup.email" defaultMessage="Email" />}
-          sublabel={<FormattedMessage id="sharePopup.emailSublabel" defaultMessage="Share via email" />}
-          onClick={() => setEmailExpanded(true)}
-        />
-
         {isMobile() && (
           <ModalOption
             icon={<span className="modal-option-icon-circle"><SmsIcon /></span>}
@@ -218,6 +217,23 @@ const ShareModal = () => {
             onClick={handleMinimize}
           />
         )}
+
+        {isMobile() && (
+          <ModalOption
+            icon={<span className="modal-option-icon-circle"><WhatsAppIcon /></span>}
+            label={<FormattedMessage id="sharePopup.whatsapp" defaultMessage="WhatsApp" />}
+            sublabel={<FormattedMessage id="sharePopup.whatsappSublabel" defaultMessage="Share via WhatsApp" />}
+            href={whatsappUrl()}
+            onClick={handleMinimize}
+          />
+        )}
+
+        <ModalOption
+          icon={<span className="modal-option-icon-circle"><EmailIcon /></span>}
+          label={<FormattedMessage id="sharePopup.email" defaultMessage="Email" />}
+          sublabel={<FormattedMessage id="sharePopup.emailSublabel" defaultMessage="Share via email" />}
+          onClick={() => setEmailExpanded(true)}
+        />
 
         <ModalOption
           icon={

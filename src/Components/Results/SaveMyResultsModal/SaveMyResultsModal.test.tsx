@@ -73,9 +73,10 @@ describe('SaveMyResultsModal', () => {
       expect(screen.getByText('Copy a link to your results')).toBeInTheDocument();
     });
 
-    it('always shows SMS option', () => {
+    it('always shows SMS and WhatsApp options', () => {
       renderModal();
       expect(screen.getByText('SMS')).toBeInTheDocument();
+      expect(screen.getByText('WhatsApp')).toBeInTheDocument();
     });
 
     it('calls onClose when backdrop is clicked', () => {
@@ -186,7 +187,6 @@ describe('SaveMyResultsModal', () => {
   });
 
   describe('sms view', () => {
-
     it('navigates to SMS form when SMS is clicked', () => {
       renderModal();
       fireEvent.click(screen.getByText('SMS'));
@@ -258,6 +258,67 @@ describe('SaveMyResultsModal', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Please enter a 10 digit phone number')).toBeInTheDocument();
+      });
+      expect(postMessage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('whatsapp view', () => {
+    it('navigates to WhatsApp form when WhatsApp is clicked', () => {
+      renderModal();
+      fireEvent.click(screen.getByText('WhatsApp'));
+      expect(screen.getByText('Enter your phone number')).toBeInTheDocument();
+      expect(screen.getByText('WhatsApp Number')).toBeInTheDocument();
+    });
+
+    it('returns to options when back is clicked from WhatsApp view', () => {
+      renderModal();
+      fireEvent.click(screen.getByText('WhatsApp'));
+      fireEvent.click(screen.getByLabelText('Back'));
+      expect(screen.getByText('Choose how to save your results')).toBeInTheDocument();
+    });
+
+    it('submits international number and returns to options view on success', async () => {
+      (postMessage as jest.Mock).mockResolvedValue({});
+      renderModal();
+      fireEvent.click(screen.getByText('WhatsApp'));
+
+      // react-international-phone renders a plain input
+      const input = screen.getByRole('textbox');
+      fireEvent.change(input, { target: { value: '+14155552671' } });
+      fireEvent.click(screen.getByText('Send Results'));
+
+      await waitFor(() => {
+        expect(postMessage).toHaveBeenCalledWith({
+          screen: 'test-uuid',
+          whatsapp: '+14155552671',
+          type: 'whatsappScreen',
+        });
+        expect(screen.getByText('Choose how to save your results')).toBeInTheDocument();
+      });
+    });
+
+    it('shows inline error and stays on WhatsApp view when submit fails', async () => {
+      (postMessage as jest.Mock).mockRejectedValue(new Error('Network error'));
+      renderModal();
+      fireEvent.click(screen.getByText('WhatsApp'));
+
+      const input = screen.getByRole('textbox');
+      fireEvent.change(input, { target: { value: '+14155552671' } });
+      fireEvent.click(screen.getByText('Send Results'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Failed to send. Please try again.')).toBeInTheDocument();
+      });
+    });
+
+    it('shows validation error when phone is invalid', async () => {
+      renderModal();
+      fireEvent.click(screen.getByText('WhatsApp'));
+      fireEvent.click(screen.getByText('Send Results'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Please enter a valid international phone number')).toBeInTheDocument();
       });
       expect(postMessage).not.toHaveBeenCalled();
     });

@@ -4,14 +4,16 @@ import EmailIcon from '@mui/icons-material/Email';
 import SmsIcon from '@mui/icons-material/Sms';
 import LinkIcon from '@mui/icons-material/Link';
 import CheckIcon from '@mui/icons-material/Check';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { FormattedMessage } from 'react-intl';
 import ModalShell from '../shared/ModalShell';
 import ModalOption from '../shared/ModalOption';
 import '../shared/ModalShell.css';
-import SaveEmailForm from './SaveEmailForm';
-import SavePhoneForm from './SavePhoneForm';
+import SaveViaEmailForm from './SaveViaEmailForm';
+import SaveViaSMSForm from './SaveViaSMSForm';
+import SaveViaWhatsAppForm from './SaveViaWhatsAppForm';
 
-type SaveView = 'options' | 'email' | 'sms';
+type SaveView = 'options' | 'email' | 'sms' | 'whatsapp';
 
 type SaveMyResultsModalProps = {
   onClose: () => void;
@@ -23,6 +25,7 @@ const subtitles: Record<SaveView, React.ReactNode> = {
   options: <FormattedMessage id="saveMyResults.subtitle" defaultMessage="Choose how to save your results" />,
   email: <FormattedMessage id="saveMyResults.emailSubtitle" defaultMessage="Enter your email address" />,
   sms: <FormattedMessage id="saveMyResults.smsSubtitle" defaultMessage="Enter your phone number" />,
+  whatsapp: <FormattedMessage id="saveMyResults.whatsappSubtitle" defaultMessage="Enter your phone number" />,
 };
 
 const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
@@ -60,6 +63,13 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
           />
 
           <ModalOption
+            icon={<span className="modal-option-icon-circle"><WhatsAppIcon /></span>}
+            label={<FormattedMessage id="saveMyResults.whatsapp" defaultMessage="WhatsApp" />}
+            sublabel={<FormattedMessage id="saveMyResults.whatsappSublabel" defaultMessage="Send a link to your results via WhatsApp" />}
+            onClick={() => setView('whatsapp')}
+          />
+
+          <ModalOption
             icon={
               <span className="modal-option-icon-circle">
                 {copied ? <CheckIcon /> : <LinkIcon />}
@@ -77,11 +87,15 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
       )}
 
       {view === 'email' && (
-        <SaveEmailForm onSuccess={() => setView('options')} />
+        <SaveViaEmailForm onSuccess={() => setView('options')} />
       )}
 
       {view === 'sms' && (
-        <SavePhoneForm onSuccess={() => setView('options')} />
+        <SaveViaSMSForm onSuccess={() => setView('options')} />
+      )}
+
+      {view === 'whatsapp' && (
+        <SaveViaWhatsAppForm onSuccess={() => setView('options')} />
       )}
 
       <p className="save-my-results-privacy-note">
