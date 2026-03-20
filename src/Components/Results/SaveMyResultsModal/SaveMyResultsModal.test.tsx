@@ -73,16 +73,7 @@ describe('SaveMyResultsModal', () => {
       expect(screen.getByText('Copy a link to your results')).toBeInTheDocument();
     });
 
-    it('does not show SMS on desktop', () => {
-      renderModal();
-      expect(screen.queryByText('SMS')).not.toBeInTheDocument();
-    });
-
-    it('shows SMS on mobile', () => {
-      Object.defineProperty(navigator, 'userAgent', {
-        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14)',
-        configurable: true,
-      });
+    it('always shows SMS option', () => {
       renderModal();
       expect(screen.getByText('SMS')).toBeInTheDocument();
     });
@@ -195,12 +186,6 @@ describe('SaveMyResultsModal', () => {
   });
 
   describe('sms view', () => {
-    beforeEach(() => {
-      Object.defineProperty(navigator, 'userAgent', {
-        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14)',
-        configurable: true,
-      });
-    });
 
     it('navigates to SMS form when SMS is clicked', () => {
       renderModal();

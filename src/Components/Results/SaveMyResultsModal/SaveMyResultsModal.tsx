@@ -17,10 +17,6 @@ type SaveMyResultsModalProps = {
   onClose: () => void;
 };
 
-function isMobile() {
-  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
 const COPY_FEEDBACK_MS = 2000;
 
 const subtitles: Record<SaveView, React.ReactNode> = {
@@ -56,14 +52,12 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
             onClick={() => setView('email')}
           />
 
-          {isMobile() && (
-            <ModalOption
-              icon={<span className="modal-option-icon-circle"><SmsIcon style={{ fontSize: '1.25rem' }} /></span>}
-              label={<FormattedMessage id="saveMyResults.sms" defaultMessage="SMS" />}
-              sublabel={<FormattedMessage id="saveMyResults.smsSublabel" defaultMessage="Text a link to your results" />}
-              onClick={() => setView('sms')}
-            />
-          )}
+          <ModalOption
+            icon={<span className="modal-option-icon-circle"><SmsIcon style={{ fontSize: '1.25rem' }} /></span>}
+            label={<FormattedMessage id="saveMyResults.sms" defaultMessage="SMS" />}
+            sublabel={<FormattedMessage id="saveMyResults.smsSublabel" defaultMessage="Text a link to your results" />}
+            onClick={() => setView('sms')}
+          />
 
           <ModalOption
             icon={

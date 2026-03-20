@@ -14,31 +14,33 @@ import ModalOption from '../shared/ModalOption';
 import '../shared/ModalShell.css';
 import './ShareModal.css';
 
-const SHARE_URL = 'https://myfriendben.org';
+const SHARE_URL_EMAIL = 'https://screener.myfriendben.org?referrer=email';
+const SHARE_URL_SMS = 'https://screener.myfriendben.org?referrer=sms';
+const SHARE_URL_COPY = 'https://myfriendben.org';
 const SHARE_SUBJECT = 'Check out MyFriendBen';
 const SHARE_BODY =
-  "I just found out about programs I may be eligible for through MyFriendBen — it's a free, confidential tool that helps you discover benefits you qualify for. Check it out!";
+  "I just found out about programs I may be eligible for through MyFriendBen — it's a free, confidential screener that helps you discover benefits you qualify for. Check it out!";
 
 const COPY_FEEDBACK_MS = 2000;
 
 function gmailUrl() {
-  return `https://mail.google.com/mail/?view=cm&to=&su=${encodeURIComponent(SHARE_SUBJECT)}&body=${encodeURIComponent(`${SHARE_BODY}\n\n${SHARE_URL}`)}`;
+  return `https://mail.google.com/mail/?view=cm&to=&su=${encodeURIComponent(SHARE_SUBJECT)}&body=${encodeURIComponent(`${SHARE_BODY}\n\n${SHARE_URL_EMAIL}`)}`;
 }
 
 function outlookUrl() {
-  return `https://outlook.live.com/owa/?path=/mail/action/compose&subject=${encodeURIComponent(SHARE_SUBJECT)}&body=${encodeURIComponent(`${SHARE_BODY}\n\n${SHARE_URL}`)}`;
+  return `https://outlook.live.com/owa/?path=/mail/action/compose&subject=${encodeURIComponent(SHARE_SUBJECT)}&body=${encodeURIComponent(`${SHARE_BODY}\n\n${SHARE_URL_EMAIL}`)}`;
 }
 
 function yahooUrl() {
-  return `https://compose.mail.yahoo.com/?to=&subject=${encodeURIComponent(SHARE_SUBJECT)}&body=${encodeURIComponent(`${SHARE_BODY}\n\n${SHARE_URL}`)}`;
+  return `https://compose.mail.yahoo.com/?to=&subject=${encodeURIComponent(SHARE_SUBJECT)}&body=${encodeURIComponent(`${SHARE_BODY}\n\n${SHARE_URL_EMAIL}`)}`;
 }
 
 function mailtoUrl() {
-  return `mailto:?subject=${encodeURIComponent(SHARE_SUBJECT)}&body=${encodeURIComponent(`${SHARE_BODY}\n\n${SHARE_URL}`)}`;
+  return `mailto:?subject=${encodeURIComponent(SHARE_SUBJECT)}&body=${encodeURIComponent(`${SHARE_BODY}\n\n${SHARE_URL_EMAIL}`)}`;
 }
 
 function smsUrl() {
-  return `sms:?body=${encodeURIComponent(`${SHARE_BODY} ${SHARE_URL}`)}`;
+  return `sms:?body=${encodeURIComponent(`${SHARE_BODY} ${SHARE_URL_SMS}`)}`;
 }
 
 function isMobile() {
@@ -120,7 +122,7 @@ const ShareModal = () => {
   }, []);
 
   const handleCopyLink = useCallback(() => {
-    navigator.clipboard.writeText(SHARE_URL).catch(() => {});
+    navigator.clipboard.writeText(SHARE_URL_COPY).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
   }, []);
