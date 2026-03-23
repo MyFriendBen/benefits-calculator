@@ -20,7 +20,9 @@ const SHARE_URL_SMS = 'https://screener.myfriendben.org/share/sms';
 const SHARE_URL_WHATSAPP = 'https://screener.myfriendben.org/share/whatsapp';
 const SHARE_URL_COPY = 'https://screener.myfriendben.org';
 
-const IS_MOBILE = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+function isMobile() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
 
 function buildGmailUrl(subject: string, body: string) {
   return `https://mail.google.com/mail/?view=cm&to=&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -216,7 +218,7 @@ const ShareModal = () => {
       onClose={handleMinimize}
     >
       <div className="modal-options-list">
-        {IS_MOBILE && (
+        {isMobile() && (
           <>
             <ModalOption
               icon={<span className="modal-option-icon-circle"><SmsIcon /></span>}
