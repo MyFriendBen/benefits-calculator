@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import IosShareIcon from '@mui/icons-material/IosShare';
 import EmailIcon from '@mui/icons-material/Email';
@@ -48,7 +47,7 @@ const ShareModal = () => {
 
   const [isVisible, setIsVisible] = useState(false);
   const [isMinimized, setIsMinimized] = useState(true);
-  const [isDismissed, setIsDismissed] = useState(() => sessionStorage.getItem('share-popup-dismissed') === 'true');
+  const [isDismissed, setIsDismissed] = useState(false);
   const [view, setView] = useState<ShareView>('options');
 
   useEffect(() => {
@@ -149,18 +148,25 @@ const ShareModal = () => {
         onClick={handleRestore}
         aria-label="Open share options"
       >
-        <IconButton
+        <span
+          role="button"
+          tabIndex={0}
           aria-label="Close share popup"
-          size="small"
           className="share-modal-chip-close"
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
-            sessionStorage.setItem('share-popup-dismissed', 'true');
             setIsDismissed(true);
+          }}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDismissed(true);
+            }
           }}
         >
           <CloseIcon fontSize="inherit" />
-        </IconButton>
+        </span>
         <span className="share-modal-chip-icon" aria-hidden="true">
           <IosShareIcon style={{ fontSize: '1rem' }} />
         </span>
