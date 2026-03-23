@@ -36,6 +36,7 @@
 }
 
 .save-icon {
+  display: block;
   margin-left: 0.25rem;
   font-size: 1.1rem !important;
 }
@@ -47,6 +48,7 @@
 .btn-icon-text-container {
   display: flex;
   align-items: center;
+  line-height: 1;
 }
 
 .padding-right {

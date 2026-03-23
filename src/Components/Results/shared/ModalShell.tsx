@@ -15,23 +15,21 @@ type ModalShellProps = {
 };
 
 const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: ModalShellProps) => {
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
 
   useEffect(() => {
-    dialogRef.current?.focus();
+    closeButtonRef.current?.focus();
   }, []);
 
   return (
     <>
       <div className="modal-shell-backdrop" onClick={onClose} aria-hidden="true" />
       <div
-        ref={dialogRef}
         className="modal-shell-card"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        tabIndex={-1}
       >
         {onBack && (
           <IconButton
@@ -45,6 +43,7 @@ const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: 
         )}
 
         <IconButton
+          ref={closeButtonRef}
           aria-label="Close dialog"
           size="small"
           className="modal-shell-close-btn"
