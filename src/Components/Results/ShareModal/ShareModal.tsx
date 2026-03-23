@@ -48,7 +48,7 @@ const ShareModal = () => {
 
   const [isVisible, setIsVisible] = useState(false);
   const [isMinimized, setIsMinimized] = useState(true);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(() => sessionStorage.getItem('share-popup-dismissed') === 'true');
   const [view, setView] = useState<ShareView>('options');
 
   useEffect(() => {
@@ -155,6 +155,7 @@ const ShareModal = () => {
           className="share-modal-chip-close"
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
+            sessionStorage.setItem('share-popup-dismissed', 'true');
             setIsDismissed(true);
           }}
         >

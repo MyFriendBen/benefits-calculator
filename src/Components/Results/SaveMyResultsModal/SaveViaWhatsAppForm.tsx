@@ -61,7 +61,7 @@ const SaveViaWhatsAppForm = ({ onSuccess }: SaveViaWhatsAppFormProps) => {
         <PhoneInput
           value={phoneValue}
           onChange={(value) => {
-            setValue('phone', value, { shouldValidate: false });
+            setValue('phone', value, { shouldValidate: errors.phone !== undefined });
             clearApiError();
           }}
           defaultCountry="us"

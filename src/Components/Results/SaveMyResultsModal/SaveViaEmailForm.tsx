@@ -27,8 +27,8 @@ const SaveViaEmailForm = ({ onSuccess }: SaveViaEmailFormProps) => {
           }),
         }),
       })
-      .email()
-      .trim(),
+      .trim()
+      .email(),
   });
 
   const {
