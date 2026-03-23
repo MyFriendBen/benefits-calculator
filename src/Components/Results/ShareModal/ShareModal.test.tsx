@@ -102,14 +102,16 @@ describe('ShareModal', () => {
     expect(screen.getByText('Copied!')).toBeInTheDocument();
   });
 
-  it('resets "Copied!" back to "Copy Link" after 2 seconds', () => {
+  it('resets "Copied!" back to "Copy Link" after 2 seconds', async () => {
     Object.assign(navigator, {
       clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
     });
     renderModal();
     advanceToVisible();
     fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
-    fireEvent.click(screen.getByText('Copy Link'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Copy Link'));
+    });
     act(() => {
       jest.advanceTimersByTime(2000);
     });
