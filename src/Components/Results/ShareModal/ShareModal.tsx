@@ -134,7 +134,6 @@ const ShareModal = () => {
         ),
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [shareSubject, emailBody],
   );
 
