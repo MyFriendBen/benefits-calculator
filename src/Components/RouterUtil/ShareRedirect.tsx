@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 const SHARE_BASE = 'https://screener.myfriendben.org?referrer=friend&utm_source=friend&utm_campaign=screener_share';
@@ -12,7 +13,9 @@ const ShareRedirect = () => {
   const { medium } = useParams<{ medium: string }>();
   const url = (medium && SHARE_URLS[medium]) ?? SHARE_BASE;
 
-  window.location.replace(url);
+  useEffect(() => {
+    window.location.replace(url);
+  }, [url]);
 
   return null;
 };

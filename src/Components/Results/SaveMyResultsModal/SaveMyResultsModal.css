@@ -63,7 +63,6 @@
   width: 100%;
   border: 1px solid #c0c0c0;
   border-radius: 4px;
-  overflow: hidden;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 

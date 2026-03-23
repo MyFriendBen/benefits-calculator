@@ -1,4 +1,4 @@
-import { ReactNode, useRef, useEffect } from 'react';
+import { ReactNode, useRef, useEffect, useId } from 'react';
 import { IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -16,6 +16,7 @@ type ModalShellProps = {
 
 const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: ModalShellProps) => {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     dialogRef.current?.focus();
@@ -29,7 +30,7 @@ const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: 
         className="modal-shell-card"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="modal-shell-title"
+        aria-labelledby={titleId}
         tabIndex={-1}
       >
         {onBack && (
@@ -56,7 +57,7 @@ const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: 
           {headerIcon}
         </div>
 
-        <Typography variant="h6" component="h2" id="modal-shell-title" className="modal-shell-title">
+        <Typography variant="h6" component="h2" id={titleId} className="modal-shell-title">
           {title}
         </Typography>
 
