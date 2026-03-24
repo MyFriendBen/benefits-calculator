@@ -48,8 +48,8 @@ describe('ModalShell', () => {
 
   it('calls onClose when backdrop is clicked', () => {
     const onClose = jest.fn();
-    const { container } = renderShell({ onClose });
-    const backdrop = container.querySelector('.modal-shell-backdrop');
+    renderShell({ onClose });
+    const backdrop = document.querySelector('.modal-shell-backdrop');
     expect(backdrop).toBeInTheDocument();
     fireEvent.click(backdrop!);
     expect(onClose).toHaveBeenCalledTimes(1);

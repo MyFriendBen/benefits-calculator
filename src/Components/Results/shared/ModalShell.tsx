@@ -26,6 +26,8 @@ const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: 
     >
       <div
         className="modal-shell-card"
+        role="dialog"
+        aria-modal="true"
         aria-labelledby={titleId}
       >
         {onBack && (

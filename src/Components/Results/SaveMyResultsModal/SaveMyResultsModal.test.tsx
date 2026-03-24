@@ -90,8 +90,8 @@ describe('SaveMyResultsModal', () => {
 
     it('calls onClose when backdrop is clicked', () => {
       const onClose = jest.fn();
-      const { container } = renderModal(onClose);
-      fireEvent.click(container.querySelector('.modal-shell-backdrop')!);
+      renderModal(onClose);
+      fireEvent.click(document.querySelector('.modal-shell-backdrop')!);
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
