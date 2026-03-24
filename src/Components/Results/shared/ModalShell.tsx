@@ -1,5 +1,5 @@
-import { ReactNode, useRef, useEffect, useId } from 'react';
-import { IconButton, Typography } from '@mui/material';
+import { ReactNode, useRef, useId } from 'react';
+import { IconButton, Modal, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import './ModalShell.css';
@@ -18,17 +18,14 @@ const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: 
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
 
-  useEffect(() => {
-    closeButtonRef.current?.focus();
-  }, []);
-
   return (
-    <>
-      <div className="modal-shell-backdrop" onClick={onClose} aria-hidden="true" />
+    <Modal
+      open
+      onClose={onClose}
+      BackdropProps={{ className: 'modal-shell-backdrop' }}
+    >
       <div
         className="modal-shell-card"
-        role="dialog"
-        aria-modal="true"
         aria-labelledby={titleId}
       >
         {onBack && (
@@ -68,7 +65,7 @@ const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: 
 
         {children}
       </div>
-    </>
+    </Modal>
   );
 };
 

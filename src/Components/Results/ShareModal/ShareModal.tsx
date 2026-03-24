@@ -141,43 +141,34 @@ const ShareModal = () => {
 
   if (isMinimized) {
     return (
-      <button
-        type="button"
-        className="share-modal-chip"
-        onClick={handleRestore}
-        aria-label="Open share options"
-      >
-        <span
-          role="button"
-          tabIndex={0}
+      <div className="share-modal-chip-container">
+        <button
+          type="button"
           aria-label="Close share popup"
           className="share-modal-chip-close"
-          onClick={(e: React.MouseEvent) => {
-            e.stopPropagation();
-            setIsDismissed(true);
-          }}
-          onKeyDown={(e: React.KeyboardEvent) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsDismissed(true);
-            }
-          }}
+          onClick={() => setIsDismissed(true)}
         >
           <CloseIcon fontSize="inherit" />
-        </span>
-        <span className="share-modal-chip-icon" aria-hidden="true">
-          <IosShareIcon style={{ fontSize: '1rem' }} />
-        </span>
-        <span className="share-modal-chip-text">
-          <span className="share-modal-chip-title">
-            <FormattedMessage id="sharePopup.minimized" defaultMessage="Share MyFriendBen" />
+        </button>
+        <button
+          type="button"
+          className="share-modal-chip"
+          onClick={handleRestore}
+          aria-label="Open share options"
+        >
+          <span className="share-modal-chip-icon" aria-hidden="true">
+            <IosShareIcon style={{ fontSize: '1rem' }} />
           </span>
-          <span className="share-modal-chip-subtitle">
-            <FormattedMessage id="sharePopup.minimizedSubtitle" defaultMessage="Help a friend discover benefits" />
+          <span className="share-modal-chip-text">
+            <span className="share-modal-chip-title">
+              <FormattedMessage id="sharePopup.minimized" defaultMessage="Share MyFriendBen" />
+            </span>
+            <span className="share-modal-chip-subtitle">
+              <FormattedMessage id="sharePopup.minimizedSubtitle" defaultMessage="Help a friend discover benefits" />
+            </span>
           </span>
-        </span>
-      </button>
+        </button>
+      </div>
     );
   }
 

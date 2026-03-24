@@ -6,11 +6,14 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.share-modal-chip {
+.share-modal-chip-container {
   position: fixed;
   bottom: 1rem;
   right: 1rem;
   z-index: 1299;
+}
+
+.share-modal-chip {
   display: flex;
   align-items: center;
   gap: 0.625rem;
