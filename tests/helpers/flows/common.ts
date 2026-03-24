@@ -16,9 +16,9 @@ import {
   selectIncomeType,
   selectFrequency,
 } from '../form';
-import { FORM_INPUTS, BUTTONS, DROPDOWN } from '../selectors';
+import { FORM_INPUTS, BUTTONS, DROPDOWN, BASIC_INFO_PAGE } from '../selectors';
 import { URL_PATTERNS } from '../utils/constants';
-import { FlowResult, PrimaryUserInfo, HouseholdMemberInfo, ExpenseInfo } from './types';
+import { FlowResult, PrimaryUserInfo, HouseholdMemberInfo, ExpenseInfo, BasicInfoMember } from './types';
 
 /**
  * Completes the state selection step
@@ -124,18 +124,68 @@ export async function completeHouseholdSize(page: Page, householdSize: string): 
 }
 
 /**
+ * Completes the basic info page (step-5/0) for multi-member households.
+ * Fills birth month/year for all members and relationship for non-primary members.
+ * @param page - Playwright page instance
+ * @param members - Array of basic info for each household member (index 0 = primary)
+ * @returns Promise with flow result
+ */
+export async function completeBasicInfoPage(page: Page, members: BasicInfoMember[]): Promise<FlowResult> {
+  try {
+    await verifyCurrentUrl(page, URL_PATTERNS.HOUSEHOLD_MEMBER);
+
+    for (let i = 0; i < members.length; i++) {
+      const member = members[i];
+
+      // Select birth month via the indexed MUI Select
+      const birthMonthSelect = page.locator(BASIC_INFO_PAGE.birthMonthSelect(i));
+      await expect(birthMonthSelect).toBeVisible();
+      await birthMonthSelect.click();
+      await page.getByRole('option', { name: member.birthMonth, exact: true }).click();
+
+      // Fill birth year via the indexed text input
+      const birthYearInput = page.locator(BASIC_INFO_PAGE.birthYearInput(i));
+      await expect(birthYearInput).toBeVisible();
+      await birthYearInput.fill(member.birthYear);
+
+      // Select relationship for non-primary members
+      if (i > 0 && member.relationship) {
+        const relationshipSelect = page.locator(BASIC_INFO_PAGE.relationshipSelect(i));
+        await expect(relationshipSelect).toBeVisible();
+        await relationshipSelect.click();
+        await page.getByRole('option', { name: member.relationship, exact: true }).click();
+      }
+    }
+
+    await clickContinue(page);
+    return { success: true, step: 'basic-info-page' };
+  } catch (error) {
+    return {
+      success: false,
+      step: 'basic-info-page',
+      error: error as Error,
+    };
+  }
+}
+
+/**
  * Completes primary user information
  * @param page - Playwright page instance
  * @param userInfo - Primary user information
  * @returns Promise with flow result
  */
-export async function completePrimaryUserInfo(page: Page, userInfo: PrimaryUserInfo): Promise<FlowResult> {
+export async function completePrimaryUserInfo(
+  page: Page,
+  userInfo: PrimaryUserInfo,
+  skipBasicInfo = false,
+): Promise<FlowResult> {
   try {
     await verifyCurrentUrl(page, URL_PATTERNS.HOUSEHOLD_MEMBER);
 
-    // Enter birth date
-    // Assuming selectDate handles its own internal waits.
-    await selectDate(page, userInfo.birthMonth, userInfo.birthYear);
+    // Enter birth date — skipped when basic info was already collected on step-5/0
+    if (!skipBasicInfo) {
+      await selectDate(page, userInfo.birthMonth, userInfo.birthYear);
+    }
 
     // Handle health insurance
     const healthInsuranceButtonLocator = page.getByRole('button', { name: "I don't have or know if I" });
@@ -182,15 +232,19 @@ export async function completePrimaryUserInfo(page: Page, userInfo: PrimaryUserI
  * @param memberInfo - Household member information
  * @returns Promise with flow result
  */
-export async function completeHouseholdMemberInfo(page: Page, memberInfo: HouseholdMemberInfo): Promise<FlowResult> {
+export async function completeHouseholdMemberInfo(
+  page: Page,
+  memberInfo: HouseholdMemberInfo,
+  skipBasicInfo = false,
+): Promise<FlowResult> {
   try {
     await verifyCurrentUrl(page, URL_PATTERNS.HOUSEHOLD_MEMBER);
 
-    // Enter birth date
-    await selectDate(page, memberInfo.birthMonth, memberInfo.birthYear);
-
-    // Select relationship - use exact matching to avoid ambiguity with similar options
-    await selectDropdownOption(page, FORM_INPUTS.RELATIONSHIP_SELECT, memberInfo.relationship, true);
+    // Enter birth date and relationship — skipped when basic info was already collected on step-5/0
+    if (!skipBasicInfo) {
+      await selectDate(page, memberInfo.birthMonth, memberInfo.birthYear);
+      await selectDropdownOption(page, FORM_INPUTS.RELATIONSHIP_SELECT, memberInfo.relationship, true);
+    }
 
     // Handle health insurance
     await page.getByRole('button', { name: "They don't have or know if" }).click();
