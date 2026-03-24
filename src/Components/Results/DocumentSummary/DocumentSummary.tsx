@@ -1,5 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import { Program, ProgramDocument } from '../../../Types/Results';
 import ResultsTranslate from '../Translate/Translate';
 import './DocumentSummary.css';
@@ -31,12 +33,18 @@ type DocumentSummaryProps = {
   programs: Program[];
 };
 
+const COLLAPSED_ITEM_COUNT = 3;
+
 const DocumentSummary = ({ programs }: DocumentSummaryProps) => {
   const documentsWithCounts = useMemo(() => getUniqueDocumentsWithCounts(programs), [programs]);
+  const [expanded, setExpanded] = useState(false);
 
   if (documentsWithCounts.length === 0) {
     return null;
   }
+
+  const canExpand = documentsWithCounts.length > COLLAPSED_ITEM_COUNT;
+  const visibleDocuments = canExpand && !expanded ? documentsWithCounts.slice(0, COLLAPSED_ITEM_COUNT) : documentsWithCounts;
 
   return (
     <div className="document-summary-container">
@@ -47,7 +55,7 @@ const DocumentSummary = ({ programs }: DocumentSummaryProps) => {
         />
       </p>
       <ul className="document-summary-list">
-        {documentsWithCounts.map(({ document, programCount }, index) => (
+        {visibleDocuments.map(({ document, programCount }, index) => (
           <li key={document.text.label} className="document-summary-item">
             <ResultsTranslate translation={document.text} />
             <span className="document-summary-program-count">
@@ -68,6 +76,21 @@ const DocumentSummary = ({ programs }: DocumentSummaryProps) => {
           </li>
         ))}
       </ul>
+      {canExpand && (
+        <button className="document-summary-toggle" onClick={() => setExpanded((prev) => !prev)}>
+          {expanded ? (
+            <>
+              <VisibilityOffOutlinedIcon fontSize="small" />
+              <FormattedMessage id="results.document-summary.show-less" defaultMessage="Show less" />
+            </>
+          ) : (
+            <>
+              <VisibilityOutlinedIcon fontSize="small" />
+              <FormattedMessage id="results.document-summary.show-more" defaultMessage="Show more" />
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 };

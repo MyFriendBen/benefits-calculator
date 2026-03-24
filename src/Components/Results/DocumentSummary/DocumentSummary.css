@@ -29,3 +29,22 @@
   font-size: 0.875rem;
   margin-left: 0.35rem;
 }
+
+.document-summary-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 0.5rem;
+  color: var(--secondary-color);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.document-summary-toggle svg {
+  margin-top: 0.15rem;
+}
