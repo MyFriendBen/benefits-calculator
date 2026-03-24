@@ -48,12 +48,12 @@ const DocumentSummary = ({ programs }: DocumentSummaryProps) => {
 
   return (
     <div className="document-summary-container">
-      <p className="document-summary-header">
+      <h4 className="document-summary-header">
         <FormattedMessage
           id="results.document-summary.header"
           defaultMessage="In order to apply for the programs you might be eligible for, you will need the below documents:"
         />
-      </p>
+      </h4>
       <ul className="document-summary-list">
         {visibleDocuments.map(({ document, programCount }, index) => (
           <li key={document.text.label} className="document-summary-item">
@@ -77,7 +77,7 @@ const DocumentSummary = ({ programs }: DocumentSummaryProps) => {
         ))}
       </ul>
       {canExpand && (
-        <button className="document-summary-toggle" onClick={() => setExpanded((prev) => !prev)}>
+        <button className="document-summary-toggle" onClick={() => setExpanded((prev) => !prev)} aria-expanded={expanded}>
           {expanded ? (
             <>
               <VisibilityOffOutlinedIcon fontSize="small" />
