@@ -15,7 +15,7 @@
 }
 
 /* Backdrop overlay */
-.results-popup-backdrop {
+.notification-popup-backdrop {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
@@ -24,7 +24,7 @@
 }
 
 /* Full popup container */
-.results-popup-container {
+.notification-popup-container {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -37,20 +37,20 @@
 }
 
 /* Shared Alert styles */
-.results-popup-container .MuiAlert-root,
-.results-popup-minimized .MuiAlert-root {
+.notification-popup-container .MuiAlert-root,
+.notification-popup-minimized .MuiAlert-root {
   background-color: white;
   border: 2px solid var(--secondary-color);
   position: relative;
 }
 
 /* Full popup Alert */
-.results-popup-container .MuiAlert-root {
+.notification-popup-container .MuiAlert-root {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   padding: 1.75rem 1rem 1rem;
 }
 
-.results-popup-container .MuiAlert-message {
+.notification-popup-container .MuiAlert-message {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -60,14 +60,14 @@
   margin: 0;
 }
 
-.results-popup-text {
+.notification-popup-text {
   font-family: "Open Sans", sans-serif;
   line-height: 1.5;
   text-align: center;
 }
 
 /* Button styles */
-.results-popup-container .results-popup-button {
+.notification-popup-container .notification-popup-button {
   display: inline-block;
   color: white;
   font-size: 0.8rem;
@@ -84,21 +84,21 @@
   cursor: pointer;
 }
 
-.results-popup-container .results-popup-button:hover {
+.notification-popup-container .notification-popup-button:hover {
   background-color: white;
   color: var(--secondary-color);
   border-color: var(--secondary-color);
 }
 
 @media (min-width: 768px) {
-  .results-popup-button {
+  .notification-popup-button {
     padding: 0.5rem 1.5rem;
   }
 }
 
 /* Close button - full popup */
-.results-popup-container .results-popup-close-button,
-.results-popup-container .results-popup-close-button.MuiIconButton-root {
+.notification-popup-container .notification-popup-close-button,
+.notification-popup-container .notification-popup-close-button.MuiIconButton-root {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
@@ -106,7 +106,7 @@
 }
 
 /* Minimized popup */
-.results-popup-minimized {
+.notification-popup-minimized {
   position: fixed;
   bottom: 1rem;
   right: 1rem;
@@ -117,30 +117,30 @@
   animation: slideInFromBottomRight 0.3s ease-out;
 }
 
-.results-popup-minimized:hover {
+.notification-popup-minimized:hover {
   transform: scale(1.05);
 }
 
-.results-popup-minimized .MuiAlert-root {
+.notification-popup-minimized .MuiAlert-root {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   padding: 0.75rem 1rem;
   cursor: pointer;
   margin: 0;
 }
 
-.results-popup-minimized .MuiAlert-action {
+.notification-popup-minimized .MuiAlert-action {
   padding-left: 4px;
   margin-left: 0;
 }
 
-.results-popup-minimized .MuiTypography-root {
+.notification-popup-minimized .MuiTypography-root {
   font-weight: bold;
   font-size: 0.85rem;
 }
 
 /* Close button - minimized */
-.results-popup-minimized .results-popup-minimized-close-button,
-.results-popup-minimized .results-popup-minimized-close-button.MuiIconButton-root {
+.notification-popup-minimized .notification-popup-minimized-close-button,
+.notification-popup-minimized .notification-popup-minimized-close-button.MuiIconButton-root {
   position: relative;
   z-index: 10;
   padding: 4px;
@@ -148,7 +148,7 @@
   margin-right: -4px;
 }
 
-.results-popup-minimized .results-popup-minimized-close-button:hover,
-.results-popup-minimized .results-popup-minimized-close-button.MuiIconButton-root:hover {
+.notification-popup-minimized .notification-popup-minimized-close-button:hover,
+.notification-popup-minimized .notification-popup-minimized-close-button.MuiIconButton-root:hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
