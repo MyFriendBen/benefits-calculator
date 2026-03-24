@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import SessionInitializer from './SessionInitializer';
 import SessionRestoration from './SessionRestoration';
 import RedirectToWhiteLabel from './RedirectToWhiteLabel';
+import ShareRedirect from './ShareRedirect';
 
 /**
  * Paths that should redirect to white-labeled versions during initialization.
@@ -41,6 +42,9 @@ const buildInitializationRouteElements = (): ReactElement[] => {
   routes.push(
     <Route key="wl-current-benefits" path=":whiteLabel/current-benefits" element={<SessionInitializer />} />
   );
+
+  // Share redirect: must come before :uuid catch-alls to avoid being swallowed
+  routes.push(<Route key="share" path="share/:medium" element={<ShareRedirect />} />);
 
   // UUID routes: Restore session data from API
   routes.push(

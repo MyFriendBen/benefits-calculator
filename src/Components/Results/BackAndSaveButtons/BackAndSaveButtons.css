@@ -36,18 +36,19 @@
 }
 
 .save-icon {
-  margin-left: 0.5rem;
-  height: 1.8rem;
-  width: 1.8rem;
+  display: block;
+  margin-left: 0.25rem;
+  font-size: 1.1rem !important;
 }
 
 .results-back-save-buttons:hover .save-icon {
-  fill: var(--secondary-color);
+  color: var(--secondary-color);
 }
 
 .btn-icon-text-container {
   display: flex;
   align-items: center;
+  line-height: 1;
 }
 
 .padding-right {
@@ -66,8 +67,7 @@
   }
 
   .save-icon {
-    height: 2rem;
-    width: 2rem;
+    font-size: 1.1rem !important;
   }
 
   .btn-icon-text-container {
