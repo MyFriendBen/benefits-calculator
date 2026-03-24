@@ -1,5 +1,5 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
 import { useContext } from 'react';
 import { HouseholdData } from '../../../../Types/FormData';
@@ -15,7 +15,7 @@ import useScreenApi from '../../../../Assets/updateScreen';
 import '../styles/IncomeSection.css';
 import { useShouldRedirectToConfirmation } from '../../../QuestionComponents/questionHooks';
 import useStepForm from '../../stepForm';
-import { WorkflowType } from '../utils/types';
+import { WorkflowType, LocationState } from '../utils/types';
 import { calculateAge, createHouseholdMemberData, scrollToFirstError } from '../utils/helpers';
 import { useHouseholdMembersNavigation } from '../hooks/useHouseholdMembersNavigation';
 import { useHouseholdMemberConfig } from '../hooks/useHouseholdMemberConfig';
@@ -36,9 +36,16 @@ const HouseholdMemberForm = () => {
   // CONTEXT & ROUTING
   const { formData } = useContext(Context);
   const { uuid, page, whiteLabel } = useParams<{ uuid: string; page: string; whiteLabel: string }>();
+  const location = useLocation();
   const { updateScreen } = useScreenApi();
   const intl = useIntl();
   const pageNumber = Number(page);
+  const locationState = location.state as LocationState | null;
+  const isEditing = !!locationState?.isEditing || !!locationState?.routedFromConfirmationPg;
+  const basicInfoCollected = !!locationState?.basicInfoCollected;
+  // Show BasicInfoSection when householdSize === 1 and they came directly from step 4 (skipping page 0),
+  // or when editing a member. basicInfoCollected means they went through page 0 already.
+  const showBasicInfoSection = (formData.householdSize === 1 && !basicInfoCollected) || isEditing;
 
   // CURRENT MEMBER DATA
   const currentMemberIndex = pageNumber - 1;
@@ -65,7 +72,6 @@ const HouseholdMemberForm = () => {
     whiteLabel,
     currentStepId,
     pageNumber,
-    householdSize: formData.householdSize,
     redirectToConfirmationPage: redirectToConfirmationPage ?? false,
   });
 
@@ -176,7 +182,7 @@ const HouseholdMemberForm = () => {
         <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
       </h2>
       <p className="question-sub-label">
-        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="Click any completed member to edit" />
+        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="You may edit or delete completed members below." />
       </p>
       <Box className="summary-cards-container">
         <HouseholdMemberSummaryCards questionName={questionName} />
@@ -216,12 +222,14 @@ const HouseholdMemberForm = () => {
 
   const renderFormSections = () => (
     <>
-      <BasicInfoSection
-        control={control as any}
-        errors={errors}
-        isFirstMember={pageNumber === 1}
-        relationshipOptions={relationshipOptions}
-      />
+      {showBasicInfoSection && (
+        <BasicInfoSection
+          control={control as any}
+          errors={errors}
+          isFirstMember={pageNumber === 1}
+          relationshipOptions={relationshipOptions}
+        />
+      )}
 
       {!isEnergyCalculator && (
         <HealthInsuranceSection
@@ -268,7 +276,7 @@ const HouseholdMemberForm = () => {
     </>
   );
 
-  // Show summary cards only when there are multiple members
+  // Show summary cards only when on member 2+
   const showSummaryCards = pageNumber > 1;
 
   return (
@@ -277,10 +285,7 @@ const HouseholdMemberForm = () => {
 
       {renderHeader()}
 
-      <form
-        key={`household-member-${pageNumber}`}
-        onSubmit={handleSubmit(formSubmitHandler, handleFormError)}
-      >
+      <form onSubmit={handleSubmit(formSubmitHandler, handleFormError)}>
         {renderFormSections()}
         <PrevAndContinueButtons backNavigationFunction={navigateBack} />
       </form>
