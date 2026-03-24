@@ -1,0 +1,50 @@
+.document-summary-container {
+  border: 2px solid var(--primary-color);
+  border-radius: 0.25rem;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.document-summary-header {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #000;
+  margin: 0 0 0.5rem 0;
+}
+
+.document-summary-list {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.document-summary-item {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.document-summary-program-count {
+  color: #666;
+  font-size: 0.85rem;
+  margin-left: 0.35rem;
+}
+
+.document-summary-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 0.5rem;
+  color: var(--secondary-color);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.document-summary-toggle svg {
+  margin-top: 0.15rem;
+}
