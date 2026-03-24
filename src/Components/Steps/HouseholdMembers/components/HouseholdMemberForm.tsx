@@ -280,7 +280,7 @@ const HouseholdMemberForm = () => {
   const showSummaryCards = pageNumber > 1;
 
   return (
-    <main className="benefits-form" key={pageNumber}>
+    <main className="benefits-form">
       {showSummaryCards && renderSummaryCards()}
 
       {renderHeader()}

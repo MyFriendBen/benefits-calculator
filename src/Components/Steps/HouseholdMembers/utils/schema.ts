@@ -194,10 +194,10 @@ export const createBasicInfoPageSchema = (intl: IntlShape) => {
         .number()
         .min(1, { message: renderMissingBirthMonthHelperText(intl) })
         .max(12, { message: renderMissingBirthMonthHelperText(intl) }),
-      birthYear: z.coerce
+      birthYear: z.union([z.literal(''), z.coerce
         .number()
         .min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
-        .max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
+        .max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) })]),
       relationshipToHH: z.string().min(1, { message: renderRelationshipToHHHelperText(intl) }),
     })
     .refine(

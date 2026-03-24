@@ -3,12 +3,7 @@ import { calculateAgeStatus } from '../../../AgeCalculation/AgeCalculation';
 import { EMPTY_INCOME_STREAM } from './constants';
 import { getDefaultFormItems } from './helpers';
 
-/**
- * Sentinel value for an unset birth year field.
- * The form models birthYear as number but the input starts empty.
- * Using '' renders the field blank; the cast satisfies the TS type.
- */
-export const UNSET_BIRTH_YEAR = '' as unknown as number;
+export const UNSET_BIRTH_YEAR: number | '' = '';
 
 /**
  * Default health insurance object
