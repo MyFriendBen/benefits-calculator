@@ -225,7 +225,7 @@ describe('SaveMyResultsModal', () => {
       await waitFor(() => {
         expect(postMessage).toHaveBeenCalledWith({
           screen: 'test-uuid',
-          phone: '3031234567',
+          phone: '+13031234567',
           type: 'textScreen',
         });
         expect(screen.getByText('Results Sent')).toBeInTheDocument();
