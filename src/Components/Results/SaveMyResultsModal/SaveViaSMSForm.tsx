@@ -40,7 +40,7 @@ const SaveViaSMSForm = ({ onSuccess }: SaveViaSMSFormProps) => {
   });
 
   const { apiError, isSubmitting, clearApiError, onSubmit } = useSaveResultsSubmit<z.infer<typeof schema>>({
-    buildPayload: (data) => ({ phone: data.phone, type: 'textScreen' }),
+    buildPayload: (data) => ({ phone: '+1' + data.phone, type: 'textScreen' }),
     onSuccess,
   });
 
