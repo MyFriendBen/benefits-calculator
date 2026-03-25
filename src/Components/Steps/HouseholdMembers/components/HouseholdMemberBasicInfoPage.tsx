@@ -89,7 +89,7 @@ const HouseholdMemberBasicInfoPage = () => {
       createDefaultMember(index, {
         ...formData.householdData[index],
         birthMonth: member.birthMonth,
-        birthYear: member.birthYear === '' ? 0 : member.birthYear,
+        birthYear: member.birthYear,
         relationshipToHH: member.relationshipToHH,
       }),
     );

@@ -182,8 +182,8 @@ const getHouseholdMemberBody = (householdMemberData: HouseholdData): ApiHousehol
   return {
     frontend_id: householdMemberData.frontendId,
     age: householdMemberData.age ?? null,
-    birth_year: householdMemberData.birthYear ?? null,
-    birth_month: householdMemberData.birthMonth ?? null,
+    birth_year: householdMemberData.birthYear || null,
+    birth_month: householdMemberData.birthMonth || null,
     relationship: householdMemberData.relationshipToHH,
     student: householdMemberData.conditions.student ?? null,
     student_full_time: householdMemberData.studentEligibility?.studentFullTime ?? null,
