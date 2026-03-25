@@ -129,12 +129,14 @@ export const createDefaultValues = (
   const incomeStreams = getDefaultIncomeStreams(householdMemberFormData);
 
   return {
-    birthMonth: householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
-      ? householdMemberFormData.birthMonth
-      : 0,
-    birthYear: householdMemberFormData?.birthYear && householdMemberFormData.birthYear > 0
-      ? householdMemberFormData.birthYear
-      : 0,
+    birthMonth:
+      householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
+        ? householdMemberFormData.birthMonth
+        : undefined,
+    birthYear:
+      householdMemberFormData?.birthYear && householdMemberFormData.birthYear > 0
+        ? householdMemberFormData.birthYear
+        : undefined,
     relationshipToHH: householdMemberFormData?.relationshipToHH ?? (isFirstMember ? 'headOfHousehold' : ''),
     healthInsurance: householdMemberFormData?.healthInsurance
       ? { ...DEFAULT_HEALTH_INSURANCE, ...householdMemberFormData.healthInsurance }
@@ -165,8 +167,8 @@ export const createDefaultMember = (index: number, existingMember?: HouseholdDat
   ...existingMember,
   id: existingMember?.id ?? crypto.randomUUID(),
   frontendId: existingMember?.frontendId ?? crypto.randomUUID(),
-  birthMonth: existingMember?.birthMonth ?? 0,
-  birthYear: existingMember?.birthYear ?? 0,
+  birthMonth: existingMember?.birthMonth || undefined,
+  birthYear: existingMember?.birthYear || undefined,
   relationshipToHH: existingMember?.relationshipToHH ?? (index === 0 ? 'headOfHousehold' : ''),
   conditions: existingMember?.conditions ?? { ...DEFAULT_SPECIAL_CONDITIONS },
   hasIncome: existingMember?.hasIncome ?? false,
@@ -181,12 +183,14 @@ export const createEnergyCalculatorDefaultValues = (
   const incomeStreams = getDefaultIncomeStreams(householdMemberFormData);
 
   return {
-    birthMonth: householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
-      ? householdMemberFormData.birthMonth
-      : 0,
-    birthYear: householdMemberFormData?.birthYear && householdMemberFormData.birthYear > 0
-      ? householdMemberFormData.birthYear
-      : 0,
+    birthMonth:
+      householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
+        ? householdMemberFormData.birthMonth
+        : undefined,
+    birthYear:
+      householdMemberFormData?.birthYear && householdMemberFormData.birthYear > 0
+        ? householdMemberFormData.birthYear
+        : undefined,
     conditions: {
       survivingSpouse: householdMemberFormData?.energyCalculator?.survivingSpouse ?? false,
       disabled: householdMemberFormData?.conditions?.disabled ?? false,
