@@ -52,7 +52,7 @@ const BasicInfoFields = ({
               labelId={`birth-month-label${labelSuffix}`}
               label="Birth Month"
               value={field.value || ''}
-              onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+              onChange={(e) => field.onChange(Number(e.target.value) || undefined)}
             >
               {monthMenuItems}
             </Select>
@@ -73,7 +73,7 @@ const BasicInfoFields = ({
           render={({ field }) => (
             <NumericFormat
               value={field.value || ''}
-              onValueChange={({ floatValue }) => field.onChange(floatValue ?? 0)}
+              onValueChange={({ floatValue }) => field.onChange(floatValue)}
               onBlur={field.onBlur}
               getInputRef={field.ref}
               allowNegative={false}
