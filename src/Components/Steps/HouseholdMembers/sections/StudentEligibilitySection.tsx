@@ -22,8 +22,8 @@ const StudentEligibilitySection = ({ control, errors, pageNumber }: StudentEligi
       <QuestionQuestion>
         <FormattedMessage id="studentEligibility.sectionTitle" defaultMessage="Student Information" />
       </QuestionQuestion>
-      {STUDENT_QUESTIONS.map(({ name, messageId, defaultMessage, ariaLabelId, ariaLabelDefault }) => (
-        <Box key={name} sx={{ pb: '1.5rem' }}>
+      {STUDENT_QUESTIONS.map(({ name, messageId, defaultMessage, ariaLabelId, ariaLabelDefault }, index) => (
+        <Box key={name} sx={{ pb: index === STUDENT_QUESTIONS.length - 1 ? 0 : '1.5rem' }}>
           <Controller
             name={`studentEligibility.${name}`}
             control={control}
