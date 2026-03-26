@@ -32,7 +32,7 @@ const StudentEligibilitySection = ({ control, errors, pageNumber }: StudentEligi
                 <FormLabel
                   component="legend"
                   className="question-sub-label"
-                  sx={{ mb: 1, '&.Mui-focused': { color: '#666' } }}
+                  sx={{ mb: 1, '&.Mui-focused': { color: '#666' }, '&.Mui-error': { color: '#666' } }}
                 >
                   <FormattedMessage
                     id={messageId}
