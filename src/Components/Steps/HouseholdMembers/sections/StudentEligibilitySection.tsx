@@ -1,6 +1,7 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Box, FormControl, FormControlLabel, FormHelperText, FormLabel, Radio, RadioGroup } from '@mui/material';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
+import QuestionQuestion from '../../../QuestionComponents/QuestionQuestion';
 import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
 import { HouseholdMemberFormSchema } from '../utils/schema';
 import { STUDENT_QUESTIONS } from '../utils/schema';
@@ -17,10 +18,10 @@ const StudentEligibilitySection = ({ control, errors, pageNumber }: StudentEligi
   const subject = pageNumber === 1 ? 'you' : 'they';
 
   return (
-    <Box id="student-eligibility-section" className="section" sx={{ mt: 2, pl: 2, borderLeft: '3px solid #e0e0e0' }}>
-      <Box component="h4" sx={{ fontWeight: 700, mb: 2, mt: 0, fontSize: '1.13rem', color: 'text.primary' }}>
+    <Box id="student-eligibility-section" className="section">
+      <QuestionQuestion>
         <FormattedMessage id="studentEligibility.sectionTitle" defaultMessage="Student Information" />
-      </Box>
+      </QuestionQuestion>
       {STUDENT_QUESTIONS.map(({ name, messageId, defaultMessage, ariaLabelId, ariaLabelDefault }) => (
         <Box key={name} sx={{ pb: '1.5rem' }}>
           <Controller
@@ -28,7 +29,10 @@ const StudentEligibilitySection = ({ control, errors, pageNumber }: StudentEligi
             control={control}
             render={({ field }) => (
               <FormControl component="fieldset" error={!!errors.studentEligibility?.[name]}>
-                <FormLabel component="legend" sx={{ fontWeight: 700, mb: 1 }}>
+                <FormLabel
+                  component="legend"
+                  sx={{ fontWeight: 600, fontSize: '1.125rem', mb: 1, color: 'black', '&.Mui-focused': { color: 'black' } }}
+                >
                   <FormattedMessage
                     id={messageId}
                     defaultMessage={defaultMessage}
