@@ -31,7 +31,8 @@ const StudentEligibilitySection = ({ control, errors, pageNumber }: StudentEligi
               <FormControl component="fieldset" error={!!errors.studentEligibility?.[name]}>
                 <FormLabel
                   component="legend"
-                  sx={{ fontWeight: 600, fontSize: '1.125rem', mb: 1, color: 'black', '&.Mui-focused': { color: 'black' } }}
+                  className="question-sub-label"
+                  sx={{ mb: 1, '&.Mui-focused': { color: '#666' } }}
                 >
                   <FormattedMessage
                     id={messageId}
