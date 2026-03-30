@@ -40,7 +40,6 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     has_acp: formData.benefits.acp ?? null,
     has_andcs: formData.benefits.andcs ?? null,
     has_coeitc: formData.benefits.coeitc ?? null,
-    has_chs: formData.benefits.coheadstart ?? null,
     has_cpcr: formData.benefits.coPropTaxRentHeatCreditRebate ?? null,
     has_ctc: formData.benefits.ctc ?? null,
     has_cdhcs: formData.benefits.dentallowincseniors ?? null,

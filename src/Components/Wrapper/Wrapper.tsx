@@ -31,7 +31,6 @@ const initialFormData: FormData = {
     ccap: false,
     coctc: false,
     coeitc: false,
-    coheadstart: false,
     coPropTaxRentHeatCreditRebate: false,
     ctc: false,
     dentallowincseniors: false,

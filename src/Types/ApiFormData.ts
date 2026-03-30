@@ -179,7 +179,6 @@ export type ApiFormData = {
   has_ccb?: boolean | null;
   has_ssi: boolean | null;
   has_andcs: boolean | null;
-  has_chs: boolean | null;
   has_cpcr: boolean | null;
   has_cdhcs: boolean | null;
   has_dpp: boolean | null;

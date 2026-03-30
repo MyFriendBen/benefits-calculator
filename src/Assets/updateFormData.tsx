@@ -28,7 +28,6 @@ export function useUpdateFormData() {
         acp: response.has_acp ?? false,
         andcs: response.has_andcs ?? false,
         coeitc: response.has_coeitc ?? false,
-        coheadstart: response.has_chs ?? false,
         coPropTaxRentHeatCreditRebate: response.has_cpcr ?? false,
         ctc: response.has_ctc ?? false,
         dentallowincseniors: response.has_cdhcs ?? false,
