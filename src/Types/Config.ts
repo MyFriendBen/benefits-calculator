@@ -41,7 +41,6 @@ export type ApiBenefits = {
   andcs: string;
   cccap: string;
   coeitc: string;
-  coheadstart: string;
   coPropTaxRentHeatCreditRebate: string;
   ctc: string;
   dentallowincseniors: string;
