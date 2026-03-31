@@ -1,12 +1,55 @@
+.cesn-footer-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  max-width: var(--main-max-width);
+  margin: auto;
+  padding: 1.25rem 1rem 0.5rem 1rem;
+  gap: 1rem;
+}
+
+.cesn-footer-branding {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.cesn-footer-dora-logo {
+  max-height: 3.5rem;
+  width: auto;
+}
+
+.cesn-footer-name {
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+}
+
 .energy-calculator-footer-logo-container {
   display: flex;
-  justify-content: center;
+  align-items: center;
+  gap: 1rem;
 }
 
 .energy-calculator-footer-logo-container img {
   margin: 0;
-  padding: 1.3rem 0 0.8rem 0;
+  padding: 0;
   max-height: 4.75rem;
   width: auto;
   height: auto;
+}
+
+@media (max-width: 767px) {
+  .cesn-footer-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .energy-calculator-footer-logo-container {
+    align-self: center;
+  }
 }

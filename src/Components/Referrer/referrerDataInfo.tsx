@@ -28,6 +28,8 @@ import Broomfield_MFBLogo from '../../Assets/States/CO/WhiteLabels/Broomfield/Br
 import TheActionCenter_MFBLogo from '../../Assets/States/CO/WhiteLabels/TheActionCenter/TheActionCenter_MFBLogo.png';
 import CESN_Logo_English from '../../Assets/States/CO/WhiteLabels/cesn/CESN_logo_English.png';
 import CESN_Logo_Spanish from '../../Assets/States/CO/WhiteLabels/cesn/CESN_logo_Spanish.png';
+import CESN_DORA_Color from '../../Assets/States/CO/WhiteLabels/cesn/co_dora_comm_pu_reverse_rgb.png';
+import CESN_DORA_White from '../../Assets/States/CO/WhiteLabels/cesn/co_dora_comm_pu_white.png';
 import HispanicFederation_MFBLogo from '../../Assets/States/NC/WhiteLabels/HispanicFederation/HispanicFederation_MFBLogo.png';
 import { useIntl } from 'react-intl';
 
@@ -62,6 +64,8 @@ const logoMap: { [key: string]: string | undefined } = {
   TheActionCenter_MFBLogo: TheActionCenter_MFBLogo,
   CESN_Logo_English: CESN_Logo_English,
   CESN_Logo_Spanish: CESN_Logo_Spanish,
+  CESN_DORA_Color: CESN_DORA_Color,
+  CESN_DORA_White: CESN_DORA_White,
   HispanicFederation_MFBLogo: HispanicFederation_MFBLogo,
 };
 

@@ -13,6 +13,7 @@ import TwoOneOneHeaderNC from '../TwoOneOneNCComponents/TwoOneOneHeaderNC/TwoOne
 import TwoOneOneFooterNC from '../TwoOneOneNCComponents/TwoOneOneFooterNC/TwoOneOneFooterNC';
 import PoweredByFooter from '../Footer/PoweredByFooter';
 import EnergyCalculatorFooter from '../EnergyCalculator/Footer/Footer';
+import CesnHeader from '../EnergyCalculator/Header/Header';
 import { useIsEnergyCalculator } from '../EnergyCalculator/hooks';
 import LancHeader from '../LancComponents/LancHeader/LancHeader';
 import LancFooter from '../LancComponents/LancFooter/LancFooter';
@@ -21,6 +22,11 @@ import NCHispanicFederationFooter from '../NCHispanicFederation/NCHispanicFedera
 export const BrandedHeader = () => {
   const { getReferrer } = useContext(Context);
   const uiOptions = getReferrer('uiOptions', [] as string[]);
+  const isEnergyCalculator = useIsEnergyCalculator();
+
+  if (isEnergyCalculator) {
+    return <CesnHeader />;
+  }
 
   if (uiOptions.includes('211co')) {
     return <TwoOneOneHeaderCO />;
