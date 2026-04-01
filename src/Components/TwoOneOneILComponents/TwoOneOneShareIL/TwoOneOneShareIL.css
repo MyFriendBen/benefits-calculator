@@ -1,0 +1,74 @@
+button.twoOneOneIL-share-close {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+[dir='rtl'] button.twoOneOneIL-share-close {
+  left: 0;
+  right: unset;
+}
+
+.twoOneOneIL-share-container {
+  padding: 2rem;
+}
+
+button.copy-link-btn-il {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.twoOneOneIL-share-header {
+  text-align: center;
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+}
+
+.twoOneOneIL-share-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.twoOneOneIL-row-group {
+  margin-top: 0.4rem;
+  white-space: nowrap;
+}
+
+.twoOneOneIL-icon-name {
+  overflow: hidden;
+  white-space: nowrap;
+  margin-left: 0;
+  max-width: 0px;
+  transition: max-width 1s, margin 0.3s;
+  font-size: 0.88rem;
+  cursor: pointer;
+  color: #fff;
+}
+
+.twoOneOneIL-fb {
+  background-color: #3b5998;
+  color: white;
+}
+
+.twoOneOneIL-twitter {
+  background-color: #00aced;
+  color: white;
+}
+
+.twoOneOneIL-gray {
+  background-color: #686565;
+  color: white;
+}
+
+.twoOneOneIL-whatsApp {
+  background-color: #25d366;
+  color: white;
+}
+
+.twoOneOneIL-messenger {
+  background-color: #2196f3;
+  color: white;
+}

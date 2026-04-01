@@ -29,6 +29,7 @@ import TheActionCenter_MFBLogo from '../../Assets/States/CO/WhiteLabels/TheActio
 import CESN_Logo_English from '../../Assets/States/CO/WhiteLabels/cesn/CESN_logo_English.png';
 import CESN_Logo_Spanish from '../../Assets/States/CO/WhiteLabels/cesn/CESN_logo_Spanish.png';
 import HispanicFederation_MFBLogo from '../../Assets/States/NC/WhiteLabels/HispanicFederation/HispanicFederation_MFBLogo.png';
+import TwoOneOneILMFBLogo from '../../Assets/States/IL/WhiteLabels/TwoOneOneAssets/twoOneOneILMFBLogo.png';
 import { useIntl } from 'react-intl';
 
 const logoMap: { [key: string]: string | undefined } = {
@@ -63,6 +64,7 @@ const logoMap: { [key: string]: string | undefined } = {
   CESN_Logo_English: CESN_Logo_English,
   CESN_Logo_Spanish: CESN_Logo_Spanish,
   HispanicFederation_MFBLogo: HispanicFederation_MFBLogo,
+  TwoOneOneIL_MFBLogo: TwoOneOneILMFBLogo,
 };
 
 export const renderLogoSource = (sourceLabel: string, logoAlt: string, logoClass: string) => {
