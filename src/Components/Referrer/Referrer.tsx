@@ -25,7 +25,12 @@ export const BrandedHeader = () => {
   const isEnergyCalculator = useIsEnergyCalculator();
 
   if (isEnergyCalculator) {
-    return <CesnHeader />;
+    return (
+      <>
+        <CesnHeader />
+        <Header />
+      </>
+    );
   }
 
   if (uiOptions.includes('211co')) {

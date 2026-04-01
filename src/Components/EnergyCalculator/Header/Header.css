@@ -6,7 +6,7 @@
 .cesn-official-banner-inner {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 3rem;
   max-width: var(--main-max-width);
   margin: auto;
   padding: 0.5rem 1rem;
