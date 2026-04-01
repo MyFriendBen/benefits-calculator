@@ -23,3 +23,17 @@
   font-size: 0.75rem;
   white-space: nowrap;
 }
+
+@media (max-width: 767px) {
+  .cesn-header-logo {
+    height: 0.75rem;
+  }
+
+  .cesn-official-banner-text {
+    font-size: 0.625rem;
+  }
+
+  .cesn-official-banner-inner {
+    gap: 0.5rem;
+  }
+}
