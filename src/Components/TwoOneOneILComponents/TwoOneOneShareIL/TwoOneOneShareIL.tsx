@@ -51,12 +51,14 @@ const TwoOneOneShareIL = ({ close }: TwoOneOneShareProps) => {
 
   const iconSize = { fontSize: '1.3rem' };
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
-    setTimeout(() => {
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 5000);
+    } catch {
       setCopied(false);
-    }, 5000);
+    }
   };
 
   const Icon = ({ name, children, color }: { name: string; children: React.ReactNode; color: string }) => {
@@ -124,7 +126,7 @@ const TwoOneOneShareIL = ({ close }: TwoOneOneShareProps) => {
               <FacebookMessengerIcon size={20.5} />
             </Icon>
           </FacebookMessengerShareButton>
-          <button onClick={copyLink} className="copy-link-btn-il">
+          <button type="button" onClick={copyLink} className="copy-link-btn-il">
             <Icon name={copied ? labels.copied : labels.copyLink} color="twoOneOneIL-gray">
               {copied ? <CheckIcon sx={iconSize} /> : <LinkIcon sx={iconSize} />}
             </Icon>

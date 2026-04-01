@@ -21,7 +21,7 @@ type LanguageOptions = {
 
 const TwoOneOneHeaderIL = () => {
   const { formData, locale, selectLanguage, whiteLabel } = useContext(Context);
-  const languageOptions = useConfig<LanguageOptions>('language_options');
+  const languageOptions = useConfig<LanguageOptions>('language_options') ?? {};
   const queryString = formData.immutableReferrer ? `?referrer=${formData.immutableReferrer}` : '';
   const intl = useIntl();
 
@@ -55,11 +55,11 @@ const TwoOneOneHeaderIL = () => {
   const [openMenu, setOpenMenu] = useState(false);
 
   useEffect(() => {
-    if (openMenu) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'scroll';
-    }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = openMenu ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
   }, [openMenu]);
 
   const handleOpenShare = () => {
@@ -93,6 +93,7 @@ const TwoOneOneHeaderIL = () => {
           href={link.href}
           underline="none"
           target="_blank"
+          rel="noopener noreferrer"
           aria-label={link.ariaLabel}
           className="twoOneOneIL-menu-link"
           key={link.defaultMessage + index}

@@ -1,6 +1,6 @@
 .twoOneOneIL-font {
   color: #505050;
-  font-family: 'league-gothic', Helvetica, Arial, sans-serif;
+  font-family: league-gothic, Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-weight: 550;
   line-height: 1.1em;
@@ -9,7 +9,7 @@
 
 .MuiTypography-root.il-icon-header {
   color: #505050;
-  font-family: 'league-gothic', Helvetica, Arial, sans-serif;
+  font-family: league-gothic, Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-weight: 550;
   line-height: 1.1em;
@@ -79,7 +79,7 @@
   color: #6b6b6b;
   font-weight: 500;
   font-size: 0.68rem;
-  font-family: 'league-gothic', Helvetica, Arial, sans-serif;
+  font-family: league-gothic, Helvetica, Arial, sans-serif;
 }
 
 .il-displayInline {

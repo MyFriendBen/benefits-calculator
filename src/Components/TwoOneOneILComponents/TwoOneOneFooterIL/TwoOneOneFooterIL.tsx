@@ -14,9 +14,21 @@ const TwoOneOneFooterIL = () => {
     id: 'twoOneOneFooterIL.dialAL',
     defaultMessage: '211 Illinois dial link',
   };
+  const twoOneOneSmsALProps = {
+    id: 'twoOneOneFooterIL.smsAL',
+    defaultMessage: '211 Illinois text link',
+  };
   const twoOneOneTOSALProps = {
     id: 'twoOneOneFooterIL.termsOfSvcAL',
     defaultMessage: '211 Illinois terms of service',
+  };
+  const twoOneOnePrivacyALProps = {
+    id: 'twoOneOneFooterIL.privacyAL',
+    defaultMessage: '211 Illinois privacy policy',
+  };
+  const twoOneOneMFBPrivacyALProps = {
+    id: 'twoOneOneFooterIL.mfbPrivacyAL',
+    defaultMessage: 'MyFriendBen privacy policy',
   };
 
   const displayDialStack = () => {
@@ -30,7 +42,6 @@ const TwoOneOneFooterIL = () => {
           <Link
             href="tel:211"
             underline="none"
-            target="_blank"
             aria-label={intl.formatMessage(twoOneOneDialALProps)}
             color="primary"
             sx={{ display: 'inline-block' }}
@@ -64,8 +75,7 @@ const TwoOneOneFooterIL = () => {
           <Link
             href="sms:898211"
             underline="none"
-            target="_blank"
-            aria-label={intl.formatMessage(twoOneOneDialALProps)}
+            aria-label={intl.formatMessage(twoOneOneSmsALProps)}
             color="primary"
             className="il-font-weight"
           >
@@ -115,6 +125,7 @@ const TwoOneOneFooterIL = () => {
             href="https://211illinois.org/terms-of-service/"
             underline="none"
             target="_blank"
+            rel="noopener noreferrer"
             aria-label={intl.formatMessage(twoOneOneTOSALProps)}
             className="il-privacy-policy-links"
           >
@@ -125,7 +136,8 @@ const TwoOneOneFooterIL = () => {
             href="https://211illinois.org/privacy-policy/"
             underline="none"
             target="_blank"
-            aria-label={intl.formatMessage(twoOneOneTOSALProps)}
+            rel="noopener noreferrer"
+            aria-label={intl.formatMessage(twoOneOnePrivacyALProps)}
             className="il-privacy-policy-links"
           >
             <FormattedMessage id="footerIL-twoOneOne-privacy" defaultMessage="2-1-1 Illinois Privacy Policy |" />
@@ -135,7 +147,8 @@ const TwoOneOneFooterIL = () => {
             href={privacyPolicyLink}
             underline="none"
             target="_blank"
-            aria-label={intl.formatMessage(twoOneOneTOSALProps)}
+            rel="noopener noreferrer"
+            aria-label={intl.formatMessage(twoOneOneMFBPrivacyALProps)}
             className="il-privacy-policy-links"
           >
             <FormattedMessage id="footerIL-twoOneOne-mfb" defaultMessage="MyFriendBen Privacy Policy" />
