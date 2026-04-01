@@ -2,7 +2,7 @@ import { useIntl } from 'react-intl';
 import { renderLogoSource } from '../../Referrer/referrerDataInfo';
 import './Header.css';
 
-const CesnHeader = () => {
+const CesnBanner = () => {
   const intl = useIntl();
 
   const doraLogo = renderLogoSource(
@@ -24,4 +24,4 @@ const CesnHeader = () => {
   );
 };
 
-export default CesnHeader;
+export default CesnBanner;
