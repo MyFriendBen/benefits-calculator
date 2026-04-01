@@ -21,4 +21,5 @@
   color: #ffffff;
   font-family: var(--font-body);
   font-size: 0.75rem;
+  white-space: nowrap;
 }
