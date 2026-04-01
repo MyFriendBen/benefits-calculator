@@ -6,7 +6,7 @@ const CesnHeader = () => {
   const intl = useIntl();
 
   const doraLogo = renderLogoSource(
-    'CESN_DORA_White',
+    'CESN_Colorado_White',
     intl.formatMessage({
       id: 'cesnHeader.logo.alt',
       defaultMessage: 'Colorado Department of Regulatory Agencies logo',
