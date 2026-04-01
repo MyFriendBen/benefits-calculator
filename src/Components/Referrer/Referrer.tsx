@@ -13,7 +13,7 @@ import TwoOneOneHeaderNC from '../TwoOneOneNCComponents/TwoOneOneHeaderNC/TwoOne
 import TwoOneOneFooterNC from '../TwoOneOneNCComponents/TwoOneOneFooterNC/TwoOneOneFooterNC';
 import PoweredByFooter from '../Footer/PoweredByFooter';
 import EnergyCalculatorFooter from '../EnergyCalculator/Footer/Footer';
-import ColoradoBanner from '../EnergyCalculator/Header/Header';
+import CesnBanner from '../EnergyCalculator/Banner/Banner';
 import { useIsEnergyCalculator } from '../EnergyCalculator/hooks';
 import LancHeader from '../LancComponents/LancHeader/LancHeader';
 import LancFooter from '../LancComponents/LancFooter/LancFooter';
@@ -27,7 +27,7 @@ export const BrandedHeader = () => {
   if (isEnergyCalculator) {
     return (
       <>
-        <ColoradoBanner />
+        <CesnBanner />
         <Header />
       </>
     );
