@@ -53,22 +53,33 @@
   font-family: var(--font-body);
   font-size: 0.75rem;
   margin: 0;
-  margin-top: 0.125rem;
   text-align: right;
+  align-self: flex-end;
 }
 
 @media (max-width: 767px) {
   .cesn-footer-content {
     flex-direction: column;
     align-items: flex-start;
+    gap: 0.75rem;
   }
 
   .cesn-footer-links {
+    order: -2;
     align-items: flex-start;
   }
 
-  .cesn-footer-links .policy-link,
-  .cesn-footer-copyright {
+  .cesn-footer-links .policy-link {
     text-align: left;
+  }
+
+  .cesn-footer-branding {
+    order: -1;
+  }
+
+  .cesn-footer-copyright {
+    order: 0;
+    text-align: left;
+    align-self: flex-start;
   }
 }
