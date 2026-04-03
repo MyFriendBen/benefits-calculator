@@ -80,11 +80,12 @@
 
   .cesn-footer-links .policy-link {
     text-align: left;
+    font-size: 0.875rem;
   }
 
   .cesn-footer-branding {
     order: -1;
-    margin-top: 1.5rem;
+    margin-top: 2.25rem;
   }
 
   .cesn-footer-copyright {
