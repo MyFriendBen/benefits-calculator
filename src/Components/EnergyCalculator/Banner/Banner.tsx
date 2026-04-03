@@ -66,7 +66,7 @@ const CesnBanner = () => {
                     defaultMessage="A <b>lock (</b><lock/><b>)</b> or <b>https://</b> means you've safely connected to the .gov website. Share sensitive information only on official, secure websites."
                     values={{
                       b: (chunks) => <strong>{chunks}</strong>,
-                      lock: () => <LockIcon className="cesn-banner-inline-lock" />,
+                      lock: <LockIcon className="cesn-banner-inline-lock" />,
                     }}
                   />
                 </p>
