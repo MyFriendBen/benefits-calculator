@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useIntl } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
 import LockIcon from '@mui/icons-material/Lock';
 import { renderLogoSource } from '../../Referrer/referrerDataInfo';
@@ -23,9 +23,10 @@ const CesnBanner = () => {
       <div className="cesn-official-banner-inner">
         {doraLogo}
         <span className="cesn-official-banner-text">
-          An official website of the State of Colorado&nbsp;
+          <FormattedMessage id="cesnHeader.bannerText" defaultMessage="An official website of the State of Colorado" />
+          &nbsp;
           <button className="cesn-banner-toggle" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen}>
-            Here&apos;s how you know {isOpen ? '∧' : '∨'}
+            <FormattedMessage id="cesnHeader.bannerToggle" defaultMessage="Here's how you know" /> {isOpen ? '∧' : '∨'}
           </button>
         </span>
         {isOpen && (
@@ -41,21 +42,33 @@ const CesnBanner = () => {
             <div className="cesn-banner-dropdown-item">
               <AccountBalanceOutlinedIcon className="cesn-banner-dropdown-icon" />
               <div>
-                <p className="cesn-banner-dropdown-title">Official websites use .gov</p>
+                <p className="cesn-banner-dropdown-title">
+                  <FormattedMessage id="cesnHeader.govTitle" defaultMessage="Official websites use .gov" />
+                </p>
                 <p className="cesn-banner-dropdown-body">
-                  A <strong>.gov</strong> website belongs to an official government organization in the United States.
+                  <FormattedMessage
+                    id="cesnHeader.govBody"
+                    defaultMessage="A <b>.gov</b> website belongs to an official government organization in the United States."
+                    values={{ b: (chunks) => <strong>{chunks}</strong> }}
+                  />
                 </p>
               </div>
             </div>
             <div className="cesn-banner-dropdown-item">
               <LockIcon className="cesn-banner-dropdown-icon" />
               <div>
-                <p className="cesn-banner-dropdown-title">Secure .gov websites use HTTPS</p>
+                <p className="cesn-banner-dropdown-title">
+                  <FormattedMessage id="cesnHeader.httpsTitle" defaultMessage="Secure .gov websites use HTTPS" />
+                </p>
                 <p className="cesn-banner-dropdown-body">
-                  A <strong>lock (</strong>
-                  <LockIcon className="cesn-banner-inline-lock" />
-                  <strong>)</strong> or <strong>https://</strong> means you&apos;ve safely connected to the .gov
-                  website. Share sensitive information only on official, secure websites.
+                  <FormattedMessage
+                    id="cesnHeader.httpsBody"
+                    defaultMessage="A <b>lock (</b><lock/><b>)</b> or <b>https://</b> means you've safely connected to the .gov website. Share sensitive information only on official, secure websites."
+                    values={{
+                      b: (chunks) => <strong>{chunks}</strong>,
+                      lock: () => <LockIcon className="cesn-banner-inline-lock" />,
+                    }}
+                  />
                 </p>
               </div>
             </div>
