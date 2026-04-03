@@ -87,7 +87,7 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     has_ma_ssp: formData.benefits.ma_ssp ?? null,
     has_ma_mbta: formData.benefits.ma_mbta ?? null,
     has_ma_maeitc: formData.benefits.ma_maeitc ?? null,
-    has_ma_macfc: formData.benefits.ma_macfc ?? null,
+    has_ma_cfc: formData.benefits.ma_cfc ?? null,
     has_ma_homebridge: formData.benefits.ma_homebridge ?? null,
     has_ma_dhsp_afterschool: formData.benefits.ma_dhsp_afterschool ?? null,
     has_ma_door_to_door: formData.benefits.ma_door_to_door ?? null,

@@ -206,7 +206,7 @@ export type ApiFormData = {
   has_ma_ssp: boolean | null;
   has_ma_mbta: boolean | null;
   has_ma_maeitc: boolean | null;
-  has_ma_macfc: boolean | null;
+  has_ma_cfc: boolean | null;
   has_ma_homebridge: boolean | null;
   has_ma_dhsp_afterschool: boolean | null;
   has_ma_door_to_door: boolean | null;

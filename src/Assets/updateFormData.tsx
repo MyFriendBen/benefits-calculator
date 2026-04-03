@@ -74,7 +74,7 @@ export function useUpdateFormData() {
         ma_ssp: response.has_ma_ssp ?? false,
         ma_mbta: response.has_ma_mbta ?? false,
         ma_maeitc: response.has_ma_maeitc ?? false,
-        ma_macfc: response.has_ma_macfc ?? false,
+        ma_cfc: response.has_ma_cfc ?? false,
         ma_homebridge: response.has_ma_homebridge ?? false,
         ma_dhsp_afterschool: response.has_ma_dhsp_afterschool ?? false,
         ma_door_to_door: response.has_ma_door_to_door ?? false,
