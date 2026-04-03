@@ -85,13 +85,12 @@
 
   .cesn-footer-branding {
     order: -1;
-    margin-top: 2.25rem;
+    margin-top: 2rem;
   }
 
   .cesn-footer-copyright {
     order: 0;
     text-align: left;
     align-self: flex-start;
-    margin-top: 2rem;
   }
 }
