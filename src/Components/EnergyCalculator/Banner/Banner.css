@@ -24,7 +24,81 @@
   white-space: nowrap;
 }
 
+.cesn-banner-toggle {
+  background: none;
+  border: none;
+  color: #6fa8f5;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cesn-banner-toggle-arrow {
+  font-size: 0.625rem;
+}
+
+.cesn-banner-close-mobile {
+  display: none;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.cesn-banner-dropdown {
+  background-color: #f0f0f0;
+  width: 100%;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.cesn-banner-dropdown-inner {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  max-width: var(--main-max-width);
+  margin: auto;
+  padding: 1rem 2rem;
+}
+
+.cesn-banner-dropdown-item {
+  display: flex;
+  flex-direction: row;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.cesn-banner-dropdown-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.cesn-banner-dropdown-title {
+  font-weight: bold;
+  margin: 0 0 0.25rem 0;
+  font-size: 0.875rem;
+  color: #1a1a1a;
+}
+
+.cesn-banner-dropdown-body {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #333333;
+  line-height: 1.4;
+}
+
 @media (max-width: 767px) {
+  .cesn-official-banner-inner {
+    gap: 0.75rem;
+  }
+
   .cesn-header-logo {
     height: 0.75rem;
   }
@@ -33,7 +107,17 @@
     font-size: 0.625rem;
   }
 
-  .cesn-official-banner-inner {
-    gap: 0.75rem;
+  .cesn-banner-toggle {
+    font-size: 0.625rem;
+  }
+
+  .cesn-banner-close-mobile {
+    display: block;
+  }
+
+  .cesn-banner-dropdown-inner {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
   }
 }

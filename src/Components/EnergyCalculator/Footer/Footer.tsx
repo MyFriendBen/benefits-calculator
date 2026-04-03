@@ -51,20 +51,18 @@ export default function EnergyCalculatorFooter() {
               </a>
             </div>
           </div>
-          <div className="cesn-footer-right">
-            <div className="cesn-footer-links">
-              <a href={privacyPolicyLink} target="_blank" className="policy-link">
-                <FormattedMessage id="footer.privacyPolicy" defaultMessage="Privacy Policy" />
-              </a>
-              <a href={CESN_ACCESSIBILITY_URL} target="_blank" className="policy-link">
-                <FormattedMessage id="cesnFooter.accessibilityStatement" defaultMessage="Accessibility Statement" />
-              </a>
-            </div>
-            <p className="cesn-footer-copyright">
-              &copy; {currentYear}{' '}
-              <FormattedMessage id="cesnFooter.copyright" defaultMessage="State of Colorado" />
-            </p>
+          <div className="cesn-footer-links">
+            <a href={privacyPolicyLink} target="_blank" className="policy-link">
+              <FormattedMessage id="footer.privacyPolicy" defaultMessage="Privacy Policy" />
+            </a>
+            <a href={CESN_ACCESSIBILITY_URL} target="_blank" className="policy-link">
+              <FormattedMessage id="cesnFooter.accessibilityStatement" defaultMessage="Accessibility Statement" />
+            </a>
           </div>
+          <p className="cesn-footer-copyright">
+            &copy; {currentYear}{' '}
+            <FormattedMessage id="cesnFooter.copyright" defaultMessage="State of Colorado" />
+          </p>
         </div>
       </Paper>
     </footer>
