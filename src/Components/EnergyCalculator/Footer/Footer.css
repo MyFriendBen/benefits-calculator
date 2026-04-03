@@ -85,7 +85,8 @@
 
   .cesn-footer-branding {
     order: -1;
-    margin-top: 2rem;
+    margin-top: 1.25rem;
+    align-self: flex-start;
   }
 
   .cesn-footer-links {
