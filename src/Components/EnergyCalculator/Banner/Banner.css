@@ -54,13 +54,18 @@
   border-bottom: 1px solid #d0d0d0;
 }
 
+.cesn-banner-dropdown-align {
+  max-width: var(--main-max-width);
+  margin: auto;
+  padding: 0 1rem;
+}
+
 .cesn-banner-dropdown-inner {
   display: flex;
   flex-direction: row;
   gap: 2rem;
-  max-width: var(--main-max-width);
-  margin: auto;
-  padding: 1.25rem 1rem;
+  max-width: 48rem;
+  padding: 1.25rem 0;
 }
 
 .cesn-banner-dropdown-item {
@@ -117,6 +122,10 @@
 
   .cesn-banner-close-mobile {
     display: block;
+  }
+
+  .cesn-banner-dropdown-align {
+    padding: 0;
   }
 
   .cesn-banner-dropdown-inner {

@@ -36,6 +36,7 @@ const CesnBanner = () => {
       </div>
       {isOpen && (
         <div className="cesn-banner-dropdown">
+          <div className="cesn-banner-dropdown-align">
           <div className="cesn-banner-dropdown-inner">
             <div className="cesn-banner-dropdown-item">
               <AccountBalanceOutlinedIcon className="cesn-banner-dropdown-icon" />
@@ -58,6 +59,7 @@ const CesnBanner = () => {
                 </p>
               </div>
             </div>
+          </div>
           </div>
         </div>
       )}
