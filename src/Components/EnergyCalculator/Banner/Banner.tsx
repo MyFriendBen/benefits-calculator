@@ -29,11 +29,6 @@ const CesnBanner = () => {
             <FormattedMessage id="cesnHeader.bannerToggle" defaultMessage="Here's how you know" /> {isOpen ? '∧' : '∨'}
           </button>
         </span>
-        {isOpen && (
-          <button className="cesn-banner-close-mobile" onClick={() => setIsOpen(false)} aria-label="Close">
-            ✕
-          </button>
-        )}
       </div>
       {isOpen && (
         <div className="cesn-banner-dropdown">
