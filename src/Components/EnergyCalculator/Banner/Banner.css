@@ -36,18 +36,6 @@
   white-space: nowrap;
 }
 
-.cesn-banner-close-mobile {
-  display: none;
-  background: none;
-  border: none;
-  color: #ffffff;
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 0;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
 .cesn-banner-dropdown {
   background-color: #f0f0f0;
   width: 100%;
@@ -118,10 +106,6 @@
 
   .cesn-banner-toggle {
     font-size: 0.625rem;
-  }
-
-  .cesn-banner-close-mobile {
-    display: block;
   }
 
   .cesn-banner-dropdown-align {

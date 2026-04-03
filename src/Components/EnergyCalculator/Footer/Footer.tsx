@@ -43,19 +43,19 @@ export default function EnergyCalculatorFooter() {
           <div className="cesn-footer-branding">
             {doraLogo}
             <div className="energy-calculator-footer-logo-container">
-              <a href={mfbUrl} target="_blank">
+              <a href={mfbUrl} target="_blank" rel="noreferrer">
                 {mfbLogo}
               </a>
-              <a href={raUrl} target="_blank">
+              <a href={raUrl} target="_blank" rel="noreferrer">
                 {raLogo}
               </a>
             </div>
           </div>
           <div className="cesn-footer-links">
-            <a href={privacyPolicyLink} target="_blank" className="policy-link">
+            <a href={privacyPolicyLink} target="_blank" rel="noreferrer" className="policy-link">
               <FormattedMessage id="footer.privacyPolicy" defaultMessage="Privacy Policy" />
             </a>
-            <a href={CESN_ACCESSIBILITY_URL} target="_blank" className="policy-link">
+            <a href={CESN_ACCESSIBILITY_URL} target="_blank" rel="noreferrer" className="policy-link">
               <FormattedMessage id="cesnFooter.accessibilityStatement" defaultMessage="Accessibility Statement" />
             </a>
           </div>
