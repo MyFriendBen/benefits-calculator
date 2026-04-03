@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import LockIcon from '@mui/icons-material/Lock';
 import { renderLogoSource } from '../../Referrer/referrerDataInfo';
 import './Banner.css';
 
@@ -47,12 +47,12 @@ const CesnBanner = () => {
               </div>
             </div>
             <div className="cesn-banner-dropdown-item">
-              <LockOutlinedIcon className="cesn-banner-dropdown-icon" />
+              <LockIcon className="cesn-banner-dropdown-icon" />
               <div>
                 <p className="cesn-banner-dropdown-title">Secure .gov websites use HTTPS</p>
                 <p className="cesn-banner-dropdown-body">
                   A <strong>lock (</strong>
-                  <LockOutlinedIcon className="cesn-banner-inline-lock" />
+                  <LockIcon className="cesn-banner-inline-lock" />
                   <strong>)</strong> or <strong>https://</strong> means you&apos;ve safely connected to the .gov
                   website. Share sensitive information only on official, secure websites.
                 </p>
