@@ -23,7 +23,7 @@ function hashString(str: string): number {
  * defined in backend config. Same seed always gets the same variant.
  *
  * Priority:
- * 1. URL parameter override (e.g., ?exampleExperiment=A)
+ * 1. URL parameter override (e.g., ?exampleVariant=A)
  * 2. localStorage override (for persistent dev/QA testing)
  * 3. Backend config variants + seed-based deterministic assignment
  *
