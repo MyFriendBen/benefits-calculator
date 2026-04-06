@@ -23,18 +23,18 @@ function hashString(str: string): number {
  * defined in backend config. Same seed always gets the same variant.
  *
  * Priority:
- * 1. URL parameter override (e.g., ?npsVariant=floating)
+ * 1. URL parameter override (e.g., ?exampleExperiment=A)
  * 2. localStorage override (for persistent dev/QA testing)
  * 3. Backend config variants + seed-based deterministic assignment
  *
- * @param experimentName - The experiment key in backend config (e.g., 'npsVariant')
+ * @param experimentName - The experiment key in backend config (e.g., 'exampleVariant')
  * @param seed - Stable identifier (e.g., uuid) for deterministic assignment
  * @returns The assigned variant string, or null if not configured/assigned
  *
  * To test variants:
- * - URL: ?npsVariant=floating or ?npsVariant=inline
- * - localStorage: localStorage.setItem('experiment_override_npsVariant', 'floating')
- * - Clear: localStorage.removeItem('experiment_override_npsVariant')
+ * - URL: ?exampleVariant=A or ?exampleVariant=B
+ * - localStorage: localStorage.setItem('experiment_override_exampleVariant', 'A')
+ * - Clear: localStorage.removeItem('experiment_override_exampleVariant')
  */
 export function useExperiment(experimentName: string, seed?: string): string | null {
   const { config } = useContext(Context);
