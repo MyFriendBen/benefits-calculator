@@ -4,22 +4,16 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField } from '@mui/material';
-import { FormattedMessageType } from '../../Types/Questions';
 import { Context } from '../Wrapper/Wrapper';
 import * as z from 'zod';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
 import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useDefaultBackNavigationFunction } from '../QuestionComponents/questionHooks';
-import { useConfig } from '../Config/configHook';
+import { useReferralSources } from '../../hooks/useReferralSources';
 import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
 import useScreenApi from '../../Assets/updateScreen';
 import useStepForm from './stepForm';
-
-type ReferralOptions = {
-  other: string;
-  [key: string]: string | FormattedMessageType;
-};
 
 export default function ReferralSourceStep() {
   const { formData } = useContext(Context);
@@ -31,7 +25,11 @@ export default function ReferralSourceStep() {
   }
 
   const backNavigationFunction = useDefaultBackNavigationFunction('referralSource');
-  const referralOptions = useConfig<ReferralOptions>('referral_options');
+  const { referralOptions, loading } = useReferralSources();
+
+  if (loading) {
+    return null;
+  }
   const { formatMessage } = useIntl();
 
   const formSchema = z

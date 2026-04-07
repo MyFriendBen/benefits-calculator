@@ -22,6 +22,7 @@ const messageEndpoint = `${domain}/api/messages/`;
 const apiProgramCategoriesEndPoint = `${domain}/api/program_categories/`;
 const apiUrgentNeedTypesEndpoint = `${domain}/api/urgent_need_types/`;
 export const configEndpoint = `${domain}/api/configuration/`;
+const screenerOptionsEndpoint = `${domain}/api/screener-options/`;
 const eligibilityEndpoint = `${domain}/api/eligibility/`;
 const validationEndpoint = `${domain}/api/validations/`;
 const authTokenEndpoint = `${domain}/api/auth-token/`;
@@ -284,6 +285,17 @@ const getAuthToken = async (email: string, password: string) => {
   return data.token;
 };
 
+const getReferralSources = async (whiteLabel: string): Promise<Record<string, string>> => {
+  const response = await fetch(`${screenerOptionsEndpoint}${whiteLabel}/referral-sources/`, {
+    method: 'GET',
+    headers: header,
+  });
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`);
+  }
+  return response.json();
+};
+
 export {
   getTranslations,
   postScreen,
@@ -299,4 +311,5 @@ export {
   getAuthToken,
   postNPSScore,
   patchNPSReason,
+  getReferralSources,
 };

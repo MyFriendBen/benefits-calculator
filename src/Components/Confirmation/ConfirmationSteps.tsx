@@ -12,6 +12,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { useTranslateNumber } from '../../Assets/languageOptions';
 import { FormattedMessageType, QuestionName } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
+import { useReferralSources } from '../../hooks/useReferralSources';
 import DefaultConfirmationHHData from './ConfirmationHouseholdData';
 import { Benefits as BenefitsType } from '../../Types/FormData';
 import EnergyCalculatorElectricityProvider from '../EnergyCalculator/ConfirmationPage/ElectricityProvider';
@@ -333,7 +334,7 @@ function AcuteConditions() {
 function ReferralSource() {
   const { formData } = useContext(Context);
   const { formatMessage } = useIntl();
-  const referralOptions = useConfig<{ [key: string]: string | FormattedMessageType }>('referral_options');
+  const { referralOptions } = useReferralSources();
 
   if (formData.referralSource === undefined) {
     return null;
