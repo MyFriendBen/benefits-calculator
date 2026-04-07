@@ -21,9 +21,9 @@ describe('CesnBanner', () => {
     expect(screen.getByText(/An official website of the State of Colorado/i)).toBeInTheDocument();
   });
 
-  it('renders the DORA logo', () => {
+  it('renders the Colorado logo', () => {
     renderBanner();
-    expect(screen.getByAltText('Colorado Department of Regulatory Agencies logo')).toBeInTheDocument();
+    expect(screen.getByAltText('State of Colorado logo')).toBeInTheDocument();
   });
 
   it('renders the toggle button', () => {

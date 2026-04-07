@@ -15,7 +15,7 @@ const CesnBanner = () => {
     'CESN_Colorado_White',
     intl.formatMessage({
       id: 'cesnHeader.logo.alt',
-      defaultMessage: 'Colorado Department of Regulatory Agencies logo',
+      defaultMessage: 'State of Colorado logo',
     }),
     'cesn-header-logo',
   );
@@ -26,15 +26,15 @@ const CesnBanner = () => {
         {doraLogo}
         <span className="cesn-official-banner-text">
           <FormattedMessage id="cesnHeader.bannerText" defaultMessage="An official website of the State of Colorado" />
-          <button className="cesn-banner-toggle" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen}>
+          <button className="cesn-banner-toggle" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen} aria-controls="cesn-banner-dropdown">
             <FormattedMessage id="cesnHeader.bannerToggle" defaultMessage="Here's how you know" /> {isOpen ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
           </button>
         </span>
       </div>
       {isOpen && (
-        <div className="cesn-banner-dropdown">
+        <div className="cesn-banner-dropdown" id="cesn-banner-dropdown">
           <div className="cesn-banner-dropdown-align">
-          <div className="cesn-banner-dropdown-inner">
+            <div className="cesn-banner-dropdown-inner">
             <div className="cesn-banner-dropdown-item">
               <AccountBalanceOutlinedIcon className="cesn-banner-dropdown-icon" />
               <div>
@@ -67,7 +67,7 @@ const CesnBanner = () => {
                   />
                 </p>
               </div>
-            </div>
+              </div>
           </div>
           </div>
         </div>
