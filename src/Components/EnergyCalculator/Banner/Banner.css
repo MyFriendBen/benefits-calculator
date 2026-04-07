@@ -22,6 +22,8 @@
   color: #ffffff;
   font-family: var(--font-body);
   font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
 }
 
 .cesn-banner-toggle {
@@ -34,6 +36,16 @@
   padding: 0;
   text-decoration: underline;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: 0.5rem;
+}
+
+.cesn-banner-toggle .MuiSvgIcon-root {
+  font-size: 1rem;
+  margin-left: 0.125rem;
+  margin-top: 0.1rem;
 }
 
 .cesn-banner-dropdown {

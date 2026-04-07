@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LockIcon from '@mui/icons-material/Lock';
 import { renderLogoSource } from '../../Referrer/referrerDataInfo';
 import './Banner.css';
@@ -24,9 +26,8 @@ const CesnBanner = () => {
         {doraLogo}
         <span className="cesn-official-banner-text">
           <FormattedMessage id="cesnHeader.bannerText" defaultMessage="An official website of the State of Colorado" />
-          &nbsp;
           <button className="cesn-banner-toggle" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen}>
-            <FormattedMessage id="cesnHeader.bannerToggle" defaultMessage="Here's how you know" /> {isOpen ? '∧' : '∨'}
+            <FormattedMessage id="cesnHeader.bannerToggle" defaultMessage="Here's how you know" /> {isOpen ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
           </button>
         </span>
       </div>
@@ -56,12 +57,13 @@ const CesnBanner = () => {
                   <FormattedMessage id="cesnHeader.httpsTitle" defaultMessage="Secure .gov websites use HTTPS" />
                 </p>
                 <p className="cesn-banner-dropdown-body">
-                  A <strong>lock (</strong>
-                  <LockIcon className="cesn-banner-inline-lock" />
-                  <strong>)</strong> or <strong>https://</strong>{' '}
                   <FormattedMessage
-                    id="cesnHeader.httpsBodyText"
-                    defaultMessage="means you've safely connected to the .gov website. Share sensitive information only on official, secure websites."
+                    id="cesnHeader.httpsBody"
+                    defaultMessage="A <b>lock (</b>{lock}<b>)</b> or <b>https://</b> means you've safely connected to the .gov website. Share sensitive information only on official, secure websites."
+                    values={{
+                      b: (chunks) => <strong>{chunks}</strong>,
+                      lock: <LockIcon className="cesn-banner-inline-lock" />,
+                    }}
                   />
                 </p>
               </div>
