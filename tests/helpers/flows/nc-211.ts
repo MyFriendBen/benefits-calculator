@@ -24,7 +24,6 @@ import {
   completeAssets,
   completePublicBenefits,
   completeNeeds,
-  completeReferralSource,
   completeAdditionalInfo,
   navigateToResults,
 } from './common';
@@ -96,7 +95,6 @@ export async function completeNC211FullApplication(page: Page, data: Application
       () => completeAssets(page, data.assets),
       () => completePublicBenefits(page),
       () => completeNeeds(page, data.needs),
-      () => completeReferralSource(page, data.referralSource),
       () => completeAdditionalInfo(page),
       () => navigateToResults(page),
     ];
