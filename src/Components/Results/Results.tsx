@@ -35,7 +35,7 @@ import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/reba
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
 import { usePageTitle } from '../Common/usePageTitle';
 import { NPSWidget } from '../NPS';
-import ShareModal from './ShareModal/ShareModal';
+import { ChatbotProvider } from './Chatbot/Chatbot';
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -250,23 +250,24 @@ const Results = ({ type }: ResultsProps) => {
   } else if (programId === undefined && (type === 'program' || type === 'need')) {
     return (
       <ResultsContextProvider>
-        <main>
-          <ResultsHeader type={type} />
-          <div className="results-card-wrapper">
-            <ResultsTabs />
-            <div id="results-tabpanel" role="tabpanel" aria-labelledby={type === 'program' ? 'long-term-benefits-tab' : 'near-term-benefits-tab'} className="benefits-form results-card-body">
-              {type === 'program' && <UrgentNeedBanner />}
-              <Grid container sx={{ pt: '1rem' }}>
-                <Grid item xs={12}>
-                  {type === 'need' ? <Needs /> : <Programs />}
+        <ChatbotProvider>
+          <main>
+            <ResultsHeader type={type} />
+            <div className="results-card-wrapper">
+              <ResultsTabs />
+              <div id="results-tabpanel" role="tabpanel" aria-labelledby={type === 'program' ? 'long-term-benefits-tab' : 'near-term-benefits-tab'} className="benefits-form results-card-body">
+                {type === 'program' && <UrgentNeedBanner />}
+                <Grid container sx={{ pt: '1rem' }}>
+                  <Grid item xs={12}>
+                    {type === 'need' ? <Needs /> : <Programs />}
+                  </Grid>
                 </Grid>
-              </Grid>
-              {!noHelpButton && <HelpButton />}
-              <NPSWidget uuid={uuid} />
-              <ShareModal />
+                {!noHelpButton && <HelpButton />}
+                <NPSWidget uuid={uuid} />
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </ChatbotProvider>
       </ResultsContextProvider>
     );
   }

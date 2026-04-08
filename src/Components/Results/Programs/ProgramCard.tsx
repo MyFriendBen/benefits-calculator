@@ -12,6 +12,7 @@ import { BREAKPOINTS } from '../../../utils/breakpoints';
 import { Context } from '../../Wrapper/Wrapper';
 import { useConfig, useFeatureFlag } from '../../Config/configHook';
 import { calcAge } from '../../../Assets/age';
+import { useChatbotContext } from '../Chatbot/Chatbot';
 
 type ResultsCardDetail = {
   title: FormattedMessageType;
@@ -47,6 +48,7 @@ type ResultsCardProps = {
   flags?: ResultsCardFlag[];
   containerClassNames?: string[];
   eligibleMembers?: EligibleMemberTag[];
+  onMoreInfo?: () => void;
 };
 
 function EligibleMemberTags({ members }: { members: EligibleMemberTag[] }) {
@@ -79,6 +81,7 @@ export function ResultsCard({
   flags = [],
   containerClassNames = [],
   eligibleMembers = [],
+  onMoreInfo,
 }: ResultsCardProps) {
   // Mobile is below desktop breakpoint (0-767px)
   const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.desktop - 1}px)`);
@@ -106,9 +109,9 @@ export function ResultsCard({
               <Link to={link}>{name}</Link>
             </div>
             <div className="result-program-more-info-button">
-              <Link to={link} data-testid="more-info-link" aria-label={moreInfoLabel}>
+              <button type="button" data-testid="more-info-link" aria-label={moreInfoLabel} onClick={onMoreInfo}>
                 <FormattedMessage id="more-info" defaultMessage="More Info" />
-              </Link>
+              </button>
             </div>
           </div>
           <EligibleMemberTags members={eligibleMembers} />
@@ -126,9 +129,9 @@ export function ResultsCard({
       </div>
       {!isMobile && (
         <div className="result-program-more-info-button">
-          <Link to={link} data-testid="more-info-link" aria-label={moreInfoLabel}>
+          <button type="button" data-testid="more-info-link" aria-label={moreInfoLabel} onClick={onMoreInfo}>
             <FormattedMessage id="more-info" defaultMessage="More Info" />
-          </Link>
+          </button>
         </div>
       )}
     </article>
@@ -148,6 +151,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
   const { formData } = useContext(Context);
   const relationshipOptions = useConfig<{ [key: string]: FormattedMessageType }>('relationship_options');
   const showEligibilityTags = useFeatureFlag('eligibility_tags');
+  const { openWithMessage } = useChatbotContext();
 
   const containerClass = useMemo(() => {
     const classNames = [];
@@ -258,10 +262,20 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
 
   const nameString = intl.formatMessage({ id: programName.label, defaultMessage: programName.default_message });
 
+  const handleMoreInfo = () => {
+    openWithMessage(
+      intl.formatMessage(
+        { id: 'chatbot.tellMeMore', defaultMessage: 'Tell me more about {program}' },
+        { program: nameString },
+      ),
+    );
+  };
+
   return (
     <ResultsCard
       name={<ResultsTranslate translation={programName} />}
       nameString={nameString}
+      onMoreInfo={handleMoreInfo}
       detail1={{
         title: <FormattedMessage id="results.estimated_application_time" defaultMessage="Application Time: " />,
         value: <ResultsTranslate translation={estimatedAppTime} />,

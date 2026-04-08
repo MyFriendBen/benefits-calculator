@@ -112,6 +112,7 @@
 }
 
 .result-program-more-info-button a,
+.result-program-more-info-button button,
 .result-program-learn-more-button a {
   color: white;
   text-decoration: none;
@@ -119,6 +120,9 @@
   border-radius: 0.75rem;
   padding: 0.5rem 0.75rem;
   background-color: var(--primary-color);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .result-program-details strong {
@@ -197,6 +201,7 @@ h1.header-text-bottom {
   }
 
   .result-program-more-info-button a,
+  .result-program-more-info-button button,
   .result-program-learn-more-button a {
     padding: 0.5rem 1rem;
   }
@@ -241,7 +246,8 @@ h1.header-text-bottom {
     margin-top: 0.1rem;
   }
 
-  .result-program-more-info-button a {
+  .result-program-more-info-button a,
+  .result-program-more-info-button button {
     display: inline-block;
   }
 

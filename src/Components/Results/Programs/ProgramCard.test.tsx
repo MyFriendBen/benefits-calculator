@@ -7,6 +7,7 @@ import { WrapperContext } from '../../../Types/WrapperContext';
 import { Config } from '../../../Types/Config';
 import { HouseholdData } from '../../../Types/FormData';
 import { createProgram, createMemberEligibility, createFormData } from '../testHelpers';
+import { ChatbotProvider } from '../Chatbot/Chatbot';
 
 // Mock Results module hooks
 jest.mock('../Results', () => ({
@@ -85,7 +86,9 @@ const renderProgramCard = (
     <MemoryRouter>
       <IntlProvider locale="en" messages={{}}>
         <Context.Provider value={createContextValue(config, formData)}>
-          <ProgramCard program={program} />
+          <ChatbotProvider>
+            <ProgramCard program={program} />
+          </ChatbotProvider>
         </Context.Provider>
       </IntlProvider>
     </MemoryRouter>,
