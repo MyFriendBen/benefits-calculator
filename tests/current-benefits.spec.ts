@@ -14,6 +14,7 @@ const TEST_CONFIG: Record<WhiteLabel, { name: string; skip?: boolean; skipReason
   cesn: { name: 'Colorado Energy Savings Navigator' },
   il: { name: 'Illinois' },
   tx: { name: 'Texas' },
+  wa: { name: 'Washington', skip: true, skipReason: 'Washington backend not yet configured — unskip when first WA program is added (MFB-848)' },
 };
 
 // Validate that TEST_CONFIG is in sync with ALL_VALID_WHITE_LABELS
