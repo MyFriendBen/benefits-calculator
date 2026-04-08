@@ -114,10 +114,12 @@
 
   .cesn-official-banner-text {
     font-size: 0.625rem;
+    flex-wrap: wrap;
   }
 
   .cesn-banner-toggle {
     font-size: 0.625rem;
+    margin-left: 0;
   }
 
   .cesn-banner-dropdown-align {
