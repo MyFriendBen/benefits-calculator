@@ -3,7 +3,7 @@ import { findValidationForProgram, useResultsContext } from '../Results';
 import Filter from '../Filter/Filter';
 import ProgramCard from './ProgramCard';
 import CategoryHeading from '../CategoryHeading/CategoryHeading';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { calculateTotalValue, programValue } from '../FormattedValue';
 import { ResultsMessage } from '../../Referrer/Referrer';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
@@ -11,6 +11,8 @@ import EnergyCalculatorRebateCategoryList, {
   useEnergyCalculatorNeedsRebates,
 } from '../../EnergyCalculator/Results/RebateCategories';
 import DocumentSummary from '../DocumentSummary/DocumentSummary';
+import { FormattedMessage, useIntl } from 'react-intl';
+import { useChatbotContext } from '../Chatbot/Chatbot';
 
 function sortProgramsIntoCategories(categories: ProgramCategory[]): ProgramCategory[] {
   // sort categories by total category value in decending order
@@ -70,6 +72,28 @@ const ValidationCategory = () => {
   );
 };
 
+const GuideMeButton = () => {
+  const { openWithMessage } = useChatbotContext();
+  const { formatMessage } = useIntl();
+
+  const handleClick = useCallback(() => {
+    openWithMessage(
+      formatMessage({
+        id: 'chatbot.guideMeMessage',
+        defaultMessage: 'Guide me through my benefits',
+      }),
+    );
+  }, [openWithMessage, formatMessage]);
+
+  return (
+    <div className="guide-me-button-container">
+      <button type="button" className="guide-me-button" onClick={handleClick}>
+        <FormattedMessage id="programs.guideMeButton" defaultMessage="Guide Me Through My Benefits" />
+      </button>
+    </div>
+  );
+};
+
 const Programs = () => {
   const { programs, programCategories } = useResultsContext();
 
@@ -84,6 +108,7 @@ const Programs = () => {
       {!isEnergyCalculator && <Filter />}
       {isEnergyCalculator && <DocumentSummary programs={programs} />}
       <ValidationCategory />
+      <GuideMeButton />
       {isEnergyCalculator && needsRebates && <EnergyCalculatorRebateCategoryList />}
       {categories.map((category) => {
         return (

@@ -263,6 +263,36 @@
   outline-offset: 2px;
 }
 
+/* Guide Me button */
+.guide-me-button-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.guide-me-button {
+  background-color: var(--primary-color);
+  color: #fff;
+  border: 2px solid var(--primary-color);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.guide-me-button:hover {
+  background-color: #fff;
+  color: var(--primary-color);
+}
+
+.guide-me-button:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
 /* DESKTOP - 768px and above (matches BREAKPOINTS.desktop in src/utils/breakpoints.ts) */
 @media (min-width: 768px) {
   .results-header-programs-count-text {

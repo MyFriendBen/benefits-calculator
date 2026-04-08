@@ -126,6 +126,20 @@
   border-bottom-left-radius: 0.2rem;
 }
 
+.chatbot-link {
+  color: var(--primary-color);
+  word-break: break-all;
+}
+
+.chatbot-list {
+  margin: 0.25rem 0;
+  padding-left: 1.25rem;
+}
+
+.chatbot-list li {
+  margin-bottom: 0.2rem;
+}
+
 /* Input area */
 .chatbot-input-area {
   display: flex;
