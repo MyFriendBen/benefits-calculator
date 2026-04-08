@@ -336,7 +336,7 @@ function ReferralSource() {
   const { formatMessage } = useIntl();
   const { allOptions, loading } = useReferralOptions();
 
-  if (formData.referralSource === undefined || loading) {
+  if (formData.referralSource === undefined || loading || !(formData.referralSource in allOptions)) {
     return null;
   }
 
@@ -359,14 +359,10 @@ function ReferralSource() {
       stepName="referralSource"
     >
       <ConfirmationItem
-        value={
-          formData.referralSource in allOptions
-            ? formatMessage({
-                id: `referralOptions.${formData.referralSource}`,
-                defaultMessage: allOptions[formData.referralSource],
-              })
-            : formData.referralSource
-        }
+        value={formatMessage({
+          id: `referralOptions.${formData.referralSource}`,
+          defaultMessage: allOptions[formData.referralSource],
+        })}
       />
     </ConfirmationBlock>
   );
