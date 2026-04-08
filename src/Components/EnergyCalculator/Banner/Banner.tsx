@@ -35,39 +35,39 @@ const CesnBanner = () => {
         <div className="cesn-banner-dropdown" id="cesn-banner-dropdown">
           <div className="cesn-banner-dropdown-align">
             <div className="cesn-banner-dropdown-inner">
-            <div className="cesn-banner-dropdown-item">
-              <AccountBalanceOutlinedIcon className="cesn-banner-dropdown-icon" />
-              <div>
-                <p className="cesn-banner-dropdown-title">
-                  <FormattedMessage id="cesnHeader.govTitle" defaultMessage="Official websites use .gov" />
-                </p>
-                <p className="cesn-banner-dropdown-body">
-                  <FormattedMessage
-                    id="cesnHeader.govBody"
-                    defaultMessage="A <b>.gov</b> website belongs to an official government organization in the United States."
-                    values={{ b: (chunks) => <strong>{chunks}</strong> }}
-                  />
-                </p>
+              <div className="cesn-banner-dropdown-item">
+                <AccountBalanceOutlinedIcon className="cesn-banner-dropdown-icon" />
+                <div>
+                  <p className="cesn-banner-dropdown-title">
+                    <FormattedMessage id="cesnHeader.govTitle" defaultMessage="Official websites use .gov" />
+                  </p>
+                  <p className="cesn-banner-dropdown-body">
+                    <FormattedMessage
+                      id="cesnHeader.govBody"
+                      defaultMessage="A <b>.gov</b> website belongs to an official government organization in the United States."
+                      values={{ b: (chunks) => <strong>{chunks}</strong> }}
+                    />
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="cesn-banner-dropdown-item">
-              <LockIcon className="cesn-banner-dropdown-icon" />
-              <div>
-                <p className="cesn-banner-dropdown-title">
-                  <FormattedMessage id="cesnHeader.httpsTitle" defaultMessage="Secure .gov websites use HTTPS" />
-                </p>
-                <p className="cesn-banner-dropdown-body">
-                  <FormattedMessage
-                    id="cesnHeader.httpsBody"
-                    defaultMessage="A <b>lock (</b>{lock}<b>)</b> or <b>https://</b> means you've safely connected to the .gov website. Share sensitive information only on official, secure websites."
-                    values={{
-                      b: (chunks) => <strong>{chunks}</strong>,
-                      lock: <LockIcon className="cesn-banner-inline-lock" />,
-                    }}
-                  />
-                </p>
+              <div className="cesn-banner-dropdown-item">
+                <LockIcon className="cesn-banner-dropdown-icon" />
+                <div>
+                  <p className="cesn-banner-dropdown-title">
+                    <FormattedMessage id="cesnHeader.httpsTitle" defaultMessage="Secure .gov websites use HTTPS" />
+                  </p>
+                  <p className="cesn-banner-dropdown-body">
+                    <FormattedMessage
+                      id="cesnHeader.httpsBody"
+                      defaultMessage="A <b>lock (</b>{lock}<b>)</b> or <b>https://</b> means you've safely connected to the .gov website. Share sensitive information only on official, secure websites."
+                      values={{
+                        b: (chunks) => <strong>{chunks}</strong>,
+                        lock: <LockIcon className="cesn-banner-inline-lock" />,
+                      }}
+                    />
+                  </p>
+                </div>
               </div>
-            </div>
             </div>
           </div>
         </div>
