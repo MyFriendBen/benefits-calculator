@@ -95,7 +95,7 @@ export async function completeNC211FullApplication(page: Page, data: Application
       () => completeAssets(page, data.assets),
       () => completePublicBenefits(page),
       () => completeNeeds(page, data.needs),
-      () => completeAdditionalInfo(page),
+      () => completeAdditionalInfo(page, URL_PATTERNS.REFERRAL_SOURCE), // referralSource step is skipped, so signUpInfo shifts to step-10
       () => navigateToResults(page),
     ];
 
