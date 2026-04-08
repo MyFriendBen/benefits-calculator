@@ -26,7 +26,7 @@ const CesnBanner = () => {
         {doraLogo}
         <span className="cesn-official-banner-text">
           <FormattedMessage id="cesnHeader.bannerText" defaultMessage="An official website of the State of Colorado" />
-          <button className="cesn-banner-toggle" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen} aria-controls="cesn-banner-dropdown">
+          <button className="cesn-banner-toggle" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen} {...(isOpen && { 'aria-controls': 'cesn-banner-dropdown' })}>
             <FormattedMessage id="cesnHeader.bannerToggle" defaultMessage="Here's how you know" /> {isOpen ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
           </button>
         </span>
@@ -67,8 +67,8 @@ const CesnBanner = () => {
                   />
                 </p>
               </div>
-              </div>
-          </div>
+            </div>
+            </div>
           </div>
         </div>
       )}
