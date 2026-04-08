@@ -11,6 +11,7 @@ import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
 import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useDefaultBackNavigationFunction } from '../QuestionComponents/questionHooks';
 import { useReferralSources } from '../../hooks/useReferralSources';
+import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
 import useScreenApi from '../../Assets/updateScreen';
 import useStepForm from './stepForm';
@@ -25,12 +26,23 @@ export default function ReferralSourceStep() {
   }
 
   const backNavigationFunction = useDefaultBackNavigationFunction('referralSource');
-  const { referralOptions, loading } = useReferralSources();
+  const { referralOptions, loading, error } = useReferralSources();
+  const { formatMessage } = useIntl();
 
   if (loading) {
     return <CircularProgress />;
   }
-  const { formatMessage } = useIntl();
+
+  if (error) {
+    return (
+      <ErrorMessage
+        error={formatMessage({
+          id: 'errorMessage.referralOptions.loadFailed',
+          defaultMessage: 'Something went wrong loading this page. Please refresh and try again.',
+        })}
+      />
+    );
+  }
 
   const formSchema = z
     .object({
