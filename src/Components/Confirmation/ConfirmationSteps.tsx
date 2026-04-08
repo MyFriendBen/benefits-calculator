@@ -361,7 +361,10 @@ function ReferralSource() {
       <ConfirmationItem
         value={
           formData.referralSource in referralOptions
-            ? referralOptions[formData.referralSource]
+            ? formatMessage({
+                id: `referralOptions.${formData.referralSource}`,
+                defaultMessage: referralOptions[formData.referralSource],
+              })
             : formData.referralSource
         }
       />

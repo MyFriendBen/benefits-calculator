@@ -110,10 +110,10 @@ export default function ReferralSourceStep() {
       </MenuItem>
     );
 
-    const dropdownMenuItems = Object.entries(referralOptions).map(([value, message]) => {
+    const dropdownMenuItems = Object.entries(referralOptions).map(([value, name]) => {
       return (
         <MenuItem value={value} key={value}>
-          {message}
+          {formatMessage({ id: `referralOptions.${value}`, defaultMessage: name })}
         </MenuItem>
       );
     });
