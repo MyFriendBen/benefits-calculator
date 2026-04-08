@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
 import { Context } from '../Components/Wrapper/Wrapper';
-import { getReferralSources } from '../apiCalls';
+import { getReferralOptions } from '../apiCalls';
 
 export type ReferralOptions = Record<string, string>;
 
-export function useReferralSources(): { referralOptions: ReferralOptions; loading: boolean; error: Error | null } {
+export function useReferralOptions(): { referralOptions: ReferralOptions; loading: boolean; error: Error | null } {
   const { whiteLabel } = useContext(Context);
   const [referralOptions, setReferralOptions] = useState<ReferralOptions>({});
   const [loading, setLoading] = useState(true);
@@ -17,7 +17,7 @@ export function useReferralSources(): { referralOptions: ReferralOptions; loadin
     setLoading(true);
     setError(null);
 
-    getReferralSources(whiteLabel, controller.signal)
+    getReferralOptions(whiteLabel, controller.signal)
       .then((data) => {
         if (!cancelled) {
           setReferralOptions(data);

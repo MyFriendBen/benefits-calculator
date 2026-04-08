@@ -10,7 +10,7 @@ import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
 import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useDefaultBackNavigationFunction } from '../QuestionComponents/questionHooks';
-import { useReferralSources } from '../../hooks/useReferralSources';
+import { useReferralOptions } from '../../hooks/useReferralOptions';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
 import useScreenApi from '../../Assets/updateScreen';
@@ -26,7 +26,7 @@ export default function ReferralSourceStep() {
   }
 
   const backNavigationFunction = useDefaultBackNavigationFunction('referralSource');
-  const { referralOptions, loading, error } = useReferralSources();
+  const { referralOptions, loading, error } = useReferralOptions();
   const { formatMessage } = useIntl();
 
   if (loading) {

@@ -285,7 +285,7 @@ const getAuthToken = async (email: string, password: string) => {
   return data.token;
 };
 
-const getReferralSources = async (whiteLabel: string, signal?: AbortSignal): Promise<Record<string, string>> => {
+const getReferralOptions = async (whiteLabel: string, signal?: AbortSignal): Promise<Record<string, string>> => {
   const response = await fetch(`${screenerOptionsEndpoint}${whiteLabel}/referral-options/`, {
     method: 'GET',
     headers: header,
@@ -312,5 +312,5 @@ export {
   getAuthToken,
   postNPSScore,
   patchNPSReason,
-  getReferralSources,
+  getReferralOptions,
 };

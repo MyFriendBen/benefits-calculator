@@ -1,16 +1,16 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import React, { PropsWithChildren } from 'react';
-import { useReferralSources } from './useReferralSources';
+import { useReferralOptions } from './useReferralOptions';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { createMockContextValue } from '../test-utils/renderHelpers';
 
 jest.mock('../apiCalls', () => ({
-  getReferralSources: jest.fn(),
+  getReferralOptions: jest.fn(),
 }));
 
-import { getReferralSources } from '../apiCalls';
+import { getReferralOptions } from '../apiCalls';
 
-const mockGetReferralSources = getReferralSources as jest.MockedFunction<typeof getReferralSources>;
+const mockGetReferralSources = getReferralOptions as jest.MockedFunction<typeof getReferralOptions>;
 
 function wrapper({ children }: PropsWithChildren) {
   return React.createElement(
@@ -20,7 +20,7 @@ function wrapper({ children }: PropsWithChildren) {
   );
 }
 
-describe('useReferralSources', () => {
+describe('useReferralOptions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -28,7 +28,7 @@ describe('useReferralSources', () => {
   it('starts with loading=true and empty options', () => {
     mockGetReferralSources.mockReturnValue(new Promise(() => {})); // never resolves
 
-    const { result } = renderHook(() => useReferralSources(), { wrapper });
+    const { result } = renderHook(() => useReferralOptions(), { wrapper });
 
     expect(result.current.loading).toBe(true);
     expect(result.current.referralOptions).toEqual({});
@@ -39,7 +39,7 @@ describe('useReferralSources', () => {
     const mockOptions = { friend: 'Friend / Family', other: 'Other' };
     mockGetReferralSources.mockResolvedValueOnce(mockOptions);
 
-    const { result } = renderHook(() => useReferralSources(), { wrapper });
+    const { result } = renderHook(() => useReferralOptions(), { wrapper });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -51,7 +51,7 @@ describe('useReferralSources', () => {
     const fetchError = new Error('500 Internal Server Error');
     mockGetReferralSources.mockRejectedValueOnce(fetchError);
 
-    const { result } = renderHook(() => useReferralSources(), { wrapper });
+    const { result } = renderHook(() => useReferralOptions(), { wrapper });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -59,10 +59,10 @@ describe('useReferralSources', () => {
     expect(result.current.error).toBe(fetchError);
   });
 
-  it('passes abort signal to getReferralSources', () => {
+  it('passes abort signal to getReferralOptions', () => {
     mockGetReferralSources.mockReturnValue(new Promise(() => {}));
 
-    renderHook(() => useReferralSources(), { wrapper });
+    renderHook(() => useReferralOptions(), { wrapper });
 
     expect(mockGetReferralSources).toHaveBeenCalledWith('co', expect.any(AbortSignal));
   });
@@ -81,7 +81,7 @@ describe('useReferralSources', () => {
       );
     }
 
-    const { rerender } = renderHook(() => useReferralSources(), { wrapper: dynamicWrapper });
+    const { rerender } = renderHook(() => useReferralOptions(), { wrapper: dynamicWrapper });
 
     await waitFor(() => expect(mockGetReferralSources).toHaveBeenCalledTimes(1));
 
