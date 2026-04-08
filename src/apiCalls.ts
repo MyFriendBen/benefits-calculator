@@ -285,7 +285,12 @@ const getAuthToken = async (email: string, password: string) => {
   return data.token;
 };
 
-const getReferralOptions = async (whiteLabel: string, signal?: AbortSignal): Promise<Record<string, string>> => {
+export interface ReferralOptionsResponse {
+  generic: Record<string, string>;
+  partners: Record<string, string>;
+}
+
+const getReferralOptions = async (whiteLabel: string, signal?: AbortSignal): Promise<ReferralOptionsResponse> => {
   const response = await fetch(`${screenerOptionsEndpoint}${whiteLabel}/referral-options/`, {
     method: 'GET',
     headers: header,
@@ -294,7 +299,7 @@ const getReferralOptions = async (whiteLabel: string, signal?: AbortSignal): Pro
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`);
   }
-  return response.json() as Promise<Record<string, string>>;
+  return response.json() as Promise<ReferralOptionsResponse>;
 };
 
 export {

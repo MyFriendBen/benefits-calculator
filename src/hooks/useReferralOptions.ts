@@ -2,11 +2,23 @@ import { useContext, useEffect, useState } from 'react';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { getReferralOptions } from '../apiCalls';
 
-export type ReferralOptions = Record<string, string>;
+export type ReferralOptionGroup = Record<string, string>;
 
-export function useReferralOptions(): { referralOptions: ReferralOptions; loading: boolean; error: Error | null } {
+export interface ReferralOptions {
+  generic: ReferralOptionGroup;
+  partners: ReferralOptionGroup;
+}
+
+const EMPTY_REFERRAL_OPTIONS: ReferralOptions = { generic: {}, partners: {} };
+
+export function useReferralOptions(): {
+  referralOptions: ReferralOptions;
+  allOptions: ReferralOptionGroup;
+  loading: boolean;
+  error: Error | null;
+} {
   const { whiteLabel } = useContext(Context);
-  const [referralOptions, setReferralOptions] = useState<ReferralOptions>({});
+  const [referralOptions, setReferralOptions] = useState<ReferralOptions>(EMPTY_REFERRAL_OPTIONS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -27,7 +39,7 @@ export function useReferralOptions(): { referralOptions: ReferralOptions; loadin
       .catch((err: Error) => {
         if (!cancelled) {
           setError(err);
-          setReferralOptions({});
+          setReferralOptions(EMPTY_REFERRAL_OPTIONS);
           setLoading(false);
         }
       });
@@ -38,5 +50,7 @@ export function useReferralOptions(): { referralOptions: ReferralOptions; loadin
     };
   }, [whiteLabel]);
 
-  return { referralOptions, loading, error };
+  const allOptions = { ...referralOptions.generic, ...referralOptions.partners };
+
+  return { referralOptions, allOptions, loading, error };
 }

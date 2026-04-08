@@ -334,7 +334,7 @@ function AcuteConditions() {
 function ReferralSource() {
   const { formData } = useContext(Context);
   const { formatMessage } = useIntl();
-  const { referralOptions, loading } = useReferralOptions();
+  const { allOptions, loading } = useReferralOptions();
 
   if (formData.referralSource === undefined || loading) {
     return null;
@@ -360,10 +360,10 @@ function ReferralSource() {
     >
       <ConfirmationItem
         value={
-          formData.referralSource in referralOptions
+          formData.referralSource in allOptions
             ? formatMessage({
                 id: `referralOptions.${formData.referralSource}`,
-                defaultMessage: referralOptions[formData.referralSource],
+                defaultMessage: allOptions[formData.referralSource],
               })
             : formData.referralSource
         }
