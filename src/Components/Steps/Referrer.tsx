@@ -5,6 +5,7 @@ import { Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CircularProgress,
+  Divider,
   FormControl,
   FormHelperText,
   InputLabel,
@@ -120,20 +121,32 @@ export default function ReferralSourceStep() {
       </MenuItem>
     );
 
-    const genericItems = Object.entries(referralOptions.generic).map(([value, name]) => (
-      <MenuItem value={value} key={value}>
-        {formatMessage({ id: `referralOptions.${value}`, defaultMessage: name })}
-      </MenuItem>
-    ));
+    const subheaderSx = { fontWeight: 700, color: 'text.primary', lineHeight: '2rem' };
+    const menuItemSx = { pl: 5 };
+
+    const genericItems = [
+      <Divider key="general-divider-top" />,
+      <ListSubheader key="general-header" sx={subheaderSx}>
+        <FormattedMessage id="qcc.createReferralDropdownMenu-generalHeader" defaultMessage="General" />
+      </ListSubheader>,
+      <Divider key="general-divider-bottom" />,
+      ...Object.entries(referralOptions.generic).map(([value, name]) => (
+        <MenuItem value={value} key={value} sx={menuItemSx}>
+          {formatMessage({ id: `referralOptions.${value}`, defaultMessage: name })}
+        </MenuItem>
+      )),
+    ];
 
     const partnerItems =
       Object.keys(referralOptions.partners).length > 0
         ? [
-            <ListSubheader key="partners-header">
+            <Divider key="partners-divider-top" />,
+            <ListSubheader key="partners-header" sx={subheaderSx}>
               <FormattedMessage id="qcc.createReferralDropdownMenu-partnersHeader" defaultMessage="Partners" />
             </ListSubheader>,
+            <Divider key="partners-divider-bottom" />,
             ...Object.entries(referralOptions.partners).map(([value, name]) => (
-              <MenuItem value={value} key={value}>
+              <MenuItem value={value} key={value} sx={menuItemSx}>
                 {formatMessage({ id: `referralOptions.${value}`, defaultMessage: name })}
               </MenuItem>
             )),
