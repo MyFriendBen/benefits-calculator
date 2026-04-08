@@ -334,9 +334,9 @@ function AcuteConditions() {
 function ReferralSource() {
   const { formData } = useContext(Context);
   const { formatMessage } = useIntl();
-  const { referralOptions } = useReferralSources();
+  const { referralOptions, loading } = useReferralSources();
 
-  if (formData.referralSource === undefined) {
+  if (formData.referralSource === undefined || loading) {
     return null;
   }
 

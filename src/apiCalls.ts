@@ -285,15 +285,16 @@ const getAuthToken = async (email: string, password: string) => {
   return data.token;
 };
 
-const getReferralSources = async (whiteLabel: string): Promise<Record<string, string>> => {
+const getReferralSources = async (whiteLabel: string, signal?: AbortSignal): Promise<Record<string, string>> => {
   const response = await fetch(`${screenerOptionsEndpoint}${whiteLabel}/referral-sources/`, {
     method: 'GET',
     headers: header,
+    signal,
   });
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`);
   }
-  return response.json();
+  return response.json() as Promise<Record<string, string>>;
 };
 
 export {

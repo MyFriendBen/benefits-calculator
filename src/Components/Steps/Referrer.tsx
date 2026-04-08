@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { CircularProgress, FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { Context } from '../Wrapper/Wrapper';
 import * as z from 'zod';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
@@ -28,7 +28,7 @@ export default function ReferralSourceStep() {
   const { referralOptions, loading } = useReferralSources();
 
   if (loading) {
-    return null;
+    return <CircularProgress />;
   }
   const { formatMessage } = useIntl();
 

@@ -4,23 +4,39 @@ import { getReferralSources } from '../apiCalls';
 
 export type ReferralOptions = Record<string, string>;
 
-export function useReferralSources(): { referralOptions: ReferralOptions; loading: boolean } {
+export function useReferralSources(): { referralOptions: ReferralOptions; loading: boolean; error: Error | null } {
   const { whiteLabel } = useContext(Context);
   const [referralOptions, setReferralOptions] = useState<ReferralOptions>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    getReferralSources(whiteLabel)
+    let cancelled = false;
+    const controller = new AbortController();
+
+    setLoading(true);
+    setError(null);
+
+    getReferralSources(whiteLabel, controller.signal)
       .then((data) => {
-        setReferralOptions(data);
-        setLoading(false);
+        if (!cancelled) {
+          setReferralOptions(data);
+          setLoading(false);
+        }
       })
-      .catch((error) => {
-        console.error('Failed to load referral sources:', error);
-        setReferralOptions({});
-        setLoading(false);
+      .catch((err: Error) => {
+        if (!cancelled) {
+          setError(err);
+          setReferralOptions({});
+          setLoading(false);
+        }
       });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [whiteLabel]);
 
-  return { referralOptions, loading };
+  return { referralOptions, loading, error };
 }
