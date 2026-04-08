@@ -9,17 +9,19 @@ export function useStepDirectory() {
 
   const stepDirectory = getReferrer('stepDirectory', []);
 
+  let steps: QuestionName[];
   if (Array.isArray(stepDirectory)) {
-    return stepDirectory;
+    steps = stepDirectory;
+  } else {
+    const pathStepDirectory = stepDirectory[formData.path ?? 'default'];
+    steps = pathStepDirectory !== undefined ? pathStepDirectory : stepDirectory.default;
   }
 
-  const pathStepDirectory = stepDirectory[formData.path ?? 'default'];
-
-  if (pathStepDirectory !== undefined) {
-    return pathStepDirectory;
+  if (formData.immutableReferrer) {
+    return steps.filter((step) => step !== 'referralSource');
   }
 
-  return stepDirectory.default;
+  return steps;
 }
 
 export function useStepNumber(name: QuestionName, raise: boolean = true) {

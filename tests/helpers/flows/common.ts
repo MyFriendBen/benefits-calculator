@@ -393,9 +393,9 @@ export async function completeReferralSource(page: Page, referralSource: string)
  * @param page - Playwright page instance
  * @returns Promise with flow result
  */
-export async function completeAdditionalInfo(page: Page): Promise<FlowResult> {
+export async function completeAdditionalInfo(page: Page, urlPattern: RegExp = URL_PATTERNS.ADDITIONAL_INFO): Promise<FlowResult> {
   try {
-    await verifyCurrentUrl(page, URL_PATTERNS.ADDITIONAL_INFO);
+    await verifyCurrentUrl(page, urlPattern);
     await clickContinue(page);
     return { success: true, step: 'additional-info' };
   } catch (error) {
