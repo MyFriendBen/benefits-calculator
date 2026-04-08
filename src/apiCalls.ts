@@ -286,7 +286,7 @@ const getAuthToken = async (email: string, password: string) => {
 };
 
 const getReferralSources = async (whiteLabel: string, signal?: AbortSignal): Promise<Record<string, string>> => {
-  const response = await fetch(`${screenerOptionsEndpoint}${whiteLabel}/referral-sources/`, {
+  const response = await fetch(`${screenerOptionsEndpoint}${whiteLabel}/referral-options/`, {
     method: 'GET',
     headers: header,
     signal,
