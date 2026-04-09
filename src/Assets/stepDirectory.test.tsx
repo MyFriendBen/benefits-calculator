@@ -3,7 +3,7 @@ import React from 'react';
 import { useStepDirectory } from './stepDirectory';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { createMockContextValue } from '../test-utils/renderHelpers';
-import type { QuestionName } from '../Types/Questions';
+import { QuestionName } from '../Types/Questions';
 
 const BASE_STEPS: QuestionName[] = ['zipcode', 'householdData', 'referralSource', 'signUpInfo'];
 
