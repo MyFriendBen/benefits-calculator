@@ -153,7 +153,7 @@ export default function ReferralSourceStep() {
           ]
         : [];
 
-    return [...genericItems, ...partnerItems];
+    return [disabledSelectMenuItem, ...genericItems, ...partnerItems];
   };
 
   return (

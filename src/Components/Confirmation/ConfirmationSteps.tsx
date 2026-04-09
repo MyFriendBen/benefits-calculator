@@ -336,7 +336,7 @@ function ReferralSource() {
   const { formatMessage } = useIntl();
   const { allOptions, loading } = useReferralOptions();
 
-  if (formData.referralSource === undefined || loading || !(formData.referralSource in allOptions)) {
+  if (formData.referralSource === undefined || loading) {
     return null;
   }
 
@@ -349,6 +349,13 @@ function ReferralSource() {
     defaultMessage: 'referral source',
   };
 
+  // If not a known code, the user typed custom text via the "other" path.
+  // Referrer.tsx stores that text directly in referralSource, so display it verbatim.
+  const displayValue =
+    formData.referralSource in allOptions
+      ? formatMessage({ id: `referralOptions.${formData.referralSource}`, defaultMessage: allOptions[formData.referralSource] })
+      : formData.referralSource;
+
   return (
     <ConfirmationBlock
       icon={<Referral title={formatMessage(referralSourceIconAlt)} />}
@@ -358,12 +365,7 @@ function ReferralSource() {
       editAriaLabel={editReferralSourceAriaLabel}
       stepName="referralSource"
     >
-      <ConfirmationItem
-        value={formatMessage({
-          id: `referralOptions.${formData.referralSource}`,
-          defaultMessage: allOptions[formData.referralSource],
-        })}
-      />
+      <ConfirmationItem value={displayValue} />
     </ConfirmationBlock>
   );
 }
