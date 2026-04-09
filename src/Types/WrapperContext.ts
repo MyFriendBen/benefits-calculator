@@ -3,6 +3,7 @@ import { ITheme, ThemeName } from '../Assets/styleController';
 import { ReferrerData, ReferrerDataValue } from '../Components/Referrer/referrerHook';
 import { Language } from '../Assets/languageOptions';
 import { Config } from './Config';
+import type { ReferralOptions } from '../hooks/useReferralOptions';
 
 export interface WrapperContext {
   locale: Language;
@@ -23,4 +24,6 @@ export interface WrapperContext {
   setStaffToken: (token: string | undefined) => void;
   whiteLabel: string;
   setWhiteLabel: (whiteLabel: string) => void;
+  referralOptions: ReferralOptions;
+  referralOptionsLoading: boolean;
 }
