@@ -30,8 +30,6 @@ export const createMockContextValue = (overrides: Partial<WrapperContext> = {}):
   setStaffToken: jest.fn(),
   whiteLabel: '_default',
   setWhiteLabel: jest.fn(),
-  referralOptions: { generic: {}, partners: {} },
-  referralOptionsLoading: false,
   ...overrides,
 });
 
