@@ -88,14 +88,17 @@
 @media (max-width: 767px) {
   .footer-content-container {
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     padding-bottom: 1rem;
-    gap: 1rem;
-    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .footer-content-container > div:first-child {
+    margin-bottom: 0.25rem;
   }
 
   .footer-feedback-buttons {
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .footer-feedback-button {
