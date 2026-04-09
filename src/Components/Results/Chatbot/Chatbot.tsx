@@ -26,30 +26,8 @@ export function useChatbotContext() {
 }
 
 const DEMO_BOT_REPLIES = [
-  `Great work filling out the survey! Based on your results, you're eligible for four programs:
-
-* **SNAP**
-* **RTD Live**
-* **Colorado Utility Bill Help Program**
-* **Lifeline**
-
-We should start right away by applying to SNAP.`,
-  `SNAP (Supplemental Nutrition Assistance Program) puts money on a card each month that you can use at most grocery stores to buy food essentials like produce, bread, and dairy. Benefits are loaded automatically — nothing special to do at checkout, just swipe.
-
-The application takes about two hours, but with almost **$300 per month** in savings, it'll be well worth it.`,
-  `There are four ways to apply for SNAP — pick whichever works best for you:
-
-* **Paper application** — print and mail or drop off a physical form
-* **Online** — apply through the state benefits portal
-* **Mobile app** — apply on your phone via the MyCOBenefits app
-* **Phone** — call for assistance and apply with a caseworker
-
-Which would you prefer?`,
-  `Great! Here's the link:
-
-[Apply for SNAP on PEAK](https://peak.my.site.com/peak/s/peak-landing-page?language=en_US)
-
-I'll be here the whole time if you need to come back and ask about the application — whether it's what documents to have handy, what a question is asking, or what happens after you submit. When you're finished, just let me know and we can move on to the next benefit.`,
+  `Congrats! You completed the screener and found almost **$3200 monthly** in benefits.  Can I help you decide where to start?`,
+  `Looks like Supplemental Security Income (SSI) would be the most meaningful, with almost **$2000 per month in savings**.  The application takes about 90 minutes but will be well worth it.  Can I help you grab the right documents and get started?`,
 ];
 
 function renderFormattedMessage(text: string): React.ReactNode {
@@ -162,10 +140,10 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
     <ChatbotContext.Provider value={{ openWithMessage }}>
       {children}
       {isOpen ? (
-        <div className="chatbot-panel" role="dialog" aria-label={formatMessage({ id: 'chatbot.ariaLabel', defaultMessage: 'Benefits Assistant chat' })}>
+        <div className="chatbot-panel" role="dialog" aria-label={formatMessage({ id: 'chatbot.ariaLabel', defaultMessage: 'BenBot Assistant chat' })}>
           <div className="chatbot-header">
             <span className="chatbot-header-title">
-              <FormattedMessage id="chatbot.title" defaultMessage="Benefits Assistant" />
+              <FormattedMessage id="chatbot.title" defaultMessage="BenBot Assistant" />
             </span>
             <button
               type="button"
@@ -219,7 +197,7 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
           type="button"
           className="chatbot-fab"
           onClick={handleOpen}
-          aria-label={formatMessage({ id: 'chatbot.open', defaultMessage: 'Open Benefits Assistant chat' })}
+          aria-label={formatMessage({ id: 'chatbot.open', defaultMessage: 'Open BenBot Assistant chat' })}
         >
           <ChatIcon />
         </button>
