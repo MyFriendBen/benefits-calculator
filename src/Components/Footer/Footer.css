@@ -44,29 +44,27 @@
 .footer-bottom-bar {
   max-width: var(--main-max-width);
   margin: 0 auto;
-  padding: 0 1rem 1.25rem;
+  padding: 0.75rem 1rem 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .footer-policy-links {
   display: flex;
-  gap: 0.5rem;
+  gap: 1.5rem;
 }
 
 .policy-link {
   text-decoration: none;
-  color: #fff;
-  font-weight: bold;
-  text-transform: uppercase;
-  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: normal;
+  font-size: 0.8rem;
 }
 
 .policy-link-separator {
-  color: #fff;
-  font-weight: bold;
-  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .footer-social-icons {
@@ -114,5 +112,6 @@
 
   .policy-link {
     font-size: 0.75rem;
+    font-weight: normal;
   }
 }
