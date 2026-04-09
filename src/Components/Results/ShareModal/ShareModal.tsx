@@ -41,9 +41,17 @@ function buildMailtoUrl(subject: string, body: string) {
 
 type ShareView = 'options' | 'email' | 'success';
 
-const ShareModal = () => {
+type ShareModalProps = {
+  /** When provided, puts the modal in controlled mode (bypasses timer/feature-flag logic) */
+  open?: boolean;
+  onClose?: () => void;
+};
+
+const ShareModal = ({ open: controlledOpen, onClose: controlledOnClose }: ShareModalProps = {}) => {
   const isShareEnabled = useFeatureFlag('share_popup');
   const { formatMessage } = useIntl();
+
+  const isControlled = controlledOpen !== undefined;
 
   const [isVisible, setIsVisible] = useState(false);
   const [isMinimized, setIsMinimized] = useState(true);
@@ -51,9 +59,17 @@ const ShareModal = () => {
   const [view, setView] = useState<ShareView>('options');
 
   useEffect(() => {
+    if (isControlled) return;
     const timer = setTimeout(() => setIsVisible(true), 5000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isControlled]);
+
+  useEffect(() => {
+    if (isControlled && controlledOpen) {
+      setIsMinimized(false);
+      setView('options');
+    }
+  }, [isControlled, controlledOpen]);
 
   const handleRestore = useCallback(() => {
     setIsMinimized(false);
@@ -61,9 +77,13 @@ const ShareModal = () => {
   }, []);
 
   const handleMinimize = useCallback(() => {
-    setIsMinimized(true);
+    if (isControlled) {
+      controlledOnClose?.();
+    } else {
+      setIsMinimized(true);
+    }
     setView('options');
-  }, []);
+  }, [isControlled, controlledOnClose]);
 
   // Translated share text — recomputed when locale changes
   const shareSubject = formatMessage({
@@ -137,7 +157,11 @@ const ShareModal = () => {
     [shareSubject, emailBody],
   );
 
-  if (!isShareEnabled || !isVisible || isDismissed) return null;
+  if (isControlled) {
+    if (!controlledOpen) return null;
+  } else {
+    if (!isShareEnabled || !isVisible || isDismissed) return null;
+  }
 
   if (isMinimized) {
     return (

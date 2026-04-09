@@ -2,12 +2,13 @@ import Paper from '@mui/material/Paper';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import SvgIcon from '@mui/material/SvgIcon';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { Context } from '../Wrapper/Wrapper';
 import { useConfig, useLocalizedLink } from '../Config/configHook';
 import { FormattedMessage } from 'react-intl';
 import './Footer.css';
 import { useLogo } from '../Referrer/useLogo';
+import ShareModal from '../Results/ShareModal/ShareModal';
 
 const InstagramIcon = () => (
   <SvgIcon sx={{ color: '#fff', fontSize: '1.25rem' }} viewBox="0 0 24 24">
@@ -32,6 +33,8 @@ const Footer = ({ hideServiceLinks }: FooterProps) => {
   const { getReferrer, theme } = context;
   const { email, survey } = useConfig<{ email: string; survey: string }>('feedback_links');
 
+  const [shareOpen, setShareOpen] = useState(false);
+
   const baseLogoClass = 'logo footer-logo';
   const footerLogoClass = getReferrer('footerLogoClass', '');
   const logoClassName = footerLogoClass ? `${baseLogoClass} ${footerLogoClass}` : baseLogoClass;
@@ -48,7 +51,11 @@ const Footer = ({ hideServiceLinks }: FooterProps) => {
             <a className="footer-feedback-button" href={survey} target="_blank" rel="noreferrer">
               <FormattedMessage id="reportABugButton" defaultMessage="REPORT AN ISSUE" />
             </a>
+            <button className="footer-feedback-button" onClick={() => setShareOpen(true)}>
+              <FormattedMessage id="shareMfbButton" defaultMessage="SHARE MFB" />
+            </button>
           </div>
+          <ShareModal open={shareOpen} onClose={() => setShareOpen(false)} />
         </div>
         {!hideServiceLinks && (
           <div className="footer-bottom-bar">
