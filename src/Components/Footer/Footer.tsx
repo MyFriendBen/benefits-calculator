@@ -48,11 +48,11 @@ const Footer = ({ hideServiceLinks }: FooterProps) => {
             <button className="footer-feedback-button" onClick={() => setShareOpen(true)}>
               <FormattedMessage id="shareMfbButton" defaultMessage="SHARE MFB" />
             </button>
-            <a className="footer-feedback-button" href={`mailto:${email}`}>
-              <FormattedMessage id="contactUsButton" defaultMessage="CONTACT US" />
-            </a>
             <a className="footer-feedback-button" href={survey} target="_blank" rel="noreferrer">
               <FormattedMessage id="reportABugButton" defaultMessage="REPORT AN ISSUE" />
+            </a>
+            <a className="footer-feedback-button" href={`mailto:${email}`}>
+              <FormattedMessage id="contactUsButton" defaultMessage="CONTACT US" />
             </a>
           </div>
           <ShareModal open={shareOpen} onClose={() => setShareOpen(false)} />
