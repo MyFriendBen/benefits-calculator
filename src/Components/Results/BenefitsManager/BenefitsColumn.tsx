@@ -8,6 +8,7 @@ type BenefitsColumnProps = {
   columnId: ColumnId;
   programs: Program[];
   onDrop: (programId: number, toColumn: ColumnId) => void;
+  onSelectProgram: (program: Program) => void;
 };
 
 const COLUMN_LABELS: Record<ColumnId, { id: string; defaultMessage: string }> = {
@@ -24,7 +25,7 @@ const COLUMN_COLORS: Record<ColumnId, string> = {
   rejected: '#f44336',
 };
 
-const BenefitsColumn = ({ columnId, programs, onDrop }: BenefitsColumnProps) => {
+const BenefitsColumn = ({ columnId, programs, onDrop, onSelectProgram }: BenefitsColumnProps) => {
   const [dragOver, setDragOver] = useState(false);
   const dragCounterRef = useState(0);
 
@@ -82,7 +83,7 @@ const BenefitsColumn = ({ columnId, programs, onDrop }: BenefitsColumnProps) => 
       </div>
       <div className="benefits-column-body">
         {programs.map((program) => (
-          <BenefitDragCard key={program.program_id} program={program} />
+          <BenefitDragCard key={program.program_id} program={program} onSelect={onSelectProgram} />
         ))}
         {programs.length === 0 && (
           <div className="benefits-column-empty">
