@@ -6,7 +6,7 @@ import RestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Program } from '../../../Types/Results';
-import { programValue, useFormatDisplayValue } from '../FormattedValue';
+import { programValue } from '../FormattedValue';
 import ResultsTranslate from '../Translate/Translate';
 import { ColumnId } from './benefitsCodeUtils';
 import { useResultsContext, useResultsLink } from '../Results';
@@ -45,10 +45,6 @@ const BenefitsManager = () => {
 
   const handleSelectProgram = useCallback((program: Program) => {
     setSelectedProgram(program);
-  }, []);
-
-  const handleCloseDetail = useCallback(() => {
-    setSelectedProgram(null);
   }, []);
 
   const handleCloseNewBenefits = useCallback(() => {
@@ -189,10 +185,52 @@ const BenefitsManager = () => {
         </div>
       </div>
 
+      {nextApplication && (
+        <div className="next-application-bar">
+          <h3 className="next-application-title">
+            <FormattedMessage id="benefitsManager.nextApplication" defaultMessage="Your Next Application" />
+          </h3>
+          <div className="next-application-content">
+            <button
+              type="button"
+              className="next-application-card"
+              onClick={() => handleSelectProgram(nextApplication)}
+            >
+              <span className="benefit-drag-card-name">
+                <ResultsTranslate translation={nextApplication.name} />
+              </span>
+              <span className="benefit-drag-card-value">
+                {formatDollars(nextApplicationMonthly)}/mo
+              </span>
+            </button>
+            <div className="next-application-info">
+              <p className="next-application-savings">
+                <FormattedMessage
+                  id="benefitsManager.nextApplication.savings"
+                  defaultMessage="{name} can save you {dollars} per month"
+                  values={{
+                    name: <strong><ResultsTranslate translation={nextApplication.name} /></strong>,
+                    dollars: <strong>{formatDollars(nextApplicationMonthly)}</strong>,
+                  }}
+                />
+              </p>
+              <button type="button" className="next-application-apply-btn" onClick={handleFindOutHowToApply}>
+                <FormattedMessage id="benefitsManager.nextApplication.findOut" defaultMessage="Find out how to apply" />
+                <ArrowForwardIcon fontSize="small" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <BenefitsBoard columns={columns} moveProgram={handleMoveProgram} allColumns={allColumns} onSelectProgram={handleSelectProgram} />
 
       {selectedProgram !== null && (
-        <BenefitDetailView program={selectedProgram} onClose={handleCloseDetail} />
+        <BenefitDetailView
+          program={selectedProgram}
+          onClose={handleCloseDetailWithReset}
+          highlightApplicationProcess={highlightApplication}
+        />
       )}
 
       {newBenefitsData !== null && (
