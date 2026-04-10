@@ -5,7 +5,7 @@ import { Controller } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { z } from 'zod';
-import { getHasBenefitsPrograms, HasBenefitsProgram } from '../../apiCalls';
+import { getScreenerOptions, HasBenefitsProgram } from '../../apiCalls';
 import useScreenApi from '../../Assets/updateScreen';
 import { OverrideableTranslation } from '../../Assets/languageOptions';
 import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
@@ -55,7 +55,9 @@ function AlreadyHasBenefits() {
 
   useEffect(() => {
     if (!whiteLabel) return;
-    getHasBenefitsPrograms(whiteLabel).then(setPrograms).catch(console.error);
+    getScreenerOptions(whiteLabel)
+      .then((options) => setPrograms(options.has_benefits_programs))
+      .catch(console.error);
   }, [whiteLabel]);
 
   const formSchema = z
