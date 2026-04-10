@@ -1,12 +1,10 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import CloseIcon from '@mui/icons-material/Close';
+import { useState, useCallback, useMemo } from 'react';
 import IosShareIcon from '@mui/icons-material/IosShare';
 import EmailIcon from '@mui/icons-material/Email';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import SmsIcon from '@mui/icons-material/Sms';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useFeatureFlag } from '../../Config/configHook';
 import ModalShell from '../shared/ModalShell';
 import ModalOption from '../shared/ModalOption';
 import CopyLinkOption from '../shared/CopyLinkOption';
@@ -42,50 +40,19 @@ function buildMailtoUrl(subject: string, body: string) {
 type ShareView = 'options' | 'email' | 'success';
 
 type ShareModalProps = {
-  /** When provided, puts the modal in controlled mode (bypasses timer/feature-flag logic) */
-  open?: boolean;
-  onClose?: () => void;
+  open: boolean;
+  onClose: () => void;
 };
 
-const ShareModal = ({ open: controlledOpen, onClose: controlledOnClose }: ShareModalProps = {}) => {
-  const isShareEnabled = useFeatureFlag('share_popup');
+const ShareModal = ({ open, onClose }: ShareModalProps) => {
   const { formatMessage } = useIntl();
-
-  const isControlled = controlledOpen !== undefined;
-
-  const [isVisible, setIsVisible] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(true);
-  const [isDismissed, setIsDismissed] = useState(false);
   const [view, setView] = useState<ShareView>('options');
 
-  useEffect(() => {
-    if (isControlled) return;
-    const timer = setTimeout(() => setIsVisible(true), 5000);
-    return () => clearTimeout(timer);
-  }, [isControlled]);
-
-  useEffect(() => {
-    if (isControlled && controlledOpen) {
-      setIsMinimized(false);
-      setView('options');
-    }
-  }, [isControlled, controlledOpen]);
-
-  const handleRestore = useCallback(() => {
-    setIsMinimized(false);
+  const handleClose = useCallback(() => {
+    onClose();
     setView('options');
-  }, []);
+  }, [onClose]);
 
-  const handleMinimize = useCallback(() => {
-    if (isControlled) {
-      controlledOnClose?.();
-    } else {
-      setIsMinimized(true);
-    }
-    setView('options');
-  }, [isControlled, controlledOnClose]);
-
-  // Translated share text — recomputed when locale changes
   const shareSubject = formatMessage({
     id: 'sharePopup.emailSubject',
     defaultMessage: 'Check out MyFriendBen',
@@ -157,44 +124,7 @@ const ShareModal = ({ open: controlledOpen, onClose: controlledOnClose }: ShareM
     [shareSubject, emailBody],
   );
 
-  if (isControlled) {
-    if (!controlledOpen) return null;
-  } else {
-    if (!isShareEnabled || !isVisible || isDismissed) return null;
-  }
-
-  if (isMinimized) {
-    return (
-      <div className="share-modal-chip-container">
-        <button
-          type="button"
-          aria-label="Close share popup"
-          className="share-modal-chip-close"
-          onClick={() => setIsDismissed(true)}
-        >
-          <CloseIcon fontSize="inherit" />
-        </button>
-        <button
-          type="button"
-          className="share-modal-chip"
-          onClick={handleRestore}
-          aria-label="Open share options"
-        >
-          <span className="share-modal-chip-icon" aria-hidden="true">
-            <IosShareIcon style={{ fontSize: '1rem' }} />
-          </span>
-          <span className="share-modal-chip-text">
-            <span className="share-modal-chip-title">
-              <FormattedMessage id="sharePopup.minimized" defaultMessage="Share MyFriendBen" />
-            </span>
-            <span className="share-modal-chip-subtitle">
-              <FormattedMessage id="sharePopup.minimizedSubtitle" defaultMessage="Help a friend discover benefits" />
-            </span>
-          </span>
-        </button>
-      </div>
-    );
-  }
+  if (!open) return null;
 
   if (view === 'success') {
     return (
@@ -202,7 +132,7 @@ const ShareModal = ({ open: controlledOpen, onClose: controlledOnClose }: ShareM
         title={<FormattedMessage id="sharePopup.successTitle" defaultMessage="Link Shared!" />}
         subtitle={<FormattedMessage id="sharePopup.successSubtitle" defaultMessage="Thanks for spreading the word" />}
         doneLabel={<FormattedMessage id="sharePopup.successDone" defaultMessage="Done" />}
-        onClose={handleMinimize}
+        onClose={handleClose}
       />
     );
   }
@@ -213,7 +143,7 @@ const ShareModal = ({ open: controlledOpen, onClose: controlledOnClose }: ShareM
         headerIcon={<IosShareIcon />}
         title={<FormattedMessage id="sharePopup.emailProviderTitle" defaultMessage="Choose email provider" />}
         subtitle={<FormattedMessage id="sharePopup.emailProviderSubtitle" defaultMessage="Select your preferred email service" />}
-        onClose={handleMinimize}
+        onClose={handleClose}
         onBack={() => setView('options')}
       >
         <div className="modal-options-list">
@@ -236,7 +166,7 @@ const ShareModal = ({ open: controlledOpen, onClose: controlledOnClose }: ShareM
       headerIcon={<IosShareIcon />}
       title={<FormattedMessage id="sharePopup.title" defaultMessage="Share MyFriendBen" />}
       subtitle={<FormattedMessage id="sharePopup.subtitle" defaultMessage="Help a friend discover benefits" />}
-      onClose={handleMinimize}
+      onClose={handleClose}
     >
       <div className="modal-options-list">
         {isMobile() && (
