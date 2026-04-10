@@ -14,6 +14,7 @@ const resultsRoutes: RouteObject[] = [
   },
   { path: 'results/benefits/:programId', element: <Results type="program" /> },
   { path: 'results/more-help', element: <Results type="help" /> },
+  { path: 'results/manage', element: <Results type="manage" /> },
 ];
 
 export default resultsRoutes;

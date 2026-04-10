@@ -1,9 +1,10 @@
+import { Link } from 'react-router-dom';
 import { ProgramCategory } from '../../../Types/Results';
-import { findValidationForProgram, useResultsContext } from '../Results';
+import { findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
 import Filter from '../Filter/Filter';
 import ProgramCard from './ProgramCard';
 import CategoryHeading from '../CategoryHeading/CategoryHeading';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { calculateTotalValue, programValue } from '../FormattedValue';
 import { ResultsMessage } from '../../Referrer/Referrer';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
@@ -11,6 +12,8 @@ import EnergyCalculatorRebateCategoryList, {
   useEnergyCalculatorNeedsRebates,
 } from '../../EnergyCalculator/Results/RebateCategories';
 import DocumentSummary from '../DocumentSummary/DocumentSummary';
+import { FormattedMessage, useIntl } from 'react-intl';
+import { useChatbotContext } from '../Chatbot/Chatbot';
 
 function sortProgramsIntoCategories(categories: ProgramCategory[]): ProgramCategory[] {
   // sort categories by total category value in decending order
@@ -70,6 +73,36 @@ const ValidationCategory = () => {
   );
 };
 
+const GuideMeButton = () => {
+  const { openWithMessage } = useChatbotContext();
+  const { formatMessage } = useIntl();
+
+  const handleClick = useCallback(() => {
+    openWithMessage(
+      formatMessage({
+        id: 'chatbot.guideMeMessage',
+        defaultMessage: 'Guide me through my benefits',
+      }),
+    );
+  }, [openWithMessage, formatMessage]);
+
+  return (
+    <button type="button" className="guide-me-button" onClick={handleClick}>
+      <FormattedMessage id="programs.guideMeButton" defaultMessage="Guide Me Through My Benefits" />
+    </button>
+  );
+};
+
+const ManageBenefitsButton = () => {
+  const manageLink = useResultsLink('results/manage');
+
+  return (
+    <Link to={manageLink} className="manage-benefits-button">
+      <FormattedMessage id="programs.manageBenefits" defaultMessage="Manage My Benefits" />
+    </Link>
+  );
+};
+
 const Programs = () => {
   const { programs, programCategories } = useResultsContext();
 
@@ -84,6 +117,10 @@ const Programs = () => {
       {!isEnergyCalculator && <Filter />}
       {isEnergyCalculator && <DocumentSummary programs={programs} />}
       <ValidationCategory />
+      <div className="results-action-buttons">
+        <GuideMeButton />
+        <ManageBenefitsButton />
+      </div>
       {isEnergyCalculator && needsRebates && <EnergyCalculatorRebateCategoryList />}
       {categories.map((category) => {
         return (

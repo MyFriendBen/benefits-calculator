@@ -263,6 +263,57 @@
   outline-offset: 2px;
 }
 
+/* Action buttons row (Guide Me + Manage My Benefits) */
+.results-action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
+.guide-me-button,
+.manage-benefits-button {
+  border: 2px solid var(--primary-color);
+  border-radius: 0.75rem;
+  padding: 1.125rem 3rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.375rem;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  text-decoration: none;
+  text-align: center;
+}
+
+.guide-me-button {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+.guide-me-button:hover {
+  background-color: #fff;
+  color: var(--primary-color);
+}
+
+.manage-benefits-button {
+  background-color: #fff;
+  color: var(--primary-color);
+  display: inline-flex;
+  align-items: center;
+}
+
+.manage-benefits-button:hover {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+.guide-me-button:focus-visible,
+.manage-benefits-button:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
 /* DESKTOP - 768px and above (matches BREAKPOINTS.desktop in src/utils/breakpoints.ts) */
 @media (min-width: 768px) {
   .results-header-programs-count-text {
