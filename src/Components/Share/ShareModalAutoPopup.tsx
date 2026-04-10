@@ -32,14 +32,6 @@ const ShareModalAutoPopup = () => {
       <div className="share-modal-chip-container">
         <button
           type="button"
-          aria-label="Close share popup"
-          className="share-modal-chip-close"
-          onClick={() => setIsDismissed(true)}
-        >
-          <CloseIcon fontSize="inherit" />
-        </button>
-        <button
-          type="button"
           className="share-modal-chip"
           onClick={handleRestore}
           aria-label="Open share options"
@@ -55,6 +47,14 @@ const ShareModalAutoPopup = () => {
               <FormattedMessage id="sharePopup.minimizedSubtitle" defaultMessage="Help a friend discover benefits" />
             </span>
           </span>
+        </button>
+        <button
+          type="button"
+          aria-label="Close share popup"
+          className="share-modal-chip-close"
+          onClick={() => setIsDismissed(true)}
+        >
+          <CloseIcon fontSize="inherit" />
         </button>
       </div>
     );
