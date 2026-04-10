@@ -65,10 +65,10 @@ const Footer = ({ hideServiceLinks }: FooterProps) => {
                 <FormattedMessage id="footer.aboutUs" defaultMessage="About Us" />
               </a>
               <a href={privacyPolicyLink} target="_blank" rel="noreferrer" className="policy-link">
-                <FormattedMessage id="footer.privacyPolicy" defaultMessage="Privacy" />
+                <FormattedMessage id="footer.privacyPolicy" defaultMessage="Privacy Policy" />
               </a>
               <a href={termsAndConditionsLink} target="_blank" rel="noreferrer" className="policy-link">
-                <FormattedMessage id="footer.termsAndConditions" defaultMessage="Terms" />
+                <FormattedMessage id="footer.termsAndConditions" defaultMessage="Terms and Conditions" />
               </a>
             </div>
             <div className="footer-social-icons">
