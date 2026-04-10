@@ -2,7 +2,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import ShareModal from './ShareModal';
 
-jest.mock('../shared/ModalShell.css', () => ({}));
+jest.mock('../Results/shared/ModalShell.css', () => ({}));
 jest.mock('./ShareModal.css', () => ({}));
 
 const renderModal = (open: boolean, onClose = jest.fn()) =>

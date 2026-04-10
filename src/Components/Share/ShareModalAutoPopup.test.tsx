@@ -2,11 +2,11 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import ShareModalAutoPopup from './ShareModalAutoPopup';
 
-jest.mock('../../Config/configHook', () => ({
+jest.mock('../Config/configHook', () => ({
   useFeatureFlag: jest.fn(),
 }));
 
-jest.mock('../shared/ModalShell.css', () => ({}));
+jest.mock('../Results/shared/ModalShell.css', () => ({}));
 jest.mock('./ShareModal.css', () => ({}));
 
 const renderAutoPopup = () =>
@@ -24,7 +24,7 @@ const advanceToVisible = () => {
 
 describe('ShareModalAutoPopup', () => {
   beforeEach(() => {
-    const { useFeatureFlag } = require('../../Config/configHook');
+    const { useFeatureFlag } = require('../Config/configHook');
     useFeatureFlag.mockReturnValue(true);
     jest.useFakeTimers({ legacyFakeTimers: true });
     Object.defineProperty(navigator, 'userAgent', {
@@ -75,7 +75,7 @@ describe('ShareModalAutoPopup', () => {
   });
 
   it('renders nothing when feature flag is disabled', () => {
-    const { useFeatureFlag } = require('../../Config/configHook');
+    const { useFeatureFlag } = require('../Config/configHook');
     useFeatureFlag.mockReturnValue(false);
     renderAutoPopup();
     advanceToVisible();

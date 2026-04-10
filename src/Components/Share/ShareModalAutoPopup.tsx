@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import IosShareIcon from '@mui/icons-material/IosShare';
 import { FormattedMessage } from 'react-intl';
-import { useFeatureFlag } from '../../Config/configHook';
+import { useFeatureFlag } from '../Config/configHook';
 import ShareModal from './ShareModal';
 import './ShareModal.css';
 

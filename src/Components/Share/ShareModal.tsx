@@ -5,11 +5,11 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import SmsIcon from '@mui/icons-material/Sms';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { FormattedMessage, useIntl } from 'react-intl';
-import ModalShell from '../shared/ModalShell';
-import ModalOption from '../shared/ModalOption';
-import CopyLinkOption from '../shared/CopyLinkOption';
-import SuccessView from '../shared/SuccessView';
-import '../shared/ModalShell.css';
+import ModalShell from '../Results/shared/ModalShell';
+import ModalOption from '../Results/shared/ModalOption';
+import CopyLinkOption from '../Results/shared/CopyLinkOption';
+import SuccessView from '../Results/shared/SuccessView';
+import '../Results/shared/ModalShell.css';
 import './ShareModal.css';
 
 const SHARE_URL_EMAIL = 'https://screener.myfriendben.org/share/email';

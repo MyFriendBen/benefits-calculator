@@ -8,7 +8,7 @@ import { useConfig, useLocalizedLink } from '../Config/configHook';
 import { FormattedMessage } from 'react-intl';
 import './Footer.css';
 import { useLogo } from '../Referrer/useLogo';
-import ShareModal from '../Results/ShareModal/ShareModal';
+import ShareModal from '../Share/ShareModal';
 
 const InstagramIcon = () => (
   <SvgIcon sx={{ color: '#fff', fontSize: '1.25rem' }} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
