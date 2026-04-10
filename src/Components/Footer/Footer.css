@@ -43,6 +43,11 @@
   border: 1px solid var(--hover-color);
 }
 
+.footer-feedback-button:focus-visible {
+  outline: 2px solid var(--hover-color);
+  outline-offset: 2px;
+}
+
 .footer-bottom-bar {
   max-width: var(--main-max-width);
   margin: 0 auto;
@@ -65,8 +70,9 @@
   font-size: 0.8rem;
 }
 
-.policy-link-separator {
-  color: rgba(255, 255, 255, 0.85);
+.policy-link:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 2px;
 }
 
 .footer-social-icons {
@@ -79,6 +85,12 @@
   display: flex;
   align-items: center;
   color: #fff;
+}
+
+.footer-social-icons a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /**
