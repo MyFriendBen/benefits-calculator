@@ -1,0 +1,39 @@
+.has-benefits-programs {
+  transition: opacity 0.2s ease;
+}
+
+.has-benefits-programs--disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  user-select: none;
+}
+
+.has-benefits-category {
+  margin-bottom: 1.5rem;
+}
+
+.has-benefits-category-header.MuiTypography-root {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary-color);
+  margin-bottom: 0.75rem;
+}
+
+.has-benefits-tile-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.has-benefits-tile-acronym {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.has-benefits-tile-name {
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
