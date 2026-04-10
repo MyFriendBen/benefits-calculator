@@ -2,75 +2,51 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import ShareModal from './ShareModal';
 
-// Feature flag hook — mocked; implementation set in beforeEach to survive resetMocks
-jest.mock('../../Config/configHook', () => ({
-  useFeatureFlag: jest.fn(),
-}));
-
-// Stub CSS imports
 jest.mock('../shared/ModalShell.css', () => ({}));
 jest.mock('./ShareModal.css', () => ({}));
 
-const renderModal = () =>
+const renderModal = (open: boolean, onClose = jest.fn()) =>
   render(
     <IntlProvider locale="en">
-      <ShareModal />
+      <ShareModal open={open} onClose={onClose} />
     </IntlProvider>,
   );
 
-const advanceToVisible = () => {
-  act(() => {
-    jest.advanceTimersByTime(5000);
-  });
-};
-
 describe('ShareModal', () => {
   beforeEach(() => {
-    const { useFeatureFlag } = require('../../Config/configHook');
-    useFeatureFlag.mockReturnValue(true);
-    jest.useFakeTimers({ legacyFakeTimers: true });
     Object.defineProperty(navigator, 'userAgent', {
       value: 'Mozilla/5.0 (Macintosh)',
       configurable: true,
     });
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterEach(() => {
     jest.useRealTimers();
   });
 
-  it('renders nothing before the 5-second delay', () => {
-    renderModal();
-    expect(screen.queryByRole('button', { name: /open share options/i })).not.toBeInTheDocument();
+  it('renders nothing when open is false', () => {
+    renderModal(false);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('shows the minimized chip after 5 seconds', () => {
-    renderModal();
-    advanceToVisible();
-    expect(screen.getByRole('button', { name: /open share options/i })).toBeInTheDocument();
-    expect(screen.getByText('Share MyFriendBen')).toBeInTheDocument();
-  });
-
-  it('dismisses the chip when the close button is clicked', () => {
-    renderModal();
-    advanceToVisible();
-    fireEvent.click(screen.getByLabelText('Close share popup'));
-    expect(screen.queryByText('Share MyFriendBen')).not.toBeInTheDocument();
-  });
-
-  it('expands to the modal when the chip is clicked', () => {
-    renderModal();
-    advanceToVisible();
-    fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
+  it('renders the dialog when open is true', () => {
+    renderModal(true);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('Share MyFriendBen')).toBeInTheDocument();
     expect(screen.getByText('Email')).toBeInTheDocument();
     expect(screen.getByText('Copy Link')).toBeInTheDocument();
   });
 
+  it('calls onClose when close button is clicked', () => {
+    const onClose = jest.fn();
+    renderModal(true, onClose);
+    fireEvent.click(screen.getByLabelText('Close dialog'));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('shows email provider list when Email option is clicked', () => {
-    renderModal();
-    advanceToVisible();
-    fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
+    renderModal(true);
     fireEvent.click(screen.getByText('Email'));
     expect(screen.getByText('Gmail')).toBeInTheDocument();
     expect(screen.getByText('Outlook')).toBeInTheDocument();
@@ -80,9 +56,7 @@ describe('ShareModal', () => {
   });
 
   it('goes back to main options from email provider list', () => {
-    renderModal();
-    advanceToVisible();
-    fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
+    renderModal(true);
     fireEvent.click(screen.getByText('Email'));
     fireEvent.click(screen.getByLabelText('Back'));
     expect(screen.getByText('Email')).toBeInTheDocument();
@@ -93,9 +67,7 @@ describe('ShareModal', () => {
     Object.assign(navigator, {
       clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
     });
-    renderModal();
-    advanceToVisible();
-    fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
+    renderModal(true);
     await act(async () => {
       fireEvent.click(screen.getByText('Copy Link'));
     });
@@ -106,9 +78,7 @@ describe('ShareModal', () => {
     Object.assign(navigator, {
       clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
     });
-    renderModal();
-    advanceToVisible();
-    fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
+    renderModal(true);
     await act(async () => {
       fireEvent.click(screen.getByText('Copy Link'));
     });
@@ -119,37 +89,38 @@ describe('ShareModal', () => {
   });
 
   it('does not show SMS option on desktop', () => {
-    renderModal();
-    advanceToVisible();
-    fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
+    renderModal(true);
     expect(screen.queryByText('SMS')).not.toBeInTheDocument();
   });
 
-  it('shows SMS option on mobile', () => {
+  it('shows SMS and WhatsApp options on mobile', () => {
     Object.defineProperty(navigator, 'userAgent', {
       value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14)',
       configurable: true,
     });
-    renderModal();
-    advanceToVisible();
-    fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
+    renderModal(true);
     expect(screen.getByText('SMS')).toBeInTheDocument();
+    expect(screen.getByText('WhatsApp')).toBeInTheDocument();
   });
 
-  it('minimizes when close button on modal is clicked', () => {
-    renderModal();
-    advanceToVisible();
-    fireEvent.click(screen.getByRole('button', { name: /open share options/i }));
+  it('resets view to options when reopened after close', () => {
+    const onClose = jest.fn();
+    const { rerender } = render(
+      <IntlProvider locale="en">
+        <ShareModal open={true} onClose={onClose} />
+      </IntlProvider>,
+    );
+    fireEvent.click(screen.getByText('Email'));
+    expect(screen.getByText('Gmail')).toBeInTheDocument();
+
     fireEvent.click(screen.getByLabelText('Close dialog'));
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(screen.getByText('Share MyFriendBen')).toBeInTheDocument();
-  });
 
-  it('renders nothing when feature flag is disabled', () => {
-    const { useFeatureFlag } = require('../../Config/configHook');
-    useFeatureFlag.mockReturnValue(false);
-    renderModal();
-    advanceToVisible();
-    expect(screen.queryByText('Share MyFriendBen')).not.toBeInTheDocument();
+    rerender(
+      <IntlProvider locale="en">
+        <ShareModal open={true} onClose={onClose} />
+      </IntlProvider>,
+    );
+    expect(screen.queryByText('Gmail')).not.toBeInTheDocument();
+    expect(screen.getByText('Email')).toBeInTheDocument();
   });
 });
