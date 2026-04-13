@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material';
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { Controller } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { z } from 'zod';
-import { getHasBenefitsPrograms, HasBenefitsProgram } from '../../apiCalls';
+import type { HasBenefitsProgram } from '../../apiCalls';
 import useScreenApi from '../../Assets/updateScreen';
 import { OverrideableTranslation } from '../../Assets/languageOptions';
 import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
@@ -46,19 +46,11 @@ function groupByCategory(programs: HasBenefitsProgram[]): ProgramsByCategory[] {
 }
 
 function AlreadyHasBenefits() {
-  const { formData } = useContext(Context);
+  const { formData, hasBenefitsPrograms: programs } = useContext(Context);
   const { formatMessage } = useIntl();
-  const { uuid, whiteLabel } = useParams();
+  const { uuid } = useParams();
   const backNavigationFunction = useDefaultBackNavigationFunction('hasBenefits');
   const { updateScreen } = useScreenApi();
-  const [programs, setPrograms] = useState<HasBenefitsProgram[]>([]);
-
-  useEffect(() => {
-    if (!whiteLabel) return;
-    getHasBenefitsPrograms(whiteLabel)
-      .then((programs) => setPrograms(programs))
-      .catch(console.error);
-  }, [whiteLabel]);
 
   const formSchema = z
     .object({
