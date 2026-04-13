@@ -291,23 +291,15 @@ export type HasBenefitsProgram = {
   category: { label: string; default_message: string };
 };
 
-export type ScreenerOptions = {
-  referral_options: {
-    generic: Record<string, string>;
-    partners: Record<string, string>;
-  };
-  has_benefits_programs: HasBenefitsProgram[];
-};
-
-const getScreenerOptions = async (whiteLabel: string): Promise<ScreenerOptions> => {
-  const response = await fetch(`${domain}/api/screener-options/${whiteLabel}/`, {
+const getHasBenefitsPrograms = async (whiteLabel: string): Promise<HasBenefitsProgram[]> => {
+  const response = await fetch(`${domain}/api/screener-options/${whiteLabel}/has-benefits-programs/`, {
     method: 'GET',
     headers: header,
   });
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`);
   }
-  return response.json() as Promise<ScreenerOptions>;
+  return response.json() as Promise<HasBenefitsProgram[]>;
 };
 
 export {
@@ -325,5 +317,5 @@ export {
   getAuthToken,
   postNPSScore,
   patchNPSReason,
-  getScreenerOptions,
+  getHasBenefitsPrograms,
 };
