@@ -288,7 +288,7 @@ export type HasBenefitsProgram = {
   name_abbreviated: string;
   name: { label: string; default_message: string };
   website_description: { label: string; default_message: string };
-  category: { label: string; default_message: string };
+  category: { label: string; default_message: string } | null;
 };
 
 const getHasBenefitsPrograms = async (whiteLabel: string): Promise<HasBenefitsProgram[]> => {

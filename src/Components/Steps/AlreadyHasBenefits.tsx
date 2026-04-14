@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { Controller } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
@@ -9,7 +9,7 @@ import type { HasBenefitsProgram } from '../../apiCalls';
 import useScreenApi from '../../Assets/updateScreen';
 import { OverrideableTranslation } from '../../Assets/languageOptions';
 import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
-import MultiSelectTiles from '../SelectTiles/MultiSelectTiles';
+import HasBenefitsTile from './HasBenefitsTile';
 import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import { useDefaultBackNavigationFunction } from '../QuestionComponents/questionHooks';
@@ -29,6 +29,7 @@ function groupByCategory(programs: HasBenefitsProgram[]): ProgramsByCategory[] {
   const map = new Map<string, ProgramsByCategory>();
 
   for (const program of programs) {
+    if (program.category === null) continue;
     const key = program.category.label;
     if (!map.has(key)) {
       map.set(key, {
@@ -121,20 +122,6 @@ function AlreadyHasBenefits() {
 
   const categories = groupByCategory(programs);
 
-  const tileOptions = programs.map((program) => ({
-    value: program.name_abbreviated,
-    icon: null,
-    text: (
-      <span className="has-benefits-tile-text">
-        <strong className="has-benefits-tile-acronym">{program.name_abbreviated}</strong>
-        <span className="has-benefits-tile-name">
-          <ResultsTranslate translation={program.name} />
-          {': '}
-          <ResultsTranslate translation={program.website_description} />
-        </span>
-      </span>
-    ),
-  }));
 
   return (
     <div>
@@ -193,27 +180,29 @@ function AlreadyHasBenefits() {
 
         <div className={`has-benefits-programs${tilesEnabled ? '' : ' has-benefits-programs--disabled'}`}>
           {categories.map((category) => {
-            const categoryOptions = tileOptions.filter((opt) =>
-              category.programs.some((p) => p.name_abbreviated === opt.value),
-            );
             return (
               <div key={category.categoryLabel} className="has-benefits-category">
                 <Typography className="has-benefits-category-header">
                   <ResultsTranslate translation={{ label: category.categoryLabel, default_message: category.categoryDefaultMessage }} />
                 </Typography>
-                <MultiSelectTiles
-                  options={categoryOptions}
-                  values={watch('alreadyHasBenefits') as Partial<Record<string, boolean>>}
-                  onChange={(values) => {
-                    if (!tilesEnabled) return;
-                    setValue('alreadyHasBenefits', values as Record<string, boolean>, {
-                      shouldValidate: isSubmitted,
-                      shouldDirty: true,
-                      shouldTouch: true,
-                    });
-                  }}
-                  variant="flat"
-                />
+                <div className="hb-tiles-grid">
+                  {category.programs.map((program) => (
+                    <HasBenefitsTile
+                      key={program.name_abbreviated}
+                      program={program}
+                      selected={!!watch('alreadyHasBenefits')[program.name_abbreviated]}
+                      disabled={!tilesEnabled}
+                      onClick={() => {
+                        const current = watch('alreadyHasBenefits');
+                        setValue(
+                          'alreadyHasBenefits',
+                          { ...current, [program.name_abbreviated]: !current[program.name_abbreviated] },
+                          { shouldValidate: isSubmitted, shouldDirty: true, shouldTouch: true },
+                        );
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             );
           })}

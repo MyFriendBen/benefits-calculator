@@ -10,30 +10,17 @@
 
 .has-benefits-category {
   margin-bottom: 1.5rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem 1.25rem;
+  background-color: var(--secondary-background-color);
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.08);
 }
 
 .has-benefits-category-header.MuiTypography-root {
-  font-size: 0.75rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--primary-color);
   margin-bottom: 0.75rem;
 }
 
-.has-benefits-tile-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.has-benefits-tile-acronym {
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.has-benefits-tile-name {
-  font-size: 0.875rem;
-  line-height: 1.3;
-}
