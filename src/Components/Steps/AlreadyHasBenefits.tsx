@@ -178,6 +178,14 @@ function AlreadyHasBenefits() {
           )}
         />
 
+        {tilesEnabled && (
+          <Typography variant="body1" sx={{ fontWeight: 700, mb: 1.5 }}>
+            <FormattedMessage
+              id="questions.hasBenefits-select"
+              defaultMessage="Please tell us what benefits your household currently has."
+            />
+          </Typography>
+        )}
         <div className={`has-benefits-programs${tilesEnabled ? '' : ' has-benefits-programs--disabled'}`}>
           {categories.map((category) => {
             return (

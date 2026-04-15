@@ -10,17 +10,14 @@
 
 .has-benefits-category {
   margin-bottom: 1.5rem;
-  border: 1px solid #d0d0d0;
-  border-radius: 0.5rem;
-  padding: 1rem 1.25rem 1.25rem;
-  background-color: var(--secondary-background-color);
-  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.08);
 }
 
 .has-benefits-category-header.MuiTypography-root {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--primary-color);
   margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #d0d0d0;
 }
 
