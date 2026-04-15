@@ -227,7 +227,6 @@ const deleteValidation = async (validationid: number, key: string) => {
 type NPSScoreData = {
   uuid: string;
   score: number;
-  variant: 'floating' | 'inline';
 };
 
 type NPSReasonData = {
