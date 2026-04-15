@@ -3,7 +3,10 @@ import useStyle from '../../Assets/styleController';
 import { IntlProvider } from 'react-intl';
 import { WrapperContext } from '../../Types/WrapperContext';
 import { FormData } from '../../Types/FormData';
-import { getTranslations } from '../../apiCalls';
+import { getTranslations, getReferralOptions } from '../../apiCalls';
+import type { ReferralOptions } from '../../hooks/useReferralOptions';
+
+const EMPTY_REFERRAL_OPTIONS: ReferralOptions = { generic: {}, partners: {} };
 import useReferrer, { ReferrerData } from '../Referrer/referrerHook';
 import { useGetConfig } from '../Config/configHook';
 import { rightToLeftLanguages, Language } from '../../Assets/languageOptions';
@@ -117,6 +120,34 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   // Initialize white label from URL to ensure correct config loads
   const [whiteLabel, setWhiteLabel] = useState(getWhiteLabelFromUrl);
+
+  const [referralOptions, setReferralOptions] = useState<ReferralOptions>(EMPTY_REFERRAL_OPTIONS);
+  const [referralOptionsLoading, setReferralOptionsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+
+    setReferralOptionsLoading(true);
+    getReferralOptions(whiteLabel, controller.signal)
+      .then((data) => {
+        if (!cancelled) {
+          setReferralOptions(data);
+          setReferralOptionsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setReferralOptions(EMPTY_REFERRAL_OPTIONS);
+          setReferralOptionsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [whiteLabel]);
 
   const { configLoading, configResponse: config } = useGetConfig(screenLoading, whiteLabel);
   const { language_options: languageOptions = {} } = config ?? {};
@@ -265,6 +296,8 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
       getReferrer,
       whiteLabel,
       setWhiteLabel,
+      referralOptions,
+      referralOptionsLoading,
     }),
     [
       locale,
@@ -285,6 +318,8 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
       getReferrer,
       whiteLabel,
       setWhiteLabel,
+      referralOptions,
+      referralOptionsLoading,
     ],
   );
 
