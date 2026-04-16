@@ -1,0 +1,103 @@
+.twoOneOneIL-font {
+  color: #505050;
+  font-family: league-gothic, Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 550;
+  line-height: 1.1em;
+  word-spacing: 1px;
+}
+
+.MuiTypography-root.il-icon-header {
+  color: #505050;
+  font-family: league-gothic, Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 550;
+  line-height: 1.1em;
+  margin-bottom: 1rem;
+  word-spacing: 1px;
+}
+
+.il-font-color {
+  color: #505050;
+}
+
+.twoOneOneIL-footer-icon {
+  max-width: 150px;
+  height: 130px;
+  color: #005191;
+}
+
+.il-font-weight {
+  font-weight: 700;
+}
+
+.il-flexIntoRow {
+  max-width: var(--main-max-width);
+  margin: auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: row;
+}
+
+.il-flexLinksIntoRow {
+  display: flex;
+  flex-direction: row;
+}
+
+.il-getHelp-text {
+  padding-top: 3rem;
+  margin-bottom: 2.5rem;
+  justify-content: center;
+}
+
+.il-icon-section {
+  padding-bottom: 3rem;
+  gap: 5rem;
+  justify-content: center;
+}
+
+.il-footer-paragraph {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.il-first-paragraph {
+  font-style: italic;
+  padding-top: 1rem;
+}
+
+.il-second-paragraph {
+  padding-bottom: 1rem;
+}
+
+.il-copyright-container {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.MuiTypography-root.il-privacy-policy-links {
+  color: #6b6b6b;
+  font-weight: 500;
+  font-size: 0.68rem;
+  font-family: league-gothic, Helvetica, Arial, sans-serif;
+}
+
+.il-displayInline {
+  display: inline;
+}
+
+@media (max-width: 870px) {
+  .il-flexIntoRow,
+  .il-flexLinksIntoRow {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .MuiPaper-root.il-paper-container {
+    margin-top: 5.4375rem;
+  }
+
+  .il-icon-section {
+    gap: 3rem;
+  }
+}

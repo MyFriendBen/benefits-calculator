@@ -1,0 +1,77 @@
+.cobranded-logo-il {
+  max-width: 20rem;
+  display: block;
+}
+
+.MuiTypography-root.MuiLink-root.twoOneOneIL-menu-link {
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+
+.twoOneOneIL-globe-icon {
+  color: var(--primary-color);
+}
+
+.twoOneOneIL-header-container {
+  height: 5rem;
+  width: 100%;
+}
+
+#twoOneOneIL-select-language {
+  padding: 0;
+  color: #005191;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  margin-right: 1.5rem;
+  text-transform: uppercase;
+}
+
+#twoOneOneIL-nav-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  max-width: var(--main-max-width);
+  margin: auto;
+  height: 100%;
+  padding: 0 1rem;
+}
+
+#twoOneOneIL-select-language:focus-visible {
+  outline: -webkit-focus-ring-color auto 1px;
+}
+
+button.hamburger-icon-il {
+  display: none;
+}
+
+#hamburger-drawer-il {
+  display: none;
+}
+
+@media (max-width: 1280px) {
+  button.hamburger-icon-il {
+    display: flex;
+  }
+
+  #hamburger-drawer-il {
+    display: flex;
+    background-color: #fff;
+    position: relative;
+    z-index: 1000;
+    padding: 1rem;
+    align-items: flex-end;
+    gap: 1rem;
+    height: 100vh;
+  }
+
+  div.twoOneOneIL-desktop-links {
+    display: none;
+  }
+}
+
+@media (max-width: 650px) {
+  .cobranded-logo-il {
+    width: 90%;
+  }
+}
