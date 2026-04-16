@@ -11,6 +11,16 @@ jest.mock('../../../apiCalls', () => ({
 
 jest.mock('../shared/ModalShell.css', () => ({}));
 jest.mock('./SaveMyResultsModal.css', () => ({}));
+jest.mock('./SaveViaWhatsAppForm', () => ({
+  __esModule: true,
+  default: ({ onSuccess }: { onSuccess: () => void }) => (
+    <div>
+      <span>WhatsApp Number</span>
+      <button type="button" onClick={onSuccess}>Send Results</button>
+    </div>
+  ),
+}));
+
 // PhoneNumberInput can have complex internals — keep it simple
 jest.mock('../../Common/PhoneNumberInput', () => ({
   __esModule: true,
@@ -72,9 +82,10 @@ describe('SaveMyResultsModal', () => {
       expect(screen.getByText('Copy a link to your results')).toBeInTheDocument();
     });
 
-    it('always shows SMS option', () => {
+    it('always shows SMS and WhatsApp options', () => {
       renderModal();
       expect(screen.getByText('SMS')).toBeInTheDocument();
+      expect(screen.getByText('WhatsApp')).toBeInTheDocument();
     });
 
     it('calls onClose when backdrop is clicked', () => {
@@ -263,5 +274,26 @@ describe('SaveMyResultsModal', () => {
     });
   });
 
-});
+  describe('whatsapp view', () => {
+    it('navigates to WhatsApp form when WhatsApp is clicked', () => {
+      renderModal();
+      fireEvent.click(screen.getByText('WhatsApp'));
+      expect(screen.getByText('Enter your phone number')).toBeInTheDocument();
+      expect(screen.getByText('WhatsApp Number')).toBeInTheDocument();
+    });
 
+    it('returns to options when back is clicked from WhatsApp view', () => {
+      renderModal();
+      fireEvent.click(screen.getByText('WhatsApp'));
+      fireEvent.click(screen.getByLabelText('Back'));
+      expect(screen.getByText('Choose how to save your results')).toBeInTheDocument();
+    });
+
+    it('shows success view when form calls onSuccess', () => {
+      renderModal();
+      fireEvent.click(screen.getByText('WhatsApp'));
+      fireEvent.click(screen.getByText('Send Results'));
+      expect(screen.getByText('Results Sent')).toBeInTheDocument();
+    });
+  });
+});
