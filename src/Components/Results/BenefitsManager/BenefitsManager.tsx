@@ -5,6 +5,8 @@ import SaveIcon from '@mui/icons-material/Save';
 import RestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CloseIcon from '@mui/icons-material/Close';
 import { Program } from '../../../Types/Results';
 import { programValue } from '../FormattedValue';
 import ResultsTranslate from '../Translate/Translate';
@@ -26,6 +28,9 @@ const BenefitsManager = () => {
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [highlightApplication, setHighlightApplication] = useState(false);
   const [newBenefitsData, setNewBenefitsData] = useState<{ program: Program; benefits: NewBenefit[] } | null>(null);
+  const [showUpkeepDetail, setShowUpkeepDetail] = useState(false);
+  const [showUpkeepConfirm, setShowUpkeepConfirm] = useState(false);
+  const [upkeepCompleted, setUpkeepCompleted] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Intercept moveProgram: if moving to "receiving", show the congratulations modal
@@ -109,6 +114,37 @@ const BenefitsManager = () => {
   }, [columns.eligible]);
 
   const nextApplicationMonthly = nextApplication ? Math.round(programValue(nextApplication) / 12) : 0;
+
+  // Upkeep: find SNAP in receiving column (match by external_name or name)
+  const snapInReceiving = useMemo(() => {
+    return columns.receiving.find((p) => {
+      const ext = (p.external_name ?? '').toLowerCase();
+      const nameMsg = (p.name?.default_message ?? '').toLowerCase();
+      return ext.includes('snap') || nameMsg.includes('snap');
+    }) ?? null;
+  }, [columns.receiving]);
+
+  // Reset upkeepCompleted if SNAP leaves receiving
+  useEffect(() => {
+    if (!snapInReceiving && upkeepCompleted) {
+      setUpkeepCompleted(false);
+    }
+  }, [snapInReceiving, upkeepCompleted]);
+
+  // Next month / current year label — e.g. "May, 2026"
+  const nextMonthLabel = useMemo(() => {
+    const now = new Date();
+    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const monthName = next.toLocaleString('default', { month: 'long' });
+    return `${monthName}, ${now.getFullYear()}`;
+  }, []);
+
+  const handleConfirmResubmit = useCallback((confirmed: boolean) => {
+    setShowUpkeepConfirm(false);
+    if (confirmed) {
+      setUpkeepCompleted(true);
+    }
+  }, []);
 
   const handleFindOutHowToApply = useCallback(() => {
     if (nextApplication) {
@@ -223,6 +259,47 @@ const BenefitsManager = () => {
         </div>
       )}
 
+      <div className="upkeep-bar">
+        <h3 className="upkeep-title">
+          <FormattedMessage id="benefitsManager.upkeep" defaultMessage="Upkeep" />
+        </h3>
+        {snapInReceiving && !upkeepCompleted ? (
+          <div className="upkeep-content">
+            <button
+              type="button"
+              className="upkeep-card"
+              onClick={() => setShowUpkeepDetail(true)}
+            >
+              <span className="benefit-drag-card-name">
+                <ResultsTranslate translation={snapInReceiving.name} />
+              </span>
+              <span className="benefit-drag-card-value">
+                <FormattedMessage id="benefitsManager.upkeep.monthlyLabel" defaultMessage="Monthly task" />
+              </span>
+            </button>
+            <button
+              type="button"
+              className="upkeep-resubmit-btn"
+              onClick={() => setShowUpkeepConfirm(true)}
+            >
+              <CheckCircleIcon fontSize="small" />
+              <FormattedMessage
+                id="benefitsManager.upkeep.resubmitted"
+                defaultMessage="Resubmitted for {month}?"
+                values={{ month: nextMonthLabel }}
+              />
+            </button>
+          </div>
+        ) : (
+          <p className="upkeep-empty">
+            <FormattedMessage
+              id="benefitsManager.upkeep.empty"
+              defaultMessage="You have no tasks on any benefits."
+            />
+          </p>
+        )}
+      </div>
+
       <BenefitsBoard columns={columns} moveProgram={handleMoveProgram} allColumns={allColumns} onSelectProgram={handleSelectProgram} />
 
       {selectedProgram !== null && (
@@ -249,6 +326,84 @@ const BenefitsManager = () => {
           onRestore={restoreFromCode}
           onClose={() => setModalMode(null)}
         />
+      )}
+
+      {showUpkeepDetail && snapInReceiving && (
+        <div className="benefit-detail-overlay" onClick={() => setShowUpkeepDetail(false)}>
+          <div
+            className="benefit-detail-card upkeep-detail-card"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+          >
+            <button
+              type="button"
+              className="benefit-detail-close"
+              onClick={() => setShowUpkeepDetail(false)}
+              aria-label="Close"
+            >
+              <CloseIcon />
+            </button>
+            <div className="benefit-detail-header">
+              <h2 className="benefit-detail-title">
+                <ResultsTranslate translation={snapInReceiving.name} />
+              </h2>
+            </div>
+            <div className="benefit-detail-sections">
+              <p className="upkeep-detail-text">
+                <FormattedMessage
+                  id="benefitsManager.upkeep.detailText"
+                  defaultMessage="SNAP benefits require the resubmission of materials every month."
+                />
+              </p>
+            </div>
+            <div className="benefit-detail-footer">
+              <button
+                type="button"
+                className="benefit-detail-apply-btn"
+                onClick={() => {
+                  /* demo only — no navigation */
+                }}
+              >
+                <FormattedMessage id="benefitsManager.upkeep.moreInfo" defaultMessage="More Info" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showUpkeepConfirm && (
+        <div className="benefit-detail-overlay" onClick={() => setShowUpkeepConfirm(false)}>
+          <div
+            className="benefit-detail-card upkeep-confirm-card"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+          >
+            <div className="upkeep-confirm-body">
+              <h2 className="upkeep-confirm-title">
+                <FormattedMessage
+                  id="benefitsManager.upkeep.confirmTitle"
+                  defaultMessage="Have you resubmitted your materials?"
+                />
+              </h2>
+              <div className="upkeep-confirm-actions">
+                <button
+                  type="button"
+                  className="upkeep-confirm-btn upkeep-confirm-btn-yes"
+                  onClick={() => handleConfirmResubmit(true)}
+                >
+                  <FormattedMessage id="benefitsManager.upkeep.yes" defaultMessage="Yes" />
+                </button>
+                <button
+                  type="button"
+                  className="upkeep-confirm-btn upkeep-confirm-btn-no"
+                  onClick={() => handleConfirmResubmit(false)}
+                >
+                  <FormattedMessage id="benefitsManager.upkeep.no" defaultMessage="No" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );
