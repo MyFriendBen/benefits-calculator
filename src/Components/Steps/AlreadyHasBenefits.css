@@ -1,13 +1,3 @@
-.has-benefits-programs {
-  transition: opacity 0.2s ease;
-}
-
-.has-benefits-programs--disabled {
-  opacity: 0.4;
-  pointer-events: none;
-  user-select: none;
-}
-
 .has-benefits-category {
   margin-bottom: 1.5rem;
 }

@@ -1,14 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material';
-import { useContext, useEffect } from 'react';
-import { Controller } from 'react-hook-form';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { Typography } from '@mui/material';
+import { useContext } from 'react';
+import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { z } from 'zod';
 import type { HasBenefitsProgram } from '../../apiCalls';
 import useScreenApi from '../../Assets/updateScreen';
 import { OverrideableTranslation } from '../../Assets/languageOptions';
-import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
 import HasBenefitsTile from './HasBenefitsTile';
 import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
@@ -48,80 +46,40 @@ function groupByCategory(programs: HasBenefitsProgram[]): ProgramsByCategory[] {
 
 function AlreadyHasBenefits() {
   const { formData, hasBenefitsPrograms: programs } = useContext(Context);
-  const { formatMessage } = useIntl();
   const { uuid } = useParams();
   const backNavigationFunction = useDefaultBackNavigationFunction('hasBenefits');
   const { updateScreen } = useScreenApi();
 
-  const formSchema = z
-    .object({
-      hasBenefits: z.enum(['true', 'false', 'preferNotToAnswer'], {
-        required_error: formatMessage({
-          id: 'validation-helperText.hasBenefits',
-          defaultMessage: 'Please select an option.',
-        }),
-      }),
-      alreadyHasBenefits: z.record(z.string(), z.boolean()),
-    })
-    .refine(
-      ({ hasBenefits, alreadyHasBenefits }) => {
-        const noBenefitsSelected = Object.values(alreadyHasBenefits).every((value) => !value);
-        if (hasBenefits === 'true' && noBenefitsSelected) {
-          return false;
-        }
-        return true;
-      },
-      {
-        message: formatMessage({
-          id: 'validation-helperText.benefits',
-          defaultMessage:
-            'If your household does not receive any of these benefits, please select the "No" option above.',
-        }),
-        path: ['alreadyHasBenefits'],
-      },
-    );
+  const formSchema = z.object({
+    alreadyHasBenefits: z.record(z.string(), z.boolean()),
+  });
 
   type FormSchema = z.infer<typeof formSchema>;
 
   const {
-    control,
-    formState: { errors, isSubmitted },
+    formState: { isSubmitted },
     handleSubmit,
     setValue,
     watch,
   } = useStepForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      // Don't pre-fill — user must make an explicit choice each visit
-      hasBenefits: undefined as unknown as 'true' | 'false' | 'preferNotToAnswer',
       alreadyHasBenefits: formData.benefits,
     },
     questionName: 'hasBenefits',
   });
 
-  const hasBenefits = watch('hasBenefits');
-  const tilesEnabled = hasBenefits === 'true';
-
-  useEffect(() => {
-    if (!tilesEnabled) {
-      const cleared = { ...watch('alreadyHasBenefits') };
-      for (const key in cleared) {
-        cleared[key] = false;
-      }
-      setValue('alreadyHasBenefits', cleared);
-    }
-  }, [tilesEnabled]);
-
-  const formSubmitHandler = async ({ alreadyHasBenefits, hasBenefits }: FormSchema) => {
+  const formSubmitHandler = async ({ alreadyHasBenefits }: FormSchema) => {
     if (uuid === undefined) {
       throw new Error('uuid is not defined');
     }
+    const anySelected = Object.values(alreadyHasBenefits).some(Boolean);
+    const hasBenefits = anySelected ? ('true' as const) : ('false' as const);
     const newFormData = { ...formData, hasBenefits, benefits: alreadyHasBenefits };
     await updateScreen(newFormData);
   };
 
   const categories = groupByCategory(programs);
-
 
   return (
     <div>
@@ -134,59 +92,17 @@ function AlreadyHasBenefits() {
       <QuestionQuestion>
         <OverrideableTranslation
           id="questions.hasBenefits"
-          defaultMessage="Does anyone in your household currently receive any public benefits?"
+          defaultMessage="Does anyone in your household currently receive any of these public benefits?"
         />
       </QuestionQuestion>
       <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
         <FormattedMessage
           id="questions.hasBenefits-description"
-          defaultMessage="You may automatically qualify for certain programs if someone in your household receives public benefits."
+          defaultMessage="Select all that apply. Receiving any of these benefits may automatically qualify you for other programs. Leave blank if none apply."
         />
       </Typography>
       <form onSubmit={handleSubmit(formSubmitHandler)}>
-        <Controller
-          name="hasBenefits"
-          control={control}
-          render={({ field }) => (
-            <RadioGroup
-              {...field}
-              value={field.value ?? ''}
-              aria-label={formatMessage({
-                id: 'questions.hasBenefits',
-                defaultMessage: 'Does anyone in your household currently receive any public benefits?',
-              })}
-              sx={{ marginBottom: '1.5rem' }}
-            >
-              <FormControlLabel
-                value="true"
-                control={<Radio />}
-                label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
-              />
-              <FormControlLabel
-                value="false"
-                control={<Radio />}
-                label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
-              />
-              <FormControlLabel
-                value="preferNotToAnswer"
-                control={<Radio />}
-                label={
-                  <FormattedMessage id="radiofield.label-preferNotToAnswer" defaultMessage="Prefer not to answer" />
-                }
-              />
-            </RadioGroup>
-          )}
-        />
-
-        {tilesEnabled && (
-          <Typography variant="body1" sx={{ fontWeight: 700, mb: 1.5 }}>
-            <FormattedMessage
-              id="questions.hasBenefits-select"
-              defaultMessage="Please tell us what benefits your household currently has."
-            />
-          </Typography>
-        )}
-        <div className={`has-benefits-programs${tilesEnabled ? '' : ' has-benefits-programs--disabled'}`}>
+        <div className="has-benefits-programs">
           {categories.map((category) => {
             return (
               <div key={category.categoryLabel} className="has-benefits-category">
@@ -199,7 +115,7 @@ function AlreadyHasBenefits() {
                       key={program.name_abbreviated}
                       program={program}
                       selected={!!watch('alreadyHasBenefits')[program.name_abbreviated]}
-                      disabled={!tilesEnabled}
+                      disabled={false}
                       onClick={() => {
                         const current = watch('alreadyHasBenefits');
                         setValue(
@@ -215,12 +131,6 @@ function AlreadyHasBenefits() {
             );
           })}
         </div>
-
-        {errors.alreadyHasBenefits !== undefined && (
-          <ErrorMessageWrapper fontSize="1rem">
-            {errors.alreadyHasBenefits.message as unknown as string}
-          </ErrorMessageWrapper>
-        )}
 
         <PrevAndContinueButtons backNavigationFunction={backNavigationFunction} />
       </form>
