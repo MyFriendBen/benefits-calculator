@@ -266,7 +266,7 @@ const Results = ({ type }: ResultsProps) => {
                 </Grid>
                 {!noHelpButton && <HelpButton />}
                 <NPSWidget uuid={uuid} />
-                <ShareModal />
+                {/* <ShareModal /> hidden for demo */}
               </div>
             </div>
           </main>

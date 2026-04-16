@@ -28,8 +28,32 @@ export function useChatbotContext() {
 const URL_REGEX = /(https?:\/\/[^\s]+)/g;
 
 const DEMO_BOT_REPLIES = [
-  `Congrats! You completed the screener and found almost **$3200 monthly** in benefits.  Can I help you decide where to start?`,
-  `Looks like Supplemental Security Income (SSI) would be the most meaningful, with almost **$2000 per month in savings**.  The application takes about 90 minutes but will be well worth it.  Can I help you grab the right documents and get started?`,
+  `Great work filling out the survey! Based on your results, you're eligible for 19 programs, that's a lot!
+
+I'm here to guide you through your benefits and applications, so let's get started with the biggest buck for your time - **SNAP**. This program will provide the quickest relief for you, your spouse, and your child.
+
+Would you like some help with the application process?`,
+  `**SNAP** (Supplemental Nutrition Assistance Program) puts money on a card each month that you can use at most grocery stores to buy food essentials like produce, bread, and dairy. Benefits are loaded automatically — nothing special to do at checkout, just swipe.
+
+The application takes about two hours, but with almost **$800 per month** in savings, it'll be well worth it.
+
+Shall we continue?`,
+  `There are four ways to apply for **SNAP** — pick whichever works best for you:
+
+* **Paper application** — print and mail or drop off a physical form
+* **Online** — apply through the state benefits portal
+* **Mobile app** — apply on your phone via the MyCOBenefits app
+* **Phone** — call for assistance and apply with a caseworker
+
+Which would you prefer?`,
+  `Great! Here's the link:
+
+https://peak.my.site.com/peak/s/peak-landing-page?language=en_US
+
+Can I text you additional help while you start to apply? If so, please reply with your phone number.`,
+  `Thank you! I just sent a message, let me know if you didn't get it.
+
+I'll be here or available over text the whole time to guide your application — whether it's what documents to have handy, what a question is asking, or what happens after you submit.`,
 ];
 
 function renderFormattedMessage(text: string): React.ReactNode {
@@ -37,6 +61,7 @@ function renderFormattedMessage(text: string): React.ReactNode {
   const lines = text.split('\n');
   const elements: React.ReactNode[] = [];
   let bulletBuffer: string[] = [];
+  let paragraphBuffer: string[] = [];
   let key = 0;
 
   const flushBullets = () => {
@@ -51,19 +76,36 @@ function renderFormattedMessage(text: string): React.ReactNode {
     bulletBuffer = [];
   };
 
+  const flushParagraph = () => {
+    if (paragraphBuffer.length === 0) return;
+    const paragraphKey = key++;
+    elements.push(
+      <p key={paragraphKey} className="chatbot-paragraph">
+        {paragraphBuffer.map((line, j) => (
+          <span key={j}>
+            {j > 0 && <br />}
+            {parseMarkdown(line, PRIMARY_COLOR)}
+          </span>
+        ))}
+      </p>,
+    );
+    paragraphBuffer = [];
+  };
+
   for (const line of lines) {
     if (line.startsWith('* ')) {
+      flushParagraph();
       bulletBuffer.push(line.slice(2));
+    } else if (line === '') {
+      flushBullets();
+      flushParagraph();
     } else {
       flushBullets();
-      if (line === '') {
-        elements.push(<br key={key++} />);
-      } else {
-        elements.push(<span key={key++}>{parseMarkdown(line, PRIMARY_COLOR)}</span>);
-      }
+      paragraphBuffer.push(line);
     }
   }
   flushBullets();
+  flushParagraph();
 
   return elements;
 }

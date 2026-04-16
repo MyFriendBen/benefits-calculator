@@ -132,12 +132,26 @@
 }
 
 .chatbot-list {
-  margin: 0.25rem 0;
+  margin: 0.5rem 0;
   padding-left: 1.25rem;
 }
 
 .chatbot-list li {
   margin-bottom: 0.2rem;
+}
+
+.chatbot-paragraph {
+  margin: 0 0 0.75rem 0;
+  color: inherit;
+}
+
+.chatbot-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.chatbot-message > .chatbot-paragraph + .chatbot-list,
+.chatbot-message > .chatbot-list + .chatbot-paragraph {
+  margin-top: 0.25rem;
 }
 
 /* Input area */
