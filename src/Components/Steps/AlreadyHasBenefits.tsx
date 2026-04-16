@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useWatch } from 'react-hook-form';
 import { Typography } from '@mui/material';
 import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
@@ -57,10 +58,10 @@ function AlreadyHasBenefits() {
   type FormSchema = z.infer<typeof formSchema>;
 
   const {
+    control,
     formState: { isSubmitted },
     handleSubmit,
     setValue,
-    watch,
   } = useStepForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -68,6 +69,8 @@ function AlreadyHasBenefits() {
     },
     questionName: 'hasBenefits',
   });
+
+  const alreadyHasBenefits = useWatch({ control, name: 'alreadyHasBenefits' });
 
   const formSubmitHandler = async ({ alreadyHasBenefits }: FormSchema) => {
     if (uuid === undefined) {
@@ -110,22 +113,24 @@ function AlreadyHasBenefits() {
                   <ResultsTranslate translation={{ label: category.categoryLabel, default_message: category.categoryDefaultMessage }} />
                 </Typography>
                 <div className="hb-tiles-grid">
-                  {category.programs.map((program) => (
-                    <HasBenefitsTile
-                      key={program.name_abbreviated}
-                      program={program}
-                      selected={!!watch('alreadyHasBenefits')[program.name_abbreviated]}
-                      disabled={false}
-                      onClick={() => {
-                        const current = watch('alreadyHasBenefits');
-                        setValue(
-                          'alreadyHasBenefits',
-                          { ...current, [program.name_abbreviated]: !current[program.name_abbreviated] },
-                          { shouldValidate: isSubmitted, shouldDirty: true, shouldTouch: true },
-                        );
-                      }}
-                    />
-                  ))}
+                  {category.programs.map((program) => {
+                    const key = program.name_abbreviated.toLowerCase();
+                    return (
+                      <HasBenefitsTile
+                        key={program.name_abbreviated}
+                        program={program}
+                        selected={!!alreadyHasBenefits[key]}
+                        disabled={false}
+                        onClick={() => {
+                          setValue(
+                            'alreadyHasBenefits',
+                            { ...alreadyHasBenefits, [key]: !alreadyHasBenefits[key] },
+                            { shouldValidate: isSubmitted, shouldDirty: true, shouldTouch: true },
+                          );
+                        }}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             );
