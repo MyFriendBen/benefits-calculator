@@ -19,7 +19,6 @@ function HasBenefitsTile({ program, selected, onClick, disabled }: Props) {
       disableRipple={disabled}
     >
       <Card className={`hb-tile${selected ? ' hb-tile--selected' : ''}`} elevation={0}>
-        <span className="hb-tile-acronym">{program.name_abbreviated.toUpperCase()}</span>
         <span className="hb-tile-body">
           <strong className="hb-tile-name">
             <ResultsTranslate translation={program.name} />
