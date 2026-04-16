@@ -3,35 +3,35 @@ import { useParams } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField } from '@mui/material';
-import { FormattedMessageType } from '../../Types/Questions';
+import {
+  CircularProgress,
+  Divider,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  ListSubheader,
+  MenuItem,
+  Select,
+  TextField,
+} from '@mui/material';
 import { Context } from '../Wrapper/Wrapper';
 import * as z from 'zod';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
 import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useDefaultBackNavigationFunction } from '../QuestionComponents/questionHooks';
-import { useConfig } from '../Config/configHook';
+import { useReferralOptions } from '../../hooks/useReferralOptions';
+import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
 import useScreenApi from '../../Assets/updateScreen';
 import useStepForm from './stepForm';
-
-type ReferralOptions = {
-  other: string;
-  [key: string]: string | FormattedMessageType;
-};
 
 export default function ReferralSourceStep() {
   const { formData } = useContext(Context);
   const { uuid } = useParams();
   const { updateScreen } = useScreenApi();
-
-  if (uuid === undefined) {
-    throw new Error('no uuid');
-  }
-
   const backNavigationFunction = useDefaultBackNavigationFunction('referralSource');
-  const referralOptions = useConfig<ReferralOptions>('referral_options');
+  const { referralOptions, allOptions, loading, error } = useReferralOptions();
   const { formatMessage } = useIntl();
 
   const formSchema = z
@@ -63,9 +63,11 @@ export default function ReferralSourceStep() {
   type FormSchema = z.infer<typeof formSchema>;
 
   const isOtherSource =
+    !loading &&
+    !error &&
     formData.referralSource !== undefined &&
     formData.referralSource !== '' &&
-    !(formData.referralSource in referralOptions);
+    !(formData.referralSource in allOptions);
 
   const {
     control,
@@ -80,6 +82,25 @@ export default function ReferralSourceStep() {
     },
     questionName: 'referralSource',
   });
+
+  if (uuid === undefined) {
+    throw new Error('no uuid');
+  }
+
+  if (loading) {
+    return <CircularProgress />;
+  }
+
+  if (error) {
+    return (
+      <ErrorMessage
+        error={formatMessage({
+          id: 'errorMessage.referralOptions.loadFailed',
+          defaultMessage: 'Something went wrong loading this page. Please refresh and try again.',
+        })}
+      />
+    );
+  }
 
   const referralSource = watch('referralSource');
   const showOtherSource = referralSource === 'other';
@@ -100,15 +121,39 @@ export default function ReferralSourceStep() {
       </MenuItem>
     );
 
-    const dropdownMenuItems = Object.entries(referralOptions).map(([value, message]) => {
-      return (
-        <MenuItem value={value} key={value}>
-          {message}
-        </MenuItem>
-      );
-    });
+    const subheaderSx = { fontWeight: 700, color: 'text.primary', lineHeight: '2rem' };
+    const menuItemSx = { pl: 5 };
 
-    return [disabledSelectMenuItem, dropdownMenuItems];
+    const genericItems = [
+      <Divider key="general-divider-top" />,
+      <ListSubheader key="general-header" sx={subheaderSx}>
+        <FormattedMessage id="qcc.createReferralDropdownMenu-generalHeader" defaultMessage="General" />
+      </ListSubheader>,
+      <Divider key="general-divider-bottom" />,
+      ...Object.entries(referralOptions.generic).map(([value, name]) => (
+        <MenuItem value={value} key={value} sx={menuItemSx}>
+          {formatMessage({ id: `referralOptions.${value}`, defaultMessage: name })}
+        </MenuItem>
+      )),
+    ];
+
+    const partnerItems =
+      Object.keys(referralOptions.partners).length > 0
+        ? [
+            <Divider key="partners-divider-top" />,
+            <ListSubheader key="partners-header" sx={subheaderSx}>
+              <FormattedMessage id="qcc.createReferralDropdownMenu-partnersHeader" defaultMessage="Partners" />
+            </ListSubheader>,
+            <Divider key="partners-divider-bottom" />,
+            ...Object.entries(referralOptions.partners).map(([value, name]) => (
+              <MenuItem value={value} key={value} sx={menuItemSx}>
+                {formatMessage({ id: `referralOptions.${value}`, defaultMessage: name })}
+              </MenuItem>
+            )),
+          ]
+        : [];
+
+    return [disabledSelectMenuItem, ...genericItems, ...partnerItems];
   };
 
   return (

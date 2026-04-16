@@ -22,6 +22,7 @@ const messageEndpoint = `${domain}/api/messages/`;
 const apiProgramCategoriesEndPoint = `${domain}/api/program_categories/`;
 const apiUrgentNeedTypesEndpoint = `${domain}/api/urgent_need_types/`;
 export const configEndpoint = `${domain}/api/configuration/`;
+const screenerOptionsEndpoint = `${domain}/api/screener-options/`;
 const eligibilityEndpoint = `${domain}/api/eligibility/`;
 const validationEndpoint = `${domain}/api/validations/`;
 const authTokenEndpoint = `${domain}/api/auth-token/`;
@@ -226,7 +227,6 @@ const deleteValidation = async (validationid: number, key: string) => {
 type NPSScoreData = {
   uuid: string;
   score: number;
-  variant: 'floating' | 'inline';
 };
 
 type NPSReasonData = {
@@ -302,6 +302,23 @@ const getHasBenefitsPrograms = async (whiteLabel: string): Promise<HasBenefitsPr
   return response.json() as Promise<HasBenefitsProgram[]>;
 };
 
+export interface ReferralOptionsResponse {
+  generic: Record<string, string>;
+  partners: Record<string, string>;
+}
+
+const getReferralOptions = async (whiteLabel: string, signal?: AbortSignal): Promise<ReferralOptionsResponse> => {
+  const response = await fetch(`${screenerOptionsEndpoint}${whiteLabel}/referral-options/`, {
+    method: 'GET',
+    headers: header,
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`);
+  }
+  return response.json() as Promise<ReferralOptionsResponse>;
+};
+
 export {
   getTranslations,
   postScreen,
@@ -318,4 +335,5 @@ export {
   postNPSScore,
   patchNPSReason,
   getHasBenefitsPrograms,
+  getReferralOptions,
 };

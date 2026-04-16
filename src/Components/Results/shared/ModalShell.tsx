@@ -1,4 +1,4 @@
-import { ReactNode, useRef, useId } from 'react';
+import { ReactNode, useId } from 'react';
 import { IconButton, Modal, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -15,7 +15,6 @@ type ModalShellProps = {
 };
 
 const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: ModalShellProps) => {
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
 
   return (
@@ -42,7 +41,6 @@ const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: 
         )}
 
         <IconButton
-          ref={closeButtonRef}
           aria-label="Close dialog"
           size="small"
           className="modal-shell-close-btn"
