@@ -42,7 +42,7 @@ describe('EnergyCalculatorFooter', () => {
   it('renders the accessibility statement link', () => {
     renderFooter();
     const link = screen.getByRole('link', { name: /accessibility statement/i });
-    expect(link).toHaveAttribute('href', 'https://www.colorado.gov/accessibility');
+    expect(link).toHaveAttribute('href', 'https://www.colorado.gov/accessibility-standards');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noreferrer');
   });
