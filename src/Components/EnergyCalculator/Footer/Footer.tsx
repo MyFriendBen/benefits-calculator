@@ -5,7 +5,7 @@ import '../../Footer/PoweredByFooter.css';
 import './Footer.css';
 import { renderLogoSource } from '../../Referrer/referrerDataInfo';
 
-const CESN_ACCESSIBILITY_URL = 'https://www.colorado.gov/accessibility';
+const CESN_ACCESSIBILITY_URL = 'https://www.colorado.gov/accessibility-standards';
 
 export default function EnergyCalculatorFooter() {
   const privacyPolicyLink = useLocalizedLink('privacy_policy');
