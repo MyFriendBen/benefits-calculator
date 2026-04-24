@@ -1,0 +1,13 @@
+.has-benefits-category {
+  margin-bottom: 1.5rem;
+}
+
+.has-benefits-category-header.MuiTypography-root {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 2px solid var(--secondary-color);
+}
+
