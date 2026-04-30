@@ -14,7 +14,6 @@ import { FormattedMessageType, QuestionName } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
 import { useReferralOptions } from '../../hooks/useReferralOptions';
 import DefaultConfirmationHHData from './ConfirmationHouseholdData';
-import { Benefits as BenefitsType } from '../../Types/FormData';
 import EnergyCalculatorElectricityProvider from '../EnergyCalculator/ConfirmationPage/ElectricityProvider';
 import EnergyCalculatorGasProvider from '../EnergyCalculator/ConfirmationPage/GasProvider';
 import EnergyCalculatorExpenses from '../EnergyCalculator/ConfirmationPage/Expenses';
@@ -216,42 +215,45 @@ function Assets() {
   );
 }
 
-type BenefitList = {
-  [key: string]: {
-    name: FormattedMessageType;
-    description: FormattedMessageType;
-  };
-};
-
-type CategoryBenefits = {
-  [key: string]: { benefits: BenefitList; category_name: FormattedMessageType };
-};
-
 function HasBenefits() {
-  const { formData } = useContext(Context);
+  const { formData, hasBenefitsPrograms } = useContext(Context);
   const { formatMessage } = useIntl();
-  const categoryBenefits = useConfig<CategoryBenefits>('category_benefits');
 
   const alreadyHasBenefits = () => {
-    let allBenefits: BenefitList = {};
+    // Selected benefit keys, in admin-sorted order from the BE.
+    const selectedKeys = Object.entries(formData.benefits)
+      .filter(([, isSelected]) => isSelected)
+      .map(([key]) => key);
 
-    for (const category of Object.values(categoryBenefits)) {
-      allBenefits = { ...allBenefits, ...category.benefits };
+    if (selectedKeys.length === 0) {
+      return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
     }
 
-    const benefitsText = Object.entries(allBenefits)
-      .filter(([name, _]) => {
-        return formData.benefits[name as keyof BenefitsType];
-      })
-      .map(([name, value]) => {
-        return <ConfirmationItem label={value.name} value={value.description} key={name} />;
-      });
+    // Match by lowercased name_abbreviated to mirror AlreadyHasBenefits.tsx.
+    // TODO(MFB-720): drop the lowercase coercion once the join-table migration ships.
+    const programsByKey = new Map(hasBenefitsPrograms.map((p) => [p.name_abbreviated.toLowerCase(), p]));
 
-    if (benefitsText.length > 0) {
-      return benefitsText;
-    }
-
-    return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
+    return selectedKeys.map((key) => {
+      const program = programsByKey.get(key);
+      if (program) {
+        return (
+          <ConfirmationItem
+            key={key}
+            label={<FormattedMessage id={program.name.label} defaultMessage={program.name.default_message} />}
+            value={
+              <FormattedMessage
+                id={program.website_description.label}
+                defaultMessage={program.website_description.default_message}
+              />
+            }
+          />
+        );
+      }
+      // Fallback: a benefit was previously selected but is no longer flagged
+      // for this step (e.g. admin toggled show_in_has_benefits_step off).
+      // Render the raw key so the user can still see what was on file.
+      return <ConfirmationItem key={key} value={key} />;
+    });
   };
 
   const editHasBenefitsAriaLabel = {

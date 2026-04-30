@@ -2,6 +2,7 @@ import { Language } from './Assets/languageOptions';
 import { Category, Program } from './Components/CurrentBenefits/CurrentBenefits';
 import {
   AdminTokenResponse,
+  HasBenefitsProgram,
   ProgramCategoryResponse,
   SendMessageRequestData,
   TranslationResponse,
@@ -284,6 +285,18 @@ const getAuthToken = async (email: string, password: string) => {
   return data.token;
 };
 
+const getHasBenefitsPrograms = (whiteLabel: string): Promise<HasBenefitsProgram[]> => {
+  return fetch(`${screenerOptionsEndpoint}${whiteLabel}/has-benefits-programs/`, {
+    method: 'GET',
+    headers: header,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json() as Promise<HasBenefitsProgram[]>;
+  });
+};
+
 export interface ReferralOptionsResponse {
   generic: Record<string, string>;
   partners: Record<string, string>;
@@ -316,5 +329,6 @@ export {
   getAuthToken,
   postNPSScore,
   patchNPSReason,
+  getHasBenefitsPrograms,
   getReferralOptions,
 };

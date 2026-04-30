@@ -26,6 +26,13 @@ export type ProgramCategoryResponse = {
   }[];
 }[];
 
+export type HasBenefitsProgram = {
+  name_abbreviated: string;
+  name: Translation;
+  website_description: Translation;
+  category: Translation | null;
+};
+
 export type UrgentNeedProgramsResponse = {
   name: Translation;
   type: Translation;

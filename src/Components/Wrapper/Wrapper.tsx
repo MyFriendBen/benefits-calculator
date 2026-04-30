@@ -3,7 +3,8 @@ import useStyle from '../../Assets/styleController';
 import { IntlProvider } from 'react-intl';
 import { WrapperContext } from '../../Types/WrapperContext';
 import { FormData } from '../../Types/FormData';
-import { getTranslations } from '../../apiCalls';
+import { getTranslations, getHasBenefitsPrograms } from '../../apiCalls';
+import { HasBenefitsProgram } from '../../Types/ApiCalls';
 import useReferrer, { ReferrerData } from '../Referrer/referrerHook';
 import { useGetConfig } from '../Config/configHook';
 import { rightToLeftLanguages, Language } from '../../Assets/languageOptions';
@@ -117,6 +118,33 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   // Initialize white label from URL to ensure correct config loads
   const [whiteLabel, setWhiteLabel] = useState(getWhiteLabelFromUrl);
+
+  const [hasBenefitsPrograms, setHasBenefitsPrograms] = useState<HasBenefitsProgram[]>([]);
+  const [hasBenefitsProgramsLoading, setHasBenefitsProgramsLoading] = useState(true);
+  const [hasBenefitsProgramsError, setHasBenefitsProgramsError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setHasBenefitsProgramsLoading(true);
+    setHasBenefitsProgramsError(false);
+    getHasBenefitsPrograms(whiteLabel)
+      .then((data) => {
+        if (!cancelled) {
+          setHasBenefitsPrograms(data);
+          setHasBenefitsProgramsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setHasBenefitsPrograms([]);
+          setHasBenefitsProgramsLoading(false);
+          setHasBenefitsProgramsError(true);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [whiteLabel]);
 
   const { configLoading, configResponse: config } = useGetConfig(screenLoading, whiteLabel);
   const { language_options: languageOptions = {} } = config ?? {};
@@ -265,6 +293,9 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
       getReferrer,
       whiteLabel,
       setWhiteLabel,
+      hasBenefitsPrograms,
+      hasBenefitsProgramsLoading,
+      hasBenefitsProgramsError,
     }),
     [
       locale,
@@ -285,6 +316,9 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
       getReferrer,
       whiteLabel,
       setWhiteLabel,
+      hasBenefitsPrograms,
+      hasBenefitsProgramsLoading,
+      hasBenefitsProgramsError,
     ],
   );
 
