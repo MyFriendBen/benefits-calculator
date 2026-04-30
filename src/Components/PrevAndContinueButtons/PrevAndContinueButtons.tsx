@@ -4,15 +4,17 @@ import FormContinueButton from '../ContinueButton/FormContinueButton';
 
 type PrevAndContinueButtonsProps = {
   backNavigationFunction: () => void;
+  disabled?: boolean;
 };
 
-const PrevAndContinueButtons = ({ backNavigationFunction }: PrevAndContinueButtonsProps) => {
+const PrevAndContinueButtons = ({ backNavigationFunction, disabled }: PrevAndContinueButtonsProps) => {
   return (
     <div className="question-buttons">
       <PreviousButton navFunction={backNavigationFunction} />
       <FormContinueButton
         variant="outlined"
         endIcon={<NavigateNextIcon sx={{ ml: '-8px' }} className="rtl-mirror" />}
+        disabled={disabled}
       />
     </div>
   );

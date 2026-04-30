@@ -3,7 +3,8 @@ import useStyle from '../../Assets/styleController';
 import { IntlProvider } from 'react-intl';
 import { WrapperContext } from '../../Types/WrapperContext';
 import { FormData } from '../../Types/FormData';
-import { getTranslations, getHasBenefitsPrograms, HasBenefitsProgram } from '../../apiCalls';
+import { getTranslations, getHasBenefitsPrograms } from '../../apiCalls';
+import { HasBenefitsProgram } from '../../Types/ApiCalls';
 import useReferrer, { ReferrerData } from '../Referrer/referrerHook';
 import { useGetConfig } from '../Config/configHook';
 import { rightToLeftLanguages, Language } from '../../Assets/languageOptions';
@@ -120,10 +121,12 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   const [hasBenefitsPrograms, setHasBenefitsPrograms] = useState<HasBenefitsProgram[]>([]);
   const [hasBenefitsProgramsLoading, setHasBenefitsProgramsLoading] = useState(true);
+  const [hasBenefitsProgramsError, setHasBenefitsProgramsError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     setHasBenefitsProgramsLoading(true);
+    setHasBenefitsProgramsError(false);
     getHasBenefitsPrograms(whiteLabel)
       .then((data) => {
         if (!cancelled) {
@@ -135,6 +138,7 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
         if (!cancelled) {
           setHasBenefitsPrograms([]);
           setHasBenefitsProgramsLoading(false);
+          setHasBenefitsProgramsError(true);
         }
       });
     return () => {
@@ -291,6 +295,7 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
       setWhiteLabel,
       hasBenefitsPrograms,
       hasBenefitsProgramsLoading,
+      hasBenefitsProgramsError,
     }),
     [
       locale,
@@ -313,6 +318,7 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
       setWhiteLabel,
       hasBenefitsPrograms,
       hasBenefitsProgramsLoading,
+      hasBenefitsProgramsError,
     ],
   );
 

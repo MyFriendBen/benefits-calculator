@@ -3,7 +3,7 @@ import { ITheme, ThemeName } from '../Assets/styleController';
 import { ReferrerData, ReferrerDataValue } from '../Components/Referrer/referrerHook';
 import { Language } from '../Assets/languageOptions';
 import { Config } from './Config';
-import type { HasBenefitsProgram } from '../apiCalls';
+import type { HasBenefitsProgram } from './ApiCalls';
 
 export interface WrapperContext {
   locale: Language;
@@ -26,4 +26,5 @@ export interface WrapperContext {
   setWhiteLabel: (whiteLabel: string) => void;
   hasBenefitsPrograms: HasBenefitsProgram[];
   hasBenefitsProgramsLoading: boolean;
+  hasBenefitsProgramsError: boolean;
 }

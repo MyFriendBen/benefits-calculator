@@ -138,7 +138,7 @@ function applyProgramExclusions(programs: Program[], isAdminView: boolean): Prog
     }
   }
   
-  return programs.filter(program =>
+  return programs.filter(program => 
     !excludedProgramIds.has(program.program_id)
   );
 }
