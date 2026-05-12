@@ -10,6 +10,7 @@ import './RebatePage.css';
 import { useMemo, useContext } from 'react';
 import { TrackedOutboundLink } from '../../Common/TrackedOutboundLink';
 import { Context } from '../../Wrapper/Wrapper';
+import CesnHeatPumpJourney from './CesnHeatPumpJourney';
 
 // Format expiration date from ISO string to readable format
 const formatExpirationDate = (dateString: string): string => {
@@ -54,8 +55,9 @@ export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePag
           <Coin />
           <span>{rebateCategory.name}</span>
         </h1>
-        {renderCategoryDescription(rebateCategory.type, formData)}
         <section>
+          {renderCategoryDescription(rebateCategory.type, formData)}
+          {rebateCategory.type === 'waterHeater' ? <CesnHeatPumpJourney /> : null}
           {rebateCategory.rebates.map((rebate, i) => {
             return <RebateCard rebate={rebate} rebateCategory={rebateCategory} key={i} />;
           })}
