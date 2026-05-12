@@ -5,7 +5,8 @@ import { Context } from '../Components/Wrapper/Wrapper';
 export const STARTING_QUESTION_NUMBER = 3;
 
 export function useStepDirectory() {
-  const { getReferrer, formData, hasBenefitsPrograms, hasBenefitsProgramsLoading } = useContext(Context);
+  const { getReferrer, formData, hasBenefitsPrograms, hasBenefitsProgramsLoading, hasBenefitsProgramsError } =
+    useContext(Context);
 
   const stepDirectory = getReferrer('stepDirectory', []);
 
@@ -22,10 +23,14 @@ export function useStepDirectory() {
   }
 
   // Skip the 'already has benefits' step entirely when the WL has no programs
-  // flagged for it (so users don't land on a blank dead-end page). We wait for
-  // the fetch to resolve before filtering — otherwise the step would briefly
-  // appear and then disappear mid-flight.
-  if (hasBenefitsProgramsLoading === false && (hasBenefitsPrograms ?? []).length === 0) {
+  // flagged for it (so users don't land on a blank dead-end page). Only skip
+  // on a *successful* empty fetch — on error, keep the step so AlreadyHasBenefits
+  // can render its error Alert rather than silently bypassing the step.
+  if (
+    hasBenefitsProgramsLoading === false &&
+    hasBenefitsProgramsError === false &&
+    (hasBenefitsPrograms ?? []).length === 0
+  ) {
     steps = steps.filter((step) => step !== 'hasBenefits');
   }
 
