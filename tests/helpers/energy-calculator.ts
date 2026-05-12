@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
 import { selectIncomeCategory, selectIncomeType, selectFrequency } from './form';
 
 export async function selectOwnerOrRenter(page: Page, type: string) {
@@ -28,7 +28,10 @@ export async function selectHouseholdInfo(page: Page, householdInfo: string) {
 }
 
 export async function selectNoBenefit(page: Page) {
-  await page.getByRole('radio', { name: 'No', exact: true }).check();
+  // Post-MFB-862: the has-benefits step is tile-based and optional. Leaving
+  // every tile unselected means "no benefits" — no radio to toggle.
+  // Wait for the program fetch to resolve so Continue becomes enabled.
+  await expect(page.locator('.hb-loading')).toBeHidden();
 }
 
 export async function selectECIncome(page: Page, incomeCategory: string, incomeType: string, frequency: string, amount: number) {
