@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
 import { selectIncomeCategory, selectIncomeType, selectFrequency } from './form';
 
 export async function navigateHomePage(page: Page, specificPath?: string) {
@@ -82,14 +82,16 @@ export async function fillHouseholdSavings(page: Page, amount: number) {
 
 /**
  * Toggles the first benefit tile on the has-benefits step and asserts
- * the selected state flipped. Useful for end-to-end coverage that the
- * tile-based UI is wired up (selection persists via aria-pressed).
+ * the selected state flipped on THAT tile (not just any pressed tile in the
+ * grid — otherwise this could false-pass if another tile is already
+ * selected). Useful for end-to-end coverage that the tile-based UI is
+ * wired up (selection persists via aria-pressed).
  */
 export async function selectFirstHasBenefitsTile(page: Page) {
   const firstTile = page.locator('.hb-tile-action').first();
   await firstTile.waitFor({ state: 'visible' });
   await firstTile.click();
-  await page.locator('.hb-tile-action[aria-pressed="true"]').first().waitFor({ state: 'visible' });
+  await expect(firstTile).toHaveAttribute('aria-pressed', 'true');
 }
 
 export async function selectNearTermNeeds(page: Page, needs: string[]) {
