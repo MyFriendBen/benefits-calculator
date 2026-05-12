@@ -80,11 +80,16 @@ export async function fillHouseholdSavings(page: Page, amount: number) {
   await page.getByRole('textbox', { name: 'Dollar Amount' }).fill(amount.toString());
 }
 
-export async function selectCurrentBenefits(page: Page, answer: string, benefitsType?: string, benefitName?: string) {
-  await page.getByRole('radio', { name: answer }).check();
-  if (answer === 'Yes') {
-    // TODO
-  }
+/**
+ * Toggles the first benefit tile on the has-benefits step and asserts
+ * the selected state flipped. Useful for end-to-end coverage that the
+ * tile-based UI is wired up (selection persists via aria-pressed).
+ */
+export async function selectFirstHasBenefitsTile(page: Page) {
+  const firstTile = page.locator('.hb-tile-action').first();
+  await firstTile.waitFor({ state: 'visible' });
+  await firstTile.click();
+  await page.locator('.hb-tile-action[aria-pressed="true"]').first().waitFor({ state: 'visible' });
 }
 
 export async function selectNearTermNeeds(page: Page, needs: string[]) {

@@ -330,6 +330,9 @@ export async function completeAssets(page: Page, assetAmount: string): Promise<F
 export async function completePublicBenefits(page: Page): Promise<FlowResult> {
   try {
     await verifyCurrentUrl(page, URL_PATTERNS.PUBLIC_BENEFITS);
+    // Continue is disabled until the program fetch resolves; wait for the
+    // has-benefits loading spinner to disappear before clicking.
+    await expect(page.locator('.hb-loading')).toBeHidden();
     await clickContinue(page);
     return { success: true, step: 'public-benefits' };
   } catch (error) {

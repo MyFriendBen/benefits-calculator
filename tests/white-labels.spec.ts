@@ -154,6 +154,9 @@ test.describe('Basic e2e tests for each white label', () => {
       await clickContinueButton(page);
       await verifyCurrentUrl(page, URL_PATTERNS.PUBLIC_BENEFITS);
 
+      // Continue is gated on the program fetch resolving; wait for the
+      // has-benefits loading spinner to disappear before clicking.
+      await expect(page.locator('.hb-loading')).toBeHidden();
       await clickContinueButton(page);
       await verifyCurrentUrl(page, URL_PATTERNS.NEEDS);
 
