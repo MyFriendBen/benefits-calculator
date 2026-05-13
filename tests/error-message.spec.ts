@@ -24,6 +24,7 @@ import {
   selectNearTermNeeds,
   selectReferralSource,
 } from './helpers/steps';
+import { waitForResultsPageLoad } from './helpers/results';
 
 const userInfo = {
   state: 'North Carolina',
@@ -192,6 +193,7 @@ test.describe('Error Messages Test', () => {
 
     // Results page
     await verifyCurrentUrl(page, URL_PATTERNS.RESULTS);
+    await waitForResultsPageLoad(page);
     await expect(page.locator('.results-header .results-header-programs-count-text')).toContainText('Programs Found');
 
     const estimateMessages = await page.locator('div.results-header-label').allTextContents();
