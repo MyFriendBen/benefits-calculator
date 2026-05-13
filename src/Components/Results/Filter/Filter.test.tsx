@@ -52,6 +52,7 @@ describe('Filter Component', () => {
     setWhiteLabel: jest.fn(),
     referralOptions: { generic: {}, partners: {} },
     referralOptionsLoading: false,
+    referralOptionsError: null,
   });
 
   const renderFilter = (

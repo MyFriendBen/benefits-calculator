@@ -26,4 +26,5 @@ export interface WrapperContext {
   setWhiteLabel: (whiteLabel: string) => void;
   referralOptions: ReferralOptions;
   referralOptionsLoading: boolean;
+  referralOptionsError: Error | null;
 }

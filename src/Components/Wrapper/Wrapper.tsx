@@ -5,13 +5,13 @@ import { WrapperContext } from '../../Types/WrapperContext';
 import { FormData } from '../../Types/FormData';
 import { getTranslations, getReferralOptions } from '../../apiCalls';
 import type { ReferralOptions } from '../../hooks/useReferralOptions';
-
-const EMPTY_REFERRAL_OPTIONS: ReferralOptions = { generic: {}, partners: {} };
 import useReferrer, { ReferrerData } from '../Referrer/referrerHook';
 import { useGetConfig } from '../Config/configHook';
 import { rightToLeftLanguages, Language } from '../../Assets/languageOptions';
 import { HtmlLangUpdater } from '../HtmlLangUpdater/HtmlLangUpdater';
 import { ALL_VALID_WHITE_LABELS, WhiteLabel } from '../../Types/WhiteLabel';
+
+const EMPTY_REFERRAL_OPTIONS: ReferralOptions = { generic: {}, partners: {} };
 
 const initialFormData: FormData = {
   isTest: false,
@@ -123,22 +123,26 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   const [referralOptions, setReferralOptions] = useState<ReferralOptions>(EMPTY_REFERRAL_OPTIONS);
   const [referralOptionsLoading, setReferralOptionsLoading] = useState(true);
+  const [referralOptionsError, setReferralOptionsError] = useState<Error | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     const controller = new AbortController();
 
     setReferralOptionsLoading(true);
+    setReferralOptionsError(null);
     getReferralOptions(whiteLabel, controller.signal)
       .then((data) => {
         if (!cancelled) {
           setReferralOptions(data);
+          setReferralOptionsError(null);
           setReferralOptionsLoading(false);
         }
       })
-      .catch(() => {
+      .catch((err: unknown) => {
         if (!cancelled) {
           setReferralOptions(EMPTY_REFERRAL_OPTIONS);
+          setReferralOptionsError(err instanceof Error ? err : new Error(String(err)));
           setReferralOptionsLoading(false);
         }
       });
@@ -298,6 +302,7 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
       setWhiteLabel,
       referralOptions,
       referralOptionsLoading,
+      referralOptionsError,
     }),
     [
       locale,
@@ -320,6 +325,7 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
       setWhiteLabel,
       referralOptions,
       referralOptionsLoading,
+      referralOptionsError,
     ],
   );
 

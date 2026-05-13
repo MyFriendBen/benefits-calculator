@@ -76,6 +76,7 @@ const createContextValue = (config: Config | undefined, formData = createFormDat
     setWhiteLabel: jest.fn(),
     referralOptions: { generic: {}, partners: {} },
     referralOptionsLoading: false,
+    referralOptionsError: null,
   }) as WrapperContext;
 
 const renderProgramCard = (

@@ -32,6 +32,7 @@ export const createMockContextValue = (overrides: Partial<WrapperContext> = {}):
   setWhiteLabel: jest.fn(),
   referralOptions: { generic: {}, partners: {} },
   referralOptionsLoading: false,
+  referralOptionsError: null,
   ...overrides,
 });
 
