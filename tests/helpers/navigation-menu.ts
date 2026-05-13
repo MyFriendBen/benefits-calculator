@@ -25,14 +25,40 @@ export const NC_211_NAV_LINKS = {
   RESOURCES: 'RESOURCES',
 } as const;
 
+const NC_HEADER_MENU_TIMEOUT_MS = 25_000;
+
+/**
+ * NC 211 cobranded header uses a responsive layout: at max-width 1280px the
+ * desktop nav is hidden and links move behind the hamburger menu. Playwright's
+ * `Desktop Chrome` device is exactly 1280px wide unless tests override the
+ * viewport, so we expand the menu when needed before asserting on link text.
+ */
+export async function ensureNC211NavLinksExpanded(page: Page): Promise<void> {
+  const desktopRow = page.locator('.twoOneOne-desktop-links');
+  if (await desktopRow.isVisible().catch(() => false)) {
+    return;
+  }
+
+  const openMenuButton = page.getByRole('button', { name: /open menu/i });
+  await expect(openMenuButton).toBeVisible({ timeout: NC_HEADER_MENU_TIMEOUT_MS });
+  await openMenuButton.click();
+  await expect(page.locator('#hamburger-drawer a.twoOneOneMenuLink').first()).toBeVisible({
+    timeout: NC_HEADER_MENU_TIMEOUT_MS,
+  });
+}
+
 /**
  * Verifies that the navigation menu container is visible
  * @param page - Playwright page instance
  */
 export async function verifyNavigationMenuVisible(page: Page): Promise<void> {
   try {
-    // Look for navigation menu container with various selectors
+    // NC 211: prefer the real header bar (avoids matching an unrelated `nav`
+    // elsewhere in the tree and tolerates slow config/hydration on CI).
     const navSelectors = [
+      '#twoOneOne-nav-container',
+      'nav:has(#twoOneOne-nav-container)',
+      '.twoOneOne-header-container nav',
       'nav',
       '[role="navigation"]',
       '[data-testid="navigation"]',
@@ -46,7 +72,7 @@ export async function verifyNavigationMenuVisible(page: Page): Promise<void> {
     let navFound = false;
     for (const selector of navSelectors) {
       try {
-        await expect(page.locator(selector)).toBeVisible({ timeout: 5000 });
+        await expect(page.locator(selector).first()).toBeVisible({ timeout: NC_HEADER_MENU_TIMEOUT_MS });
         navFound = true;
         console.log(`[Navigation] Found navigation menu with selector: ${selector}`);
         break;
@@ -73,6 +99,8 @@ export async function verifyNavigationLink(page: Page, linkText: string): Promis
   try {
     // Look for navigation link with various selector strategies
     const linkSelectors = [
+      `a.twoOneOneMenuLink:has-text("${linkText}")`,
+      `#hamburger-drawer a.twoOneOneMenuLink:has-text("${linkText}")`,
       `nav a:has-text("${linkText}")`,
       `[role="navigation"] a:has-text("${linkText}")`,
       `a:has-text("${linkText}")`,
@@ -86,8 +114,8 @@ export async function verifyNavigationLink(page: Page, linkText: string): Promis
     let linkFound = false;
     for (const selector of linkSelectors) {
       try {
-        const link = page.locator(selector);
-        await expect(link).toBeVisible({ timeout: 5000 });
+        const link = page.locator(selector).first();
+        await expect(link).toBeVisible({ timeout: NC_HEADER_MENU_TIMEOUT_MS });
         linkFound = true;
         console.log(`[Navigation] Found ${linkText} link with selector: ${selector}`);
         break;
@@ -172,6 +200,7 @@ export async function verifyAllNC211NavigationLinks(page: Page): Promise<void> {
 
     // First verify the navigation menu container is visible
     await verifyNavigationMenuVisible(page);
+    await ensureNC211NavLinksExpanded(page);
 
     // Verify each expected navigation link
     for (const linkText of Object.values(NC_211_NAV_LINKS)) {
@@ -204,6 +233,8 @@ export async function testNC211NavigationMenu(page: Page): Promise<FlowResult> {
       try {
         // Look for the link and verify it has an href attribute
         const linkSelectors = [
+          `a.twoOneOneMenuLink:has-text("${linkText}")`,
+          `#hamburger-drawer a.twoOneOneMenuLink:has-text("${linkText}")`,
           `nav a:has-text("${linkText}")`,
           `[role="navigation"] a:has-text("${linkText}")`,
           `header a:has-text("${linkText}")`,
@@ -212,8 +243,8 @@ export async function testNC211NavigationMenu(page: Page): Promise<FlowResult> {
         let linkFound = false;
         for (const selector of linkSelectors) {
           try {
-            const link = page.locator(selector);
-            await expect(link).toBeVisible({ timeout: 3000 });
+            const link = page.locator(selector).first();
+            await expect(link).toBeVisible({ timeout: NC_HEADER_MENU_TIMEOUT_MS });
 
             // Verify the link has an href attribute (indicates it's a proper link)
             const href = await link.getAttribute('href');
