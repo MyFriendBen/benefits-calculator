@@ -33,6 +33,9 @@ export const createMockContextValue = (overrides: Partial<WrapperContext> = {}):
   hasBenefitsPrograms: [],
   hasBenefitsProgramsLoading: false,
   hasBenefitsProgramsError: false,
+  referralOptions: { generic: {}, partners: {} },
+  referralOptionsLoading: false,
+  referralOptionsError: null,
   ...overrides,
 });
 

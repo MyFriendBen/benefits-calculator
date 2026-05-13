@@ -4,6 +4,7 @@ import { ReferrerData, ReferrerDataValue } from '../Components/Referrer/referrer
 import { Language } from '../Assets/languageOptions';
 import { Config } from './Config';
 import type { HasBenefitsProgram } from './ApiCalls';
+import type { ReferralOptions } from '../hooks/useReferralOptions';
 
 export interface WrapperContext {
   locale: Language;
@@ -27,4 +28,7 @@ export interface WrapperContext {
   hasBenefitsPrograms: HasBenefitsProgram[];
   hasBenefitsProgramsLoading: boolean;
   hasBenefitsProgramsError: boolean;
+  referralOptions: ReferralOptions;
+  referralOptionsLoading: boolean;
+  referralOptionsError: Error | null;
 }

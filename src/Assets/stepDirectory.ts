@@ -5,8 +5,15 @@ import { Context } from '../Components/Wrapper/Wrapper';
 export const STARTING_QUESTION_NUMBER = 3;
 
 export function useStepDirectory() {
-  const { getReferrer, formData, hasBenefitsPrograms, hasBenefitsProgramsLoading, hasBenefitsProgramsError } =
-    useContext(Context);
+  const {
+    getReferrer,
+    formData,
+    hasBenefitsPrograms,
+    hasBenefitsProgramsLoading,
+    hasBenefitsProgramsError,
+    referralOptions,
+    referralOptionsLoading,
+  } = useContext(Context);
 
   const stepDirectory = getReferrer('stepDirectory', []);
 
@@ -18,8 +25,11 @@ export function useStepDirectory() {
     steps = pathStepDirectory !== undefined ? pathStepDirectory : stepDirectory.default;
   }
 
-  if (formData.immutableReferrer) {
-    steps = steps.filter((step) => step !== 'referralSource');
+  if (formData.immutableReferrer && !referralOptionsLoading) {
+    const allOptions = { ...referralOptions.generic, ...referralOptions.partners };
+    if (formData.immutableReferrer in allOptions) {
+      steps = steps.filter((step) => step !== 'referralSource');
+    }
   }
 
   // Skip the 'already has benefits' step entirely when the WL has no programs
