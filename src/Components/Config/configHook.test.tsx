@@ -335,6 +335,9 @@ describe('useFeatureFlag', () => {
       setStaffToken: jest.fn(),
       whiteLabel: '',
       setWhiteLabel: jest.fn(),
+      referralOptions: { generic: {}, partners: {} },
+      referralOptionsLoading: false,
+      referralOptionsError: null,
     } as WrapperContext;
 
     return ({ children }: PropsWithChildren) => (
