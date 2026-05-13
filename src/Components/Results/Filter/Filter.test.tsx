@@ -53,6 +53,9 @@ describe('Filter Component', () => {
     referralOptions: { generic: {}, partners: {} },
     referralOptionsLoading: false,
     referralOptionsError: null,
+    hasBenefitsPrograms: [],
+    hasBenefitsProgramsLoading: false,
+    hasBenefitsProgramsError: false,
   });
 
   const renderFilter = (

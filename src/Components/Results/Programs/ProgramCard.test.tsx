@@ -77,6 +77,9 @@ const createContextValue = (config: Config | undefined, formData = createFormDat
     referralOptions: { generic: {}, partners: {} },
     referralOptionsLoading: false,
     referralOptionsError: null,
+    hasBenefitsPrograms: [],
+    hasBenefitsProgramsLoading: false,
+    hasBenefitsProgramsError: false,
   }) as WrapperContext;
 
 const renderProgramCard = (

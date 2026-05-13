@@ -3,7 +3,8 @@ import useStyle from '../../Assets/styleController';
 import { IntlProvider } from 'react-intl';
 import { WrapperContext } from '../../Types/WrapperContext';
 import { FormData } from '../../Types/FormData';
-import { getTranslations, getReferralOptions } from '../../apiCalls';
+import { getTranslations, getHasBenefitsPrograms, getReferralOptions } from '../../apiCalls';
+import { HasBenefitsProgram } from '../../Types/ApiCalls';
 import type { ReferralOptions } from '../../hooks/useReferralOptions';
 import useReferrer, { ReferrerData } from '../Referrer/referrerHook';
 import { useGetConfig } from '../Config/configHook';
@@ -120,6 +121,33 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   // Initialize white label from URL to ensure correct config loads
   const [whiteLabel, setWhiteLabel] = useState(getWhiteLabelFromUrl);
+
+  const [hasBenefitsPrograms, setHasBenefitsPrograms] = useState<HasBenefitsProgram[]>([]);
+  const [hasBenefitsProgramsLoading, setHasBenefitsProgramsLoading] = useState(true);
+  const [hasBenefitsProgramsError, setHasBenefitsProgramsError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setHasBenefitsProgramsLoading(true);
+    setHasBenefitsProgramsError(false);
+    getHasBenefitsPrograms(whiteLabel)
+      .then((data) => {
+        if (!cancelled) {
+          setHasBenefitsPrograms(data);
+          setHasBenefitsProgramsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setHasBenefitsPrograms([]);
+          setHasBenefitsProgramsLoading(false);
+          setHasBenefitsProgramsError(true);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [whiteLabel]);
 
   const [referralOptions, setReferralOptions] = useState<ReferralOptions>(EMPTY_REFERRAL_OPTIONS);
   const [referralOptionsLoading, setReferralOptionsLoading] = useState(true);
@@ -300,6 +328,9 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
       getReferrer,
       whiteLabel,
       setWhiteLabel,
+      hasBenefitsPrograms,
+      hasBenefitsProgramsLoading,
+      hasBenefitsProgramsError,
       referralOptions,
       referralOptionsLoading,
       referralOptionsError,
@@ -323,6 +354,9 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
       getReferrer,
       whiteLabel,
       setWhiteLabel,
+      hasBenefitsPrograms,
+      hasBenefitsProgramsLoading,
+      hasBenefitsProgramsError,
       referralOptions,
       referralOptionsLoading,
       referralOptionsError,

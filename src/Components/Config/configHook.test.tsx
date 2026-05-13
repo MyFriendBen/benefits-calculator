@@ -338,6 +338,9 @@ describe('useFeatureFlag', () => {
       referralOptions: { generic: {}, partners: {} },
       referralOptionsLoading: false,
       referralOptionsError: null,
+      hasBenefitsPrograms: [],
+      hasBenefitsProgramsLoading: false,
+      hasBenefitsProgramsError: false,
     } as WrapperContext;
 
     return ({ children }: PropsWithChildren) => (
