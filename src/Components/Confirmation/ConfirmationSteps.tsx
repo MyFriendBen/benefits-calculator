@@ -12,6 +12,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { useTranslateNumber } from '../../Assets/languageOptions';
 import { FormattedMessageType, QuestionName } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
+import { useReferralOptions } from '../../hooks/useReferralOptions';
 import DefaultConfirmationHHData from './ConfirmationHouseholdData';
 import { Benefits as BenefitsType } from '../../Types/FormData';
 import EnergyCalculatorElectricityProvider from '../EnergyCalculator/ConfirmationPage/ElectricityProvider';
@@ -333,9 +334,9 @@ function AcuteConditions() {
 function ReferralSource() {
   const { formData } = useContext(Context);
   const { formatMessage } = useIntl();
-  const referralOptions = useConfig<{ [key: string]: string | FormattedMessageType }>('referral_options');
+  const { allOptions, loading } = useReferralOptions();
 
-  if (formData.referralSource === undefined) {
+  if (formData.referralSource === undefined || loading) {
     return null;
   }
 
@@ -348,6 +349,13 @@ function ReferralSource() {
     defaultMessage: 'referral source',
   };
 
+  // If not a known code, the user typed custom text via the "other" path.
+  // Referrer.tsx stores that text directly in referralSource, so display it verbatim.
+  const displayValue =
+    formData.referralSource in allOptions
+      ? formatMessage({ id: `referralOptions.${formData.referralSource}`, defaultMessage: allOptions[formData.referralSource] })
+      : formData.referralSource;
+
   return (
     <ConfirmationBlock
       icon={<Referral title={formatMessage(referralSourceIconAlt)} />}
@@ -357,13 +365,7 @@ function ReferralSource() {
       editAriaLabel={editReferralSourceAriaLabel}
       stepName="referralSource"
     >
-      <ConfirmationItem
-        value={
-          formData.referralSource in referralOptions
-            ? referralOptions[formData.referralSource]
-            : formData.referralSource
-        }
-      />
+      <ConfirmationItem value={displayValue} />
     </ConfirmationBlock>
   );
 }

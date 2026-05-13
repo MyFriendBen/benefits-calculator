@@ -22,14 +22,6 @@ export type Config = Record<string, ConfigValue> & {
   experiments?: ExperimentsConfig;
 };
 
-export type FooterDataConfig = {
-  address_one: string;
-  address_two: string;
-  city: string;
-  state: string;
-  zip_code: string;
-  email: string;
-};
 
 export type ApiExpenses = {
   expenseSourceName: string;

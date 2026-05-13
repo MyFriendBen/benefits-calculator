@@ -34,7 +34,7 @@ function renderHook(
 }
 
 describe('useExperiment', () => {
-  const STORAGE_KEY = 'experiment_override_npsVariant';
+  const STORAGE_KEY = 'experiment_override_testExperiment';
 
   beforeEach(() => {
     localStorage.clear();
@@ -42,27 +42,27 @@ describe('useExperiment', () => {
 
   describe('returns null when not configured', () => {
     it('returns null when config is undefined', () => {
-      const result = renderHook('npsVariant', 'seed-123');
+      const result = renderHook('testExperiment', 'seed-123');
       expect(result.current).toBeNull();
     });
 
     it('returns null when experiment is not in config', () => {
-      const result = renderHook('npsVariant', 'seed-123', '/', {
+      const result = renderHook('testExperiment', 'seed-123', '/', {
         otherExperiment: { variants: ['a', 'b'] },
       });
       expect(result.current).toBeNull();
     });
 
     it('returns null when variants array is empty', () => {
-      const result = renderHook('npsVariant', 'seed-123', '/', {
-        npsVariant: { variants: [] },
+      const result = renderHook('testExperiment', 'seed-123', '/', {
+        testExperiment: { variants: [] },
       });
       expect(result.current).toBeNull();
     });
 
     it('returns null when no seed is provided', () => {
-      const result = renderHook('npsVariant', undefined, '/', {
-        npsVariant: { variants: ['floating', 'inline'] },
+      const result = renderHook('testExperiment', undefined, '/', {
+        testExperiment: { variants: ['A', 'B'] },
       });
       expect(result.current).toBeNull();
     });
@@ -70,18 +70,18 @@ describe('useExperiment', () => {
 
   describe('deterministic hash-based assignment', () => {
     it('assigns a variant from the configured list', () => {
-      const result = renderHook('npsVariant', 'user-abc', '/', {
-        npsVariant: { variants: ['floating', 'inline'] },
+      const result = renderHook('testExperiment', 'user-abc', '/', {
+        testExperiment: { variants: ['A', 'B'] },
       });
-      expect(['floating', 'inline']).toContain(result.current);
+      expect(['A', 'B']).toContain(result.current);
     });
 
     it('returns the same variant for the same seed', () => {
-      const r1 = renderHook('npsVariant', 'stable-uuid', '/', {
-        npsVariant: { variants: ['floating', 'inline'] },
+      const r1 = renderHook('testExperiment', 'stable-uuid', '/', {
+        testExperiment: { variants: ['A', 'B'] },
       });
-      const r2 = renderHook('npsVariant', 'stable-uuid', '/', {
-        npsVariant: { variants: ['floating', 'inline'] },
+      const r2 = renderHook('testExperiment', 'stable-uuid', '/', {
+        testExperiment: { variants: ['A', 'B'] },
       });
       expect(r1.current).toBe(r2.current);
     });
@@ -89,86 +89,86 @@ describe('useExperiment', () => {
     it('can assign different variants to different seeds', () => {
       const variants = new Set<string | null>();
 
-      for (let i = 0; i < 50; i++) {
-        const result = renderHook('npsVariant', `uuid-${i}`, '/', {
-          npsVariant: { variants: ['floating', 'inline'] },
+      for (let i = 0; i < 100; i++) {
+        const result = renderHook('testExperiment', `uuid-${i}`, '/', {
+          testExperiment: { variants: ['A', 'B'] },
         });
         variants.add(result.current);
       }
 
-      expect(variants.has('floating')).toBe(true);
-      expect(variants.has('inline')).toBe(true);
+      expect(variants.has('A')).toBe(true);
+      expect(variants.has('B')).toBe(true);
     });
 
     it('always returns the single variant when only one is configured', () => {
-      const result = renderHook('npsVariant', 'any-seed', '/', {
-        npsVariant: { variants: ['floating'] },
+      const result = renderHook('testExperiment', 'any-seed', '/', {
+        testExperiment: { variants: ['A'] },
       });
-      expect(result.current).toBe('floating');
+      expect(result.current).toBe('A');
     });
   });
 
   describe('URL parameter override', () => {
     it('returns URL param value over hash assignment', () => {
-      const result = renderHook('npsVariant', 'seed-123', '/?npsVariant=inline', {
-        npsVariant: { variants: ['floating', 'inline'] },
+      const result = renderHook('testExperiment', 'seed-123', '/?testExperiment=B', {
+        testExperiment: { variants: ['A', 'B'] },
       });
-      expect(result.current).toBe('inline');
+      expect(result.current).toBe('B');
     });
 
     it('accepts URL param even without backend config', () => {
-      const result = renderHook('npsVariant', 'seed-123', '/?npsVariant=floating');
-      expect(result.current).toBe('floating');
+      const result = renderHook('testExperiment', 'seed-123', '/?testExperiment=A');
+      expect(result.current).toBe('A');
     });
 
     it('ignores URL param not in variants list', () => {
-      const result = renderHook('npsVariant', 'seed-123', '/?npsVariant=invalid', {
-        npsVariant: { variants: ['floating', 'inline'] },
+      const result = renderHook('testExperiment', 'seed-123', '/?testExperiment=invalid', {
+        testExperiment: { variants: ['A', 'B'] },
       });
       // Falls through to hash assignment
-      expect(['floating', 'inline']).toContain(result.current);
+      expect(['A', 'B']).toContain(result.current);
     });
   });
 
   describe('localStorage override', () => {
     it('returns localStorage value over hash assignment', () => {
-      localStorage.setItem(STORAGE_KEY, 'inline');
+      localStorage.setItem(STORAGE_KEY, 'B');
 
-      const result = renderHook('npsVariant', 'seed-123', '/', {
-        npsVariant: { variants: ['floating', 'inline'] },
+      const result = renderHook('testExperiment', 'seed-123', '/', {
+        testExperiment: { variants: ['A', 'B'] },
       });
-      expect(result.current).toBe('inline');
+      expect(result.current).toBe('B');
     });
 
     it('ignores localStorage value not in variants list', () => {
       localStorage.setItem(STORAGE_KEY, 'invalid');
 
-      const result = renderHook('npsVariant', 'seed-123', '/', {
-        npsVariant: { variants: ['floating', 'inline'] },
+      const result = renderHook('testExperiment', 'seed-123', '/', {
+        testExperiment: { variants: ['A', 'B'] },
       });
       // Falls through to hash assignment
-      expect(['floating', 'inline']).toContain(result.current);
+      expect(['A', 'B']).toContain(result.current);
     });
 
     it('URL param takes priority over localStorage', () => {
-      localStorage.setItem(STORAGE_KEY, 'inline');
+      localStorage.setItem(STORAGE_KEY, 'B');
 
-      const result = renderHook('npsVariant', 'seed-123', '/?npsVariant=floating', {
-        npsVariant: { variants: ['floating', 'inline'] },
+      const result = renderHook('testExperiment', 'seed-123', '/?testExperiment=A', {
+        testExperiment: { variants: ['A', 'B'] },
       });
-      expect(result.current).toBe('floating');
+      expect(result.current).toBe('A');
     });
   });
 
   describe('helper functions', () => {
     it('setExperimentOverride stores value in localStorage', () => {
-      setExperimentOverride('npsVariant', 'floating');
-      expect(localStorage.getItem(STORAGE_KEY)).toBe('floating');
+      setExperimentOverride('testExperiment', 'A');
+      expect(localStorage.getItem(STORAGE_KEY)).toBe('A');
     });
 
     it('clearExperimentOverride removes value from localStorage', () => {
-      localStorage.setItem(STORAGE_KEY, 'floating');
-      clearExperimentOverride('npsVariant');
+      localStorage.setItem(STORAGE_KEY, 'A');
+      clearExperimentOverride('testExperiment');
       expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
     });
   });

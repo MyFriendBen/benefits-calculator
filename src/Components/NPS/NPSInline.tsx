@@ -14,7 +14,7 @@ type NPSInlineProps = {
  */
 export default function NPSInline({ uuid }: NPSInlineProps) {
   const { selectedScore, isScoreSubmitted, isFullySubmitted, isSubmitting, reason, setReason, submitScore, submitReason, skipReason } =
-    useNPSState('inline', uuid);
+    useNPSState(uuid);
 
   if (isFullySubmitted) {
     return (
