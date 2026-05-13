@@ -11,6 +11,7 @@ import { ReactComponent as Referral } from '../../Assets/icons/General/referral.
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useTranslateNumber } from '../../Assets/languageOptions';
 import { FormattedMessageType, QuestionName } from '../../Types/Questions';
+import { HasBenefitsProgram } from '../../Types/ApiCalls';
 import { useConfig } from '../Config/configHook';
 import { useReferralOptions } from '../../hooks/useReferralOptions';
 import DefaultConfirmationHHData from './ConfirmationHouseholdData';
@@ -233,27 +234,30 @@ function HasBenefits() {
     // TODO(MFB-720): drop the lowercase coercion once the join-table migration ships.
     const programsByKey = new Map(hasBenefitsPrograms.map((p) => [p.name_abbreviated.toLowerCase(), p]));
 
-    return selectedKeys.map((key) => {
-      const program = programsByKey.get(key);
-      if (program) {
-        return (
-          <ConfirmationItem
-            key={key}
-            label={<FormattedMessage id={program.name.label} defaultMessage={program.name.default_message} />}
-            value={
-              <FormattedMessage
-                id={program.website_description.label}
-                defaultMessage={program.website_description.default_message}
-              />
-            }
+    // updateFormData fans a single saved benefit (e.g. has_section_8) out to
+    // per-white-label keys (section_8, co_section_8, ma_section_8, ...).
+    // Only the active white label's variant is in hasBenefitsPrograms; drop
+    // the rest so the user sees one row per program, not one per WL.
+    const matched = selectedKeys
+      .map((key) => ({ key, program: programsByKey.get(key) }))
+      .filter((entry): entry is { key: string; program: HasBenefitsProgram } => entry.program !== undefined);
+
+    if (matched.length === 0) {
+      return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
+    }
+
+    return matched.map(({ key, program }) => (
+      <ConfirmationItem
+        key={key}
+        label={<FormattedMessage id={program.name.label} defaultMessage={program.name.default_message} />}
+        value={
+          <FormattedMessage
+            id={program.website_description.label}
+            defaultMessage={program.website_description.default_message}
           />
-        );
-      }
-      // Fallback: a benefit was previously selected but is no longer flagged
-      // for this step (e.g. admin toggled show_in_has_benefits_step off).
-      // Render the raw key so the user can still see what was on file.
-      return <ConfirmationItem key={key} value={key} />;
-    });
+        }
+      />
+    ));
   };
 
   const editHasBenefitsAriaLabel = {
