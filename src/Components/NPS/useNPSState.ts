@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { postNPSScore, patchNPSReason } from '../../apiCalls';
 
-export type NPSVariantType = 'floating' | 'inline';
-
 type UseNPSStateReturn = {
   selectedScore: number | null;
   isScoreSubmitted: boolean;
@@ -16,12 +14,12 @@ type UseNPSStateReturn = {
 };
 
 /**
- * Shared hook for NPS state management across variants.
+ * Shared hook for NPS state management.
  * Handles score selection, followup reason, and API calls.
  *
  * Flow: select score (POST) → enter reason → submit reason (PATCH) → thank you
  */
-export function useNPSState(variant: NPSVariantType, uuid?: string): UseNPSStateReturn {
+export function useNPSState(uuid?: string): UseNPSStateReturn {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
   const [isScoreSubmitted, setIsScoreSubmitted] = useState(false);
   const [isFullySubmitted, setIsFullySubmitted] = useState(false);
@@ -33,7 +31,7 @@ export function useNPSState(variant: NPSVariantType, uuid?: string): UseNPSState
     setIsScoreSubmitted(true);
 
     if (uuid) {
-      postNPSScore({ uuid, score, variant }).catch((error) => {
+      postNPSScore({ uuid, score }).catch((error) => {
         console.error('Failed to submit NPS score:', error);
       });
     }

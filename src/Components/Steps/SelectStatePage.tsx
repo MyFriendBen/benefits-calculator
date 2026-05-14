@@ -17,9 +17,10 @@ import { usePageTitle } from '../Common/usePageTitle';
 
 export const STATES: { [key: string]: string } = {
   co: 'Colorado',
-  nc: 'North Carolina',
-  ma: 'Massachusetts',
   il: 'Illinois',
+  ma: 'Massachusetts',
+  nc: 'North Carolina',
+  tx: 'Texas',
 };
 
 const SelectStatePage = () => {

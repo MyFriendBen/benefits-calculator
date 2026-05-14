@@ -1,5 +1,5 @@
 import { render, act } from '@testing-library/react';
-import { useNPSState, NPSVariantType } from './useNPSState';
+import { useNPSState } from './useNPSState';
 import * as apiCalls from '../../apiCalls';
 import React from 'react';
 
@@ -13,11 +13,11 @@ const mockPatchNPSReason = apiCalls.patchNPSReason as jest.MockedFunction<typeof
 
 type HookResult = ReturnType<typeof useNPSState>;
 
-function renderHook(variant: NPSVariantType, uuid?: string) {
+function renderHook(uuid?: string) {
   const resultRef: { current: HookResult | null } = { current: null };
 
   function TestComponent() {
-    resultRef.current = useNPSState(variant, uuid);
+    resultRef.current = useNPSState(uuid);
     return null;
   }
 
@@ -34,29 +34,29 @@ describe('useNPSState', () => {
 
   describe('initial state', () => {
     it('should have null selectedScore initially', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
       expect(result.current.selectedScore).toBeNull();
     });
 
     it('should have isScoreSubmitted as false initially', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
       expect(result.current.isScoreSubmitted).toBe(false);
     });
 
     it('should have isFullySubmitted as false initially', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
       expect(result.current.isFullySubmitted).toBe(false);
     });
 
     it('should have empty reason initially', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
       expect(result.current.reason).toBe('');
     });
   });
 
   describe('submitScore', () => {
     it('should update selectedScore when submitting', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.submitScore(8);
@@ -66,7 +66,7 @@ describe('useNPSState', () => {
     });
 
     it('should set isScoreSubmitted to true when submitting', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.submitScore(8);
@@ -76,7 +76,7 @@ describe('useNPSState', () => {
     });
 
     it('should not set isFullySubmitted when submitting score', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.submitScore(8);
@@ -86,7 +86,7 @@ describe('useNPSState', () => {
     });
 
     it('should call postNPSScore with correct data', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.submitScore(9);
@@ -95,26 +95,11 @@ describe('useNPSState', () => {
       expect(mockPostNPSScore).toHaveBeenCalledWith({
         uuid: 'test-uuid',
         score: 9,
-        variant: 'floating',
-      });
-    });
-
-    it('should call postNPSScore with inline variant', () => {
-      const { result } = renderHook('inline', 'another-uuid');
-
-      act(() => {
-        result.current.submitScore(7);
-      });
-
-      expect(mockPostNPSScore).toHaveBeenCalledWith({
-        uuid: 'another-uuid',
-        score: 7,
-        variant: 'inline',
       });
     });
 
     it('should not call postNPSScore when uuid is undefined', () => {
-      const { result } = renderHook('floating');
+      const { result } = renderHook();
 
       act(() => {
         result.current.submitScore(5);
@@ -124,7 +109,7 @@ describe('useNPSState', () => {
     });
 
     it('should still update state when uuid is undefined', () => {
-      const { result } = renderHook('floating');
+      const { result } = renderHook();
 
       act(() => {
         result.current.submitScore(5);
@@ -135,7 +120,7 @@ describe('useNPSState', () => {
     });
 
     it('should accept score of 1', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.submitScore(1);
@@ -145,12 +130,11 @@ describe('useNPSState', () => {
       expect(mockPostNPSScore).toHaveBeenCalledWith({
         uuid: 'test-uuid',
         score: 1,
-        variant: 'floating',
       });
     });
 
     it('should accept score of 10', () => {
-      const { result } = renderHook('inline', 'test-uuid');
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.submitScore(10);
@@ -160,14 +144,13 @@ describe('useNPSState', () => {
       expect(mockPostNPSScore).toHaveBeenCalledWith({
         uuid: 'test-uuid',
         score: 10,
-        variant: 'inline',
       });
     });
   });
 
   describe('reason state', () => {
     it('should update reason via setReason', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.setReason('Great service!');
@@ -178,8 +161,8 @@ describe('useNPSState', () => {
   });
 
   describe('submitReason', () => {
-    it('should set isFullySubmitted to true', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+    it('should set isFullySubmitted to true', async () => {
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.submitScore(8);
@@ -189,15 +172,15 @@ describe('useNPSState', () => {
         result.current.setReason('Great service!');
       });
 
-      act(() => {
+      await act(async () => {
         result.current.submitReason();
       });
 
       expect(result.current.isFullySubmitted).toBe(true);
     });
 
-    it('should call patchNPSReason with correct data', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+    it('should call patchNPSReason with correct data', async () => {
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.submitScore(8);
@@ -207,7 +190,7 @@ describe('useNPSState', () => {
         result.current.setReason('Great service!');
       });
 
-      act(() => {
+      await act(async () => {
         result.current.submitReason();
       });
 
@@ -217,14 +200,14 @@ describe('useNPSState', () => {
       });
     });
 
-    it('should trim whitespace from reason before sending', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+    it('should trim whitespace from reason before sending', async () => {
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.setReason('  Great service!  ');
       });
 
-      act(() => {
+      await act(async () => {
         result.current.submitReason();
       });
 
@@ -234,10 +217,10 @@ describe('useNPSState', () => {
       });
     });
 
-    it('should not call patchNPSReason when reason is empty', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+    it('should not call patchNPSReason when reason is empty', async () => {
+      const { result } = renderHook('test-uuid');
 
-      act(() => {
+      await act(async () => {
         result.current.submitReason();
       });
 
@@ -245,14 +228,14 @@ describe('useNPSState', () => {
       expect(result.current.isFullySubmitted).toBe(true);
     });
 
-    it('should not call patchNPSReason when reason is only whitespace', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+    it('should not call patchNPSReason when reason is only whitespace', async () => {
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.setReason('   ');
       });
 
-      act(() => {
+      await act(async () => {
         result.current.submitReason();
       });
 
@@ -260,14 +243,14 @@ describe('useNPSState', () => {
       expect(result.current.isFullySubmitted).toBe(true);
     });
 
-    it('should not call patchNPSReason when uuid is undefined', () => {
-      const { result } = renderHook('floating');
+    it('should not call patchNPSReason when uuid is undefined', async () => {
+      const { result } = renderHook();
 
       act(() => {
         result.current.setReason('Great service!');
       });
 
-      act(() => {
+      await act(async () => {
         result.current.submitReason();
       });
 
@@ -279,7 +262,7 @@ describe('useNPSState', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       mockPatchNPSReason.mockRejectedValue(new Error('Network error'));
 
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.setReason('Great service!');
@@ -302,7 +285,7 @@ describe('useNPSState', () => {
 
   describe('skipReason', () => {
     it('should set isFullySubmitted to true', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.skipReason();
@@ -312,7 +295,7 @@ describe('useNPSState', () => {
     });
 
     it('should not call patchNPSReason', () => {
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.skipReason();
@@ -327,7 +310,7 @@ describe('useNPSState', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       mockPostNPSScore.mockRejectedValue(new Error('Network error'));
 
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.submitScore(8);
@@ -347,7 +330,7 @@ describe('useNPSState', () => {
     it('should not block UI when API call is slow', () => {
       mockPostNPSScore.mockImplementation(() => new Promise(() => {}));
 
-      const { result } = renderHook('floating', 'test-uuid');
+      const { result } = renderHook('test-uuid');
 
       act(() => {
         result.current.submitScore(8);

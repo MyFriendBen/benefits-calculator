@@ -1,12 +1,18 @@
-import { Button, CircularProgress } from '@mui/material';
+import { Button, ButtonProps, CircularProgress } from '@mui/material';
 import { PropsWithChildren, useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Context } from '../Wrapper/Wrapper';
 
-const FormContinueButton = ({ children }: PropsWithChildren) => {
+type FormContinueButtonProps = PropsWithChildren<{
+  variant?: ButtonProps['variant'];
+  endIcon?: ButtonProps['endIcon'];
+  disabled?: boolean;
+}>;
+
+const FormContinueButton = ({ children, variant = 'contained', endIcon, disabled }: FormContinueButtonProps) => {
   const { stepLoading } = useContext(Context);
   return (
-    <Button variant="contained" type="submit">
+    <Button variant={variant} type="submit" endIcon={endIcon} disabled={disabled || stepLoading}>
       {stepLoading && <CircularProgress size="1rem" color="inherit" sx={{ position: 'absolute' }} />}
       <span
         style={{

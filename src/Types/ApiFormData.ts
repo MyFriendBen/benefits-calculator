@@ -202,6 +202,7 @@ export type ApiFormData = {
   has_csfp: boolean | null;
   has_ccdf: boolean | null;
   has_aca: boolean | null;
+  has_ma_heap: boolean | null;
   has_ma_eaedc: boolean | null;
   has_ma_ssp: boolean | null;
   has_ma_mbta: boolean | null;

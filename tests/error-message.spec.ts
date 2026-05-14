@@ -6,7 +6,6 @@ import {
   fillTextField,
   FORM_INPUTS,
   selectDropdownOption,
-  selectRadio,
   selectIncomeCategory,
   selectIncomeType,
   selectFrequency,
@@ -20,10 +19,12 @@ import { URL_PATTERNS, STATES } from './helpers/utils/constants';
 import {
   fillDateOfBirth,
   fillHouseholdSize,
+  selectFirstHasBenefitsTile,
   selectInsurance,
   selectNearTermNeeds,
   selectReferralSource,
 } from './helpers/steps';
+import { waitForResultsPageLoad } from './helpers/results';
 
 const userInfo = {
   state: 'North Carolina',
@@ -137,18 +138,13 @@ test.describe('Error Messages Test', () => {
     await verifyCurrentUrl(page, URL_PATTERNS.ASSETS);
     await clickContinue(page);
 
-    // Verify current benefits error message
+    // Current benefits step — tile-based, optional, no validation.
+    // Continue is gated on the program fetch resolving, so wait for the
+    // loading state to clear. Toggle the first tile to cover the new
+    // tile-selection UI end-to-end (aria-pressed reflects selection).
     await verifyCurrentUrl(page, URL_PATTERNS.PUBLIC_BENEFITS);
-    await selectRadio(page, FORM_INPUTS.YES_RADIO.name);
-
-    await clickContinue(page);
-
-    await expect(page.locator('span.error-message')).toHaveText(
-      'If your household does not receive any of these benefits, please select the "No" option above.',
-    );
-
-    await page.locator('input[type="radio"][value="false"]').check();
-
+    await expect(page.locator('.hb-loading')).toBeHidden();
+    await selectFirstHasBenefitsTile(page);
     await clickContinue(page);
 
     // Select near term benefits
@@ -197,6 +193,7 @@ test.describe('Error Messages Test', () => {
 
     // Results page
     await verifyCurrentUrl(page, URL_PATTERNS.RESULTS);
+    await waitForResultsPageLoad(page);
     await expect(page.locator('.results-header .results-header-programs-count-text')).toContainText('Programs Found');
 
     const estimateMessages = await page.locator('div.results-header-label').allTextContents();
