@@ -1,4 +1,4 @@
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
@@ -9,6 +9,7 @@ import './HeatPumpJourneyCards.css';
 const POWER_AHEAD_LEARN_MORE_URL = 'https://poweraheadcolorado.org/why-heat-pumps?utm_source=cesn';
 
 export default function HeatPumpJourneyCards() {
+  const intl = useIntl();
   const isEnabled = useFeatureFlag('cesn_heat_pump_journey');
   const billsImpactLink = useResultsLink('results/heat-pump-bills-impact');
   const contractorsLink = useResultsLink('results/heat-pump-contractors');
@@ -17,8 +18,13 @@ export default function HeatPumpJourneyCards() {
     return null;
   }
 
+  const sectionAriaLabel = intl.formatMessage({
+    id: 'energyCalculator.heatPumpJourney.sectionAriaLabel',
+    defaultMessage: 'Heat pump journey',
+  });
+
   return (
-    <section className="heat-pump-journey-cards" aria-label="Heat pump journey">
+    <section className="heat-pump-journey-cards" aria-label={sectionAriaLabel}>
       <article className="heat-pump-journey-card">
         <div className="heat-pump-journey-card-header">
           <span className="heat-pump-journey-card-badge" aria-hidden="true">
