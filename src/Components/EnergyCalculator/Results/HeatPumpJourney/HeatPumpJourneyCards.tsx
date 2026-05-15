@@ -1,5 +1,6 @@
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import { useFeatureFlag } from '../../../Config/configHook';
 import { useResultsLink } from '../../../Results/Results';
@@ -44,6 +45,7 @@ export default function HeatPumpJourneyCards() {
           className="heat-pump-journey-card-cta"
         >
           <FormattedMessage id="energyCalculator.heatPumpJourney.card1.cta" defaultMessage="Learn more" />
+          <OpenInNewIcon className="heat-pump-journey-card-cta-icon" aria-hidden="true" />
         </TrackedOutboundLink>
       </article>
 
