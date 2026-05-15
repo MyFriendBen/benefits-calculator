@@ -14,7 +14,7 @@
   flex-direction: column;
   gap: 0.7rem;
   background-color: #ffffff;
-  border: 1.5px solid var(--icon-color);
+  border: 2px solid var(--icon-color);
   border-radius: 0.3rem;
   padding: 1.25rem 0.7rem;
   aspect-ratio: 33 / 40;
