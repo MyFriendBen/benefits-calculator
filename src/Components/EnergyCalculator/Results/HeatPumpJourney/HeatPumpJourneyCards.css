@@ -1,0 +1,72 @@
+.heat-pump-journey-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem 0;
+}
+
+.heat-pump-journey-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background-color: var(--secondary-background-color);
+  border: 1px solid var(--primary-color);
+  border-radius: 0.3rem;
+  padding: 1.25rem;
+}
+
+.heat-pump-journey-card-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background-color: var(--secondary-background-color);
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  font-family: 'Roboto Slab', serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.heat-pump-journey-card-title {
+  color: var(--primary-color);
+  font-family: 'Roboto Slab', serif;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.heat-pump-journey-card-description {
+  color: var(--text-color, #000);
+  font-size: 0.95rem;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.heat-pump-journey-card-cta {
+  align-self: flex-start;
+  font-size: 0.85rem;
+  color: white;
+  text-decoration: none;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--primary-color);
+  font-family: 'Roboto Slab', serif;
+  font-weight: 700;
+  border: 1px solid var(--primary-color);
+  margin-top: auto;
+}
+
+.heat-pump-journey-card-cta:hover,
+.heat-pump-journey-card-cta:focus-visible {
+  background-color: white;
+  color: var(--primary-color);
+}
+
+@media (max-width: 767px) {
+  .heat-pump-journey-cards {
+    grid-template-columns: 1fr;
+  }
+}
