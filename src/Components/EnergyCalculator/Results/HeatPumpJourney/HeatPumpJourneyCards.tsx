@@ -19,15 +19,17 @@ export default function HeatPumpJourneyCards() {
   return (
     <section className="heat-pump-journey-cards" aria-label="Heat pump journey">
       <article className="heat-pump-journey-card">
-        <span className="heat-pump-journey-card-badge" aria-hidden="true">
-          1
-        </span>
-        <h3 className="heat-pump-journey-card-title">
-          <FormattedMessage
-            id="energyCalculator.heatPumpJourney.card1.title"
-            defaultMessage="Why get a heat pump?"
-          />
-        </h3>
+        <div className="heat-pump-journey-card-header">
+          <span className="heat-pump-journey-card-badge" aria-hidden="true">
+            1
+          </span>
+          <h3 className="heat-pump-journey-card-title">
+            <FormattedMessage
+              id="energyCalculator.heatPumpJourney.card1.title"
+              defaultMessage="Why get a heat pump?"
+            />
+          </h3>
+        </div>
         <p className="heat-pump-journey-card-description">
           <FormattedMessage
             id="energyCalculator.heatPumpJourney.card1.description"
@@ -46,15 +48,17 @@ export default function HeatPumpJourneyCards() {
       </article>
 
       <article className="heat-pump-journey-card">
-        <span className="heat-pump-journey-card-badge" aria-hidden="true">
-          2
-        </span>
-        <h3 className="heat-pump-journey-card-title">
-          <FormattedMessage
-            id="energyCalculator.heatPumpJourney.card2.title"
-            defaultMessage="Will it impact my bills?"
-          />
-        </h3>
+        <div className="heat-pump-journey-card-header">
+          <span className="heat-pump-journey-card-badge" aria-hidden="true">
+            2
+          </span>
+          <h3 className="heat-pump-journey-card-title">
+            <FormattedMessage
+              id="energyCalculator.heatPumpJourney.card2.title"
+              defaultMessage="Will it impact my bills?"
+            />
+          </h3>
+        </div>
         <p className="heat-pump-journey-card-description">
           <FormattedMessage
             id="energyCalculator.heatPumpJourney.card2.description"
@@ -67,15 +71,17 @@ export default function HeatPumpJourneyCards() {
       </article>
 
       <article className="heat-pump-journey-card">
-        <span className="heat-pump-journey-card-badge" aria-hidden="true">
-          3
-        </span>
-        <h3 className="heat-pump-journey-card-title">
-          <FormattedMessage
-            id="energyCalculator.heatPumpJourney.card3.title"
-            defaultMessage="Whom should I hire?"
-          />
-        </h3>
+        <div className="heat-pump-journey-card-header">
+          <span className="heat-pump-journey-card-badge" aria-hidden="true">
+            3
+          </span>
+          <h3 className="heat-pump-journey-card-title">
+            <FormattedMessage
+              id="energyCalculator.heatPumpJourney.card3.title"
+              defaultMessage="Whom should I hire?"
+            />
+          </h3>
+        </div>
         <p className="heat-pump-journey-card-description">
           <FormattedMessage
             id="energyCalculator.heatPumpJourney.card3.description"
