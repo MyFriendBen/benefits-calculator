@@ -12,12 +12,12 @@
 .heat-pump-journey-card {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.5rem;
   background-color: #ffffff;
   border: 2px solid var(--icon-color);
   border-radius: 0.3rem;
   padding: 0.8rem;
-  aspect-ratio: 33 / 40;
+  aspect-ratio: 33 / 37.5;
   overflow: hidden;
 }
 
@@ -49,10 +49,9 @@
 .heat-pump-journey-card-title {
   color: var(--primary-color);
   font-family: 'Roboto Slab', serif;
-  font-size: 1.05rem;
+  font-size: 1rem;
   line-height: 1.2;
   margin: 0;
-  white-space: nowrap;
 }
 
 .heat-pump-journey-card-description {
