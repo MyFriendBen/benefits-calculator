@@ -58,21 +58,21 @@ export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePag
           <span>{rebateCategory.name}</span>
         </h1>
         {renderCategoryDescription(rebateCategory.type, formData)}
-        {showHeatPumpJourney && <HeatPumpJourneyCards />}
         {showHeatPumpJourney && (
-          <h2 className="energy-calculator-rebate-page-rebates-heading">
-            <Coin />
-            <span>
-              <FormattedMessage id="energyCalculator.rebatePage.rebatesHeading" defaultMessage="Rebates" />
-            </span>
-          </h2>
+          <>
+            <HeatPumpJourneyCards />
+            <h2 className="energy-calculator-rebate-page-rebates-heading">
+              <Coin />
+              <span>
+                <FormattedMessage id="energyCalculator.rebatePage.rebatesHeading" defaultMessage="Rebates" />
+              </span>
+            </h2>
+          </>
         )}
         <section
-          className={
-            showHeatPumpJourney
-              ? 'energy-calculator-rebate-page-rebates-list energy-calculator-rebate-page-rebates-list-full-width'
-              : 'energy-calculator-rebate-page-rebates-list'
-          }
+          className={`energy-calculator-rebate-page-rebates-list${
+            showHeatPumpJourney ? ' energy-calculator-rebate-page-rebates-list-full-width' : ''
+          }`}
         >
           {rebateCategory.rebates.map((rebate, i) => {
             return <RebateCard rebate={rebate} rebateCategory={rebateCategory} key={i} />;

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+import { FormattedMessage, IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 import EnergyCalculatorRebatePage from './RebatePage';
 import { Context } from '../../Wrapper/Wrapper';
@@ -35,7 +35,7 @@ const mockUseResultsLink = useResultsLink as jest.MockedFunction<typeof useResul
 
 const buildCategory = (type: EnergyCalculatorRebateCategoryType): EnergyCalculatorRebateCategory => ({
   type,
-  name: 'Category Name' as unknown as EnergyCalculatorRebateCategory['name'],
+  name: <FormattedMessage id="test.category.name" defaultMessage="Category Name" />,
   rebates: [],
 });
 

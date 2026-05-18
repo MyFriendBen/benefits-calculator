@@ -33,7 +33,8 @@
   padding: 1rem;
 }
 
-.energy-calculator-rebate-page-container .energy-calculator-rebate-page-rebates-list-full-width {
+.energy-calculator-rebate-page-container
+  .energy-calculator-rebate-page-rebates-list.energy-calculator-rebate-page-rebates-list-full-width {
   width: 100%;
   padding: 0;
 }
