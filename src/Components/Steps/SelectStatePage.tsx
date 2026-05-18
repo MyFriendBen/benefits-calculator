@@ -19,6 +19,7 @@ export const STATES: { [key: string]: string } = {
   ma: 'Massachusetts',
   nc: 'North Carolina',
   tx: 'Texas',
+  wa: 'Washington',
 };
 
 const SelectStatePage = () => {

@@ -11,10 +11,10 @@ import { ReactComponent as Referral } from '../../Assets/icons/General/referral.
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useTranslateNumber } from '../../Assets/languageOptions';
 import { FormattedMessageType, QuestionName } from '../../Types/Questions';
+import { HasBenefitsProgram } from '../../Types/ApiCalls';
 import { useConfig } from '../Config/configHook';
 import { useReferralOptions } from '../../hooks/useReferralOptions';
 import DefaultConfirmationHHData from './ConfirmationHouseholdData';
-import { Benefits as BenefitsType } from '../../Types/FormData';
 import EnergyCalculatorElectricityProvider from '../EnergyCalculator/ConfirmationPage/ElectricityProvider';
 import EnergyCalculatorGasProvider from '../EnergyCalculator/ConfirmationPage/GasProvider';
 import EnergyCalculatorExpenses from '../EnergyCalculator/ConfirmationPage/Expenses';
@@ -216,42 +216,48 @@ function Assets() {
   );
 }
 
-type BenefitList = {
-  [key: string]: {
-    name: FormattedMessageType;
-    description: FormattedMessageType;
-  };
-};
-
-type CategoryBenefits = {
-  [key: string]: { benefits: BenefitList; category_name: FormattedMessageType };
-};
-
 function HasBenefits() {
-  const { formData } = useContext(Context);
+  const { formData, hasBenefitsPrograms } = useContext(Context);
   const { formatMessage } = useIntl();
-  const categoryBenefits = useConfig<CategoryBenefits>('category_benefits');
 
   const alreadyHasBenefits = () => {
-    let allBenefits: BenefitList = {};
+    // Selected benefit keys, in admin-sorted order from the BE.
+    const selectedKeys = Object.entries(formData.benefits)
+      .filter(([, isSelected]) => isSelected)
+      .map(([key]) => key);
 
-    for (const category of Object.values(categoryBenefits)) {
-      allBenefits = { ...allBenefits, ...category.benefits };
+    if (selectedKeys.length === 0) {
+      return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
     }
 
-    const benefitsText = Object.entries(allBenefits)
-      .filter(([name, _]) => {
-        return formData.benefits[name as keyof BenefitsType];
-      })
-      .map(([name, value]) => {
-        return <ConfirmationItem label={value.name} value={value.description} key={name} />;
-      });
+    // Match by lowercased name_abbreviated to mirror AlreadyHasBenefits.tsx.
+    // TODO(MFB-720): drop the lowercase coercion once the join-table migration ships.
+    const programsByKey = new Map(hasBenefitsPrograms.map((p) => [p.name_abbreviated.toLowerCase(), p]));
 
-    if (benefitsText.length > 0) {
-      return benefitsText;
+    // updateFormData fans a single saved benefit (e.g. has_section_8) out to
+    // per-white-label keys (section_8, co_section_8, ma_section_8, ...).
+    // Only the active white label's variant is in hasBenefitsPrograms; drop
+    // the rest so the user sees one row per program, not one per WL.
+    const matched = selectedKeys
+      .map((key) => ({ key, program: programsByKey.get(key) }))
+      .filter((entry): entry is { key: string; program: HasBenefitsProgram } => entry.program !== undefined);
+
+    if (matched.length === 0) {
+      return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
     }
 
-    return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
+    return matched.map(({ key, program }) => (
+      <ConfirmationItem
+        key={key}
+        label={<FormattedMessage id={program.name.label} defaultMessage={program.name.default_message} />}
+        value={
+          <FormattedMessage
+            id={program.website_description.label}
+            defaultMessage={program.website_description.default_message}
+          />
+        }
+      />
+    ));
   };
 
   const editHasBenefitsAriaLabel = {

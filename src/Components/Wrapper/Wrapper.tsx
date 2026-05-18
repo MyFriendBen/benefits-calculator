@@ -3,12 +3,16 @@ import useStyle from '../../Assets/styleController';
 import { IntlProvider } from 'react-intl';
 import { WrapperContext } from '../../Types/WrapperContext';
 import { FormData } from '../../Types/FormData';
-import { getTranslations } from '../../apiCalls';
+import { getTranslations, getHasBenefitsPrograms, getReferralOptions } from '../../apiCalls';
+import { HasBenefitsProgram } from '../../Types/ApiCalls';
+import type { ReferralOptions } from '../../hooks/useReferralOptions';
 import useReferrer, { ReferrerData } from '../Referrer/referrerHook';
 import { useGetConfig } from '../Config/configHook';
 import { rightToLeftLanguages, Language } from '../../Assets/languageOptions';
 import { HtmlLangUpdater } from '../HtmlLangUpdater/HtmlLangUpdater';
 import { ALL_VALID_WHITE_LABELS, WhiteLabel } from '../../Types/WhiteLabel';
+
+const EMPTY_REFERRAL_OPTIONS: ReferralOptions = { generic: {}, partners: {} };
 
 const initialFormData: FormData = {
   isTest: false,
@@ -117,6 +121,65 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   // Initialize white label from URL to ensure correct config loads
   const [whiteLabel, setWhiteLabel] = useState(getWhiteLabelFromUrl);
+
+  const [hasBenefitsPrograms, setHasBenefitsPrograms] = useState<HasBenefitsProgram[]>([]);
+  const [hasBenefitsProgramsLoading, setHasBenefitsProgramsLoading] = useState(true);
+  const [hasBenefitsProgramsError, setHasBenefitsProgramsError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setHasBenefitsProgramsLoading(true);
+    setHasBenefitsProgramsError(false);
+    getHasBenefitsPrograms(whiteLabel)
+      .then((data) => {
+        if (!cancelled) {
+          setHasBenefitsPrograms(data);
+          setHasBenefitsProgramsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setHasBenefitsPrograms([]);
+          setHasBenefitsProgramsLoading(false);
+          setHasBenefitsProgramsError(true);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [whiteLabel]);
+
+  const [referralOptions, setReferralOptions] = useState<ReferralOptions>(EMPTY_REFERRAL_OPTIONS);
+  const [referralOptionsLoading, setReferralOptionsLoading] = useState(true);
+  const [referralOptionsError, setReferralOptionsError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+
+    setReferralOptionsLoading(true);
+    setReferralOptionsError(null);
+    getReferralOptions(whiteLabel, controller.signal)
+      .then((data) => {
+        if (!cancelled) {
+          setReferralOptions(data);
+          setReferralOptionsError(null);
+          setReferralOptionsLoading(false);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setReferralOptions(EMPTY_REFERRAL_OPTIONS);
+          setReferralOptionsError(err instanceof Error ? err : new Error(String(err)));
+          setReferralOptionsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [whiteLabel]);
 
   const { configLoading, configResponse: config } = useGetConfig(screenLoading, whiteLabel);
   const { language_options: languageOptions = {} } = config ?? {};
@@ -265,6 +328,12 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
       getReferrer,
       whiteLabel,
       setWhiteLabel,
+      hasBenefitsPrograms,
+      hasBenefitsProgramsLoading,
+      hasBenefitsProgramsError,
+      referralOptions,
+      referralOptionsLoading,
+      referralOptionsError,
     }),
     [
       locale,
@@ -285,6 +354,12 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
       getReferrer,
       whiteLabel,
       setWhiteLabel,
+      hasBenefitsPrograms,
+      hasBenefitsProgramsLoading,
+      hasBenefitsProgramsError,
+      referralOptions,
+      referralOptionsLoading,
+      referralOptionsError,
     ],
   );
 
