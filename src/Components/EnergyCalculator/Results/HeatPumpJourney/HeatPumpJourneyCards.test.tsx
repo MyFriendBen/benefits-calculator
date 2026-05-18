@@ -2,18 +2,12 @@ import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 import HeatPumpJourneyCards from './HeatPumpJourneyCards';
-import { useFeatureFlag } from '../../../Config/configHook';
 import { useResultsLink } from '../../../Results/Results';
-
-jest.mock('../../../Config/configHook', () => ({
-  useFeatureFlag: jest.fn(),
-}));
 
 jest.mock('../../../Results/Results', () => ({
   useResultsLink: jest.fn(),
 }));
 
-const mockUseFeatureFlag = useFeatureFlag as jest.MockedFunction<typeof useFeatureFlag>;
 const mockUseResultsLink = useResultsLink as jest.MockedFunction<typeof useResultsLink>;
 
 const renderCards = () =>
@@ -31,27 +25,7 @@ describe('HeatPumpJourneyCards', () => {
     mockUseResultsLink.mockImplementation((link: string) => `/co/test-uuid/${link}`);
   });
 
-  it('renders nothing when the cesn_heat_pump_journey feature flag is disabled', () => {
-    mockUseFeatureFlag.mockReturnValue(false);
-
-    const { container } = renderCards();
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('checks the cesn_heat_pump_journey feature flag', () => {
-    mockUseFeatureFlag.mockReturnValue(false);
-
-    renderCards();
-
-    expect(mockUseFeatureFlag).toHaveBeenCalledWith('cesn_heat_pump_journey');
-  });
-
-  describe('when the feature flag is enabled', () => {
-    beforeEach(() => {
-      mockUseFeatureFlag.mockReturnValue(true);
-    });
-
+  describe('rendering', () => {
     it('renders all three cards with titles', () => {
       renderCards();
 

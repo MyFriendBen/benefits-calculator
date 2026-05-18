@@ -2,21 +2,16 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
-import { useFeatureFlag } from '../../../Config/configHook';
 import { useResultsLink } from '../../../Results/Results';
 import './HeatPumpJourneyCards.css';
 
+// Caller is responsible for gating render on the `cesn_heat_pump_journey` flag.
 const POWER_AHEAD_LEARN_MORE_URL = 'https://poweraheadcolorado.org/why-heat-pumps?utm_source=cesn';
 
 export default function HeatPumpJourneyCards() {
   const intl = useIntl();
-  const isEnabled = useFeatureFlag('cesn_heat_pump_journey');
   const billsImpactLink = useResultsLink('results/heat-pump-bills-impact');
   const contractorsLink = useResultsLink('results/heat-pump-contractors');
-
-  if (!isEnabled) {
-    return null;
-  }
 
   const sectionAriaLabel = intl.formatMessage({
     id: 'energyCalculator.heatPumpJourney.sectionAriaLabel',
