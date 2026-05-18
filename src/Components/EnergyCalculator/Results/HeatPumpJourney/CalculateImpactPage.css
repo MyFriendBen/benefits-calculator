@@ -1,0 +1,27 @@
+.calculate-impact-page {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
+}
+
+.calculate-impact-page .calculate-impact-header {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.calculate-impact-page .calculate-impact-section {
+  margin-bottom: 1.75rem;
+}
+
+.calculate-impact-page .calculate-impact-section-title {
+  margin-bottom: 0.75rem;
+}
+
+.calculate-impact-page .calculate-impact-intro a {
+  color: var(--link-color, #1976d2);
+  text-decoration: underline;
+}
+
+.calculate-impact-page .calculate-impact-submit {
+  margin-top: 1rem;
+}
