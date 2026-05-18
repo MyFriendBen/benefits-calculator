@@ -14,13 +14,11 @@ import { useConfig, useLocalizedLink } from '../../Config/configHook';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useQueryString } from '../../QuestionComponents/questionHooks';
-import { OTHER_PAGE_TITLES } from '../../../Assets/pageTitleTags';
 import useScreenApi from '../../../Assets/updateScreen';
 import { OverrideableTranslation } from '../../../Assets/languageOptions';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorDisclaimer from '../../EnergyCalculator/Steps/Disclaimer';
 import './Disclaimer.css';
-import { usePageTitle } from '../../Common/usePageTitle';
 
 const isTrue = (value: boolean) => {
   return value;
@@ -50,9 +48,8 @@ const Disclaimer = () => {
     navigate(`/${whiteLabel}/step-1${queryString}`);
   };
 
-  usePageTitle(OTHER_PAGE_TITLES.disclaimer);
-
   const { formatMessage } = useIntl();
+
   const isChecked = () => {
     return {
       message: formatMessage({

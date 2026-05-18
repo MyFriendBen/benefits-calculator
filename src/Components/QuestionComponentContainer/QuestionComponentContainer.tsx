@@ -4,7 +4,6 @@ import Expenses from '../Steps/Expenses/Expenses';
 import HouseholdSize from '../Steps/HouseholdSize/HouseholdSize';
 import { useStepName, useStepDirectory, STARTING_QUESTION_NUMBER } from '../../Assets/stepDirectory';
 import ReferralSourceStep from '../Steps/Referrer';
-import { QUESTION_TITLES } from '../../Assets/pageTitleTags';
 import AlreadyHasBenefits from '../Steps/AlreadyHasBenefits';
 import ImmediateNeeds from '../Steps/ImmediateNeeds';
 import SignUp from '../Steps/SignUp/SignUp';
@@ -15,7 +14,6 @@ import EnergyCalculatorExpenses from '../EnergyCalculator/Steps/Expenses';
 import Appliances from '../EnergyCalculator/Steps/Appliances';
 import Utilities from '../EnergyCalculator/Steps/Utilities';
 import './QuestionComponentContainer.css';
-import { usePageTitle } from '../Common/usePageTitle';
 
 const QuestionComponentContainer = () => {
   // ALL HOOKS MUST BE CALLED FIRST - before any conditional returns
@@ -28,10 +26,6 @@ const QuestionComponentContainer = () => {
   const maxStep = stepDirectory.length + STARTING_QUESTION_NUMBER;
   const stepName = useStepName(stepNumber);
   const questionName = !isNaN(stepNumber) ? stepName : undefined;
-  const pageTitle = questionName ? QUESTION_TITLES[questionName] : '' as any;
-
-  // Call usePageTitle hook unconditionally
-  usePageTitle(pageTitle);
 
   // NOW we can do conditional logic and returns
   if (id === undefined) {

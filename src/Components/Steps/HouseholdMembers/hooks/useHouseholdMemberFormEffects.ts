@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { UseFormSetValue, UseFormGetValues, UseFormReset } from 'react-hook-form';
 import { QuestionName } from '../../../../Types/Questions';
-import { QUESTION_TITLES } from '../../../../Assets/pageTitleTags';
 import { EMPTY_INCOME_STREAM } from '../utils/constants';
 import { MAX_AGE } from '../../../../Assets/age';
 
@@ -91,11 +90,6 @@ export const useHouseholdMemberFormEffects = ({
       setValue('receivesSsi', 'false');
     }
   }, [watchIsDisabled, isEnergyCalculator, getValues, setValue]);
-
-  // Page title
-  useEffect(() => {
-    document.title = QUESTION_TITLES[questionName];
-  }, [questionName]);
 
   // Reset form when navigating between pages
   const prevPageRef = useRef(pageNumber);

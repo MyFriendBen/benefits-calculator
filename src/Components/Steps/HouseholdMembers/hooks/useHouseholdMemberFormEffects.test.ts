@@ -1,6 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
 import { useHouseholdMemberFormEffects } from './useHouseholdMemberFormEffects';
-import { QUESTION_TITLES } from '../../../../Assets/pageTitleTags';
 import { EMPTY_INCOME_STREAM } from '../utils/constants';
 
 // ============================================================================
@@ -38,24 +37,6 @@ describe('useHouseholdMemberFormEffects', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     document.title = '';
-  });
-
-  // ============================================================================
-  // Page title effect
-  // ============================================================================
-
-  describe('page title', () => {
-    it('sets document title from QUESTION_TITLES on mount', () => {
-      const params = makeParams({ questionName: 'householdData' });
-      renderHook(() => useHouseholdMemberFormEffects(params));
-      expect(document.title).toBe(QUESTION_TITLES['householdData']);
-    });
-
-    it('sets document title on mount', () => {
-      const params = makeParams({ questionName: 'householdData' });
-      renderHook(() => useHouseholdMemberFormEffects(params));
-      expect(document.title).toBe(QUESTION_TITLES['householdData']);
-    });
   });
 
   // ============================================================================

@@ -27,13 +27,11 @@ import BackAndSaveButtons from './BackAndSaveButtons/BackAndSaveButtons';
 import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
 import { FormattedMessage } from 'react-intl';
 import './Results.css';
-import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { FormData } from '../../Types/FormData';
 import filterProgramsGenerator from './Filter/filterPrograms';
 import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRebates';
 import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/rebateTypes';
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
-import { usePageTitle } from '../Common/usePageTitle';
 import { NPSWidget } from '../NPS';
 import ShareModalAutoPopup from '../Share/ShareModalAutoPopup';
 
@@ -115,8 +113,6 @@ const Results = ({ type }: ResultsProps) => {
   useEffect(() => {
     dataLayerPush({ event: 'config', user_id: uuid });
   }, [uuid]);
-
-  usePageTitle(OTHER_PAGE_TITLES.results);
 
   const fetchResults = async () => {
     try {
