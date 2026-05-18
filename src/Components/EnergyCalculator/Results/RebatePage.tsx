@@ -67,7 +67,13 @@ export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePag
             </span>
           </h2>
         )}
-        <section className={showHeatPumpJourney ? 'energy-calculator-rebate-page-rebates-list-full-width' : undefined}>
+        <section
+          className={
+            showHeatPumpJourney
+              ? 'energy-calculator-rebate-page-rebates-list energy-calculator-rebate-page-rebates-list-full-width'
+              : 'energy-calculator-rebate-page-rebates-list'
+          }
+        >
           {rebateCategory.rebates.map((rebate, i) => {
             return <RebateCard rebate={rebate} rebateCategory={rebateCategory} key={i} />;
           })}

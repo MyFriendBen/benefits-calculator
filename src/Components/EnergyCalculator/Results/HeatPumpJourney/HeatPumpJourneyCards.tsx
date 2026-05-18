@@ -5,7 +5,9 @@ import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import { useResultsLink } from '../../../Results/Results';
 import './HeatPumpJourneyCards.css';
 
-// Caller is responsible for gating render on the `cesn_heat_pump_journey` flag.
+// CESN-specific feature (Colorado Energy Savings Network). Caller is responsible
+// for gating render on the `cesn_heat_pump_journey` flag. The hardcoded utm_source
+// below is intentional — this component is not expected to render for other white labels.
 const POWER_AHEAD_LEARN_MORE_URL = 'https://poweraheadcolorado.org/why-heat-pumps?utm_source=cesn';
 
 export default function HeatPumpJourneyCards() {

@@ -1,7 +1,6 @@
 .energy-calculator-rebate-page-container .heat-pump-journey-cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  flex-direction: row;
   gap: 1rem;
   width: 100%;
   padding: 0.25rem 0 1rem;
