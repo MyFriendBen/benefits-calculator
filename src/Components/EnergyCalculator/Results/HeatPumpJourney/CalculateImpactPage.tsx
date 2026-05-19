@@ -35,9 +35,6 @@ function addAdminToLink(link: string, isAdmin: boolean) {
   return link;
 }
 
-const REM_DOCS_URL =
-  'https://docs.rewiringamerica.org/api/residential-electrification-model' as const;
-
 const HOUSEHOLD_TYPE_OPTIONS: { value: CalculateImpactHouseholdType; messageId: string; defaultMessage: string }[] =
   [
     {
@@ -177,7 +174,7 @@ export default function CalculateImpactPage() {
         <Typography variant="body1" className="calculate-impact-intro energy-calculator-body-text" sx={{ mt: 1 }}>
           <FormattedMessage
             id="energyCalculator.calculateImpact.intro"
-            defaultMessage="Estimate how electrification could affect your bills. Savings models are powered by our partners at {rewiringAmerica}. Data you enter will be used in a future release to fetch estimates from Rewiring America’s Residential Electrification Model ({remApi})."
+            defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
             values={{
               rewiringAmerica: (
                 <TrackedOutboundLink
@@ -188,20 +185,6 @@ export default function CalculateImpactPage() {
                   category="energy_rebate"
                 >
                   <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
-                </TrackedOutboundLink>
-              ),
-              remApi: (
-                <TrackedOutboundLink
-                  href={REM_DOCS_URL}
-                  className="link-color"
-                  action="calculate_impact_rem_docs"
-                  label="REM API"
-                  category="energy_rebate"
-                >
-                  <FormattedMessage
-                    id="energyCalculator.calculateImpact.remApiLinkLabel"
-                    defaultMessage="REM API"
-                  />
                 </TrackedOutboundLink>
               ),
             }}
