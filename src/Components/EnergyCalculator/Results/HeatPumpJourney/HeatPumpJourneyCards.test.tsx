@@ -57,7 +57,7 @@ describe('HeatPumpJourneyCards', () => {
       renderCards();
 
       const calculateImpact = screen.getByRole('link', { name: /calculate impact/i });
-      expect(calculateImpact).toHaveAttribute('href', '/co/test-uuid/results/heat-pump-bills-impact');
+      expect(calculateImpact).toHaveAttribute('href', '/co/test-uuid/results/energy-rebates/waterHeater/calculate-impact');
     });
 
     it('routes the Connect now CTA to the internal contractors path', () => {

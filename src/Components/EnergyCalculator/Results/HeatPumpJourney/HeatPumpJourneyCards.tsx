@@ -12,7 +12,7 @@ const POWER_AHEAD_LEARN_MORE_URL = 'https://poweraheadcolorado.org/why-heat-pump
 
 export default function HeatPumpJourneyCards() {
   const intl = useIntl();
-  const billsImpactLink = useResultsLink('results/heat-pump-bills-impact');
+  const billsImpactLink = useResultsLink('results/energy-rebates/waterHeater/calculate-impact');
   const contractorsLink = useResultsLink('results/heat-pump-contractors');
 
   const sectionAriaLabel = intl.formatMessage({
