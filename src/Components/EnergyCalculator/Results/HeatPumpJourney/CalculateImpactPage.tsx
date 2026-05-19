@@ -114,6 +114,7 @@ export default function CalculateImpactPage() {
   const [heatingFuel, setHeatingFuel] = useState<RemFuelType>('natural_gas');
   const [waterHeatingFuel, setWaterHeatingFuel] = useState<RemFuelType | ''>('');
   const [upgradeChoice, setUpgradeChoice] = useState<CalculateImpactUpgradeChoice>('heat_pump_water_heater');
+  const [addressError, setAddressError] = useState(false);
 
   const handleHouseholdTypeChange = (e: SelectChangeEvent<CalculateImpactHouseholdType>) => {
     setHouseholdType(e.target.value as CalculateImpactHouseholdType);
@@ -129,16 +130,27 @@ export default function CalculateImpactPage() {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    const trimmedAddress = address.trim();
+    if (!trimmedAddress) {
+      setAddressError(true);
+      return;
+    }
+    setAddressError(false);
+
     const payload = buildCalculateImpactPayload({
       upgradeChoice,
-      address,
+      address: trimmedAddress,
       heatingFuel,
       waterHeatingFuel,
       householdType,
     });
     // Step 3: call REM /api/v1/rem/address with payload.remAddressQuery
+    const payloadPreview = {
+      ...payload,
+      remAddressQuery: { ...payload.remAddressQuery, address: '[redacted]' },
+    };
     // eslint-disable-next-line no-console -- MFB-979 placeholder until Step 3 API integration
-    console.log('[CalculateImpact] submit payload (MFB-979 placeholder)', payload);
+    console.log('[CalculateImpact] submit payload (MFB-979 placeholder)', payloadPreview);
   };
 
   return (
@@ -248,7 +260,19 @@ export default function CalculateImpactPage() {
               defaultMessage: 'Street address',
             })}
             value={address}
-            onChange={(ev) => setAddress(ev.target.value)}
+            onChange={(ev) => {
+              setAddress(ev.target.value);
+              if (addressError) setAddressError(false);
+            }}
+            error={addressError}
+            helperText={
+              addressError
+                ? intl.formatMessage({
+                    id: 'energyCalculator.calculateImpact.field.addressRequired',
+                    defaultMessage: 'Please enter a valid street address.',
+                  })
+                : undefined
+            }
             placeholder={intl.formatMessage({
               id: 'energyCalculator.calculateImpact.field.addressPlaceholder',
               defaultMessage: 'e.g. 123 Main St, Denver, CO 80202',
