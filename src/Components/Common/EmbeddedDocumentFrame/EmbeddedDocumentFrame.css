@@ -1,0 +1,25 @@
+.embedded-document-frame-root {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--icon-color, #666) 35%, transparent);
+  border-radius: 0.25rem;
+  background: #f5f5f5;
+  box-sizing: border-box;
+}
+
+.embedded-document-frame-iframe {
+  display: block;
+  width: 100%;
+  min-height: min(50vh, 28rem);
+  height: min(80vh, 56rem);
+  max-height: 56rem;
+  border: 0;
+}
+
+@media (max-width: 600px) {
+  .embedded-document-frame-iframe {
+    min-height: min(70vh, 32rem);
+    height: min(75vh, 40rem);
+  }
+}

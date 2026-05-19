@@ -26,7 +26,8 @@ export type OtherStepName =
   | 'results'
   | 'default'
   | 'energyCalculatorLandingPage'
-  | 'energyCalculatorRedirectToMFB';
+  | 'energyCalculatorRedirectToMFB'
+  | 'energyCalculatorConnectNow';
 
 export const OTHER_PAGE_TITLES: Record<OtherStepName, string> = {
   language: 'Preferred Language',
@@ -37,6 +38,7 @@ export const OTHER_PAGE_TITLES: Record<OtherStepName, string> = {
   default: 'MyFriendBen',
   energyCalculatorLandingPage: 'Energy Calculator',
   energyCalculatorRedirectToMFB: 'Redirect to MFB',
+  energyCalculatorConnectNow: 'Find a Contractor',
 };
 
 export type AppKey = 'mfb' | 'cesn';

@@ -64,7 +64,7 @@ describe('HeatPumpJourneyCards', () => {
       renderCards();
 
       const connectNow = screen.getByRole('link', { name: /connect now/i });
-      expect(connectNow).toHaveAttribute('href', '/co/test-uuid/results/heat-pump-contractors');
+      expect(connectNow).toHaveAttribute('href', '/co/test-uuid/results/energy-rebates/waterHeater/connect-now');
     });
 
     it('exposes the section with an accessible label', () => {
