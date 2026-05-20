@@ -1,22 +1,23 @@
-import { FormEvent, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Box,
   Button,
   FormControl,
   FormControlLabel,
-  FormLabel,
-  InputLabel,
+  FormHelperText,
   MenuItem,
   Radio,
   RadioGroup,
   Select,
-  type SelectChangeEvent,
   TextField,
   Typography,
 } from '@mui/material';
-import BackAndSaveButtons from '../../../Results/BackAndSaveButtons/BackAndSaveButtons';
+import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
@@ -24,8 +25,9 @@ import {
   type CalculateImpactHouseholdType,
   type CalculateImpactUpgradeChoice,
   type RemFuelType,
-  buildCalculateImpactPayload,
+  CALCULATE_IMPACT_UPGRADE_MAP,
 } from './remCalculateImpactTypes';
+import { ReactComponent as Coin } from '../../Icons/Coin.svg';
 import './CalculateImpactPage.css';
 
 function addAdminToLink(link: string, isAdmin: boolean) {
@@ -70,31 +72,82 @@ const UPGRADE_OPTIONS: {
   value: CalculateImpactUpgradeChoice;
   messageId: string;
   defaultMessage: string;
+  descriptionId: string;
+  descriptionDefault: string;
 }[] = [
   {
     value: 'heat_pump',
     messageId: 'energyCalculator.calculateImpact.upgrade.heatPump',
-    defaultMessage: 'Heat pump (HVAC)',
+    defaultMessage: 'Heat pump',
+    descriptionId: 'energyCalculator.calculateImpact.upgrade.heatPump.description',
+    descriptionDefault:
+      'A heat pump is a single appliance with two modes, heating and cooling. By transferring heat (instead of creating it), heat pumps use less energy, making them more efficient than traditional systems.',
   },
   {
     value: 'weatherization',
     messageId: 'energyCalculator.calculateImpact.upgrade.weatherization',
     defaultMessage: 'Weatherization',
+    descriptionId: 'energyCalculator.calculateImpact.upgrade.weatherization.description',
+    descriptionDefault:
+      'Weatherization includes insulation, air sealing, and other improvements that reduce energy waste and make your home more comfortable year-round.',
   },
   {
     value: 'heat_pump_weatherization',
     messageId: 'energyCalculator.calculateImpact.upgrade.heatPumpWeatherization',
     defaultMessage: 'Heat pump + weatherization',
+    descriptionId: 'energyCalculator.calculateImpact.upgrade.heatPumpWeatherization.description',
+    descriptionDefault:
+      'Combining a heat pump with weatherization maximizes energy savings by pairing efficient heating and cooling with a well-sealed, insulated home.',
   },
   {
     value: 'heat_pump_water_heater',
     messageId: 'energyCalculator.calculateImpact.upgrade.heatPumpWaterHeater',
     defaultMessage: 'Heat pump water heater',
+    descriptionId: 'energyCalculator.calculateImpact.upgrade.heatPumpWaterHeater.description',
+    descriptionDefault:
+      'A heat pump water heater uses electricity to move heat from the surrounding air to heat water, using significantly less energy than traditional electric or gas water heaters.',
   },
 ];
 
+const HOUSEHOLD_TYPE_VALUES: [CalculateImpactHouseholdType, ...CalculateImpactHouseholdType[]] = [
+  'single_family_detached',
+  'single_family_attached',
+  'apartment_condo',
+  'mobile_home',
+];
+
+const FUEL_TYPE_VALUES: [RemFuelType, ...RemFuelType[]] = ['natural_gas', 'propane', 'electricity', 'fuel_oil'];
+
+const UPGRADE_CHOICE_VALUES: [CalculateImpactUpgradeChoice, ...CalculateImpactUpgradeChoice[]] = [
+  'heat_pump',
+  'weatherization',
+  'heat_pump_weatherization',
+  'heat_pump_water_heater',
+];
+
+const calculateImpactSchema = z.object({
+  householdType: z.enum(HOUSEHOLD_TYPE_VALUES, {
+    required_error: 'Please select a household type.',
+  }),
+  address: z
+    .string()
+    .min(1, 'Please enter a valid street address.')
+    .transform((val) => val.trim())
+    .refine((val) => val.length > 0, { message: 'Please enter a valid street address.' }),
+  heatingFuel: z.enum(FUEL_TYPE_VALUES, {
+    required_error: 'Please select a heating fuel.',
+  }),
+  waterHeatingFuel: z.enum(FUEL_TYPE_VALUES).optional(),
+  upgradeChoice: z.enum(UPGRADE_CHOICE_VALUES, {
+    required_error: 'Please select an upgrade option.',
+  }),
+});
+
+type CalculateImpactFormData = z.infer<typeof calculateImpactSchema>;
+
 export default function CalculateImpactPage() {
   const intl = useIntl();
+  const navigate = useNavigate();
   const { whiteLabel, uuid } = useParams();
   const [searchParams] = useSearchParams();
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams]);
@@ -106,245 +159,360 @@ export default function CalculateImpactPage() {
 
   usePageTitle(OTHER_PAGE_TITLES.energyCalculatorCalculateImpact);
 
-  const [householdType, setHouseholdType] = useState<CalculateImpactHouseholdType>('single_family_detached');
-  const [address, setAddress] = useState('');
-  const [heatingFuel, setHeatingFuel] = useState<RemFuelType>('natural_gas');
-  const [waterHeatingFuel, setWaterHeatingFuel] = useState<RemFuelType | ''>('');
-  const [upgradeChoice, setUpgradeChoice] = useState<CalculateImpactUpgradeChoice>('heat_pump_water_heater');
-  const [addressError, setAddressError] = useState(false);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CalculateImpactFormData>({
+    resolver: zodResolver(calculateImpactSchema),
+    defaultValues: {
+      householdType: undefined,
+      address: '',
+      heatingFuel: undefined,
+      waterHeatingFuel: undefined,
+      upgradeChoice: undefined,
+    },
+  });
 
-  const handleHouseholdTypeChange = (e: SelectChangeEvent<CalculateImpactHouseholdType>) => {
-    setHouseholdType(e.target.value as CalculateImpactHouseholdType);
-  };
-
-  const handleHeatingFuelChange = (e: SelectChangeEvent<RemFuelType>) => {
-    setHeatingFuel(e.target.value as RemFuelType);
-  };
-
-  const handleWaterHeatingFuelChange = (e: SelectChangeEvent<RemFuelType | ''>) => {
-    setWaterHeatingFuel(e.target.value as RemFuelType | '');
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    const trimmedAddress = address.trim();
-    if (!trimmedAddress) {
-      setAddressError(true);
-      return;
-    }
-    setAddressError(false);
-
-    const payload = buildCalculateImpactPayload({
-      upgradeChoice,
-      address: trimmedAddress,
-      heatingFuel,
-      waterHeatingFuel,
-      householdType,
-    });
-    // Step 3: call REM /api/v1/rem/address with payload.remAddressQuery
-    const payloadPreview = {
-      ...payload,
-      remAddressQuery: { ...payload.remAddressQuery, address: '[redacted]' },
+  const onSubmit = (data: CalculateImpactFormData) => {
+    const payload = {
+      remAddressQuery: {
+        upgrade: CALCULATE_IMPACT_UPGRADE_MAP[data.upgradeChoice],
+        address: data.address,
+        heating_fuel: data.heatingFuel,
+        water_heater_fuel: data.waterHeatingFuel ?? null,
+      },
+      household_type: data.householdType,
     };
+
     // eslint-disable-next-line no-console -- MFB-979 placeholder until Step 3 API integration
-    console.log('[CalculateImpact] submit payload (MFB-979 placeholder)', payloadPreview);
+    console.log('[CalculateImpact] submit payload', payload);
   };
 
   return (
-    <main className="benefits-form calculate-impact-page">
-      <section className="back-to-results-button-container">
-        <BackAndSaveButtons
-          navigateToLink={backLink}
-          BackToThisPageText={
-            <FormattedMessage
-              id="energyCalculator.calculateImpact.backToWaterHeater"
-              defaultMessage="BACK TO WATER HEATER REBATES"
-            />
-          }
-        />
-      </section>
+    <>
+      <nav className="calculate-impact-back-nav-wrapper">
+        <button
+          className="calculate-impact-back-btn"
+          onClick={() => navigate(backLink)}
+          aria-label={intl.formatMessage({ id: 'backAndSaveBtns.backBtnAL', defaultMessage: 'back' })}
+        >
+          <LeftArrowIcon />
+          <FormattedMessage
+            id="energyCalculator.calculateImpact.backToResults"
+            defaultMessage="BACK TO RESULTS"
+          />
+        </button>
+      </nav>
+      <main className="benefits-form calculate-impact-page">
 
       <header className="calculate-impact-header">
-        <Typography variant="h1" component="h1" sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem' }, fontWeight: 600 }}>
-          <FormattedMessage
-            id="energyCalculator.calculateImpact.title"
-            defaultMessage="Bill Impact Calculator / Estimated Savings"
-          />
-        </Typography>
-        <Typography variant="body1" className="calculate-impact-intro energy-calculator-body-text" sx={{ mt: 1 }}>
-          <FormattedMessage
-            id="energyCalculator.calculateImpact.intro"
-            defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
-            values={{
-              rewiringAmerica: (
-                <TrackedOutboundLink
-                  href="https://www.rewiringamerica.org"
-                  className="link-color"
-                  action="calculate_impact_rewiring_america"
-                  label="Rewiring America"
-                  category="energy_rebate"
-                >
-                  <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
-                </TrackedOutboundLink>
-              ),
-            }}
-          />
-        </Typography>
+        <Coin aria-hidden="true" className="calculate-impact-icon" />
+        <div className="calculate-impact-header-text">
+          <span className="calculate-impact-title-text">
+            <FormattedMessage
+              id="energyCalculator.calculateImpact.titleLabel"
+              defaultMessage="Bill Impact Calculator"
+            />
+          </span>
+          <hr className="calculate-impact-separator" />
+          <h1 className="calculate-impact-subtitle">
+            <FormattedMessage
+              id="energyCalculator.calculateImpact.subtitle"
+              defaultMessage="Estimated Savings"
+            />
+          </h1>
+        </div>
       </header>
 
-      <Box component="form" onSubmit={handleSubmit}>
-        <section className="calculate-impact-section" aria-labelledby="calculate-impact-household-heading">
-          <Typography
-            id="calculate-impact-household-heading"
-            variant="h2"
-            component="h2"
-            className="calculate-impact-section-title"
-            sx={{ fontSize: '1.25rem', fontWeight: 600 }}
-          >
+      <Typography variant="body1" className="calculate-impact-intro energy-calculator-body-text">
+        <FormattedMessage
+          id="energyCalculator.calculateImpact.intro"
+          defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
+          values={{
+            rewiringAmerica: (
+              <TrackedOutboundLink
+                href="https://www.rewiringamerica.org"
+                className="link-color"
+                action="calculate_impact_rewiring_america"
+                label="Rewiring America"
+                category="energy_rebate"
+              >
+                <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
+              </TrackedOutboundLink>
+            ),
+          }}
+        />
+      </Typography>
+
+      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <section className="calculate-impact-card" aria-labelledby="calculate-impact-household-heading">
+          <h2 id="calculate-impact-household-heading" className="calculate-impact-section-title">
             <FormattedMessage
               id="energyCalculator.calculateImpact.section.household"
               defaultMessage="Your household info"
             />
-          </Typography>
+          </h2>
+          <p className="calculate-impact-section-description">
+            <FormattedMessage
+              id="energyCalculator.calculateImpact.section.household.description"
+              defaultMessage="Enter your household information to see potential energy bill changes and emissions reductions by upgrade type."
+            />
+          </p>
 
-          <FormControl fullWidth margin="normal" required>
-            <InputLabel id="calculate-impact-household-type-label">
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.field.householdType"
-                defaultMessage="Household / building type"
-              />
-            </InputLabel>
-            <Select<CalculateImpactHouseholdType>
-              labelId="calculate-impact-household-type-label"
-              id="calculate-impact-household-type"
-              value={householdType}
-              label={intl.formatMessage({
-                id: 'energyCalculator.calculateImpact.field.householdType',
-                defaultMessage: 'Household / building type',
-              })}
-              onChange={handleHouseholdTypeChange}
-            >
-              {HOUSEHOLD_TYPE_OPTIONS.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>
-                  <FormattedMessage id={opt.messageId} defaultMessage={opt.defaultMessage} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <TextField
-            fullWidth
-            required
-            margin="normal"
-            id="calculate-impact-address"
-            name="address"
-            label={intl.formatMessage({
-              id: 'energyCalculator.calculateImpact.field.address',
-              defaultMessage: 'Street address',
-            })}
-            value={address}
-            onChange={(ev) => {
-              setAddress(ev.target.value);
-              if (addressError) setAddressError(false);
-            }}
-            error={addressError}
-            helperText={
-              addressError
-                ? intl.formatMessage({
-                    id: 'energyCalculator.calculateImpact.field.addressRequired',
-                    defaultMessage: 'Please enter a valid street address.',
-                  })
-                : undefined
-            }
-            placeholder={intl.formatMessage({
-              id: 'energyCalculator.calculateImpact.field.addressPlaceholder',
-              defaultMessage: 'e.g. 123 Main St, Denver, CO 80202',
-            })}
-          />
-
-          <FormControl fullWidth margin="normal" required>
-            <InputLabel id="calculate-impact-heating-fuel-label">
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.field.heatingFuel"
-                defaultMessage="Primary heating fuel"
-              />
-            </InputLabel>
-            <Select<RemFuelType>
-              labelId="calculate-impact-heating-fuel-label"
-              id="calculate-impact-heating-fuel"
-              value={heatingFuel}
-              label={intl.formatMessage({
-                id: 'energyCalculator.calculateImpact.field.heatingFuel',
-                defaultMessage: 'Primary heating fuel',
-              })}
-              onChange={handleHeatingFuelChange}
-            >
-              {FUEL_OPTIONS.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>
-                  <FormattedMessage id={opt.messageId} defaultMessage={opt.defaultMessage} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="calculate-impact-water-fuel-label">
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.field.waterHeatingFuel"
-                defaultMessage="Water heating fuel (optional)"
-              />
-            </InputLabel>
-            <Select<RemFuelType | ''>
-              labelId="calculate-impact-water-fuel-label"
-              id="calculate-impact-water-heating-fuel"
-              value={waterHeatingFuel}
-              label={intl.formatMessage({
-                id: 'energyCalculator.calculateImpact.field.waterHeatingFuel',
-                defaultMessage: 'Water heating fuel (optional)',
-              })}
-              onChange={handleWaterHeatingFuelChange}
-            >
-              <MenuItem value="">
+          <div className="calculate-impact-fields-grid">
+            <div className="calculate-impact-field">
+              <label htmlFor="calculate-impact-household-type" className="calculate-impact-field-label">
                 <FormattedMessage
-                  id="energyCalculator.calculateImpact.field.waterHeatingFuelNone"
-                  defaultMessage="No answer / same as heating"
+                  id="energyCalculator.calculateImpact.field.householdType"
+                  defaultMessage="Household Type"
                 />
-              </MenuItem>
-              {FUEL_OPTIONS.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>
-                  <FormattedMessage id={opt.messageId} defaultMessage={opt.defaultMessage} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </section>
+              </label>
+              <FormControl fullWidth error={!!errors.householdType}>
+                <Controller
+                  name="householdType"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      id="calculate-impact-household-type"
+                      value={field.value ?? ''}
+                      displayEmpty
+                      inputProps={{
+                        'aria-label': intl.formatMessage({
+                          id: 'energyCalculator.calculateImpact.field.householdType',
+                          defaultMessage: 'Household Type',
+                        }),
+                      }}
+                      renderValue={(value) => {
+                        if (!value) {
+                          return (
+                            <span className="calculate-impact-select-placeholder">
+                              {intl.formatMessage({
+                                id: 'energyCalculator.calculateImpact.field.householdTypePlaceholder',
+                                defaultMessage: 'Select household type...',
+                              })}
+                            </span>
+                          );
+                        }
+                        const opt = HOUSEHOLD_TYPE_OPTIONS.find((o) => o.value === value);
+                        return opt ? intl.formatMessage({ id: opt.messageId, defaultMessage: opt.defaultMessage }) : '';
+                      }}
+                    >
+                      {HOUSEHOLD_TYPE_OPTIONS.map((opt) => (
+                        <MenuItem key={opt.value} value={opt.value}>
+                          <FormattedMessage id={opt.messageId} defaultMessage={opt.defaultMessage} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+                {errors.householdType && (
+                  <FormHelperText>{errors.householdType.message}</FormHelperText>
+                )}
+              </FormControl>
+            </div>
 
-        <section className="calculate-impact-section" aria-labelledby="calculate-impact-upgrade-heading">
-          <FormControl component="fieldset" fullWidth>
-            <FormLabel id="calculate-impact-upgrade-heading" component="legend" sx={{ fontWeight: 600, mb: 1 }}>
-              <FormattedMessage id="energyCalculator.calculateImpact.section.upgrade" defaultMessage="Select upgrade" />
-            </FormLabel>
-            <RadioGroup
+            <div className="calculate-impact-field">
+              <label htmlFor="calculate-impact-address" className="calculate-impact-field-label">
+                <FormattedMessage
+                  id="energyCalculator.calculateImpact.field.address"
+                  defaultMessage="Address"
+                />
+              </label>
+              <p id="calculate-impact-address-helper" className="calculate-impact-field-helper">
+                <FormattedMessage
+                  id="energyCalculator.calculateImpact.field.address.helper"
+                  defaultMessage="Enter your street address, city, state, and ZIP code."
+                />
+              </p>
+              <Controller
+                name="address"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    id="calculate-impact-address"
+                    error={!!errors.address}
+                    inputProps={{
+                      autoComplete: 'street-address',
+                      'aria-describedby': 'calculate-impact-address-helper',
+                    }}
+                    helperText={errors.address?.message}
+                    placeholder={intl.formatMessage({
+                      id: 'energyCalculator.calculateImpact.field.addressPlaceholder',
+                      defaultMessage: '1234 Main St, Denver, CO 80014',
+                    })}
+                  />
+                )}
+              />
+            </div>
+
+            <div className="calculate-impact-field">
+              <label htmlFor="calculate-impact-heating-fuel" className="calculate-impact-field-label">
+                <FormattedMessage
+                  id="energyCalculator.calculateImpact.field.heatingFuel"
+                  defaultMessage="Heating Fuel"
+                />
+              </label>
+              <FormControl fullWidth error={!!errors.heatingFuel}>
+                <Controller
+                  name="heatingFuel"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      id="calculate-impact-heating-fuel"
+                      value={field.value ?? ''}
+                      displayEmpty
+                      inputProps={{
+                        'aria-label': intl.formatMessage({
+                          id: 'energyCalculator.calculateImpact.field.heatingFuel',
+                          defaultMessage: 'Heating Fuel',
+                        }),
+                      }}
+                      renderValue={(value) => {
+                        if (!value) {
+                          return (
+                            <span className="calculate-impact-select-placeholder">
+                              {intl.formatMessage({
+                                id: 'energyCalculator.calculateImpact.field.heatingFuelPlaceholder',
+                                defaultMessage: 'Select heating fuel...',
+                              })}
+                            </span>
+                          );
+                        }
+                        const opt = FUEL_OPTIONS.find((o) => o.value === value);
+                        return opt ? intl.formatMessage({ id: opt.messageId, defaultMessage: opt.defaultMessage }) : '';
+                      }}
+                    >
+                      {FUEL_OPTIONS.map((opt) => (
+                        <MenuItem key={opt.value} value={opt.value}>
+                          <FormattedMessage id={opt.messageId} defaultMessage={opt.defaultMessage} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+                {errors.heatingFuel && (
+                  <FormHelperText>{errors.heatingFuel.message}</FormHelperText>
+                )}
+              </FormControl>
+            </div>
+
+            <div className="calculate-impact-field">
+              <label htmlFor="calculate-impact-water-heating-fuel" className="calculate-impact-field-label">
+                <FormattedMessage
+                  id="energyCalculator.calculateImpact.field.waterHeatingFuel"
+                  defaultMessage="Water Heating Type (optional)"
+                />
+              </label>
+              <p id="calculate-impact-water-heating-helper" className="calculate-impact-field-helper">
+                <FormattedMessage
+                  id="energyCalculator.calculateImpact.field.waterHeatingFuel.helper"
+                  defaultMessage="Select your water heating fuel to see the impact of a water heater upgrade."
+                />
+              </p>
+              <FormControl fullWidth>
+                <Controller
+                  name="waterHeatingFuel"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      id="calculate-impact-water-heating-fuel"
+                      value={field.value ?? ''}
+                      displayEmpty
+                      inputProps={{
+                        'aria-label': intl.formatMessage({
+                          id: 'energyCalculator.calculateImpact.field.waterHeatingFuel',
+                          defaultMessage: 'Water Heating Type',
+                        }),
+                        'aria-describedby': 'calculate-impact-water-heating-helper',
+                      }}
+                      renderValue={(value) => {
+                        if (!value) {
+                          return (
+                            <span className="calculate-impact-select-placeholder">
+                              {intl.formatMessage({
+                                id: 'energyCalculator.calculateImpact.field.waterHeatingFuelPlaceholder',
+                                defaultMessage: 'Select water heating type...',
+                              })}
+                            </span>
+                          );
+                        }
+                        const opt = FUEL_OPTIONS.find((o) => o.value === value);
+                        return opt ? intl.formatMessage({ id: opt.messageId, defaultMessage: opt.defaultMessage }) : '';
+                      }}
+                    >
+                      <MenuItem value="">
+                        <FormattedMessage
+                          id="energyCalculator.calculateImpact.field.waterHeatingFuelNone"
+                          defaultMessage="No answer / same as heating"
+                        />
+                      </MenuItem>
+                      {FUEL_OPTIONS.map((opt) => (
+                        <MenuItem key={opt.value} value={opt.value}>
+                          <FormattedMessage id={opt.messageId} defaultMessage={opt.defaultMessage} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </FormControl>
+            </div>
+          </div>
+
+          <h2 id="calculate-impact-upgrade-heading" className="calculate-impact-section-title">
+            <FormattedMessage id="energyCalculator.calculateImpact.section.upgrade" defaultMessage="Select upgrade" />
+          </h2>
+          <p className="calculate-impact-section-description">
+            <FormattedMessage
+              id="energyCalculator.calculateImpact.section.upgrade.description"
+              defaultMessage="Select an upgrade option to learn more about how it works within a household."
+            />
+          </p>
+
+          <FormControl component="fieldset" fullWidth error={!!errors.upgradeChoice} aria-labelledby="calculate-impact-upgrade-heading">
+            <Controller
               name="upgradeChoice"
-              value={upgradeChoice}
-              onChange={(ev) => setUpgradeChoice(ev.target.value as CalculateImpactUpgradeChoice)}
-            >
-              {UPGRADE_OPTIONS.map((opt) => (
-                <FormControlLabel
-                  key={opt.value}
-                  value={opt.value}
-                  control={<Radio />}
-                  label={<FormattedMessage id={opt.messageId} defaultMessage={opt.defaultMessage} />}
-                />
-              ))}
-            </RadioGroup>
+              control={control}
+              render={({ field }) => (
+                <RadioGroup
+                  {...field}
+                  value={field.value ?? ''}
+                >
+                  {UPGRADE_OPTIONS.map((opt) => (
+                    <div key={opt.value} className="calculate-impact-radio-option">
+                      <FormControlLabel
+                        value={opt.value}
+                        control={<Radio />}
+                        label={
+                          <span className="calculate-impact-radio-label">
+                            <FormattedMessage id={opt.messageId} defaultMessage={opt.defaultMessage} />
+                          </span>
+                        }
+                      />
+                      <p className="calculate-impact-radio-description">
+                        <FormattedMessage id={opt.descriptionId} defaultMessage={opt.descriptionDefault} />
+                      </p>
+                    </div>
+                  ))}
+                </RadioGroup>
+              )}
+            />
+            {errors.upgradeChoice && (
+              <FormHelperText>{errors.upgradeChoice.message}</FormHelperText>
+            )}
           </FormControl>
-        </section>
 
-        <Button type="submit" variant="contained" color="primary" size="large" className="calculate-impact-submit">
-          <FormattedMessage id="energyCalculator.calculateImpact.submit" defaultMessage="Calculate impact" />
-        </Button>
+          <Button type="submit" variant="contained" color="primary" size="medium" className="calculate-impact-submit">
+            <FormattedMessage id="energyCalculator.calculateImpact.submit" defaultMessage="Calculate impact" />
+          </Button>
+        </section>
       </Box>
     </main>
+    </>
   );
 }

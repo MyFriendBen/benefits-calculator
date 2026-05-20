@@ -1,27 +1,334 @@
 .calculate-impact-page {
-  max-width: 40rem;
+  max-width: 60rem;
   margin: 0 auto;
-  padding: 0 1rem 2rem;
+  padding: 0.25rem 1.5rem 2rem !important;
+  margin-top: 0 !important;
+  box-shadow: none !important;
 }
 
+/* Back button nav — outside page container, aligned with header logo */
+.calculate-impact-back-nav-wrapper {
+  max-width: var(--main-max-width, 1310px);
+  margin: 0 auto;
+  padding: 0.75rem 1rem 0;
+  box-sizing: border-box;
+}
+
+.calculate-impact-back-nav-wrapper .calculate-impact-back-btn {
+  display: inline-flex;
+  align-items: center;
+  color: #fff;
+  background-color: var(--secondary-color, #001970);
+  border-radius: 0.75rem;
+  padding: 0.4rem 0.9rem;
+  font-weight: 700;
+  font-size: 0.7rem;
+  border: 1px solid var(--secondary-color, #001970);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.calculate-impact-back-nav-wrapper .calculate-impact-back-btn:hover {
+  color: var(--secondary-color, #001970);
+  background-color: #fff;
+}
+
+.calculate-impact-back-nav-wrapper .calculate-impact-back-btn svg {
+  font-size: 0.85rem;
+  margin-right: 0.05rem;
+}
+
+/* Header: icon left, text stacked right */
 .calculate-impact-page .calculate-impact-header {
   margin-top: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  margin-left: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
 }
 
-.calculate-impact-page .calculate-impact-section {
-  margin-bottom: 1.75rem;
+.calculate-impact-page .calculate-impact-header-text {
+  display: flex;
+  flex-direction: column;
 }
 
-.calculate-impact-page .calculate-impact-section-title {
-  margin-bottom: 0.75rem;
+.calculate-impact-page .calculate-impact-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: #E84444;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.calculate-impact-page .calculate-impact-icon,
+.calculate-impact-page .calculate-impact-icon * {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+.calculate-impact-page .calculate-impact-title-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--secondary-color, #001970);
+}
+
+.calculate-impact-page .calculate-impact-separator {
+  border: none;
+  border-top: 2px solid var(--secondary-color, #001970);
+  margin: 0.2rem 0;
+  width: 18rem;
+}
+
+.calculate-impact-page .calculate-impact-subtitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--secondary-color, #001970);
+  margin: 0 0 0.75rem;
+}
+
+/* Intro paragraph */
+.calculate-impact-page .calculate-impact-intro {
+  text-align: left;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
 
 .calculate-impact-page .calculate-impact-intro a {
-  color: var(--link-color, #1976d2);
+  color: var(--secondary-color, #001970);
   text-decoration: underline;
 }
 
+/* Bordered card — contains entire form */
+.calculate-impact-page .calculate-impact-card {
+  border: 1px solid #999;
+  border-radius: 0.25rem;
+  padding: 1.25rem 1.5rem 1.5rem;
+  margin-bottom: 1.5rem;
+  background-color: #fff;
+}
+
+/* Section titles (h2) */
+.calculate-impact-page .calculate-impact-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--secondary-color, #001970);
+  margin: 0 0 0.35rem;
+}
+
+.calculate-impact-page .calculate-impact-section-description {
+  font-size: 0.82rem;
+  color: #333;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+/* Two-column grid — left column narrower, right wider */
+.calculate-impact-page .calculate-impact-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Push input to the bottom of the field so inputs align across columns regardless of helper text height */
+.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiFormControl-root,
+.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiTextField-root {
+  margin-top: auto;
+}
+
+/* Reserve consistent space for error messages so they don't shift adjacent inputs */
+.calculate-impact-page .calculate-impact-fields-grid .MuiFormHelperText-root {
+  position: absolute;
+  bottom: -1.25rem;
+}
+
+.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiFormControl-root,
+.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiTextField-root {
+  margin-top: auto;
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 767px) {
+  .calculate-impact-page .calculate-impact-fields-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .calculate-impact-page {
+    padding: 0.25rem 1rem 1.5rem !important;
+  }
+
+  .calculate-impact-page .calculate-impact-header {
+    margin-left: 0.5rem;
+  }
+
+  .calculate-impact-page .calculate-impact-separator {
+    width: 100%;
+    max-width: 18rem;
+  }
+
+  .calculate-impact-page .calculate-impact-card {
+    padding: 1rem;
+  }
+
+  .calculate-impact-page .calculate-impact-radio-description {
+    margin-left: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .calculate-impact-page {
+    padding: 0.25rem 0.75rem 1.5rem !important;
+  }
+
+  .calculate-impact-page .calculate-impact-header {
+    margin-left: 0;
+    gap: 0.4rem;
+  }
+
+  .calculate-impact-page .calculate-impact-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .calculate-impact-page .calculate-impact-title-text {
+    font-size: 0.8rem;
+  }
+
+  .calculate-impact-page .calculate-impact-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .calculate-impact-page .calculate-impact-separator {
+    width: 100%;
+    max-width: 12rem;
+  }
+
+  .calculate-impact-page .calculate-impact-intro {
+    font-size: 0.82rem;
+  }
+
+  .calculate-impact-page .calculate-impact-card {
+    padding: 0.75rem;
+    border-radius: 0.2rem;
+  }
+
+  .calculate-impact-page .calculate-impact-section-title {
+    font-size: 0.9rem;
+  }
+
+  .calculate-impact-page .calculate-impact-section-description {
+    font-size: 0.78rem;
+  }
+
+  .calculate-impact-page .calculate-impact-field-label {
+    font-size: 0.8rem;
+  }
+
+  .calculate-impact-page .calculate-impact-field-helper {
+    font-size: 0.7rem;
+  }
+
+  .calculate-impact-page .calculate-impact-radio-description {
+    margin-left: 2rem;
+    font-size: 0.72rem;
+  }
+
+  .calculate-impact-page .calculate-impact-radio-label {
+    font-size: 0.8rem;
+  }
+
+  .calculate-impact-page .calculate-impact-submit {
+    width: 100%;
+    padding: 0.6rem 1rem;
+  }
+
+}
+
+/* Individual field blocks */
+.calculate-impact-page .calculate-impact-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.calculate-impact-page .calculate-impact-field-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--secondary-color, #001970);
+  margin-bottom: 0.15rem;
+}
+
+.calculate-impact-page .calculate-impact-field-helper {
+  font-size: 0.75rem;
+  color: #555;
+  margin: 0 0 0.3rem;
+  line-height: 1.4;
+}
+
+/* Radio options with descriptions */
+.calculate-impact-page .calculate-impact-radio-option {
+  margin: 0 -1.5rem 0.5rem;
+  padding: 0.5rem 1.5rem;
+  border-bottom: 1px solid #e8e8e8;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.calculate-impact-page .calculate-impact-radio-option:hover {
+  background-color: #f0f4fa;
+}
+
+.calculate-impact-page .calculate-impact-radio-option:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.calculate-impact-page .calculate-impact-radio-label {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.calculate-impact-page .calculate-impact-radio-description {
+  margin: 0.15rem 0 0 2rem;
+  font-size: 0.78rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* Submit button — compact rounded pill */
 .calculate-impact-page .calculate-impact-submit {
   margin-top: 1rem;
+  padding: 0.5rem 1.5rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border-radius: 1rem;
+  text-transform: none;
+}
+
+/* Blue borders on form inputs */
+.calculate-impact-page .MuiOutlinedInput-notchedOutline {
+  border-color: var(--secondary-color, #001970) !important;
+}
+
+.calculate-impact-page .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: var(--secondary-color, #001970) !important;
+}
+
+/* Faded placeholder text for Select dropdowns */
+.calculate-impact-page .calculate-impact-select-placeholder {
+  color: #999;
+}
+
+/* Faded placeholder for TextField (Address) */
+.calculate-impact-page .MuiInputBase-input::placeholder {
+  color: #999;
+  opacity: 1;
 }
