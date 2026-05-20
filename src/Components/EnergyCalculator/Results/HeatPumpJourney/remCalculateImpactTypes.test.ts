@@ -1,0 +1,119 @@
+import {
+  buildCalculateImpactPayload,
+  CALCULATE_IMPACT_UPGRADE_MAP,
+  type CalculateImpactUpgradeChoice,
+  type RemFuelType,
+  type CalculateImpactHouseholdType,
+} from './remCalculateImpactTypes';
+
+describe('CALCULATE_IMPACT_UPGRADE_MAP', () => {
+  it('maps heat_pump to the correct REM upgrade', () => {
+    expect(CALCULATE_IMPACT_UPGRADE_MAP.heat_pump).toBe('hvac__heat_pump_seer24_hspf13');
+  });
+
+  it('maps weatherization to the correct REM upgrade', () => {
+    expect(CALCULATE_IMPACT_UPGRADE_MAP.weatherization).toBe('weatherization__insulation_air_duct_sealing');
+  });
+
+  it('maps heat_pump_weatherization to the correct REM upgrade', () => {
+    expect(CALCULATE_IMPACT_UPGRADE_MAP.heat_pump_weatherization).toBe(
+      'combination__hvac_seer18_hspf10__weatherization',
+    );
+  });
+
+  it('maps heat_pump_water_heater to the correct REM upgrade', () => {
+    expect(CALCULATE_IMPACT_UPGRADE_MAP.heat_pump_water_heater).toBe('water_heater__heat_pump_uef3.35');
+  });
+
+  it('contains exactly 4 upgrade choices', () => {
+    expect(Object.keys(CALCULATE_IMPACT_UPGRADE_MAP)).toHaveLength(4);
+  });
+});
+
+describe('buildCalculateImpactPayload', () => {
+  const baseInput = {
+    upgradeChoice: 'heat_pump' as CalculateImpactUpgradeChoice,
+    address: '1234 Main St, Denver, CO 80014',
+    heatingFuel: 'natural_gas' as RemFuelType,
+    waterHeatingFuel: '' as RemFuelType | '',
+    householdType: 'single_family_detached' as CalculateImpactHouseholdType,
+  };
+
+  it('builds the correct payload structure', () => {
+    const payload = buildCalculateImpactPayload(baseInput);
+
+    expect(payload).toEqual({
+      remAddressQuery: {
+        upgrade: 'hvac__heat_pump_seer24_hspf13',
+        address: '1234 Main St, Denver, CO 80014',
+        heating_fuel: 'natural_gas',
+        water_heater_fuel: null,
+      },
+      household_type: 'single_family_detached',
+    });
+  });
+
+  it('trims whitespace from the address', () => {
+    const payload = buildCalculateImpactPayload({
+      ...baseInput,
+      address: '  123 Elm St, Boulder, CO 80301  ',
+    });
+
+    expect(payload.remAddressQuery.address).toBe('123 Elm St, Boulder, CO 80301');
+  });
+
+  it('sets water_heater_fuel to null when waterHeatingFuel is empty string', () => {
+    const payload = buildCalculateImpactPayload({
+      ...baseInput,
+      waterHeatingFuel: '',
+    });
+
+    expect(payload.remAddressQuery.water_heater_fuel).toBeNull();
+  });
+
+  it('passes through a specified water heating fuel value', () => {
+    const payload = buildCalculateImpactPayload({
+      ...baseInput,
+      waterHeatingFuel: 'propane',
+    });
+
+    expect(payload.remAddressQuery.water_heater_fuel).toBe('propane');
+  });
+
+  it('maps each upgrade choice correctly', () => {
+    const choices: CalculateImpactUpgradeChoice[] = [
+      'heat_pump',
+      'weatherization',
+      'heat_pump_weatherization',
+      'heat_pump_water_heater',
+    ];
+
+    choices.forEach((choice) => {
+      const payload = buildCalculateImpactPayload({ ...baseInput, upgradeChoice: choice });
+      expect(payload.remAddressQuery.upgrade).toBe(CALCULATE_IMPACT_UPGRADE_MAP[choice]);
+    });
+  });
+
+  it('maps each fuel type correctly for heating_fuel', () => {
+    const fuels: RemFuelType[] = ['natural_gas', 'propane', 'electricity', 'fuel_oil'];
+
+    fuels.forEach((fuel) => {
+      const payload = buildCalculateImpactPayload({ ...baseInput, heatingFuel: fuel });
+      expect(payload.remAddressQuery.heating_fuel).toBe(fuel);
+    });
+  });
+
+  it('maps each household type correctly', () => {
+    const types: CalculateImpactHouseholdType[] = [
+      'single_family_detached',
+      'single_family_attached',
+      'apartment_condo',
+      'mobile_home',
+    ];
+
+    types.forEach((type) => {
+      const payload = buildCalculateImpactPayload({ ...baseInput, householdType: type });
+      expect(payload.household_type).toBe(type);
+    });
+  });
+});
