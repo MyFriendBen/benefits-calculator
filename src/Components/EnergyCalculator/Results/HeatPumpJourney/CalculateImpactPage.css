@@ -246,10 +246,11 @@
 
 .calculate-impact-page .calculate-impact-field-helper {
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #555;
   margin: 0 0 0.4rem;
   line-height: 1.4;
+  white-space: nowrap;
 }
 
 /* Radio options with descriptions */
