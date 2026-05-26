@@ -42,30 +42,30 @@ const HOUSEHOLD_TYPE_OPTIONS: { value: CalculateImpactHouseholdType; messageId: 
     {
       value: 'single_family_detached',
       messageId: 'energyCalculator.calculateImpact.householdType.singleFamilyDetached',
-      defaultMessage: 'Single-family detached home',
-    },
-    {
-      value: 'single_family_attached',
-      messageId: 'energyCalculator.calculateImpact.householdType.singleFamilyAttached',
-      defaultMessage: 'Single-family attached home (townhouse / duplex)',
+      defaultMessage: 'House',
     },
     {
       value: 'apartment_condo',
       messageId: 'energyCalculator.calculateImpact.householdType.apartmentCondo',
-      defaultMessage: 'Apartment or condominium',
+      defaultMessage: 'Apartment',
     },
     {
       value: 'mobile_home',
       messageId: 'energyCalculator.calculateImpact.householdType.mobileHome',
       defaultMessage: 'Mobile home',
     },
+    {
+      value: 'single_family_attached',
+      messageId: 'energyCalculator.calculateImpact.householdType.singleFamilyAttached',
+      defaultMessage: 'Townhome',
+    },
   ];
 
 const FUEL_OPTIONS: { value: RemFuelType; messageId: string; defaultMessage: string }[] = [
-  { value: 'natural_gas', messageId: 'energyCalculator.calculateImpact.fuel.naturalGas', defaultMessage: 'Natural gas' },
-  { value: 'propane', messageId: 'energyCalculator.calculateImpact.fuel.propane', defaultMessage: 'Propane' },
   { value: 'electricity', messageId: 'energyCalculator.calculateImpact.fuel.electricity', defaultMessage: 'Electricity' },
-  { value: 'fuel_oil', messageId: 'energyCalculator.calculateImpact.fuel.fuelOil', defaultMessage: 'Heating oil' },
+  { value: 'natural_gas', messageId: 'energyCalculator.calculateImpact.fuel.naturalGas', defaultMessage: 'Natural gas' },
+  { value: 'fuel_oil', messageId: 'energyCalculator.calculateImpact.fuel.fuelOil', defaultMessage: 'Fuel oil' },
+  { value: 'propane', messageId: 'energyCalculator.calculateImpact.fuel.propane', defaultMessage: 'Propane' },
 ];
 
 const UPGRADE_OPTIONS: {
@@ -153,7 +153,7 @@ export default function CalculateImpactPage() {
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams]);
 
   const backLink = addAdminToLink(
-    `/${whiteLabel}/${uuid}/results/energy-rebates/waterHeater`,
+    `/${whiteLabel}/${uuid}/results/energy-rebates/hvac`,
     isAdminView,
   );
 
@@ -190,21 +190,23 @@ export default function CalculateImpactPage() {
   };
 
   return (
-    <>
-      <nav className="calculate-impact-back-nav-wrapper">
+    <main className="benefits-form calculate-impact-page">
+      <div className="calculate-impact-back-row results-back-save-btn-container">
         <button
-          className="calculate-impact-back-btn"
+          data-testid="back-to-results-button"
+          className="results-back-save-buttons"
           onClick={() => navigate(backLink)}
           aria-label={intl.formatMessage({ id: 'backAndSaveBtns.backBtnAL', defaultMessage: 'back' })}
         >
-          <LeftArrowIcon />
-          <FormattedMessage
-            id="energyCalculator.calculateImpact.backToResults"
-            defaultMessage="BACK TO RESULTS"
-          />
+          <div className="btn-icon-text-container padding-right">
+            <LeftArrowIcon />
+            <FormattedMessage
+              id="energyCalculator.calculateImpact.backToResults"
+              defaultMessage="BACK TO RESULTS"
+            />
+          </div>
         </button>
-      </nav>
-      <main className="benefits-form calculate-impact-page">
+      </div>
 
       <header className="calculate-impact-header">
         <Coin aria-hidden="true" className="calculate-impact-icon" />
@@ -437,7 +439,7 @@ export default function CalculateImpactPage() {
                             <span className="calculate-impact-select-placeholder">
                               {intl.formatMessage({
                                 id: 'energyCalculator.calculateImpact.field.waterHeatingFuelPlaceholder',
-                                defaultMessage: 'Select water heating type...',
+                                defaultMessage: 'Select water heating fuel...',
                               })}
                             </span>
                           );
@@ -449,7 +451,7 @@ export default function CalculateImpactPage() {
                       <MenuItem value="">
                         <FormattedMessage
                           id="energyCalculator.calculateImpact.field.waterHeatingFuelNone"
-                          defaultMessage="No answer / same as heating"
+                          defaultMessage="No selection"
                         />
                       </MenuItem>
                       {FUEL_OPTIONS.map((opt) => (
@@ -483,22 +485,29 @@ export default function CalculateImpactPage() {
                   {...field}
                   value={field.value ?? ''}
                 >
-                  {UPGRADE_OPTIONS.map((opt) => (
-                    <div key={opt.value} className="calculate-impact-radio-option">
-                      <FormControlLabel
-                        value={opt.value}
-                        control={<Radio />}
-                        label={
-                          <span className="calculate-impact-radio-label">
-                            <FormattedMessage id={opt.messageId} defaultMessage={opt.defaultMessage} />
-                          </span>
-                        }
-                      />
-                      <p className="calculate-impact-radio-description">
-                        <FormattedMessage id={opt.descriptionId} defaultMessage={opt.descriptionDefault} />
-                      </p>
-                    </div>
-                  ))}
+                  {UPGRADE_OPTIONS.map((opt) => {
+                    const isSelected = field.value === opt.value;
+                    return (
+                      <div
+                        key={opt.value}
+                        className="calculate-impact-radio-option"
+                        data-selected={isSelected ? 'true' : 'false'}
+                      >
+                        <FormControlLabel
+                          value={opt.value}
+                          control={<Radio />}
+                          label={
+                            <span className="calculate-impact-radio-label">
+                              <FormattedMessage id={opt.messageId} defaultMessage={opt.defaultMessage} />
+                            </span>
+                          }
+                        />
+                        <p className="calculate-impact-radio-description">
+                          <FormattedMessage id={opt.descriptionId} defaultMessage={opt.descriptionDefault} />
+                        </p>
+                      </div>
+                    );
+                  })}
                 </RadioGroup>
               )}
             />
@@ -513,6 +522,5 @@ export default function CalculateImpactPage() {
         </section>
       </Box>
     </main>
-    </>
   );
 }

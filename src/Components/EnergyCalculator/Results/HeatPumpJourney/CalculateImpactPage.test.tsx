@@ -101,7 +101,7 @@ describe('CalculateImpactPage', () => {
       renderPage();
       expect(screen.getByText('Select household type...')).toBeInTheDocument();
       expect(screen.getByText('Select heating fuel...')).toBeInTheDocument();
-      expect(screen.getByText('Select water heating type...')).toBeInTheDocument();
+      expect(screen.getByText('Select water heating fuel...')).toBeInTheDocument();
     });
 
     it('renders the address placeholder', () => {
@@ -122,14 +122,14 @@ describe('CalculateImpactPage', () => {
     it('navigates to the results page when BACK TO RESULTS is clicked', () => {
       renderPage();
       fireEvent.click(screen.getByRole('button', { name: /back/i }));
-      expect(mockNavigate).toHaveBeenCalledWith('/cesn/test-uuid/results/energy-rebates/waterHeater');
+      expect(mockNavigate).toHaveBeenCalledWith('/cesn/test-uuid/results/energy-rebates/hvac');
     });
 
     it('includes admin=true in back link when admin search param is present', () => {
       renderPage('/cesn/test-uuid/results/energy-rebates/waterHeater/calculate-impact?admin=true');
       fireEvent.click(screen.getByRole('button', { name: /back/i }));
       expect(mockNavigate).toHaveBeenCalledWith(
-        '/cesn/test-uuid/results/energy-rebates/waterHeater?admin=true',
+        '/cesn/test-uuid/results/energy-rebates/hvac?admin=true',
       );
     });
   });
@@ -187,8 +187,8 @@ describe('CalculateImpactPage', () => {
     it('allows selecting a household type', async () => {
       renderPage();
       const householdSelect = screen.getByRole('button', { name: /household type/i });
-      await selectOption(householdSelect, 'Single-family detached home');
-      expect(householdSelect).toHaveTextContent('Single-family detached home');
+      await selectOption(householdSelect, 'House');
+      expect(householdSelect).toHaveTextContent('House');
     });
 
     it('allows typing an address', () => {
@@ -218,7 +218,7 @@ describe('CalculateImpactPage', () => {
       renderPage();
 
       const householdSelect = screen.getByRole('button', { name: /household type/i });
-      await selectOption(householdSelect, 'Single-family detached home');
+      await selectOption(householdSelect, 'House');
 
       const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
       fireEvent.change(addressInput, { target: { value: '789 Pine St, Denver, CO 80202' } });
@@ -272,7 +272,7 @@ describe('CalculateImpactPage', () => {
       renderPage();
 
       const householdSelect = screen.getByRole('button', { name: /household type/i });
-      await selectOption(householdSelect, 'Apartment or condominium');
+      await selectOption(householdSelect, 'Apartment');
 
       const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
       fireEvent.change(addressInput, { target: { value: '100 Test Blvd, Denver, CO 80202' } });

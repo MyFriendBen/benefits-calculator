@@ -16,8 +16,7 @@
   border: 2px solid var(--icon-color);
   border-radius: 0.3rem;
   padding: 0.8rem;
-  aspect-ratio: 33 / 37.5;
-  overflow: hidden;
+  min-height: 14rem;
 }
 
 .heat-pump-journey-card-header {
@@ -95,13 +94,22 @@
   color: var(--primary-color);
 }
 
-@media (max-width: 767px) {
+/* Only stack to a single column at true mobile widths; in between, the 3-up
+   grid stays and the cards simply grow taller to fit wrapped titles. */
+@media (max-width: 700px) {
   .energy-calculator-rebate-page-container .heat-pump-journey-cards {
     grid-template-columns: 1fr;
     padding: 0;
   }
 
   .heat-pump-journey-card {
-    aspect-ratio: auto;
+    min-height: 0;
+  }
+
+  /* Mobile: number badge inline with the title on the same row */
+  .heat-pump-journey-card-header {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
   }
 }

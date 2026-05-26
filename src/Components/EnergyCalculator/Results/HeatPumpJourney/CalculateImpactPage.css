@@ -1,41 +1,11 @@
 .calculate-impact-page {
   max-width: 60rem;
-  margin: 0 auto;
-  padding: 0.25rem 1.5rem 2rem !important;
-  margin-top: 0 !important;
-  box-shadow: none !important;
 }
 
-/* Back button nav — outside page container, aligned with header logo */
-.calculate-impact-back-nav-wrapper {
-  max-width: var(--main-max-width, 1310px);
-  margin: 0 auto;
-  padding: 0.75rem 1rem 0;
-  box-sizing: border-box;
-}
-
-.calculate-impact-back-nav-wrapper .calculate-impact-back-btn {
-  display: inline-flex;
-  align-items: center;
-  color: #fff;
-  background-color: var(--secondary-color, #001970);
-  border-radius: 0.75rem;
-  padding: 0.4rem 0.9rem;
-  font-weight: 700;
-  font-size: 0.7rem;
-  border: 1px solid var(--secondary-color, #001970);
-  cursor: pointer;
-  line-height: 1;
-}
-
-.calculate-impact-back-nav-wrapper .calculate-impact-back-btn:hover {
-  color: var(--secondary-color, #001970);
-  background-color: #fff;
-}
-
-.calculate-impact-back-nav-wrapper .calculate-impact-back-btn svg {
-  font-size: 0.85rem;
-  margin-right: 0.05rem;
+/* Back button row — reuses .results-back-save-btn-container / .results-back-save-buttons */
+.calculate-impact-page .calculate-impact-back-row {
+  padding: 0 0 1.5rem;
+  margin-bottom: 0;
 }
 
 /* Header: icon left, text stacked right */
@@ -68,7 +38,8 @@
 }
 
 .calculate-impact-page .calculate-impact-title-text {
-  font-size: 0.95rem;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
   font-weight: 500;
   color: var(--secondary-color, #001970);
 }
@@ -81,19 +52,21 @@
 }
 
 .calculate-impact-page .calculate-impact-subtitle {
-  font-size: 1.4rem;
+  font-family: var(--font-body);
+  font-size: 1.75rem;
   font-weight: 700;
-  font-style: italic;
   color: var(--secondary-color, #001970);
   margin: 0 0 0.75rem;
 }
 
 /* Intro paragraph */
 .calculate-impact-page .calculate-impact-intro {
+  font-family: var(--font-body);
   text-align: left;
   margin-bottom: 1.5rem;
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.6;
+  color: #333;
 }
 
 .calculate-impact-page .calculate-impact-intro a {
@@ -103,25 +76,27 @@
 
 /* Bordered card — contains entire form */
 .calculate-impact-page .calculate-impact-card {
-  border: 1px solid #999;
-  border-radius: 0.25rem;
-  padding: 1.25rem 1.5rem 1.5rem;
+  border: 1px solid #d6d8dc;
+  border-radius: 0.5rem;
+  padding: 1.5rem 1.75rem 1.75rem;
   margin-bottom: 1.5rem;
-  background-color: #fff;
+  background-color: #f5f6f8;
 }
 
 /* Section titles (h2) */
 .calculate-impact-page .calculate-impact-section-title {
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--secondary-color, #001970);
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.4rem;
 }
 
 .calculate-impact-page .calculate-impact-section-description {
-  font-size: 0.82rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
   color: #333;
-  margin: 0 0 1rem;
+  margin: 0 0 1.25rem;
   line-height: 1.5;
 }
 
@@ -129,8 +104,9 @@
 .calculate-impact-page .calculate-impact-fields-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1.25rem;
+  column-gap: 1.5rem;
+  row-gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field {
@@ -154,7 +130,7 @@
 .calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiTextField-root {
   margin-top: auto;
   position: relative;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 @media (max-width: 767px) {
@@ -200,11 +176,11 @@
   }
 
   .calculate-impact-page .calculate-impact-title-text {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
 
   .calculate-impact-page .calculate-impact-subtitle {
-    font-size: 1.1rem;
+    font-size: 1.4rem;
   }
 
   .calculate-impact-page .calculate-impact-separator {
@@ -213,42 +189,43 @@
   }
 
   .calculate-impact-page .calculate-impact-intro {
-    font-size: 0.82rem;
-  }
-
-  .calculate-impact-page .calculate-impact-card {
-    padding: 0.75rem;
-    border-radius: 0.2rem;
-  }
-
-  .calculate-impact-page .calculate-impact-section-title {
     font-size: 0.9rem;
   }
 
+  .calculate-impact-page .calculate-impact-card {
+    padding: 1rem;
+    border-radius: 0.4rem;
+  }
+
+  .calculate-impact-page .calculate-impact-section-title {
+    font-size: 1.05rem;
+  }
+
   .calculate-impact-page .calculate-impact-section-description {
-    font-size: 0.78rem;
+    font-size: 0.85rem;
   }
 
   .calculate-impact-page .calculate-impact-field-label {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
 
   .calculate-impact-page .calculate-impact-field-helper {
-    font-size: 0.7rem;
+    font-size: 0.78rem;
   }
 
   .calculate-impact-page .calculate-impact-radio-description {
     margin-left: 2rem;
-    font-size: 0.72rem;
+    font-size: 0.82rem;
   }
 
   .calculate-impact-page .calculate-impact-radio-label {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
 
   .calculate-impact-page .calculate-impact-submit {
     width: 100%;
-    padding: 0.6rem 1rem;
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
   }
 
 }
@@ -260,60 +237,63 @@
 }
 
 .calculate-impact-page .calculate-impact-field-label {
-  font-size: 0.85rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
   font-weight: 700;
   color: var(--secondary-color, #001970);
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.25rem;
 }
 
 .calculate-impact-page .calculate-impact-field-helper {
-  font-size: 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
   color: #555;
-  margin: 0 0 0.3rem;
+  margin: 0 0 0.4rem;
   line-height: 1.4;
 }
 
 /* Radio options with descriptions */
 .calculate-impact-page .calculate-impact-radio-option {
-  margin: 0 -1.5rem 0.5rem;
-  padding: 0.5rem 1.5rem;
-  border-bottom: 1px solid #e8e8e8;
+  margin: 0 0 0.25rem;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  border-radius: 0.5rem;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .calculate-impact-page .calculate-impact-radio-option:hover {
-  background-color: #f0f4fa;
+  background-color: #e7ecf5;
 }
 
-.calculate-impact-page .calculate-impact-radio-option:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
+.calculate-impact-page .calculate-impact-radio-option[data-selected='true'] {
+  background-color: #e3e9f3;
 }
 
 .calculate-impact-page .calculate-impact-radio-label {
+  font-family: var(--font-body);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 1.15rem;
+  color: #000;
 }
 
 .calculate-impact-page .calculate-impact-radio-description {
+  font-family: var(--font-body);
   margin: 0.15rem 0 0 2rem;
-  font-size: 0.78rem;
-  color: #555;
+  font-size: 0.9rem;
+  color: #333;
   line-height: 1.5;
 }
 
-/* Submit button — compact rounded pill */
 .calculate-impact-page .calculate-impact-submit {
-  margin-top: 1rem;
-  padding: 0.5rem 1.5rem;
-  font-weight: 700;
-  font-size: 0.8rem;
-  border-radius: 1rem;
-  text-transform: none;
+  margin-top: 1.25rem;
 }
 
-/* Blue borders on form inputs */
+/* Form inputs sit on white inside the grey card */
+.calculate-impact-page .MuiOutlinedInput-root {
+  background-color: #fff;
+}
+
 .calculate-impact-page .MuiOutlinedInput-notchedOutline {
   border-color: var(--secondary-color, #001970) !important;
 }
