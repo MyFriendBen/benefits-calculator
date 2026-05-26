@@ -232,29 +232,6 @@ describe('CalculateImpactPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
     };
 
-    it('logs the payload to console on valid submission', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-      await fillAndSubmit();
-
-      await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(
-          '[CalculateImpact] submit payload',
-          expect.objectContaining({
-            remAddressQuery: expect.objectContaining({
-              upgrade: 'hvac__heat_pump_seer24_hspf13',
-              address: '789 Pine St, Denver, CO 80202',
-              heating_fuel: 'natural_gas',
-              water_heater_fuel: null,
-            }),
-            household_type: 'single_family_detached',
-          }),
-        );
-      });
-
-      consoleSpy.mockRestore();
-    });
-
     it('does not show validation errors on valid submission', async () => {
       await fillAndSubmit();
 
@@ -266,44 +243,6 @@ describe('CalculateImpactPage', () => {
       });
     });
 
-    it('includes water heating fuel in payload when selected', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-      renderPage();
-
-      const householdSelect = screen.getByRole('button', { name: /household type/i });
-      await selectOption(householdSelect, 'Apartment');
-
-      const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
-      fireEvent.change(addressInput, { target: { value: '100 Test Blvd, Denver, CO 80202' } });
-
-      const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
-      await selectOption(fuelSelect, 'Propane');
-
-      const waterSelect = screen.getByRole('button', { name: /water heating type/i });
-      await selectOption(waterSelect, 'Electricity');
-
-      const weatherRadio = screen.getByRole('radio', { name: /^weatherization$/i });
-      fireEvent.click(weatherRadio);
-
-      fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
-
-      await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(
-          '[CalculateImpact] submit payload',
-          expect.objectContaining({
-            remAddressQuery: expect.objectContaining({
-              upgrade: 'weatherization__insulation_air_duct_sealing',
-              heating_fuel: 'propane',
-              water_heater_fuel: 'electricity',
-            }),
-            household_type: 'apartment_condo',
-          }),
-        );
-      });
-
-      consoleSpy.mockRestore();
-    });
   });
 
   describe('accessibility', () => {

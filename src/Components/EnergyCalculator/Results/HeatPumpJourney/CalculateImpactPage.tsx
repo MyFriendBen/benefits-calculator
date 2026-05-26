@@ -25,7 +25,6 @@ import {
   type CalculateImpactHouseholdType,
   type CalculateImpactUpgradeChoice,
   type RemFuelType,
-  CALCULATE_IMPACT_UPGRADE_MAP,
 } from './remCalculateImpactTypes';
 import { ReactComponent as Coin } from '../../Icons/Coin.svg';
 import './CalculateImpactPage.css';
@@ -174,19 +173,9 @@ export default function CalculateImpactPage() {
     },
   });
 
-  const onSubmit = (data: CalculateImpactFormData) => {
-    const payload = {
-      remAddressQuery: {
-        upgrade: CALCULATE_IMPACT_UPGRADE_MAP[data.upgradeChoice],
-        address: data.address,
-        heating_fuel: data.heatingFuel,
-        water_heater_fuel: data.waterHeatingFuel ?? null,
-      },
-      household_type: data.householdType,
-    };
-
-    // eslint-disable-next-line no-console -- MFB-979 placeholder until Step 3 API integration
-    console.log('[CalculateImpact] submit payload', payload);
+  const onSubmit = (_data: CalculateImpactFormData) => {
+    // MFB-981 (Step 3) will wire this submit handler to the Rewiring America REM API.
+    // Intentionally a no-op until then — see remCalculateImpactTypes.ts for the payload shape.
   };
 
   return (
