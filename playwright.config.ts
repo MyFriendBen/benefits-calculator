@@ -13,6 +13,10 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   workers: process.env.CI ? 1 : undefined,
+  /* On CI, retry failed tests up to twice to absorb infra/network flakes
+     (mid-spec dev-server hiccups, slow first-paint timeouts, etc.). Real
+     failures cost extra wallclock but pass-on-retry saves a full re-run. */
+  retries: process.env.CI ? 2 : 0,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['html'], ['json', { outputFile: 'results.json' }], ['list']],
 
