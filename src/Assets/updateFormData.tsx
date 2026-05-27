@@ -143,6 +143,7 @@ export function useUpdateFormData() {
         legalServices: response.needs_legal_services ?? false,
         savings: response.needs_college_savings ?? false,
         veteranServices: response.needs_veteran_services ?? false,
+        disabilityResources: response.needs_disability_resources ?? false,
       },
       signUpInfo: {
         email: '',
