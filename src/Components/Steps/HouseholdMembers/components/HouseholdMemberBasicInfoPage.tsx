@@ -118,7 +118,7 @@ const HouseholdMemberBasicInfoPage = () => {
   };
 
   return (
-    <main className="benefits-form">
+    <main className="benefits-form" data-step-id="household-basics">
       <QuestionHeader>
         <FormattedMessage
           id="householdDataBlock.basicInfo.header"

@@ -17,6 +17,24 @@ import Utilities from '../EnergyCalculator/Steps/Utilities';
 import './QuestionComponentContainer.css';
 import { usePageTitle } from '../Common/usePageTitle';
 
+// Stable step identifiers for analytics (GA4). These slugs are decoupled from
+// display order so they survive step skips and reorders. See MFB-1079.
+const STEP_ID_BY_QUESTION_NAME: Record<string, { stepId: string; component: JSX.Element }> = {
+  zipcode: { stepId: 'zip-code', component: <Zipcode /> },
+  householdSize: { stepId: 'household-size', component: <HouseholdSize /> },
+  hasExpenses: { stepId: 'expenses', component: <Expenses /> },
+  householdAssets: { stepId: 'assets', component: <HouseholdAssets /> },
+  hasBenefits: { stepId: 'current-benefits', component: <AlreadyHasBenefits /> },
+  acuteHHConditions: { stepId: 'immediate-needs', component: <ImmediateNeeds /> },
+  referralSource: { stepId: 'referral-source', component: <ReferralSourceStep /> },
+  signUpInfo: { stepId: 'sign-up', component: <SignUp /> },
+  energyCalculatorElectricityProvider: { stepId: 'cesn-electric-provider', component: <ElectricityProvider /> },
+  energyCalculatorGasProvider: { stepId: 'cesn-gas-provider', component: <GasProvider /> },
+  energyCalculatorExpenses: { stepId: 'cesn-energy-expenses', component: <EnergyCalculatorExpenses /> },
+  energyCalculatorApplianceStatus: { stepId: 'cesn-appliances', component: <Appliances /> },
+  energyCalculatorUtilityStatus: { stepId: 'cesn-utility-status', component: <Utilities /> },
+};
+
 const QuestionComponentContainer = () => {
   // ALL HOOKS MUST BE CALLED FIRST - before any conditional returns
   let { id } = useParams();
@@ -45,88 +63,17 @@ const QuestionComponentContainer = () => {
     return <Navigate to={`../step-1${location.search}${location.hash}`} replace />;
   }
 
-  switch (questionName) {
-    case 'zipcode':
-      return (
-        <main className="benefits-form">
-          <Zipcode />
-        </main>
-      );
-    case 'householdSize':
-      return (
-        <main className="benefits-form">
-          <HouseholdSize />
-        </main>
-      );
-    case 'hasExpenses':
-      return (
-        <main className="benefits-form">
-          <Expenses />
-        </main>
-      );
-    case 'householdAssets':
-      return (
-        <main className="benefits-form">
-          <HouseholdAssets />
-        </main>
-      );
-    case 'hasBenefits':
-      return (
-        <main className="benefits-form">
-          <AlreadyHasBenefits />
-        </main>
-      );
-    case 'acuteHHConditions':
-      return (
-        <main className="benefits-form">
-          <ImmediateNeeds />
-        </main>
-      );
-    case 'referralSource':
-      return (
-        <main className="benefits-form">
-          <ReferralSourceStep />
-        </main>
-      );
-    case 'signUpInfo':
-      return (
-        <main className="benefits-form">
-          <SignUp />
-        </main>
-      );
-    case 'energyCalculatorElectricityProvider':
-      return (
-        <main className="benefits-form">
-          <ElectricityProvider />
-        </main>
-      );
-    case 'energyCalculatorGasProvider':
-      return (
-        <main className="benefits-form">
-          <GasProvider />
-        </main>
-      );
-    case 'energyCalculatorExpenses':
-      return (
-        <main className="benefits-form">
-          <EnergyCalculatorExpenses />
-        </main>
-      );
-    case 'energyCalculatorApplianceStatus':
-      return (
-        <main className="benefits-form">
-          <Appliances />
-        </main>
-      );
-    case 'energyCalculatorUtilityStatus':
-      return (
-        <main className="benefits-form">
-          <Utilities />
-        </main>
-      );
+  const step = questionName ? STEP_ID_BY_QUESTION_NAME[questionName] : undefined;
+
+  if (step === undefined) {
+    return null;
   }
 
-  return null;
+  return (
+    <main className="benefits-form" data-step-id={step.stepId}>
+      {step.component}
+    </main>
+  );
 };
 
 export default QuestionComponentContainer;

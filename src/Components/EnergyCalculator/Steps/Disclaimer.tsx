@@ -164,7 +164,7 @@ const Disclaimer = () => {
   };
 
   return (
-    <main className="benefits-form">
+    <main className="benefits-form" data-step-id="disclaimer">
       <QuestionHeader>
         <FormattedMessage id="disclaimer.header" defaultMessage="What you should know: " />
       </QuestionHeader>

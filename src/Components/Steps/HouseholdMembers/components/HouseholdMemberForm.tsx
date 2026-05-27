@@ -280,7 +280,7 @@ const HouseholdMemberForm = () => {
   const showSummaryCards = pageNumber > 1;
 
   return (
-    <main className="benefits-form">
+    <main className="benefits-form" data-step-id="member-details" data-member-index={currentMemberIndex}>
       {showSummaryCards && renderSummaryCards()}
 
       {renderHeader()}
