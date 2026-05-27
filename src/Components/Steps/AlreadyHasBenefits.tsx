@@ -5,6 +5,7 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import type { HasBenefitsProgram } from '../../Types/ApiCalls';
 import useScreenApi from '../../Assets/updateScreen';
+import { getBenefitSiblings } from '../../Assets/benefitSiblings';
 import { OverrideableTranslation } from '../../Assets/languageOptions';
 import HasBenefitsTile from './HasBenefitsTile';
 import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
@@ -163,9 +164,18 @@ function AlreadyHasBenefits() {
                   program={program}
                   selected={!!alreadyHasBenefits[key]}
                   onClick={() => {
+                    // Multiple formData.benefits keys share one has_* column on
+                    // the backend (e.g. 'snap' and 'co_snap' both map to
+                    // has_snap). Step 8 only shows ONE tile per column, so we
+                    // must flip every sibling together — otherwise the unshown
+                    // siblings keep their stale value and updateScreen's OR-chain
+                    // re-asserts has_*=true on deselect. See MFB-1085.
+                    const newValue = !alreadyHasBenefits[key];
+                    const siblings = getBenefitSiblings(key);
+                    const updates = Object.fromEntries(siblings.map((s) => [s, newValue]));
                     setValue(
                       'alreadyHasBenefits',
-                      { ...alreadyHasBenefits, [key]: !alreadyHasBenefits[key] },
+                      { ...alreadyHasBenefits, ...updates },
                       { shouldDirty: true, shouldTouch: true },
                     );
                   }}
