@@ -95,7 +95,7 @@ const SelectStatePage = () => {
   };
 
   return (
-    <main className="benefits-form">
+    <main className="benefits-form" data-step-id="select-state">
       <QuestionHeader>
         <FormattedMessage id="stateStep.header" defaultMessage="Before you begin..." />
       </QuestionHeader>
