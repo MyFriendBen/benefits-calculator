@@ -19,20 +19,20 @@ import { usePageTitle } from '../Common/usePageTitle';
 
 // Stable step identifiers for analytics (GA4). These slugs are decoupled from
 // display order so they survive step skips and reorders. See MFB-1079.
-const STEP_ID_BY_QUESTION_NAME: Record<string, { stepId: string; component: JSX.Element }> = {
-  zipcode: { stepId: 'zip-code', component: <Zipcode /> },
-  householdSize: { stepId: 'household-size', component: <HouseholdSize /> },
-  hasExpenses: { stepId: 'expenses', component: <Expenses /> },
-  householdAssets: { stepId: 'assets', component: <HouseholdAssets /> },
-  hasBenefits: { stepId: 'current-benefits', component: <AlreadyHasBenefits /> },
-  acuteHHConditions: { stepId: 'immediate-needs', component: <ImmediateNeeds /> },
-  referralSource: { stepId: 'referral-source', component: <ReferralSourceStep /> },
-  signUpInfo: { stepId: 'sign-up', component: <SignUp /> },
-  energyCalculatorElectricityProvider: { stepId: 'cesn-electric-provider', component: <ElectricityProvider /> },
-  energyCalculatorGasProvider: { stepId: 'cesn-gas-provider', component: <GasProvider /> },
-  energyCalculatorExpenses: { stepId: 'cesn-energy-expenses', component: <EnergyCalculatorExpenses /> },
-  energyCalculatorApplianceStatus: { stepId: 'cesn-appliances', component: <Appliances /> },
-  energyCalculatorUtilityStatus: { stepId: 'cesn-utility-status', component: <Utilities /> },
+const STEP_ID_BY_QUESTION_NAME: Record<string, { stepId: string; Component: React.ComponentType }> = {
+  zipcode: { stepId: 'zip-code', Component: Zipcode },
+  householdSize: { stepId: 'household-size', Component: HouseholdSize },
+  hasExpenses: { stepId: 'expenses', Component: Expenses },
+  householdAssets: { stepId: 'assets', Component: HouseholdAssets },
+  hasBenefits: { stepId: 'current-benefits', Component: AlreadyHasBenefits },
+  acuteHHConditions: { stepId: 'immediate-needs', Component: ImmediateNeeds },
+  referralSource: { stepId: 'referral-source', Component: ReferralSourceStep },
+  signUpInfo: { stepId: 'sign-up', Component: SignUp },
+  energyCalculatorElectricityProvider: { stepId: 'cesn-electric-provider', Component: ElectricityProvider },
+  energyCalculatorGasProvider: { stepId: 'cesn-gas-provider', Component: GasProvider },
+  energyCalculatorExpenses: { stepId: 'cesn-energy-expenses', Component: EnergyCalculatorExpenses },
+  energyCalculatorApplianceStatus: { stepId: 'cesn-appliances', Component: Appliances },
+  energyCalculatorUtilityStatus: { stepId: 'cesn-utility-status', Component: Utilities },
 };
 
 const QuestionComponentContainer = () => {
@@ -69,9 +69,11 @@ const QuestionComponentContainer = () => {
     return null;
   }
 
+  const { Component } = step;
+
   return (
     <main className="benefits-form" data-step-id={step.stepId}>
-      {step.component}
+      <Component />
     </main>
   );
 };
