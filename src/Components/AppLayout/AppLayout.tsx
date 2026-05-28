@@ -17,16 +17,13 @@ interface AppLayoutProps {
  * Renders the header, footer, banner, progress bar, and main content area.
  */
 const AppLayout = ({ children }: AppLayoutProps) => {
-  const { config, whiteLabel, formData } = useContext(Context);
+  const { config } = useContext(Context);
   const stepDirectory = useStepDirectory();
   const totalSteps = stepDirectory ? stepDirectory.length + STARTING_QUESTION_NUMBER : STARTING_QUESTION_NUMBER;
   const bannerMessages = config?.banner_messages as BannerMessage[] | undefined;
 
-  const dataFlow =
-    whiteLabel === 'cesn' ? (formData?.path === 'renter' ? 'cesn-renter' : 'cesn-homeowner') : 'default';
-
   return (
-    <div className="app" data-flow={dataFlow}>
+    <div className="app">
       <CssBaseline />
       <FaviconManager />
       <BrandedHeader />
