@@ -25,7 +25,7 @@ const STEP_ID_BY_QUESTION_NAME: Record<string, { stepId: string; Component: Reac
   hasExpenses: { stepId: 'expenses', Component: Expenses },
   householdAssets: { stepId: 'assets', Component: HouseholdAssets },
   hasBenefits: { stepId: 'current-benefits', Component: AlreadyHasBenefits },
-  acuteHHConditions: { stepId: 'immediate-needs', Component: ImmediateNeeds },
+  acuteHHConditions: { stepId: 'additional-resources', Component: ImmediateNeeds },
   referralSource: { stepId: 'referral-source', Component: ReferralSourceStep },
   signUpInfo: { stepId: 'sign-up', Component: SignUp },
   energyCalculatorElectricityProvider: { stepId: 'cesn-electric-provider', Component: ElectricityProvider },
