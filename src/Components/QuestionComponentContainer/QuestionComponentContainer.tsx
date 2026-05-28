@@ -57,13 +57,11 @@ const QuestionComponentContainer = () => {
   }
 
   // Validate step number and redirect if needed
-  const isInvalidStep = isNaN(stepNumber) || stepNumber < 1 || stepNumber > maxStep || questionName === undefined;
-
-  if (isInvalidStep) {
+  if (isNaN(stepNumber) || stepNumber < 1 || stepNumber > maxStep || questionName === undefined) {
     return <Navigate to={`../step-1${location.search}${location.hash}`} replace />;
   }
 
-  const step = questionName ? STEP_ID_BY_QUESTION_NAME[questionName] : undefined;
+  const step = STEP_ID_BY_QUESTION_NAME[questionName];
 
   if (step === undefined) {
     return null;
