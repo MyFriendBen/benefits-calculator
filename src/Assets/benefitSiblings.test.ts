@@ -19,7 +19,7 @@ describe('getBenefitSiblings', () => {
 
   it('returns the single-key fallback for keys not in any group', () => {
     expect(getBenefitSiblings('medicaid')).toEqual(['medicaid']);
-    expect(getBenefitSiblings('eitc')).toEqual(['eitc']);
+    expect(getBenefitSiblings('lifeline')).toEqual(['lifeline']);
   });
 
   it('returns the single-key fallback for unknown keys', () => {

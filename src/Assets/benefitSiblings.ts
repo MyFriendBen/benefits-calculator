@@ -23,20 +23,23 @@
  * and `formData.benefits` keys mirror `name_abbreviated` 1:1.
  */
 export const BENEFIT_SIBLING_GROUPS: ReadonlyArray<ReadonlyArray<string>> = [
-  ['ccap', 'il_ccap', 'nc_cccap'],
-  ['leap', 'nc_leap'],
+  ['ccap', 'il_ccap', 'nc_cccap', 'cccap'],
+  ['leap', 'nc_leap', 'cesn_leap'],
   ['oap', 'cesn_oap'],
   ['rtdlive', 'cesn_rtdlive'],
   ['snap', 'co_snap', 'il_snap', 'ma_snap', 'nc_snap', 'tx_snap', 'cesn_snap'],
-  ['ssdi', 'tx_ssdi', 'cesn_ssdi'],
-  ['ssi', 'tx_ssi', 'cesn_ssi'],
+  ['ssdi', 'tx_ssdi', 'cesn_ssdi', 'wa_ssdi'],
+  ['ssi', 'tx_ssi', 'cesn_ssi', 'wa_ssi'],
   ['cowap', 'cesn_cowap'],
-  ['tanf', 'co_tanf', 'il_tanf', 'nc_tanf', 'tx_tanf', 'cesn_tanf'],
+  ['tanf', 'co_tanf', 'il_tanf', 'nc_tanf', 'tx_tanf', 'cesn_tanf', 'wa_tanf'],
   ['wic', 'co_wic', 'il_wic', 'ma_wic', 'nc_wic', 'tx_wic', 'cesn_wic'],
-  ['section_8', 'co_section_8', 'ma_section_8', 'cesn_section_8'],
+  ['section_8', 'co_section_8', 'ma_section_8', 'cesn_section_8', 'wa_hcv'],
   ['aca', 'nc_aca'],
   ['co_andso', 'cesn_andso'],
   ['co_care', 'cesn_care'],
+  ['eitc', 'wa_eitc'],
+  ['nslp', 'wa_nslp'],
+  ['head_start', 'wa_head_start'],
 ];
 
 /**
