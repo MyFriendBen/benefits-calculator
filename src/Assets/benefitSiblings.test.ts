@@ -10,6 +10,7 @@ describe('getBenefitSiblings', () => {
       'nc_snap',
       'tx_snap',
       'cesn_snap',
+      'wa_snap',
     ]);
   });
 
