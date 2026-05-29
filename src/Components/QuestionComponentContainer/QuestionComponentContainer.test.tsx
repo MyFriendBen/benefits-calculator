@@ -111,7 +111,9 @@ describe('QuestionComponentContainer - Step Number Validation', () => {
       const { container } = renderWithRouter('3', ['zipcode', 'householdSize']);
       // Should render the component, not the redirect message
       expect(screen.queryByText('Redirected to Step 1')).not.toBeInTheDocument();
-      expect(container.querySelector('.benefits-form')).toBeInTheDocument();
+      const main = container.querySelector('.benefits-form');
+      expect(main).toBeInTheDocument();
+      expect(main).toHaveAttribute('data-step-id', 'zip-code');
     });
   });
 });

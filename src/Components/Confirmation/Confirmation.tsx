@@ -34,7 +34,7 @@ const Confirmation = () => {
   const totalNumberOfQuestions = useStepDirectory().length + STARTING_QUESTION_NUMBER;
 
   return (
-    <main className="benefits-form">
+    <main className="benefits-form" data-step-id="confirm-information">
       <QuestionHeader>
         <FormattedMessage id="confirmation.return-subheader" defaultMessage="Is all of your information correct?" />
       </QuestionHeader>

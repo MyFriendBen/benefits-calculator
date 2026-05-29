@@ -83,7 +83,7 @@ const SelectLanguagePage = () => {
   };
 
   return (
-    <main className="benefits-form">
+    <main className="benefits-form" data-step-id="language">
       <QuestionHeader>
         <FormattedMessage id="selectLanguage.header" defaultMessage="Before you begin..." />
       </QuestionHeader>
