@@ -23,8 +23,8 @@
  * and `formData.benefits` keys mirror `name_abbreviated` 1:1.
  */
 export const BENEFIT_SIBLING_GROUPS: ReadonlyArray<ReadonlyArray<string>> = [
-  ['ccap', 'il_ccap', 'nc_cccap'],
-  ['leap', 'nc_leap'],
+  ['ccap', 'il_ccap', 'nc_cccap', 'cccap'],
+  ['leap', 'nc_leap', 'cesn_leap'],
   ['oap', 'cesn_oap'],
   ['rtdlive', 'cesn_rtdlive'],
   ['snap', 'co_snap', 'il_snap', 'ma_snap', 'nc_snap', 'tx_snap', 'cesn_snap'],
