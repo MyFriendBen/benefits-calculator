@@ -103,7 +103,10 @@
 /* Two-column grid — left column narrower, right wider */
 .calculate-impact-page .calculate-impact-fields-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* minmax(0, 1fr) lets the columns shrink below their content's intrinsic width
+     (the default min-width: auto would let long labels/placeholders — e.g. the
+     longer Spanish strings — push the grid past the card edge). */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   column-gap: 1.5rem;
   row-gap: 0.5rem;
   margin-bottom: 1rem;
@@ -112,6 +115,8 @@
 .calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field {
   display: flex;
   flex-direction: column;
+  /* Allow the flex item to shrink so its contents (selects/inputs) don't force overflow. */
+  min-width: 0;
 }
 
 /* Push input to the bottom of the field so inputs align across columns regardless of helper text height */
@@ -131,6 +136,16 @@
   margin-top: auto;
   position: relative;
   margin-bottom: 0.75rem;
+}
+
+/* Truncate the selected value / placeholder inside the select so a long localized
+   string (e.g. Spanish "Seleccione el combustible para calefacción...") ellipsizes
+   instead of widening the column and overflowing the card. */
+.calculate-impact-page .calculate-impact-fields-grid .MuiSelect-select,
+.calculate-impact-page .calculate-impact-fields-grid .calculate-impact-select-placeholder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 767px) {
@@ -250,7 +265,9 @@
   color: #555;
   margin: 0 0 0.4rem;
   line-height: 1.4;
-  white-space: nowrap;
+  /* Must wrap: localized helper text (e.g. Spanish) is longer than the English
+     original and would overflow the card if forced onto a single line. */
+  overflow-wrap: break-word;
 }
 
 /* Radio options with descriptions */
