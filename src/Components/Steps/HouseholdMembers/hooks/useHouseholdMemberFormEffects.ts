@@ -92,11 +92,11 @@ export const useHouseholdMemberFormEffects = ({
     }
   }, [watchIsDisabled, isEnergyCalculator, getValues, setValue]);
 
-   // Page title
+  // Page title
   useEffect(() => {
     document.title = QUESTION_TITLES[questionName];
   }, [questionName]);
-  
+
   // Reset form when navigating between pages
   const prevPageRef = useRef(pageNumber);
   useEffect(() => {

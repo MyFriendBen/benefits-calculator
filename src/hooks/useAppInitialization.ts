@@ -18,7 +18,6 @@ export const useAppInitialization = (themeName: string) => {
   useUrlParametersInit();
   useScrollToTop();
 
-
   // Set default page title once on mount
   useEffect(() => {
     document.title = OTHER_PAGE_TITLES.default;
