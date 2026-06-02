@@ -5,6 +5,7 @@ import { usePageTracking } from './usePageTracking';
 import { useHttpsRedirect } from './useHttpsRedirect';
 import { useUrlParametersInit } from './useUrlParametersInit';
 import { useScrollToTop } from './useScrollToTop';
+import { OTHER_PAGE_TITLES } from '../Assets/pageTitleTags';
 
 // Mock all the individual hooks
 jest.mock('./useThemeValidation');
@@ -16,6 +17,7 @@ jest.mock('./useScrollToTop');
 describe('useAppInitialization', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    document.title = '';
   });
 
   it('should call all initialization hooks', () => {
@@ -26,6 +28,12 @@ describe('useAppInitialization', () => {
     expect(useHttpsRedirect).toHaveBeenCalled();
     expect(useUrlParametersInit).toHaveBeenCalled();
     expect(useScrollToTop).toHaveBeenCalled();
+  });
+
+  it('should set default page title', () => {
+    renderHook(() => useAppInitialization('default'));
+
+    expect(document.title).toBe(OTHER_PAGE_TITLES.default);
   });
 
   it('should pass themeName to useThemeValidation', () => {

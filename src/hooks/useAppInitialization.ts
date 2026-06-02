@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { OTHER_PAGE_TITLES } from '../Assets/pageTitleTags';
 import { useThemeValidation } from './useThemeValidation';
 import { usePageTracking } from './usePageTracking';
 import { useHttpsRedirect } from './useHttpsRedirect';
@@ -15,4 +17,10 @@ export const useAppInitialization = (themeName: string) => {
   useHttpsRedirect();
   useUrlParametersInit();
   useScrollToTop();
+
+
+  // Set default page title once on mount
+  useEffect(() => {
+    document.title = OTHER_PAGE_TITLES.default;
+  }, []);
 };

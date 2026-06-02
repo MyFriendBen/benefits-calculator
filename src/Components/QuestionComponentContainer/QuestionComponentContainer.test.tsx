@@ -16,6 +16,9 @@ jest.mock('../Steps/Expenses/Expenses', () => ({
   __esModule: true,
   default: () => <div data-testid="expenses-component">Expenses Step</div>,
 }));
+jest.mock('../Common/usePageTitle', () => ({
+  usePageTitle: jest.fn(),
+}));
 
 // Create a minimal mock context
 const createMockContext = (stepDirectory: string[] = []): Partial<WrapperContext> => ({

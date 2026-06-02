@@ -19,6 +19,8 @@ import {
 } from '@mui/material';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
+import { usePageTitle } from '../../../Common/usePageTitle';
+import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
 import {
   type CalculateImpactHouseholdType,
   type CalculateImpactUpgradeChoice,
@@ -153,6 +155,8 @@ export default function CalculateImpactPage() {
     `/${whiteLabel}/${uuid}/results/energy-rebates/hvac`,
     isAdminView,
   );
+
+  usePageTitle(OTHER_PAGE_TITLES.energyCalculatorCalculateImpact);
 
   const {
     control,

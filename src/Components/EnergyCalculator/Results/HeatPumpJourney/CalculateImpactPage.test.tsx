@@ -10,6 +10,10 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+jest.mock('../../../Common/usePageTitle', () => ({
+  usePageTitle: jest.fn(),
+}));
+
 jest.mock('../../../Common/TrackedOutboundLink', () => ({
   TrackedOutboundLink: ({ children, href }: { children: React.ReactNode; href: string }) => (
     <a href={href}>{children}</a>

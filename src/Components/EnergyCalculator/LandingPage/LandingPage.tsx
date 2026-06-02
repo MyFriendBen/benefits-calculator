@@ -1,13 +1,17 @@
 import { FormattedMessage } from 'react-intl';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
+import { OTHER_PAGE_TITLES } from '../../../Assets/pageTitleTags';
 import { ReactComponent as Apartment } from '../Icons/Apartment.svg';
 import { ReactComponent as Housing } from '../../../Assets/icons/General/residence.svg';
 import { CardActionArea, Card, Stack, CardContent, Box } from '@mui/material';
 import './LandingPage.css';
 import { useQueryString } from '../../QuestionComponents/questionHooks';
+import { usePageTitle } from '../../Common/usePageTitle';
 
 const LandingPage = () => {
+
+  usePageTitle(OTHER_PAGE_TITLES.energyCalculatorLandingPage, 'cesn');
 
   const homeownerQueryString = useQueryString({ path: null });
   const renterQueryString = useQueryString({ path: 'renter' });
