@@ -52,7 +52,12 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     has_il_bap: formData.benefits.il_bap ?? null,
     has_il_hbwd: formData.benefits.il_hbwd ?? null,
     has_csfp: formData.benefits.csfp ?? null,
-    has_ccap: formData.benefits.ccap || formData.benefits.il_ccap || formData.benefits.nc_cccap || formData.benefits.cccap || null,
+    has_ccap:
+      formData.benefits.ccap ||
+      formData.benefits.il_ccap ||
+      formData.benefits.nc_cccap ||
+      formData.benefits.cccap ||
+      null,
     has_erc: null,
     has_lifeline: formData.benefits.lifeline ?? null,
     has_leap: formData.benefits.leap || formData.benefits.nc_leap || formData.benefits.cesn_leap || null,
@@ -63,20 +68,62 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     has_pell_grant: formData.benefits.pell ?? null,
     has_nfp: formData.benefits.nfp ?? null,
     has_rtdlive: formData.benefits.rtdlive || formData.benefits.cesn_rtdlive || null,
-    has_snap: formData.benefits.snap || formData.benefits.co_snap || formData.benefits.il_snap || formData.benefits.ma_snap || formData.benefits.nc_snap || formData.benefits.tx_snap || formData.benefits.cesn_snap || formData.benefits.wa_snap || null,
+    has_snap:
+      formData.benefits.snap ||
+      formData.benefits.co_snap ||
+      formData.benefits.il_snap ||
+      formData.benefits.ma_snap ||
+      formData.benefits.nc_snap ||
+      formData.benefits.tx_snap ||
+      formData.benefits.cesn_snap ||
+      formData.benefits.wa_snap ||
+      null,
     has_sunbucks: formData.benefits.sunbucks ?? null,
-    has_ssdi: formData.benefits.ssdi || formData.benefits.tx_ssdi || formData.benefits.cesn_ssdi || formData.benefits.wa_ssdi || null,
-    has_ssi: formData.benefits.ssi || formData.benefits.tx_ssi || formData.benefits.cesn_ssi || formData.benefits.wa_ssi || null,
+    has_ssdi:
+      formData.benefits.ssdi ||
+      formData.benefits.tx_ssdi ||
+      formData.benefits.cesn_ssdi ||
+      formData.benefits.wa_ssdi ||
+      null,
+    has_ssi:
+      formData.benefits.ssi ||
+      formData.benefits.tx_ssi ||
+      formData.benefits.cesn_ssi ||
+      formData.benefits.wa_ssi ||
+      null,
     has_cowap: formData.benefits.cowap || formData.benefits.cesn_cowap || null,
     has_ubp: formData.benefits.ubp ?? null,
-    has_tanf: formData.benefits.tanf || formData.benefits.co_tanf || formData.benefits.il_tanf || formData.benefits.nc_tanf || formData.benefits.tx_tanf || formData.benefits.cesn_tanf || formData.benefits.wa_tanf || null,
-    has_wic: formData.benefits.wic || formData.benefits.co_wic || formData.benefits.il_wic || formData.benefits.ma_wic || formData.benefits.nc_wic || formData.benefits.tx_wic || formData.benefits.cesn_wic || formData.benefits.wa_wic || null,
+    has_tanf:
+      formData.benefits.tanf ||
+      formData.benefits.co_tanf ||
+      formData.benefits.il_tanf ||
+      formData.benefits.nc_tanf ||
+      formData.benefits.tx_tanf ||
+      formData.benefits.cesn_tanf ||
+      formData.benefits.wa_tanf ||
+      null,
+    has_wic:
+      formData.benefits.wic ||
+      formData.benefits.co_wic ||
+      formData.benefits.il_wic ||
+      formData.benefits.ma_wic ||
+      formData.benefits.nc_wic ||
+      formData.benefits.tx_wic ||
+      formData.benefits.cesn_wic ||
+      formData.benefits.wa_wic ||
+      null,
     has_upk: formData.benefits.upk ?? null,
     has_coctc: formData.benefits.coctc ?? null,
     has_fatc: formData.benefits.fatc ?? null,
-    has_section_8: formData.benefits.section_8 || formData.benefits.co_section_8 || formData.benefits.ma_section_8 || formData.benefits.cesn_section_8 || formData.benefits.wa_hcv || null,
+    has_section_8:
+      formData.benefits.section_8 ||
+      formData.benefits.co_section_8 ||
+      formData.benefits.ma_section_8 ||
+      formData.benefits.cesn_section_8 ||
+      formData.benefits.wa_hcv ||
+      null,
     has_chp: formData.benefits.chp ?? null,
-    has_medicaid: formData.benefits.medicaid ?? null,
+    has_medicaid: formData.benefits.medicaid || formData.benefits.cesn_medicaid || null,
     has_nc_medicare_savings: formData.benefits.nc_medicare_savings ?? null,
     has_nc_lieap: formData.benefits.nc_lieap ?? null,
     has_ncwap: formData.benefits.ncwap ?? null,

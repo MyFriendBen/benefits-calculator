@@ -18,8 +18,12 @@ describe('getBenefitSiblings', () => {
     expect(getBenefitSiblings('snap')).toEqual(getBenefitSiblings('cesn_snap'));
   });
 
+  it('groups medicaid with its CESN variant', () => {
+    expect(getBenefitSiblings('medicaid')).toEqual(['medicaid', 'cesn_medicaid']);
+    expect(getBenefitSiblings('cesn_medicaid')).toEqual(getBenefitSiblings('medicaid'));
+  });
+
   it('returns the single-key fallback for keys not in any group', () => {
-    expect(getBenefitSiblings('medicaid')).toEqual(['medicaid']);
     expect(getBenefitSiblings('lifeline')).toEqual(['lifeline']);
   });
 

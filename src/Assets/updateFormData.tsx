@@ -102,6 +102,7 @@ export function useUpdateFormData() {
         wa_hcv: response.has_section_8 ?? false,
         chp: response.has_chp ?? false,
         medicaid: response.has_medicaid ?? false,
+        cesn_medicaid: response.has_medicaid ?? false,
         ccap: response.has_ccap ?? false,
         il_ccap: response.has_ccap ?? false,
         nc_cccap: response.has_ccap ?? false,
@@ -259,7 +260,7 @@ export function useUpdateFormData() {
       updatedFormData.expenses.push({
         expenseSourceName: expense.type ?? '',
         expenseAmount: Math.round(parseFloat(String(expense.amount ?? 0)) || 0),
-        expenseFrequency: (expense.frequency === 'yearly' ? 'yearly' : 'monthly'),
+        expenseFrequency: expense.frequency === 'yearly' ? 'yearly' : 'monthly',
       });
     }
 

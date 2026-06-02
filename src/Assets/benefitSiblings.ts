@@ -37,6 +37,7 @@ export const BENEFIT_SIBLING_GROUPS: ReadonlyArray<ReadonlyArray<string>> = [
   ['aca', 'nc_aca'],
   ['co_andso', 'cesn_andso'],
   ['co_care', 'cesn_care'],
+  ['medicaid', 'cesn_medicaid'],
   ['eitc', 'wa_eitc'],
   ['nslp', 'wa_nslp'],
   ['head_start', 'wa_head_start'],
