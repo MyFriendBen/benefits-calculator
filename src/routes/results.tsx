@@ -1,6 +1,7 @@
 import { Navigate, RouteObject } from 'react-router-dom';
 import Results from '../Components/Results/Results';
 import ConnectNowPage from '../Components/EnergyCalculator/Results/HeatPumpJourney/ConnectNowPage';
+import CalculateImpactPage from '../Components/EnergyCalculator/Results/HeatPumpJourney/CalculateImpactPage';
 
 /**
  * Results page routes - terminal routes displaying calculation results.
@@ -12,6 +13,10 @@ const resultsRoutes: RouteObject[] = [
   {
     path: 'results/energy-rebates/waterHeater/connect-now',
     element: <ConnectNowPage />,
+  },
+  {
+    path: 'results/energy-rebates/waterHeater/calculate-impact',
+    element: <CalculateImpactPage />,
   },
   {
     path: 'results/energy-rebates/:energyCalculatorRebateType',
