@@ -1,5 +1,7 @@
 import type { CalculateImpactRemAddressQuery, RemImpactApiResponse } from './remCalculateImpactTypes';
 
+const domain = process.env.REACT_APP_DOMAIN_URL;
+
 export async function fetchRemImpact(
   whiteLabel: string,
   query: CalculateImpactRemAddressQuery,
@@ -13,7 +15,7 @@ export async function fetchRemImpact(
     params.append('water_heater_fuel', query.water_heater_fuel);
   }
 
-  const res = await fetch(`/api/screener-options/${whiteLabel}/rem-impact/?${params.toString()}`);
+  const res = await fetch(`${domain}/api/screener-options/${whiteLabel}/rem-impact/?${params.toString()}`);
 
   if (!res.ok) {
     throw new Error(`REM API error: ${res.status}`);

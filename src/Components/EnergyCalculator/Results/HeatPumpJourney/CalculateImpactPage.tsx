@@ -131,23 +131,33 @@ const UPGRADE_CHOICE_VALUES: [CalculateImpactUpgradeChoice, ...CalculateImpactUp
   'heat_pump_water_heater',
 ];
 
-const calculateImpactSchema = z.object({
-  householdType: z.enum(HOUSEHOLD_TYPE_VALUES, {
-    required_error: 'Please select a household type.',
-  }),
-  address: z
-    .string()
-    .min(1, 'Please enter a valid street address.')
-    .transform((val) => val.trim())
-    .refine((val) => val.length > 0, { message: 'Please enter a valid street address.' }),
-  heatingFuel: z.enum(FUEL_TYPE_VALUES, {
-    required_error: 'Please select a heating fuel.',
-  }),
-  waterHeatingFuel: z.enum(FUEL_TYPE_VALUES).optional(),
-  upgradeChoice: z.enum(UPGRADE_CHOICE_VALUES, {
-    required_error: 'Please select an upgrade option.',
-  }),
-});
+const calculateImpactSchema = z
+  .object({
+    householdType: z.enum(HOUSEHOLD_TYPE_VALUES, {
+      required_error: 'Please select a household type.',
+    }),
+    address: z
+      .string()
+      .min(1, 'Please enter a valid street address.')
+      .transform((val) => val.trim())
+      .refine((val) => val.length > 0, { message: 'Please enter a valid street address.' }),
+    heatingFuel: z.enum(FUEL_TYPE_VALUES, {
+      required_error: 'Please select a heating fuel.',
+    }),
+    waterHeatingFuel: z.enum(FUEL_TYPE_VALUES).optional(),
+    upgradeChoice: z.enum(UPGRADE_CHOICE_VALUES, {
+      required_error: 'Please select an upgrade option.',
+    }),
+  })
+  .superRefine((data, ctx) => {
+    if (data.upgradeChoice === 'heat_pump_water_heater' && !data.waterHeatingFuel) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['waterHeatingFuel'],
+        message: 'Please select a water heating fuel for this upgrade.',
+      });
+    }
+  });
 
 type CalculateImpactFormData = z.infer<typeof calculateImpactSchema>;
 
