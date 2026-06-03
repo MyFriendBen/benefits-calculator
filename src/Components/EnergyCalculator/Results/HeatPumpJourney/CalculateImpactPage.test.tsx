@@ -194,6 +194,28 @@ describe('CalculateImpactPage', () => {
 
       expect(screen.queryByText(/please select a water heating/i)).not.toBeInTheDocument();
     });
+
+    it('shows error for water heating fuel when heat pump water heater is selected without water heating fuel', async () => {
+      renderPage();
+
+      const hpwhRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
+      fireEvent.click(hpwhRadio);
+
+      const householdSelect = screen.getByRole('button', { name: /household type/i });
+      await selectOption(householdSelect, 'House');
+
+      const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
+      fireEvent.change(addressInput, { target: { value: '789 Pine St, Denver, CO 80202' } });
+
+      const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
+      await selectOption(fuelSelect, 'Natural gas');
+
+      fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText('Please select a water heating fuel for this upgrade.')).toBeInTheDocument();
+      });
+    });
   });
 
   describe('form interaction', () => {

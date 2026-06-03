@@ -271,11 +271,19 @@ export default function CalculateImpactResults({
             />
           </h3>
           <p className="calculate-impact-impact-description">
-            <FormattedMessage
-              id="energyCalculator.calculateImpact.results.billImpact.description"
-              defaultMessage="Our modeling shows that homes like yours will tend to save between {low} and {high} a year on their energy bills, with most homes saving at least {mostLikely}."
-              values={{ low: billRangeLow, high: billRangeHigh, mostLikely: billMostLikely }}
-            />
+            {billMedian <= 0 ? (
+              <FormattedMessage
+                id="energyCalculator.calculateImpact.results.billImpact.description.save"
+                defaultMessage="Our modeling shows that homes like yours will tend to save between {low} and {high} a year on their energy bills, with most homes saving at least {mostLikely}."
+                values={{ low: billRangeLow, high: billRangeHigh, mostLikely: billMostLikely }}
+              />
+            ) : (
+              <FormattedMessage
+                id="energyCalculator.calculateImpact.results.billImpact.description.increase"
+                defaultMessage="Our modeling shows that homes like yours will tend to see energy bills increase between {low} and {high} a year, with most homes seeing increases of at least {mostLikely}."
+                values={{ low: billRangeLow, high: billRangeHigh, mostLikely: billMostLikely }}
+              />
+            )}
           </p>
           <ImpactRangeBar
             p20={billP20}
@@ -295,11 +303,19 @@ export default function CalculateImpactResults({
             />
           </h3>
           <p className="calculate-impact-impact-description">
-            <FormattedMessage
-              id="energyCalculator.calculateImpact.results.emissionsImpact.description"
-              defaultMessage="Our modeling shows that homes like yours will tend to have annual emissions reductions between {low} and {high} lb CO₂e, with most homes reducing emissions by at least {mostLikely} lb."
-              values={{ low: emRangeLow, high: emRangeHigh, mostLikely: emMostLikely }}
-            />
+            {emMedian <= 0 ? (
+              <FormattedMessage
+                id="energyCalculator.calculateImpact.results.emissionsImpact.description.reduction"
+                defaultMessage="Our modeling shows that homes like yours will tend to have annual emissions reductions between {low} and {high} lb CO₂e, with most homes reducing emissions by at least {mostLikely} lb."
+                values={{ low: emRangeLow, high: emRangeHigh, mostLikely: emMostLikely }}
+              />
+            ) : (
+              <FormattedMessage
+                id="energyCalculator.calculateImpact.results.emissionsImpact.description.increase"
+                defaultMessage="Our modeling shows that homes like yours will tend to see annual emissions increases between {low} and {high} lb CO₂e, with most homes seeing increases of at least {mostLikely} lb."
+                values={{ low: emRangeLow, high: emRangeHigh, mostLikely: emMostLikely }}
+              />
+            )}
           </p>
           <ImpactRangeBar
             p20={emP20}

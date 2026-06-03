@@ -202,6 +202,7 @@ export default function CalculateImpactPage() {
 
   const onSubmit = (data: CalculateImpactFormData) => {
     if (!whiteLabel) return;
+    if (submitState.status === 'loading') return;
     const payload = buildCalculateImpactPayload({
       upgradeChoice: data.upgradeChoice,
       address: data.address,
@@ -639,7 +640,7 @@ export default function CalculateImpactPage() {
             )}
           </FormControl>
 
-          <Button type="submit" variant="contained" color="primary" size="medium" className="calculate-impact-submit">
+          <Button type="submit" variant="contained" color="primary" size="medium" className="calculate-impact-submit" disabled={submitState.status === 'loading'} aria-busy={submitState.status === 'loading'}>
             <FormattedMessage id="energyCalculator.calculateImpact.submit" defaultMessage="Calculate impact" />
           </Button>
         </section>
