@@ -307,6 +307,239 @@
   margin-top: 1.25rem;
 }
 
+/* ── "Coming soon" badge on disabled upgrade options ── */
+.calculate-impact-page .calculate-impact-coming-soon {
+  font-size: 0.72rem;
+  font-weight: 400;
+  font-style: italic;
+  color: #777;
+  margin-left: 0.5rem;
+}
+
+.calculate-impact-page .calculate-impact-radio-option[data-disabled='true'] {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ── Loading / error states ── */
+.calculate-impact-page .calculate-impact-loading {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+
+.calculate-impact-page .calculate-impact-error {
+  margin-bottom: 1rem;
+}
+
+/* ── Results view ── */
+.calculate-impact-results {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Summary card header row (title + pencil icon) */
+.calculate-impact-summary-card .calculate-impact-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.calculate-impact-summary-card .calculate-impact-edit-btn {
+  color: var(--secondary-color, #001970);
+}
+
+/* Summary field list */
+.calculate-impact-summary-fields {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.calculate-impact-summary-field {
+  display: flex;
+  gap: 0.35rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #333;
+}
+
+.calculate-impact-summary-field dt {
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.calculate-impact-summary-field dt::after {
+  content: ':';
+}
+
+.calculate-impact-summary-field dd {
+  margin: 0;
+}
+
+/* Selected upgrade row */
+.calculate-impact-selected-upgrade {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.calculate-impact-upgrade-value {
+  background-color: #f0f2f5;
+  border-radius: 0.375rem;
+  padding: 0.6rem 0.9rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: #333;
+}
+
+/* Bill + emissions impact card subsections */
+.calculate-impact-impact-section {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #d6d8dc;
+}
+
+.calculate-impact-impact-section:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.calculate-impact-impact-title {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 0.4rem;
+}
+
+.calculate-impact-impact-description {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.55;
+  margin: 0 0 1rem;
+}
+
+/* ── Range bar ── */
+.impact-range-bar {
+  margin: 0.5rem 0 1rem;
+}
+
+.impact-range-bar__median-wrapper {
+  position: relative;
+  height: 2.75rem;
+  margin-bottom: 0.1rem;
+}
+
+.impact-range-bar__median-float {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.impact-range-bar__median-value {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111;
+  background: #e8ecf5;
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.4rem;
+  line-height: 1.4;
+}
+
+.impact-range-bar__median-caret {
+  font-size: 0.7rem;
+  color: #444;
+  line-height: 1;
+  margin-top: 0.1rem;
+}
+
+.impact-range-bar__track {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  background: #d9dde6;
+  overflow: hidden;
+}
+
+.impact-range-bar__fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+}
+
+.impact-range-bar__fill--savings {
+  background-color: #388e3c;
+}
+
+.impact-range-bar__fill--increase {
+  background-color: #d32f2f;
+}
+
+.impact-range-bar__end-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.3rem;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+}
+
+.impact-range-bar__label--savings {
+  color: #2e7d32;
+}
+
+.impact-range-bar__label--increase {
+  color: #c62828;
+}
+
+/* ── EPA equivalencies ── */
+.calculate-impact-epa-section {
+  margin-top: 1rem;
+}
+
+.calculate-impact-epa-intro {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: #555;
+  margin: 0 0 0.5rem;
+}
+
+.calculate-impact-epa-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.calculate-impact-epa-chip.MuiChip-root {
+  background-color: #e0e8e0;
+  color: #1b5e20;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+.calculate-impact-epa-chip .MuiChip-icon {
+  color: #2e7d32;
+}
+
+.calculate-impact-epa-source {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: #777;
+  margin: 0;
+}
+
 /* Form inputs sit on white inside the grey card */
 .calculate-impact-page .MuiOutlinedInput-root {
   background-color: #fff;
