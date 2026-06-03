@@ -24,6 +24,16 @@ jest.mock('../../Icons/Coin.svg', () => ({
   ReactComponent: () => <svg data-testid="coin-icon" />,
 }));
 
+jest.mock('../../../Config/configHook', () => ({
+  useFeatureFlag: jest.fn(),
+}));
+
+// Plain function (not jest.fn) so clearAllMocks() doesn't reset it.
+// Stays in loading state permanently — these tests only verify no validation errors appear.
+jest.mock('./fetchRemImpact', () => ({
+  fetchRemImpact: () => new Promise(() => {}),
+}));
+
 const renderPage = (route = '/cesn/test-uuid/results/energy-rebates/waterHeater/calculate-impact') =>
   render(
     <IntlProvider locale="en" defaultLocale="en">
@@ -45,6 +55,9 @@ const selectOption = async (selectElement: HTMLElement, optionText: string) => {
 describe('CalculateImpactPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Re-apply after clearAllMocks resets the return value. The flag must be true
+    // for these tests — they exercise the form, not the flag-off code path.
+    (jest.requireMock('../../../Config/configHook').useFeatureFlag as jest.Mock).mockReturnValue(true);
   });
 
   describe('rendering', () => {
@@ -207,9 +220,10 @@ describe('CalculateImpactPage', () => {
 
     it('allows selecting an upgrade option via radio button', () => {
       renderPage();
-      const heatPumpRadio = screen.getByRole('radio', { name: /^heat pump$/i });
-      fireEvent.click(heatPumpRadio);
-      expect(heatPumpRadio).toBeChecked();
+      // Only "Heat pump water heater" is enabled in Step 3; other options are "Coming soon".
+      const hpwhRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
+      fireEvent.click(hpwhRadio);
+      expect(hpwhRadio).toBeChecked();
     });
   });
 
@@ -226,7 +240,7 @@ describe('CalculateImpactPage', () => {
       const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
       await selectOption(fuelSelect, 'Natural gas');
 
-      const heatPumpRadio = screen.getByRole('radio', { name: /^heat pump$/i });
+      const heatPumpRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
       fireEvent.click(heatPumpRadio);
 
       fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));

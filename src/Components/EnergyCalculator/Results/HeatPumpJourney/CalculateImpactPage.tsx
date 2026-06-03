@@ -171,10 +171,6 @@ export default function CalculateImpactPage() {
     isAdminView,
   );
 
-  usePageTitle(OTHER_PAGE_TITLES.energyCalculatorCalculateImpact);
-
-  if (!showCalculateImpact) return null;
-
   const {
     control,
     handleSubmit,
@@ -189,6 +185,10 @@ export default function CalculateImpactPage() {
       upgradeChoice: undefined,
     },
   });
+
+  usePageTitle(OTHER_PAGE_TITLES.energyCalculatorCalculateImpact);
+
+  if (!showCalculateImpact) return null;
 
   const onSubmit = (data: CalculateImpactFormData) => {
     if (!whiteLabel) return;
