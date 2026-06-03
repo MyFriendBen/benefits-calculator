@@ -194,6 +194,7 @@ export type ApiFormData = {
   has_ssdi: boolean | null;
   has_cowap: boolean | null;
   has_ncwap: boolean | null;
+  has_wap: boolean | null;
   has_ubp: boolean | null;
   has_pell_grant: boolean | null;
   has_nfp: boolean | null;
