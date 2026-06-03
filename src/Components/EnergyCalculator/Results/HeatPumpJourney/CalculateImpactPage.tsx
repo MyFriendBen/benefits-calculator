@@ -529,7 +529,7 @@ export default function CalculateImpactPage() {
                   defaultMessage="Select your water heating fuel to see the impact of a water heater upgrade."
                 />
               </p>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!errors.waterHeatingFuel}>
                 <Controller
                   name="waterHeatingFuel"
                   control={control}
@@ -575,6 +575,9 @@ export default function CalculateImpactPage() {
                     </Select>
                   )}
                 />
+                {errors.waterHeatingFuel && (
+                  <FormHelperText>{errors.waterHeatingFuel.message}</FormHelperText>
+                )}
               </FormControl>
             </div>
           </div>
