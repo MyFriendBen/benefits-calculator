@@ -73,7 +73,7 @@ export default function ConnectNowPage() {
         <Typography variant="body1" className="connect-now-intro energy-calculator-body-text" sx={{ mt: 1 }}>
           <FormattedMessage
             id="energyCalculator.connectNow.intro"
-            defaultMessage="Use the tools below to search for installers, then review the checklist for what to look for in a qualified HVAC contractor for your heat pump project."
+            defaultMessage="Based on what you've shared about your location and utility provider(s), we recommend starting your search with Power Ahead Colorado. This tool, from the Denver Regional Council of Governments, can help you find and compare contractors by Google reviews, services offered, service area, and more."
           />
         </Typography>
       </header>
@@ -89,6 +89,12 @@ export default function ConnectNowPage() {
           <FormattedMessage id="energyCalculator.connectNow.cta.findInstaller" defaultMessage="Find an installer" />
           <OpenInNewIcon className="connect-now-cta-icon" aria-hidden="true" />
         </TrackedOutboundLink>
+        <Typography variant="body2" className="connect-now-cta-interstitial">
+          <FormattedMessage
+            id="energyCalculator.connectNow.cta.interstitial"
+            defaultMessage="If you are unable to find someone in your area, try an expanded search."
+          />
+        </Typography>
         <TrackedOutboundLink
           href={EXPAND_SEARCH_URL}
           action="heat_pump_connect_now_expand_search"
@@ -110,7 +116,7 @@ export default function ConnectNowPage() {
         >
           <FormattedMessage
             id="energyCalculator.connectNow.pdfSectionHeading"
-            defaultMessage="How to find a good HVAC contractor"
+            defaultMessage="How to find a good HVAC contractor, from our friends at Electrify Now."
           />
         </Typography>
         <EmbeddedDocumentFrame src={CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL} title={pdfIframeTitle} className="connect-now-pdf-frame" />

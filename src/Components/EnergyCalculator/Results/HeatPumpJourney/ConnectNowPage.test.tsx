@@ -37,11 +37,25 @@ describe('ConnectNowPage', () => {
     expect(expandSearch).toHaveAttribute('target', '_blank');
   });
 
+  it('renders the interstitial text between the two CTAs', () => {
+    renderConnectNow();
+    expect(
+      screen.getByText(/if you are unable to find someone in your area/i),
+    ).toBeInTheDocument();
+  });
+
   it('embeds the contractor guide PDF with an accessible iframe title', () => {
     renderConnectNow();
     expect(screen.getByTitle(/how to find a good hvac contractor \(pdf\)/i)).toHaveAttribute(
       'src',
       CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL,
     );
+  });
+
+  it('renders the PDF section heading with Electrify Now attribution', () => {
+    renderConnectNow();
+    expect(
+      screen.getByRole('heading', { level: 2, name: /electrify now/i }),
+    ).toBeInTheDocument();
   });
 });

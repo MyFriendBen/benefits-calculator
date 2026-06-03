@@ -17,12 +17,9 @@
   margin-bottom: 1.75rem;
 }
 
-@media (min-width: 600px) {
-  .connect-now-page .connect-now-ctas {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-  }
+.connect-now-page .connect-now-cta-interstitial {
+  color: var(--text-color, #333);
+  margin: 0.25rem 0;
 }
 
 .connect-now-page .connect-now-cta {
