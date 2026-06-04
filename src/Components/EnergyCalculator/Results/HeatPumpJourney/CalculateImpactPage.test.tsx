@@ -28,11 +28,24 @@ jest.mock('../../../Config/configHook', () => ({
   useFeatureFlag: jest.fn(),
 }));
 
-// Plain function (not jest.fn) so clearAllMocks() doesn't reset it.
-// Stays in loading state permanently — these tests only verify no validation errors appear.
 jest.mock('./fetchRemImpact', () => ({
-  fetchRemImpact: () => new Promise(() => {}),
+  fetchRemImpact: jest.fn(),
 }));
+
+const MOCK_RESULT = {
+  bill_delta: {
+    mean: { value: -19.76, unit: '$' },
+    median: { value: -21.91, unit: '$' },
+    percentile_20: { value: -60.52, unit: '$' },
+    percentile_80: { value: 20.50, unit: '$' },
+  },
+  emissions_delta: {
+    mean: { value: -1758.0, unit: 'lbCO2e' },
+    median: { value: -1611.7, unit: 'lbCO2e' },
+    percentile_20: { value: -2558.6, unit: 'lbCO2e' },
+    percentile_80: { value: -950.0, unit: 'lbCO2e' },
+  },
+};
 
 const renderPage = (route = '/cesn/test-uuid/results/energy-rebates/waterHeater/calculate-impact') =>
   render(
@@ -55,9 +68,9 @@ const selectOption = async (selectElement: HTMLElement, optionText: string) => {
 describe('CalculateImpactPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Re-apply after clearAllMocks resets the return value. The flag must be true
-    // for these tests — they exercise the form, not the flag-off code path.
     (jest.requireMock('../../../Config/configHook').useFeatureFlag as jest.Mock).mockReturnValue(true);
+    // Default: stays loading — most tests only exercise form state, not API results.
+    (jest.requireMock('./fetchRemImpact').fetchRemImpact as jest.Mock).mockReturnValue(new Promise(() => {}));
   });
 
   describe('rendering', () => {
@@ -250,7 +263,7 @@ describe('CalculateImpactPage', () => {
   });
 
   describe('successful form submission', () => {
-    const fillAndSubmit = async () => {
+    const fillValidForm = async () => {
       renderPage();
 
       const householdSelect = screen.getByRole('button', { name: /household type/i });
@@ -262,23 +275,54 @@ describe('CalculateImpactPage', () => {
       const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
       await selectOption(fuelSelect, 'Natural gas');
 
-      const heatPumpRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
-      fireEvent.click(heatPumpRadio);
+      // Water heating fuel is required when HPWH is selected (superRefine validation)
+      const waterFuelSelect = screen.getByRole('button', { name: /water heating type/i });
+      await selectOption(waterFuelSelect, 'Natural gas');
 
-      fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+      const hpwhRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
+      fireEvent.click(hpwhRadio);
     };
 
     it('does not show validation errors on valid submission', async () => {
-      await fillAndSubmit();
+      await fillValidForm();
+      fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
 
       await waitFor(() => {
         expect(screen.queryByText(/please select a household type/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/please enter a valid street address/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/please select a heating fuel/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/please select an upgrade option/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/please select a water heating fuel/i)).not.toBeInTheDocument();
       });
     });
 
+    it('renders the results card after a successful API response', async () => {
+      (jest.requireMock('./fetchRemImpact').fetchRemImpact as jest.Mock).mockResolvedValue(MOCK_RESULT);
+      await fillValidForm();
+      fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/bill and emissions impact/i)).toBeInTheDocument();
+      });
+      expect(screen.getByRole('heading', { name: /energy bill impact/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /^emissions impact$/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /your household info/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /selected upgrade/i })).toBeInTheDocument();
+    });
+
+    it('returns to the form when the edit button is clicked', async () => {
+      (jest.requireMock('./fetchRemImpact').fetchRemImpact as jest.Mock).mockResolvedValue(MOCK_RESULT);
+      await fillValidForm();
+      fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/bill and emissions impact/i)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /edit household info/i }));
+
+      expect(screen.getByRole('button', { name: /calculate impact/i })).toBeInTheDocument();
+    });
   });
 
   describe('accessibility', () => {

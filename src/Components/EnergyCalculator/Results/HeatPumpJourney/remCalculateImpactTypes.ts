@@ -23,6 +23,30 @@ export interface RemImpactApiResponse {
   emissions_delta: RemImpactRange;  // annual CO₂e delta in lbCO2e; negative = reduction
 }
 
+const RANGE_KEYS: ReadonlyArray<keyof RemImpactRange> = ['mean', 'median', 'percentile_20', 'percentile_80'];
+
+/**
+ * Guards against a partial RA response (e.g. a missing percentile key) that
+ * would otherwise cause a TypeError in CalculateImpactResults at render time —
+ * after the promise has already resolved and past the .catch() that shows the
+ * error Alert. Call this before setSubmitState({ status: 'success' }).
+ */
+export function isValidRemImpactApiResponse(data: unknown): data is RemImpactApiResponse {
+  if (!data || typeof data !== 'object') return false;
+  const d = data as Record<string, unknown>;
+  for (const delta of ['bill_delta', 'emissions_delta'] as const) {
+    const range = d[delta];
+    if (!range || typeof range !== 'object') return false;
+    const r = range as Record<string, unknown>;
+    for (const key of RANGE_KEYS) {
+      const stat = r[key];
+      if (!stat || typeof stat !== 'object') return false;
+      if (typeof (stat as Record<string, unknown>)['value'] !== 'number') return false;
+    }
+  }
+  return true;
+}
+
 // ─── Form values (shared between form and results summary) ───────────────────
 
 export interface CalculateImpactFormValues {

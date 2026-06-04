@@ -29,6 +29,7 @@ import {
   type RemFuelType,
   type RemImpactApiResponse,
   type CalculateImpactFormValues,
+  isValidRemImpactApiResponse,
 } from './remCalculateImpactTypes';
 import { fetchRemImpact } from './fetchRemImpact';
 import { buildCalculateImpactPayload } from './remCalculateImpactTypes';
@@ -212,9 +213,13 @@ export default function CalculateImpactPage() {
     });
     setSubmitState({ status: 'loading' });
     fetchRemImpact(whiteLabel, payload.remAddressQuery)
-      .then((result) =>
-        setSubmitState({ status: 'success', result, formValues: data }),
-      )
+      .then((result) => {
+        if (!isValidRemImpactApiResponse(result)) {
+          setSubmitState({ status: 'error', message: 'Unexpected response from Rewiring America.' });
+          return;
+        }
+        setSubmitState({ status: 'success', result, formValues: data });
+      })
       .catch((err: Error) =>
         setSubmitState({ status: 'error', message: err.message }),
       );
