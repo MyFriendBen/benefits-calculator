@@ -4,22 +4,124 @@
   padding: 0 1rem 2rem;
 }
 
+/* Back button row — reuses .results-back-save-btn-container / .results-back-save-buttons */
+.connect-now-page .connect-now-back-row {
+  padding: 0 0 1.5rem;
+  margin-bottom: 0;
+}
+
+/* Header: wrench icon left, text stacked right */
 .connect-now-page .connect-now-header {
   margin-top: 0.5rem;
   margin-bottom: 1.25rem;
+  margin-left: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.connect-now-page .connect-now-header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.connect-now-page .connect-now-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: #e84444;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.connect-now-page .connect-now-icon,
+.connect-now-page .connect-now-icon * {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+.connect-now-page .connect-now-title-text {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--secondary-color, #001970);
+}
+
+.connect-now-page .connect-now-separator {
+  border: none;
+  border-top: 2px solid var(--secondary-color, #001970);
+  margin: 0.2rem 0;
+  width: 18rem;
+}
+
+.connect-now-page .connect-now-subtitle {
+  font-family: var(--font-body);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--secondary-color, #001970);
+  margin: 0 0 0.75rem;
+}
+
+.connect-now-page .connect-now-intro {
+  font-family: var(--font-body);
+  text-align: left;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #333;
+}
+
+@media (max-width: 767px) {
+  .connect-now-page .connect-now-header {
+    margin-left: 0.5rem;
+  }
+
+  .connect-now-page .connect-now-separator {
+    width: 100%;
+    max-width: 18rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .connect-now-page .connect-now-header {
+    margin-left: 0;
+    gap: 0.4rem;
+  }
+
+  .connect-now-page .connect-now-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .connect-now-page .connect-now-title-text {
+    font-size: 0.9rem;
+  }
+
+  .connect-now-page .connect-now-subtitle {
+    font-size: 1.4rem;
+  }
+
+  .connect-now-page .connect-now-separator {
+    width: 100%;
+    max-width: 12rem;
+  }
+
+  .connect-now-page .connect-now-intro {
+    font-size: 0.9rem;
+  }
 }
 
 .connect-now-page .connect-now-ctas {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: flex-start;
   gap: 0.75rem;
   margin-bottom: 1.75rem;
 }
 
 .connect-now-page .connect-now-cta-interstitial {
+  font-family: var(--font-body);
   color: var(--text-color, #333);
-  margin: 0.25rem 0;
+  margin: 1rem 0 0.25rem;
 }
 
 .connect-now-page .connect-now-cta {
@@ -27,9 +129,8 @@
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  flex: 1 1 auto;
   min-height: 2.5rem;
-  padding: 0 1.25rem;
+  padding: 0 1.5rem;
   font-size: 0.9rem;
   line-height: 1.2;
   font-family: 'Roboto Slab', serif;
@@ -56,6 +157,14 @@
 
 .connect-now-page .connect-now-pdf-section {
   margin-top: 0.5rem;
+}
+
+.connect-now-page .connect-now-pdf-heading {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 1rem;
 }
 
 .connect-now-page .connect-now-pdf-frame {

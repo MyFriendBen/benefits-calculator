@@ -1,7 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import ConnectNowPage, { CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL } from './ConnectNowPage';
+import ConnectNowPage, {
+  CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL,
+  CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES,
+} from './ConnectNowPage';
 
 function renderConnectNow() {
   return render(
@@ -21,9 +24,8 @@ function renderConnectNow() {
 describe('ConnectNowPage', () => {
   it('renders heading and contractor CTAs with correct outbound URLs', () => {
     renderConnectNow();
-    expect(
-      screen.getByRole('heading', { level: 1, name: /find a contractor \/ contractor checklist/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: /contractor checklist/i })).toBeInTheDocument();
+    expect(screen.getByText(/find a contractor/i)).toBeInTheDocument();
 
     const findInstaller = screen.getByRole('link', { name: /find an installer/i });
     expect(findInstaller).toHaveAttribute(
@@ -37,6 +39,13 @@ describe('ConnectNowPage', () => {
     expect(expandSearch).toHaveAttribute('target', '_blank');
   });
 
+  it('renders a back-to-results button (not water heater rebates)', () => {
+    renderConnectNow();
+    const backButton = screen.getByTestId('back-to-results-button');
+    expect(backButton).toHaveTextContent(/back to results/i);
+    expect(backButton).not.toHaveTextContent(/water heater/i);
+  });
+
   it('renders the interstitial text between the two CTAs', () => {
     renderConnectNow();
     expect(
@@ -44,12 +53,19 @@ describe('ConnectNowPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('embeds the contractor guide PDF with an accessible iframe title', () => {
+  it('renders the contractor guide in a paged viewer showing the first page image', () => {
     renderConnectNow();
-    expect(screen.getByTitle(/how to find a good hvac contractor \(pdf\)/i)).toHaveAttribute(
-      'src',
-      CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL,
-    );
+    const firstPage = screen.getByRole('img', { name: /how to find a good hvac contractor/i });
+    expect(firstPage).toHaveAttribute('src', CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES[0]);
+    expect(screen.getByText('1/2')).toBeInTheDocument();
+  });
+
+  it('points the viewer Print action at the real PDF', () => {
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    renderConnectNow();
+    screen.getByRole('button', { name: /print/i }).click();
+    expect(openSpy).toHaveBeenCalledWith(CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL, '_blank', 'noopener,noreferrer');
+    openSpy.mockRestore();
   });
 
   it('renders the PDF section heading with Electrify Now attribution', () => {

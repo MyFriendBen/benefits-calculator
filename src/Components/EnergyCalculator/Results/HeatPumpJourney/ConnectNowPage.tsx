@@ -1,13 +1,14 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useMemo } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { Typography } from '@mui/material';
-import BackAndSaveButtons from '../../../Results/BackAndSaveButtons/BackAndSaveButtons';
 import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
-import EmbeddedDocumentFrame from '../../../Common/EmbeddedDocumentFrame';
+import PagedDocumentViewer from '../../../Common/PagedDocumentViewer';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
+import { ReactComponent as Wrench } from '../../Icons/Wrench.svg';
 import './ConnectNowPage.css';
 
 function addAdminToLink(link: string, isAdmin: boolean) {
@@ -23,60 +24,77 @@ const CONTRACTOR_FINDER_URL =
 const EXPAND_SEARCH_URL = 'https://app.hvacree.net/LoveElectric' as const;
 
 /**
- * WIP PDF URL from the MFB-980 design doc (Linear upload). Replace with the
- * final Power Ahead / CESN asset URL when stakeholders publish it.
+ * "How to find a good HVAC contractor" guide (Electrify Now), served as a static
+ * asset from `public/documents/`. See `public/documents/README.md`.
+ *
+ * The PagedDocumentViewer displays pre-rendered page images (so the toolbar/pager
+ * can match the design); Print/Download opens this PDF so users get a real PDF.
+ * Regenerate the page images if this PDF changes — see the README.
  */
 export const CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL =
-  'https://uploads.linear.app/2f6473df-05c1-41b3-9368-074f571d0e87/9e6a6dbe-5008-480a-be75-c7aea752a2e6/16b66a6e-ef7e-455f-a1d1-b92b1c6aa998' as const;
+  `${process.env.PUBLIC_URL}/documents/how-to-find-hvac-contractor.pdf` as const;
+
+export const CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES = [
+  `${process.env.PUBLIC_URL}/documents/hvac-contractor-guide/page-1.png`,
+  `${process.env.PUBLIC_URL}/documents/hvac-contractor-guide/page-2.png`,
+] as const;
 
 export default function ConnectNowPage() {
   const intl = useIntl();
+  const navigate = useNavigate();
   const { whiteLabel, uuid } = useParams();
   const [searchParams] = useSearchParams();
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams]);
 
   const backLink = addAdminToLink(
-    `/${whiteLabel}/${uuid}/results/energy-rebates/waterHeater`,
+    `/${whiteLabel}/${uuid}/results/energy-rebates/hvac`,
     isAdminView,
   );
 
   usePageTitle(OTHER_PAGE_TITLES.energyCalculatorConnectNow);
 
-  const pdfIframeTitle = intl.formatMessage({
-    id: 'energyCalculator.connectNow.pdfIframeTitle',
-    defaultMessage: 'How to find a good HVAC contractor (PDF)',
+  const pdfDocumentTitle = intl.formatMessage({
+    id: 'energyCalculator.connectNow.pdfDocumentTitle',
+    defaultMessage: 'How to find a good HVAC contractor',
   });
 
   const pdfSectionHeadingId = 'connect-now-pdf-heading';
 
   return (
     <main className="benefits-form connect-now-page">
-      <section className="back-to-results-button-container">
-        <BackAndSaveButtons
-          navigateToLink={backLink}
-          BackToThisPageText={
-            <FormattedMessage
-              id="energyCalculator.connectNow.backToWaterHeater"
-              defaultMessage="BACK TO WATER HEATER REBATES"
-            />
-          }
-        />
-      </section>
+      <div className="connect-now-back-row results-back-save-btn-container">
+        <button
+          data-testid="back-to-results-button"
+          className="results-back-save-buttons"
+          onClick={() => navigate(backLink)}
+          aria-label={intl.formatMessage({ id: 'backAndSaveBtns.backBtnAL', defaultMessage: 'back' })}
+        >
+          <div className="btn-icon-text-container padding-right">
+            <LeftArrowIcon />
+            <FormattedMessage id="energyCalculator.connectNow.backToResults" defaultMessage="BACK TO RESULTS" />
+          </div>
+        </button>
+      </div>
 
       <header className="connect-now-header">
-        <Typography variant="h1" component="h1" sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem' }, fontWeight: 600 }}>
-          <FormattedMessage
-            id="energyCalculator.connectNow.title"
-            defaultMessage="Find a Contractor / Contractor Checklist"
-          />
-        </Typography>
-        <Typography variant="body1" className="connect-now-intro energy-calculator-body-text" sx={{ mt: 1 }}>
-          <FormattedMessage
-            id="energyCalculator.connectNow.intro"
-            defaultMessage="Based on what you've shared about your location and utility provider(s), we recommend starting your search with Power Ahead Colorado. This tool, from the Denver Regional Council of Governments, can help you find and compare contractors by Google reviews, services offered, service area, and more."
-          />
-        </Typography>
+        <Wrench aria-hidden="true" className="connect-now-icon" />
+        <div className="connect-now-header-text">
+          <span className="connect-now-title-text">
+            <FormattedMessage id="energyCalculator.connectNow.eyebrow" defaultMessage="Find a Contractor" />
+          </span>
+          <hr className="connect-now-separator" />
+          <h1 className="connect-now-subtitle">
+            <FormattedMessage id="energyCalculator.connectNow.subtitle" defaultMessage="Contractor Checklist" />
+          </h1>
+        </div>
       </header>
+
+      <Typography variant="body1" className="connect-now-intro energy-calculator-body-text">
+        <FormattedMessage
+          id="energyCalculator.connectNow.intro"
+          defaultMessage="Based on what you've shared about your location and utility provider(s), we recommend starting your search with Power Ahead Colorado. This tool, from the Denver Regional Council of Governments, can help you find and compare contractors by Google reviews, services offered, service area, and more."
+        />
+      </Typography>
 
       <section className="connect-now-ctas" aria-label={intl.formatMessage({ id: 'energyCalculator.connectNow.ctasSectionAria', defaultMessage: 'Contractor search links' })}>
         <TrackedOutboundLink
@@ -89,7 +107,7 @@ export default function ConnectNowPage() {
           <FormattedMessage id="energyCalculator.connectNow.cta.findInstaller" defaultMessage="Find an installer" />
           <OpenInNewIcon className="connect-now-cta-icon" aria-hidden="true" />
         </TrackedOutboundLink>
-        <Typography variant="body2" className="connect-now-cta-interstitial">
+        <Typography variant="body1" className="connect-now-cta-interstitial">
           <FormattedMessage
             id="energyCalculator.connectNow.cta.interstitial"
             defaultMessage="If you are unable to find someone in your area, try an expanded search."
@@ -108,18 +126,18 @@ export default function ConnectNowPage() {
       </section>
 
       <section className="connect-now-pdf-section" aria-labelledby={pdfSectionHeadingId}>
-        <Typography
-          id={pdfSectionHeadingId}
-          variant="h2"
-          component="h2"
-          sx={{ fontSize: { xs: '1.15rem', sm: '1.25rem' }, fontWeight: 600, mb: 1 }}
-        >
+        <Typography id={pdfSectionHeadingId} variant="h2" component="h2" className="connect-now-pdf-heading">
           <FormattedMessage
             id="energyCalculator.connectNow.pdfSectionHeading"
             defaultMessage="How to find a good HVAC contractor, from our friends at Electrify Now."
           />
         </Typography>
-        <EmbeddedDocumentFrame src={CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL} title={pdfIframeTitle} className="connect-now-pdf-frame" />
+        <PagedDocumentViewer
+          pageImages={[...CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES]}
+          pdfUrl={CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL}
+          title={pdfDocumentTitle}
+          className="connect-now-pdf-frame"
+        />
       </section>
     </main>
   );

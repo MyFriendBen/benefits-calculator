@@ -16,4 +16,9 @@ describe('EmbeddedDocumentFrame', () => {
     render(<EmbeddedDocumentFrame src="https://example.com/x" title="Doc" sandbox="allow-downloads" />);
     expect(screen.getByTitle('Doc')).toHaveAttribute('sandbox', 'allow-downloads');
   });
+
+  it('omits the sandbox attribute when sandbox is null', () => {
+    render(<EmbeddedDocumentFrame src="https://example.com/x" title="Doc" sandbox={null} />);
+    expect(screen.getByTitle('Doc')).not.toHaveAttribute('sandbox');
+  });
 });

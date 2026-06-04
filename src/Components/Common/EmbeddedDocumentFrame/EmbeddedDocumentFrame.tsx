@@ -9,8 +9,13 @@ export type EmbeddedDocumentFrameProps = {
    * `sandbox` token list. Default allows common browser PDF rendering while
    * avoiding unnecessary permission (`allow-forms`, `allow-top-navigation`, etc.).
    * Tighten per origin when you know the embed’s behavior.
+   *
+   * Pass `null` to omit the attribute entirely. Chrome's built-in PDF viewer is a
+   * plugin and is blocked inside a sandboxed iframe; a same-origin sandboxed PDF
+   * fails to render and falls back to the SPA. Omit sandbox only for trusted,
+   * first-party documents (e.g. our own static assets in `public/`).
    */
-  sandbox?: string;
+  sandbox?: string | null;
 };
 
 /** Default sandbox for third‑party document (e.g. PDF) embeds. */
@@ -33,7 +38,7 @@ export default function EmbeddedDocumentFrame({
       <iframe
         src={src}
         title={title}
-        sandbox={sandbox}
+        {...(sandbox === null ? {} : { sandbox })}
         className="embedded-document-frame-iframe"
         loading="lazy"
       />
