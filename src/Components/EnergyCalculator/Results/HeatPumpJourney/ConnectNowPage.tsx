@@ -8,15 +8,9 @@ import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import PagedDocumentViewer from '../../../Common/PagedDocumentViewer';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
+import { addAdminToLink } from '../../../../Assets/adminLink';
 import { ReactComponent as Wrench } from '../../Icons/Wrench.svg';
 import './ConnectNowPage.css';
-
-function addAdminToLink(link: string, isAdmin: boolean) {
-  if (isAdmin) {
-    return `${link}?admin=true`;
-  }
-  return link;
-}
 
 const CONTRACTOR_FINDER_URL =
   'https://contractors.poweraheadcolorado.org/contractor-finder?utm_source=cesn' as const;
@@ -133,7 +127,7 @@ export default function ConnectNowPage() {
           />
         </Typography>
         <PagedDocumentViewer
-          pageImages={[...CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES]}
+          pageImages={CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES}
           pdfUrl={CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL}
           title={pdfDocumentTitle}
           className="connect-now-pdf-frame"

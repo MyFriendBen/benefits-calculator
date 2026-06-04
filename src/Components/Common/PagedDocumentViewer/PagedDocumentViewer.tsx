@@ -9,7 +9,7 @@ import './PagedDocumentViewer.css';
 
 export type PagedDocumentViewerProps = {
   /** Ordered list of page image URLs (one per page). */
-  pageImages: string[];
+  pageImages: readonly string[];
   /**
    * URL of the underlying PDF — used by the Print/Download action so users get a
    * real PDF, not the display images.
@@ -112,7 +112,7 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
         </button>
       </div>
 
-      <div className="paged-document-viewer-page-area">
+      <div className="paged-document-viewer-page-area" tabIndex={0}>
         <img
           className="paged-document-viewer-page"
           src={pageImages[pageIndex]}

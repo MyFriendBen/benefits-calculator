@@ -21,6 +21,7 @@ import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
+import { addAdminToLink } from '../../../../Assets/adminLink';
 import {
   type CalculateImpactHouseholdType,
   type CalculateImpactUpgradeChoice,
@@ -28,13 +29,6 @@ import {
 } from './remCalculateImpactTypes';
 import { ReactComponent as Coin } from '../../Icons/Coin.svg';
 import './CalculateImpactPage.css';
-
-function addAdminToLink(link: string, isAdmin: boolean) {
-  if (isAdmin) {
-    return `${link}?admin=true`;
-  }
-  return link;
-}
 
 const HOUSEHOLD_TYPE_OPTIONS: { value: CalculateImpactHouseholdType; messageId: string; defaultMessage: string }[] =
   [
