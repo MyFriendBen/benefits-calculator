@@ -92,6 +92,7 @@ export function useUpdateFormData() {
         cowap: response.has_cowap ?? false,
         cesn_cowap: response.has_cowap ?? false,
         ncwap: response.has_ncwap ?? false,
+        wa_wap: response.has_wap ?? false,
         ubp: response.has_ubp ?? false,
         nfp: response.has_nfp ?? false,
         fatc: response.has_fatc ?? false,
