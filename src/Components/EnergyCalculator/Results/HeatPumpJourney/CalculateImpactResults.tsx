@@ -1,5 +1,5 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { Chip, IconButton } from '@mui/material';
+import { IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import ForestIcon from '@mui/icons-material/Forest';
 import { formatToUSD } from '../../../../utils/formatCurrency';
@@ -25,12 +25,33 @@ interface ImpactRangeBarProps {
   unitSuffix: string;
 }
 
-function directionIndicator(value: number): string {
-  return value <= 0 ? '▼' : '▲';
+function isSavings(value: number): boolean {
+  return value <= 0;
 }
 
-function formatEndLabel(value: number, formatFn: (n: number) => string): string {
-  return `${directionIndicator(value)}${formatFn(Math.abs(value))}`;
+/** Arrow (▼/▲) is colored; number is black. */
+function ArrowNumber({
+  value,
+  formatFn,
+  suffix = '',
+}: {
+  value: number;
+  formatFn: (n: number) => string;
+  suffix?: string;
+}) {
+  const arrow = isSavings(value) ? '▼' : '▲';
+  const colorClass = isSavings(value)
+    ? 'impact-range-bar__arrow--savings'
+    : 'impact-range-bar__arrow--increase';
+  return (
+    <>
+      <span className={`impact-range-bar__arrow ${colorClass}`}>{arrow}</span>
+      <span className="impact-range-bar__number">
+        {formatFn(Math.abs(value))}
+        {suffix}
+      </span>
+    </>
+  );
 }
 
 function ImpactRangeBar({ p20, median, p80, formatValue, unitSuffix }: ImpactRangeBarProps) {
@@ -50,18 +71,18 @@ function ImpactRangeBar({ p20, median, p80, formatValue, unitSuffix }: ImpactRan
   const zeroPct = crossesZero ? pctFromLeft(0) : null;
   const allNegative = leftVal <= 0;
 
-  const medianLabel = `${directionIndicator(median)}${formatValue(Math.abs(median))}${unitSuffix}`;
-
   return (
     <div className="impact-range-bar">
-      {/* Median label + downward caret, centered above the median position */}
+      {/* Median label + caret, floats above the bar */}
       <div className="impact-range-bar__median-wrapper">
         <div
           className="impact-range-bar__median-float"
           style={{ left: `${medianPct}%` }}
           aria-hidden="true"
         >
-          <span className="impact-range-bar__median-value">{medianLabel}</span>
+          <span className="impact-range-bar__median-value">
+            <ArrowNumber value={median} formatFn={formatValue} suffix={unitSuffix} />
+          </span>
           <span className="impact-range-bar__median-caret">▼</span>
         </div>
       </div>
@@ -85,15 +106,37 @@ function ImpactRangeBar({ p20, median, p80, formatValue, unitSuffix }: ImpactRan
             style={{ left: 0, width: '100%' }}
           />
         )}
+        {/* Circle indicator at median position */}
+        <div
+          className="impact-range-bar__median-circle"
+          style={{ left: `${medianPct}%` }}
+        />
+        {/* Grey oval marker at zero crossing — text label is in the end-labels row below */}
+        {crossesZero && zeroPct !== null && (
+          <div
+            className="impact-range-bar__zero-pill"
+            style={{ left: `${zeroPct}%` }}
+            aria-hidden="true"
+          />
+        )}
       </div>
 
-      {/* End labels */}
+      {/* End labels — left/right percentiles + $0 reference at zero crossing */}
       <div className="impact-range-bar__end-labels">
-        <span className={leftVal > 0 ? 'impact-range-bar__label--increase' : 'impact-range-bar__label--savings'}>
-          {formatEndLabel(leftVal, formatValue)}
+        <span className="impact-range-bar__end-label">
+          <ArrowNumber value={leftVal} formatFn={formatValue} />
         </span>
-        <span className={rightVal > 0 ? 'impact-range-bar__label--increase' : 'impact-range-bar__label--savings'}>
-          {formatEndLabel(rightVal, formatValue)}
+        {crossesZero && zeroPct !== null && (
+          <span
+            className="impact-range-bar__zero-label"
+            style={{ left: `${zeroPct}%` }}
+            aria-hidden="true"
+          >
+            {formatValue(0)}
+          </span>
+        )}
+        <span className="impact-range-bar__end-label">
+          <ArrowNumber value={rightVal} formatFn={formatValue} />
         </span>
       </div>
     </div>
@@ -145,10 +188,10 @@ export default function CalculateImpactResults({
   const equivalencies = getEpaEquivalencies(emMedian);
 
   return (
-    <div className="calculate-impact-results">
+    <div className="calculate-impact-results-outer-card">
       {/* ── Household info summary card ── */}
       <section
-        className="calculate-impact-card calculate-impact-summary-card"
+        className="calculate-impact-summary-card"
         aria-labelledby="ci-summary-heading"
       >
         <div className="calculate-impact-summary-header">
@@ -232,7 +275,7 @@ export default function CalculateImpactResults({
       <section className="calculate-impact-selected-upgrade" aria-labelledby="ci-upgrade-heading">
         <h2 id="ci-upgrade-heading" className="calculate-impact-section-title">
           <FormattedMessage
-            id="energyCalculator.calculateImpact.section.upgrade"
+            id="energyCalculator.calculateImpact.results.selectedUpgrade"
             defaultMessage="Selected upgrade"
           />
         </h2>
@@ -244,9 +287,9 @@ export default function CalculateImpactResults({
         </div>
       </section>
 
-      {/* ── Bill and emissions impact card ── */}
+      {/* ── Bill and emissions impact ── */}
       <section
-        className="calculate-impact-card calculate-impact-results-card"
+        className="calculate-impact-bill-emissions-section"
         aria-labelledby="ci-impact-heading"
       >
         <h2 id="ci-impact-heading" className="calculate-impact-section-title">
@@ -262,105 +305,109 @@ export default function CalculateImpactResults({
           />
         </p>
 
-        {/* Energy bill impact */}
-        <div className="calculate-impact-impact-section">
-          <h3 className="calculate-impact-impact-title">
-            <FormattedMessage
-              id="energyCalculator.calculateImpact.results.billImpact.title"
-              defaultMessage="Energy bill impact"
-            />
-          </h3>
-          <p className="calculate-impact-impact-description">
-            {billMedian <= 0 ? (
+        {/* Indented subsections */}
+        <div className="calculate-impact-impact-indented">
+          {/* Energy bill impact */}
+          <div className="calculate-impact-impact-section">
+            <h3 className="calculate-impact-impact-title">
               <FormattedMessage
-                id="energyCalculator.calculateImpact.results.billImpact.description.save"
-                defaultMessage="Our modeling shows that homes like yours will tend to save between {low} and {high} a year on their energy bills, with most homes saving at least {mostLikely}."
-                values={{ low: billRangeLow, high: billRangeHigh, mostLikely: billMostLikely }}
+                id="energyCalculator.calculateImpact.results.billImpact.title"
+                defaultMessage="Energy bill impact"
               />
-            ) : (
+            </h3>
+            <p className="calculate-impact-impact-description">
+              {billMedian <= 0 ? (
+                <FormattedMessage
+                  id="energyCalculator.calculateImpact.results.billImpact.description.save"
+                  defaultMessage="Our modeling shows that homes like yours will tend to save between {low} and {high} a year on their energy bills, with most homes saving at least {mostLikely}."
+                  values={{ low: billRangeLow, high: billRangeHigh, mostLikely: billMostLikely }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="energyCalculator.calculateImpact.results.billImpact.description.increase"
+                  defaultMessage="Our modeling shows that homes like yours will tend to see energy bills increase between {low} and {high} a year, with most homes seeing increases of at least {mostLikely}."
+                  values={{ low: billRangeLow, high: billRangeHigh, mostLikely: billMostLikely }}
+                />
+              )}
+              {' '}
               <FormattedMessage
-                id="energyCalculator.calculateImpact.results.billImpact.description.increase"
-                defaultMessage="Our modeling shows that homes like yours will tend to see energy bills increase between {low} and {high} a year, with most homes seeing increases of at least {mostLikely}."
-                values={{ low: billRangeLow, high: billRangeHigh, mostLikely: billMostLikely }}
-              />
-            )}
-          </p>
-          <ImpactRangeBar
-            p20={billP20}
-            median={billMedian}
-            p80={billP80}
-            formatValue={(n) => formatToUSD(n)}
-            unitSuffix="/yr"
-          />
-        </div>
-
-        {/* Emissions impact */}
-        <div className="calculate-impact-impact-section">
-          <h3 className="calculate-impact-impact-title">
-            <FormattedMessage
-              id="energyCalculator.calculateImpact.results.emissionsImpact.title"
-              defaultMessage="Emissions impact"
-            />
-          </h3>
-          <p className="calculate-impact-impact-description">
-            {emMedian <= 0 ? (
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.results.emissionsImpact.description.reduction"
-                defaultMessage="Our modeling shows that homes like yours will tend to have annual emissions reductions between {low} and {high} lb CO₂e, with most homes reducing emissions by at least {mostLikely} lb."
-                values={{ low: emRangeLow, high: emRangeHigh, mostLikely: emMostLikely }}
-              />
-            ) : (
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.results.emissionsImpact.description.increase"
-                defaultMessage="Our modeling shows that homes like yours will tend to see annual emissions increases between {low} and {high} lb CO₂e, with most homes seeing increases of at least {mostLikely} lb."
-                values={{ low: emRangeLow, high: emRangeHigh, mostLikely: emMostLikely }}
-              />
-            )}
-          </p>
-          <ImpactRangeBar
-            p20={emP20}
-            median={emMedian}
-            p80={emP80}
-            formatValue={(n) => formatEmissionsLbs(n)}
-            unitSuffix=" CO₂e/yr"
-          />
-
-          {/* EPA equivalencies */}
-          <div className="calculate-impact-epa-section">
-            <p className="calculate-impact-epa-intro">
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.epa.intro"
-                defaultMessage="This is equivalent to carbon sequestered by:"
+                id="energyCalculator.calculateImpact.results.billImpact.however"
+                defaultMessage="However, your utility bill could increase if you are adding air conditioning to a home that did not have it before."
               />
             </p>
-            <div className="calculate-impact-epa-chips">
-              {equivalencies.map((eq) => (
-                <Chip
-                  key={eq.id}
-                  icon={<ForestIcon />}
-                  label={
+            <ImpactRangeBar
+              p20={billP20}
+              median={billMedian}
+              p80={billP80}
+              formatValue={(n) => formatToUSD(n)}
+              unitSuffix="/yr"
+            />
+          </div>
+
+          {/* Emissions impact */}
+          <div className="calculate-impact-impact-section">
+            <h3 className="calculate-impact-impact-title">
+              <FormattedMessage
+                id="energyCalculator.calculateImpact.results.emissionsImpact.title"
+                defaultMessage="Emissions impact"
+              />
+            </h3>
+            <p className="calculate-impact-impact-description">
+              {emMedian <= 0 ? (
+                <FormattedMessage
+                  id="energyCalculator.calculateImpact.results.emissionsImpact.description.reduction"
+                  defaultMessage="Our modeling shows that homes like yours will tend to have annual emissions reductions between {low} and {high} lb CO₂e, with most homes reducing emissions by at least {mostLikely} lb."
+                  values={{ low: emRangeLow, high: emRangeHigh, mostLikely: emMostLikely }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="energyCalculator.calculateImpact.results.emissionsImpact.description.increase"
+                  defaultMessage="Our modeling shows that homes like yours will tend to see annual emissions increases between {low} and {high} lb CO₂e, with most homes seeing increases of at least {mostLikely} lb."
+                  values={{ low: emRangeLow, high: emRangeHigh, mostLikely: emMostLikely }}
+                />
+              )}
+            </p>
+            <ImpactRangeBar
+              p20={emP20}
+              median={emMedian}
+              p80={emP80}
+              formatValue={(n) => formatEmissionsLbs(n)}
+              unitSuffix=" CO₂e/yr"
+            />
+
+            {/* EPA equivalencies */}
+            <div className="calculate-impact-epa-section">
+              <p className="calculate-impact-epa-intro">
+                <FormattedMessage
+                  id="energyCalculator.calculateImpact.epa.intro"
+                  defaultMessage="This is equivalent to carbon sequestered by:"
+                />
+              </p>
+              <div className="calculate-impact-epa-chips">
+                {equivalencies.map((eq) => (
+                  <span key={eq.id} className="calculate-impact-epa-badge">
+                    <ForestIcon className="calculate-impact-epa-badge-icon" />
                     <FormattedMessage
                       id={eq.labelMessageId}
                       defaultMessage={eq.labelDefaultMessage}
                       values={{ value: eq.value.toFixed(1) }}
                     />
-                  }
-                  className="calculate-impact-epa-chip"
+                  </span>
+                ))}
+              </div>
+              <p className="calculate-impact-epa-source">
+                <FormattedMessage
+                  id="energyCalculator.calculateImpact.epa.dataSourceLabel"
+                  defaultMessage="Data source: {source}"
+                  values={{
+                    source: intl.formatMessage({
+                      id: EPA_DATA_SOURCE_MESSAGE_ID,
+                      defaultMessage: EPA_DATA_SOURCE_DEFAULT_MESSAGE,
+                    }),
+                  }}
                 />
-              ))}
+              </p>
             </div>
-            <p className="calculate-impact-epa-source">
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.epa.dataSourceLabel"
-                defaultMessage="Data source: {source}"
-                values={{
-                  source: intl.formatMessage({
-                    id: EPA_DATA_SOURCE_MESSAGE_ID,
-                    defaultMessage: EPA_DATA_SOURCE_DEFAULT_MESSAGE,
-                  }),
-                }}
-              />
-            </p>
           </div>
         </div>
       </section>
