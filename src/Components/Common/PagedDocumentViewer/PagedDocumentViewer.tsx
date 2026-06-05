@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
@@ -38,6 +39,19 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
 
   const goPrev = useCallback(() => setPageIndex((i) => Math.max(0, i - 1)), []);
   const goNext = useCallback(() => setPageIndex((i) => Math.min(pageCount - 1, i + 1)), [pageCount]);
+
+  const onPageAreaKeyDown = useCallback(
+    (e: ReactKeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        goPrev();
+      } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        e.preventDefault();
+        goNext();
+      }
+    },
+    [goPrev, goNext],
+  );
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(document.fullscreenElement === rootRef.current);
@@ -112,7 +126,23 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
         </button>
       </div>
 
-      <div className="paged-document-viewer-page-area" tabIndex={0}>
+      <div
+        className="paged-document-viewer-page-area"
+        tabIndex={0}
+        role="group"
+        aria-roledescription={intl.formatMessage({
+          id: 'pagedDocumentViewer.pageAreaRoleDescription',
+          defaultMessage: 'document viewer',
+        })}
+        aria-label={intl.formatMessage(
+          {
+            id: 'pagedDocumentViewer.pageAreaLabel',
+            defaultMessage: '{title} — use the left and right arrow keys to change pages',
+          },
+          { title },
+        )}
+        onKeyDown={onPageAreaKeyDown}
+      >
         <img
           className="paged-document-viewer-page"
           src={pageImages[pageIndex]}

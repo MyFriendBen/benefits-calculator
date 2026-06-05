@@ -35,6 +35,33 @@ describe('PagedDocumentViewer', () => {
     expect(screen.getByRole('button', { name: /next page/i })).toBeDisabled();
   });
 
+  it('pages with the arrow keys on the focusable page area', () => {
+    renderViewer();
+    const pageArea = screen.getByRole('group');
+
+    fireEvent.keyDown(pageArea, { key: 'ArrowRight' });
+    expect(screen.getByText('2/2')).toBeInTheDocument();
+    expect(screen.getByRole('img')).toHaveAttribute('src', PAGE_IMAGES[1]);
+
+    fireEvent.keyDown(pageArea, { key: 'ArrowLeft' });
+    expect(screen.getByText('1/2')).toBeInTheDocument();
+    expect(screen.getByRole('img')).toHaveAttribute('src', PAGE_IMAGES[0]);
+  });
+
+  it('does not page past the bounds with arrow keys', () => {
+    renderViewer();
+    const pageArea = screen.getByRole('group');
+
+    // Already on the first page — ArrowLeft is a no-op.
+    fireEvent.keyDown(pageArea, { key: 'ArrowLeft' });
+    expect(screen.getByText('1/2')).toBeInTheDocument();
+
+    // On the last page — ArrowRight is a no-op.
+    fireEvent.keyDown(pageArea, { key: 'ArrowRight' });
+    fireEvent.keyDown(pageArea, { key: 'ArrowRight' });
+    expect(screen.getByText('2/2')).toBeInTheDocument();
+  });
+
   it('opens the underlying PDF when Print is clicked', () => {
     const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
     renderViewer();
