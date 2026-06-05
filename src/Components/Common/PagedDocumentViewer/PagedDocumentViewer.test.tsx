@@ -89,4 +89,36 @@ describe('PagedDocumentViewer', () => {
     expect(screen.getByRole('button', { name: /exit full screen/i })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^full screen$/i })).not.toBeInTheDocument();
   });
+
+  it('focuses the page area and pages on arrow keys after entering fullscreen', () => {
+    (HTMLElement.prototype as unknown as { requestFullscreen: () => void }).requestFullscreen = jest.fn();
+
+    renderViewer();
+    const root = document.querySelector('.paged-document-viewer') as HTMLElement;
+    const pageArea = screen.getByRole('group');
+
+    fireEvent.click(screen.getByRole('button', { name: /^full screen$/i }));
+
+    // Simulate the browser entering fullscreen on our element.
+    Object.defineProperty(document, 'fullscreenElement', { value: root, configurable: true });
+    fireEvent(document, new Event('fullscreenchange'));
+
+    // Focus moves to the page area so the user does not have to click first.
+    expect(pageArea).toHaveFocus();
+
+    // Arrow keys page even when the keydown is dispatched at the document level
+    // (e.g. the toggle button still holds focus in a real browser).
+    fireEvent.keyDown(document, { key: 'ArrowRight' });
+    expect(screen.getByText('2/2')).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: 'ArrowLeft' });
+    expect(screen.getByText('1/2')).toBeInTheDocument();
+  });
+
+  it('does not hijack arrow keys at the document level when not fullscreen', () => {
+    renderViewer();
+    // No fullscreen entered — a stray document-level arrow should not page.
+    fireEvent.keyDown(document, { key: 'ArrowRight' });
+    expect(screen.getByText('1/2')).toBeInTheDocument();
+  });
 });

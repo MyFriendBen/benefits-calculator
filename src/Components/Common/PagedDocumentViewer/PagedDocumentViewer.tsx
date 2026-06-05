@@ -32,6 +32,7 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
   const [pageIndex, setPageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const pageAreaRef = useRef<HTMLDivElement>(null);
 
   const pageCount = pageImages.length;
   const isFirst = pageIndex === 0;
@@ -40,24 +41,59 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
   const goPrev = useCallback(() => setPageIndex((i) => Math.max(0, i - 1)), []);
   const goNext = useCallback(() => setPageIndex((i) => Math.min(pageCount - 1, i + 1)), [pageCount]);
 
-  const onPageAreaKeyDown = useCallback(
-    (e: ReactKeyboardEvent<HTMLDivElement>) => {
-      if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
-        e.preventDefault();
+  const handlePagingKey = useCallback(
+    (key: string): boolean => {
+      if (key === 'ArrowLeft' || key === 'PageUp') {
         goPrev();
-      } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
-        e.preventDefault();
-        goNext();
+        return true;
       }
+      if (key === 'ArrowRight' || key === 'PageDown') {
+        goNext();
+        return true;
+      }
+      return false;
     },
     [goPrev, goNext],
   );
 
+  const onPageAreaKeyDown = useCallback(
+    (e: ReactKeyboardEvent<HTMLDivElement>) => {
+      if (handlePagingKey(e.key)) {
+        e.preventDefault();
+      }
+    },
+    [handlePagingKey],
+  );
+
   useEffect(() => {
-    const onChange = () => setIsFullscreen(document.fullscreenElement === rootRef.current);
+    const onChange = () => {
+      const nowFullscreen = document.fullscreenElement === rootRef.current;
+      setIsFullscreen(nowFullscreen);
+      // On entering fullscreen, focus stays on the toggle button, so arrow keys
+      // do nothing until the user clicks the page. Move focus to the page area so
+      // arrow-key paging works immediately.
+      if (nowFullscreen) {
+        pageAreaRef.current?.focus();
+      }
+    };
     document.addEventListener('fullscreenchange', onChange);
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
+
+  // While fullscreen, page on arrow keys no matter which control inside the
+  // viewer holds focus (e.g. the toggle button right after entering).
+  useEffect(() => {
+    if (!isFullscreen) {
+      return;
+    }
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (handlePagingKey(e.key)) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isFullscreen, handlePagingKey]);
 
   const toggleFullscreen = useCallback(() => {
     if (document.fullscreenElement === rootRef.current) {
@@ -127,6 +163,7 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
       </div>
 
       <div
+        ref={pageAreaRef}
         className="paged-document-viewer-page-area"
         tabIndex={0}
         role="group"
