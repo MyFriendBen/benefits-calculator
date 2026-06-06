@@ -1,15 +1,28 @@
 import { createContext, useContext, useState, useRef, useEffect, useCallback, PropsWithChildren } from 'react';
+import { useParams } from 'react-router-dom';
 import ChatIcon from '@mui/icons-material/Chat';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { parseMarkdown } from '../../../utils/parseMarkdown';
+import { startAssistantConversation, sendAssistantMessage, AssistantApiMessage } from '../../../apiCalls';
 import './Chatbot.css';
 
 type Message = {
   role: 'user' | 'bot';
   text: string;
 };
+
+// The API uses role 'assistant'; the widget renders it as 'bot'.
+function toWidgetMessage(m: AssistantApiMessage): Message {
+  return { role: m.role === 'assistant' ? 'bot' : 'user', text: m.text };
+}
+
+function newClientMessageId(): string {
+  return typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 type ChatbotContextType = {
   openWithMessage: (message: string) => void;
@@ -26,35 +39,6 @@ export function useChatbotContext() {
 }
 
 const URL_REGEX = /(https?:\/\/[^\s]+)/g;
-
-const DEMO_BOT_REPLIES = [
-  `Great work filling out the survey! Based on your results, you're eligible for 19 programs, that's a lot!
-
-I'm here to guide you through your benefits and applications, so let's get started with the biggest buck for your time - **SNAP**. This program will provide the quickest relief for you, your spouse, and your child.
-
-Would you like some help with the application process?`,
-  `**SNAP** (Supplemental Nutrition Assistance Program) puts money on a card each month that you can use at most grocery stores to buy food essentials like produce, bread, and dairy. Benefits are loaded automatically — nothing special to do at checkout, just swipe.
-
-The application takes about two hours, but with almost **$800 per month** in savings, it'll be well worth it.
-
-Shall we continue?`,
-  `There are four ways to apply for **SNAP** — pick whichever works best for you:
-
-* **Paper application** — print and mail or drop off a physical form
-* **Online** — apply through the state benefits portal
-* **Mobile app** — apply on your phone via the MyCOBenefits app
-* **Phone** — call for assistance and apply with a caseworker
-
-Which would you prefer?`,
-  `Great! Here's the link:
-
-https://peak.my.site.com/peak/s/peak-landing-page?language=en_US
-
-Can I text you additional help while you start to apply? If so, please reply with your phone number.`,
-  `Thank you! I just sent a message, let me know if you didn't get it.
-
-I'll be here or available over text the whole time to guide your application — whether it's what documents to have handy, what a question is asking, or what happens after you submit.`,
-];
 
 function renderFormattedMessage(text: string): React.ReactNode {
   const PRIMARY_COLOR = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#1976d2';
@@ -111,13 +95,21 @@ function renderFormattedMessage(text: string): React.ReactNode {
 }
 
 export function ChatbotProvider({ children }: PropsWithChildren) {
+  const { uuid } = useParams();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const replyIndexRef = useRef(0);
+  const conversationIdRef = useRef<string | null>(null);
+  const startPromiseRef = useRef<Promise<string | null> | null>(null);
   const { formatMessage } = useIntl();
+
+  const errorMessage = formatMessage({
+    id: 'chatbot.error',
+    defaultMessage: 'Sorry, something went wrong. Please try again.',
+  });
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -133,34 +125,64 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
     }
   }, [isOpen]);
 
-  const sendMessage = useCallback((text: string) => {
-    const userMessage: Message = { role: 'user', text };
-    setMessages((prev) => [...prev, userMessage]);
+  // Start (or reuse) the conversation; returns the conversation id, or null on failure.
+  // Deduped via startPromiseRef so concurrent opens/sends don't create two conversations.
+  const ensureConversation = useCallback(async (): Promise<string | null> => {
+    if (conversationIdRef.current) return conversationIdRef.current;
+    if (!uuid) return null;
+    if (!startPromiseRef.current) {
+      startPromiseRef.current = startAssistantConversation(uuid)
+        .then((res) => {
+          conversationIdRef.current = res.conversation_id;
+          setMessages(res.messages.map(toWidgetMessage));
+          return res.conversation_id;
+        })
+        .catch(() => {
+          setMessages((prev) => [...prev, { role: 'bot', text: errorMessage }]);
+          return null;
+        })
+        .finally(() => {
+          startPromiseRef.current = null;
+        });
+    }
+    return startPromiseRef.current;
+  }, [uuid, errorMessage]);
 
-    // Walk through demo replies in order, repeat the last one if exhausted
-    const replyText = DEMO_BOT_REPLIES[Math.min(replyIndexRef.current, DEMO_BOT_REPLIES.length - 1)];
-    replyIndexRef.current += 1;
-
-    setTimeout(() => {
-      const botMessage: Message = { role: 'bot', text: replyText };
-      setMessages((prev) => [...prev, botMessage]);
-    }, 500);
-  }, []);
+  const sendMessage = useCallback(
+    async (text: string) => {
+      const conversationId = await ensureConversation();
+      setMessages((prev) => [...prev, { role: 'user', text }]);
+      if (!conversationId || !uuid) {
+        setMessages((prev) => [...prev, { role: 'bot', text: errorMessage }]);
+        return;
+      }
+      setIsSending(true);
+      try {
+        const res = await sendAssistantMessage(uuid, conversationId, text, newClientMessageId());
+        setMessages((prev) => [...prev, toWidgetMessage(res.assistant_message)]);
+      } catch {
+        setMessages((prev) => [...prev, { role: 'bot', text: errorMessage }]);
+      } finally {
+        setIsSending(false);
+      }
+    },
+    [ensureConversation, uuid, errorMessage],
+  );
 
   const openWithMessage = useCallback(
     (message: string) => {
       setIsOpen(true);
-      sendMessage(message);
+      void sendMessage(message);
     },
     [sendMessage],
   );
 
   const handleSend = useCallback(() => {
     const trimmed = inputValue.trim();
-    if (trimmed === '') return;
-    sendMessage(trimmed);
+    if (trimmed === '' || isSending) return;
+    void sendMessage(trimmed);
     setInputValue('');
-  }, [inputValue, sendMessage]);
+  }, [inputValue, isSending, sendMessage]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -177,6 +199,8 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
   }, []);
 
   const handleOpen = useCallback(() => {
+    // Open to a blank window; the conversation is created lazily on the first
+    // user message (typed, or via the "Guide me" button), so no unsolicited reply.
     setIsOpen(true);
   }, []);
 
@@ -224,12 +248,13 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
               onKeyDown={handleKeyDown}
               placeholder={formatMessage({ id: 'chatbot.placeholder', defaultMessage: 'Type a message...' })}
               aria-label={formatMessage({ id: 'chatbot.inputAriaLabel', defaultMessage: 'Chat message input' })}
+              disabled={isSending}
             />
             <button
               type="button"
               className="chatbot-send-btn"
               onClick={handleSend}
-              disabled={inputValue.trim() === ''}
+              disabled={inputValue.trim() === '' || isSending}
               aria-label={formatMessage({ id: 'chatbot.send', defaultMessage: 'Send message' })}
             >
               <SendIcon fontSize="small" />
