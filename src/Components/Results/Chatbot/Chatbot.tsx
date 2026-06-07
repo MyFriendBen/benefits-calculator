@@ -117,7 +117,7 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, scrollToBottom]);
+  }, [messages, isSending, scrollToBottom]);
 
   useEffect(() => {
     if (isOpen) {
@@ -236,6 +236,17 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
                 {renderFormattedMessage(msg.text)}
               </div>
             ))}
+            {isSending && (
+              <div
+                className="chatbot-message chatbot-message-bot chatbot-message-loading"
+                role="status"
+                aria-label={formatMessage({ id: 'chatbot.loading', defaultMessage: 'BenBot is typing' })}
+              >
+                <span className="chatbot-typing-dot" />
+                <span className="chatbot-typing-dot" />
+                <span className="chatbot-typing-dot" />
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
           <div className="chatbot-input-area">

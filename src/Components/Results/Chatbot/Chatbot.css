@@ -211,3 +211,47 @@
     right: 1rem;
   }
 }
+
+/* "BenBot is typing" loading indicator — pulsing dots in a bot bubble */
+.chatbot-message-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 2.5rem;
+}
+
+.chatbot-typing-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: #999;
+  display: inline-block;
+  animation: chatbot-typing 1.2s infinite ease-in-out both;
+}
+
+.chatbot-typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.chatbot-typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes chatbot-typing {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Respect users who prefer no motion */
+@media (prefers-reduced-motion: reduce) {
+  .chatbot-typing-dot {
+    animation: none;
+    opacity: 0.6;
+  }
+}
