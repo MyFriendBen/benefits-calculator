@@ -22,6 +22,7 @@ import { Alert, CircularProgress } from '@mui/material';
 import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
+import { addAdminToLink } from '../../../../Assets/adminLink';
 import { useFeatureFlag } from '../../../Config/configHook';
 import {
   type CalculateImpactHouseholdType,
@@ -37,40 +38,40 @@ import CalculateImpactResults from './CalculateImpactResults';
 import { ReactComponent as Coin } from '../../Icons/Coin.svg';
 import './CalculateImpactPage.css';
 
-function addAdminToLink(link: string, isAdmin: boolean) {
-  if (isAdmin) {
-    return `${link}?admin=true`;
-  }
-  return link;
-}
-
-const HOUSEHOLD_TYPE_OPTIONS: { value: CalculateImpactHouseholdType; messageId: string; defaultMessage: string }[] =
-  [
-    {
-      value: 'single_family_detached',
-      messageId: 'energyCalculator.calculateImpact.householdType.singleFamilyDetached',
-      defaultMessage: 'House',
-    },
-    {
-      value: 'apartment_condo',
-      messageId: 'energyCalculator.calculateImpact.householdType.apartmentCondo',
-      defaultMessage: 'Apartment',
-    },
-    {
-      value: 'mobile_home',
-      messageId: 'energyCalculator.calculateImpact.householdType.mobileHome',
-      defaultMessage: 'Mobile home',
-    },
-    {
-      value: 'single_family_attached',
-      messageId: 'energyCalculator.calculateImpact.householdType.singleFamilyAttached',
-      defaultMessage: 'Townhome',
-    },
-  ];
+const HOUSEHOLD_TYPE_OPTIONS: { value: CalculateImpactHouseholdType; messageId: string; defaultMessage: string }[] = [
+  {
+    value: 'single_family_detached',
+    messageId: 'energyCalculator.calculateImpact.householdType.singleFamilyDetached',
+    defaultMessage: 'House',
+  },
+  {
+    value: 'apartment_condo',
+    messageId: 'energyCalculator.calculateImpact.householdType.apartmentCondo',
+    defaultMessage: 'Apartment',
+  },
+  {
+    value: 'mobile_home',
+    messageId: 'energyCalculator.calculateImpact.householdType.mobileHome',
+    defaultMessage: 'Mobile home',
+  },
+  {
+    value: 'single_family_attached',
+    messageId: 'energyCalculator.calculateImpact.householdType.singleFamilyAttached',
+    defaultMessage: 'Townhome',
+  },
+];
 
 const FUEL_OPTIONS: { value: RemFuelType; messageId: string; defaultMessage: string }[] = [
-  { value: 'electricity', messageId: 'energyCalculator.calculateImpact.fuel.electricity', defaultMessage: 'Electricity' },
-  { value: 'natural_gas', messageId: 'energyCalculator.calculateImpact.fuel.naturalGas', defaultMessage: 'Natural gas' },
+  {
+    value: 'electricity',
+    messageId: 'energyCalculator.calculateImpact.fuel.electricity',
+    defaultMessage: 'Electricity',
+  },
+  {
+    value: 'natural_gas',
+    messageId: 'energyCalculator.calculateImpact.fuel.naturalGas',
+    defaultMessage: 'Natural gas',
+  },
   { value: 'fuel_oil', messageId: 'energyCalculator.calculateImpact.fuel.fuelOil', defaultMessage: 'Fuel oil' },
   { value: 'propane', messageId: 'energyCalculator.calculateImpact.fuel.propane', defaultMessage: 'Propane' },
 ];
@@ -177,10 +178,7 @@ export default function CalculateImpactPage() {
   const showCalculateImpact = useFeatureFlag('cesn_heat_pump_journey');
   const [submitState, setSubmitState] = useState<SubmitState>({ status: 'idle' });
 
-  const backLink = addAdminToLink(
-    `/${whiteLabel}/${uuid}/results/energy-rebates/hvac`,
-    isAdminView,
-  );
+  const backLink = addAdminToLink(`/${whiteLabel}/${uuid}/results/energy-rebates/hvac`, isAdminView);
 
   const {
     control,
@@ -220,9 +218,7 @@ export default function CalculateImpactPage() {
         }
         setSubmitState({ status: 'success', result, formValues: data });
       })
-      .catch((err: Error) =>
-        setSubmitState({ status: 'error', message: err.message }),
-      );
+      .catch((err: Error) => setSubmitState({ status: 'error', message: err.message }));
   };
 
   if (submitState.status === 'success') {
@@ -233,14 +229,14 @@ export default function CalculateImpactPage() {
             data-testid="back-to-results-button"
             className="results-back-save-buttons"
             onClick={() => navigate(backLink)}
-            aria-label={intl.formatMessage({ id: 'backAndSaveBtns.backBtnAL', defaultMessage: 'back' })}
+            aria-label={intl.formatMessage({
+              id: 'energyCalculator.calculateImpact.backToResults',
+              defaultMessage: 'BACK TO RESULTS',
+            })}
           >
             <div className="btn-icon-text-container padding-right">
               <LeftArrowIcon />
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.backToResults"
-                defaultMessage="BACK TO RESULTS"
-              />
+              <FormattedMessage id="energyCalculator.calculateImpact.backToResults" defaultMessage="BACK TO RESULTS" />
             </div>
           </button>
         </div>
@@ -256,10 +252,7 @@ export default function CalculateImpactPage() {
             </span>
             <hr className="calculate-impact-separator" />
             <h1 className="calculate-impact-subtitle">
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.subtitle"
-                defaultMessage="Estimated Savings"
-              />
+              <FormattedMessage id="energyCalculator.calculateImpact.subtitle" defaultMessage="Estimated Savings" />
             </h1>
           </div>
         </header>
@@ -300,14 +293,14 @@ export default function CalculateImpactPage() {
           data-testid="back-to-results-button"
           className="results-back-save-buttons"
           onClick={() => navigate(backLink)}
-          aria-label={intl.formatMessage({ id: 'backAndSaveBtns.backBtnAL', defaultMessage: 'back' })}
+          aria-label={intl.formatMessage({
+            id: 'energyCalculator.calculateImpact.backToResults',
+            defaultMessage: 'BACK TO RESULTS',
+          })}
         >
           <div className="btn-icon-text-container padding-right">
             <LeftArrowIcon />
-            <FormattedMessage
-              id="energyCalculator.calculateImpact.backToResults"
-              defaultMessage="BACK TO RESULTS"
-            />
+            <FormattedMessage id="energyCalculator.calculateImpact.backToResults" defaultMessage="BACK TO RESULTS" />
           </div>
         </button>
       </div>
@@ -323,10 +316,7 @@ export default function CalculateImpactPage() {
           </span>
           <hr className="calculate-impact-separator" />
           <h1 className="calculate-impact-subtitle">
-            <FormattedMessage
-              id="energyCalculator.calculateImpact.subtitle"
-              defaultMessage="Estimated Savings"
-            />
+            <FormattedMessage id="energyCalculator.calculateImpact.subtitle" defaultMessage="Estimated Savings" />
           </h1>
         </div>
       </header>
@@ -353,7 +343,10 @@ export default function CalculateImpactPage() {
 
       {submitState.status === 'loading' && (
         <div className="calculate-impact-loading">
-          <CircularProgress size={28} aria-label={intl.formatMessage({ id: 'general.loading', defaultMessage: 'Loading' })} />
+          <CircularProgress
+            size={28}
+            aria-label={intl.formatMessage({ id: 'general.loading', defaultMessage: 'Loading' })}
+          />
         </div>
       )}
       {submitState.status === 'error' && (
@@ -427,18 +420,13 @@ export default function CalculateImpactPage() {
                     </Select>
                   )}
                 />
-                {errors.householdType && (
-                  <FormHelperText>{errors.householdType.message}</FormHelperText>
-                )}
+                {errors.householdType && <FormHelperText>{errors.householdType.message}</FormHelperText>}
               </FormControl>
             </div>
 
             <div className="calculate-impact-field">
               <label htmlFor="calculate-impact-address" className="calculate-impact-field-label">
-                <FormattedMessage
-                  id="energyCalculator.calculateImpact.field.address"
-                  defaultMessage="Address"
-                />
+                <FormattedMessage id="energyCalculator.calculateImpact.field.address" defaultMessage="Address" />
               </label>
               <p id="calculate-impact-address-helper" className="calculate-impact-field-helper">
                 <FormattedMessage
@@ -515,9 +503,7 @@ export default function CalculateImpactPage() {
                     </Select>
                   )}
                 />
-                {errors.heatingFuel && (
-                  <FormHelperText>{errors.heatingFuel.message}</FormHelperText>
-                )}
+                {errors.heatingFuel && <FormHelperText>{errors.heatingFuel.message}</FormHelperText>}
               </FormControl>
             </div>
 
@@ -580,9 +566,7 @@ export default function CalculateImpactPage() {
                     </Select>
                   )}
                 />
-                {errors.waterHeatingFuel && (
-                  <FormHelperText>{errors.waterHeatingFuel.message}</FormHelperText>
-                )}
+                {errors.waterHeatingFuel && <FormHelperText>{errors.waterHeatingFuel.message}</FormHelperText>}
               </FormControl>
             </div>
           </div>
@@ -597,15 +581,17 @@ export default function CalculateImpactPage() {
             />
           </p>
 
-          <FormControl component="fieldset" fullWidth error={!!errors.upgradeChoice} aria-labelledby="calculate-impact-upgrade-heading">
+          <FormControl
+            component="fieldset"
+            fullWidth
+            error={!!errors.upgradeChoice}
+            aria-labelledby="calculate-impact-upgrade-heading"
+          >
             <Controller
               name="upgradeChoice"
               control={control}
               render={({ field }) => (
-                <RadioGroup
-                  {...field}
-                  value={field.value ?? ''}
-                >
+                <RadioGroup {...field} value={field.value ?? ''}>
                   {UPGRADE_OPTIONS.map((opt) => {
                     const isSelected = field.value === opt.value;
                     const isAvailable = opt.value === 'heat_pump_water_heater';
@@ -643,12 +629,18 @@ export default function CalculateImpactPage() {
                 </RadioGroup>
               )}
             />
-            {errors.upgradeChoice && (
-              <FormHelperText>{errors.upgradeChoice.message}</FormHelperText>
-            )}
+            {errors.upgradeChoice && <FormHelperText>{errors.upgradeChoice.message}</FormHelperText>}
           </FormControl>
 
-          <Button type="submit" variant="contained" color="primary" size="medium" className="calculate-impact-submit" disabled={submitState.status === 'loading'} aria-busy={submitState.status === 'loading'}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            size="medium"
+            className="calculate-impact-submit"
+            disabled={submitState.status === 'loading'}
+            aria-busy={submitState.status === 'loading'}
+          >
             <FormattedMessage id="energyCalculator.calculateImpact.submit" defaultMessage="Calculate impact" />
           </Button>
         </section>
