@@ -110,6 +110,13 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
 
   const rootClass = ['paged-document-viewer', className].filter(Boolean).join(' ');
 
+  // Guard against an empty page list: with no pages the pager would render "1/0"
+  // and the page <img> would point at an undefined src. Render nothing instead.
+  // Done after the hooks (not as an early return) to keep hook order stable.
+  if (pageCount === 0) {
+    return null;
+  }
+
   return (
     <div ref={rootRef} className={rootClass}>
       <div className="paged-document-viewer-toolbar">

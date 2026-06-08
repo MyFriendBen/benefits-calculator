@@ -121,4 +121,15 @@ describe('PagedDocumentViewer', () => {
     fireEvent.keyDown(document, { key: 'ArrowRight' });
     expect(screen.getByText('1/2')).toBeInTheDocument();
   });
+
+  it('renders nothing when there are no page images', () => {
+    const { container } = render(
+      <IntlProvider locale="en" messages={{}}>
+        <PagedDocumentViewer pageImages={[]} pdfUrl={PDF_URL} title="Empty guide" />
+      </IntlProvider>,
+    );
+    // Guard prevents a "1/0" pager and an <img> with an undefined src.
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
 });

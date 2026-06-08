@@ -7,7 +7,8 @@
  */
 export function addAdminToLink(link: string, isAdmin: boolean): string {
   if (isAdmin) {
-    return `${link}?admin=true`;
+    const separator = link.includes('?') ? '&' : '?';
+    return `${link}${separator}admin=true`;
   }
   return link;
 }

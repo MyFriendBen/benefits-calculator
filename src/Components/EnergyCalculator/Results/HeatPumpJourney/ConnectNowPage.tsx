@@ -12,8 +12,7 @@ import { addAdminToLink } from '../../../../Assets/adminLink';
 import { ReactComponent as Wrench } from '../../Icons/Wrench.svg';
 import './ConnectNowPage.css';
 
-const CONTRACTOR_FINDER_URL =
-  'https://contractors.poweraheadcolorado.org/contractor-finder?utm_source=cesn' as const;
+const CONTRACTOR_FINDER_URL = 'https://contractors.poweraheadcolorado.org/contractor-finder?utm_source=cesn' as const;
 
 const EXPAND_SEARCH_URL = 'https://app.hvacree.net/LoveElectric' as const;
 
@@ -40,10 +39,7 @@ export default function ConnectNowPage() {
   const [searchParams] = useSearchParams();
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams]);
 
-  const backLink = addAdminToLink(
-    `/${whiteLabel}/${uuid}/results/energy-rebates/hvac`,
-    isAdminView,
-  );
+  const backLink = addAdminToLink(`/${whiteLabel}/${uuid}/results/energy-rebates/hvac`, isAdminView);
 
   usePageTitle(OTHER_PAGE_TITLES.energyCalculatorConnectNow);
 
@@ -61,7 +57,10 @@ export default function ConnectNowPage() {
           data-testid="back-to-results-button"
           className="results-back-save-buttons"
           onClick={() => navigate(backLink)}
-          aria-label={intl.formatMessage({ id: 'backAndSaveBtns.backBtnAL', defaultMessage: 'back' })}
+          aria-label={intl.formatMessage({
+            id: 'energyCalculator.connectNow.backToResults',
+            defaultMessage: 'BACK TO RESULTS',
+          })}
         >
           <div className="btn-icon-text-container padding-right">
             <LeftArrowIcon />
@@ -90,7 +89,13 @@ export default function ConnectNowPage() {
         />
       </Typography>
 
-      <section className="connect-now-ctas" aria-label={intl.formatMessage({ id: 'energyCalculator.connectNow.ctasSectionAria', defaultMessage: 'Contractor search links' })}>
+      <section
+        className="connect-now-ctas"
+        aria-label={intl.formatMessage({
+          id: 'energyCalculator.connectNow.ctasSectionAria',
+          defaultMessage: 'Contractor search links',
+        })}
+      >
         <TrackedOutboundLink
           href={CONTRACTOR_FINDER_URL}
           action="heat_pump_connect_now_find_installer"
