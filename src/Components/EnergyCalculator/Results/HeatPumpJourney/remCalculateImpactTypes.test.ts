@@ -1,10 +1,61 @@
 import {
   buildCalculateImpactPayload,
+  isValidRemImpactApiResponse,
   CALCULATE_IMPACT_UPGRADE_MAP,
   type CalculateImpactUpgradeChoice,
   type RemFuelType,
   type CalculateImpactHouseholdType,
 } from './remCalculateImpactTypes';
+
+// ─── Shared fixture ────────────────────────────────────────────────────────────
+
+const VALID_STAT = { value: -21.9, unit: '$' };
+const VALID_RANGE = {
+  mean: VALID_STAT,
+  median: VALID_STAT,
+  percentile_20: VALID_STAT,
+  percentile_80: VALID_STAT,
+};
+const VALID_RESPONSE = { bill_delta: VALID_RANGE, emissions_delta: VALID_RANGE };
+
+describe('isValidRemImpactApiResponse', () => {
+  it('returns true for a well-formed response', () => {
+    expect(isValidRemImpactApiResponse(VALID_RESPONSE)).toBe(true);
+  });
+
+  it('returns false for null / undefined', () => {
+    expect(isValidRemImpactApiResponse(null)).toBe(false);
+    expect(isValidRemImpactApiResponse(undefined)).toBe(false);
+  });
+
+  it('returns false when bill_delta is missing entirely', () => {
+    expect(isValidRemImpactApiResponse({ emissions_delta: VALID_RANGE })).toBe(false);
+  });
+
+  it('returns false when a percentile key is absent from bill_delta', () => {
+    const missingPercentile = {
+      ...VALID_RESPONSE,
+      bill_delta: { mean: VALID_STAT, median: VALID_STAT, percentile_20: VALID_STAT },
+    };
+    expect(isValidRemImpactApiResponse(missingPercentile)).toBe(false);
+  });
+
+  it('returns false when a stat value is null (backend defensive default becomes 0, but upstream could send null)', () => {
+    const nullValue = {
+      ...VALID_RESPONSE,
+      bill_delta: { ...VALID_RANGE, median: { value: null, unit: '$' } },
+    };
+    expect(isValidRemImpactApiResponse(nullValue)).toBe(false);
+  });
+
+  it('returns false when a stat value is a string instead of a number', () => {
+    const stringValue = {
+      ...VALID_RESPONSE,
+      emissions_delta: { ...VALID_RANGE, percentile_80: { value: '-430', unit: 'lbCO2e' } },
+    };
+    expect(isValidRemImpactApiResponse(stringValue)).toBe(false);
+  });
+});
 
 describe('CALCULATE_IMPACT_UPGRADE_MAP', () => {
   it('maps heat_pump to the correct REM upgrade', () => {

@@ -54,6 +54,7 @@ test.describe('Current Benefits Pages Test', () => {
          * instead of the less reliable 'networkidle' state
          */
         // Wait for the main container to be visible
+        await page.locator('main.benefits-form').waitFor({ state: 'visible', timeout: 60000 });
         await expect(page.locator('main.benefits-form')).toBeVisible({ timeout: 15000 });
 
         // Wait for the header to be visible

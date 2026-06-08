@@ -31,6 +31,7 @@ export async function waitForResultsPageLoad(page: Page, timeoutMs: number = 600
     await expect(page.locator('main')).toBeVisible();
 
     // Wait for results header to be present (indicates page is fully rendered)
+    await page.locator('[data-testid="results-header"], .results-header').waitFor({ state: 'visible', timeout: 30000 });
     await expect(page.locator('[data-testid="results-header"], .results-header')).toBeVisible();
 
     console.log('[Results] Results page loaded successfully');
