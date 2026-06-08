@@ -46,7 +46,11 @@ const DefaultConfirmationHHData = () => {
   const formatBirthMonthYear = useFormatBirthMonthYear();
 
   const relationshipOptions = useConfig<OptionMap>('relationship_options');
-  const incomeOptions = useConfig<OptionMap>('income_options');
+  const incomeOptionsByCategory = useConfig<Record<string, OptionMap>>('income_options_by_category', {});
+  const incomeOptions = Object.values(incomeOptionsByCategory).reduce<OptionMap>(
+    (acc, category) => ({ ...acc, ...category }),
+    {},
+  );
   const frequencyOptions = useConfig<OptionMap>('frequency_options');
   const healthInsuranceOptions = useConfig<{
     you: IconAndFormattedMessageMap;
