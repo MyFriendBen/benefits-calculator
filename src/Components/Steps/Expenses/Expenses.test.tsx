@@ -58,13 +58,21 @@ const baseFormData: FormData = {
   householdData: [],
   householdAssets: 0,
   hasBenefits: 'preferNotToAnswer',
-  benefits: {} as FormData['benefits'],
+  benefits: new Set<string>(),
   healthInsuranceOptions: {} as FormData['healthInsuranceOptions'],
   referralSource: '',
   referralSourceDetails: '',
   acesScore: null,
   commConsent: false,
-  signUpInfo: { email: '', phone: '', firstName: '', lastName: '', sendOffers: false, sendUpdates: false, commConsent: false },
+  signUpInfo: {
+    email: '',
+    phone: '',
+    firstName: '',
+    lastName: '',
+    sendOffers: false,
+    sendUpdates: false,
+    commConsent: false,
+  },
   urlSearchParams: '',
   utmParameters: { utm_source: '', utm_medium: '', utm_campaign: '', utm_term: '', utm_content: '' },
   currentStep: 0,
@@ -77,15 +85,17 @@ function renderExpenses(formDataOverrides: Partial<FormData> = {}) {
   return render(
     <IntlProvider locale="en">
       <Context.Provider
-        value={{
-          formData,
-          setFormData: jest.fn(),
-          setStepLoading: jest.fn(),
-          config: undefined,
-          whiteLabel: undefined,
-          locale: 'en',
-          theme: undefined,
-        } as any}
+        value={
+          {
+            formData,
+            setFormData: jest.fn(),
+            setStepLoading: jest.fn(),
+            config: undefined,
+            whiteLabel: undefined,
+            locale: 'en',
+            theme: undefined,
+          } as any
+        }
       >
         <Expenses />
       </Context.Provider>
@@ -314,9 +324,7 @@ describe('Expenses', () => {
       fireEvent.click(screen.getByRole('button', { name: /continue/i }));
 
       await waitFor(() => {
-        expect(mockUpdateScreen).toHaveBeenCalledWith(
-          expect.objectContaining({ expenses: [], hasExpenses: 'false' }),
-        );
+        expect(mockUpdateScreen).toHaveBeenCalledWith(expect.objectContaining({ expenses: [], hasExpenses: 'false' }));
       });
     });
   });
