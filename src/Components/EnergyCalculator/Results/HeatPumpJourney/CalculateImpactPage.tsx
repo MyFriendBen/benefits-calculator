@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -18,14 +18,22 @@ import {
   Typography,
 } from '@mui/material';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
+import { Alert, CircularProgress } from '@mui/material';
 import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
+import { useFeatureFlag } from '../../../Config/configHook';
 import {
   type CalculateImpactHouseholdType,
   type CalculateImpactUpgradeChoice,
   type RemFuelType,
+  type RemImpactApiResponse,
+  type CalculateImpactFormValues,
+  isValidRemImpactApiResponse,
 } from './remCalculateImpactTypes';
+import { fetchRemImpact } from './fetchRemImpact';
+import { buildCalculateImpactPayload } from './remCalculateImpactTypes';
+import CalculateImpactResults from './CalculateImpactResults';
 import { ReactComponent as Coin } from '../../Icons/Coin.svg';
 import './CalculateImpactPage.css';
 
@@ -124,25 +132,41 @@ const UPGRADE_CHOICE_VALUES: [CalculateImpactUpgradeChoice, ...CalculateImpactUp
   'heat_pump_water_heater',
 ];
 
-const calculateImpactSchema = z.object({
-  householdType: z.enum(HOUSEHOLD_TYPE_VALUES, {
-    required_error: 'Please select a household type.',
-  }),
-  address: z
-    .string()
-    .min(1, 'Please enter a valid street address.')
-    .transform((val) => val.trim())
-    .refine((val) => val.length > 0, { message: 'Please enter a valid street address.' }),
-  heatingFuel: z.enum(FUEL_TYPE_VALUES, {
-    required_error: 'Please select a heating fuel.',
-  }),
-  waterHeatingFuel: z.enum(FUEL_TYPE_VALUES).optional(),
-  upgradeChoice: z.enum(UPGRADE_CHOICE_VALUES, {
-    required_error: 'Please select an upgrade option.',
-  }),
-});
+const calculateImpactSchema = z
+  .object({
+    householdType: z.enum(HOUSEHOLD_TYPE_VALUES, {
+      required_error: 'Please select a household type.',
+    }),
+    address: z
+      .string()
+      .min(1, 'Please enter a valid street address.')
+      .transform((val) => val.trim())
+      .refine((val) => val.length > 0, { message: 'Please enter a valid street address.' }),
+    heatingFuel: z.enum(FUEL_TYPE_VALUES, {
+      required_error: 'Please select a heating fuel.',
+    }),
+    waterHeatingFuel: z.enum(FUEL_TYPE_VALUES).optional(),
+    upgradeChoice: z.enum(UPGRADE_CHOICE_VALUES, {
+      required_error: 'Please select an upgrade option.',
+    }),
+  })
+  .superRefine((data, ctx) => {
+    if (data.upgradeChoice === 'heat_pump_water_heater' && !data.waterHeatingFuel) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['waterHeatingFuel'],
+        message: 'Please select a water heating fuel for this upgrade.',
+      });
+    }
+  });
 
 type CalculateImpactFormData = z.infer<typeof calculateImpactSchema>;
+
+type SubmitState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; result: RemImpactApiResponse; formValues: CalculateImpactFormValues }
+  | { status: 'error'; message: string };
 
 export default function CalculateImpactPage() {
   const intl = useIntl();
@@ -150,13 +174,13 @@ export default function CalculateImpactPage() {
   const { whiteLabel, uuid } = useParams();
   const [searchParams] = useSearchParams();
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams]);
+  const showCalculateImpact = useFeatureFlag('cesn_heat_pump_journey');
+  const [submitState, setSubmitState] = useState<SubmitState>({ status: 'idle' });
 
   const backLink = addAdminToLink(
     `/${whiteLabel}/${uuid}/results/energy-rebates/hvac`,
     isAdminView,
   );
-
-  usePageTitle(OTHER_PAGE_TITLES.energyCalculatorCalculateImpact);
 
   const {
     control,
@@ -173,10 +197,101 @@ export default function CalculateImpactPage() {
     },
   });
 
-  const onSubmit = (_data: CalculateImpactFormData) => {
-    // MFB-981 (Step 3) will wire this submit handler to the Rewiring America REM API.
-    // Intentionally a no-op until then — see remCalculateImpactTypes.ts for the payload shape.
+  usePageTitle(OTHER_PAGE_TITLES.energyCalculatorCalculateImpact);
+
+  if (!showCalculateImpact) return null;
+
+  const onSubmit = (data: CalculateImpactFormData) => {
+    if (!whiteLabel) return;
+    if (submitState.status === 'loading') return;
+    const payload = buildCalculateImpactPayload({
+      upgradeChoice: data.upgradeChoice,
+      address: data.address,
+      heatingFuel: data.heatingFuel,
+      waterHeatingFuel: data.waterHeatingFuel ?? '',
+      householdType: data.householdType,
+    });
+    setSubmitState({ status: 'loading' });
+    fetchRemImpact(whiteLabel, payload.remAddressQuery)
+      .then((result) => {
+        if (!isValidRemImpactApiResponse(result)) {
+          setSubmitState({ status: 'error', message: 'Unexpected response from Rewiring America.' });
+          return;
+        }
+        setSubmitState({ status: 'success', result, formValues: data });
+      })
+      .catch((err: Error) =>
+        setSubmitState({ status: 'error', message: err.message }),
+      );
   };
+
+  if (submitState.status === 'success') {
+    return (
+      <main className="benefits-form calculate-impact-page">
+        <div className="calculate-impact-back-row results-back-save-btn-container">
+          <button
+            data-testid="back-to-results-button"
+            className="results-back-save-buttons"
+            onClick={() => navigate(backLink)}
+            aria-label={intl.formatMessage({ id: 'backAndSaveBtns.backBtnAL', defaultMessage: 'back' })}
+          >
+            <div className="btn-icon-text-container padding-right">
+              <LeftArrowIcon />
+              <FormattedMessage
+                id="energyCalculator.calculateImpact.backToResults"
+                defaultMessage="BACK TO RESULTS"
+              />
+            </div>
+          </button>
+        </div>
+
+        <header className="calculate-impact-header">
+          <Coin aria-hidden="true" className="calculate-impact-icon" />
+          <div className="calculate-impact-header-text">
+            <span className="calculate-impact-title-text">
+              <FormattedMessage
+                id="energyCalculator.calculateImpact.titleLabel"
+                defaultMessage="Bill Impact Calculator"
+              />
+            </span>
+            <hr className="calculate-impact-separator" />
+            <h1 className="calculate-impact-subtitle">
+              <FormattedMessage
+                id="energyCalculator.calculateImpact.subtitle"
+                defaultMessage="Estimated Savings"
+              />
+            </h1>
+          </div>
+        </header>
+
+        <Typography variant="body1" className="calculate-impact-intro energy-calculator-body-text">
+          <FormattedMessage
+            id="energyCalculator.calculateImpact.intro"
+            defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
+            values={{
+              rewiringAmerica: (
+                <TrackedOutboundLink
+                  href="https://www.rewiringamerica.org"
+                  className="link-color"
+                  action="calculate_impact_rewiring_america"
+                  label="Rewiring America"
+                  category="energy_rebate"
+                >
+                  <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
+                </TrackedOutboundLink>
+              ),
+            }}
+          />
+        </Typography>
+
+        <CalculateImpactResults
+          result={submitState.result}
+          formValues={submitState.formValues}
+          onEdit={() => setSubmitState({ status: 'idle' })}
+        />
+      </main>
+    );
+  }
 
   return (
     <main className="benefits-form calculate-impact-page">
@@ -235,6 +350,20 @@ export default function CalculateImpactPage() {
           }}
         />
       </Typography>
+
+      {submitState.status === 'loading' && (
+        <div className="calculate-impact-loading">
+          <CircularProgress size={28} aria-label={intl.formatMessage({ id: 'general.loading', defaultMessage: 'Loading' })} />
+        </div>
+      )}
+      {submitState.status === 'error' && (
+        <Alert severity="error" className="calculate-impact-error">
+          <FormattedMessage
+            id="energyCalculator.calculateImpact.error"
+            defaultMessage="Something went wrong calculating your impact. Please try again."
+          />
+        </Alert>
+      )}
 
       <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
         <section className="calculate-impact-card" aria-labelledby="calculate-impact-household-heading">
@@ -405,7 +534,7 @@ export default function CalculateImpactPage() {
                   defaultMessage="Select your water heating fuel to see the impact of a water heater upgrade."
                 />
               </p>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!errors.waterHeatingFuel}>
                 <Controller
                   name="waterHeatingFuel"
                   control={control}
@@ -451,6 +580,9 @@ export default function CalculateImpactPage() {
                     </Select>
                   )}
                 />
+                {errors.waterHeatingFuel && (
+                  <FormHelperText>{errors.waterHeatingFuel.message}</FormHelperText>
+                )}
               </FormControl>
             </div>
           </div>
@@ -476,18 +608,29 @@ export default function CalculateImpactPage() {
                 >
                   {UPGRADE_OPTIONS.map((opt) => {
                     const isSelected = field.value === opt.value;
+                    const isAvailable = opt.value === 'heat_pump_water_heater';
                     return (
                       <div
                         key={opt.value}
                         className="calculate-impact-radio-option"
                         data-selected={isSelected ? 'true' : 'false'}
+                        data-disabled={!isAvailable ? 'true' : 'false'}
                       >
                         <FormControlLabel
                           value={opt.value}
+                          disabled={!isAvailable}
                           control={<Radio />}
                           label={
                             <span className="calculate-impact-radio-label">
                               <FormattedMessage id={opt.messageId} defaultMessage={opt.defaultMessage} />
+                              {!isAvailable && (
+                                <span className="calculate-impact-coming-soon">
+                                  <FormattedMessage
+                                    id="energyCalculator.calculateImpact.comingSoon"
+                                    defaultMessage="Coming soon"
+                                  />
+                                </span>
+                              )}
                             </span>
                           }
                         />
@@ -505,7 +648,7 @@ export default function CalculateImpactPage() {
             )}
           </FormControl>
 
-          <Button type="submit" variant="contained" color="primary" size="medium" className="calculate-impact-submit">
+          <Button type="submit" variant="contained" color="primary" size="medium" className="calculate-impact-submit" disabled={submitState.status === 'loading'} aria-busy={submitState.status === 'loading'}>
             <FormattedMessage id="energyCalculator.calculateImpact.submit" defaultMessage="Calculate impact" />
           </Button>
         </section>
