@@ -22,6 +22,7 @@ import { ReactComponent as JobResources } from '../../Assets/icons/UrgentNeeds/A
 import { ReactComponent as LegalServices } from '../../Assets/icons/UrgentNeeds/AcuteConditions/legal_services.svg';
 import { ReactComponent as Support } from '../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
 import { ReactComponent as Military } from '../../Assets/icons/UrgentNeeds/AcuteConditions/military.svg';
+import { ReactComponent as Aging } from '../../Assets/icons/UrgentNeeds/AcuteConditions/aging.svg';
 import { ReactComponent as Resources } from '../../Assets/icons/General/resources.svg';
 
 /**
@@ -36,6 +37,7 @@ export const LUCIDE_ICONS = ['house_plug', 'light_bulb', 'talk', 'air_vent', 'co
  * NOTE: keys must be lower case
  */
 export const ICON_OPTIONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
+  aging: Aging,
   baby_supplies: BabySupplies,
   behavioral_health: Support,
   cash: CashAssistance,
