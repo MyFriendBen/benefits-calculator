@@ -19,6 +19,14 @@
   width: 4.5rem;
 }
 
+/* Render the aging icon as an outline (line art) instead of a solid fill;
+   stroke-width comes from the SVG. Matches the Additional Resources button. */
+.result-resource-more-info svg.aging-icon,
+.result-resource-more-info svg.aging-icon path.cls-1 {
+  fill: none;
+  stroke: var(--icon-color);
+}
+
 .result-resource-more-info span {
   font-family: 'Open Sans', sans-serif;
   font-size: 0.7rem;

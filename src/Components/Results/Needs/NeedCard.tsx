@@ -15,7 +15,7 @@ const getIcon = (messageType: string) => {
   const Icon = ICON_OPTIONS_MAP[messageType] ?? ICON_OPTIONS_MAP['default'];
 
   if (Icon !== undefined) {
-    return <Icon />;
+    return <Icon className={messageType === 'aging' ? 'aging-icon' : undefined} />;
   }
 
   return null;
