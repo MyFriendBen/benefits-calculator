@@ -15,7 +15,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "allowImportingTsExtensions": true
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src"]
 }
