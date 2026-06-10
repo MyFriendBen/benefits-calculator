@@ -84,7 +84,7 @@ function transformItemIcon(item: unknown): any {
       iconComponent = <Military className={icon._classname} />;
       break;
     case 'Aging':
-      iconComponent = <Aging className={`${icon._classname} aging-icon`} />;
+      iconComponent = <Aging className={`${icon._classname} aging`} />;
       break;
     case 'Savings':
       iconComponent = <Resources className={icon._classname} />;

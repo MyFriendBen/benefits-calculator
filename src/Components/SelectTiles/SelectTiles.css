@@ -175,25 +175,12 @@
   stroke-width: 0.313rem;
 }
 
-/* Render the aging icon as an outline (line art) instead of a solid fill.
-   Overrides the force-fill in `.option-card-icon *`; stroke-width comes from the SVG. */
-.option-card-icon.aging-icon * {
-  fill: none !important;
-  stroke: var(--icon-color) !important;
-}
-
 /* ============================================
    Section 5: Selected icon overrides
    Order matters: general rule first, then lucide override.
    ============================================ */
 .option-card--selected .option-card-icon * {
   fill: white !important;
-  stroke: white !important;
-}
-
-/* Keep the aging icon an outline when selected (white line on the selected fill) */
-.option-card--selected .option-card-icon.aging-icon * {
-  fill: none !important;
   stroke: white !important;
 }
 
