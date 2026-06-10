@@ -23,6 +23,7 @@ import { ReactComponent as LegalServices } from '../../Assets/icons/UrgentNeeds/
 import { ReactComponent as Support } from '../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
 import { ReactComponent as Military } from '../../Assets/icons/UrgentNeeds/AcuteConditions/military.svg';
 import { ReactComponent as Aging } from '../../Assets/icons/UrgentNeeds/AcuteConditions/aging.svg';
+import { ReactComponent as Disabled } from '../../Assets/icons/General/OptionCard/Conditions/disabled.svg';
 import { ReactComponent as Resources } from '../../Assets/icons/General/resources.svg';
 
 /**
@@ -45,6 +46,7 @@ export const ICON_OPTIONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGEleme
   child_care: ChildCareYouthEducation,
   child_development: ChildDevelopment,
   dental_care: DentalCare,
+  disability: Disabled,
   family_planning: FamilyPlanning,
   food: Food,
   food_groceries: Food,
