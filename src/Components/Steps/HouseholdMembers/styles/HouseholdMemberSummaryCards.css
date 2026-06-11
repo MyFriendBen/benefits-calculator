@@ -23,8 +23,12 @@
 }
 
 .member-added-container.current-household-member {
-  background-color: white;
+  /* Distinguish the member currently being edited with a filled tint + heavier border, not just
+     color — some white labels (e.g. CESN) set --secondary-color equal to --primary-color, so a
+     border-color difference alone wouldn't separate "completed" from "editing". */
+  background-color: #eef1f8;
   border-style: solid;
+  border-width: 3px;
 }
 
 .household-member-status-icon {
