@@ -14,10 +14,11 @@
   font-size: 0.75rem;
   box-sizing: border-box;
   background-color: var(--input-section-background);
+  /* Just wide enough to fit the label plus the trash button without crowding. */
+  min-width: 7.5rem;
 }
 
 .member-added-container.completed-household-member {
-  background-color: var(--input-section-background);
   border-style: solid;
 }
 
@@ -38,25 +39,62 @@
   padding: 0.15rem;
 }
 
-.completed-icon {
-  color: var(--primary-color);
-  font-size: .5rem;
+/*
+  These are MUI SvgIcons. MUI's injected `.MuiSvgIcon-root` sets font-size: 1.5rem and
+  width/height: 1em at equal specificity, so a bare `.current-icon { font-size }` loses the
+  cascade and the icon renders at full size (overlapping the card text). Scope under the
+  container and pin width/height explicitly to win and clamp the actual SVG box.
+*/
+.household-member-status-icon .completed-icon,
+.household-member-status-icon .current-icon {
+  font-size: 0.85rem;
+  width: 0.85rem;
+  height: 0.85rem;
   display: block;
 }
 
-.current-icon {
+.household-member-status-icon .completed-icon {
+  color: var(--primary-color);
+}
+
+.household-member-status-icon .current-icon {
   color: var(--secondary-color);
-  font-size: .5rem;
-  display: block;
 }
 
 .household-member-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   margin-top: 0;
   margin-bottom: 0.1rem;
   padding-left: 0;
+}
+
+/*
+  The trash (delete) button sits at the top-right of the header. Keep it compact and pull it
+  slightly into the card's padding so it aligns with the card edge without adding card height.
+  Grey keeps it a quiet secondary affordance that doesn't compete with the colored card; it
+  reads as destructive on hover/focus.
+*/
+.household-member-delete-button.MuiIconButton-root {
+  padding: 0.125rem;
+  /* Negative top margin lifts the trash can higher toward the top edge of the card. */
+  margin: -0.3rem -0.4rem 0 0;
+  align-self: flex-start;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.household-member-delete-button.MuiIconButton-root:hover,
+.household-member-delete-button.MuiIconButton-root:focus-visible {
+  color: var(--error-color, #c62828);
+}
+
+.household-member-delete-button .MuiSvgIcon-root {
+  font-size: 0.85rem;
+  width: 0.95rem;
+  height: 0.95rem;
 }
 
 .completed-household-member {
@@ -107,64 +145,22 @@
   margin-top: 1rem;
 }
 
-/* Clickable card styles */
-.member-added-container[role="button"] {
+/*
+  Editable cards are clickable to edit. A subtle hover lift + pointer cursor signals this
+  without a heavy overlay — the previous full-card "Edit" overlay competed with the trash
+  button and obscured the card text, so we keep the affordance lightweight instead.
+*/
+.member-added-container[role='button'] {
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  will-change: transform;
 }
 
-.member-added-container[role="button"]:hover,
-.member-added-container[role="button"]:focus-visible {
+.member-added-container[role='button']:hover,
+.member-added-container[role='button']:focus-visible {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
-}
-
-.hover-edit-button {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: white;
-  border: 2px solid var(--primary-color);
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: var(--primary-color);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.member-added-container[role="button"]:hover .hover-edit-button,
-.member-added-container[role="button"]:focus-visible .hover-edit-button {
-  opacity: 1;
-}
-
-.member-added-container[role="button"]:hover .household-member-header,
-.member-added-container[role="button"]:hover .member-added-income,
-.member-added-container[role="button"]:focus-visible .household-member-header,
-.member-added-container[role="button"]:focus-visible .member-added-income {
-  opacity: 0.3;
-}
-
-/* Disable hover effects for current member */
-.current-household-member[role="button"]:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-.current-household-member .hover-edit-button {
-  display: none;
-}
-
-.current-household-member:hover .household-member-header,
-.current-household-member:hover .member-added-income {
-  opacity: 1;
 }
 
 @media (max-width: 600px) {
@@ -179,16 +175,6 @@
     width: 90%;
   }
 
-  /* Make clickable cards more obvious on mobile */
-  .member-added-container[role="button"] {
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-  }
-
-  .member-added-container[role="button"]:active {
-    transform: scale(0.98);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-  }
-
   .member-added-relationship {
     display: inline;
     padding-right: 0.5rem;
@@ -198,20 +184,9 @@
     display: block;
   }
 
+  /* Keep the cards compact on mobile — income isn't shown in the summary roster here. */
   .member-added-income {
     display: none;
-  }
-
-  /* Hide hover edit button on mobile */
-  .hover-edit-button {
-    display: none !important;
-  }
-
-  .member-added-container[role="button"]:hover .household-member-header,
-  .member-added-container[role="button"]:hover .member-added-income,
-  .member-added-container[role="button"]:focus-visible .household-member-header,
-  .member-added-container[role="button"]:focus-visible .member-added-income {
-    opacity: 1;
   }
 
   .question-buttons {

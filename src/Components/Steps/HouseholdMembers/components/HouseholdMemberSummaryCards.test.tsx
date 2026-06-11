@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
@@ -8,6 +8,7 @@ import { calcMemberYearlyIncome } from '../../../../Assets/income';
 import { useConfig } from '../../../Config/configHook';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { useTranslateNumber } from '../../../../Assets/languageOptions';
+import useScreenApi from '../../../../Assets/updateScreen';
 
 jest.mock('../../../../Assets/age.tsx', () => ({
   calcAge: jest.fn(),
@@ -29,11 +30,18 @@ jest.mock('../../../../Assets/languageOptions', () => ({
   useTranslateNumber: jest.fn(),
 }));
 
+jest.mock('../../../../Assets/updateScreen', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
 const mockCalcAge = calcAge as jest.MockedFunction<typeof calcAge>;
 const mockCalcMemberYearlyIncome = calcMemberYearlyIncome as jest.MockedFunction<typeof calcMemberYearlyIncome>;
 const mockUseConfig = useConfig as jest.MockedFunction<typeof useConfig>;
 const mockUseStepNumber = useStepNumber as jest.MockedFunction<typeof useStepNumber>;
 const mockUseTranslateNumber = useTranslateNumber as jest.MockedFunction<typeof useTranslateNumber>;
+const mockUseScreenApi = useScreenApi as jest.MockedFunction<typeof useScreenApi>;
+const mockUpdateScreen = jest.fn();
 
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -70,6 +78,10 @@ const renderCards = (householdData: any[] = [], householdSize?: number) => {
     'householdDataBlock.member-income': 'Annual Income: ',
     'householdDataBlock.edit': 'Edit',
     'editHHMember.ariaText': 'edit household member',
+    'deleteHHMember.ariaText': 'delete household member',
+    'householdDataBlock.basicInfo.deleteConfirm': 'Remove this member?',
+    'householdDataBlock.basicInfo.deleteCancel': 'Cancel',
+    'householdDataBlock.basicInfo.deleteConfirmButton': 'Remove',
   };
 
   return render(
@@ -84,14 +96,13 @@ const renderCards = (householdData: any[] = [], householdSize?: number) => {
           </Routes>
         </MemoryRouter>
       </Context.Provider>
-    </IntlProvider>
+    </IntlProvider>,
   );
 };
 
 // Completed non-current cards get role="button", so query by class rather than
 // by the "article" role (which would exclude the clickable cards).
-const cardContainers = () =>
-  Array.from(document.querySelectorAll('.member-added-container')) as HTMLElement[];
+const cardContainers = () => Array.from(document.querySelectorAll('.member-added-container')) as HTMLElement[];
 
 describe('HouseholdMemberSummaryCards', () => {
   beforeEach(() => {
@@ -101,6 +112,8 @@ describe('HouseholdMemberSummaryCards', () => {
     mockCalcAge.mockReturnValue(35);
     mockCalcMemberYearlyIncome.mockReturnValue(12000);
     mockUseTranslateNumber.mockReturnValue((n: any) => String(n));
+    mockUpdateScreen.mockResolvedValue(undefined);
+    mockUseScreenApi.mockReturnValue({ updateScreen: mockUpdateScreen } as any);
   });
 
   describe('rendering', () => {
@@ -155,6 +168,14 @@ describe('HouseholdMemberSummaryCards', () => {
       expect(screen.queryByText(/Annual Income/i)).not.toBeInTheDocument();
     });
 
+    it('renders income for the current member when editing (data already submitted)', () => {
+      // page is '2' → index 1 is the current member. When that member is already completed
+      // (i.e. the user navigated back to edit them), their submitted income should still show.
+      renderCards([completedMember(), completedMember()], 2);
+      // Both completed members surface income, including the current one being edited.
+      expect(screen.getAllByText(/Annual Income/i)).toHaveLength(2);
+    });
+
     it('treats a member with birth data but no insurance answer as not completed', () => {
       // Has birth data + relationship but the health insurance question is unanswered,
       // so the single isMemberCompleted predicate must not treat it as completed:
@@ -166,6 +187,45 @@ describe('HouseholdMemberSummaryCards', () => {
       expect(cards[0].className).not.toContain('completed-household-member');
       expect(cards[0]).not.toHaveAttribute('role', 'button');
       expect(screen.queryByText(/Annual Income/i)).not.toBeInTheDocument();
+    });
+
+    it('treats a member with no healthInsurance object at all as not completed', () => {
+      // Distinct from the `{}` case: healthInsurance is entirely absent, exercising the
+      // `member.healthInsurance && ...` short-circuit in isMemberCompleted.
+      const inProgress = completedMember({ healthInsurance: undefined });
+      renderCards([inProgress], 1);
+      const cards = cardContainers();
+      expect(cards[0].className).not.toContain('completed-household-member');
+      expect(cards[0]).not.toHaveAttribute('role', 'button');
+      expect(screen.queryByText(/Annual Income/i)).not.toBeInTheDocument();
+    });
+
+    it('treats "none" (no insurance) as a completed insurance answer', () => {
+      // `{ none: true }` is a real, intentional answer — someone with no coverage is done.
+      // Guards against a future refactor silently requiring a "positive" coverage type.
+      renderCards([completedMember({ healthInsurance: { none: true } })], 1);
+      const cards = cardContainers();
+      expect(cards[0].className).toContain('completed-household-member');
+      expect(screen.getByText(/Annual Income/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('household slot count', () => {
+    it('renders nothing extra when householdSize is 0 but members exist', () => {
+      // A stale/malformed householdSize must never hide already-entered members:
+      // the slot count is clamped up to householdData.length.
+      renderCards([completedMember()], 0);
+      expect(cardContainers()).toHaveLength(1);
+    });
+
+    it('clamps a householdSize smaller than the member count up to the member count', () => {
+      renderCards([completedMember(), completedMember({ relationshipToHH: 'child' })], 1);
+      expect(cardContainers()).toHaveLength(2);
+    });
+
+    it('falls back to the member count when householdSize is not a finite number', () => {
+      renderCards([completedMember()], NaN);
+      expect(cardContainers()).toHaveLength(1);
     });
   });
 
@@ -204,30 +264,27 @@ describe('HouseholdMemberSummaryCards', () => {
       renderCards([completedMember(), completedMember()], 2);
       const cards = cardContainers();
       fireEvent.click(cards[0]);
-      expect(mockNavigate).toHaveBeenCalledWith(
-        '/default/test-uuid/step-3/1',
-        { state: { isEditing: true, returnToPage: 2 } },
-      );
+      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/1', {
+        state: { isEditing: true, returnToPage: 2 },
+      });
     });
 
     it('navigates when a completed card is activated with the Enter key', () => {
       renderCards([completedMember(), completedMember()], 2);
       const cards = cardContainers();
       fireEvent.keyDown(cards[0], { key: 'Enter' });
-      expect(mockNavigate).toHaveBeenCalledWith(
-        '/default/test-uuid/step-3/1',
-        { state: { isEditing: true, returnToPage: 2 } },
-      );
+      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/1', {
+        state: { isEditing: true, returnToPage: 2 },
+      });
     });
 
     it('navigates when a completed card is activated with the Space key', () => {
       renderCards([completedMember(), completedMember()], 2);
       const cards = cardContainers();
       fireEvent.keyDown(cards[0], { key: ' ' });
-      expect(mockNavigate).toHaveBeenCalledWith(
-        '/default/test-uuid/step-3/1',
-        { state: { isEditing: true, returnToPage: 2 } },
-      );
+      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/1', {
+        state: { isEditing: true, returnToPage: 2 },
+      });
     });
 
     it('does not make the current member card clickable', () => {
@@ -237,11 +294,22 @@ describe('HouseholdMemberSummaryCards', () => {
     });
   });
 
-  describe('calcAge NaN handling', () => {
-    it('renders 0 instead of NaN when calcAge returns NaN', () => {
+  describe('age display', () => {
+    it('omits the age parenthetical entirely when calcAge returns NaN', () => {
+      // A malformed birthdate must not render a misleading "(0)" or "(NaN)" — we show the
+      // relationship label alone until a valid age can be computed.
       mockCalcAge.mockReturnValue(NaN);
       renderCards([completedMember()], 1);
-      expect(screen.getByText(/\(0\)/)).toBeInTheDocument();
+      expect(screen.queryByText(/\(0\)/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/\(NaN\)/)).not.toBeInTheDocument();
+    });
+
+    it('omits the age and income for an in-progress member with no birthdate yet', () => {
+      // A member slot with no birth data shows just its label (no "(0)" age, no "$0" income),
+      // so the roster can render on the member's own page while they're still filling it in.
+      renderCards([{ relationshipToHH: 'spouse' } as any], 2);
+      expect(screen.queryByText(/\(0\)/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Annual Income/i)).not.toBeInTheDocument();
     });
   });
 
@@ -259,6 +327,105 @@ describe('HouseholdMemberSummaryCards', () => {
       expect(cards[0]).toHaveAttribute('tabindex', '0');
       // Current member card: not in the tab order
       expect(cards[1]).not.toHaveAttribute('tabindex');
+    });
+  });
+
+  describe('delete actions', () => {
+    // page is '2' → index 1 is the current member. The trash button only renders on entered,
+    // non-head members, so getAllByLabelText returns them in DOM (member-index) order.
+    const trashButtons = () => screen.getAllByLabelText('delete household member');
+
+    it('does not render a delete button on the head-of-household card', () => {
+      // Index 0 ("Yourself") can never be deleted here, so it has no trash button. With one
+      // other (deletable) member, exactly one trash button renders.
+      renderCards([completedMember(), completedMember({ relationshipToHH: 'child' })], 2);
+      expect(trashButtons()).toHaveLength(1);
+    });
+
+    it('renders a delete button for an incomplete non-head member', () => {
+      // An entered-but-incomplete member can still be removed (it just isn't editable).
+      const incomplete = { relationshipToHH: 'child', healthInsurance: {} } as any;
+      renderCards([completedMember(), incomplete], 3);
+      // Only the incomplete member (index 1) is deletable; the head (0) and placeholder (2) aren't.
+      expect(trashButtons()).toHaveLength(1);
+    });
+
+    it('removes the member and decrements household size on confirm', async () => {
+      const members = [
+        completedMember(),
+        completedMember({ relationshipToHH: 'child' }),
+        completedMember({ relationshipToHH: 'parent' }),
+      ];
+      renderCards(members, 3);
+      // Trash buttons: [0] = member index 1, [1] = member index 2. Delete the last (index 2).
+      fireEvent.click(trashButtons()[1]);
+      fireEvent.click(screen.getByText('Remove'));
+
+      await waitFor(() => expect(mockUpdateScreen).toHaveBeenCalledTimes(1));
+      const payload = mockUpdateScreen.mock.calls[0][0];
+      expect(payload.householdSize).toBe(2);
+      expect(payload.householdData).toHaveLength(2);
+      expect(payload.householdData.map((m: any) => m.relationshipToHH)).toEqual(['spouse', 'child']);
+    });
+
+    it('navigates to the basic-info page when deleting the current member', async () => {
+      // page is '2' → index 1 is current. Deleting it invalidates the current page.
+      renderCards([completedMember(), completedMember({ relationshipToHH: 'child' })], 2);
+      // The only trash button belongs to the current member (index 1).
+      fireEvent.click(trashButtons()[0]);
+      fireEvent.click(screen.getByText('Remove'));
+
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/0'));
+    });
+
+    it('stays on the current page when deleting a member after it', async () => {
+      // Deleting a member whose page is after the current one doesn't change the current page
+      // number, so no navigation happens — the updated context re-renders the roster in place.
+      const members = [
+        completedMember(),
+        completedMember({ relationshipToHH: 'child' }),
+        completedMember({ relationshipToHH: 'parent' }),
+      ];
+      renderCards(members, 3);
+      // [1] = member index 2 (page 3), which is after the current page (2).
+      fireEvent.click(trashButtons()[1]);
+      fireEvent.click(screen.getByText('Remove'));
+
+      await waitFor(() => expect(mockUpdateScreen).toHaveBeenCalled());
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('does not trigger edit navigation when the trash button is clicked', () => {
+      // The trash button lives inside an editable (clickable) card; its click must not bubble
+      // up and navigate to the edit page.
+      renderCards(
+        [
+          completedMember(),
+          completedMember({ relationshipToHH: 'child' }),
+          completedMember({ relationshipToHH: 'parent' }),
+        ],
+        2,
+      );
+      // [1] = member index 2, an editable (completed, non-current) card.
+      fireEvent.click(trashButtons()[1]);
+      // Confirmation opened, but no edit navigation happened.
+      expect(screen.getByText('Remove this member?')).toBeInTheDocument();
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('can cancel the delete confirmation without removing the member', () => {
+      renderCards(
+        [
+          completedMember(),
+          completedMember({ relationshipToHH: 'child' }),
+          completedMember({ relationshipToHH: 'parent' }),
+        ],
+        3,
+      );
+      fireEvent.click(trashButtons()[1]);
+      fireEvent.click(screen.getByText('Cancel'));
+
+      expect(mockUpdateScreen).not.toHaveBeenCalled();
     });
   });
 });

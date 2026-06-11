@@ -182,7 +182,10 @@ const HouseholdMemberForm = () => {
         <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
       </h2>
       <p className="question-sub-label">
-        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="You may edit or delete completed members below." />
+        <FormattedMessage
+          id="householdDataBlock.clickToEdit"
+          defaultMessage="You may edit or delete completed members below."
+        />
       </p>
       <Box className="summary-cards-container">
         <HouseholdMemberSummaryCards questionName={questionName} />
@@ -193,21 +196,24 @@ const HouseholdMemberForm = () => {
   const renderHeader = () => {
     let headerContent;
     if (pageNumber === 1) {
-      headerContent = <FormattedMessage id="householdDataBlock.questionHeader" defaultMessage="Tell us about yourself." />;
-    } else if (relationshipText) {
-      headerContent = age !== null ? (
-        <FormattedMessage
-          id="householdDataBlock.questionHeader-relationship-age"
-          defaultMessage="Tell us about your {relationship}, age {age}"
-          values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span>, age }}
-        />
-      ) : (
-        <FormattedMessage
-          id="householdDataBlock.questionHeader-relationship"
-          defaultMessage="Tell us about your {relationship}"
-          values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span> }}
-        />
+      headerContent = (
+        <FormattedMessage id="householdDataBlock.questionHeader" defaultMessage="Tell us about yourself." />
       );
+    } else if (relationshipText) {
+      headerContent =
+        age !== null ? (
+          <FormattedMessage
+            id="householdDataBlock.questionHeader-relationship-age"
+            defaultMessage="Tell us about your {relationship}, age {age}"
+            values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span>, age }}
+          />
+        ) : (
+          <FormattedMessage
+            id="householdDataBlock.questionHeader-relationship"
+            defaultMessage="Tell us about your {relationship}"
+            values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span> }}
+          />
+        );
     } else {
       headerContent = (
         <FormattedMessage
@@ -254,11 +260,7 @@ const HouseholdMemberForm = () => {
       />
 
       {!isEnergyCalculator && watchIsStudent && (
-        <StudentEligibilitySection
-          control={control as any}
-          errors={errors}
-          pageNumber={pageNumber}
-        />
+        <StudentEligibilitySection control={control as any} errors={errors} pageNumber={pageNumber} />
       )}
 
       <IncomeSection
@@ -276,8 +278,9 @@ const HouseholdMemberForm = () => {
     </>
   );
 
-  // Show summary cards only when on member 2+
-  const showSummaryCards = pageNumber > 1;
+  // Show the Household Members summary cards whenever the household has more than one member,
+  // including on member 1's page, so the user always sees the full household roster.
+  const showSummaryCards = Number(formData.householdSize) > 1;
 
   return (
     <main className="benefits-form" data-step-id="member-details" data-member-number={pageNumber}>
