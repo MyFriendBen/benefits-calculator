@@ -34,10 +34,13 @@ export const DEFAULT_SPECIAL_CONDITIONS = {
 };
 
 /**
- * Helper to check if user has health insurance selections (indicates they've progressed through form)
+ * Whether a member has successfully submitted their detail form at least once (i.e. hit
+ * "Continue" on their page). This is the workflow-agnostic source of truth for "completed":
+ * neither signal below exists for a brand-new member created on page 0, so detecting either
+ * means the form was submitted. Don't enumerate per-flow fields elsewhere — reuse this.
  */
-const hasProgressedThroughForm = (data?: HouseholdData): boolean => {
-  // Main workflow: health insurance is filled in after first submission
+export const hasSubmittedMemberForm = (data?: HouseholdData): boolean => {
+  // Main workflow: health insurance is filled in after first submission.
   if (data?.healthInsurance && Object.values(data.healthInsurance).some((v) => v === true)) {
     return true;
   }
@@ -62,7 +65,7 @@ const isWorkingAge = (birthYear?: number, birthMonth?: number): boolean => {
  * Determines default income streams - auto-adds for working-age members on first visit
  */
 const getDefaultIncomeStreams = (data?: HouseholdData): any[] => {
-  const progressed = hasProgressedThroughForm(data);
+  const progressed = hasSubmittedMemberForm(data);
   // Normalize [] to undefined when not yet progressed — the API always returns [] for
   // brand-new members, but getDefaultFormItems needs undefined to distinguish
   // "never visited" from "visited and intentionally cleared".
@@ -75,7 +78,7 @@ const getDefaultIncomeStreams = (data?: HouseholdData): any[] => {
     existingStreams,
     progressed,
     isWorkingAge(data?.birthYear, data?.birthMonth),
-    EMPTY_INCOME_STREAM as any
+    EMPTY_INCOME_STREAM as any,
   );
   return streams.map((stream: any) => ({
     ...stream,
@@ -99,7 +102,7 @@ const getDefaultSpecialConditions = (data?: HouseholdData): typeof DEFAULT_SPECI
     .filter(([key]) => key !== 'none')
     .some(([, value]) => value === true);
 
-  const progressed = hasProgressedThroughForm(data);
+  const progressed = hasSubmittedMemberForm(data);
 
   // If they've been through form but no special conditions are true, they selected "none"
   if (progressed && !hasAnyCondition) {
@@ -124,17 +127,19 @@ export const DEFAULT_STUDENT_ELIGIBILITY = {
  */
 export const createDefaultValues = (
   householdMemberFormData: HouseholdData | undefined,
-  isFirstMember: boolean = false
+  isFirstMember: boolean = false,
 ) => {
   const incomeStreams = getDefaultIncomeStreams(householdMemberFormData);
 
   return {
-    birthMonth: householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
-      ? householdMemberFormData.birthMonth
-      : 0,
-    birthYear: householdMemberFormData?.birthYear && householdMemberFormData.birthYear > 0
-      ? householdMemberFormData.birthYear
-      : 0,
+    birthMonth:
+      householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
+        ? householdMemberFormData.birthMonth
+        : 0,
+    birthYear:
+      householdMemberFormData?.birthYear && householdMemberFormData.birthYear > 0
+        ? householdMemberFormData.birthYear
+        : 0,
     relationshipToHH: householdMemberFormData?.relationshipToHH ?? (isFirstMember ? 'headOfHousehold' : ''),
     healthInsurance: householdMemberFormData?.healthInsurance
       ? { ...DEFAULT_HEALTH_INSURANCE, ...householdMemberFormData.healthInsurance }
@@ -181,20 +186,21 @@ export const createEnergyCalculatorDefaultValues = (
   const incomeStreams = getDefaultIncomeStreams(householdMemberFormData);
 
   return {
-    birthMonth: householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
-      ? householdMemberFormData.birthMonth
-      : 0,
-    birthYear: householdMemberFormData?.birthYear && householdMemberFormData.birthYear > 0
-      ? householdMemberFormData.birthYear
-      : 0,
+    birthMonth:
+      householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
+        ? householdMemberFormData.birthMonth
+        : 0,
+    birthYear:
+      householdMemberFormData?.birthYear && householdMemberFormData.birthYear > 0
+        ? householdMemberFormData.birthYear
+        : 0,
     conditions: {
       survivingSpouse: householdMemberFormData?.energyCalculator?.survivingSpouse ?? false,
       disabled: householdMemberFormData?.conditions?.disabled ?? false,
       medicalEquipment: householdMemberFormData?.energyCalculator?.medicalEquipment ?? false,
     },
     receivesSsi: householdMemberFormData?.energyCalculator?.receivesSsi ? 'true' : 'false',
-    relationshipToHH: householdMemberFormData?.relationshipToHH
-      ?? (pageNumber === 1 ? 'headOfHousehold' : ''),
+    relationshipToHH: householdMemberFormData?.relationshipToHH ?? (pageNumber === 1 ? 'headOfHousehold' : ''),
     incomeStreams,
   };
 };

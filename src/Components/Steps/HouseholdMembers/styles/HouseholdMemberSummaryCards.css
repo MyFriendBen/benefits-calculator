@@ -1,28 +1,148 @@
+.household-members-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .member-added-container {
   display: inline-flex;
   flex-direction: column;
-  flex-wrap: wrap;
-  outline: 1px solid black;
-  border-radius: 10px;
-  padding: 0.4rem 0.6rem;
-  margin: 0.25rem 0.5rem 0.25rem 0;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 0.5rem 0.625rem;
   position: relative;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  box-sizing: border-box;
+  background-color: var(--input-section-background);
+  /* Just wide enough to fit the label plus the trash button without crowding. */
+  min-width: 7.5rem;
+}
+
+.member-added-container.completed-household-member {
+  border-style: solid;
+}
+
+.member-added-container.current-household-member {
+  /* White fill + a heavier border distinguish the editing card from completed cards even on
+     themes where --secondary-color equals --primary-color (e.g. CESN) — a color-free emphasis. */
+  background-color: white;
+  border-style: solid;
+  border-width: 3px;
+}
+
+.household-member-status-icon {
+  position: absolute;
+  top: -0.5rem;
+  left: -0.35rem;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem;
+}
+
+/*
+  These are MUI SvgIcons. MUI's injected `.MuiSvgIcon-root` sets font-size: 1.5rem and
+  width/height: 1em at equal specificity, so a bare `.current-icon { font-size }` loses the
+  cascade and the icon renders at full size (overlapping the card text). Scope under the
+  container and pin width/height explicitly to win and clamp the actual SVG box.
+*/
+.household-member-status-icon .completed-icon,
+.household-member-status-icon .current-icon {
+  font-size: 0.85rem;
+  width: 0.85rem;
+  height: 0.85rem;
+  display: block;
+}
+
+.household-member-status-icon .completed-icon {
+  color: var(--primary-color);
+}
+
+.household-member-status-icon .current-icon {
+  color: var(--secondary-color);
 }
 
 .household-member-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0;
+  margin-bottom: 0.1rem;
+  padding-left: 0;
 }
 
+/*
+  The trash (delete) button sits at the top-right of the header. Keep it compact and pull it
+  slightly into the card's padding so it aligns with the card edge without adding card height.
+  Grey keeps it a quiet secondary affordance that doesn't compete with the colored card; it
+  darkens on hover/focus for feedback.
+*/
+.household-member-delete-button.MuiIconButton-root {
+  padding: 0.125rem;
+  /* Negative top margin lifts the trash can higher toward the top edge of the card. */
+  margin: -0.3rem -0.4rem 0 0;
+  align-self: flex-start;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.household-member-delete-button.MuiIconButton-root:hover,
+.household-member-delete-button.MuiIconButton-root:focus-visible {
+  /* Darken the grey on hover/focus for feedback — red isn't used in the design system. */
+  color: #374151;
+}
+
+.household-member-delete-button .MuiSvgIcon-root {
+  font-size: 0.85rem;
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.completed-household-member {
+  border-color: var(--primary-color);
+}
+
+.completed-household-member .member-added-relationship {
+  color: var(--primary-color);
+}
+
+.completed-household-member .member-added-income {
+  color: var(--primary-color);
+}
+
+/*
+  The editing member uses --secondary-color (terracotta on the default theme). On white labels
+  that set --secondary-color equal to --primary-color (e.g. CESN), the card matches the navy
+  completed cards — but the white fill (vs. their tinted background) and the wrench badge still
+  set it apart, so we avoid the too-loud bright accent a full red card border would give.
+*/
 .current-household-member {
-  outline: 3px solid var(--active-border-color);
-  box-shadow: 1px 1px 10px rgb(0 0 0 / 0.4);
+  border-color: var(--secondary-color);
+  border-style: solid;
+}
+
+.current-household-member .member-added-relationship {
+  color: var(--secondary-color);
+}
+
+.current-household-member .member-added-income {
+  color: var(--secondary-color);
 }
 
 .member-added-relationship {
   color: var(--primary-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.member-added-income {
+  font-size: 0.75rem;
+  padding-left: 0;
 }
 
 .household-data-sub-header {
@@ -35,11 +155,33 @@
   margin-top: 1rem;
 }
 
+/*
+  Editable cards are clickable to edit. A subtle hover lift + pointer cursor signals this
+  without a heavy overlay — the previous full-card "Edit" overlay competed with the trash
+  button and obscured the card text, so we keep the affordance lightweight instead.
+*/
+.member-added-container[role='button'] {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.member-added-container[role='button']:hover,
+.member-added-container[role='button']:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
 @media (max-width: 600px) {
+  .household-members-grid {
+    gap: 0.25rem;
+  }
+
   .member-added-container {
     display: inline-block;
     padding: 0.5rem;
-    margin: 0.5rem;
+    margin: 0.25rem;
     width: 90%;
   }
 
@@ -52,11 +194,12 @@
     display: block;
   }
 
-  .member-added-birth {
+  /* Keep the cards compact on mobile — income isn't shown in the summary roster here. */
+  .member-added-income {
     display: none;
   }
 
-  .member-added-income {
-    display: none;
+  .question-buttons {
+    padding: 0;
   }
 }
