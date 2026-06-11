@@ -55,13 +55,13 @@ const completedMember = (overrides = {}) => ({
   ...overrides,
 });
 
-const renderCards = (householdData: any[] = [], householdSize?: number, whiteLabel = 'default') => {
+const renderCards = (householdData: any[] = [], householdSize?: number) => {
   const contextValue = {
     formData: {
       householdData,
       householdSize: householdSize ?? householdData.length,
     } as any,
-    whiteLabel,
+    whiteLabel: 'default',
   } as any;
 
   const messages = {
@@ -88,8 +88,10 @@ const renderCards = (householdData: any[] = [], householdSize?: number, whiteLab
   );
 };
 
+// Completed non-current cards get role="button", so query by class rather than
+// by the "article" role (which would exclude the clickable cards).
 const cardContainers = () =>
-  screen.getAllByRole('article').filter((el) => el.className.includes('member-added-container'));
+  Array.from(document.querySelectorAll('.member-added-container')) as HTMLElement[];
 
 describe('HouseholdMemberSummaryCards', () => {
   beforeEach(() => {
@@ -152,6 +154,19 @@ describe('HouseholdMemberSummaryCards', () => {
       renderCards([], 2);
       expect(screen.queryByText(/Annual Income/i)).not.toBeInTheDocument();
     });
+
+    it('treats a member with birth data but no insurance answer as not completed', () => {
+      // Has birth data + relationship but the health insurance question is unanswered,
+      // so the single isMemberCompleted predicate must not treat it as completed:
+      // no income, not the completed class, and not clickable.
+      const inProgress = completedMember({ healthInsurance: {} });
+      renderCards([inProgress], 1);
+      const cards = cardContainers();
+      expect(cards).toHaveLength(1);
+      expect(cards[0].className).not.toContain('completed-household-member');
+      expect(cards[0]).not.toHaveAttribute('role', 'button');
+      expect(screen.queryByText(/Annual Income/i)).not.toBeInTheDocument();
+    });
   });
 
   describe('completion status icons', () => {
@@ -195,6 +210,26 @@ describe('HouseholdMemberSummaryCards', () => {
       );
     });
 
+    it('navigates when a completed card is activated with the Enter key', () => {
+      renderCards([completedMember(), completedMember()], 2);
+      const cards = cardContainers();
+      fireEvent.keyDown(cards[0], { key: 'Enter' });
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/default/test-uuid/step-3/1',
+        { state: { isEditing: true, returnToPage: 2 } },
+      );
+    });
+
+    it('navigates when a completed card is activated with the Space key', () => {
+      renderCards([completedMember(), completedMember()], 2);
+      const cards = cardContainers();
+      fireEvent.keyDown(cards[0], { key: ' ' });
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/default/test-uuid/step-3/1',
+        { state: { isEditing: true, returnToPage: 2 } },
+      );
+    });
+
     it('does not make the current member card clickable', () => {
       renderCards([completedMember(), completedMember()], 2);
       const cards = cardContainers();
@@ -211,9 +246,19 @@ describe('HouseholdMemberSummaryCards', () => {
   });
 
   describe('accessibility', () => {
-    it('each member card is an article element', () => {
+    it('renders a member card for each household slot', () => {
       renderCards([completedMember(), completedMember()], 2);
       expect(cardContainers().length).toBeGreaterThan(0);
+    });
+
+    it('exposes completed editable cards as keyboard-focusable buttons', () => {
+      renderCards([completedMember(), completedMember()], 2);
+      const cards = cardContainers();
+      // Completed, non-current card: focusable + announced as a button
+      expect(cards[0]).toHaveAttribute('role', 'button');
+      expect(cards[0]).toHaveAttribute('tabindex', '0');
+      // Current member card: not in the tab order
+      expect(cards[1]).not.toHaveAttribute('tabindex');
     });
   });
 });

@@ -8,7 +8,7 @@ import { useTranslateNumber } from '../../../../Assets/languageOptions';
 import { HouseholdData } from '../../../../Types/FormData';
 import { FormattedMessageType, QuestionName } from '../../../../Types/Questions';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useContext } from 'react';
+import { KeyboardEvent, useContext } from 'react';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { Context } from '../../../Wrapper/Wrapper';
 import '../styles/HouseholdMemberSummaryCards.css';
@@ -17,6 +17,19 @@ import { formatToUSD } from '../../../../utils/formatCurrency';
 
 type HHMSummariesProps = {
   questionName: QuestionName;
+};
+
+// A member's card is "completed" once they have basic info (birth date + relationship)
+// and have answered the health insurance question. This is the single source of truth
+// for whether a card shows income, gets the completed badge, and is clickable to edit.
+const isMemberCompleted = (member: HouseholdData | undefined): member is HouseholdData => {
+  if (!member) {
+    return false;
+  }
+  const hasAnsweredInsurance = Boolean(
+    member.healthInsurance && Object.values(member.healthInsurance).some((value) => value === true),
+  );
+  return Boolean(member.birthYear && member.birthMonth && member.relationshipToHH && hasAnsweredInsurance);
 };
 
 const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
@@ -34,57 +47,65 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   });
   const navigate = useNavigate();
 
-  const handleEditBtnSubmit = async (memberIndex: number) => {
-    // Navigate directly without validation when editing a member
-    // Validation will happen when they submit that member's form
-    // Pass state to indicate we're in edit mode and where to return
+  // Navigate straight to the member's page without re-validating — validation runs when
+  // they submit that member's form. `returnToPage` lets the form send the user back here.
+  const goToMember = (memberIndex: number) => {
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, {
-      state: { isEditing: true, returnToPage: pageNumber }
+      state: { isEditing: true, returnToPage: pageNumber },
     });
   };
 
-  const createMemberCard = (
-    memberIndex: number,
-    memberData: HouseholdData | null,
-    age: number,
-    income: number | null,
-    relationship_options: Record<string, FormattedMessageType>,
-    isCompleted: boolean,
-  ) => {
+  const createMemberCard = (memberIndex: number, member: HouseholdData | undefined) => {
     const isCurrentMember = memberIndex + 1 === pageNumber;
-    const containerClassName = `member-added-container ${
-      isCompleted ? 'completed-household-member' : ''
-    } ${isCurrentMember ? 'current-household-member' : ''}`;
+    const isCompleted = isMemberCompleted(member);
+    // Only completed, non-current cards are editable: the current member is being entered
+    // right now, and incomplete members have nothing to edit yet.
+    const isEditable = isCompleted && !isCurrentMember;
 
-    let relationship;
-    if (memberData) {
-      const { relationshipToHH } = memberData;
-      relationship = relationship_options[relationshipToHH];
-      if (memberIndex === 0) {
-        relationship = <FormattedMessage id="relationshipOptions.yourself" defaultMessage="Yourself" />;
-      }
+    let age = member ? calcAge(member) : 0;
+    if (Number.isNaN(age)) {
+      age = 0;
+    }
+    const income = isCompleted ? calcMemberYearlyIncome(member) : null;
+
+    let relationship: FormattedMessageType;
+    if (memberIndex === 0) {
+      relationship = <FormattedMessage id="relationshipOptions.yourself" defaultMessage="Yourself" />;
+    } else if (member) {
+      relationship = relationshipOptions[member.relationshipToHH];
     } else {
-      // For future members, show a generic label
       relationship = <FormattedMessage id="householdDataBlock.householdMember" defaultMessage="Household Member" />;
     }
+
+    const containerClassName = `member-added-container ${isCompleted ? 'completed-household-member' : ''} ${
+      isCurrentMember ? 'current-household-member' : ''
+    }`;
+
+    const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        goToMember(memberIndex);
+      }
+    };
 
     return (
       <article
         className={containerClassName}
         key={memberIndex}
-        onClick={isCompleted && !isCurrentMember ? () => handleEditBtnSubmit(memberIndex) : undefined}
-        role={isCompleted && !isCurrentMember ? "button" : undefined}
-        tabIndex={isCompleted && !isCurrentMember ? 0 : undefined}
-        aria-label={isCompleted && !isCurrentMember ? editHHMemberAriaLabel : undefined}
+        onClick={isEditable ? () => goToMember(memberIndex) : undefined}
+        onKeyDown={isEditable ? handleKeyDown : undefined}
+        role={isEditable ? 'button' : undefined}
+        tabIndex={isEditable ? 0 : undefined}
+        aria-label={isEditable ? editHHMemberAriaLabel : undefined}
       >
         {isCurrentMember && (
           <div className="household-member-status-icon">
-            <ConstructionIcon className="current-icon" sx={{ fontSize: '.9rem' }} />
+            <ConstructionIcon className="current-icon" sx={{ fontSize: '.9rem' }} aria-hidden="true" />
           </div>
         )}
-        {isCompleted && !isCurrentMember && (
+        {isEditable && (
           <div className="household-member-status-icon">
-            <CheckCircleIcon className="completed-icon" sx={{ fontSize: '.9rem' }} />
+            <CheckCircleIcon className="completed-icon" sx={{ fontSize: '.9rem' }} aria-hidden="true" />
           </div>
         )}
         <div className="household-member-header">
@@ -97,7 +118,7 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
             <strong>
               <FormattedMessage id="householdDataBlock.member-income" defaultMessage="Annual Income: " />
             </strong>
-            {translateNumber(formatToUSD(Number(income)))}
+            {translateNumber(formatToUSD(income ?? 0))}
           </div>
         )}
         {isCompleted && (
@@ -109,61 +130,10 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
     );
   };
 
-  const isMemberCompleted = (member: HouseholdData) => {
-    // A member is completed if they have basic info (birthYear, birthMonth, relationshipToHH)
-    // and have answered the health insurance question (at least one insurance type selected)
-    const hasAnsweredInsurance = member.healthInsurance &&
-      Object.values(member.healthInsurance).some((value) => value === true);
-
-    return Boolean(
-      member.birthYear &&
-      member.birthMonth &&
-      member.relationshipToHH &&
-      hasAnsweredInsurance
-    );
-  };
-
-  const createFormDataMemberCard = (
-    memberIndex: number,
-    member: HouseholdData,
-    relationship_options: Record<string, FormattedMessageType>,
-  ) => {
-    if (member.birthYear && member.birthMonth) {
-      let age = calcAge(member);
-
-      if (Number.isNaN(age)) {
-        age = 0;
-      }
-
-      const income = calcMemberYearlyIncome(member);
-      const isCompleted = isMemberCompleted(member);
-
-      return createMemberCard(memberIndex, member, age, income, relationship_options, isCompleted);
-    }
-  };
-
-  // Create a placeholder card for members not yet entered
-  const createPlaceholderMemberCard = (
-    memberIndex: number,
-    relationship_options: Record<string, FormattedMessageType>,
-  ) => {
-    // Use a default age of 0 for placeholder cards
-    return createMemberCard(memberIndex, null, 0, null, relationship_options, false);
-  };
-
-  // Show all household members - both completed and pending
-  const allMemberCards = [];
-  for (let i = 0; i < formData.householdSize; i++) {
-    const memberData = formData.householdData[i];
-
-    if (memberData && memberData.birthYear && memberData.birthMonth) {
-      // Member has at least basic info - show their card
-      allMemberCards.push(createFormDataMemberCard(i, memberData, relationshipOptions));
-    } else {
-      // Member hasn't been entered yet - show placeholder
-      allMemberCards.push(createPlaceholderMemberCard(i, relationshipOptions));
-    }
-  }
+  // Render one card per household slot — completed members show their data, the rest are placeholders.
+  const allMemberCards = Array.from({ length: formData.householdSize }, (_, i) =>
+    createMemberCard(i, formData.householdData[i]),
+  );
 
   return (
     <article key={pageNumber}>

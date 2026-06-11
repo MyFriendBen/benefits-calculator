@@ -14,7 +14,6 @@
   font-size: 0.75rem;
   box-sizing: border-box;
   background-color: var(--input-section-background);
-  width: auto;
 }
 
 .member-added-container.completed-household-member {
@@ -98,11 +97,6 @@
   padding-left: 0;
 }
 
-.income-missing {
-  color: #d32f2f;
-  font-style: italic;
-}
-
 .household-data-sub-header {
   margin-top: 0.5rem;
 }
@@ -116,12 +110,16 @@
 /* Clickable card styles */
 .member-added-container[role="button"] {
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
 }
 
-.member-added-container[role="button"]:hover {
+.member-added-container[role="button"]:hover,
+.member-added-container[role="button"]:focus-visible {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .hover-edit-button {
@@ -142,12 +140,15 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.member-added-container[role="button"]:hover .hover-edit-button {
+.member-added-container[role="button"]:hover .hover-edit-button,
+.member-added-container[role="button"]:focus-visible .hover-edit-button {
   opacity: 1;
 }
 
 .member-added-container[role="button"]:hover .household-member-header,
-.member-added-container[role="button"]:hover .member-added-income {
+.member-added-container[role="button"]:hover .member-added-income,
+.member-added-container[role="button"]:focus-visible .household-member-header,
+.member-added-container[role="button"]:focus-visible .member-added-income {
   opacity: 0.3;
 }
 
@@ -207,7 +208,9 @@
   }
 
   .member-added-container[role="button"]:hover .household-member-header,
-  .member-added-container[role="button"]:hover .member-added-income {
+  .member-added-container[role="button"]:hover .member-added-income,
+  .member-added-container[role="button"]:focus-visible .household-member-header,
+  .member-added-container[role="button"]:focus-visible .member-added-income {
     opacity: 1;
   }
 
