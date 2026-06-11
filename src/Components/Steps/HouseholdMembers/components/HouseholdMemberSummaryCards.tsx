@@ -16,6 +16,7 @@ import useScreenApi from '../../../../Assets/updateScreen';
 import '../styles/HouseholdMemberSummaryCards.css';
 import { calcMemberYearlyIncome } from '../../../../Assets/income';
 import { formatToUSD } from '../../../../utils/formatCurrency';
+import { hasSubmittedMemberForm } from '../utils/defaultValues';
 import DeleteConfirmationPopover from './DeleteConfirmationPopover';
 import type { DeletePopoverState } from '../utils/types';
 
@@ -23,17 +24,16 @@ type HHMSummariesProps = {
   questionName: QuestionName;
 };
 
-// A member's card is "completed" once they have basic info (birth date + relationship)
-// and have answered the health insurance question. This is the single source of truth
-// for whether a card shows income, gets the completed badge, and is clickable to edit.
+// A member's card is "completed" once they have basic info (birth date + relationship) and have
+// successfully submitted their detail form (hit "Continue"). We detect the submit via the shared,
+// workflow-agnostic `hasSubmittedMemberForm` rather than enumerating per-flow fields here — that's
+// the single source of truth across the main and energy-calculator (CESN) flows.
 const isMemberCompleted = (member: HouseholdData | undefined): member is HouseholdData => {
   if (!member) {
     return false;
   }
-  const hasAnsweredInsurance = Boolean(
-    member.healthInsurance && Object.values(member.healthInsurance).some((value) => value === true),
-  );
-  return Boolean(member.birthYear && member.birthMonth && member.relationshipToHH && hasAnsweredInsurance);
+  const hasBasicInfo = Boolean(member.birthYear && member.birthMonth && member.relationshipToHH);
+  return hasBasicInfo && hasSubmittedMemberForm(member);
 };
 
 const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {

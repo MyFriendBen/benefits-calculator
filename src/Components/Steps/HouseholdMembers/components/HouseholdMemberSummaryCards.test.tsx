@@ -208,6 +208,15 @@ describe('HouseholdMemberSummaryCards', () => {
       expect(cards[0].className).toContain('completed-household-member');
       expect(screen.getByText(/Annual Income/i)).toBeInTheDocument();
     });
+
+    it('treats an energy-calculator (CESN) member as completed without health insurance', () => {
+      // CESN never collects health insurance; a submitted member instead has an energyCalculator
+      // object. Completion must key off "form was submitted", not the insurance answer.
+      const cesnMember = completedMember({ healthInsurance: undefined, energyCalculator: { receivesSsi: false } });
+      renderCards([cesnMember], 1);
+      const cards = cardContainers();
+      expect(cards[0].className).toContain('completed-household-member');
+    });
   });
 
   describe('household slot count', () => {
