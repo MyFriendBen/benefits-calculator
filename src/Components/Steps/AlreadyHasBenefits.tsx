@@ -5,7 +5,6 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import type { HasBenefitsProgram } from '../../Types/ApiCalls';
 import useScreenApi from '../../Assets/updateScreen';
-import { getBenefitSiblings } from '../../Assets/benefitSiblings';
 import { OverrideableTranslation } from '../../Assets/languageOptions';
 import HasBenefitsTile from './HasBenefitsTile';
 import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
@@ -18,7 +17,7 @@ import ResultsTranslate from '../Results/Translate/Translate';
 import './AlreadyHasBenefits.css';
 
 type FormSchema = {
-  alreadyHasBenefits: { [key: string]: boolean };
+  alreadyHasBenefits: Set<string>;
 };
 
 type ProgramsByCategory = {
@@ -85,11 +84,7 @@ function AlreadyHasBenefits() {
   const backNavigationFunction = useDefaultBackNavigationFunction('hasBenefits');
   const { updateScreen } = useScreenApi();
 
-  const {
-    control,
-    handleSubmit,
-    setValue,
-  } = useStepForm<FormSchema>({
+  const { control, handleSubmit, setValue } = useStepForm<FormSchema>({
     defaultValues: {
       alreadyHasBenefits: formData.benefits,
     },
@@ -102,8 +97,7 @@ function AlreadyHasBenefits() {
     if (uuid === undefined) {
       throw new Error('uuid is not defined');
     }
-    const anySelected = Object.values(alreadyHasBenefits).some(Boolean);
-    const hasBenefits = anySelected ? ('true' as const) : ('false' as const);
+    const hasBenefits = alreadyHasBenefits.size > 0 ? ('true' as const) : ('false' as const);
     const newFormData = { ...formData, hasBenefits, benefits: alreadyHasBenefits };
     await updateScreen(newFormData);
   };
@@ -139,11 +133,7 @@ function AlreadyHasBenefits() {
       const headingId = `has-benefits-category-${category.groupKey}`;
       return (
         <div key={category.groupKey} className="has-benefits-category" role="group" aria-labelledby={headingId}>
-          <Typography
-            id={headingId}
-            component="h3"
-            className="has-benefits-category-header"
-          >
+          <Typography id={headingId} component="h3" className="has-benefits-category-header">
             {category.categoryTranslation ? (
               <ResultsTranslate translation={category.categoryTranslation} />
             ) : (
@@ -152,32 +142,20 @@ function AlreadyHasBenefits() {
           </Typography>
           <div className="hb-tiles-grid">
             {category.programs.map((program) => {
-              // TODO(MFB-720): drop .toLowerCase() once the join-table migration
-              // ships and formData.benefits keys mirror name_abbreviated exactly.
-              // Today the read/write paths in updateScreen.ts/updateFormData.tsx
-              // use lowercase keys, so admin-entered abbreviations like "SNAP"
-              // need coercing to match.
-              const key = program.name_abbreviated.toLowerCase();
+              const key = program.name_abbreviated;
               return (
                 <HasBenefitsTile
-                  key={program.name_abbreviated}
+                  key={key}
                   program={program}
-                  selected={!!alreadyHasBenefits[key]}
+                  selected={alreadyHasBenefits.has(key)}
                   onClick={() => {
-                    // Multiple formData.benefits keys share one has_* column on
-                    // the backend (e.g. 'snap' and 'co_snap' both map to
-                    // has_snap). Step 8 only shows ONE tile per column, so we
-                    // must flip every sibling together — otherwise the unshown
-                    // siblings keep their stale value and updateScreen's OR-chain
-                    // re-asserts has_*=true on deselect. See MFB-1085.
-                    const newValue = !alreadyHasBenefits[key];
-                    const siblings = getBenefitSiblings(key);
-                    const updates = Object.fromEntries(siblings.map((s) => [s, newValue]));
-                    setValue(
-                      'alreadyHasBenefits',
-                      { ...alreadyHasBenefits, ...updates },
-                      { shouldDirty: true, shouldTouch: true },
-                    );
+                    const next = new Set(alreadyHasBenefits);
+                    if (next.has(key)) {
+                      next.delete(key);
+                    } else {
+                      next.add(key);
+                    }
+                    setValue('alreadyHasBenefits', next, { shouldDirty: true, shouldTouch: true });
                   }}
                 />
               );

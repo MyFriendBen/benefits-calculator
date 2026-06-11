@@ -55,9 +55,8 @@ export type HouseholdData = {
   healthInsurance?: HealthInsurance;
 };
 
-export type Benefits = {
-  [key: string]: boolean;
-};
+/** Program `name_abbreviated` values the household already receives. */
+export type Benefits = Set<string>;
 
 export type HealthInsurance = {
   none: boolean;
