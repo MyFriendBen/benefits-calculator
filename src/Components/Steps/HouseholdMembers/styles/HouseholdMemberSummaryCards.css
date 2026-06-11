@@ -75,7 +75,7 @@
   The trash (delete) button sits at the top-right of the header. Keep it compact and pull it
   slightly into the card's padding so it aligns with the card edge without adding card height.
   Grey keeps it a quiet secondary affordance that doesn't compete with the colored card; it
-  reads as destructive on hover/focus.
+  darkens on hover/focus for feedback.
 */
 .household-member-delete-button.MuiIconButton-root {
   padding: 0.125rem;
@@ -88,7 +88,8 @@
 
 .household-member-delete-button.MuiIconButton-root:hover,
 .household-member-delete-button.MuiIconButton-root:focus-visible {
-  color: var(--error-color, #c62828);
+  /* Darken the grey on hover/focus for feedback — red isn't used in the design system. */
+  color: #374151;
 }
 
 .household-member-delete-button .MuiSvgIcon-root {

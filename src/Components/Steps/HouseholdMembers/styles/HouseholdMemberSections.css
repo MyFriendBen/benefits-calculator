@@ -42,7 +42,13 @@
 
 .manage-household-members-button.MuiIconButton-root {
   padding: 0.25rem;
-  color: var(--primary-color);
+  color: #6b7280;
+}
+
+.manage-household-members-button .MuiSvgIcon-root {
+  font-size: 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
 .question-sub-label {
