@@ -28,6 +28,7 @@ import { ReactComponent as JobResources } from '../../Assets/icons/UrgentNeeds/A
 import { ReactComponent as LegalServices } from '../../Assets/icons/UrgentNeeds/AcuteConditions/legal_services.svg';
 import { ReactComponent as Support } from '../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
 import { ReactComponent as Military } from '../../Assets/icons/UrgentNeeds/AcuteConditions/military.svg';
+import { ReactComponent as Aging } from '../../Assets/icons/UrgentNeeds/AcuteConditions/aging.svg';
 import { ReactComponent as Resources } from '../../Assets/icons/General/resources.svg';
 import { ReactComponent as SurvivingSpouse } from '../EnergyCalculator/Icons/Person.svg';
 import { ReactComponent as Wheelchair } from '../EnergyCalculator/Icons/Wheelchair.svg';
@@ -81,6 +82,9 @@ function transformItemIcon(item: unknown): any {
       break;
     case 'Military':
       iconComponent = <Military className={icon._classname} />;
+      break;
+    case 'Aging':
+      iconComponent = <Aging className={`${icon._classname} aging`} />;
       break;
     case 'Savings':
       iconComponent = <Resources className={icon._classname} />;

@@ -176,6 +176,7 @@ export type ApiFormData = {
   needs_college_savings: boolean | null;
   needs_veteran_services: boolean | null;
   needs_disability_resources: boolean | null;
+  needs_aging_resources: boolean | null;
   utm_id: string | null;
   utm_source: string | null;
   utm_medium: string | null;
