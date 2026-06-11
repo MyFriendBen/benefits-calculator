@@ -10,7 +10,6 @@ export type QuestionName =
   | 'acuteHHConditions'
   | 'referralSource'
   | 'signUpInfo'
-  | 'energyCalculatorHouseholdData'
   | 'energyCalculatorElectricityProvider'
   | 'energyCalculatorGasProvider'
   | 'energyCalculatorExpenses'

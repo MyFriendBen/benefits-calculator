@@ -178,7 +178,7 @@ const CurrentBenefits = () => {
 
   if (progamsLoaded && urgentNeedsLoaded) {
     return (
-      <main className="current-benefits-container">
+      <main className="benefits-form">
         <QuestionHeader>
           <div className="current-benefits-header">{title}</div>
         </QuestionHeader>

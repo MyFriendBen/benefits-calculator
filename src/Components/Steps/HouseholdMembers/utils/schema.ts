@@ -16,6 +16,7 @@ import {
   renderBirthYearHelperText,
   renderInvalidBirthYearHelperText,
   renderRelationshipToHHHelperText,
+  renderIncomeCategoryHelperText,
   hasAtLeastOneTrue,
   validateNoneExclusive,
   validateHourlyIncome,
@@ -71,6 +72,7 @@ export const STUDENT_QUESTIONS: StudentQuestion[] = [
 const createIncomeSourceSchema = (intl: IntlShape) => {
   return z
     .object({
+      incomeCategory: z.string().min(1, { message: renderIncomeCategoryHelperText(intl) }),
       incomeStreamName: z.string().min(1, { message: renderIncomeStreamNameHelperText(intl) }),
       incomeFrequency: z.string().min(1, { message: renderIncomeFrequencyHelperText(intl) }),
       hoursPerWeek: z.string().trim(),
@@ -139,7 +141,6 @@ export const createHouseholdMemberSchema = (
 ) => {
   const incomeSourcesSchema = createIncomeSourceSchema(intl);
   const incomeStreamsSchema = z.array(incomeSourcesSchema);
-  const hasIncomeSchema = z.enum(['true', 'false']);
 
   const studentEligibilitySchema = z.object({
     studentFullTime: z.union([z.boolean(), z.undefined()]),
@@ -155,9 +156,17 @@ export const createHouseholdMemberSchema = (
     healthInsurance: createHealthInsuranceSchema(intl, pageNumber),
     conditions: createSpecialConditionsSchema(intl),
     studentEligibility: studentEligibilitySchema,
-    hasIncome: hasIncomeSchema,
     incomeStreams: incomeStreamsSchema,
-  }).superRefine(({ conditions, studentEligibility }, ctx) => {
+  }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility }, ctx) => {
+    const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
+    if (birthYear === CURRENT_YEAR && birthMonth > CURRENT_MONTH) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: renderFutureBirthMonthHelperText(intl),
+        path: ['birthMonth'],
+      });
+    }
+
     if (conditions.student) {
       STUDENT_QUESTIONS.forEach(({ name }) => {
         if (studentEligibility[name] === undefined) {
@@ -171,6 +180,40 @@ export const createHouseholdMemberSchema = (
     }
   });
 };
+
+/**
+ * Creates the basic info page schema (birth month, birth year, relationship)
+ * for all household members on the pre-detail page (page 0).
+ */
+export const createBasicInfoPageSchema = (intl: IntlShape) => {
+  const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
+
+  const memberSchema = z
+    .object({
+      birthMonth: z
+        .number()
+        .min(1, { message: renderMissingBirthMonthHelperText(intl) })
+        .max(12, { message: renderMissingBirthMonthHelperText(intl) }),
+      birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl) })
+        .int()
+        .min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
+        .max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
+      relationshipToHH: z.string().min(1, { message: renderRelationshipToHHHelperText(intl) }),
+    })
+    .refine(
+      ({ birthMonth, birthYear }) => {
+        if (birthYear === CURRENT_YEAR) {
+          return birthMonth <= CURRENT_MONTH;
+        }
+        return true;
+      },
+      { message: renderFutureBirthMonthHelperText(intl), path: ['birthMonth'] },
+    );
+
+  return z.object({ members: z.array(memberSchema) });
+};
+
+export type BasicInfoPageSchema = z.infer<ReturnType<typeof createBasicInfoPageSchema>>;
 
 /**
  * Type helper to infer the schema type
@@ -195,7 +238,6 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
   const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
   const incomeSourcesSchema = createIncomeSourceSchema(intl);
   const incomeStreamsSchema = z.array(incomeSourcesSchema);
-  const hasIncomeSchema = z.enum(['true', 'false']);
 
   return z
     .object({
@@ -213,7 +255,6 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
           (value) => [...Object.keys(relationshipOptions)].includes(value) || pageNumber === 1,
           { message: renderRelationshipToHHHelperText(intl) },
         ),
-      hasIncome: hasIncomeSchema,
       incomeStreams: incomeStreamsSchema,
     })
     .refine(

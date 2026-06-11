@@ -152,7 +152,7 @@ export const Zipcode = () => {
 
   const renderCountyHelperText = () => {
     return (
-      <ErrorMessageWrapper fontSize="1rem">
+      <ErrorMessageWrapper>
         <OverrideableTranslation id="errorMessage-county" defaultMessage="Please Select a county" />
       </ErrorMessageWrapper>
     );
@@ -205,7 +205,7 @@ export const Zipcode = () => {
               error={errors.zipcode !== undefined}
               helperText={
                 errors.zipcode !== undefined && (
-                  <ErrorMessageWrapper fontSize="1rem">{errors.zipcode.message}</ErrorMessageWrapper>
+                  <ErrorMessageWrapper>{errors.zipcode.message}</ErrorMessageWrapper>
                 )
               }
             />

@@ -1,5 +1,5 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
 import { useContext } from 'react';
 import { HouseholdData } from '../../../../Types/FormData';
@@ -15,32 +15,37 @@ import useScreenApi from '../../../../Assets/updateScreen';
 import '../styles/IncomeSection.css';
 import { useShouldRedirectToConfirmation } from '../../../QuestionComponents/questionHooks';
 import useStepForm from '../../stepForm';
-import { WorkflowType } from '../utils/types';
+import { WorkflowType, LocationState } from '../utils/types';
 import { calculateAge, createHouseholdMemberData, scrollToFirstError } from '../utils/helpers';
 import { useHouseholdMembersNavigation } from '../hooks/useHouseholdMembersNavigation';
 import { useHouseholdMemberConfig } from '../hooks/useHouseholdMemberConfig';
 import { useHouseholdMemberFormEffects } from '../hooks/useHouseholdMemberFormEffects';
 import { createHouseholdMemberSchema, createEnergyCalculatorHouseholdMemberSchema } from '../utils/schema';
 import { createDefaultValues, createEnergyCalculatorDefaultValues } from '../utils/defaultValues';
+import { useIsEnergyCalculator } from '../../../EnergyCalculator/hooks';
 import HealthInsuranceSection from '../sections/HealthInsuranceSection';
 import SpecialConditionsSection from '../sections/SpecialConditionsSection';
 import StudentEligibilitySection from '../sections/StudentEligibilitySection';
 import IncomeSection from '../sections/IncomeSection';
 import BasicInfoSection from '../sections/BasicInfoSection';
 
-interface HouseholdMemberFormProps {
-  workflowType?: WorkflowType;
-}
-
-const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps) => {
-  const isEnergyCalculator = workflowType === 'energyCalculator';
+const HouseholdMemberForm = () => {
+  const isEnergyCalculator = useIsEnergyCalculator();
+  const workflowType: WorkflowType = isEnergyCalculator ? 'energyCalculator' : 'main';
 
   // CONTEXT & ROUTING
   const { formData } = useContext(Context);
   const { uuid, page, whiteLabel } = useParams<{ uuid: string; page: string; whiteLabel: string }>();
+  const location = useLocation();
   const { updateScreen } = useScreenApi();
   const intl = useIntl();
   const pageNumber = Number(page);
+  const locationState = location.state as LocationState | null;
+  const isEditing = !!locationState?.isEditing || !!locationState?.routedFromConfirmationPg;
+  const basicInfoCollected = !!locationState?.basicInfoCollected;
+  // Show BasicInfoSection when householdSize === 1 and they came directly from step 4 (skipping page 0),
+  // or when editing a member. basicInfoCollected means they went through page 0 already.
+  const showBasicInfoSection = (formData.householdSize === 1 && !basicInfoCollected) || isEditing;
 
   // CURRENT MEMBER DATA
   const currentMemberIndex = pageNumber - 1;
@@ -50,12 +55,13 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
   const {
     healthInsuranceOptions,
     conditionOptions,
+    incomeCategories,
     incomeOptions,
     frequencyMenuItems,
     relationshipOptions,
   } = useHouseholdMemberConfig();
 
-  const questionName = isEnergyCalculator ? 'energyCalculatorHouseholdData' : 'householdData';
+  const questionName = 'householdData';
 
   const redirectToConfirmationPage = useShouldRedirectToConfirmation();
   const currentStepId = useStepNumber(questionName);
@@ -66,7 +72,6 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
     whiteLabel,
     currentStepId,
     pageNumber,
-    householdSize: formData.householdSize,
     redirectToConfirmationPage: redirectToConfirmationPage ?? false,
   });
 
@@ -99,7 +104,7 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
     onSubmitSuccessfulOverride: () => {},
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: 'incomeStreams',
   });
@@ -107,7 +112,6 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
   // AGE CALCULATION
   const { calculateCurrentAgeStatus } = useAgeCalculation(watch);
 
-  const watchHasIncome = useWatch({ control, name: 'hasIncome' });
   const watchBirthMonth = useWatch({ control, name: 'birthMonth' });
   const watchBirthYear = useWatch({ control, name: 'birthYear' });
   const watchIsStudent = useWatch({ control, name: 'conditions.student' });
@@ -123,9 +127,7 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
     getValues,
     reset,
     append,
-    replace,
     calculateCurrentAgeStatus,
-    watchHasIncome,
     watchBirthMonth,
     watchBirthYear,
     watchIsStudent,
@@ -180,7 +182,7 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
         <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
       </h2>
       <p className="question-sub-label">
-        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="Click any completed member to edit" />
+        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="You may edit or delete completed members below." />
       </p>
       <Box className="summary-cards-container">
         <HouseholdMemberSummaryCards questionName={questionName} />
@@ -220,12 +222,14 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
 
   const renderFormSections = () => (
     <>
-      <BasicInfoSection
-        control={control as any}
-        errors={errors}
-        isFirstMember={pageNumber === 1}
-        relationshipOptions={relationshipOptions}
-      />
+      {showBasicInfoSection && (
+        <BasicInfoSection
+          control={control as any}
+          errors={errors}
+          isFirstMember={pageNumber === 1}
+          relationshipOptions={relationshipOptions}
+        />
+      )}
 
       {!isEnergyCalculator && (
         <HealthInsuranceSection
@@ -263,28 +267,25 @@ const HouseholdMemberForm = ({ workflowType = 'main' }: HouseholdMemberFormProps
         fields={fields as any}
         append={append}
         remove={remove}
-        watch={watch as any}
+        setValue={setValue}
+        incomeCategories={incomeCategories}
         incomeOptions={incomeOptions}
         frequencyMenuItems={frequencyMenuItems}
         pageNumber={pageNumber}
-        isUnder16={calculateCurrentAgeStatus().isUnder16}
       />
     </>
   );
 
-  // Show summary cards only when there are multiple members
+  // Show summary cards only when on member 2+
   const showSummaryCards = pageNumber > 1;
 
   return (
-    <main className="benefits-form">
+    <main className="benefits-form" data-step-id="member-details" data-member-number={pageNumber}>
       {showSummaryCards && renderSummaryCards()}
 
       {renderHeader()}
 
-      <form
-        key={`household-member-${pageNumber}`}
-        onSubmit={handleSubmit(formSubmitHandler, handleFormError)}
-      >
+      <form onSubmit={handleSubmit(formSubmitHandler, handleFormError)}>
         {renderFormSections()}
         <PrevAndContinueButtons backNavigationFunction={navigateBack} />
       </form>

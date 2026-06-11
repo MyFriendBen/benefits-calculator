@@ -1,173 +1,169 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { FormControlLabel, Radio, RadioGroup } from '@mui/material';
-import { ReactNode, useContext, useEffect, useState } from 'react';
-import { Controller } from 'react-hook-form';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useWatch } from 'react-hook-form';
+import { Alert, CircularProgress, Typography } from '@mui/material';
+import { useContext, useMemo } from 'react';
+import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
-import { z } from 'zod';
+import type { HasBenefitsProgram } from '../../Types/ApiCalls';
 import useScreenApi from '../../Assets/updateScreen';
-import { FormattedMessageType } from '../../Types/Questions';
-import CheckBoxAccordion from '../AccordionsContainer/CheckboxAccordion';
-import { useConfig } from '../Config/configHook';
-import ErrorMessageWrapper from '../ErrorMessage/ErrorMessageWrapper';
-import HelpButton from '../HelpBubbleIcon/HelpButton';
+import { OverrideableTranslation } from '../../Assets/languageOptions';
+import HasBenefitsTile from './HasBenefitsTile';
 import PrevAndContinueButtons from '../PrevAndContinueButtons/PrevAndContinueButtons';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import { useDefaultBackNavigationFunction } from '../QuestionComponents/questionHooks';
 import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
 import { Context } from '../Wrapper/Wrapper';
 import useStepForm from './stepForm';
-import { OverrideableTranslation } from '../../Assets/languageOptions';
+import ResultsTranslate from '../Results/Translate/Translate';
+import './AlreadyHasBenefits.css';
 
-type CategoryBenefitsConfig = {
-  [key: string]: {
-    benefits: {
-      [key: string]: {
-        name: FormattedMessageType;
-        description: FormattedMessageType;
-      };
-    };
-    category_name: FormattedMessageType;
-  };
+type FormSchema = {
+  alreadyHasBenefits: Set<string>;
 };
 
-type CategoryBenefitsProps = {
-  alreadyHasBenefits: { [key: string]: boolean };
-  onChange: (alreadyHasBenefits: { [key: string]: boolean }) => void;
+type ProgramsByCategory = {
+  // Stable React key. For real categories this is the translation label;
+  // for the synthetic uncategorized group it's a fixed sentinel.
+  groupKey: string;
+  // Translation rendered as the heading. Null for the synthetic Other group,
+  // which uses a hardcoded FormattedMessage.
+  categoryTranslation: { label: string; default_message: string } | null;
+  // Sort key. Pushes the Other group to the end.
+  sortKey: string;
+  programs: HasBenefitsProgram[];
 };
 
-function CategoryBenefits({ alreadyHasBenefits, onChange }: CategoryBenefitsProps) {
-  const [currentExpanded, setCurrentExpanded] = useState(0); // start with the first accordion open
+const OTHER_GROUP_KEY = '__uncategorized__';
+// Bigger than any real category name will sort to, so Other always lands last.
+const OTHER_SORT_KEY = '￿';
 
-  const benefits = useConfig<CategoryBenefitsConfig>('category_benefits');
+function groupByCategory(programs: HasBenefitsProgram[]): ProgramsByCategory[] {
+  const map = new Map<string, ProgramsByCategory>();
 
-  return (
-    <>
-      {Object.values(benefits).map((details, index) => {
-        const options = Object.entries(details.benefits).map(([name, benefit]) => {
-          return {
-            value: name,
-            text: (
-              <span>
-                <strong>{benefit.name}</strong>
-                {benefit.description}
-              </span>
-            ),
-          };
+  for (const program of programs) {
+    if (program.category === null) {
+      if (!map.has(OTHER_GROUP_KEY)) {
+        map.set(OTHER_GROUP_KEY, {
+          groupKey: OTHER_GROUP_KEY,
+          categoryTranslation: null,
+          sortKey: OTHER_SORT_KEY,
+          programs: [],
         });
+      }
+      map.get(OTHER_GROUP_KEY)!.programs.push(program);
+      continue;
+    }
+    const key = program.category.label;
+    if (!map.has(key)) {
+      map.set(key, {
+        groupKey: key,
+        categoryTranslation: program.category,
+        sortKey: program.category.default_message,
+        programs: [],
+      });
+    }
+    map.get(key)!.programs.push(program);
+  }
 
-        return (
-          <CheckBoxAccordion
-            name={details.category_name}
-            options={options}
-            expanded={currentExpanded === index}
-            onExpand={(isExpanded) => {
-              if (isExpanded) {
-                setCurrentExpanded(index);
-              } else {
-                if (currentExpanded === index) {
-                  setCurrentExpanded(-1); // close all
-                }
-              }
-            }}
-            values={alreadyHasBenefits}
-            onChange={(values) => {
-              let newAlreadyHas: { [key: string]: boolean } = { ...alreadyHasBenefits };
-
-              newAlreadyHas = { ...newAlreadyHas, ...values };
-
-              onChange(newAlreadyHas);
-            }}
-            key={index}
-          />
-        );
-      })}
-    </>
-  );
+  // Sort groups by category display name (Other always last via sortKey),
+  // and programs within each group by display name.
+  const sorted = Array.from(map.values()).sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+  for (const group of sorted) {
+    group.programs.sort((a, b) => a.name.default_message.localeCompare(b.name.default_message));
+  }
+  return sorted;
 }
 
 function AlreadyHasBenefits() {
-  const { formData } = useContext(Context);
-  const { formatMessage } = useIntl();
+  const {
+    formData,
+    hasBenefitsPrograms: programs,
+    hasBenefitsProgramsLoading,
+    hasBenefitsProgramsError,
+  } = useContext(Context);
   const { uuid } = useParams();
   const backNavigationFunction = useDefaultBackNavigationFunction('hasBenefits');
   const { updateScreen } = useScreenApi();
 
-  const formSchema = z
-    .object({
-      hasBenefits: z.enum(['true', 'false', 'preferNotToAnswer']),
-      alreadyHasBenefits: z.record(z.string(), z.boolean()),
-    })
-    .refine(
-      ({ hasBenefits, alreadyHasBenefits }) => {
-        const noBenefitsSelected = Object.values(alreadyHasBenefits).every((value) => !value);
-
-        if (hasBenefits === 'true' && noBenefitsSelected) {
-          return false;
-        }
-
-        return true;
-      },
-      {
-        message: formatMessage({
-          id: 'validation-helperText.benefits',
-          defaultMessage:
-            'If your household does not receive any of these benefits, please select the "No" option above.',
-        }),
-        path: ['alreadyHasBenefits'],
-      },
-    );
-
-  type FormSchema = z.infer<typeof formSchema>;
-
-  const {
-    control,
-    formState: { errors, isSubmitted },
-    handleSubmit,
-    setValue,
-    watch,
-  } = useStepForm<FormSchema>({
-    resolver: zodResolver(formSchema),
+  const { control, handleSubmit, setValue } = useStepForm<FormSchema>({
     defaultValues: {
-      hasBenefits: formData.hasBenefits,
       alreadyHasBenefits: formData.benefits,
     },
     questionName: 'hasBenefits',
   });
 
-  const hasBenefits = 'true' === watch('hasBenefits');
+  const alreadyHasBenefits = useWatch({ control, name: 'alreadyHasBenefits' });
 
-  useEffect(() => {
-    const newAlreadyHasBenefits = { ...watch('alreadyHasBenefits') };
-
-    if (!hasBenefits) {
-      for (const key in newAlreadyHasBenefits) {
-        newAlreadyHasBenefits[key] = false;
-      }
-    }
-
-    setValue('alreadyHasBenefits', newAlreadyHasBenefits);
-  }, [hasBenefits]);
-
-  const formSubmitHandler = async ({ alreadyHasBenefits, hasBenefits }: z.infer<typeof formSchema>) => {
+  const formSubmitHandler = async ({ alreadyHasBenefits }: FormSchema) => {
     if (uuid === undefined) {
       throw new Error('uuid is not defined');
     }
-
-    const newFormData = { ...formData, hasBenefits: hasBenefits, benefits: alreadyHasBenefits };
-
+    const hasBenefits = alreadyHasBenefits.size > 0 ? ('true' as const) : ('false' as const);
+    const newFormData = { ...formData, hasBenefits, benefits: alreadyHasBenefits };
     await updateScreen(newFormData);
   };
 
-  const renderHelpSection = () => {
-    return (
-      <HelpButton>
-        <OverrideableTranslation
-          id="questions.hasBenefits-description"
-          defaultMessage="This information will help make sure we don't give you results for benefits you already have."
-        />
-      </HelpButton>
-    );
+  const categories = useMemo(() => groupByCategory(programs), [programs]);
+
+  const fieldsetLegendId = 'has-benefits-legend';
+
+  const renderTiles = () => {
+    if (hasBenefitsProgramsLoading) {
+      return (
+        <div className="hb-loading" role="status" aria-live="polite">
+          <CircularProgress size="1.5rem" />
+          <span className="hb-loading-label">
+            <FormattedMessage id="questions.hasBenefits-loading" defaultMessage="Loading benefit options…" />
+          </span>
+        </div>
+      );
+    }
+
+    if (hasBenefitsProgramsError) {
+      return (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          <FormattedMessage
+            id="questions.hasBenefits-loadError"
+            defaultMessage="We couldn't load the list of benefits. Please refresh the page to try again."
+          />
+        </Alert>
+      );
+    }
+
+    return categories.map((category) => {
+      const headingId = `has-benefits-category-${category.groupKey}`;
+      return (
+        <div key={category.groupKey} className="has-benefits-category" role="group" aria-labelledby={headingId}>
+          <Typography id={headingId} component="h3" className="has-benefits-category-header">
+            {category.categoryTranslation ? (
+              <ResultsTranslate translation={category.categoryTranslation} />
+            ) : (
+              <FormattedMessage id="questions.hasBenefits-otherCategory" defaultMessage="Other" />
+            )}
+          </Typography>
+          <div className="hb-tiles-grid">
+            {category.programs.map((program) => {
+              const key = program.name_abbreviated;
+              return (
+                <HasBenefitsTile
+                  key={key}
+                  program={program}
+                  selected={alreadyHasBenefits.has(key)}
+                  onClick={() => {
+                    const next = new Set(alreadyHasBenefits);
+                    if (next.has(key)) {
+                      next.delete(key);
+                    } else {
+                      next.add(key);
+                    }
+                    setValue('alreadyHasBenefits', next, { shouldDirty: true, shouldTouch: true });
+                  }}
+                />
+              );
+            })}
+          </div>
+        </div>
+      );
+    });
   };
 
   return (
@@ -179,73 +175,28 @@ function AlreadyHasBenefits() {
         />
       </QuestionHeader>
       <QuestionQuestion>
-        <OverrideableTranslation
-          id="questions.hasBenefits"
-          defaultMessage="Does anyone in your household currently have public assistance benefits?"
-        />
-        {renderHelpSection()}
+        <span id={fieldsetLegendId}>
+          <OverrideableTranslation
+            id="questions.hasBenefits"
+            defaultMessage="Does anyone in your household currently receive any of these public benefits?"
+          />
+        </span>
       </QuestionQuestion>
-      <form onSubmit={handleSubmit(formSubmitHandler)}>
-        <Controller
-          name="hasBenefits"
-          control={control}
-          render={({ field }) => {
-            return (
-              <RadioGroup
-                {...field}
-                aria-label={formatMessage({
-                  id: 'questions.hasBenefits',
-                  defaultMessage: 'Does anyone in your household currently have public assistance benefits?',
-                })}
-                sx={{ marginBottom: '1rem' }}
-              >
-                <FormControlLabel
-                  value={'true'}
-                  control={<Radio />}
-                  label={<FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />}
-                />
-                <FormControlLabel
-                  value={'false'}
-                  control={<Radio />}
-                  label={<FormattedMessage id="radiofield.label-no" defaultMessage="No" />}
-                />
-                <FormControlLabel
-                  value={'preferNotToAnswer'}
-                  control={<Radio />}
-                  label={
-                    <FormattedMessage id="radiofield.label-preferNotToAnswer" defaultMessage="Prefer not to answer" />
-                  }
-                />
-              </RadioGroup>
-            );
-          }}
+      <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+        <FormattedMessage
+          id="questions.hasBenefits-description"
+          defaultMessage="Select all that apply. Receiving any of these benefits may automatically qualify you for other programs. Leave blank if none apply."
         />
-        {watch('hasBenefits') === 'true' && (
-          <div>
-            <QuestionQuestion>
-              <FormattedMessage
-                id="questions.hasBenefits-a"
-                defaultMessage="Please tell us what benefits your household currently has."
-              />
-            </QuestionQuestion>
-            <CategoryBenefits
-              alreadyHasBenefits={watch('alreadyHasBenefits')}
-              onChange={(values) =>
-                setValue('alreadyHasBenefits', values, {
-                  shouldValidate: isSubmitted,
-                  shouldDirty: true,
-                  shouldTouch: true,
-                })
-              }
-            />
-            {errors.alreadyHasBenefits !== undefined && (
-              <ErrorMessageWrapper fontSize="1.5rem">
-                {errors.alreadyHasBenefits.message as ReactNode}
-              </ErrorMessageWrapper>
-            )}
-          </div>
-        )}
-        <PrevAndContinueButtons backNavigationFunction={backNavigationFunction} />
+      </Typography>
+      <form onSubmit={handleSubmit(formSubmitHandler)}>
+        <fieldset className="has-benefits-programs" aria-labelledby={fieldsetLegendId}>
+          {renderTiles()}
+        </fieldset>
+
+        <PrevAndContinueButtons
+          backNavigationFunction={backNavigationFunction}
+          disabled={hasBenefitsProgramsLoading || hasBenefitsProgramsError}
+        />
       </form>
     </div>
   );

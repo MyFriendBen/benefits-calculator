@@ -13,13 +13,13 @@ import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { Context } from '../../../Wrapper/Wrapper';
 import '../styles/HouseholdMemberSummaryCards.css';
 import { calcMemberYearlyIncome } from '../../../../Assets/income';
-import { formatToUSD } from '../../../Confirmation/ConfirmationBlock';
+import { formatToUSD } from '../../../../utils/formatCurrency';
 
 type HHMSummariesProps = {
   questionName: QuestionName;
 };
 
-const HHMSummaries = ({ questionName }: HHMSummariesProps) => {
+const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   const { formData, whiteLabel } = useContext(Context);
   const { uuid, page } = useParams();
   const pageNumber = Number(page);
@@ -176,4 +176,4 @@ const HHMSummaries = ({ questionName }: HHMSummariesProps) => {
   );
 };
 
-export default HHMSummaries;
+export default HouseholdMemberSummaryCards;

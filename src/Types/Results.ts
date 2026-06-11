@@ -50,7 +50,7 @@ export type Program = {
   estimated_application_time: Translation;
   description_short: Translation;
   description: Translation;
-  value_type: Translation;
+  value_type: string;
   learn_more_link: Translation;
   apply_button_link: Translation;
   apply_button_description: Translation;

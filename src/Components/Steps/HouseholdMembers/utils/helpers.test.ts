@@ -16,14 +16,14 @@ if (!globalThis.crypto?.randomUUID) {
   });
 }
 
-const mockCalcAge = calcAge as jest.MockedFunction<typeof calcAge>;
+const mockCalcAge = jest.mocked(calcAge);
 
 // ============================================================================
 // getDefaultFormItems
 // ============================================================================
 
 describe('getDefaultFormItems', () => {
-  const template = { incomeStreamName: '', incomeAmount: '', incomeFrequency: '', hoursPerWeek: '' };
+  const template = { incomeCategory: '', incomeStreamName: '', incomeAmount: '', incomeFrequency: '', hoursPerWeek: '' };
 
   it('returns existing items when they are present', () => {
     const existing = [template, template];
@@ -203,21 +203,11 @@ describe('createHouseholdMemberData', () => {
     expect(typeof result.id).toBe('string');
   });
 
-  it('sets hasIncome true when hasIncome is "true"', () => {
-    const result = createHouseholdMemberData({
-      memberData: { ...baseMemberData, hasIncome: 'true' },
-      currentMemberIndex: 0,
-      existingHouseholdData: [],
-    });
-    expect(result.hasIncome).toBe(true);
-  });
-
-  it('sets hasIncome true when there are income streams even if hasIncome is "false"', () => {
+  it('sets hasIncome true when income streams are present', () => {
     const result = createHouseholdMemberData({
       memberData: {
         ...baseMemberData,
-        hasIncome: 'false',
-        incomeStreams: [{ incomeStreamName: 'wages', incomeAmount: '1000', incomeFrequency: 'monthly', hoursPerWeek: '' }],
+        incomeStreams: [{ incomeCategory: 'employment', incomeStreamName: 'wages', incomeAmount: '1000', incomeFrequency: 'monthly', hoursPerWeek: '' }],
       },
       currentMemberIndex: 0,
       existingHouseholdData: [],
@@ -225,9 +215,9 @@ describe('createHouseholdMemberData', () => {
     expect(result.hasIncome).toBe(true);
   });
 
-  it('sets hasIncome false when hasIncome is "false" and no income streams', () => {
+  it('sets hasIncome false when no income streams', () => {
     const result = createHouseholdMemberData({
-      memberData: { ...baseMemberData, hasIncome: 'false', incomeStreams: [] },
+      memberData: { ...baseMemberData, incomeStreams: [] },
       currentMemberIndex: 0,
       existingHouseholdData: [],
     });
@@ -377,5 +367,31 @@ describe('scrollToFirstError', () => {
     scrollToFirstError({ birthMonth: { message: 'err' }, healthInsurance: { message: 'err' } });
 
     expect(mockScrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it('scrolls to the specific income row when incomeStreams has an array error', () => {
+    const rowEl = document.createElement('div');
+    rowEl.scrollIntoView = mockScrollIntoView;
+    // Row 0 has no error (null), row 1 has an error — should scroll to income-stream-1
+    const getSpy = jest.spyOn(document, 'getElementById').mockImplementation((id) => {
+      return id === 'income-stream-1' ? rowEl : null;
+    });
+
+    scrollToFirstError({ incomeStreams: [null, { incomeStreamName: { message: 'required' } }] });
+
+    expect(getSpy).toHaveBeenCalledWith('income-stream-1');
+    expect(mockScrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+  });
+
+  it('falls back to income-section when the specific income row element is not in the DOM', () => {
+    const sectionEl = document.createElement('div');
+    sectionEl.scrollIntoView = mockScrollIntoView;
+    jest.spyOn(document, 'getElementById').mockImplementation((id) => {
+      return id === 'income-section' ? sectionEl : null;
+    });
+
+    scrollToFirstError({ incomeStreams: [{ incomeCategory: { message: 'required' } }] });
+
+    expect(mockScrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
   });
 });

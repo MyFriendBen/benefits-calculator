@@ -1,4 +1,4 @@
-import { ReactNode, useContext } from 'react';
+import { ReactNode, useContext, useMemo } from 'react';
 import { Context } from '../Wrapper/Wrapper';
 import ConfirmationBlock, { ConfirmationItem, formatToUSD } from './ConfirmationBlock';
 import { ReactComponent as Residence } from '../../Assets/icons/General/residence.svg';
@@ -11,10 +11,10 @@ import { ReactComponent as Referral } from '../../Assets/icons/General/referral.
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useTranslateNumber } from '../../Assets/languageOptions';
 import { FormattedMessageType, QuestionName } from '../../Types/Questions';
+import { HasBenefitsProgram } from '../../Types/ApiCalls';
 import { useConfig } from '../Config/configHook';
+import { useReferralOptions } from '../../hooks/useReferralOptions';
 import DefaultConfirmationHHData from './ConfirmationHouseholdData';
-import EnergyCalcConfirmationHHData from '../EnergyCalculator/ConfirmationPage/HouseholdData';
-import { Benefits as BenefitsType } from '../../Types/FormData';
 import EnergyCalculatorElectricityProvider from '../EnergyCalculator/ConfirmationPage/ElectricityProvider';
 import EnergyCalculatorGasProvider from '../EnergyCalculator/ConfirmationPage/GasProvider';
 import EnergyCalculatorExpenses from '../EnergyCalculator/ConfirmationPage/Expenses';
@@ -114,7 +114,11 @@ function Expenses() {
   const { formData } = useContext(Context);
   const { formatMessage } = useIntl();
   const translateNumber = useTranslateNumber();
-  const expenseOptions = useConfig<FormattedMessageMap>('expense_options');
+  const expenseOptionsByCategory = useConfig<Record<string, FormattedMessageMap>>('expense_options_by_category');
+  const expenseOptions = useMemo(
+    () => Object.fromEntries(Object.values(expenseOptionsByCategory).flatMap(Object.entries)) as FormattedMessageMap,
+    [expenseOptionsByCategory],
+  );
 
   const editExpensesAriaLabel = {
     id: 'confirmation.expense.edit-AL',
@@ -130,10 +134,14 @@ function Expenses() {
       return <ConfirmationItem value={<FormattedMessage id="confirmation.none" defaultMessage="None" />} />;
     }
     const mappedExpenses = formData.expenses.map((expense, i) => {
+      const frequencyLabel =
+        expense.expenseFrequency === 'yearly'
+          ? formatMessage({ id: 'confirmation.expense.perYear', defaultMessage: 'year' })
+          : formatMessage({ id: 'confirmation.expense.perMonth', defaultMessage: 'month' });
       return (
         <ConfirmationItem
           label={<>{expenseOptions[expense.expenseSourceName]}:</>}
-          value={translateNumber(formatToUSD(expense.expenseAmount))}
+          value={`${translateNumber(formatToUSD(expense.expenseAmount))} / ${frequencyLabel}`}
           key={i}
         />
       );
@@ -148,7 +156,7 @@ function Expenses() {
       title={
         <FormattedMessage
           id="confirmation.headOfHouseholdDataBlock-expensesLabel"
-          defaultMessage="Monthly Household Expenses"
+          defaultMessage="Household Expenses"
         />
       }
       editAriaLabel={editExpensesAriaLabel}
@@ -208,42 +216,42 @@ function Assets() {
   );
 }
 
-type BenefitList = {
-  [key: string]: {
-    name: FormattedMessageType;
-    description: FormattedMessageType;
-  };
-};
-
-type CategoryBenefits = {
-  [key: string]: { benefits: BenefitList; category_name: FormattedMessageType };
-};
-
 function HasBenefits() {
-  const { formData } = useContext(Context);
+  const { formData, hasBenefitsPrograms } = useContext(Context);
   const { formatMessage } = useIntl();
-  const categoryBenefits = useConfig<CategoryBenefits>('category_benefits');
 
   const alreadyHasBenefits = () => {
-    let allBenefits: BenefitList = {};
+    const selectedKeys = Array.from(formData.benefits);
 
-    for (const category of Object.values(categoryBenefits)) {
-      allBenefits = { ...allBenefits, ...category.benefits };
+    if (selectedKeys.length === 0) {
+      return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
     }
 
-    const benefitsText = Object.entries(allBenefits)
-      .filter(([name, _]) => {
-        return formData.benefits[name as keyof BenefitsType];
-      })
-      .map(([name, value]) => {
-        return <ConfirmationItem label={value.name} value={value.description} key={name} />;
-      });
+    const programsByKey = new Map(hasBenefitsPrograms.map((p) => [p.name_abbreviated, p]));
 
-    if (benefitsText.length > 0) {
-      return benefitsText;
+    // Only the active white label's programs are in hasBenefitsPrograms; a
+    // selected name not offered here is dropped so the user sees one row per
+    // program they actually receive in this white label.
+    const matched = selectedKeys
+      .map((key) => ({ key, program: programsByKey.get(key) }))
+      .filter((entry): entry is { key: string; program: HasBenefitsProgram } => entry.program !== undefined);
+
+    if (matched.length === 0) {
+      return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
     }
 
-    return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
+    return matched.map(({ key, program }) => (
+      <ConfirmationItem
+        key={key}
+        label={<FormattedMessage id={program.name.label} defaultMessage={program.name.default_message} />}
+        value={
+          <FormattedMessage
+            id={program.website_description.label}
+            defaultMessage={program.website_description.default_message}
+          />
+        }
+      />
+    ));
   };
 
   const editHasBenefitsAriaLabel = {
@@ -326,9 +334,9 @@ function AcuteConditions() {
 function ReferralSource() {
   const { formData } = useContext(Context);
   const { formatMessage } = useIntl();
-  const referralOptions = useConfig<{ [key: string]: string | FormattedMessageType }>('referral_options');
+  const { allOptions, loading } = useReferralOptions();
 
-  if (formData.referralSource === undefined) {
+  if (formData.referralSource === undefined || loading) {
     return null;
   }
 
@@ -341,6 +349,16 @@ function ReferralSource() {
     defaultMessage: 'referral source',
   };
 
+  // If not a known code, the user typed custom text via the "other" path.
+  // Referrer.tsx stores that text directly in referralSource, so display it verbatim.
+  const displayValue =
+    formData.referralSource in allOptions
+      ? formatMessage({
+          id: `referralOptions.${formData.referralSource}`,
+          defaultMessage: allOptions[formData.referralSource],
+        })
+      : formData.referralSource;
+
   return (
     <ConfirmationBlock
       icon={<Referral title={formatMessage(referralSourceIconAlt)} />}
@@ -350,13 +368,7 @@ function ReferralSource() {
       editAriaLabel={editReferralSourceAriaLabel}
       stepName="referralSource"
     >
-      <ConfirmationItem
-        value={
-          formData.referralSource in referralOptions
-            ? referralOptions[formData.referralSource]
-            : formData.referralSource
-        }
-      />
+      <ConfirmationItem value={displayValue} />
     </ConfirmationBlock>
   );
 }
@@ -364,7 +376,6 @@ function ReferralSource() {
 const STEP_CONFIRMATIONS: Record<QuestionName, ReactNode | null> = {
   zipcode: <ZipCode key="zipcode" />,
   householdSize: <HouseholdSize key="householdSize" />,
-  energyCalculatorHouseholdData: <EnergyCalcConfirmationHHData key="energyCalculatorHouseholdData" />,
   householdData: <DefaultConfirmationHHData key="householdData" />,
   hasExpenses: <Expenses key="hasExpenses" />,
   householdAssets: <Assets key="householdAssets" />,

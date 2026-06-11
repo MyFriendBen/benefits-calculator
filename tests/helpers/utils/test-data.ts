@@ -20,7 +20,8 @@ export const testUsers = {
       birthYear: '1990',
       hasIncome: true,
       income: {
-        type: 'Wages, salaries, tips',
+        category: 'Work & Self-Employment Income',
+        type: 'Wages, salaries, or tips',
         frequency: 'every month',
         amount: '2200',
       },
@@ -31,7 +32,6 @@ export const testUsers = {
       relationship: 'Child', // Using exact matching to avoid selecting similar options like 'Foster Child', 'Step-Child', etc.
     },
     expenses: {
-      hasExpenses: true,
       type: 'Rent',
       amount: '2500',
     },
@@ -50,7 +50,8 @@ export const testUsers = {
       birthYear: '1990',
       hasIncome: true,
       income: {
-        type: 'Wages, salaries, tips',
+        category: 'Work & Self-Employment Income',
+        type: 'Wages, salaries, or tips',
         frequency: 'every month',
         amount: '2400',
       },
@@ -61,7 +62,6 @@ export const testUsers = {
       relationship: 'Child',
     },
     expenses: {
-      hasExpenses: true,
       type: 'Rent',
       amount: '2500',
     },
@@ -80,7 +80,8 @@ export const testUsers = {
       birthYear: '1990',
       hasIncome: true,
       income: {
-        type: 'Wages, salaries, tips',
+        category: 'Work & Self-Employment Income',
+        type: 'Wages, salaries, or tips',
         frequency: 'every month',
         amount: '2200',
       },
@@ -91,7 +92,6 @@ export const testUsers = {
       relationship: 'Child',
     },
     expenses: {
-      hasExpenses: true,
       type: 'Rent',
       amount: '2500',
     },
@@ -110,7 +110,8 @@ export const testUsers = {
       birthYear: '1985',
       hasIncome: true,
       income: {
-        type: 'Wages, salaries, tips',
+        category: 'Work & Self-Employment Income',
+        type: 'Wages, salaries, or tips',
         frequency: 'every month',
         amount: '3000',
       },
@@ -121,7 +122,6 @@ export const testUsers = {
       relationship: 'Child',
     },
     expenses: {
-      hasExpenses: true,
       type: 'Rent',
       amount: '2800',
     },
@@ -136,7 +136,7 @@ export const testUsers = {
  */
 export const defaultSelections = {
   state: STATES.NORTH_CAROLINA,
-  incomeTypes: ['Wages, salaries, tips', 'Self-employment income', 'Unemployment', 'Social Security', 'Child support'],
+  incomeTypes: ['Wages, salaries, or tips', 'Self-employment income', 'Unemployment', 'Social Security', 'Child support'],
   expenseTypes: ['Rent', 'Mortgage', 'Utilities', 'Childcare'],
   frequencies: ['every week', 'every two weeks', 'twice a month', 'every month', 'every year'],
 };

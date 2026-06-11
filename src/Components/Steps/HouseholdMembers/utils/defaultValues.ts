@@ -3,6 +3,8 @@ import { calculateAgeStatus } from '../../../AgeCalculation/AgeCalculation';
 import { EMPTY_INCOME_STREAM } from './constants';
 import { getDefaultFormItems } from './helpers';
 
+export const UNSET_BIRTH_YEAR: number | '' = '';
+
 /**
  * Default health insurance object
  */
@@ -35,7 +37,16 @@ export const DEFAULT_SPECIAL_CONDITIONS = {
  * Helper to check if user has health insurance selections (indicates they've progressed through form)
  */
 const hasProgressedThroughForm = (data?: HouseholdData): boolean => {
-  return !!data?.healthInsurance && Object.values(data.healthInsurance).some((v) => v === true);
+  // Main workflow: health insurance is filled in after first submission
+  if (data?.healthInsurance && Object.values(data.healthInsurance).some((v) => v === true)) {
+    return true;
+  }
+  // EC workflow (CESN): energyCalculator sub-object is only written on form submission,
+  // never pre-populated for brand-new members, so its presence means the form was submitted.
+  if (data?.energyCalculator !== undefined) {
+    return true;
+  }
+  return false;
 };
 
 /**
@@ -51,16 +62,25 @@ const isWorkingAge = (birthYear?: number, birthMonth?: number): boolean => {
  * Determines default income streams - auto-adds for working-age members on first visit
  */
 const getDefaultIncomeStreams = (data?: HouseholdData): any[] => {
+  const progressed = hasProgressedThroughForm(data);
+  // Normalize [] to undefined when not yet progressed — the API always returns [] for
+  // brand-new members, but getDefaultFormItems needs undefined to distinguish
+  // "never visited" from "visited and intentionally cleared".
+  const existingStreams =
+    Array.isArray(data?.incomeStreams) && data!.incomeStreams.length === 0 && !progressed
+      ? undefined
+      : data?.incomeStreams;
+
   const streams = getDefaultFormItems(
-    data?.incomeStreams,
-    hasProgressedThroughForm(data),
+    existingStreams,
+    progressed,
     isWorkingAge(data?.birthYear, data?.birthMonth),
     EMPTY_INCOME_STREAM as any
   );
   return streams.map((stream: any) => ({
     ...stream,
-    incomeAmount: stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
-    hoursPerWeek: stream.hoursPerWeek === 0 ? '' : String(stream.hoursPerWeek),
+    incomeAmount: stream.incomeAmount == null || stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
+    hoursPerWeek: stream.hoursPerWeek == null || stream.hoursPerWeek === 0 ? '' : String(stream.hoursPerWeek),
   }));
 };
 
@@ -100,19 +120,6 @@ export const DEFAULT_STUDENT_ELIGIBILITY = {
 };
 
 /**
- * Determines the default hasIncome string value.
- * Priority:
- * 1. Streams present → always 'true'
- * 2. Saved hasIncome boolean → respect it (user made an explicit choice)
- * 3. No saved data (first visit) → 'false' (age effect will auto-set if eligible)
- */
-const getDefaultHasIncome = (data: HouseholdData | undefined, incomeStreams: any[]): string => {
-  if (incomeStreams.length > 0) return 'true';
-  if (data && typeof data.hasIncome === 'boolean') return data.hasIncome ? 'true' : 'false';
-  return 'false';
-};
-
-/**
  * Creates default form values for household member
  */
 export const createDefaultValues = (
@@ -136,7 +143,6 @@ export const createDefaultValues = (
     studentEligibility: householdMemberFormData?.studentEligibility
       ? { ...DEFAULT_STUDENT_ELIGIBILITY, ...householdMemberFormData.studentEligibility }
       : DEFAULT_STUDENT_ELIGIBILITY,
-    hasIncome: getDefaultHasIncome(householdMemberFormData, incomeStreams),
     incomeStreams,
   };
 };
@@ -152,18 +158,27 @@ export const DEFAULT_ENERGY_CALCULATOR_CONDITIONS = {
 };
 
 /**
- * Creates default form values for the EC household member form.
- * Reads conditions from the energyCalculator sub-object.
+ * Creates a default HouseholdData object for a brand-new member on the basic info page.
+ * Uses the existing DEFAULT_* constants so any future field additions propagate automatically.
  */
+export const createDefaultMember = (index: number, existingMember?: HouseholdData): HouseholdData => ({
+  ...existingMember,
+  id: existingMember?.id ?? crypto.randomUUID(),
+  frontendId: existingMember?.frontendId ?? crypto.randomUUID(),
+  birthMonth: existingMember?.birthMonth ?? 0,
+  birthYear: existingMember?.birthYear ?? 0,
+  relationshipToHH: existingMember?.relationshipToHH ?? (index === 0 ? 'headOfHousehold' : ''),
+  conditions: existingMember?.conditions ?? { ...DEFAULT_SPECIAL_CONDITIONS },
+  hasIncome: existingMember?.hasIncome ?? false,
+  incomeStreams: existingMember?.incomeStreams ?? [],
+  healthInsurance: existingMember?.healthInsurance ?? { ...DEFAULT_HEALTH_INSURANCE },
+});
+
 export const createEnergyCalculatorDefaultValues = (
   householdMemberFormData: HouseholdData | undefined,
   pageNumber: number,
 ) => {
-  const incomeStreams = (householdMemberFormData?.incomeStreams ?? []).map((stream: any) => ({
-    ...stream,
-    incomeAmount: stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
-    hoursPerWeek: stream.hoursPerWeek === 0 ? '' : String(stream.hoursPerWeek),
-  }));
+  const incomeStreams = getDefaultIncomeStreams(householdMemberFormData);
 
   return {
     birthMonth: householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
@@ -180,7 +195,6 @@ export const createEnergyCalculatorDefaultValues = (
     receivesSsi: householdMemberFormData?.energyCalculator?.receivesSsi ? 'true' : 'false',
     relationshipToHH: householdMemberFormData?.relationshipToHH
       ?? (pageNumber === 1 ? 'headOfHousehold' : ''),
-    hasIncome: getDefaultHasIncome(householdMemberFormData, incomeStreams),
     incomeStreams,
   };
 };

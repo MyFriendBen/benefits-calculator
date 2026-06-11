@@ -28,6 +28,7 @@ import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
 import { FormattedMessage } from 'react-intl';
 import './Results.css';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
+import { addAdminToLink } from '../../Assets/adminLink';
 import { FormData } from '../../Types/FormData';
 import filterProgramsGenerator from './Filter/filterPrograms';
 import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRebates';
@@ -35,6 +36,7 @@ import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/reba
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
 import { usePageTitle } from '../Common/usePageTitle';
 import { NPSWidget } from '../NPS';
+import ShareModalAutoPopup from '../Share/ShareModalAutoPopup';
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -82,14 +84,6 @@ export function findProgramById(programs: Program[], id: number) {
 
 export function findValidationForProgram(validations: Validation[], program: Program) {
   return validations.find((validation) => validation.program_name === program.external_name);
-}
-
-function addAdminToLink(link: string, isAdmin: boolean) {
-  if (isAdmin) {
-    return link + '?admin=true';
-  }
-
-  return link;
 }
 
 export function useResultsLink(link: string) {
@@ -262,6 +256,7 @@ const Results = ({ type }: ResultsProps) => {
               </Grid>
               {!noHelpButton && <HelpButton />}
               <NPSWidget uuid={uuid} />
+              <ShareModalAutoPopup />
             </div>
           </div>
         </main>

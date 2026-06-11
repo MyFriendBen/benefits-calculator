@@ -16,13 +16,11 @@ const AppRoutes = () => {
 
   // Get dynamic step numbers (hooks must be called in component)
   const householdMemberStepNumber = useStepNumber('householdData', false);
-  const energyCalcHouseholdMemberStepNumber = useStepNumber('energyCalculatorHouseholdData', false);
 
   // Build route configurations using helper functions
   const globalRoutes = buildGlobalRoutes({ urlSearchParams });
   const whiteLabelRoutes = buildWLScopedRoutes({
     householdMemberStepNumber,
-    energyCalcHouseholdMemberStepNumber,
   });
 
   const allRoutes = [...whiteLabelRoutes, ...globalRoutes];

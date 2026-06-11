@@ -356,7 +356,7 @@ function SignUp() {
                     error={errors.contactInfo?.firstName !== undefined}
                     helperText={
                       errors.contactInfo?.firstName !== undefined && (
-                        <ErrorMessageWrapper fontSize="1rem">
+                        <ErrorMessageWrapper>
                           {errors.contactInfo.firstName.message}
                         </ErrorMessageWrapper>
                       )
@@ -375,7 +375,7 @@ function SignUp() {
                     error={errors.contactInfo?.lastName !== undefined}
                     helperText={
                       errors.contactInfo?.lastName !== undefined && (
-                        <ErrorMessageWrapper fontSize="1rem">{errors.contactInfo.lastName.message}</ErrorMessageWrapper>
+                        <ErrorMessageWrapper>{errors.contactInfo.lastName.message}</ErrorMessageWrapper>
                       )
                     }
                   />
@@ -400,7 +400,7 @@ function SignUp() {
                     error={errors.contactInfo?.email !== undefined}
                     helperText={
                       errors.contactInfo?.email !== undefined && (
-                        <ErrorMessageWrapper fontSize="1rem">{errors.contactInfo.email.message}</ErrorMessageWrapper>
+                        <ErrorMessageWrapper>{errors.contactInfo.email.message}</ErrorMessageWrapper>
                       )
                     }
                   />
@@ -420,7 +420,7 @@ function SignUp() {
                     error={errors.contactInfo?.cell !== undefined}
                     helperText={
                       errors.contactInfo?.cell !== undefined && (
-                        <ErrorMessageWrapper fontSize="1rem">{errors.contactInfo.cell.message}</ErrorMessageWrapper>
+                        <ErrorMessageWrapper>{errors.contactInfo.cell.message}</ErrorMessageWrapper>
                       )
                     }
                     onAfterChange={() => {
@@ -473,7 +473,7 @@ function SignUp() {
                       }
                     />
                     {errors.contactInfo?.emailConsent && (
-                      <ErrorMessageWrapper fontSize="1rem">
+                      <ErrorMessageWrapper>
                         {errors.contactInfo.emailConsent.message}
                       </ErrorMessageWrapper>
                     )}
@@ -539,7 +539,7 @@ function SignUp() {
                       }
                     />
                     {errors.contactInfo?.tcpa && (
-                      <ErrorMessageWrapper fontSize="1rem">{errors.contactInfo.tcpa.message}</ErrorMessageWrapper>
+                      <ErrorMessageWrapper>{errors.contactInfo.tcpa.message}</ErrorMessageWrapper>
                     )}
                   </>
                 )}
@@ -547,7 +547,7 @@ function SignUp() {
             </div>
             <div className="sign-up-server-error-container">
               {hasServerError && (
-                <ErrorMessageWrapper fontSize="1.5rem">
+                <ErrorMessageWrapper fontSize="1rem">
                   <FormattedMessage
                     id="validation-helperText.serverError"
                     defaultMessage="Please enter a valid email address and/or phone number. This error could also be caused by entering an email address that is already in our system. If the error persists, remember that this question is optional and will not impact your MyFriendBen results. You can skip this question by deselecting the boxes at the top of the page and pressing continue."

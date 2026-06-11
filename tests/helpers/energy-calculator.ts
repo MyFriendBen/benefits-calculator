@@ -1,4 +1,5 @@
-import { Page } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
+import { selectIncomeCategory, selectIncomeType, selectFrequency } from './form';
 
 export async function selectOwnerOrRenter(page: Page, type: string) {
   await page.getByRole('link', { name: type }).click();
@@ -27,16 +28,17 @@ export async function selectHouseholdInfo(page: Page, householdInfo: string) {
 }
 
 export async function selectNoBenefit(page: Page) {
-  await page.getByRole('radio', { name: 'No', exact: true }).check();
+  // Post-MFB-862: the has-benefits step is tile-based and optional. Leaving
+  // every tile unselected means "no benefits" — no radio to toggle.
+  // Wait for the program fetch to resolve so Continue becomes enabled.
+  await expect(page.locator('.hb-loading')).toBeHidden();
 }
 
-export async function selectECIncome(page: Page, incomeType: string, frequency: string, amount: number) {
+export async function selectECIncome(page: Page, incomeCategory: string, incomeType: string, frequency: string, amount: number) {
   // For energy calculator household member form, income radio is already set to 'Yes' for 16+ users
   // Just fill in the income details
-  await page.getByRole('button', { name: 'Income Type' }).click();
-  await page.getByRole('option', { name: incomeType }).click();
-  await page.getByRole('button', { name: 'Frequency' }).click();
-  await page.getByRole('option', { name: frequency }).click();
-  await page.getByRole('textbox', { name: 'Amount' }).click();
-  await page.getByRole('textbox', { name: 'Amount' }).fill(amount.toString());
+  await selectIncomeCategory(page, incomeCategory);
+  await selectIncomeType(page, incomeType);
+  await selectFrequency(page, frequency);
+  await page.locator('#income-amount-input-0').fill(amount.toString());
 }

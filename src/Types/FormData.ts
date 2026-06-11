@@ -1,11 +1,15 @@
 import { UtmParameters } from '../Components/CampaignAnalytics/useUtmParameters';
 
+export type ExpenseFrequency = 'monthly' | 'yearly';
+
 export type Expense = {
   expenseSourceName: string;
   expenseAmount: number;
+  expenseFrequency: ExpenseFrequency;
 };
 
 export type IncomeStream = {
+  incomeCategory: string;
   incomeStreamName: string;
   incomeAmount: number;
   incomeFrequency: string;
@@ -51,9 +55,8 @@ export type HouseholdData = {
   healthInsurance?: HealthInsurance;
 };
 
-export type Benefits = {
-  [key: string]: boolean;
-};
+/** Program `name_abbreviated` values the household already receives. */
+export type Benefits = Set<string>;
 
 export type HealthInsurance = {
   none: boolean;

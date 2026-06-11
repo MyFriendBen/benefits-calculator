@@ -7,7 +7,6 @@ import Paper from '@mui/material/Paper';
 import { useConfig } from '../../Config/configHook';
 import { Context } from '../../Wrapper/Wrapper';
 import LancLogo from '../../../Assets/States/NC/WhiteLabels/LancAssets/lanc_mfb_logo.png';
-import lancNCLinks from '../../../Assets/States/NC/WhiteLabels/LancAssets/lancLink';
 import LanguageIcon from '@mui/icons-material/Language';
 import ShareIcon from '@mui/icons-material/Share';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -84,48 +83,6 @@ const LancHeader = () => {
     selectLanguage(event.target.value);
   };
 
-  const handleOpenMenu = () => {
-    setOpenMenu(!openMenu);
-  };
-
-  const createLinks = () => {
-    const mappedLinks = lancNCLinks.map((link, index) => {
-      return (
-        <Link
-          href={link.href}
-          underline="none"
-          target="_blank"
-          aria-label={link.ariaLabel}
-          className="lanc-menu-link"
-          key={link.defaultMsg + index}
-        >
-          <FormattedMessage id={link.formattedMsgId} defaultMessage={link.defaultMsg} />
-        </Link>
-      );
-    });
-
-    return mappedLinks;
-  };
-
-  const displayHamburgerMenuIcon = () => {
-    return (
-      <IconButton
-        edge="end"
-        aria-label={
-          openMenu ? intl.formatMessage(closeBtnAriaLabelProps) : intl.formatMessage(openMenuBtnAriaLabelProps)
-        }
-        onClick={handleOpenMenu}
-        className="hamburger-icon"
-      >
-        {openMenu ? <CloseIcon /> : <MenuIcon />}
-      </IconButton>
-    );
-  };
-
-  const displayHamburgerMenu = () => {
-    return <Stack id="hamburger-drawer">{createLinks()}</Stack>;
-  };
-
   const createMenuItems = (optionList: LanguageOptions) => {
     const menuItemKeyLabelPairArr = Object.entries(optionList);
 
@@ -150,9 +107,6 @@ const LancHeader = () => {
             </a>
           </Box>
           <Stack direction="row" gap=".55rem">
-            <Stack direction="row" gap="0.55rem" alignItems="center" className="lanc-desktop-links">
-              {createLinks()}
-            </Stack>
             <Stack direction="row" gap=".25rem" alignItems="center">
               <LanguageIcon className="lanc-globe-icon" />
               <Select
@@ -178,7 +132,6 @@ const LancHeader = () => {
               >
                 <ShareIcon role="img" />
               </IconButton>
-              {displayHamburgerMenuIcon()}
             </Stack>
             <Dialog
               open={openShare}
@@ -190,7 +143,6 @@ const LancHeader = () => {
             </Dialog>
           </Stack>
         </AppBar>
-        {openMenu && displayHamburgerMenu()}
       </Paper>
     </nav>
   );

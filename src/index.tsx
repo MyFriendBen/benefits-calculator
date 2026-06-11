@@ -4,6 +4,7 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
 import Wrapper from './Components/Wrapper/Wrapper';
 import './index.css';
+import 'react-international-phone/style.css';
 import { initializeGTM } from './Assets/analytics';
 import { handleCustomDomainRedirect } from './config/customDomains';
 

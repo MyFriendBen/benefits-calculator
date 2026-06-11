@@ -25,12 +25,40 @@
   stroke: currentColor !important;
 }
 
-.energy-calculator-rebate-page-container section {
+.energy-calculator-rebate-page-container .energy-calculator-rebate-page-rebates-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   width: 80%;
   padding: 1rem;
+}
+
+.energy-calculator-rebate-page-container
+  .energy-calculator-rebate-page-rebates-list.energy-calculator-rebate-page-rebates-list-full-width {
+  width: 100%;
+  padding: 0;
+}
+
+.energy-calculator-rebate-page-container .energy-calculator-rebate-page-rebates-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+  color: var(--secondary-color);
+  margin: 0.5rem 0 .5rem;
+}
+
+.energy-calculator-rebate-page-container .energy-calculator-rebate-page-rebates-heading svg {
+  display: inline-flex;
+  width: 2rem;
+  height: 1.6rem;
+  color: var(--icon-color) !important;
+}
+
+.energy-calculator-rebate-page-container .energy-calculator-rebate-page-rebates-heading svg,
+.energy-calculator-rebate-page-container .energy-calculator-rebate-page-rebates-heading svg * {
+  fill: none !important;
+  stroke: currentColor !important;
 }
 
 .energy-calculator-rebate-page-rebate-card {
@@ -146,7 +174,7 @@
     align-self: flex-start;
   }
 
-  .energy-calculator-rebate-page-container section {
+  .energy-calculator-rebate-page-container .energy-calculator-rebate-page-rebates-list {
     align-self: center;
     width: 100%;
     padding: 0;
@@ -154,5 +182,9 @@
 
   .energy-calculator-rebate-page-rebate-card {
     padding: 1.25rem;
+  }
+
+  .energy-calculator-rebate-page-container .energy-calculator-rebate-page-rebates-heading {
+    margin-top: 1.5rem;
   }
 }

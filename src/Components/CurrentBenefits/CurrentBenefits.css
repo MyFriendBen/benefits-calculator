@@ -1,16 +1,12 @@
-.current-benefits-container {
-  margin: 1rem;
-}
-
 .current-benefits-header {
-  margin-top: 4rem;
+  margin-top: 2rem;
   text-align: center;
 }
 
 .long-near-term-header {
   color: var(--primary-color);
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
   font-size: 1.5rem;
   font-weight: 700;
   line-height: normal;
@@ -35,7 +31,7 @@ a.program-name:hover {
 }
 
 .category-section-container {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .header-and-programs-container {

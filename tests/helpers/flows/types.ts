@@ -19,6 +19,7 @@ export interface PersonInfo {
  * Income information
  */
 export interface IncomeInfo {
+  category: string;
   type: string;
   frequency: string;
   amount: string;
@@ -42,12 +43,22 @@ export interface HouseholdMemberInfo extends PersonInfo {
 }
 
 /**
- * Expense information
+ * Basic info for a single member on step-5/0
+ */
+export interface BasicInfoMember {
+  birthMonth: string;
+  birthYear: string;
+  relationship?: string; // omitted for primary member (index 0)
+}
+
+/**
+ * Expense information.
+ * hasExpenses is derived from whether amount > 0 — just omit the expense entry if there are none.
  */
 export interface ExpenseInfo {
-  hasExpenses: boolean;
   type: string;
   amount: string;
+  frequency?: 'monthly' | 'yearly';
 }
 
 /**

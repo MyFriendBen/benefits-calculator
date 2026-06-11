@@ -10,6 +10,7 @@ import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorRebateCategoryList, {
   useEnergyCalculatorNeedsRebates,
 } from '../../EnergyCalculator/Results/RebateCategories';
+import DocumentSummary from '../DocumentSummary/DocumentSummary';
 
 function sortProgramsIntoCategories(categories: ProgramCategory[]): ProgramCategory[] {
   // sort categories by total category value in decending order
@@ -70,7 +71,7 @@ const ValidationCategory = () => {
 };
 
 const Programs = () => {
-  const { programCategories } = useResultsContext();
+  const { programs, programCategories } = useResultsContext();
 
   const categories = useMemo(() => sortProgramsIntoCategories(programCategories), [programCategories]);
 
@@ -81,6 +82,7 @@ const Programs = () => {
     <>
       <ResultsMessage />
       {!isEnergyCalculator && <Filter />}
+      {isEnergyCalculator && <DocumentSummary programs={programs} />}
       <ValidationCategory />
       {isEnergyCalculator && needsRebates && <EnergyCalculatorRebateCategoryList />}
       {categories.map((category) => {

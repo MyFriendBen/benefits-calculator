@@ -17,9 +17,11 @@ import { usePageTitle } from '../Common/usePageTitle';
 
 export const STATES: { [key: string]: string } = {
   co: 'Colorado',
-  nc: 'North Carolina',
-  ma: 'Massachusetts',
   il: 'Illinois',
+  ma: 'Massachusetts',
+  nc: 'North Carolina',
+  tx: 'Texas',
+  wa: 'Washington',
 };
 
 const SelectStatePage = () => {
@@ -93,7 +95,7 @@ const SelectStatePage = () => {
   };
 
   return (
-    <main className="benefits-form">
+    <main className="benefits-form" data-step-id="select-state">
       <QuestionHeader>
         <FormattedMessage id="stateStep.header" defaultMessage="Before you begin..." />
       </QuestionHeader>
@@ -127,7 +129,7 @@ const SelectStatePage = () => {
                 </Select>
                 {errors.state !== undefined && (
                   <FormHelperText>
-                    <ErrorMessageWrapper fontSize="1rem">{errors.state.message}</ErrorMessageWrapper>
+                    <ErrorMessageWrapper>{errors.state.message}</ErrorMessageWrapper>
                   </FormHelperText>
                 )}
               </>

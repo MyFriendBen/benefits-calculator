@@ -27,7 +27,7 @@ export const FORM_INPUTS = {
   // Text inputs
   ZIP_CODE: { role: 'textbox' as const, name: 'Zip Code' },
   HOUSEHOLD_SIZE: { role: 'textbox' as const, name: 'Household Size' },
-  AMOUNT: { role: 'textbox' as const, name: 'Amount' },
+  AMOUNT: '#income-amount-input-0',
   DOLLAR_AMOUNT: { role: 'textbox' as const, name: 'Dollar Amount' },
 
   // Checkboxes
@@ -61,9 +61,24 @@ export const OPTION = {
  * Common dropdown button selectors
  */
 export const DROPDOWN = {
-  INCOME_TYPE: { role: 'button' as const, name: 'Income Type' },
+  INCOME_CATEGORY: '#income-category-select-0',
+  INCOME_TYPE: '#income-source-select-0',
   EXPENSE_TYPE: { role: 'button' as const, name: 'Expense Type' },
-  FREQUENCY: { role: 'button' as const, name: 'Frequency' },
+  FREQUENCY: '#income-frequency-select-0',
+};
+
+/**
+ * Basic info page (step-5/0) selectors — indexed by member position
+ */
+export const BASIC_INFO_PAGE = {
+  birthMonthSelect: (index: number) => `[aria-labelledby*="birth-month-label-members-${index}"]`,
+  birthYearInput: (index: number) => `input[placeholder="YYYY"] >> nth=${index}`,
+  relationshipSelect: (index: number) => `#relationship-select-members-${index}`,
+  deleteButton: (index: number) => {
+    if (index < 1) throw new Error(`deleteButton index must be >= 1 (first member has no delete button), got ${index}`);
+    return `button[aria-label="delete household member"] >> nth=${index - 1}`;
+  },
+  addMemberButton: 'button:has-text("Add a Household Member")',
 };
 
 /**

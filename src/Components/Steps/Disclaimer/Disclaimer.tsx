@@ -165,7 +165,7 @@ const Disclaimer = () => {
     return <EnergyCalculatorDisclaimer />;
   } else {
     return (
-      <main className="benefits-form">
+      <main className="benefits-form" data-step-id="disclaimer">
         <QuestionHeader>
           <FormattedMessage id="disclaimer.header" defaultMessage="What you should know: " />
         </QuestionHeader>
@@ -189,7 +189,7 @@ const Disclaimer = () => {
                     label={createAgreeTTSCheckboxLabel()}
                   />
                   {errors.agreeToTermsOfService && (
-                    <ErrorMessageWrapper fontSize="1rem">{errors.agreeToTermsOfService.message}</ErrorMessageWrapper>
+                    <ErrorMessageWrapper>{errors.agreeToTermsOfService.message}</ErrorMessageWrapper>
                   )}
                 </>
               )}
@@ -219,7 +219,7 @@ const Disclaimer = () => {
                     className="top-margin"
                   />
                   {errors.is13OrOlder && (
-                    <ErrorMessageWrapper fontSize="1rem">{errors.is13OrOlder.message}</ErrorMessageWrapper>
+                    <ErrorMessageWrapper>{errors.is13OrOlder.message}</ErrorMessageWrapper>
                   )}
                 </>
               )}

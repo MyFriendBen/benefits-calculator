@@ -14,6 +14,7 @@ const TEST_CONFIG: Record<WhiteLabel, { name: string; skip?: boolean; skipReason
   cesn: { name: 'Colorado Energy Savings Navigator' },
   il: { name: 'Illinois' },
   tx: { name: 'Texas' },
+  wa: { name: 'Washington' },
 };
 
 // Validate that TEST_CONFIG is in sync with ALL_VALID_WHITE_LABELS
@@ -53,7 +54,8 @@ test.describe('Current Benefits Pages Test', () => {
          * instead of the less reliable 'networkidle' state
          */
         // Wait for the main container to be visible
-        await expect(page.locator('.current-benefits-container')).toBeVisible({ timeout: 15000 });
+        await page.locator('main.benefits-form').waitFor({ state: 'visible', timeout: 60000 });
+        await expect(page.locator('main.benefits-form')).toBeVisible({ timeout: 15000 });
 
         // Wait for the header to be visible
         await expect(page.locator('.current-benefits-header')).toBeVisible();

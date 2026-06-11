@@ -14,7 +14,6 @@ type NPSFollowupProps = {
 
 /**
  * Followup textarea shown after a user selects an NPS score.
- * Used by both floating and inline variants.
  */
 export default function NPSFollowup({ selectedScore, reason, setReason, onSubmit, onSkip, isSubmitting = false }: NPSFollowupProps) {
   const intl = useIntl();

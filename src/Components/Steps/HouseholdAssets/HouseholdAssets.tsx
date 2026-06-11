@@ -106,7 +106,7 @@ const HouseholdAssets = () => {
               error={errors.householdAssets !== undefined}
               helperText={
                 errors.householdAssets !== undefined && (
-                  <ErrorMessageWrapper fontSize="1rem">{errors.householdAssets?.message}</ErrorMessageWrapper>
+                  <ErrorMessageWrapper>{errors.householdAssets?.message}</ErrorMessageWrapper>
                 )
               }
             />

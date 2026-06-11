@@ -19,8 +19,18 @@ export type ConditionOption = {
 export type ConditionOptions = Record<'you' | 'them', Record<keyof Conditions, ConditionOption>>;
 
 export type IncomeStreamFormData = {
+  incomeCategory: string;
   incomeStreamName: string;
   incomeAmount: string;
   incomeFrequency: string;
   hoursPerWeek: string;
 };
+
+export type LocationState = {
+  isEditing?: boolean;
+  routedFromConfirmationPg?: boolean;
+  basicInfoCollected?: boolean;
+  returnToPage?: number;
+};
+
+export type DeletePopoverState = { index: number; anchorEl: HTMLElement } | null;
