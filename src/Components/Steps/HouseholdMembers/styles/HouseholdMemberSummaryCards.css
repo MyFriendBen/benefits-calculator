@@ -23,12 +23,8 @@
 }
 
 .member-added-container.current-household-member {
-  /* Distinguish the member currently being edited with a filled tint + heavier border, not just
-     color — some white labels (e.g. CESN) set --secondary-color equal to --primary-color, so a
-     border-color difference alone wouldn't separate "completed" from "editing". */
-  background-color: #eef1f8;
+  background-color: white;
   border-style: solid;
-  border-width: 3px;
 }
 
 .household-member-status-icon {
@@ -62,7 +58,9 @@
 }
 
 .household-member-status-icon .current-icon {
-  color: var(--secondary-color);
+  /* Match the editing card's accent (see .current-household-member) so the wrench badge stands
+     out from the navy completed checkmark even when --secondary-color equals --primary-color. */
+  color: var(--icon-color);
 }
 
 .household-member-header {
@@ -114,17 +112,24 @@
   color: var(--primary-color);
 }
 
+/*
+  Differentiate the member currently being edited with the theme accent (--icon-color) rather
+  than --secondary-color: most white labels (CESN, and others) set --secondary-color equal to
+  --primary-color, so a completed card and the editing one would look identical. Every theme
+  defines --icon-color as a distinct accent (e.g. CESN's red), so it always contrasts the navy
+  primary used by completed cards.
+*/
 .current-household-member {
-  border-color: var(--secondary-color);
+  border-color: var(--icon-color);
   border-style: solid;
 }
 
 .current-household-member .member-added-relationship {
-  color: var(--secondary-color);
+  color: var(--icon-color);
 }
 
 .current-household-member .member-added-income {
-  color: var(--secondary-color);
+  color: var(--icon-color);
 }
 
 .member-added-relationship {
