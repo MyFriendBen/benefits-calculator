@@ -184,7 +184,7 @@ const HouseholdMemberForm = () => {
       <p className="question-sub-label">
         <FormattedMessage
           id="householdDataBlock.clickToEdit"
-          defaultMessage="You may edit or delete completed members below."
+          defaultMessage="Select a completed member to edit, or delete any member."
         />
       </p>
       <Box className="summary-cards-container">
