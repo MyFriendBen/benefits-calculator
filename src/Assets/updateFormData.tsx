@@ -41,6 +41,7 @@ export function useUpdateFormData() {
         savings: response.needs_college_savings ?? false,
         veteranServices: response.needs_veteran_services ?? false,
         disabilityResources: response.needs_disability_resources ?? false,
+        agingResources: response.needs_aging_resources ?? false,
       },
       signUpInfo: {
         email: '',
