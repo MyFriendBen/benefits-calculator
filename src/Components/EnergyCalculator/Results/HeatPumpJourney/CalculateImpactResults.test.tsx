@@ -166,4 +166,36 @@ describe('CalculateImpactResults', () => {
       expect(container.querySelector('.impact-range-bar__median-float')).toBeInTheDocument();
     });
   });
+
+  describe('AC disclaimer', () => {
+    const acDisclaimer = /adding air conditioning/i;
+
+    it('shows the AC disclaimer for the whole-home heat pump upgrade', () => {
+      renderResults(ALL_NEGATIVE_RESULT, {
+        formValues: { ...FORM_VALUES, upgradeChoice: 'heat_pump' },
+      });
+      expect(screen.getByText(acDisclaimer)).toBeInTheDocument();
+    });
+
+    it('shows the AC disclaimer for the heat pump + weatherization upgrade', () => {
+      renderResults(ALL_NEGATIVE_RESULT, {
+        formValues: { ...FORM_VALUES, upgradeChoice: 'heat_pump_weatherization' },
+      });
+      expect(screen.getByText(acDisclaimer)).toBeInTheDocument();
+    });
+
+    it('hides the AC disclaimer for the weatherization-only upgrade', () => {
+      renderResults(ALL_NEGATIVE_RESULT, {
+        formValues: { ...FORM_VALUES, upgradeChoice: 'weatherization' },
+      });
+      expect(screen.queryByText(acDisclaimer)).not.toBeInTheDocument();
+    });
+
+    it('hides the AC disclaimer for the heat pump water heater upgrade', () => {
+      renderResults(ALL_NEGATIVE_RESULT, {
+        formValues: { ...FORM_VALUES, upgradeChoice: 'heat_pump_water_heater' },
+      });
+      expect(screen.queryByText(acDisclaimer)).not.toBeInTheDocument();
+    });
+  });
 });

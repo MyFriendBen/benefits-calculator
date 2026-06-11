@@ -255,10 +255,17 @@ describe('CalculateImpactPage', () => {
 
     it('allows selecting an upgrade option via radio button', () => {
       renderPage();
-      // Only "Heat pump water heater" is enabled in Step 3; other options are "Coming soon".
-      const hpwhRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
-      fireEvent.click(hpwhRadio);
-      expect(hpwhRadio).toBeChecked();
+      const weatherizationRadio = screen.getByRole('radio', { name: /^weatherization$/i });
+      fireEvent.click(weatherizationRadio);
+      expect(weatherizationRadio).toBeChecked();
+    });
+
+    it('enables all four upgrade options (no "Coming soon")', () => {
+      renderPage();
+      screen.getAllByRole('radio').forEach((radio) => {
+        expect(radio).not.toBeDisabled();
+      });
+      expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
     });
   });
 
@@ -322,6 +329,31 @@ describe('CalculateImpactPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /edit household info/i }));
 
       expect(screen.getByRole('button', { name: /calculate impact/i })).toBeInTheDocument();
+    });
+
+    it('submits a non-HPWH upgrade without requiring water heating fuel', async () => {
+      (jest.requireMock('./fetchRemImpact').fetchRemImpact as jest.Mock).mockResolvedValue(MOCK_RESULT);
+      renderPage();
+
+      const householdSelect = screen.getByRole('button', { name: /household type/i });
+      await selectOption(householdSelect, 'House');
+
+      const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
+      fireEvent.change(addressInput, { target: { value: '789 Pine St, Denver, CO 80202' } });
+
+      const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
+      await selectOption(fuelSelect, 'Natural gas');
+
+      // No water heating fuel selected — should be valid for a weatherization upgrade.
+      const weatherizationRadio = screen.getByRole('radio', { name: /^weatherization$/i });
+      fireEvent.click(weatherizationRadio);
+
+      fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/bill and emissions impact/i)).toBeInTheDocument();
+      });
+      expect(screen.queryByText(/please select a water heating fuel/i)).not.toBeInTheDocument();
     });
   });
 

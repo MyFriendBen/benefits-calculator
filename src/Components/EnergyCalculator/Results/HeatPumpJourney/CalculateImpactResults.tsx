@@ -169,6 +169,11 @@ export default function CalculateImpactResults({
     : null;
   const upgradeLabel = UPGRADE_LABEL_MAP[formValues.upgradeChoice];
 
+  // The AC disclaimer only applies to upgrades that add a heat pump for space
+  // conditioning; it's misleading for weatherization-only and water-heater upgrades.
+  const showAcDisclaimer =
+    formValues.upgradeChoice === 'heat_pump' || formValues.upgradeChoice === 'heat_pump_weatherization';
+
   // Bill range values (absolute)
   const billP20 = result.bill_delta.percentile_20.value;
   const billMedian = result.bill_delta.median.value;
@@ -329,11 +334,15 @@ export default function CalculateImpactResults({
                   values={{ low: billRangeLow, high: billRangeHigh, mostLikely: billMostLikely }}
                 />
               )}
-              {' '}
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.results.billImpact.however"
-                defaultMessage="However, your utility bill could increase if you are adding air conditioning to a home that did not have it before."
-              />
+              {showAcDisclaimer && (
+                <>
+                  {' '}
+                  <FormattedMessage
+                    id="energyCalculator.calculateImpact.results.billImpact.however"
+                    defaultMessage="However, your utility bill could increase if you are adding air conditioning to a home that did not have it before."
+                  />
+                </>
+              )}
             </p>
             <ImpactRangeBar
               p20={billP20}

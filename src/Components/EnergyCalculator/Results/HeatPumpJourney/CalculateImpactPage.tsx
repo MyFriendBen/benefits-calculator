@@ -594,29 +594,19 @@ export default function CalculateImpactPage() {
                 <RadioGroup {...field} value={field.value ?? ''}>
                   {UPGRADE_OPTIONS.map((opt) => {
                     const isSelected = field.value === opt.value;
-                    const isAvailable = opt.value === 'heat_pump_water_heater';
                     return (
                       <div
                         key={opt.value}
                         className="calculate-impact-radio-option"
                         data-selected={isSelected ? 'true' : 'false'}
-                        data-disabled={!isAvailable ? 'true' : 'false'}
+                        data-disabled="false"
                       >
                         <FormControlLabel
                           value={opt.value}
-                          disabled={!isAvailable}
                           control={<Radio />}
                           label={
                             <span className="calculate-impact-radio-label">
                               <FormattedMessage id={opt.messageId} defaultMessage={opt.defaultMessage} />
-                              {!isAvailable && (
-                                <span className="calculate-impact-coming-soon">
-                                  <FormattedMessage
-                                    id="energyCalculator.calculateImpact.comingSoon"
-                                    defaultMessage="Coming soon"
-                                  />
-                                </span>
-                              )}
                             </span>
                           }
                         />
