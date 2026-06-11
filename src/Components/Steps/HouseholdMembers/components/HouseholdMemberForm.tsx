@@ -1,9 +1,10 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
 import { useContext } from 'react';
 import { HouseholdData } from '../../../../Types/FormData';
-import { Box } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
 import HouseholdMemberSummaryCards from './HouseholdMemberSummaryCards';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
@@ -37,6 +38,7 @@ const HouseholdMemberForm = () => {
   const { formData } = useContext(Context);
   const { uuid, page, whiteLabel } = useParams<{ uuid: string; page: string; whiteLabel: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
   const { updateScreen } = useScreenApi();
   const intl = useIntl();
   const pageNumber = Number(page);
@@ -176,16 +178,34 @@ const HouseholdMemberForm = () => {
   // RENDER
   // ============================================================================
 
+  // Send the user to the basic-info roster (page 0) to add/edit/remove members in bulk, and
+  // remember the member page they came from so page 0's Continue returns them here.
+  const goToManageMembers = () => {
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/0`, { state: { returnToPage: pageNumber } });
+  };
+
+  const manageMembersAriaLabel = intl.formatMessage({
+    id: 'manageHHMembers.ariaText',
+    defaultMessage: 'add or edit household members',
+  });
+
   const renderSummaryCards = () => (
     <section aria-label="Your household members" className="previous-members-section">
-      <h2 className="question-label">
-        <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
-      </h2>
+      <div className="previous-members-section__heading">
+        <h2 className="question-label">
+          <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
+        </h2>
+        <IconButton
+          className="manage-household-members-button"
+          size="small"
+          aria-label={manageMembersAriaLabel}
+          onClick={goToManageMembers}
+        >
+          <EditIcon fontSize="small" />
+        </IconButton>
+      </div>
       <p className="question-sub-label">
-        <FormattedMessage
-          id="householdDataBlock.clickToEdit"
-          defaultMessage="Select a completed member to edit."
-        />
+        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="Select a completed member to edit." />
       </p>
       <Box className="summary-cards-container">
         <HouseholdMemberSummaryCards questionName={questionName} />

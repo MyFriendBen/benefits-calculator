@@ -16,7 +16,7 @@
 
 .section .multiselect-tiles-container,
 .section .option-cards-container {
-  margin-bottom: .25rem;
+  margin-bottom: 0.25rem;
 }
 
 /* HouseholdMemberForm specific styles */
@@ -31,6 +31,18 @@
 
 .previous-members-section h2.question-label {
   margin: 0;
+}
+
+/* Heading row: the "Household Members" title with the manage-members (pencil) button beside it. */
+.previous-members-section__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.manage-household-members-button.MuiIconButton-root {
+  padding: 0.25rem;
+  color: var(--primary-color);
 }
 
 .question-sub-label {

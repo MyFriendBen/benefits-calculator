@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
@@ -135,15 +135,13 @@ const renderForm = (householdSize: number, page: number, locationState: Record<s
   return render(
     <IntlProvider locale="en" messages={{}}>
       <Context.Provider value={contextValue}>
-        <MemoryRouter
-          initialEntries={[{ pathname: `/co/test-uuid/step-5/${page}`, state: locationState }]}
-        >
+        <MemoryRouter initialEntries={[{ pathname: `/co/test-uuid/step-5/${page}`, state: locationState }]}>
           <Routes>
             <Route path="/:whiteLabel/:uuid/step-:stepId/:page" element={<HouseholdMemberForm />} />
           </Routes>
         </MemoryRouter>
       </Context.Provider>
-    </IntlProvider>
+    </IntlProvider>,
   );
 };
 
@@ -197,8 +195,16 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
   });
 
   describe('summary cards visibility', () => {
-    it('does not show summary cards on page 1', () => {
+    it('shows summary cards on page 1 when the household has more than one member', () => {
+      // The roster should be visible on member 1's page too, so the user always sees the
+      // full household when the household size is greater than one.
       renderForm(3, 1, {});
+      expect(screen.getByTestId('summary-cards')).toBeInTheDocument();
+    });
+
+    it('does not show summary cards for a single-member household', () => {
+      // With only one member there's no roster to show on their page.
+      renderForm(1, 1, {});
       expect(screen.queryByTestId('summary-cards')).not.toBeInTheDocument();
     });
 
@@ -210,6 +216,16 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
     it('shows summary cards on page 3', () => {
       renderForm(3, 3, { basicInfoCollected: true });
       expect(screen.getByTestId('summary-cards')).toBeInTheDocument();
+    });
+  });
+
+  describe('manage members button', () => {
+    it('navigates to the basic-info page and remembers the page to return to', () => {
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+      expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
+        state: { returnToPage: 2 },
+      });
     });
   });
 });
