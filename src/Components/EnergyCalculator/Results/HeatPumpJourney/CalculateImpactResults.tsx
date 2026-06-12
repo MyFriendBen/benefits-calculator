@@ -169,6 +169,10 @@ export default function CalculateImpactResults({
     : null;
   const upgradeLabel = UPGRADE_LABEL_MAP[formValues.upgradeChoice];
 
+  // The AC disclaimer only applies to upgrades that add a heat pump for space
+  // conditioning (whole-home heat pump); it's misleading for the water-heater upgrade.
+  const showAcDisclaimer = formValues.upgradeChoice === 'heat_pump';
+
   // Bill range values (absolute)
   const billP20 = result.bill_delta.percentile_20.value;
   const billMedian = result.bill_delta.median.value;
@@ -329,11 +333,15 @@ export default function CalculateImpactResults({
                   values={{ low: billRangeLow, high: billRangeHigh, mostLikely: billMostLikely }}
                 />
               )}
-              {' '}
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.results.billImpact.however"
-                defaultMessage="However, your utility bill could increase if you are adding air conditioning to a home that did not have it before."
-              />
+              {showAcDisclaimer && (
+                <>
+                  {' '}
+                  <FormattedMessage
+                    id="energyCalculator.calculateImpact.results.billImpact.however"
+                    defaultMessage="However, your utility bill could increase if you are adding air conditioning to a home that did not have it before."
+                  />
+                </>
+              )}
             </p>
             <ImpactRangeBar
               p20={billP20}
@@ -409,6 +417,16 @@ export default function CalculateImpactResults({
               </p>
             </div>
           </div>
+
+          {/* Weatherization note — weatherization is intentionally not modeled here
+              (its bill impact depends on the home's current condition), so we surface
+              its potential impact as a note instead. */}
+          <p className="calculate-impact-weatherization-note">
+            <FormattedMessage
+              id="energyCalculator.calculateImpact.results.weatherizationNote"
+              defaultMessage="Weatherization — like insulation and air sealing — can also lower your energy bills and improve comfort. Because the savings depend heavily on your home's current condition, they aren't included in this estimate."
+            />
+          </p>
         </div>
       </section>
     </div>

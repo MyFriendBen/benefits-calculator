@@ -89,23 +89,7 @@ const UPGRADE_OPTIONS: {
     defaultMessage: 'Heat pump',
     descriptionId: 'energyCalculator.calculateImpact.upgrade.heatPump.description',
     descriptionDefault:
-      'A heat pump is a single appliance with two modes, heating and cooling. By transferring heat (instead of creating it), heat pumps use less energy, making them more efficient than traditional systems.',
-  },
-  {
-    value: 'weatherization',
-    messageId: 'energyCalculator.calculateImpact.upgrade.weatherization',
-    defaultMessage: 'Weatherization',
-    descriptionId: 'energyCalculator.calculateImpact.upgrade.weatherization.description',
-    descriptionDefault:
-      'Weatherization includes insulation, air sealing, and other improvements that reduce energy waste and make your home more comfortable year-round.',
-  },
-  {
-    value: 'heat_pump_weatherization',
-    messageId: 'energyCalculator.calculateImpact.upgrade.heatPumpWeatherization',
-    defaultMessage: 'Heat pump + weatherization',
-    descriptionId: 'energyCalculator.calculateImpact.upgrade.heatPumpWeatherization.description',
-    descriptionDefault:
-      'Combining a heat pump with weatherization maximizes energy savings by pairing efficient heating and cooling with a well-sealed, insulated home.',
+      'A heat pump is an appliance that works in two modes, heating and cooling. By moving heat from the surrounding air (instead of creating it), heat pumps use less energy, making them more efficient than traditional systems.',
   },
   {
     value: 'heat_pump_water_heater',
@@ -113,7 +97,7 @@ const UPGRADE_OPTIONS: {
     defaultMessage: 'Heat pump water heater',
     descriptionId: 'energyCalculator.calculateImpact.upgrade.heatPumpWaterHeater.description',
     descriptionDefault:
-      'A heat pump water heater uses electricity to move heat from the surrounding air to heat water, using significantly less energy than traditional electric or gas water heaters.',
+      'A heat pump water heater moves heat from the surrounding air to the water tank to heat the water. Because of this, it uses significantly less energy than traditional electric or gas water heaters.',
   },
 ];
 
@@ -126,10 +110,11 @@ const HOUSEHOLD_TYPE_VALUES: [CalculateImpactHouseholdType, ...CalculateImpactHo
 
 const FUEL_TYPE_VALUES: [RemFuelType, ...RemFuelType[]] = ['natural_gas', 'propane', 'electricity', 'fuel_oil'];
 
+// Weatherization-based upgrades are intentionally excluded: per CESN SME guidance,
+// their bill impact can't be modeled reliably without knowing the home's current
+// condition. The potential impact is surfaced as a note in the results instead.
 const UPGRADE_CHOICE_VALUES: [CalculateImpactUpgradeChoice, ...CalculateImpactUpgradeChoice[]] = [
   'heat_pump',
-  'weatherization',
-  'heat_pump_weatherization',
   'heat_pump_water_heater',
 ];
 
@@ -594,29 +579,19 @@ export default function CalculateImpactPage() {
                 <RadioGroup {...field} value={field.value ?? ''}>
                   {UPGRADE_OPTIONS.map((opt) => {
                     const isSelected = field.value === opt.value;
-                    const isAvailable = opt.value === 'heat_pump_water_heater';
                     return (
                       <div
                         key={opt.value}
                         className="calculate-impact-radio-option"
                         data-selected={isSelected ? 'true' : 'false'}
-                        data-disabled={!isAvailable ? 'true' : 'false'}
+                        data-disabled="false"
                       >
                         <FormControlLabel
                           value={opt.value}
-                          disabled={!isAvailable}
                           control={<Radio />}
                           label={
                             <span className="calculate-impact-radio-label">
                               <FormattedMessage id={opt.messageId} defaultMessage={opt.defaultMessage} />
-                              {!isAvailable && (
-                                <span className="calculate-impact-coming-soon">
-                                  <FormattedMessage
-                                    id="energyCalculator.calculateImpact.comingSoon"
-                                    defaultMessage="Coming soon"
-                                  />
-                                </span>
-                              )}
                             </span>
                           }
                         />
