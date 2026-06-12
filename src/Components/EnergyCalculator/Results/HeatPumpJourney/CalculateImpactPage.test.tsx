@@ -110,12 +110,13 @@ describe('CalculateImpactPage', () => {
       expect(screen.getByLabelText(/water heating type/i)).toBeInTheDocument();
     });
 
-    it('renders the Select upgrade section with all 4 radio options', () => {
+    it('renders the Select upgrade section with the two non-weatherization options', () => {
       renderPage();
       expect(screen.getByText('Heat pump')).toBeInTheDocument();
-      expect(screen.getByText('Weatherization')).toBeInTheDocument();
-      expect(screen.getByText('Heat pump + weatherization')).toBeInTheDocument();
       expect(screen.getByText('Heat pump water heater')).toBeInTheDocument();
+      // Weatherization-based options were removed per CESN SME guidance.
+      expect(screen.queryByText('Weatherization')).not.toBeInTheDocument();
+      expect(screen.queryByText('Heat pump + weatherization')).not.toBeInTheDocument();
     });
 
     it('renders the Calculate impact submit button', () => {
@@ -255,14 +256,16 @@ describe('CalculateImpactPage', () => {
 
     it('allows selecting an upgrade option via radio button', () => {
       renderPage();
-      const weatherizationRadio = screen.getByRole('radio', { name: /^weatherization$/i });
-      fireEvent.click(weatherizationRadio);
-      expect(weatherizationRadio).toBeChecked();
+      const heatPumpRadio = screen.getByRole('radio', { name: /^heat pump$/i });
+      fireEvent.click(heatPumpRadio);
+      expect(heatPumpRadio).toBeChecked();
     });
 
-    it('enables all four upgrade options (no "Coming soon")', () => {
+    it('enables the available upgrade options (no "Coming soon")', () => {
       renderPage();
-      screen.getAllByRole('radio').forEach((radio) => {
+      const radios = screen.getAllByRole('radio');
+      expect(radios).toHaveLength(2);
+      radios.forEach((radio) => {
         expect(radio).not.toBeDisabled();
       });
       expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
@@ -344,9 +347,9 @@ describe('CalculateImpactPage', () => {
       const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
       await selectOption(fuelSelect, 'Natural gas');
 
-      // No water heating fuel selected — should be valid for a weatherization upgrade.
-      const weatherizationRadio = screen.getByRole('radio', { name: /^weatherization$/i });
-      fireEvent.click(weatherizationRadio);
+      // No water heating fuel selected — should be valid for a whole-home heat pump upgrade.
+      const heatPumpRadio = screen.getByRole('radio', { name: /^heat pump$/i });
+      fireEvent.click(heatPumpRadio);
 
       fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
 

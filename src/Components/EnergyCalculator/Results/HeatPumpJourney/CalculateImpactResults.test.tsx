@@ -177,25 +177,29 @@ describe('CalculateImpactResults', () => {
       expect(screen.getByText(acDisclaimer)).toBeInTheDocument();
     });
 
-    it('shows the AC disclaimer for the heat pump + weatherization upgrade', () => {
-      renderResults(ALL_NEGATIVE_RESULT, {
-        formValues: { ...FORM_VALUES, upgradeChoice: 'heat_pump_weatherization' },
-      });
-      expect(screen.getByText(acDisclaimer)).toBeInTheDocument();
-    });
-
-    it('hides the AC disclaimer for the weatherization-only upgrade', () => {
-      renderResults(ALL_NEGATIVE_RESULT, {
-        formValues: { ...FORM_VALUES, upgradeChoice: 'weatherization' },
-      });
-      expect(screen.queryByText(acDisclaimer)).not.toBeInTheDocument();
-    });
-
     it('hides the AC disclaimer for the heat pump water heater upgrade', () => {
       renderResults(ALL_NEGATIVE_RESULT, {
         formValues: { ...FORM_VALUES, upgradeChoice: 'heat_pump_water_heater' },
       });
       expect(screen.queryByText(acDisclaimer)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('weatherization note', () => {
+    const weatherizationNote = /weatherization — like insulation and air sealing/i;
+
+    it('shows the weatherization note for the heat pump upgrade', () => {
+      renderResults(ALL_NEGATIVE_RESULT, {
+        formValues: { ...FORM_VALUES, upgradeChoice: 'heat_pump' },
+      });
+      expect(screen.getByText(weatherizationNote)).toBeInTheDocument();
+    });
+
+    it('shows the weatherization note for the heat pump water heater upgrade', () => {
+      renderResults(ALL_NEGATIVE_RESULT, {
+        formValues: { ...FORM_VALUES, upgradeChoice: 'heat_pump_water_heater' },
+      });
+      expect(screen.getByText(weatherizationNote)).toBeInTheDocument();
     });
   });
 });
