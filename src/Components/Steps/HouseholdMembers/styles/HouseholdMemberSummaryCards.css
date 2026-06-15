@@ -18,16 +18,37 @@
   min-width: 7.5rem;
 }
 
+/*
+  Completed (editable) cards: solid border in the primary color, with primary-colored text.
+  A completed card is non-current, so this never collides with the current-member rule below.
+*/
 .member-added-container.completed-household-member {
   border-style: solid;
+  border-color: var(--primary-color);
 }
 
+.member-added-container.completed-household-member .member-added-relationship,
+.member-added-container.completed-household-member .member-added-income {
+  color: var(--primary-color);
+}
+
+/*
+  The current (being-edited) card: a white fill + heavier solid border in --secondary-color.
+  This distinguishes it from completed cards even on themes where --secondary-color equals
+  --primary-color (e.g. CESN) — the white fill (vs. their tinted background) and the wrench badge
+  set it apart without the too-loud bright accent a full red card border would give. All of the
+  current-card styling lives here so the active state is described in one place.
+*/
 .member-added-container.current-household-member {
-  /* White fill + a heavier border distinguish the editing card from completed cards even on
-     themes where --secondary-color equals --primary-color (e.g. CESN) — a color-free emphasis. */
   background-color: white;
   border-style: solid;
   border-width: 3px;
+  border-color: var(--secondary-color);
+}
+
+.member-added-container.current-household-member .member-added-relationship,
+.member-added-container.current-household-member .member-added-income {
+  color: var(--secondary-color);
 }
 
 .household-member-status-icon {
@@ -101,37 +122,6 @@
   height: 0.95rem;
 }
 
-.completed-household-member {
-  border-color: var(--primary-color);
-}
-
-.completed-household-member .member-added-relationship {
-  color: var(--primary-color);
-}
-
-.completed-household-member .member-added-income {
-  color: var(--primary-color);
-}
-
-/*
-  The editing member uses --secondary-color (terracotta on the default theme). On white labels
-  that set --secondary-color equal to --primary-color (e.g. CESN), the card matches the navy
-  completed cards — but the white fill (vs. their tinted background) and the wrench badge still
-  set it apart, so we avoid the too-loud bright accent a full red card border would give.
-*/
-.current-household-member {
-  border-color: var(--secondary-color);
-  border-style: solid;
-}
-
-.current-household-member .member-added-relationship {
-  color: var(--secondary-color);
-}
-
-.current-household-member .member-added-income {
-  color: var(--secondary-color);
-}
-
 .member-added-relationship {
   color: var(--primary-color);
   font-size: 0.875rem;
@@ -156,17 +146,35 @@
 }
 
 /*
-  Editable cards are clickable to edit. A subtle hover lift + pointer cursor signals this
-  without a heavy overlay — the previous full-card "Edit" overlay competed with the trash
-  button and obscured the card text, so we keep the affordance lightweight instead.
+  The relationship label of an editable card is a real <button> (the clickable edit surface).
+  Strip its native chrome so it reads as the card's heading, and let it size to the card width
+  so the whole label area is the click target.
 */
-.member-added-container[role='button'] {
+.member-added-edit-button {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  width: 100%;
   cursor: pointer;
+}
+
+/*
+  Editable cards are clickable to edit. A subtle hover lift + pointer cursor signals this without
+  a heavy overlay — the previous full-card "Edit" overlay competed with the trash button and
+  obscured the card text, so we keep the affordance lightweight instead. The lift is driven by the
+  inner edit button's hover/focus (`:focus-within` covers keyboard focus on that button).
+*/
+.member-added-container.completed-household-member {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.member-added-container[role='button']:hover,
-.member-added-container[role='button']:focus-visible {
+.member-added-container.completed-household-member:hover,
+.member-added-container.completed-household-member:focus-within {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   outline: 2px solid var(--primary-color);
@@ -190,11 +198,11 @@
     padding-right: 0.5rem;
   }
 
-  .member-added-age {
-    display: block;
-  }
-
-  /* Keep the cards compact on mobile — income isn't shown in the summary roster here. */
+  /*
+    Intentionally hide income on mobile to keep the roster compact — the income row is still
+    rendered in the DOM (and tested), it's only visually suppressed at this breakpoint. The age
+    stays inline in .member-added-relationship, so the card collapses to just the name + age.
+  */
   .member-added-income {
     display: none;
   }

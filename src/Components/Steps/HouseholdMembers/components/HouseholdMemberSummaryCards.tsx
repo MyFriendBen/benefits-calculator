@@ -1,23 +1,21 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { Box, IconButton } from '@mui/material';
-import ConstructionIcon from '@mui/icons-material/Construction';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { calcAge } from '../../../../Assets/age';
+import { Box } from '@mui/material';
 import { useConfig } from '../../../Config/configHook';
 import { useTranslateNumber } from '../../../../Assets/languageOptions';
 import { HouseholdData } from '../../../../Types/FormData';
 import { FormattedMessageType, QuestionName } from '../../../../Types/Questions';
 import { useNavigate, useParams } from 'react-router-dom';
-import { KeyboardEvent, MouseEvent, useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { Context } from '../../../Wrapper/Wrapper';
 import useScreenApi from '../../../../Assets/updateScreen';
 import '../styles/HouseholdMemberSummaryCards.css';
 import { calcMemberYearlyIncome } from '../../../../Assets/income';
 import { formatToUSD } from '../../../../utils/formatCurrency';
+import { calculateAge } from '../utils/helpers';
 import { hasSubmittedMemberForm } from '../utils/defaultValues';
 import DeleteConfirmationPopover from './DeleteConfirmationPopover';
+import MemberCard from './MemberCard';
 import type { DeletePopoverState } from '../utils/types';
 
 type HHMSummariesProps = {
@@ -103,6 +101,10 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
     }
   };
 
+  const handleDelete = (memberIndex: number, anchorEl: HTMLElement) => {
+    setDeletePopover({ index: memberIndex, anchorEl });
+  };
+
   const createMemberCard = (memberIndex: number, member: HouseholdData | undefined) => {
     const isCurrentMember = memberIndex + 1 === pageNumber;
     const isCompleted = isMemberCompleted(member);
@@ -115,15 +117,15 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
 
     // Show the age only once a real birthdate exists; an in-progress member (e.g. member 1
     // mid-entry) shows their relationship label with no "(0)" until they've filled it in.
-    const hasBirthdate = Boolean(member?.birthYear && member?.birthMonth);
-    let age = hasBirthdate ? calcAge(member as HouseholdData) : null;
-    if (age !== null && Number.isNaN(age)) {
-      age = null;
-    }
+    // calculateAge is the shared null-safe wrapper used by the form header, so both agree on
+    // missing/invalid birthdates (it returns null rather than a misleading 0).
+    const rawAge = member ? calculateAge(member.birthYear, member.birthMonth) : null;
+    const age = rawAge !== null && !Number.isNaN(rawAge) ? translateNumber(rawAge) : null;
+
     // Show income for any completed member, including the current one when editing — a member
     // is only "completed" once real data was submitted, so a fresh in-progress member (e.g.
     // member 1 mid-entry) is never completed and won't show a premature "Income: $0".
-    const income = isCompleted ? calcMemberYearlyIncome(member) : null;
+    const income = isCompleted ? translateNumber(formatToUSD(calcMemberYearlyIncome(member))) : null;
 
     const placeholderRelationship = (
       <FormattedMessage id="householdDataBlock.householdMember" defaultMessage="Household Member" />
@@ -138,70 +140,22 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
       relationship = placeholderRelationship;
     }
 
-    const containerClassName = `member-added-container ${isCompleted ? 'completed-household-member' : ''} ${
-      isCurrentMember ? 'current-household-member' : ''
-    }`;
-
-    const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        goToMember(memberIndex);
-      }
-    };
-
-    const handleDeleteClick = (event: MouseEvent<HTMLElement>) => {
-      // The trash button lives inside the (clickable) card — keep its click from bubbling up
-      // and triggering the card's edit navigation.
-      event.stopPropagation();
-      setDeletePopover({ index: memberIndex, anchorEl: event.currentTarget });
-    };
-
     return (
-      <article
-        className={containerClassName}
+      <MemberCard
         key={memberIndex}
-        onClick={isEditable ? () => goToMember(memberIndex) : undefined}
-        onKeyDown={isEditable ? handleKeyDown : undefined}
-        role={isEditable ? 'button' : undefined}
-        tabIndex={isEditable ? 0 : undefined}
-        aria-label={isEditable ? editHHMemberAriaLabel : undefined}
-      >
-        {isCurrentMember && (
-          <div className="household-member-status-icon">
-            <ConstructionIcon className="current-icon" aria-hidden="true" />
-          </div>
-        )}
-        {isEditable && (
-          <div className="household-member-status-icon">
-            <CheckCircleIcon className="completed-icon" aria-hidden="true" />
-          </div>
-        )}
-        <div className="household-member-header">
-          <h3 className="member-added-relationship">
-            {relationship}
-            {age !== null && <> ({translateNumber(age)})</>}
-          </h3>
-          {canDelete && (
-            <IconButton
-              className="household-member-delete-button"
-              size="small"
-              aria-label={deleteHHMemberAriaLabel}
-              onClick={handleDeleteClick}
-              onKeyDown={(event) => event.stopPropagation()}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          )}
-        </div>
-        {income !== null && (
-          <div className="member-added-income">
-            <strong>
-              <FormattedMessage id="householdDataBlock.member-income" defaultMessage="Annual Income: " />
-            </strong>
-            {translateNumber(formatToUSD(income))}
-          </div>
-        )}
-      </article>
+        memberIndex={memberIndex}
+        relationship={relationship}
+        age={age}
+        income={income}
+        isCurrentMember={isCurrentMember}
+        isCompleted={isCompleted}
+        isEditable={isEditable}
+        canDelete={canDelete}
+        editAriaLabel={editHHMemberAriaLabel}
+        deleteAriaLabel={deleteHHMemberAriaLabel}
+        onEdit={goToMember}
+        onDelete={handleDelete}
+      />
     );
   };
 
@@ -215,7 +169,10 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   const allMemberCards = Array.from({ length: slotCount }, (_, i) => createMemberCard(i, formData.householdData[i]));
 
   return (
-    <article key={pageNumber}>
+    // Keyed by pageNumber so navigating between member pages remounts the roster, resetting any
+    // transient card state (e.g. an open delete popover) for the page we're leaving. This is a
+    // plain container (not an <article>) — each member card is its own <article>.
+    <div key={pageNumber}>
       {/*
         The current member's own (incomplete) card suppresses its age until a birthdate exists,
         so showing the roster on the member-1 page no longer renders a misleading (0)-age card.
@@ -232,7 +189,7 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
         onClose={() => setDeletePopover(null)}
         onConfirm={handleDeleteConfirm}
       />
-    </article>
+    </div>
   );
 };
 

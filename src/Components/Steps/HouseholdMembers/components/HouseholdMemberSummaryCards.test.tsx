@@ -100,9 +100,13 @@ const renderCards = (householdData: any[] = [], householdSize?: number) => {
   );
 };
 
-// Completed non-current cards get role="button", so query by class rather than
-// by the "article" role (which would exclude the clickable cards).
-const cardContainers = () => Array.from(document.querySelectorAll('.member-added-container')) as HTMLElement[];
+// Each card is an <article>; the editable ones additionally contain a <button> edit surface.
+// Query the cards by their semantic article role rather than by CSS class.
+const cardContainers = () => screen.getAllByRole('article') as HTMLElement[];
+
+// The clickable edit surface inside an editable card is a real <button> labelled
+// "edit household member". Non-editable cards have no such button.
+const editButtons = () => screen.queryAllByRole('button', { name: 'edit household member' });
 
 describe('HouseholdMemberSummaryCards', () => {
   beforeEach(() => {
@@ -118,9 +122,9 @@ describe('HouseholdMemberSummaryCards', () => {
 
   describe('rendering', () => {
     it('renders nothing when household data is empty', () => {
-      const { container } = renderCards([], 0);
-      // headOfHHInfoWasEntered is false, so inner content not shown
-      expect(container.querySelector('.member-added-container')).not.toBeInTheDocument();
+      renderCards([], 0);
+      // hasMembersToShow is false, so no member cards render.
+      expect(screen.queryAllByRole('article')).toHaveLength(0);
     });
 
     it('renders a card for each household member with birth data', () => {
@@ -185,7 +189,8 @@ describe('HouseholdMemberSummaryCards', () => {
       const cards = cardContainers();
       expect(cards).toHaveLength(1);
       expect(cards[0].className).not.toContain('completed-household-member');
-      expect(cards[0]).not.toHaveAttribute('role', 'button');
+      // Not editable → no edit button surface inside the card.
+      expect(editButtons()).toHaveLength(0);
       expect(screen.queryByText(/Annual Income/i)).not.toBeInTheDocument();
     });
 
@@ -196,7 +201,7 @@ describe('HouseholdMemberSummaryCards', () => {
       renderCards([inProgress], 1);
       const cards = cardContainers();
       expect(cards[0].className).not.toContain('completed-household-member');
-      expect(cards[0]).not.toHaveAttribute('role', 'button');
+      expect(editButtons()).toHaveLength(0);
       expect(screen.queryByText(/Annual Income/i)).not.toBeInTheDocument();
     });
 
@@ -262,17 +267,16 @@ describe('HouseholdMemberSummaryCards', () => {
   });
 
   describe('edit navigation', () => {
-    it('makes completed non-current cards clickable with an edit aria-label', () => {
+    it('exposes completed non-current cards as a button with an edit aria-label', () => {
       renderCards([completedMember(), completedMember()], 2);
-      const cards = cardContainers();
-      expect(cards[0]).toHaveAttribute('role', 'button');
-      expect(cards[0]).toHaveAttribute('aria-label', 'edit household member');
+      // Index 0 is completed + non-current → editable; index 1 is the current member → not.
+      expect(editButtons()).toHaveLength(1);
+      expect(editButtons()[0]).toHaveAttribute('aria-label', 'edit household member');
     });
 
     it('navigates to the correct member page when a completed card is clicked', () => {
       renderCards([completedMember(), completedMember()], 2);
-      const cards = cardContainers();
-      fireEvent.click(cards[0]);
+      fireEvent.click(editButtons()[0]);
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/1', {
         state: { isEditing: true, returnToPage: 2 },
       });
@@ -280,8 +284,7 @@ describe('HouseholdMemberSummaryCards', () => {
 
     it('navigates when a completed card is activated with the Enter key', () => {
       renderCards([completedMember(), completedMember()], 2);
-      const cards = cardContainers();
-      fireEvent.keyDown(cards[0], { key: 'Enter' });
+      fireEvent.keyDown(editButtons()[0], { key: 'Enter' });
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/1', {
         state: { isEditing: true, returnToPage: 2 },
       });
@@ -289,17 +292,16 @@ describe('HouseholdMemberSummaryCards', () => {
 
     it('navigates when a completed card is activated with the Space key', () => {
       renderCards([completedMember(), completedMember()], 2);
-      const cards = cardContainers();
-      fireEvent.keyDown(cards[0], { key: ' ' });
+      fireEvent.keyDown(editButtons()[0], { key: ' ' });
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/1', {
         state: { isEditing: true, returnToPage: 2 },
       });
     });
 
-    it('does not make the current member card clickable', () => {
+    it('does not render an edit button for the current member card', () => {
+      // Index 1 is the current member → only index 0's editable card has a button.
       renderCards([completedMember(), completedMember()], 2);
-      const cards = cardContainers();
-      expect(cards[1]).not.toHaveAttribute('role', 'button');
+      expect(editButtons()).toHaveLength(1);
     });
   });
 
@@ -328,14 +330,16 @@ describe('HouseholdMemberSummaryCards', () => {
       expect(cardContainers().length).toBeGreaterThan(0);
     });
 
-    it('exposes completed editable cards as keyboard-focusable buttons', () => {
+    it('exposes the editable card via a native, keyboard-focusable button', () => {
       renderCards([completedMember(), completedMember()], 2);
+      // The editable (completed, non-current) card's surface is a real <button> — natively
+      // focusable and announced as a button, with no manual role/tabindex needed.
+      const buttons = editButtons();
+      expect(buttons).toHaveLength(1);
+      expect(buttons[0].tagName).toBe('BUTTON');
+      // The current member card has no edit button, so it isn't in the tab order.
       const cards = cardContainers();
-      // Completed, non-current card: focusable + announced as a button
-      expect(cards[0]).toHaveAttribute('role', 'button');
-      expect(cards[0]).toHaveAttribute('tabindex', '0');
-      // Current member card: not in the tab order
-      expect(cards[1]).not.toHaveAttribute('tabindex');
+      expect(cards[1].querySelector('.member-added-edit-button')).toBeNull();
     });
   });
 
