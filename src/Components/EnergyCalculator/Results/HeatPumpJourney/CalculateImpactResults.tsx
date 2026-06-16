@@ -169,8 +169,8 @@ export default function CalculateImpactResults({
     : null;
   const upgradeLabel = UPGRADE_LABEL_MAP[formValues.upgradeChoice];
 
-  // The AC disclaimer only applies to upgrades that add a heat pump for space
-  // conditioning (whole-home heat pump); it's misleading for the water-heater upgrade.
+  // The AC disclaimer only applies to the whole-home heat pump upgrade, which adds
+  // space conditioning; it's misleading for the heat-pump water-heater upgrade.
   const showAcDisclaimer = formValues.upgradeChoice === 'heat_pump';
 
   // Bill range values (absolute)

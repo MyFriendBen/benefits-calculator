@@ -584,7 +584,6 @@ export default function CalculateImpactPage() {
                         key={opt.value}
                         className="calculate-impact-radio-option"
                         data-selected={isSelected ? 'true' : 'false'}
-                        data-disabled="false"
                       >
                         <FormControlLabel
                           value={opt.value}
