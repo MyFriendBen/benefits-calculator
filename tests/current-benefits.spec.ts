@@ -13,6 +13,7 @@ const TEST_CONFIG: Record<WhiteLabel, { name: string; skip?: boolean; skipReason
   ma: { name: 'Massachusetts' },
   cesn: { name: 'Colorado Energy Savings Navigator' },
   il: { name: 'Illinois' },
+  ks: { name: 'Kansas' },
   tx: { name: 'Texas' },
   wa: { name: 'Washington' },
 };
