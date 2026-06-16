@@ -308,20 +308,6 @@
   margin-top: 1.25rem;
 }
 
-/* ── "Coming soon" badge on disabled upgrade options ── */
-.calculate-impact-page .calculate-impact-coming-soon {
-  font-size: 0.72rem;
-  font-weight: 400;
-  font-style: italic;
-  color: #777;
-  margin-left: 0.5rem;
-}
-
-.calculate-impact-page .calculate-impact-radio-option[data-disabled='true'] {
-  opacity: 0.55;
-  cursor: default;
-}
-
 /* ── Loading / error states ── */
 .calculate-impact-page .calculate-impact-loading {
   display: flex;
@@ -617,6 +603,18 @@
   font-size: 0.78rem;
   color: #777;
   margin: 0;
+}
+
+/* ── Weatherization note (shown in place of a weatherization upgrade option) ── */
+.calculate-impact-weatherization-note {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #555;
+  line-height: 1.55;
+  margin: 1.25rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
 }
 
 /* Form inputs sit on white inside the grey card */
