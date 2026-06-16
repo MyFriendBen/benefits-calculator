@@ -110,12 +110,13 @@ describe('CalculateImpactPage', () => {
       expect(screen.getByLabelText(/water heating type/i)).toBeInTheDocument();
     });
 
-    it('renders the Select upgrade section with all 4 radio options', () => {
+    it('renders the Select upgrade section with the two non-weatherization options', () => {
       renderPage();
       expect(screen.getByText('Heat pump')).toBeInTheDocument();
-      expect(screen.getByText('Weatherization')).toBeInTheDocument();
-      expect(screen.getByText('Heat pump + weatherization')).toBeInTheDocument();
       expect(screen.getByText('Heat pump water heater')).toBeInTheDocument();
+      // Weatherization-based options were removed per CESN SME guidance.
+      expect(screen.queryByText('Weatherization')).not.toBeInTheDocument();
+      expect(screen.queryByText('Heat pump + weatherization')).not.toBeInTheDocument();
     });
 
     it('renders the Calculate impact submit button', () => {
@@ -255,10 +256,19 @@ describe('CalculateImpactPage', () => {
 
     it('allows selecting an upgrade option via radio button', () => {
       renderPage();
-      // Only "Heat pump water heater" is enabled in Step 3; other options are "Coming soon".
-      const hpwhRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
-      fireEvent.click(hpwhRadio);
-      expect(hpwhRadio).toBeChecked();
+      const heatPumpRadio = screen.getByRole('radio', { name: /^heat pump$/i });
+      fireEvent.click(heatPumpRadio);
+      expect(heatPumpRadio).toBeChecked();
+    });
+
+    it('enables the available upgrade options (no "Coming soon")', () => {
+      renderPage();
+      const radios = screen.getAllByRole('radio');
+      expect(radios).toHaveLength(2);
+      radios.forEach((radio) => {
+        expect(radio).not.toBeDisabled();
+      });
+      expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
     });
   });
 
@@ -322,6 +332,31 @@ describe('CalculateImpactPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /edit household info/i }));
 
       expect(screen.getByRole('button', { name: /calculate impact/i })).toBeInTheDocument();
+    });
+
+    it('submits a non-HPWH upgrade without requiring water heating fuel', async () => {
+      (jest.requireMock('./fetchRemImpact').fetchRemImpact as jest.Mock).mockResolvedValue(MOCK_RESULT);
+      renderPage();
+
+      const householdSelect = screen.getByRole('button', { name: /household type/i });
+      await selectOption(householdSelect, 'House');
+
+      const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
+      fireEvent.change(addressInput, { target: { value: '789 Pine St, Denver, CO 80202' } });
+
+      const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
+      await selectOption(fuelSelect, 'Natural gas');
+
+      // No water heating fuel selected — should be valid for a whole-home heat pump upgrade.
+      const heatPumpRadio = screen.getByRole('radio', { name: /^heat pump$/i });
+      fireEvent.click(heatPumpRadio);
+
+      fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/bill and emissions impact/i)).toBeInTheDocument();
+      });
+      expect(screen.queryByText(/please select a water heating fuel/i)).not.toBeInTheDocument();
     });
   });
 

@@ -190,7 +190,7 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
           <article className="estimation-text-left">
             <FormattedMessage id="results.estimated-time-to-apply" defaultMessage="Estimated Time to Apply" />
           </article>
-          <article className="slim-text">
+          <article className="estimation-text-right slim-text">
             <ResultsTranslate translation={program.estimated_application_time} />
           </article>
         </div>
