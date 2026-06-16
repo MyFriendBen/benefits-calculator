@@ -47,12 +47,13 @@ describe('Route Configuration', () => {
   describe('White Label Routes', () => {
     it('should support all valid white labels', () => {
       // Verify we have the expected white labels defined
-      expect(ALL_VALID_WHITE_LABELS).toHaveLength(7);
+      expect(ALL_VALID_WHITE_LABELS).toHaveLength(8);
       expect(ALL_VALID_WHITE_LABELS).toContain('co');
       expect(ALL_VALID_WHITE_LABELS).toContain('nc');
       expect(ALL_VALID_WHITE_LABELS).toContain('cesn');
       expect(ALL_VALID_WHITE_LABELS).toContain('ma');
       expect(ALL_VALID_WHITE_LABELS).toContain('il');
+      expect(ALL_VALID_WHITE_LABELS).toContain('ks');
       expect(ALL_VALID_WHITE_LABELS).toContain('tx');
       expect(ALL_VALID_WHITE_LABELS).toContain('wa');
     });
