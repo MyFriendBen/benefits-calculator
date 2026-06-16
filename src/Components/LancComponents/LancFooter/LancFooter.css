@@ -43,6 +43,10 @@
   text-align: center;
 }
 
+.footer-paragraph .MuiTypography-root {
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+}
+
 .first-paragraph {
   font-style: italic;
   padding-top: 1rem;
