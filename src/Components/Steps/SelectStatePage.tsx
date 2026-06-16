@@ -18,6 +18,7 @@ import { usePageTitle } from '../Common/usePageTitle';
 export const STATES: { [key: string]: string } = {
   co: 'Colorado',
   il: 'Illinois',
+  ks: 'Kansas',
   ma: 'Massachusetts',
   nc: 'North Carolina',
   tx: 'Texas',
