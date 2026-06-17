@@ -233,37 +233,13 @@ const renderSharedHeatPumpContent = () => {
       <p className="energy-calculator-p-spacing">
         <FormattedMessage
           id="co.energy.heat_pump_other_p1"
-          defaultMessage="You may qualify for savings on the cost of a heat pump for your home heating, ventilation, and/or cooling system. Heat pumps reduce your carbon footprint, allow you to remove a furnace that burns gas inside your home, and increase comfort, among other benefits. There are numerous combinations or 'stacking' possibilities for heat pump rebates. A trusted contractor can help you maximize your rebate possibilities."
+          defaultMessage="Heat pumps offer both heating in the winter and cooling in the summer. They are more energy efficient than other heating and cooling systems, which may translate to lower energy costs. Home weatherization can also help you reduce the size and monthly expenses of a heat pump."
         />
       </p>
       <p className="energy-calculator-p-spacing">
         <FormattedMessage
           id="co.energy.heat_pump_other_p2"
-          defaultMessage="Learn more about heat pumps, including upfront costs, ongoing costs, average life span, and how to initiate a project in this {heatPumpGuide}, from our partners at {rewiringAmerica}."
-          values={{
-            heatPumpGuide: (
-              <TrackedOutboundLink
-                href="https://homes.rewiringamerica.org/projects/heating-and-cooling-homeowner"
-                className="link-color"
-                action="heat_pump_guide_click"
-                label="Heat Pump Guide"
-                category="energy_rebate"
-              >
-                <FormattedMessage id="co.energy.heat_pump_guide_link" defaultMessage="Heat Pump Guide" />
-              </TrackedOutboundLink>
-            ),
-            rewiringAmerica: (
-              <TrackedOutboundLink
-                href="https://www.rewiringamerica.org"
-                className="link-color"
-                action="rewiring_america_click"
-                label="Rewiring America"
-                category="energy_rebate"
-              >
-                <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
-              </TrackedOutboundLink>
-            ),
-          }}
+          defaultMessage="You may qualify for savings on the cost of a heat pump for your home heating, ventilation, and/or cooling system."
         />
       </p>
     </>

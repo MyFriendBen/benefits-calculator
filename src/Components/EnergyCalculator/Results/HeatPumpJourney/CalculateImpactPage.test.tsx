@@ -95,12 +95,9 @@ describe('CalculateImpactPage', () => {
       expect(screen.getByTestId('coin-icon')).toBeInTheDocument();
     });
 
-    it('renders the intro paragraph with Rewiring America link', () => {
+    it('renders the Rewiring America intro paragraph', () => {
       renderPage();
-      expect(screen.getByRole('link', { name: /rewiring america/i })).toHaveAttribute(
-        'href',
-        'https://www.rewiringamerica.org',
-      );
+      expect(screen.getByText(/this data modeling is by rewiring america/i)).toBeInTheDocument();
     });
 
     it('renders the BACK TO RESULTS button', () => {

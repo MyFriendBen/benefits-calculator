@@ -19,7 +19,6 @@ import {
 } from '@mui/material';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { Alert, CircularProgress } from '@mui/material';
-import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
 import { addAdminToLink } from '../../../../Assets/adminLink';
@@ -264,13 +263,7 @@ export default function CalculateImpactPage() {
         <Typography variant="body1" className="calculate-impact-intro energy-calculator-body-text">
           <FormattedMessage
             id="energyCalculator.calculateImpact.intro"
-            defaultMessage="Heat pumps offer both heating in the winter and cooling in the summer. They are more energy efficient than other heating and cooling systems, which may translate to lower energy costs. Home weatherization can also help you reduce the size and monthly expenses of a heat pump."
-          />
-        </Typography>
-        <Typography variant="body1" className="calculate-impact-intro energy-calculator-body-text">
-          <FormattedMessage
-            id="energyCalculator.calculateImpact.intro.2"
-            defaultMessage="You may qualify for savings on the cost of a heat pump for your home heating, ventilation, and/or cooling system."
+            defaultMessage="This data modeling is by Rewiring America, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
           />
         </Typography>
 
@@ -321,20 +314,7 @@ export default function CalculateImpactPage() {
       <Typography variant="body1" className="calculate-impact-intro energy-calculator-body-text">
         <FormattedMessage
           id="energyCalculator.calculateImpact.intro"
-          defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
-          values={{
-            rewiringAmerica: (
-              <TrackedOutboundLink
-                href="https://www.rewiringamerica.org"
-                className="link-color"
-                action="calculate_impact_rewiring_america"
-                label="Rewiring America"
-                category="energy_rebate"
-              >
-                <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
-              </TrackedOutboundLink>
-            ),
-          }}
+          defaultMessage="This data modeling is by Rewiring America, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
         />
       </Typography>
 
@@ -605,6 +585,7 @@ export default function CalculateImpactPage() {
                         key={opt.value}
                         className="calculate-impact-radio-option"
                         data-selected={isSelected ? 'true' : 'false'}
+                        data-disabled={isDisabled ? 'true' : 'false'}
                       >
                         <FormControlLabel
                           value={opt.value}
