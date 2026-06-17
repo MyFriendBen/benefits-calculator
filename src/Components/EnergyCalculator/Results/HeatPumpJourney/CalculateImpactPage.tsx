@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useEffect, useMemo, useState } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { FormattedMessage, useIntl } from 'react-intl';
@@ -131,9 +131,9 @@ const calculateImpactSchema = z
     heatingFuel: z.enum(FUEL_TYPE_VALUES, {
       required_error: 'Please select a heating fuel.',
     }),
-    waterHeatingFuel: z.enum(FUEL_TYPE_VALUES).optional(),
+    waterHeatingFuel: z.preprocess((val) => (val === '' ? undefined : val), z.enum(FUEL_TYPE_VALUES).optional()),
     upgradeChoice: z.enum(UPGRADE_CHOICE_VALUES, {
-      required_error: 'Please select an upgrade option.',
+      required_error: 'Please select one upgrade option.',
     }),
   })
   .superRefine((data, ctx) => {
@@ -168,6 +168,7 @@ export default function CalculateImpactPage() {
   const {
     control,
     handleSubmit,
+    resetField,
     formState: { errors },
   } = useForm<CalculateImpactFormData>({
     resolver: zodResolver(calculateImpactSchema),
@@ -182,6 +183,16 @@ export default function CalculateImpactPage() {
 
   usePageTitle(OTHER_PAGE_TITLES.energyCalculatorCalculateImpact);
 
+  const watchedWaterHeatingFuel = useWatch({ control, name: 'waterHeatingFuel' });
+  const watchedUpgradeChoice = useWatch({ control, name: 'upgradeChoice' });
+  const isHpwhEnabled = !!watchedWaterHeatingFuel;
+
+  useEffect(() => {
+    if (!watchedWaterHeatingFuel && watchedUpgradeChoice === 'heat_pump_water_heater') {
+      resetField('upgradeChoice');
+    }
+  }, [watchedWaterHeatingFuel, watchedUpgradeChoice, resetField]);
+
   if (!showCalculateImpact) return null;
 
   const onSubmit = (data: CalculateImpactFormData) => {
@@ -195,6 +206,7 @@ export default function CalculateImpactPage() {
       householdType: data.householdType,
     });
     setSubmitState({ status: 'loading' });
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
     fetchRemImpact(whiteLabel, payload.remAddressQuery)
       .then((result) => {
         if (!isValidRemImpactApiResponse(result)) {
@@ -245,20 +257,13 @@ export default function CalculateImpactPage() {
         <Typography variant="body1" className="calculate-impact-intro energy-calculator-body-text">
           <FormattedMessage
             id="energyCalculator.calculateImpact.intro"
-            defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
-            values={{
-              rewiringAmerica: (
-                <TrackedOutboundLink
-                  href="https://www.rewiringamerica.org"
-                  className="link-color"
-                  action="calculate_impact_rewiring_america"
-                  label="Rewiring America"
-                  category="energy_rebate"
-                >
-                  <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
-                </TrackedOutboundLink>
-              ),
-            }}
+            defaultMessage="Heat pumps offer both heating in the winter and cooling in the summer. They are more energy efficient than other heating and cooling systems, which may translate to lower energy costs. Home weatherization can also help you reduce the size and monthly expenses of a heat pump."
+          />
+        </Typography>
+        <Typography variant="body1" className="calculate-impact-intro energy-calculator-body-text">
+          <FormattedMessage
+            id="energyCalculator.calculateImpact.intro.2"
+            defaultMessage="You may qualify for savings on the cost of a heat pump for your home heating, ventilation, and/or cooling system."
           />
         </Typography>
 
@@ -338,7 +343,7 @@ export default function CalculateImpactPage() {
         <Alert severity="error" className="calculate-impact-error">
           <FormattedMessage
             id="energyCalculator.calculateImpact.error"
-            defaultMessage="Something went wrong calculating your impact. Please try again."
+            defaultMessage="Something went wrong calculating your impact. Please try selecting a different heating fuel type."
           />
         </Alert>
       )}
@@ -354,7 +359,7 @@ export default function CalculateImpactPage() {
           <p className="calculate-impact-section-description">
             <FormattedMessage
               id="energyCalculator.calculateImpact.section.household.description"
-              defaultMessage="Enter your household information to see potential energy bill changes and emissions reductions by upgrade type."
+              defaultMessage="Enter your household information to see potential energy bill changes and emissions reductions by upgrade type. (Your information will not be saved.)"
             />
           </p>
 
@@ -579,6 +584,7 @@ export default function CalculateImpactPage() {
                 <RadioGroup {...field} value={field.value ?? ''}>
                   {UPGRADE_OPTIONS.map((opt) => {
                     const isSelected = field.value === opt.value;
+                    const isDisabled = opt.value === 'heat_pump_water_heater' && !isHpwhEnabled;
                     return (
                       <div
                         key={opt.value}
@@ -587,6 +593,7 @@ export default function CalculateImpactPage() {
                       >
                         <FormControlLabel
                           value={opt.value}
+                          disabled={isDisabled}
                           control={<Radio />}
                           label={
                             <span className="calculate-impact-radio-label">
@@ -603,7 +610,14 @@ export default function CalculateImpactPage() {
                 </RadioGroup>
               )}
             />
-            {errors.upgradeChoice && <FormHelperText>{errors.upgradeChoice.message}</FormHelperText>}
+            {errors.upgradeChoice && (
+              <FormHelperText>
+                {intl.formatMessage({
+                  id: 'energyCalculator.calculateImpact.upgrade.selectOne',
+                  defaultMessage: 'Please select one upgrade option.',
+                })}
+              </FormHelperText>
+            )}
           </FormControl>
 
           <Button

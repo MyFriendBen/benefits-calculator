@@ -168,7 +168,7 @@ describe('CalculateImpactResults', () => {
   });
 
   describe('AC disclaimer', () => {
-    const acDisclaimer = /adding air conditioning/i;
+    const acDisclaimer = /add air conditioning to a home/i;
 
     it('shows the AC disclaimer for the whole-home heat pump upgrade', () => {
       renderResults(ALL_NEGATIVE_RESULT, {

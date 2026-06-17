@@ -194,7 +194,48 @@ describe('CalculateImpactPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/please select an upgrade option/i)).toBeInTheDocument();
+        expect(screen.getByText(/please select one upgrade option/i)).toBeInTheDocument();
+      });
+    });
+
+    describe('upgrade selection helper text', () => {
+      it('shows the exact message "Please select one upgrade option." when no upgrade is selected', async () => {
+        renderPage();
+        fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+
+        await waitFor(() => {
+          expect(screen.getByText('Please select one upgrade option.')).toBeInTheDocument();
+        });
+      });
+
+      it('does not show upgrade error before the form is submitted', () => {
+        renderPage();
+        expect(screen.queryByText(/please select one upgrade option/i)).not.toBeInTheDocument();
+      });
+
+      it('clears the upgrade error after an upgrade is selected and the form is resubmitted', async () => {
+        renderPage();
+
+        fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+        await waitFor(() => {
+          expect(screen.getByText('Please select one upgrade option.')).toBeInTheDocument();
+        });
+
+        const householdSelect = screen.getByRole('button', { name: /household type/i });
+        await selectOption(householdSelect, 'House');
+
+        const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
+        fireEvent.change(addressInput, { target: { value: '789 Pine St, Denver, CO 80202' } });
+
+        const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
+        await selectOption(fuelSelect, 'Natural gas');
+
+        fireEvent.click(screen.getByRole('radio', { name: /^heat pump$/i }));
+        fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+
+        await waitFor(() => {
+          expect(screen.queryByText('Please select one upgrade option.')).not.toBeInTheDocument();
+        });
       });
     });
 
@@ -209,25 +250,39 @@ describe('CalculateImpactPage', () => {
       expect(screen.queryByText(/please select a water heating/i)).not.toBeInTheDocument();
     });
 
-    it('shows error for water heating fuel when heat pump water heater is selected without water heating fuel', async () => {
-      renderPage();
+    describe('HPWH radio disabled state', () => {
+      it('disables the HPWH radio when no water heating fuel is selected', () => {
+        renderPage();
+        expect(screen.getByRole('radio', { name: /heat pump water heater/i })).toBeDisabled();
+      });
 
-      const hpwhRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
-      fireEvent.click(hpwhRadio);
+      it('enables the HPWH radio after selecting a water heating fuel', async () => {
+        renderPage();
+        const hpwhRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
+        expect(hpwhRadio).toBeDisabled();
 
-      const householdSelect = screen.getByRole('button', { name: /household type/i });
-      await selectOption(householdSelect, 'House');
+        const waterFuelSelect = screen.getByRole('button', { name: /water heating type/i });
+        await selectOption(waterFuelSelect, 'Natural gas');
 
-      const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
-      fireEvent.change(addressInput, { target: { value: '789 Pine St, Denver, CO 80202' } });
+        expect(hpwhRadio).not.toBeDisabled();
+      });
 
-      const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
-      await selectOption(fuelSelect, 'Natural gas');
+      it('resets upgrade choice when water heating fuel is cleared after selecting HPWH', async () => {
+        renderPage();
 
-      fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+        const waterFuelSelect = screen.getByRole('button', { name: /water heating type/i });
+        await selectOption(waterFuelSelect, 'Natural gas');
 
-      await waitFor(() => {
-        expect(screen.getByText('Please select a water heating fuel for this upgrade.')).toBeInTheDocument();
+        const hpwhRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
+        fireEvent.click(hpwhRadio);
+        expect(hpwhRadio).toBeChecked();
+
+        await selectOption(waterFuelSelect, 'No selection');
+
+        await waitFor(() => {
+          expect(hpwhRadio).not.toBeChecked();
+          expect(hpwhRadio).toBeDisabled();
+        });
       });
     });
   });
@@ -261,13 +316,10 @@ describe('CalculateImpactPage', () => {
       expect(heatPumpRadio).toBeChecked();
     });
 
-    it('enables the available upgrade options (no "Coming soon")', () => {
+    it('has heat pump enabled and HPWH disabled initially (no "Coming soon")', () => {
       renderPage();
-      const radios = screen.getAllByRole('radio');
-      expect(radios).toHaveLength(2);
-      radios.forEach((radio) => {
-        expect(radio).not.toBeDisabled();
-      });
+      expect(screen.getByRole('radio', { name: /^heat pump$/i })).not.toBeDisabled();
+      expect(screen.getByRole('radio', { name: /heat pump water heater/i })).toBeDisabled();
       expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
     });
   });
@@ -301,7 +353,7 @@ describe('CalculateImpactPage', () => {
         expect(screen.queryByText(/please select a household type/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/please enter a valid street address/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/please select a heating fuel/i)).not.toBeInTheDocument();
-        expect(screen.queryByText(/please select an upgrade option/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/please select one upgrade option/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/please select a water heating fuel/i)).not.toBeInTheDocument();
       });
     });
