@@ -103,6 +103,7 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
   const inputRef = useRef<HTMLInputElement>(null);
   const conversationIdRef = useRef<string | null>(null);
   const startPromiseRef = useRef<Promise<string | null> | null>(null);
+  const sendingRef = useRef(false);
   const { formatMessage } = useIntl();
 
   const errorMessage = formatMessage({
@@ -136,10 +137,7 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
           setMessages(res.messages.map(toWidgetMessage));
           return res.conversation_id;
         })
-        .catch(() => {
-          setMessages((prev) => [...prev, { role: 'bot', text: errorMessage }]);
-          return null;
-        })
+        .catch(() => null) // error surfaced by the caller (sendMessage), not here
         .finally(() => {
           startPromiseRef.current = null;
         });
@@ -149,19 +147,22 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
 
   const sendMessage = useCallback(
     async (text: string) => {
-      const conversationId = await ensureConversation();
-      setMessages((prev) => [...prev, { role: 'user', text }]);
-      if (!conversationId || !uuid) {
-        setMessages((prev) => [...prev, { role: 'bot', text: errorMessage }]);
-        return;
-      }
+      if (sendingRef.current) return; // ignore overlapping sends
+      sendingRef.current = true;
       setIsSending(true);
       try {
+        const conversationId = await ensureConversation();
+        setMessages((prev) => [...prev, { role: 'user', text }]);
+        if (!conversationId || !uuid) {
+          setMessages((prev) => [...prev, { role: 'bot', text: errorMessage }]);
+          return;
+        }
         const res = await sendAssistantMessage(uuid, conversationId, text, newClientMessageId());
         setMessages((prev) => [...prev, toWidgetMessage(res.assistant_message)]);
       } catch {
         setMessages((prev) => [...prev, { role: 'bot', text: errorMessage }]);
       } finally {
+        sendingRef.current = false;
         setIsSending(false);
       }
     },
