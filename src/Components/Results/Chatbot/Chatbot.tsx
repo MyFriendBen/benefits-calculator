@@ -38,8 +38,6 @@ export function useChatbotContext() {
   return context;
 }
 
-const URL_REGEX = /(https?:\/\/[^\s]+)/g;
-
 function renderFormattedMessage(text: string): React.ReactNode {
   const PRIMARY_COLOR = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#1976d2';
   const lines = text.split('\n');
@@ -77,7 +75,8 @@ function renderFormattedMessage(text: string): React.ReactNode {
   };
 
   for (const line of lines) {
-    if (line.startsWith('* ')) {
+    // Accept both "* " and "- " bullets (the model may emit either).
+    if (line.startsWith('* ') || line.startsWith('- ')) {
       flushParagraph();
       bulletBuffer.push(line.slice(2));
     } else if (line === '') {

@@ -48,5 +48,6 @@ a white label (in the backend admin).
 To turn it on, set the `benbot` feature flag to `true` for the relevant white
 label in `benefits-api` (see that repo's README → "Benbot feature flag").
 
-> Note: the current widget uses scripted demo replies. Live answers come from
-> `mfb-ai-service` once the backend proxy is wired up (see `benefits-api`).
+> The widget calls `benefits-api`'s assistant endpoints (`startAssistantConversation` /
+> `sendAssistantMessage` in `src/apiCalls.ts`), which proxy to `mfb-ai-service`.
+> Replies are live; there are no scripted/canned messages in the widget.
