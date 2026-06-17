@@ -28,9 +28,15 @@ jest.mock('../../../Config/configHook', () => ({
   useFeatureFlag: jest.fn(),
 }));
 
-jest.mock('./fetchRemImpact', () => ({
-  fetchRemImpact: jest.fn(),
-}));
+jest.mock('./fetchRemImpact', () => {
+  class RemAddressNotSupportedError extends Error {
+    constructor() {
+      super('Address not supported');
+      this.name = 'RemAddressNotSupportedError';
+    }
+  }
+  return { fetchRemImpact: jest.fn(), RemAddressNotSupportedError };
+});
 
 const MOCK_RESULT = {
   bill_delta: {
@@ -409,6 +415,45 @@ describe('CalculateImpactPage', () => {
         expect(screen.getByText(/bill and emissions impact/i)).toBeInTheDocument();
       });
       expect(screen.queryByText(/please select a water heating fuel/i)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('API error states', () => {
+    const fillAndSubmitHeatPumpForm = async () => {
+      renderPage();
+      const householdSelect = screen.getByRole('button', { name: /household type/i });
+      await selectOption(householdSelect, 'House');
+      const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
+      fireEvent.change(addressInput, { target: { value: '1777 Larimer St, Denver, CO 80202' } });
+      const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
+      await selectOption(fuelSelect, 'Natural gas');
+      fireEvent.click(screen.getByRole('radio', { name: /^heat pump$/i }));
+      fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+    };
+
+    it('shows the generic error alert on a non-address API failure', async () => {
+      (jest.requireMock('./fetchRemImpact').fetchRemImpact as jest.Mock).mockRejectedValue(
+        new Error('REM API error: 502'),
+      );
+      await fillAndSubmitHeatPumpForm();
+      await waitFor(() => {
+        expect(screen.getByText(/something went wrong calculating your impact/i)).toBeInTheDocument();
+      });
+      expect(screen.queryByText(/unable to calculate the impact for this address/i)).not.toBeInTheDocument();
+    });
+
+    it('shows the address-not-supported alert when RemAddressNotSupportedError is thrown', async () => {
+      const { RemAddressNotSupportedError } = jest.requireMock('./fetchRemImpact');
+      (jest.requireMock('./fetchRemImpact').fetchRemImpact as jest.Mock).mockRejectedValue(
+        new RemAddressNotSupportedError(),
+      );
+      await fillAndSubmitHeatPumpForm();
+      await waitFor(() => {
+        expect(
+          screen.getByText(/unable to calculate the impact for this address at this time/i),
+        ).toBeInTheDocument();
+      });
+      expect(screen.queryByText(/something went wrong calculating your impact/i)).not.toBeInTheDocument();
     });
   });
 

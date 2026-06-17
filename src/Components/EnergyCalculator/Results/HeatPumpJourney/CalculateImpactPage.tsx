@@ -32,7 +32,7 @@ import {
   type CalculateImpactFormValues,
   isValidRemImpactApiResponse,
 } from './remCalculateImpactTypes';
-import { fetchRemImpact } from './fetchRemImpact';
+import { fetchRemImpact, RemAddressNotSupportedError } from './fetchRemImpact';
 import { buildCalculateImpactPayload } from './remCalculateImpactTypes';
 import CalculateImpactResults from './CalculateImpactResults';
 import { ReactComponent as Coin } from '../../Icons/Coin.svg';
@@ -152,7 +152,8 @@ type SubmitState =
   | { status: 'idle' }
   | { status: 'loading' }
   | { status: 'success'; result: RemImpactApiResponse; formValues: CalculateImpactFormValues }
-  | { status: 'error'; message: string };
+  | { status: 'error'; message: string }
+  | { status: 'address_not_supported' };
 
 export default function CalculateImpactPage() {
   const intl = useIntl();
@@ -215,7 +216,13 @@ export default function CalculateImpactPage() {
         }
         setSubmitState({ status: 'success', result, formValues: data });
       })
-      .catch((err: Error) => setSubmitState({ status: 'error', message: err.message }));
+      .catch((err: Error) => {
+        if (err instanceof RemAddressNotSupportedError) {
+          setSubmitState({ status: 'address_not_supported' });
+        } else {
+          setSubmitState({ status: 'error', message: err.message });
+        }
+      });
   };
 
   if (submitState.status === 'success') {
@@ -344,6 +351,14 @@ export default function CalculateImpactPage() {
           <FormattedMessage
             id="energyCalculator.calculateImpact.error"
             defaultMessage="Something went wrong calculating your impact. Please try selecting a different heating fuel type."
+          />
+        </Alert>
+      )}
+      {submitState.status === 'address_not_supported' && (
+        <Alert severity="error" className="calculate-impact-error">
+          <FormattedMessage
+            id="energyCalculator.calculateImpact.error.addressNotSupported"
+            defaultMessage="We're unable to calculate the impact for this address at this time. Please try entering a different address."
           />
         </Alert>
       )}
