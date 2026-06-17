@@ -304,6 +304,14 @@
   line-height: 1.5;
 }
 
+.calculate-impact-page .calculate-impact-radio-option {
+  cursor: default;
+}
+
+.calculate-impact-page .calculate-impact-radio-option[data-disabled='true']:hover {
+  background-color: transparent;
+}
+
 .calculate-impact-page .calculate-impact-radio-option[data-disabled='true'] .calculate-impact-radio-label,
 .calculate-impact-page .calculate-impact-radio-option[data-disabled='true'] .calculate-impact-radio-description {
   color: rgba(0, 0, 0, 0.38);

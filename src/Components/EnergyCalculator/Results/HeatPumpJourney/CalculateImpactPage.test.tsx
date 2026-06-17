@@ -15,9 +15,7 @@ jest.mock('../../../Common/usePageTitle', () => ({
 }));
 
 jest.mock('../../../Common/TrackedOutboundLink', () => ({
-  TrackedOutboundLink: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  ),
+  TrackedOutboundLink: ({ children, href }) => <a href={href}>{children}</a>,
 }));
 
 jest.mock('../../Icons/Coin.svg', () => ({
