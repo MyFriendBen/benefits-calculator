@@ -28,6 +28,9 @@ const eligibilityEndpoint = `${domain}/api/eligibility/`;
 const validationEndpoint = `${domain}/api/validations/`;
 const authTokenEndpoint = `${domain}/api/auth-token/`;
 const getNpsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/nps/`;
+const assistantConversationsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/assistant/conversations/`;
+const assistantMessagesEndpoint = (uuid: string, conversationId: string) =>
+  `${domain}/api/screens/${uuid}/assistant/conversations/${conversationId}/messages/`;
 
 export type ScreenApiResponse = ApiFormDataReadOnly & ApiFormData;
 
@@ -314,7 +317,73 @@ const getReferralOptions = async (whiteLabel: string, signal?: AbortSignal): Pro
   return response.json() as Promise<ReferralOptionsResponse>;
 };
 
+export interface AssistantSuggestedAction {
+  type: string;
+  label: string;
+  url?: string;
+}
+
+export interface AssistantApiMessage {
+  message_id: string;
+  role: 'user' | 'assistant';
+  text: string;
+  created_at: string;
+  suggested_actions?: AssistantSuggestedAction[];
+}
+
+export interface AssistantConversationResponse {
+  conversation_id: string;
+  screen_uuid: string;
+  status: string;
+  mode: string;
+  prompt_version: string;
+  messages: AssistantApiMessage[];
+}
+
+export interface AssistantMessageResponse {
+  user_message: AssistantApiMessage;
+  assistant_message: AssistantApiMessage;
+}
+
+// Open (or resume) a Benbot conversation for a screen.
+const startAssistantConversation = async (
+  uuid: string,
+  locale?: string,
+): Promise<AssistantConversationResponse> => {
+  return fetch(assistantConversationsEndpoint(uuid), {
+    method: 'POST',
+    body: JSON.stringify({ locale }),
+    headers: header,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json() as Promise<AssistantConversationResponse>;
+  });
+};
+
+// Send a user message to an existing Benbot conversation.
+const sendAssistantMessage = async (
+  uuid: string,
+  conversationId: string,
+  text: string,
+  clientMessageId?: string,
+): Promise<AssistantMessageResponse> => {
+  return fetch(assistantMessagesEndpoint(uuid, conversationId), {
+    method: 'POST',
+    body: JSON.stringify({ text, client_message_id: clientMessageId }),
+    headers: header,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json() as Promise<AssistantMessageResponse>;
+  });
+};
+
 export {
+  startAssistantConversation,
+  sendAssistantMessage,
   getTranslations,
   postScreen,
   getScreen,

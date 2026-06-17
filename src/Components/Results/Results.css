@@ -440,3 +440,37 @@
     margin-top: 0.5rem;
   }
 }
+
+/* Benbot "Guide Me Through My Benefits" action button (feature-flagged) */
+.results-action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
+.guide-me-button {
+  border: 2px solid var(--primary-color);
+  border-radius: 0.75rem;
+  padding: 1.125rem 3rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.375rem;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  text-decoration: none;
+  text-align: center;
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+.guide-me-button:hover {
+  background-color: #fff;
+  color: var(--primary-color);
+}
+
+.guide-me-button:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+}
