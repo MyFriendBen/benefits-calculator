@@ -27,6 +27,7 @@ export type OtherStepName =
   | 'default'
   | 'energyCalculatorLandingPage'
   | 'energyCalculatorRedirectToMFB'
+  | 'energyCalculatorConnectNow'
   | 'energyCalculatorCalculateImpact';
 
 export const OTHER_PAGE_TITLES: Record<OtherStepName, string> = {
@@ -38,6 +39,7 @@ export const OTHER_PAGE_TITLES: Record<OtherStepName, string> = {
   default: 'MyFriendBen',
   energyCalculatorLandingPage: 'Energy Calculator',
   energyCalculatorRedirectToMFB: 'Redirect to MFB',
+  energyCalculatorConnectNow: 'Find a Contractor',
   energyCalculatorCalculateImpact: 'Bill Impact Calculator',
 };
 

@@ -221,23 +221,17 @@ function HasBenefits() {
   const { formatMessage } = useIntl();
 
   const alreadyHasBenefits = () => {
-    // Selected benefit keys, in admin-sorted order from the BE.
-    const selectedKeys = Object.entries(formData.benefits)
-      .filter(([, isSelected]) => isSelected)
-      .map(([key]) => key);
+    const selectedKeys = Array.from(formData.benefits);
 
     if (selectedKeys.length === 0) {
       return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
     }
 
-    // Match by lowercased name_abbreviated to mirror AlreadyHasBenefits.tsx.
-    // TODO(MFB-720): drop the lowercase coercion once the join-table migration ships.
-    const programsByKey = new Map(hasBenefitsPrograms.map((p) => [p.name_abbreviated.toLowerCase(), p]));
+    const programsByKey = new Map(hasBenefitsPrograms.map((p) => [p.name_abbreviated, p]));
 
-    // updateFormData fans a single saved benefit (e.g. has_section_8) out to
-    // per-white-label keys (section_8, co_section_8, ma_section_8, ...).
-    // Only the active white label's variant is in hasBenefitsPrograms; drop
-    // the rest so the user sees one row per program, not one per WL.
+    // Only the active white label's programs are in hasBenefitsPrograms; a
+    // selected name not offered here is dropped so the user sees one row per
+    // program they actually receive in this white label.
     const matched = selectedKeys
       .map((key) => ({ key, program: programsByKey.get(key) }))
       .filter((entry): entry is { key: string; program: HasBenefitsProgram } => entry.program !== undefined);
@@ -359,7 +353,10 @@ function ReferralSource() {
   // Referrer.tsx stores that text directly in referralSource, so display it verbatim.
   const displayValue =
     formData.referralSource in allOptions
-      ? formatMessage({ id: `referralOptions.${formData.referralSource}`, defaultMessage: allOptions[formData.referralSource] })
+      ? formatMessage({
+          id: `referralOptions.${formData.referralSource}`,
+          defaultMessage: allOptions[formData.referralSource],
+        })
       : formData.referralSource;
 
   return (
