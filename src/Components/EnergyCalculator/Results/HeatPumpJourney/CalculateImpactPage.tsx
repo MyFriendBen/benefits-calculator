@@ -131,9 +131,9 @@ const calculateImpactSchema = z
     heatingFuel: z.enum(FUEL_TYPE_VALUES, {
       required_error: 'Please select a heating fuel.',
     }),
-    waterHeatingFuel: z.enum(FUEL_TYPE_VALUES).optional(),
+    waterHeatingFuel: z.preprocess((val) => (val === '' ? undefined : val), z.enum(FUEL_TYPE_VALUES).optional()),
     upgradeChoice: z.enum(UPGRADE_CHOICE_VALUES, {
-      required_error: 'Please select an upgrade option.',
+      required_error: 'Please select one upgrade option.',
     }),
   })
   .superRefine((data, ctx) => {
@@ -195,6 +195,7 @@ export default function CalculateImpactPage() {
       householdType: data.householdType,
     });
     setSubmitState({ status: 'loading' });
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
     fetchRemImpact(whiteLabel, payload.remAddressQuery)
       .then((result) => {
         if (!isValidRemImpactApiResponse(result)) {
@@ -603,7 +604,14 @@ export default function CalculateImpactPage() {
                 </RadioGroup>
               )}
             />
-            {errors.upgradeChoice && <FormHelperText>{errors.upgradeChoice.message}</FormHelperText>}
+            {errors.upgradeChoice && (
+              <FormHelperText>
+                {intl.formatMessage({
+                  id: 'energyCalculator.calculateImpact.upgrade.selectOne',
+                  defaultMessage: 'Please select one upgrade option.',
+                })}
+              </FormHelperText>
+            )}
           </FormControl>
 
           <Button

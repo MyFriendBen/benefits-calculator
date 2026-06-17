@@ -194,7 +194,51 @@ describe('CalculateImpactPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/please select an upgrade option/i)).toBeInTheDocument();
+        expect(screen.getByText(/please select one upgrade option/i)).toBeInTheDocument();
+      });
+    });
+
+    describe('upgrade selection helper text', () => {
+      it('shows the exact message "Please select one upgrade option." when no upgrade is selected', async () => {
+        renderPage();
+        fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+
+        await waitFor(() => {
+          expect(screen.getByText('Please select one upgrade option.')).toBeInTheDocument();
+        });
+      });
+
+      it('does not show upgrade error before the form is submitted', () => {
+        renderPage();
+        expect(screen.queryByText(/please select one upgrade option/i)).not.toBeInTheDocument();
+      });
+
+      it('clears the upgrade error after an upgrade is selected and the form is resubmitted', async () => {
+        renderPage();
+
+        // Trigger validation errors
+        fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+        await waitFor(() => {
+          expect(screen.getByText('Please select one upgrade option.')).toBeInTheDocument();
+        });
+
+        // Fill all required fields including upgrade
+        const householdSelect = screen.getByRole('button', { name: /household type/i });
+        await selectOption(householdSelect, 'House');
+
+        const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
+        fireEvent.change(addressInput, { target: { value: '789 Pine St, Denver, CO 80202' } });
+
+        const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
+        await selectOption(fuelSelect, 'Natural gas');
+
+        fireEvent.click(screen.getByRole('radio', { name: /^heat pump$/i }));
+
+        fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+
+        await waitFor(() => {
+          expect(screen.queryByText('Please select one upgrade option.')).not.toBeInTheDocument();
+        });
       });
     });
 
@@ -301,7 +345,7 @@ describe('CalculateImpactPage', () => {
         expect(screen.queryByText(/please select a household type/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/please enter a valid street address/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/please select a heating fuel/i)).not.toBeInTheDocument();
-        expect(screen.queryByText(/please select an upgrade option/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/please select one upgrade option/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/please select a water heating fuel/i)).not.toBeInTheDocument();
       });
     });

@@ -284,10 +284,12 @@ export default function CalculateImpactResults({
           />
         </h2>
         <div className="calculate-impact-upgrade-value">
-          <FormattedMessage
-            id={upgradeLabel.messageId}
-            defaultMessage={upgradeLabel.defaultMessage}
-          />
+          <strong>
+            <FormattedMessage
+              id={upgradeLabel.messageId}
+              defaultMessage={upgradeLabel.defaultMessage}
+            />
+          </strong>
         </div>
       </section>
 
