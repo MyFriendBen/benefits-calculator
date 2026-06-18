@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { Alert, CircularProgress } from '@mui/material';
+import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
 import { addAdminToLink } from '../../../../Assets/adminLink';
@@ -263,7 +264,20 @@ export default function CalculateImpactPage() {
         <Typography variant="body1" className="calculate-impact-intro energy-calculator-body-text">
           <FormattedMessage
             id="energyCalculator.calculateImpact.intro"
-            defaultMessage="This data modeling is by Rewiring America, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
+            defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
+            values={{
+              rewiringAmerica: (
+                <TrackedOutboundLink
+                  href="https://www.rewiringamerica.org"
+                  className="link-color"
+                  action="calculate_impact_rewiring_america"
+                  label="Rewiring America"
+                  category="energy_rebate"
+                >
+                  <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
+                </TrackedOutboundLink>
+              ),
+            }}
           />
         </Typography>
 
@@ -314,7 +328,20 @@ export default function CalculateImpactPage() {
       <Typography variant="body1" className="calculate-impact-intro energy-calculator-body-text">
         <FormattedMessage
           id="energyCalculator.calculateImpact.intro"
-          defaultMessage="This data modeling is by Rewiring America, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
+          defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
+          values={{
+            rewiringAmerica: (
+              <TrackedOutboundLink
+                href="https://www.rewiringamerica.org"
+                className="link-color"
+                action="calculate_impact_rewiring_america"
+                label="Rewiring America"
+                category="energy_rebate"
+              >
+                <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
+              </TrackedOutboundLink>
+            ),
+          }}
         />
       </Typography>
 
