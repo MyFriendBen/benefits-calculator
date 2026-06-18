@@ -36,6 +36,10 @@ jest.mock('./fetchRemImpact', () => {
   return { fetchRemImpact: jest.fn(), RemAddressNotSupportedError };
 });
 
+jest.mock('@react-google-maps/api', () => ({
+  LoadScript: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 const MOCK_RESULT = {
   bill_delta: {
     mean: { value: -19.76, unit: '$' },
