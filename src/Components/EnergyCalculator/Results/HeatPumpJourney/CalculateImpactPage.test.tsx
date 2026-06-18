@@ -36,8 +36,36 @@ jest.mock('./fetchRemImpact', () => {
   return { fetchRemImpact: jest.fn(), RemAddressNotSupportedError };
 });
 
-jest.mock('@react-google-maps/api', () => ({
-  LoadScript: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+jest.mock('../../../Common/GooglePlacesAddressInput', () => ({
+  GooglePlacesAddressInput: ({
+    id,
+    value,
+    onChange,
+    error,
+    helperText,
+    placeholder,
+    inputProps,
+  }: {
+    id?: string;
+    value: string;
+    onChange: (v: string) => void;
+    error?: boolean;
+    helperText?: React.ReactNode;
+    placeholder?: string;
+    inputProps?: Record<string, string>;
+  }) => (
+    <>
+      <input
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        aria-invalid={error}
+        {...inputProps}
+      />
+      {helperText && <span>{helperText}</span>}
+    </>
+  ),
 }));
 
 const MOCK_RESULT = {

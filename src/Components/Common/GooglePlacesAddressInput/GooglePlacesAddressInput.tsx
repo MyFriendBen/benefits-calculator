@@ -1,8 +1,6 @@
-import { useRef, useEffect } from 'react';
-import { TextField } from '@mui/material';
-import { LoadScript } from '@react-google-maps/api';
-
-const LIBRARIES: ('places')[] = ['places'];
+import { useRef, useState } from 'react';
+import { Autocomplete, TextField } from '@mui/material';
+import { fetchAddressSuggestions, type AddressSuggestion } from '../../EnergyCalculator/Results/HeatPumpJourney/fetchAddressSuggestions';
 
 interface GooglePlacesAddressInputProps {
   id?: string;
@@ -15,74 +13,71 @@ interface GooglePlacesAddressInputProps {
   fullWidth?: boolean;
 }
 
-function PlainTextField({ id, value, onChange, error, helperText, placeholder, inputProps, fullWidth }: GooglePlacesAddressInputProps) {
+export function GooglePlacesAddressInput({
+  id,
+  value,
+  onChange,
+  error,
+  helperText,
+  placeholder,
+  inputProps,
+  fullWidth,
+}: GooglePlacesAddressInputProps) {
+  const [options, setOptions] = useState<AddressSuggestion[]>([]);
+  const [loading, setLoading] = useState(false);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleInputChange = (_: React.SyntheticEvent, newValue: string) => {
+    onChange(newValue);
+
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+
+    if (!newValue.trim()) {
+      setOptions([]);
+      return;
+    }
+
+    debounceTimer.current = setTimeout(() => {
+      setLoading(true);
+      fetchAddressSuggestions(newValue)
+        .then(setOptions)
+        .catch(() => setOptions([]))
+        .finally(() => setLoading(false));
+    }, 300);
+  };
+
+  const handleChange = (_: React.SyntheticEvent, selected: AddressSuggestion | string | null) => {
+    if (typeof selected === 'string') {
+      onChange(selected);
+    } else if (selected) {
+      onChange(selected.description);
+    }
+  };
+
   return (
-    <TextField
-      fullWidth={fullWidth}
-      id={id}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      error={error}
-      helperText={helperText}
-      placeholder={placeholder}
-      inputProps={inputProps}
+    <Autocomplete
+      freeSolo
+      options={options}
+      getOptionLabel={(option) => (typeof option === 'string' ? option : option.description)}
+      filterOptions={(x) => x}
+      loading={loading}
+      inputValue={value}
+      onInputChange={handleInputChange}
+      onChange={handleChange}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          fullWidth={fullWidth}
+          error={error}
+          helperText={helperText}
+          placeholder={placeholder}
+          inputProps={{
+            ...params.inputProps,
+            ...inputProps,
+            ...(id ? { id } : {}),
+          }}
+        />
+      )}
     />
-  );
-}
-
-function AutocompleteTextField({ id, value, onChange, error, helperText, placeholder, inputProps, fullWidth }: GooglePlacesAddressInputProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const onChangeRef = useRef(onChange);
-
-  useEffect(() => {
-    onChangeRef.current = onChange;
-  });
-
-  useEffect(() => {
-    if (!inputRef.current || typeof window.google === 'undefined') return;
-
-    const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ['address'],
-      componentRestrictions: { country: 'us' },
-    });
-
-    const listener = autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace();
-      if (place?.formatted_address) {
-        onChangeRef.current(place.formatted_address);
-      }
-    });
-
-    return () => {
-      window.google.maps.event.removeListener(listener);
-    };
-  }, []);
-
-  return (
-    <TextField
-      fullWidth={fullWidth}
-      id={id}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      error={error}
-      helperText={helperText}
-      placeholder={placeholder}
-      inputProps={inputProps}
-      inputRef={inputRef}
-    />
-  );
-}
-
-export function GooglePlacesAddressInput(props: GooglePlacesAddressInputProps) {
-  const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-
-  if (!apiKey) {
-    return <PlainTextField {...props} />;
-  }
-
-  return (
-    <LoadScript googleMapsApiKey={apiKey} libraries={LIBRARIES} loadingElement={<PlainTextField {...props} />}>
-      <AutocompleteTextField {...props} />
-    </LoadScript>
   );
 }
