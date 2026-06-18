@@ -95,7 +95,8 @@ describe('CalculateImpactPage', () => {
 
     it('renders the Rewiring America intro paragraph', () => {
       renderPage();
-      expect(screen.getByText(/this data modeling is by rewiring america/i)).toBeInTheDocument();
+      expect(screen.getByText(/this data modeling is by/i)).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /rewiring america/i })).toBeInTheDocument();
     });
 
     it('renders the BACK TO RESULTS button', () => {
