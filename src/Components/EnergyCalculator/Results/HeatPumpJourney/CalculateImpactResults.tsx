@@ -307,7 +307,7 @@ export default function CalculateImpactResults({
         <p className="calculate-impact-section-description">
           <FormattedMessage
             id="energyCalculator.calculateImpact.results.description"
-            defaultMessage="We calculated the impact estimates below based on your selected upgrade, and data such as home age, size, number of bedrooms, and construction material that match property records for your home address."
+            defaultMessage="The estimates below are based on your selected upgrade, and data such as home age, size, number of bedrooms, and construction material that match property records for your home address."
           />
         </p>
 
