@@ -129,7 +129,7 @@ export default function ConnectNowPage() {
         <Typography id={pdfSectionHeadingId} variant="h2" component="h2" className="connect-now-pdf-heading">
           <FormattedMessage
             id="energyCalculator.connectNow.pdfSectionHeading"
-            defaultMessage="How to find a good HVAC contractor from Electrify Now."
+            defaultMessage="How to find a good HVAC contractor, from Electrify Now."
           />
         </Typography>
         <PagedDocumentViewer
