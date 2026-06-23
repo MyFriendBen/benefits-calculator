@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Autocomplete, TextField } from '@mui/material';
+import type { AutocompleteInputChangeReason } from '@mui/material';
 import { fetchAddressSuggestions, type AddressSuggestion } from '../../EnergyCalculator/Results/HeatPumpJourney/fetchAddressSuggestions';
 
 interface GooglePlacesAddressInputProps {
@@ -27,7 +28,8 @@ export function GooglePlacesAddressInput({
   const [loading, setLoading] = useState(false);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleInputChange = (_: React.SyntheticEvent, newValue: string) => {
+  const handleInputChange = (e: React.SyntheticEvent, newValue: string) => {
+
     onChange(newValue);
 
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -56,7 +58,11 @@ export function GooglePlacesAddressInput({
 
   return (
     <Autocomplete
+      id={id}
       freeSolo
+      sx={{
+        '& .MuiOutlinedInput-root': { marginBottom: "14px" }
+      }}
       options={options}
       getOptionLabel={(option) => (typeof option === 'string' ? option : option.description)}
       filterOptions={(x) => x}
@@ -74,7 +80,6 @@ export function GooglePlacesAddressInput({
           inputProps={{
             ...params.inputProps,
             ...inputProps,
-            ...(id ? { id } : {}),
           }}
         />
       )}

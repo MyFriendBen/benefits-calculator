@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { GooglePlacesAddressInput } from './GooglePlacesAddressInput';
 import { fetchAddressSuggestions } from '../../EnergyCalculator/Results/HeatPumpJourney/fetchAddressSuggestions';
@@ -138,5 +139,80 @@ describe('GooglePlacesAddressInput', () => {
     await waitFor(() => {
       expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
     });
+  });
+
+  it('does not fetch when input is only whitespace', async () => {
+    render(<GooglePlacesAddressInput {...defaultProps} />);
+    fireEvent.change(screen.getByPlaceholderText(PLACEHOLDER), { target: { value: '   ' } });
+
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('clears options when input is emptied after results populate', async () => {
+    mockFetch.mockResolvedValue([{ description: '123 Main St, Denver, CO 80014', place_id: 'abc' }]);
+
+    // Stateful wrapper required: without it, `inputValue` stays '' (the mock never updates
+    // the prop), so MUI sees no change when clearing and never fires onInputChange.
+    function Wrapper() {
+      const [value, setValue] = useState('');
+      return <GooglePlacesAddressInput placeholder={PLACEHOLDER} value={value} onChange={setValue} />;
+    }
+    render(<Wrapper />);
+
+    fireEvent.change(screen.getByPlaceholderText(PLACEHOLDER), { target: { value: '123 Main' } });
+    await act(async () => { jest.runAllTimers(); });
+    await waitFor(() => screen.getByText('123 Main St, Denver, CO 80014'));
+
+    fireEvent.change(screen.getByPlaceholderText(PLACEHOLDER), { target: { value: '' } });
+    await waitFor(() => {
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    });
+  });
+
+  it('clears the loading state after a successful fetch', async () => {
+    let resolveFetch!: (value: { description: string; place_id: string }[]) => void;
+    mockFetch.mockReturnValue(new Promise((res) => { resolveFetch = res; }));
+
+    function Wrapper() {
+      const [value, setValue] = useState('');
+      return <GooglePlacesAddressInput placeholder={PLACEHOLDER} value={value} onChange={setValue} />;
+    }
+    render(<Wrapper />);
+    fireEvent.change(screen.getByPlaceholderText(PLACEHOLDER), { target: { value: '123 Main' } });
+    await act(async () => { jest.runAllTimers(); });
+
+    // MUI renders "Loading…" text in the dropdown while fetch is in flight
+    expect(screen.getByText(/Loading/)).toBeInTheDocument();
+
+    await act(async () => {
+      resolveFetch([{ description: '123 Main St, Denver, CO 80014', place_id: 'abc' }]);
+    });
+
+    expect(screen.queryByText(/Loading/)).not.toBeInTheDocument();
+  });
+
+  it('clears the loading state after a failed fetch', async () => {
+    let rejectFetch!: (reason: Error) => void;
+    mockFetch.mockReturnValue(new Promise((_, rej) => { rejectFetch = rej; }));
+
+    function Wrapper() {
+      const [value, setValue] = useState('');
+      return <GooglePlacesAddressInput placeholder={PLACEHOLDER} value={value} onChange={setValue} />;
+    }
+    render(<Wrapper />);
+    fireEvent.change(screen.getByPlaceholderText(PLACEHOLDER), { target: { value: '123 Main' } });
+    await act(async () => { jest.runAllTimers(); });
+
+    expect(screen.getByText(/Loading/)).toBeInTheDocument();
+
+    await act(async () => {
+      rejectFetch(new Error('Network error'));
+    });
+
+    expect(screen.queryByText(/Loading/)).not.toBeInTheDocument();
   });
 });
