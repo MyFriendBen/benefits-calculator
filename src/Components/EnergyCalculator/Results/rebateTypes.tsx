@@ -256,28 +256,6 @@ export const renderCategoryDescription = (rebateType: EnergyCalculatorRebateCate
       return (
         <article className="category-description-article">
           {renderSharedHeatPumpContent()}
-          <p className="energy-calculator-p-spacing">
-            <FormattedMessage
-              id="co.energy.heat_pump_xcel_p3"
-              defaultMessage="Consult with an {contractorLink} to determine your heat pump unit size and potential rebate."
-              values={{
-                contractorLink: (
-                  <TrackedOutboundLink
-                    href="https://hvacree.net/xcel-co/public_search.cfm"
-                    className="link-color"
-                    action="xcel_contractor_click"
-                    label="Xcel Energy Registered Contractor"
-                    category="energy_rebate"
-                  >
-                    <FormattedMessage
-                      id="co.energy.heat_pump_contractor_link_xcel"
-                      defaultMessage="Xcel Energy Registered Contractor"
-                    />
-                  </TrackedOutboundLink>
-                ),
-              }}
-            />
-          </p>
         </article>
       );
     }
