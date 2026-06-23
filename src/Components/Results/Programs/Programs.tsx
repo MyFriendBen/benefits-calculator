@@ -20,6 +20,12 @@ function sortProgramsIntoCategories(categories: ProgramCategory[]): ProgramCateg
   const sortedCategories = categories
     .filter((category) => category.programs.length > 0)
     .sort((a, b) => {
+      // Temporary fix (MFB-1185): always push tax credit categories to the bottom,
+      // regardless of their priority or estimated value.
+      if (a.tax_category !== b.tax_category) {
+        return a.tax_category ? 1 : -1;
+      }
+
       const aPriority = a.priority === null ? Infinity : a.priority;
       const bPriority = b.priority === null ? Infinity : b.priority;
 
