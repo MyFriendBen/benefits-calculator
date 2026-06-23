@@ -27,6 +27,7 @@ export function GooglePlacesAddressInput({
   const [options, setOptions] = useState<AddressSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const requestId = useRef(0);
 
   const handleInputChange = (e: React.SyntheticEvent, newValue: string) => {
 
@@ -40,11 +41,12 @@ export function GooglePlacesAddressInput({
     }
 
     debounceTimer.current = setTimeout(() => {
+      const currentId = ++requestId.current;
       setLoading(true);
       fetchAddressSuggestions(newValue)
-        .then(setOptions)
-        .catch(() => setOptions([]))
-        .finally(() => setLoading(false));
+        .then((results) => { if (requestId.current === currentId) setOptions(results); })
+        .catch(() => { if (requestId.current === currentId) setOptions([]); })
+        .finally(() => { if (requestId.current === currentId) setLoading(false); });
     }, 300);
   };
 
