@@ -29,13 +29,12 @@ export function GooglePlacesAddressInput({
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestId = useRef(0);
 
-  const handleInputChange = (e: React.SyntheticEvent, newValue: string) => {
-
+  const handleInputChange = (e: React.SyntheticEvent, newValue: string, reason: AutocompleteInputChangeReason) => {
     onChange(newValue);
 
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
-    if (!newValue.trim()) {
+    if (reason !== 'input' || !newValue.trim()) {
       setOptions([]);
       return;
     }
@@ -62,9 +61,9 @@ export function GooglePlacesAddressInput({
     <Autocomplete
       id={id}
       freeSolo
-      sx={{
-        '& .MuiOutlinedInput-root': { marginBottom: "14px" }
-      }}
+      sx={(theme) => ({
+        '& .MuiOutlinedInput-root': { marginBottom: theme.spacing(1.75) }
+      })}
       options={options}
       getOptionLabel={(option) => (typeof option === 'string' ? option : option.description)}
       filterOptions={(x) => x}
