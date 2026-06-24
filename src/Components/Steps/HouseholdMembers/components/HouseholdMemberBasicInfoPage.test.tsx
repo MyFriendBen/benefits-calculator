@@ -61,15 +61,15 @@ jest.mock('../../../../Assets/icons/General/head.svg', () => ({
 
 const messages = {
   'householdDataBlock.basicInfo.header': 'Tell us about each household member',
-  'householdDataBlock.basicInfo.subheader': 'Enter each member\'s birth date.',
+  'householdDataBlock.basicInfo.subheader': "Enter each member's birth date.",
   'householdDataBlock.basicInfo.you': 'You',
   'householdDataBlock.basicInfo.person': 'Person {number}',
   'householdDataBlock.basicInfo.addMember': 'Add a Household Member',
   'householdDataBlock.basicInfo.deleteConfirm': 'Remove this member?',
   'householdDataBlock.basicInfo.deleteCancel': 'Cancel',
   'householdDataBlock.basicInfo.deleteConfirmButton': 'Remove',
-  'previousButton': 'Back',
-  'continueButton': 'Continue',
+  previousButton: 'Back',
+  continueButton: 'Continue',
 };
 
 const makeFormData = (householdSize: number, householdData: any[] = []) => ({
@@ -77,7 +77,7 @@ const makeFormData = (householdSize: number, householdData: any[] = []) => ({
   householdData,
 });
 
-const renderPage = (formData: any) => {
+const renderPage = (formData: any, locationState: Record<string, unknown> = {}) => {
   const contextValue = {
     formData,
     setFormData: jest.fn(),
@@ -87,13 +87,13 @@ const renderPage = (formData: any) => {
   return render(
     <IntlProvider locale="en" messages={messages}>
       <Context.Provider value={contextValue}>
-        <MemoryRouter initialEntries={['/co/test-uuid/step-5/0']}>
+        <MemoryRouter initialEntries={[{ pathname: '/co/test-uuid/step-5/0', state: locationState }]}>
           <Routes>
             <Route path="/:whiteLabel/:uuid/step-:stepId/:page" element={<HouseholdMemberBasicInfoPage />} />
           </Routes>
         </MemoryRouter>
       </Context.Provider>
-    </IntlProvider>
+    </IntlProvider>,
   );
 };
 
@@ -241,6 +241,34 @@ describe('HouseholdMemberBasicInfoPage', () => {
         expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/1', { state: { basicInfoCollected: true } }),
       );
       expect(mockUpdateScreen).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns to the page the user came from when returnToPage is set', async () => {
+      // Reached via the "manage members" pencil from member 3 → Continue returns to page 3.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+        { id: 'id-2', frontendId: 'fid-2', birthMonth: 7, birthYear: 2015, relationshipToHH: 'child' },
+      ];
+      renderPage(makeFormData(3, householdData), { returnToPage: 3 });
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/3', { state: { basicInfoCollected: true } }),
+      );
+    });
+
+    it('clamps returnToPage to the new member count when members were removed', async () => {
+      // returnToPage was 3, but the household is now only 2 members — clamp to page 2 so we
+      // don't navigate to a member page that no longer exists.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+      ];
+      renderPage(makeFormData(2, householdData), { returnToPage: 3 });
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', { state: { basicInfoCollected: true } }),
+      );
     });
   });
 

@@ -1,5 +1,5 @@
 import { useContext, useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useFieldArray, SubmitHandler } from 'react-hook-form';
 import { Box, Typography, IconButton } from '@mui/material';
@@ -23,7 +23,7 @@ import { useHouseholdMembersNavigation } from '../hooks/useHouseholdMembersNavig
 import BasicInfoFields from '../sections/BasicInfoFields';
 import DeleteConfirmationPopover from './DeleteConfirmationPopover';
 import '../styles/HouseholdMemberBasicInfoPage.css';
-import type { DeletePopoverState } from '../utils/types';
+import type { DeletePopoverState, LocationState } from '../utils/types';
 
 const MAX_HOUSEHOLD_SIZE = 8;
 
@@ -42,6 +42,10 @@ const HouseholdMemberBasicInfoPage = () => {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
+  // When the user reached page 0 from a member page (via the "manage members" pencil), we
+  // remember which page they came from so Continue can return them there.
+  const returnToPage = (location.state as LocationState | null)?.returnToPage;
 
   const { navigateBack } = useHouseholdMembersNavigation({
     uuid,
@@ -100,7 +104,13 @@ const HouseholdMemberBasicInfoPage = () => {
       householdData: updatedHouseholdData,
     });
 
-    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/1`, { state: { basicInfoCollected: true } });
+    // If the user came here from a member page, return them to it. Clamp to the current member
+    // count in case they removed members and the original page no longer exists.
+    const targetPage = returnToPage !== undefined ? Math.min(Math.max(returnToPage, 1), members.length) : 1;
+
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${targetPage}`, {
+      state: { basicInfoCollected: true },
+    });
   };
 
   const handleDeleteConfirm = () => {
@@ -138,10 +148,7 @@ const HouseholdMemberBasicInfoPage = () => {
             const memberErrors = errors.members?.[index];
             const isFirstMember = index === 0;
             return (
-              <div
-                key={field.id}
-                className="household-basic-info-page__person-card"
-              >
+              <div key={field.id} className="household-basic-info-page__person-card">
                 <div className="household-basic-info-page__person-header">
                   <PersonIcon className="household-basic-info-page__person-icon" />
                   <Typography className="household-basic-info-page__person-title">
@@ -188,10 +195,7 @@ const HouseholdMemberBasicInfoPage = () => {
             <button type="button" onClick={handleAddMember} className="household-basic-info-page__add-button">
               <AddIcon fontSize="small" />
               <strong>
-                <FormattedMessage
-                  id="householdDataBlock.basicInfo.addMember"
-                  defaultMessage="Add a Household Member"
-                />
+                <FormattedMessage id="householdDataBlock.basicInfo.addMember" defaultMessage="Add a Household Member" />
               </strong>
             </button>
           </Box>
