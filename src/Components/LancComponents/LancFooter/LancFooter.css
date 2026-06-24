@@ -38,12 +38,12 @@
   padding: 1rem;
 }
 
-.footer-paragraph {
+.lanc-footer-paragraph {
   margin-bottom: 1rem;
   text-align: center;
 }
 
-.footer-paragraph .MuiTypography-root {
+.lanc-footer-paragraph .MuiTypography-root {
   font-size: 0.625rem;
 }
 
