@@ -14,7 +14,6 @@ import {
   Radio,
   RadioGroup,
   Select,
-  TextField,
   Typography,
 } from '@mui/material';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
@@ -35,6 +34,7 @@ import {
 import { fetchRemImpact, RemAddressNotSupportedError } from './fetchRemImpact';
 import { buildCalculateImpactPayload } from './remCalculateImpactTypes';
 import CalculateImpactResults from './CalculateImpactResults';
+import { GooglePlacesAddressInput } from '../../../Common/GooglePlacesAddressInput';
 import { ReactComponent as Coin } from '../../Icons/Coin.svg';
 import './CalculateImpactPage.css';
 
@@ -450,20 +450,21 @@ export default function CalculateImpactPage() {
                 name="address"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
+                  <GooglePlacesAddressInput
                     fullWidth
                     id="calculate-impact-address"
+                    value={field.value}
+                    onChange={field.onChange}
                     error={!!errors.address}
-                    inputProps={{
-                      autoComplete: 'street-address',
-                      'aria-describedby': 'calculate-impact-address-helper',
-                    }}
                     helperText={errors.address?.message}
                     placeholder={intl.formatMessage({
                       id: 'energyCalculator.calculateImpact.field.addressPlaceholder',
                       defaultMessage: '1234 Main St, Denver, CO 80014',
                     })}
+                    inputProps={{
+                      autoComplete: 'street-address',
+                      'aria-describedby': 'calculate-impact-address-helper',
+                    }}
                   />
                 )}
               />
