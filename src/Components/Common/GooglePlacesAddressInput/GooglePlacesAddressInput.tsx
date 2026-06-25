@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Autocomplete, TextField } from '@mui/material';
 import type { AutocompleteInputChangeReason } from '@mui/material';
-import { fetchAddressSuggestions, type AddressSuggestion } from '../../EnergyCalculator/Results/HeatPumpJourney/fetchAddressSuggestions';
+import { fetchAddressSuggestions, type AddressSuggestion } from './fetchAddressSuggestions';
 
 interface GooglePlacesAddressInputProps {
   id?: string;
@@ -28,6 +28,12 @@ export function GooglePlacesAddressInput({
   const [loading, setLoading] = useState(false);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestId = useRef(0);
+
+  // Cancel any pending debounced fetch when the component unmounts so it can't
+  // call setState (setOptions/setLoading) on an unmounted component.
+  useEffect(() => () => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+  }, []);
 
   const handleInputChange = (e: React.SyntheticEvent, newValue: string, reason: AutocompleteInputChangeReason) => {
     onChange(newValue);
@@ -61,9 +67,7 @@ export function GooglePlacesAddressInput({
     <Autocomplete
       id={id}
       freeSolo
-      sx={(theme) => ({
-        '& .MuiOutlinedInput-root': { marginBottom: theme.spacing(1.75) }
-      })}
+      fullWidth={fullWidth}
       options={options}
       getOptionLabel={(option) => (typeof option === 'string' ? option : option.description)}
       filterOptions={(x) => x}

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { GooglePlacesAddressInput } from './GooglePlacesAddressInput';
-import { fetchAddressSuggestions } from '../../EnergyCalculator/Results/HeatPumpJourney/fetchAddressSuggestions';
+import { fetchAddressSuggestions, type AddressSuggestion } from './fetchAddressSuggestions';
 
-jest.mock('../../EnergyCalculator/Results/HeatPumpJourney/fetchAddressSuggestions');
+jest.mock('./fetchAddressSuggestions');
 
 const mockFetch = fetchAddressSuggestions as jest.MockedFunction<typeof fetchAddressSuggestions>;
 
@@ -214,5 +214,50 @@ describe('GooglePlacesAddressInput', () => {
     });
 
     expect(screen.queryByText(/Loading/)).not.toBeInTheDocument();
+  });
+
+  it('does not fetch if the component unmounts before the debounce elapses', async () => {
+    const { unmount } = render(<GooglePlacesAddressInput {...defaultProps} />);
+    fireEvent.change(screen.getByPlaceholderText(PLACEHOLDER), { target: { value: '123 Main' } });
+
+    // Unmount while the 300ms debounce timer is still pending.
+    unmount();
+
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('ignores a stale response that resolves after a newer query', async () => {
+    let resolveFirst!: (value: AddressSuggestion[]) => void;
+    let resolveSecond!: (value: AddressSuggestion[]) => void;
+    mockFetch
+      .mockReturnValueOnce(new Promise((res) => { resolveFirst = res; }))
+      .mockReturnValueOnce(new Promise((res) => { resolveSecond = res; }));
+
+    function Wrapper() {
+      const [value, setValue] = useState('');
+      return <GooglePlacesAddressInput placeholder={PLACEHOLDER} value={value} onChange={setValue} />;
+    }
+    render(<Wrapper />);
+    const input = screen.getByPlaceholderText(PLACEHOLDER);
+
+    // First query fires its debounced fetch (request id 1).
+    fireEvent.change(input, { target: { value: '123' } });
+    await act(async () => { jest.runAllTimers(); });
+
+    // Second query fires its debounced fetch (request id 2) before the first resolves.
+    fireEvent.change(input, { target: { value: '123 Main' } });
+    await act(async () => { jest.runAllTimers(); });
+
+    // Newer request resolves first, then the stale one resolves out of order.
+    await act(async () => { resolveSecond([{ description: '123 Main St, Denver, CO 80014', place_id: 'new' }]); });
+    await act(async () => { resolveFirst([{ description: '123 Stale Rd', place_id: 'old' }]); });
+
+    // The stale result must not clobber the newer options.
+    await waitFor(() => screen.getByText('123 Main St, Denver, CO 80014'));
+    expect(screen.queryByText('123 Stale Rd')).not.toBeInTheDocument();
   });
 });
