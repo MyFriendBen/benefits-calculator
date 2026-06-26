@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useState } from 'react';
 
-export type ThemeName = 'default' | 'twoOneOne' | 'twoOneOneNC' | 'co_energy' | 'nc_lanc';
+export type ThemeName = 'default' | 'twoOneOne' | 'twoOneOneNC' | 'co_energy' | 'nc_lanc' | 'nc_ccla';
 
 export interface ITheme {
   primaryColor: string;
@@ -237,6 +237,45 @@ const themes: Themes = {
       // Colors - Warnings
       '--warning-background-color': '#F5E6C8',
       '--warning-text-color': '#6b5d00',
+
+      // Typography
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
+      'font-size': '18px',
+
+      // Layout
+      '--main-max-width': '1310px',
+      '--content-max-width': '900px',
+    },
+  },
+  nc_ccla: {
+    primaryColor: '#0F2B5B',
+    secondaryColor: '#E87511',
+    midBlueColor: '#0F2B5B',
+    footerColor: '#41528C',
+    secondaryBackgroundColor: '#F7F7F7',
+    hoverColor: '#FFFFFF',
+    outlineHoverBackgroundColor: '#0F2B5B',
+    outlineHoverColor: '#FFFFFF',
+    progressBarColor: '#E87511',
+    cssVariables: {
+      // Colors - Primary & Secondary
+      '--primary-color': '#0F2B5B',
+      '--secondary-color': '#E87511',
+      '--midBlue-color': '#0F2B5B',
+      '--footer-color': '#41528C',
+
+      // Colors - Background
+      '--secondary-background-color': '#F7F7F7',
+      '--hover-color': '#FFFFFF',
+
+      // Colors - Icons
+      '--icon-color': '#E87511',
+      '--secondary-icon-color': '#000000',
+
+      // Colors - Interactive States
+      '--option-card-hover-font-color': '#1D1C1E',
+      '--active-border-color': '#E87511',
 
       // Typography
       '--font-heading': "'Roboto Slab', serif",
