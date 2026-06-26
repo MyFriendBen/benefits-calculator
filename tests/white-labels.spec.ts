@@ -9,11 +9,13 @@ import {
   navigateHomePage,
   selectCounty,
   selectInsurance,
+  selectIncome,
   selectNearTermNeeds,
   selectReferralSource,
   selectState,
 } from './helpers/steps';
 import {
+  selectECIncome,
   selectElectricProvider,
   selectHeatingSource,
   selectHouseholdInfo,
@@ -35,6 +37,10 @@ const whiteLabels = {
     dobMonth: 'February',
     dobYear: '2010',
     insurance: "I don't have or know if I have health insurance",
+    incomeCategory: 'Work & Self-Employment Income',
+    incomeType: 'Wages, salaries, or tips',
+    incomeFrequency: 'every month',
+    incomeAmount: 2000,
     nearTermNeeds: ['Food or groceries'],
     referralSource: 'Test / Prospective Partner',
     expectedResult: {
@@ -51,6 +57,10 @@ const whiteLabels = {
     dobMonth: 'February',
     dobYear: '2010',
     insurance: "I don't have or know if I have health insurance",
+    incomeCategory: 'Work & Self-Employment Income',
+    incomeType: 'Wages, salaries, or tips',
+    incomeFrequency: 'every month',
+    incomeAmount: 2000,
     nearTermNeeds: ['Food or groceries'],
     referralSource: 'Test / Prospective Partner',
     expectedResult: {
@@ -61,12 +71,16 @@ const whiteLabels = {
   },
   ma: {
     state: 'Massachusetts',
-    zipcode: '',
+    zipcode: '01001',
     county: '',
     householdSize: 1,
     dobMonth: 'February',
     dobYear: '2010',
     insurance: "I don't have or know if I have health insurance",
+    incomeCategory: 'Work & Self-Employment Income',
+    incomeType: 'Wages, salaries, or tips',
+    incomeFrequency: 'every month',
+    incomeAmount: 2000,
     nearTermNeeds: ['Food or groceries'],
     referralSource: 'Test / Prospective Partner',
     expectedResult: {
@@ -78,7 +92,7 @@ const whiteLabels = {
 };
 
 const energyCalculators = {
-  co_energy_calculator: {
+  cesn: {
     ownerOrRenter: 'Renter',
     utility: 'Heating',
     zipcode: '80012',
@@ -87,6 +101,10 @@ const energyCalculators = {
     dobMonth: 'February',
     dobYear: '2010',
     status: 'Widowed',
+    incomeCategory: 'Work & Self-Employment Income',
+    incomeType: 'Wages, salaries, or tips',
+    incomeFrequency: 'every month',
+    incomeAmount: 2000,
     electricProvider: 'Xcel Energy',
     heatingSource: 'Xcel Energy',
     householdInfo: 'You have a past-due electric',
@@ -98,8 +116,7 @@ const energyCalculators = {
 };
 test.describe('Basic e2e tests for each white label', () => {
   for (const [whiteLabel, config] of Object.entries(whiteLabels)) {
-    const skip = whiteLabel === 'ma'; // skipping MA for now
-    const runner = skip ? test.skip : test;
+    const runner = test;
 
     runner(`${whiteLabel.toUpperCase()} white label`, async ({ page }) => {
       await navigateHomePage(page);
@@ -127,6 +144,7 @@ test.describe('Basic e2e tests for each white label', () => {
 
       await fillDateOfBirth(page, config.dobMonth, config.dobYear);
       await selectInsurance(page, config.insurance);
+      await selectIncome(page, config.incomeCategory, config.incomeType, config.incomeFrequency, config.incomeAmount);
       await clickContinueButton(page);
       await verifyCurrentUrl(page, URL_PATTERNS.EXPENSES);
 
@@ -136,6 +154,9 @@ test.describe('Basic e2e tests for each white label', () => {
       await clickContinueButton(page);
       await verifyCurrentUrl(page, URL_PATTERNS.PUBLIC_BENEFITS);
 
+      // Continue is gated on the program fetch resolving; wait for the
+      // has-benefits loading spinner to disappear before clicking.
+      await expect(page.locator('.hb-loading')).toBeHidden();
       await clickContinueButton(page);
       await verifyCurrentUrl(page, URL_PATTERNS.NEEDS);
 
@@ -164,55 +185,62 @@ test.describe('Basic e2e tests for each white label', () => {
   }
 
   test('Energy Calculator White label', async ({ page }) => {
-    await navigateHomePage(page, '/co_energy_calculator/landing-page');
-    await selectOwnerOrRenter(page, energyCalculators.co_energy_calculator.ownerOrRenter);
+    await navigateHomePage(page, '/cesn/landing-page');
+    await selectOwnerOrRenter(page, energyCalculators.cesn.ownerOrRenter);
     await clickGetStartedButton(page);
-    await expect(page).toHaveURL('/co_energy_calculator/step-2?path=renter');
+    await expect(page).toHaveURL('/cesn/step-2?path=renter');
 
     await acceptDisclaimer(page);
     await clickContinueButton(page);
-    await expect(page).toHaveURL(/\/co_energy_calculator\/.*\/step-3/);
+    await expect(page).toHaveURL(/\/cesn\/.*\/step-3/);
 
-    await selectUtility(page, energyCalculators.co_energy_calculator.utility);
+    await selectUtility(page, energyCalculators.cesn.utility);
     await clickContinueButton(page);
-    await expect(page).toHaveURL(/\/co_energy_calculator\/.*\/step-4/);
+    await expect(page).toHaveURL(/\/cesn\/.*\/step-4/);
 
-    await fillZipCode(page, energyCalculators.co_energy_calculator.zipcode);
-    await selectCounty(page, energyCalculators.co_energy_calculator.county);
+    await fillZipCode(page, energyCalculators.cesn.zipcode);
+    await selectCounty(page, energyCalculators.cesn.county);
     await clickContinueButton(page);
-    await expect(page).toHaveURL(/\/co_energy_calculator\/.*\/step-5/);
+    await expect(page).toHaveURL(/\/cesn\/.*\/step-5/);
 
     await fillHouseholdSize(page, 1);
     await clickContinueButton(page);
-    await expect(page).toHaveURL(/\/co_energy_calculator\/.*\/step-6/);
+    await expect(page).toHaveURL(/\/cesn\/.*\/step-6/);
 
     await fillDateOfBirth(
       page,
-      energyCalculators.co_energy_calculator.dobMonth,
-      energyCalculators.co_energy_calculator.dobYear,
+      energyCalculators.cesn.dobMonth,
+      energyCalculators.cesn.dobYear,
     );
-    await selectStatus(page, energyCalculators.co_energy_calculator.status);
+    await selectStatus(page, energyCalculators.cesn.status);
+    await selectECIncome(
+      page,
+      energyCalculators.cesn.incomeCategory,
+      energyCalculators.cesn.incomeType,
+      energyCalculators.cesn.incomeFrequency,
+      energyCalculators.cesn.incomeAmount,
+    );
     await clickContinueButton(page);
-    await expect(page).toHaveURL(/\/co_energy_calculator\/.*\/step-7/);
+    await expect(page).toHaveURL(/\/cesn\/.*\/step-7/);
 
-    await selectElectricProvider(page, energyCalculators.co_energy_calculator.electricProvider);
+    await selectElectricProvider(page, energyCalculators.cesn.electricProvider);
     await clickContinueButton(page);
-    await expect(page).toHaveURL(/\/co_energy_calculator\/.*\/step-8/);
+    await expect(page).toHaveURL(/\/cesn\/.*\/step-8/);
 
-    await selectHeatingSource(page, energyCalculators.co_energy_calculator.heatingSource);
+    await selectHeatingSource(page, energyCalculators.cesn.heatingSource);
     await clickContinueButton(page);
-    await expect(page).toHaveURL(/\/co_energy_calculator\/.*\/step-9/);
+    await expect(page).toHaveURL(/\/cesn\/.*\/step-9/);
 
-    await selectHouseholdInfo(page, energyCalculators.co_energy_calculator.householdInfo);
+    await selectHouseholdInfo(page, energyCalculators.cesn.householdInfo);
     await clickContinueButton(page);
-    await expect(page).toHaveURL(/\/co_energy_calculator\/.*\/step-10/);
+    await expect(page).toHaveURL(/\/cesn\/.*\/step-10/);
 
     await selectNoBenefit(page);
     await clickContinueButton(page);
-    await expect(page).toHaveURL(/\/co_energy_calculator\/.*\/confirm-information/);
+    await expect(page).toHaveURL(/\/cesn\/.*\/confirm-information/);
 
     await clickContinueButton(page);
-    await expect(page).toHaveURL(/\/co_energy_calculator\/.*\/results\/benefits/);
+    await expect(page).toHaveURL(/\/cesn\/.*\/results\/benefits/);
 
     await page.waitForLoadState('networkidle');
     await page.locator('header.energy-calculator-results-header').waitFor({ 
@@ -224,7 +252,7 @@ test.describe('Basic e2e tests for each white label', () => {
     await expect(page.locator('header.energy-calculator-results-header')).toContainText('Rebates Found');
     
     await expect(page.locator('header.energy-calculator-results-header')).toHaveText(
-      energyCalculators.co_energy_calculator.expectedResult.programsCount,
+      energyCalculators.cesn.expectedResult.programsCount,
     );
   });
 });

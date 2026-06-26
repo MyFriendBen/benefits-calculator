@@ -3,19 +3,29 @@ import { findValidationForProgram, useResultsContext } from '../Results';
 import Filter from '../Filter/Filter';
 import ProgramCard from './ProgramCard';
 import CategoryHeading from '../CategoryHeading/CategoryHeading';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { calculateTotalValue, programValue } from '../FormattedValue';
 import { ResultsMessage } from '../../Referrer/Referrer';
+import { useFeatureFlag } from '../../Config/configHook';
+import { useChatbotContext } from '../Chatbot/Chatbot';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorRebateCategoryList, {
   useEnergyCalculatorNeedsRebates,
 } from '../../EnergyCalculator/Results/RebateCategories';
+import DocumentSummary from '../DocumentSummary/DocumentSummary';
 
 function sortProgramsIntoCategories(categories: ProgramCategory[]): ProgramCategory[] {
   // sort categories by total category value in decending order
   const sortedCategories = categories
     .filter((category) => category.programs.length > 0)
     .sort((a, b) => {
+      // Temporary fix (MFB-1185): always push tax credit categories to the bottom,
+      // regardless of their priority or estimated value.
+      if (a.tax_category !== b.tax_category) {
+        return a.tax_category ? 1 : -1;
+      }
+
       const aPriority = a.priority === null ? Infinity : a.priority;
       const bPriority = b.priority === null ? Infinity : b.priority;
 
@@ -69,19 +79,48 @@ const ValidationCategory = () => {
   );
 };
 
+// Opens the Benbot chat window with an initial "guide me" prompt.
+// Only rendered when the 'benbot' flag is on (so it's always inside ChatbotProvider).
+const GuideMeButton = () => {
+  const { openWithMessage } = useChatbotContext();
+  const { formatMessage } = useIntl();
+
+  const handleClick = useCallback(() => {
+    openWithMessage(
+      formatMessage({
+        id: 'chatbot.guideMeMessage',
+        defaultMessage: 'Guide me through my benefits',
+      }),
+    );
+  }, [openWithMessage, formatMessage]);
+
+  return (
+    <button type="button" className="guide-me-button" onClick={handleClick}>
+      <FormattedMessage id="programs.guideMeButton" defaultMessage="Guide Me Through My Benefits" />
+    </button>
+  );
+};
+
 const Programs = () => {
-  const { programCategories } = useResultsContext();
+  const { programs, programCategories } = useResultsContext();
 
   const categories = useMemo(() => sortProgramsIntoCategories(programCategories), [programCategories]);
 
   const isEnergyCalculator = useIsEnergyCalculator();
   const needsRebates = useEnergyCalculatorNeedsRebates();
+  const isBenbotEnabled = useFeatureFlag('benbot');
 
   return (
     <>
       <ResultsMessage />
       {!isEnergyCalculator && <Filter />}
+      {isEnergyCalculator && <DocumentSummary programs={programs} />}
       <ValidationCategory />
+      {isBenbotEnabled && (
+        <div className="results-action-buttons">
+          <GuideMeButton />
+        </div>
+      )}
       {isEnergyCalculator && needsRebates && <EnergyCalculatorRebateCategoryList />}
       {categories.map((category) => {
         return (

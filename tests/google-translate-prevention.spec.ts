@@ -86,6 +86,7 @@ test.describe('Google Translate Prevention Tests', () => {
     ];
 
     for (const lang of supportedLanguages) {
+      await page.locator('#language-select').waitFor({ state: 'visible' });
       await page.locator('#language-select').click();
       await page.getByRole('option', { name: lang.display }).click();
 

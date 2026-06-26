@@ -28,12 +28,22 @@ import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
 import { FormattedMessage } from 'react-intl';
 import './Results.css';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
+import { addAdminToLink } from '../../Assets/adminLink';
 import { FormData } from '../../Types/FormData';
 import filterProgramsGenerator from './Filter/filterPrograms';
 import useFetchEnergyCalculatorRebates from '../EnergyCalculator/Results/fetchRebates';
 import { EnergyCalculatorRebateCategory } from '../EnergyCalculator/Results/rebateTypes';
 import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
 import { usePageTitle } from '../Common/usePageTitle';
+import { NPSWidget } from '../NPS';
+import ShareModalAutoPopup from '../Share/ShareModalAutoPopup';
+import { useFeatureFlag } from '../Config/configHook';
+import { ChatbotProvider } from './Chatbot/Chatbot';
+
+// Mounts the Benbot chat widget only when the flag is on; otherwise renders children unchanged.
+// Defined at module scope so its identity is stable across renders (no subtree remount).
+const BenbotWrapper = ({ enabled, children }: PropsWithChildren<{ enabled: boolean }>) =>
+  enabled ? <ChatbotProvider>{children}</ChatbotProvider> : <>{children}</>;
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -45,7 +55,7 @@ type WrapperResultsContext = {
   isAdminView: boolean;
   validations: Validation[];
   setValidations: (validations: Validation[]) => void;
-  energyCalculatorRebateCategories: EnergyCalculatorRebateCategory[]; // NOTE: will be empty if not using the energy calculator
+  energyCalculatorRebateCategories: EnergyCalculatorRebateCategory[];
   policyEngineData: PolicyEngineData | undefined;
 };
 
@@ -83,14 +93,6 @@ export function findValidationForProgram(validations: Validation[], program: Pro
   return validations.find((validation) => validation.program_name === program.external_name);
 }
 
-function addAdminToLink(link: string, isAdmin: boolean) {
-  if (isAdmin) {
-    return link + '?admin=true';
-  }
-
-  return link;
-}
-
 export function useResultsLink(link: string) {
   const { isAdminView } = useResultsContext();
   const { whiteLabel, uuid } = useParams();
@@ -101,7 +103,7 @@ export function useResultsLink(link: string) {
 const Results = ({ type }: ResultsProps) => {
   const { formData, getReferrer, locale } = useContext(Context);
   const { whiteLabel, uuid, programId, energyCalculatorRebateType } = useParams();
-  const noHelpButton = getReferrer('featureFlags').includes('no_results_more_help');
+  const noHelpButton = getReferrer('uiOptions').includes('no_results_more_help');
 
   const [searchParams] = useSearchParams();
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams.get('admin')]);
@@ -156,7 +158,11 @@ const Results = ({ type }: ResultsProps) => {
   const [missingPrograms, setMissingPrograms] = useState(false);
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
+
+  // Benbot AI assistant — gated behind the 'benbot' feature flag (off by default).
+  const isBenbotEnabled = useFeatureFlag('benbot');
   const [policyEngineData, setPolicyEngineData] = useState<PolicyEngineData>();
+  const isEnergyCalculator = whiteLabel === 'cesn';
 
   const filterPrograms = useMemo(
     () => filterProgramsGenerator(formData, filterState, isAdminView),
@@ -174,6 +180,12 @@ const Results = ({ type }: ResultsProps) => {
       return;
     }
 
+    // For energy calculator, wait for rebates to load before showing results
+    // This prevents the flash of empty rebates before they populate
+    if (isEnergyCalculator && energyCalculatorRebateCategories === undefined) {
+      return;
+    }
+
     setNeeds(apiResults.urgent_needs);
     setPrograms(filterPrograms(apiResults.programs));
     setProgramCategories(
@@ -188,7 +200,7 @@ const Results = ({ type }: ResultsProps) => {
     setValidations(apiResults.validations);
     setLoading(false);
     setPolicyEngineData(apiResults.pe_data);
-  }, [filterPrograms, apiResults]);
+  }, [filterPrograms, apiResults, isEnergyCalculator, energyCalculatorRebateCategories]);
 
   const ResultsContextProvider = ({ children }: PropsWithChildren) => {
     return (
@@ -203,7 +215,7 @@ const Results = ({ type }: ResultsProps) => {
           isAdminView,
           validations,
           setValidations,
-          energyCalculatorRebateCategories,
+          energyCalculatorRebateCategories: energyCalculatorRebateCategories ?? [],
           policyEngineData,
         }}
       >
@@ -214,7 +226,7 @@ const Results = ({ type }: ResultsProps) => {
 
   if (loading) {
     return (
-      <main>
+      <main className="benefits-form">
         <div className="results-loading-container">
           <Loading />
         </div>
@@ -224,7 +236,7 @@ const Results = ({ type }: ResultsProps) => {
     return <ResultsError />;
   } else if (programId === undefined && type === 'help') {
     return (
-      <main>
+      <main className="benefits-form">
         <Grid container>
           <Grid item xs={12}>
             <BackAndSaveButtons
@@ -240,19 +252,27 @@ const Results = ({ type }: ResultsProps) => {
     );
   } else if (programId === undefined && (type === 'program' || type === 'need')) {
     return (
-      <main>
-        <ResultsContextProvider>
-          <ResultsHeader type={type} />
-          <ResultsTabs />
-          {type === 'program' && <UrgentNeedBanner />}
-          <Grid container sx={{ p: { xs: '1rem', sm: '1rem' } }}>
-            <Grid item xs={12}>
-              {type === 'need' ? <Needs /> : <Programs />}
-            </Grid>
-          </Grid>
-          {!noHelpButton && <HelpButton />}
-        </ResultsContextProvider>
-      </main>
+      <ResultsContextProvider>
+        <BenbotWrapper enabled={isBenbotEnabled}>
+          <main>
+            <ResultsHeader type={type} />
+            <div className="results-card-wrapper">
+              <ResultsTabs />
+              <div id="results-tabpanel" role="tabpanel" aria-labelledby={type === 'program' ? 'long-term-benefits-tab' : 'near-term-benefits-tab'} className="benefits-form results-card-body">
+                {type === 'program' && <UrgentNeedBanner />}
+                <Grid container sx={{ pt: '1rem' }}>
+                  <Grid item xs={12}>
+                    {type === 'need' ? <Needs /> : <Programs />}
+                  </Grid>
+                </Grid>
+                {!noHelpButton && <HelpButton />}
+                <NPSWidget uuid={uuid} />
+                <ShareModalAutoPopup />
+              </div>
+            </div>
+          </main>
+        </BenbotWrapper>
+      </ResultsContextProvider>
     );
   }
 
@@ -273,7 +293,7 @@ const Results = ({ type }: ResultsProps) => {
       </ResultsContextProvider>
     );
   } else if (energyCalculatorRebateType !== undefined) {
-    const rebateCategory = energyCalculatorRebateCategories.find(
+    const rebateCategory = energyCalculatorRebateCategories?.find(
       (category) => category.type === energyCalculatorRebateType,
     );
 

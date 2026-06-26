@@ -26,7 +26,7 @@ const Header = () => {
       return `/step-1${queryString}`;
     }
 
-    if (getReferrer('featureFlags').includes('logo_landing_page_link')) {
+    if (getReferrer('uiOptions').includes('logo_landing_page_link')) {
       return `/${whiteLabel}/landing-page${landingPageQueryString}`;
     }
 
@@ -69,11 +69,11 @@ const Header = () => {
       className += ' frozen';
     }
 
-    if (getReferrer('featureFlags').includes('white_header')) {
+    if (getReferrer('uiOptions').includes('white_header')) {
       className += ' white-header';
     }
 
-    if (getReferrer('featureFlags').includes('small_header_language_dropdown')) {
+    if (getReferrer('uiOptions').includes('small_header_language_dropdown')) {
       className += ' small-header-language-dropdown';
     }
 

@@ -12,7 +12,6 @@ export const QUESTION_TITLES: Record<QuestionName, string> = {
   referralSource: 'Referral',
   signUpInfo: 'Optional Sign Up',
   energyCalculatorApplianceStatus: 'Appliance Broken or Needs Replacement?',
-  energyCalculatorHouseholdData: 'Household Member',
   energyCalculatorUtilityStatus: 'Utility Service Status',
   energyCalculatorElectricityProvider: 'Electricity Provider',
   energyCalculatorGasProvider: 'Gas Provider',
@@ -27,7 +26,9 @@ export type OtherStepName =
   | 'results'
   | 'default'
   | 'energyCalculatorLandingPage'
-  | 'energyCalculatorRedirectToMFB';
+  | 'energyCalculatorRedirectToMFB'
+  | 'energyCalculatorConnectNow'
+  | 'energyCalculatorCalculateImpact';
 
 export const OTHER_PAGE_TITLES: Record<OtherStepName, string> = {
   language: 'Preferred Language',
@@ -38,6 +39,8 @@ export const OTHER_PAGE_TITLES: Record<OtherStepName, string> = {
   default: 'MyFriendBen',
   energyCalculatorLandingPage: 'Energy Calculator',
   energyCalculatorRedirectToMFB: 'Redirect to MFB',
+  energyCalculatorConnectNow: 'Find a Contractor',
+  energyCalculatorCalculateImpact: 'Bill Impact Calculator',
 };
 
 export type AppKey = 'mfb' | 'cesn';
@@ -48,6 +51,6 @@ export const APP_PREFIXES: Record<AppKey, string> = {
 };
 
 export const getAppPrefixedTitle = (whiteLabel: string | undefined, pageTitle: string) => {
-  const currentPrefix = whiteLabel === 'co_energy_calculator' ? APP_PREFIXES.cesn : APP_PREFIXES.mfb;
+  const currentPrefix = whiteLabel === 'cesn' ? APP_PREFIXES.cesn : APP_PREFIXES.mfb;
   return currentPrefix + pageTitle;
 };

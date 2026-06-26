@@ -30,7 +30,7 @@ export const createProgram = (overrides: Partial<Program> = {}): Program => ({
   estimated_application_time: createTranslation('30 minutes'),
   description_short: createTranslation('Short description'),
   description: createTranslation('Long description'),
-  value_type: createTranslation('monthly'),
+  value_type: 'benefit',
   learn_more_link: createTranslation('http://example.com'),
   apply_button_link: createTranslation('http://example.com/apply'),
   apply_button_description: createTranslation('Apply now'),

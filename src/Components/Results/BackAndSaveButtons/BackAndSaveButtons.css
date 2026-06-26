@@ -10,7 +10,7 @@
   justify-content: center;
   color: #fff;
   background-color: var(--secondary-color);
-  border-radius: 1.5625rem;
+  border-radius: 0.75rem;
   padding: 0.1rem 0.75rem;
   font-weight: bold;
   font-size: 0.75rem;
@@ -23,6 +23,11 @@
   cursor: pointer;
 }
 
+.results-back-save-buttons:focus-visible {
+  outline: 3px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+
 .results-back-save-btn-container {
   display: flex;
   justify-content: space-between;
@@ -31,18 +36,19 @@
 }
 
 .save-icon {
-  margin-left: 0.5rem;
-  height: 1.8rem;
-  width: 1.8rem;
+  display: block;
+  margin-left: 0.25rem;
+  font-size: 1.1rem !important;
 }
 
 .results-back-save-buttons:hover .save-icon {
-  fill: var(--secondary-color);
+  color: var(--secondary-color);
 }
 
 .btn-icon-text-container {
   display: flex;
   align-items: center;
+  line-height: 1;
 }
 
 .padding-right {
@@ -61,8 +67,7 @@
   }
 
   .save-icon {
-    height: 2rem;
-    width: 2rem;
+    font-size: 1.1rem !important;
   }
 
   .btn-icon-text-container {

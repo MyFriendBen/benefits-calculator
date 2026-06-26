@@ -39,11 +39,11 @@ const Disclaimer = () => {
   const { createScreen, updateScreen } = useScreenApi();
   const backNavigationFunction = () => {
     if (uuid !== undefined) {
-      navigate(`/co_energy_calculator/${uuid}/step-1${queryString}`);
+      navigate(`/cesn/${uuid}/step-1${queryString}`);
       return;
     }
 
-    navigate(`/co_energy_calculator/step-1${queryString}`);
+    navigate(`/cesn/step-1${queryString}`);
   };
 
   usePageTitle(OTHER_PAGE_TITLES.disclaimer);
@@ -94,7 +94,7 @@ const Disclaimer = () => {
 
   const startScreen = async (uuid: string) => {
     setStepLoading(false);
-    navigate(`/co_energy_calculator/${uuid}/step-${STARTING_QUESTION_NUMBER}`);
+    navigate(`/cesn/${uuid}/step-${STARTING_QUESTION_NUMBER}`);
   };
 
   const renderDisclaimerText = () => {
@@ -164,7 +164,7 @@ const Disclaimer = () => {
   };
 
   return (
-    <main className="benefits-form">
+    <main className="benefits-form" data-step-id="disclaimer">
       <QuestionHeader>
         <FormattedMessage id="disclaimer.header" defaultMessage="What you should know: " />
       </QuestionHeader>
@@ -188,7 +188,7 @@ const Disclaimer = () => {
                   label={createAgreeTTSCheckboxLabel()}
                 />
                 {errors.agreeToTermsOfService && (
-                  <ErrorMessageWrapper fontSize="1rem">{errors.agreeToTermsOfService.message}</ErrorMessageWrapper>
+                  <ErrorMessageWrapper>{errors.agreeToTermsOfService.message}</ErrorMessageWrapper>
                 )}
               </>
             )}
@@ -218,7 +218,7 @@ const Disclaimer = () => {
                   className="top-margin"
                 />
                 {errors.is13OrOlder && (
-                  <ErrorMessageWrapper fontSize="1rem">{errors.is13OrOlder.message}</ErrorMessageWrapper>
+                  <ErrorMessageWrapper>{errors.is13OrOlder.message}</ErrorMessageWrapper>
                 )}
               </>
             )}

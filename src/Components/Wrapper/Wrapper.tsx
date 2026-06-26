@@ -1,13 +1,18 @@
-import React, { useEffect, useState, PropsWithChildren } from 'react';
+import React, { useEffect, useState, useMemo, PropsWithChildren } from 'react';
 import useStyle from '../../Assets/styleController';
 import { IntlProvider } from 'react-intl';
 import { WrapperContext } from '../../Types/WrapperContext';
 import { FormData } from '../../Types/FormData';
-import { getTranslations } from '../../apiCalls';
+import { getTranslations, getHasBenefitsPrograms, getReferralOptions } from '../../apiCalls';
+import { HasBenefitsProgram } from '../../Types/ApiCalls';
+import type { ReferralOptions } from '../../hooks/useReferralOptions';
 import useReferrer, { ReferrerData } from '../Referrer/referrerHook';
 import { useGetConfig } from '../Config/configHook';
 import { rightToLeftLanguages, Language } from '../../Assets/languageOptions';
 import { HtmlLangUpdater } from '../HtmlLangUpdater/HtmlLangUpdater';
+import { ALL_VALID_WHITE_LABELS, WhiteLabel } from '../../Types/WhiteLabel';
+
+const EMPTY_REFERRAL_OPTIONS: ReferralOptions = { generic: {}, partners: {} };
 
 const initialFormData: FormData = {
   isTest: false,
@@ -24,37 +29,7 @@ const initialFormData: FormData = {
   householdData: [],
   householdAssets: 0,
   hasBenefits: 'preferNotToAnswer',
-  benefits: {
-    acp: false,
-    andcs: false,
-    ccap: false,
-    coctc: false,
-    coeitc: false,
-    coheadstart: false,
-    coPropTaxRentHeatCreditRebate: false,
-    ctc: false,
-    dentallowincseniors: false,
-    denverpresc: false,
-    ede: false,
-    eitc: false,
-    lifeline: false,
-    leap: false,
-    mydenver: false,
-    nslp: false,
-    oap: false,
-    pell: false,
-    rtdlive: false,
-    snap: false,
-    ssdi: false,
-    ssi: false,
-    cowap: false,
-    ubp: false,
-    tanf: false,
-    upk: false,
-    wic: false,
-    nfp: false,
-    fatc: false,
-  },
+  benefits: new Set<string>(),
   referralSource: undefined,
   immutableReferrer: undefined,
   signUpInfo: {
@@ -81,11 +56,29 @@ const initialFormData: FormData = {
     legalServices: false,
     savings: false,
   },
+  utm: null,
 };
 
 export const DEFAULT_WHITE_LABEL = '_default';
 
 export const Context = React.createContext<WrapperContext>({} as WrapperContext);
+
+// Extract white label from URL pathname (e.g., /co/uuid/step-1 -> 'co')
+// Validates against the list of known white labels for security
+function getWhiteLabelFromUrl(): string {
+  const pathname = window.location.pathname;
+  const parts = pathname.split('/').filter(Boolean);
+
+  if (parts.length > 0) {
+    const possibleWhiteLabel = parts[0];
+    // Validate against actual white label list (not just regex pattern)
+    if (ALL_VALID_WHITE_LABELS.includes(possibleWhiteLabel as WhiteLabel)) {
+      return possibleWhiteLabel;
+    }
+  }
+
+  return DEFAULT_WHITE_LABEL;
+}
 
 const Wrapper = (props: PropsWithChildren<{}>) => {
   const [staffToken, setStaffToken] = useState<string | undefined>(undefined);
@@ -97,7 +90,67 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
 
-  const [whiteLabel, setWhiteLabel] = useState(DEFAULT_WHITE_LABEL);
+  // Initialize white label from URL to ensure correct config loads
+  const [whiteLabel, setWhiteLabel] = useState(getWhiteLabelFromUrl);
+
+  const [hasBenefitsPrograms, setHasBenefitsPrograms] = useState<HasBenefitsProgram[]>([]);
+  const [hasBenefitsProgramsLoading, setHasBenefitsProgramsLoading] = useState(true);
+  const [hasBenefitsProgramsError, setHasBenefitsProgramsError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setHasBenefitsProgramsLoading(true);
+    setHasBenefitsProgramsError(false);
+    getHasBenefitsPrograms(whiteLabel)
+      .then((data) => {
+        if (!cancelled) {
+          setHasBenefitsPrograms(data);
+          setHasBenefitsProgramsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setHasBenefitsPrograms([]);
+          setHasBenefitsProgramsLoading(false);
+          setHasBenefitsProgramsError(true);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [whiteLabel]);
+
+  const [referralOptions, setReferralOptions] = useState<ReferralOptions>(EMPTY_REFERRAL_OPTIONS);
+  const [referralOptionsLoading, setReferralOptionsLoading] = useState(true);
+  const [referralOptionsError, setReferralOptionsError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+
+    setReferralOptionsLoading(true);
+    setReferralOptionsError(null);
+    getReferralOptions(whiteLabel, controller.signal)
+      .then((data) => {
+        if (!cancelled) {
+          setReferralOptions(data);
+          setReferralOptionsError(null);
+          setReferralOptionsLoading(false);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setReferralOptions(EMPTY_REFERRAL_OPTIONS);
+          setReferralOptionsError(err instanceof Error ? err : new Error(String(err)));
+          setReferralOptionsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [whiteLabel]);
 
   const { configLoading, configResponse: config } = useGetConfig(screenLoading, whiteLabel);
   const { language_options: languageOptions = {} } = config ?? {};
@@ -121,8 +174,18 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   let [translations, setTranslations] = useState<{ Language: { [key: string]: string } } | {}>({});
 
+  // Helper function to safely access localStorage
+  const getStoredLanguage = (): Language | null => {
+    try {
+      return localStorage.getItem('language') as Language;
+    } catch (e) {
+      console.warn('localStorage unavailable (private browsing or quota exceeded):', e);
+      return null;
+    }
+  };
+
   const initializeLocale = () => {
-    let defaultLanguage = localStorage.getItem('language') as Language;
+    let defaultLanguage = getStoredLanguage();
 
     const userLanguage = navigator.language.toLowerCase() as Language;
 
@@ -163,7 +226,13 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
   }, [locale]);
 
   useEffect(() => {
-    localStorage.setItem('language', locale);
+    // Safely persist language selection
+    try {
+      localStorage.setItem('language', locale);
+    } catch (e) {
+      console.warn('Failed to save language preference to localStorage:', e);
+      // Continue anyway - app will work, just won't persist preference
+    }
 
     if (!(locale in translations)) {
       setMessages({});
@@ -209,29 +278,64 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
     setLocale(newLocale as Language);
   };
 
+  // Memoize context value to prevent unnecessary re-renders of all consumers
+  const contextValue = useMemo(
+    () => ({
+      locale,
+      selectLanguage,
+      config,
+      configLoading,
+      formData,
+      setFormData,
+      theme,
+      setTheme,
+      styleOverride,
+      pageIsLoading,
+      setScreenLoading,
+      stepLoading,
+      setStepLoading,
+      staffToken,
+      setStaffToken,
+      getReferrer,
+      whiteLabel,
+      setWhiteLabel,
+      hasBenefitsPrograms,
+      hasBenefitsProgramsLoading,
+      hasBenefitsProgramsError,
+      referralOptions,
+      referralOptionsLoading,
+      referralOptionsError,
+    }),
+    [
+      locale,
+      selectLanguage,
+      config,
+      configLoading,
+      formData,
+      setFormData,
+      theme,
+      setTheme,
+      styleOverride,
+      pageIsLoading,
+      setScreenLoading,
+      stepLoading,
+      setStepLoading,
+      staffToken,
+      setStaffToken,
+      getReferrer,
+      whiteLabel,
+      setWhiteLabel,
+      hasBenefitsPrograms,
+      hasBenefitsProgramsLoading,
+      hasBenefitsProgramsError,
+      referralOptions,
+      referralOptionsLoading,
+      referralOptionsError,
+    ],
+  );
+
   return (
-    <Context.Provider
-      value={{
-        locale,
-        selectLanguage,
-        config,
-        configLoading,
-        formData,
-        setFormData,
-        theme,
-        setTheme,
-        styleOverride,
-        pageIsLoading,
-        setScreenLoading,
-        stepLoading,
-        setStepLoading,
-        staffToken,
-        setStaffToken,
-        getReferrer,
-        whiteLabel,
-        setWhiteLabel,
-      }}
-    >
+    <Context.Provider value={contextValue}>
       <IntlProvider locale={locale} messages={messages} defaultLocale={locale}>
         <HtmlLangUpdater />
         {props.children}

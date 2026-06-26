@@ -157,7 +157,7 @@ export default function ElectricityProvider() {
               } else if (errors.electricityProvider !== undefined) {
                 errorMessage = (
                   <FormHelperText>
-                    <ErrorMessageWrapper fontSize="1rem">{errors.electricityProvider.message}</ErrorMessageWrapper>
+                    <ErrorMessageWrapper>{errors.electricityProvider.message}</ErrorMessageWrapper>
                   </FormHelperText>
                 );
               }

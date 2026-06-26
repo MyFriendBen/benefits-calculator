@@ -10,6 +10,8 @@ import './RebatePage.css';
 import { useMemo, useContext } from 'react';
 import { TrackedOutboundLink } from '../../Common/TrackedOutboundLink';
 import { Context } from '../../Wrapper/Wrapper';
+import { HeatPumpJourneyCards } from './HeatPumpJourney';
+import { useFeatureFlag } from '../../Config/configHook';
 
 // Format expiration date from ISO string to readable format
 const formatExpirationDate = (dateString: string): string => {
@@ -40,9 +42,10 @@ type RebatePageProps = {
 export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePageProps) {
   const backLink = useResultsLink(`results/benefits`);
   const { formData } = useContext(Context);
+  const showHeatPumpJourney = useFeatureFlag('cesn_heat_pump_journey') && rebateCategory.type === 'hvac';
 
   return (
-    <main>
+    <main className="benefits-form">
       <section className="back-to-results-button-container">
         <BackAndSaveButtons
           navigateToLink={backLink}
@@ -55,7 +58,22 @@ export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePag
           <span>{rebateCategory.name}</span>
         </h1>
         {renderCategoryDescription(rebateCategory.type, formData)}
-        <section>
+        {showHeatPumpJourney && (
+          <>
+            <HeatPumpJourneyCards />
+            <h2 className="energy-calculator-rebate-page-rebates-heading">
+              <Coin />
+              <span>
+                <FormattedMessage id="energyCalculator.rebatePage.rebatesHeading" defaultMessage="Rebates" />
+              </span>
+            </h2>
+          </>
+        )}
+        <section
+          className={`energy-calculator-rebate-page-rebates-list${
+            showHeatPumpJourney ? ' energy-calculator-rebate-page-rebates-list-full-width' : ''
+          }`}
+        >
           {rebateCategory.rebates.map((rebate, i) => {
             return <RebateCard rebate={rebate} rebateCategory={rebateCategory} key={i} />;
           })}

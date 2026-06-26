@@ -6,10 +6,9 @@ import {
   fillTextField,
   FORM_INPUTS,
   selectDropdownOption,
-  selectRadio,
+  selectIncomeCategory,
   selectIncomeType,
   selectFrequency,
-  selectExpenseType,
   checkCheckbox,
   UncheckCheckbox,
   clickGetStarted,
@@ -20,10 +19,12 @@ import { URL_PATTERNS, STATES } from './helpers/utils/constants';
 import {
   fillDateOfBirth,
   fillHouseholdSize,
+  selectFirstHasBenefitsTile,
   selectInsurance,
   selectNearTermNeeds,
   selectReferralSource,
 } from './helpers/steps';
+import { waitForResultsPageLoad } from './helpers/results';
 
 const userInfo = {
   state: 'North Carolina',
@@ -33,7 +34,8 @@ const userInfo = {
   dobMonth: 'January',
   dobYear: '1989',
   insurance: "I don't have or know if I have health insurance",
-  incomeType: 'Wages, salaries, tips',
+  incomeCategory: 'Work & Self-Employment Income',
+  incomeType: 'Wages, salaries, or tips',
   incomeFrequency: 'every month',
   incomeAmount: '2000',
   expenseType: 'Rent',
@@ -102,7 +104,7 @@ test.describe('Error Messages Test', () => {
 
     expect(memberErrorMessages).toEqual([
       'Please enter a birth month.',
-      'Please enter a birth year.',
+      'Please enter a valid birth year.',
       'Please select at least one health insurance option.',
     ]);
 
@@ -110,37 +112,25 @@ test.describe('Error Messages Test', () => {
 
     await selectInsurance(page, userInfo.insurance);
 
-    await selectRadio(page, FORM_INPUTS.YES_RADIO.name);
-
     await clickContinue(page);
 
     const incomeErrorMessages = await page.locator('span.error-message').allTextContents();
 
     expect(incomeErrorMessages).toEqual([
-      'Please select an income type',
-      'Please select a frequency',
-      'Please enter a number greater than 0',
+      'Please select an income category.',
+      'Please select a frequency.',
+      'Please enter a number greater than 0.',
     ]);
 
+    await selectIncomeCategory(page, userInfo.incomeCategory);
     await selectIncomeType(page, userInfo.incomeType);
     await selectFrequency(page, userInfo.incomeFrequency);
-    await fillTextField(page, FORM_INPUTS.AMOUNT.name, userInfo.incomeAmount);
+    await page.locator(FORM_INPUTS.AMOUNT).fill(userInfo.incomeAmount);
 
     await clickContinue(page);
 
-    // Verify expenses error message
+    // Expenses page - table layout, no required fields, just continue
     await verifyCurrentUrl(page, URL_PATTERNS.EXPENSES);
-
-    await selectRadio(page, FORM_INPUTS.YES_RADIO.name);
-
-    await clickContinue(page);
-
-    const expenseErrorMessages = await page.locator('span.error-message').allTextContents();
-
-    expect(expenseErrorMessages).toEqual(['Please select an expense type', 'Please enter a number greater than 0']);
-
-    await selectExpenseType(page, userInfo.expenseType);
-    await fillTextField(page, FORM_INPUTS.AMOUNT.name, userInfo.expenseAmount);
 
     await clickContinue(page);
 
@@ -148,18 +138,13 @@ test.describe('Error Messages Test', () => {
     await verifyCurrentUrl(page, URL_PATTERNS.ASSETS);
     await clickContinue(page);
 
-    // Verify current benefits error message
+    // Current benefits step — tile-based, optional, no validation.
+    // Continue is gated on the program fetch resolving, so wait for the
+    // loading state to clear. Toggle the first tile to cover the new
+    // tile-selection UI end-to-end (aria-pressed reflects selection).
     await verifyCurrentUrl(page, URL_PATTERNS.PUBLIC_BENEFITS);
-    await selectRadio(page, FORM_INPUTS.YES_RADIO.name);
-
-    await clickContinue(page);
-
-    await expect(page.locator('span.error-message')).toHaveText(
-      'If your household does not receive any of these benefits, please select the "No" option above.',
-    );
-
-    await page.locator('input[type="radio"][value="false"]').check();
-
+    await expect(page.locator('.hb-loading')).toBeHidden();
+    await selectFirstHasBenefitsTile(page);
     await clickContinue(page);
 
     // Select near term benefits
@@ -208,6 +193,7 @@ test.describe('Error Messages Test', () => {
 
     // Results page
     await verifyCurrentUrl(page, URL_PATTERNS.RESULTS);
+    await waitForResultsPageLoad(page);
     await expect(page.locator('.results-header .results-header-programs-count-text')).toContainText('Programs Found');
 
     const estimateMessages = await page.locator('div.results-header-label').allTextContents();

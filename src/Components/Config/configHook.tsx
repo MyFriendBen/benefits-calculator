@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { Context } from '../Wrapper/Wrapper';
 import { configEndpoint, header } from '../../apiCalls';
-import { ConfigApiResponse, ConfigValue } from '../../Types/Config';
+import { ConfigApiResponse, ConfigValue, FeatureFlags } from '../../Types/Config';
 import { Config } from '../../Types/Config';
 import { FormattedMessage } from 'react-intl';
 import { ReactComponent as Student } from '../../Assets/icons/General/OptionCard/Conditions/student.svg';
@@ -28,6 +28,7 @@ import { ReactComponent as JobResources } from '../../Assets/icons/UrgentNeeds/A
 import { ReactComponent as LegalServices } from '../../Assets/icons/UrgentNeeds/AcuteConditions/legal_services.svg';
 import { ReactComponent as Support } from '../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
 import { ReactComponent as Military } from '../../Assets/icons/UrgentNeeds/AcuteConditions/military.svg';
+import { ReactComponent as Aging } from '../../Assets/icons/UrgentNeeds/AcuteConditions/aging.svg';
 import { ReactComponent as Resources } from '../../Assets/icons/General/resources.svg';
 import { ReactComponent as SurvivingSpouse } from '../EnergyCalculator/Icons/Person.svg';
 import { ReactComponent as Wheelchair } from '../EnergyCalculator/Icons/Wheelchair.svg';
@@ -81,6 +82,9 @@ function transformItemIcon(item: unknown): any {
       break;
     case 'Military':
       iconComponent = <Military className={icon._classname} />;
+      break;
+    case 'Aging':
+      iconComponent = <Aging className={`${icon._classname} aging`} />;
       break;
     case 'Savings':
       iconComponent = <Resources className={icon._classname} />;
@@ -193,6 +197,27 @@ function transformConfigData(configData: ConfigApiResponse[]): Config {
     transformedConfig[name] = transformItem(configOptions);
   });
 
+  const mergedFlags: FeatureFlags = {};
+  for (const item of configData) {
+    if (item.feature_flags) {
+      // Warn in development if a flag is being overridden
+      if (process.env.NODE_ENV === 'development') {
+        for (const [key, value] of Object.entries(item.feature_flags)) {
+          if (key in mergedFlags && mergedFlags[key] !== value) {
+            console.warn(
+              `Feature flag '${key}' is defined in multiple config items with different values. ` +
+              `Previous: ${mergedFlags[key]}, Current: ${value}. Using current value from config '${item.name}'.`
+            );
+          }
+        }
+      }
+      Object.assign(mergedFlags, item.feature_flags);
+    }
+  }
+  if (Object.keys(mergedFlags).length > 0) {
+    transformedConfig._feature_flags = mergedFlags;
+  }
+
   return transformedConfig;
 }
 
@@ -223,18 +248,58 @@ export function useGetConfig(screenLoading: boolean, whiteLabel: string) {
       return;
     }
 
-    getConfig(whiteLabel).then((value: ConfigApiResponse[]) => {
-      // get data and set loading to false
-      try {
-        if (value !== undefined) {
-          const transformedOutput: Config = transformConfigData(value);
-          setConfigResponse(transformedOutput);
+    getConfig(whiteLabel)
+      .then((value: ConfigApiResponse[]) => {
+        // get data and set loading to false
+        try {
+          if (value !== undefined) {
+            const transformedOutput: Config = transformConfigData(value);
+            setConfigResponse(transformedOutput);
+          } else {
+            // Set empty config if value is undefined
+            setConfigResponse({} as Config);
+          }
+        } catch (e) {
+          console.error('Failed to transform config data:', e);
+          // Set empty config on transformation error to prevent downstream crashes
+          setConfigResponse({} as Config);
         }
-      } catch (e) {
-        console.error(e);
-      }
-      setLoading(false);
-    });
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(`Failed to load config for white label '${whiteLabel}':`, error);
+        // Fallback to default config if white label config doesn't exist
+        if (whiteLabel !== '_default') {
+          console.log(`Falling back to _default config`);
+          getConfig('_default')
+            .then((value: ConfigApiResponse[]) => {
+              try {
+                if (value !== undefined) {
+                  const transformedOutput: Config = transformConfigData(value);
+                  setConfigResponse(transformedOutput);
+                } else {
+                  // Set empty config if value is undefined
+                  setConfigResponse({} as Config);
+                }
+              } catch (e) {
+                console.error('Failed to transform default config:', e);
+                // Set empty config on transformation error to prevent downstream crashes
+                setConfigResponse({} as Config);
+              }
+              setLoading(false);
+            })
+            .catch((err) => {
+              console.error('Failed to load default config:', err);
+              // Set empty config on fallback failure to prevent downstream crashes
+              setConfigResponse({} as Config);
+              setLoading(false);
+            });
+        } else {
+          // Set empty config when already on _default and it fails
+          setConfigResponse({} as Config);
+          setLoading(false);
+        }
+      });
   }, [screenLoading, whiteLabel]);
 
   return { configLoading, configResponse };
@@ -254,6 +319,11 @@ export function useConfig<T>(name: string, defaultValue?: T): T {
   }
 
   return config[name] as T;
+}
+
+export function useFeatureFlag(flag: string): boolean {
+  const { config } = useContext(Context);
+  return config?._feature_flags?.[flag] ?? false;
 }
 
 export function useLocalizedLink(configKey: 'privacy_policy' | 'consent_to_contact') {

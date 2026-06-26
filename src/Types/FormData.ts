@@ -1,15 +1,19 @@
 import { UtmParameters } from '../Components/CampaignAnalytics/useUtmParameters';
 
+export type ExpenseFrequency = 'monthly' | 'yearly';
+
 export type Expense = {
   expenseSourceName: string;
-  expenseAmount: string;
+  expenseAmount: number;
+  expenseFrequency: ExpenseFrequency;
 };
 
 export type IncomeStream = {
+  incomeCategory: string;
   incomeStreamName: string;
-  incomeAmount: string;
+  incomeAmount: number;
   incomeFrequency: string;
-  hoursPerWeek: string;
+  hoursPerWeek: number;
 };
 
 export type EnergyCalculatorFormData = {
@@ -44,15 +48,15 @@ export type HouseholdData = {
   birthMonth?: number;
   relationshipToHH: string;
   conditions: Conditions;
+  studentEligibility?: StudentEligibility;
   hasIncome: boolean;
   incomeStreams: IncomeStream[];
   energyCalculator?: EnergyCalculatorMember;
   healthInsurance?: HealthInsurance;
 };
 
-export type Benefits = {
-  [key: string]: boolean;
-};
+/** Program `name_abbreviated` values the household already receives. */
+export type Benefits = Set<string>;
 
 export type HealthInsurance = {
   none: boolean;
@@ -110,11 +114,18 @@ export type FormData = {
 };
 
 export type Conditions = {
-  student?: boolean;
-  pregnant?: boolean;
-  blindOrVisuallyImpaired?: boolean;
-  disabled?: boolean;
-  longTermDisability?: boolean;
+  student: boolean;
+  pregnant: boolean;
+  blindOrVisuallyImpaired: boolean;
+  disabled: boolean;
+  longTermDisability: boolean;
+};
+
+export type StudentEligibility = {
+  studentFullTime?: boolean;
+  studentJobTrainingProgram?: boolean;
+  studentHasWorkStudy?: boolean;
+  studentWorks20PlusHrs?: boolean;
 };
 
 export const isCustomTypedLocationState = (

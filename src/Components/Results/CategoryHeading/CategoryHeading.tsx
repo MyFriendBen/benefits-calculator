@@ -22,7 +22,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const IconComponent = ICON_OPTIONS_MAP[actualIconKey];
 
   const monthlyCategoryAmt = calculateTotalValue(category) / 12;
-  const shouldShowAmount = showAmount ?? !getReferrer('featureFlags').includes('dont_show_category_values');
+  const shouldShowAmount = showAmount ?? !getReferrer('uiOptions').includes('dont_show_category_values');
 
   const categoryImageAriaLabelProps = {
     id: category.name.label,
@@ -42,7 +42,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
             aria-label={`${intl.formatMessage(categoryImageAriaLabelProps)} ${iconTranslation}`}
             role="img"
           >
-            <IconComponent />
+            <IconComponent aria-hidden="true" />
           </div>
           <h2 className="category-heading-text-style">
             <ResultsTranslate translation={category.name} />

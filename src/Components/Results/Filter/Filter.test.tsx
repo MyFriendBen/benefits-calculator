@@ -50,6 +50,12 @@ describe('Filter Component', () => {
     setStaffToken: jest.fn(),
     whiteLabel: '',
     setWhiteLabel: jest.fn(),
+    referralOptions: { generic: {}, partners: {} },
+    referralOptionsLoading: false,
+    referralOptionsError: null,
+    hasBenefitsPrograms: [],
+    hasBenefitsProgramsLoading: false,
+    hasBenefitsProgramsError: false,
   });
 
   const renderFilter = (
@@ -246,7 +252,7 @@ describe('Filter Component', () => {
           {
             frontendId: 'member1',
             age: 25,
-            conditions: { pregnant: true },
+            conditions: { student: false, pregnant: true, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false },
           } as any,
         ],
       });

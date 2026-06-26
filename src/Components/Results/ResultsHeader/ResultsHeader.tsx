@@ -40,30 +40,30 @@ const ProgramsHeader = () => {
   return (
     <CardContent sx={{ backgroundColor: theme.secondaryBackgroundColor, padding: '1rem' }}>
       <header className="results-header">
-        <section className="results-header-programs-count-text">
+        <div className="results-header-programs-count-text">
           <div className="results-header-programs-count">{translateNumber(programs.length)}</div>
           <div>
             <FormattedMessage id="results.header-programsFound" defaultMessage="Programs Found" />
           </div>
-        </section>
-        <section className="column-row">
-          <section className="results-data-cell">
-            <div className="results-header-values">
-              ${translateNumber(Math.round(estimatedMonthlySavings / 12).toLocaleString())}
-            </div>
+        </div>
+        <div className="column-row">
+          <div className="results-data-cell">
             <div className="results-header-label">
               <FormattedMessage id="results.header-monthlyValue" defaultMessage="Estimated Monthly Savings" />
             </div>
-          </section>
+            <div className="results-header-values">
+              ${translateNumber(Math.round(estimatedMonthlySavings / 12).toLocaleString())}
+            </div>
+          </div>
           {formData.immutableReferrer !== 'lgs' && (
-            <section className="results-data-cell">
-              <div className="results-header-values">${translateNumber(Math.round(taxCredit).toLocaleString())}</div>
+            <div className="results-data-cell">
               <div className="results-header-label">
                 <FormattedMessage id="results.header-taxCredits" defaultMessage="Annual Tax Credit" />
               </div>
-            </section>
+              <div className="results-header-values">${translateNumber(Math.round(taxCredit).toLocaleString())}</div>
+            </div>
           )}
-        </section>
+        </div>
       </header>
     </CardContent>
   );
@@ -74,12 +74,12 @@ const NeedsHeader = () => {
 
   return (
     <div className="results-needs-header-background">
-      <section className="results-needs-header">
+      <div className="results-needs-header">
         <div className="results-needs-header-programs">{needs.length}</div>
         <div className="results-needs-header-programs-text">
           <FormattedMessage id="results.needHeader" defaultMessage="Resources Found" />
         </div>
-      </section>
+      </div>
     </div>
   );
 };
@@ -98,10 +98,12 @@ const ResultsHeader = ({ type }: ResultsHeaderProps) => {
 
   return (
     <>
-      <BackAndSaveButtons
-        navigateToLink={`/${whiteLabel}/${uuid}/confirm-information`}
-        BackToThisPageText={<FormattedMessage id="results.back-to-screen-btn" defaultMessage="BACK TO SCREENER" />}
-      />
+      <div className="results-back-save-strip">
+        <BackAndSaveButtons
+          navigateToLink={`/${whiteLabel}/${uuid}/confirm-information`}
+          BackToThisPageText={<FormattedMessage id="results.back-to-screen-btn" defaultMessage="BACK TO SCREENER" />}
+        />
+      </div>
       {isAdminView && <Login setToken={setStaffToken} loggedIn={staffToken !== undefined} />}
       <div className={isEnergyCalculator ? "energy-calculator-results-header-container" : "results-header-container"}>{header}</div>
     </>

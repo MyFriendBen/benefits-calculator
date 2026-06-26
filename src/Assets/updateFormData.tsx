@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { EnergyCalculatorMember, FormData } from '../Types/FormData';
+import { EnergyCalculatorMember, FormData, StudentEligibility } from '../Types/FormData';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { ScreenApiResponse } from '../apiCalls';
 
@@ -22,75 +22,9 @@ export function useUpdateFormData() {
       expenses: [],
       householdSize: Number(response.household_size ?? 0),
       householdData: [],
-      householdAssets: Math.round(response.household_assets ?? 0),
+      householdAssets: Math.round(Number(response.household_assets ?? 0)),
       hasBenefits: response.has_benefits ?? 'preferNotToAnswer',
-      benefits: {
-        acp: response.has_acp ?? false,
-        andcs: response.has_andcs ?? false,
-        coeitc: response.has_coeitc ?? false,
-        coheadstart: response.has_chs ?? false,
-        coPropTaxRentHeatCreditRebate: response.has_cpcr ?? false,
-        ctc: response.has_ctc ?? false,
-        dentallowincseniors: response.has_cdhcs ?? false,
-        denverpresc: response.has_dpp ?? false,
-        ede: response.has_ede ?? false,
-        eitc: response.has_eitc ?? false,
-        il_eitc: response.has_il_eitc ?? false,
-        il_ctc: response.has_il_ctc ?? false,
-        il_transit_reduced_fare: response.has_il_transit_reduced_fare ?? false,
-        il_bap: response.has_il_bap ?? false,
-        il_hbwd: response.has_il_hbwd ?? false,
-        il_liheap: response.has_il_liheap ?? false,
-        lifeline: response.has_lifeline ?? false,
-        leap: response.has_leap ?? false,
-        nc_lieap: response.has_nc_lieap ?? false,
-        nccip: response.has_nccip ?? false,
-        mydenver: response.has_mydenver ?? false,
-        nslp: response.has_nslp ?? false,
-        oap: response.has_oap ?? false,
-        pell: response.has_pell_grant ?? false,
-        rtdlive: response.has_rtdlive ?? false,
-        snap: response.has_snap ?? false,
-        sunbucks: response.has_sunbucks ?? false,
-        ssdi: response.has_ssdi ?? false,
-        ssi: response.has_ssi ?? false,
-        tanf: response.has_tanf ?? false,
-        wic: response.has_wic ?? false,
-        upk: response.has_upk ?? false,
-        coctc: response.has_coctc ?? false,
-        cowap: response.has_cowap ?? false,
-        ncwap: response.has_ncwap ?? false,
-        ubp: response.has_ubp ?? false,
-        nfp: response.has_nfp ?? false,
-        fatc: response.has_fatc ?? false,
-        section_8: response.has_section_8 ?? false,
-        chp: response.has_chp ?? false,
-        medicaid: response.has_medicaid ?? false,
-        ccap: response.has_ccap ?? false,
-        csfp: response.has_csfp ?? false,
-        ccdf: response.has_ccdf ?? false,
-        aca: response.has_aca ?? false,
-        nc_medicare_savings: response.has_nc_medicare_savings ?? false,
-        ma_eaedc: response.has_ma_eaedc ?? false,
-        ma_ssp: response.has_ma_ssp ?? false,
-        ma_mbta: response.has_ma_mbta ?? false,
-        ma_maeitc: response.has_ma_maeitc ?? false,
-        ma_macfc: response.has_ma_macfc ?? false,
-        ma_homebridge: response.has_ma_homebridge ?? false,
-        ma_dhsp_afterschool: response.has_ma_dhsp_afterschool ?? false,
-        ma_door_to_door: response.has_ma_door_to_door ?? false,
-        head_start: response.has_head_start ?? false,
-        early_head_start: response.has_early_head_start ?? false,
-        co_andso: response.has_co_andso ?? false,
-        co_care: response.has_co_care ?? false,
-        project_cope: response.has_project_cope ?? false,
-        cesn_heap: response.has_cesn_heap ?? false,
-        cfhc: response.has_cfhc ?? false,
-        shitc: response.has_shitc ?? false,
-        tx_dart: response.has_tx_dart ?? false,
-        harris_county_rides: response.has_harris_county_rides ?? false,
-        ccs: response.has_ccs ?? false,
-      },
+      benefits: new Set(response.current_benefits ?? []),
       referralSource: response.referral_source ?? undefined,
       immutableReferrer: response.referrer_code ?? undefined,
       path: response.path ?? undefined,
@@ -106,6 +40,8 @@ export function useUpdateFormData() {
         legalServices: response.needs_legal_services ?? false,
         savings: response.needs_college_savings ?? false,
         veteranServices: response.needs_veteran_services ?? false,
+        disabilityResources: response.needs_disability_resources ?? false,
+        agingResources: response.needs_aging_resources ?? false,
       },
       signUpInfo: {
         email: '',
@@ -155,9 +91,12 @@ export function useUpdateFormData() {
       for (const income of member.income_streams) {
         incomes.push({
           incomeStreamName: income.type ?? '',
-          incomeAmount: String(income.amount) ?? '',
+          incomeCategory: income.category ?? '',
+          // Django DecimalField returns a string; Number() handles null via the ?? fallback
+          incomeAmount: Number(income.amount ?? 0),
           incomeFrequency: income.frequency ?? '',
-          hoursPerWeek: String(income.hours_worked) ?? '',
+          // API returns null for non-hourly streams; normalize to 0 as the default
+          hoursPerWeek: income.hours_worked ?? 0,
         });
       }
 
@@ -167,6 +106,16 @@ export function useUpdateFormData() {
           survivingSpouse: member.energy_calculator.surviving_spouse,
           receivesSsi: member.energy_calculator.receives_ssi,
           medicalEquipment: member.energy_calculator.medical_equipment,
+        };
+      }
+
+      let studentEligibility: StudentEligibility | undefined = undefined;
+      if (member.student) {
+        studentEligibility = {
+          studentFullTime: member.student_full_time ?? false,
+          studentJobTrainingProgram: member.student_job_training_program ?? false,
+          studentHasWorkStudy: member.student_has_work_study ?? false,
+          studentWorks20PlusHrs: member.student_works_20_plus_hrs ?? false,
         };
       }
 
@@ -184,6 +133,7 @@ export function useUpdateFormData() {
           disabled: member.disabled ?? false,
           longTermDisability: member.long_term_disability ?? false,
         },
+        studentEligibility: studentEligibility,
         hasIncome: member.has_income ?? false,
         incomeStreams: incomes,
         energyCalculator: energyCalculator,
@@ -195,7 +145,8 @@ export function useUpdateFormData() {
     for (const expense of response.expenses) {
       updatedFormData.expenses.push({
         expenseSourceName: expense.type ?? '',
-        expenseAmount: expense.amount ? String(Math.round(expense.amount)) : '',
+        expenseAmount: Math.round(parseFloat(String(expense.amount ?? 0)) || 0),
+        expenseFrequency: expense.frequency === 'yearly' ? 'yearly' : 'monthly',
       });
     }
 

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useTranslateNumber } from '../../../Assets/languageOptions';
 import { FormattedMessageType } from '../../../Types/Questions';
-import { handleNumbersOnly, NUM_PAD_PROPS } from '../../../Assets/numInputHelpers';
+import { NumericFormat } from 'react-number-format';
 import { formatToUSD } from '../../Results/FormattedValue';
 import {
   EnergyCalculatorAmountUnit,
@@ -594,7 +594,7 @@ export function EnergyCalculatorRebateCalculator({ rebate }: RebateComponentProp
         />
       </QuestionDescription>
       <div>
-        <TextField
+        <NumericFormat
           label={
             <>
               <FormattedMessage id="energyCalculator.rebatePage.calculator.input.cost" defaultMessage="Cost of " />
@@ -602,15 +602,14 @@ export function EnergyCalculatorRebateCalculator({ rebate }: RebateComponentProp
             </>
           }
           variant="outlined"
-          inputProps={NUM_PAD_PROPS}
           value={cost > 0 ? cost : ''}
-          onChange={handleNumbersOnly((event) => {
-            const value = event.target.value;
-            if (value.length > 10) {
-              return;
-            }
-            setCost(Number(value));
-          })}
+          onValueChange={({ floatValue }) => setCost(floatValue ?? 0)}
+          thousandSeparator
+          allowNegative={false}
+          decimalScale={0}
+          isAllowed={({ floatValue }) => floatValue === undefined || floatValue <= 9_999_999_999}
+          customInput={TextField}
+          inputProps={{ inputMode: 'numeric' }}
           sx={{ backgroundColor: '#fff', width: '18rem', maxWidth: '100%' }}
           InputProps={{
             startAdornment: <InputAdornment position="start">$</InputAdornment>,

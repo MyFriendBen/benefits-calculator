@@ -2,6 +2,7 @@ import { Language } from './Assets/languageOptions';
 import { Category, Program } from './Components/CurrentBenefits/CurrentBenefits';
 import {
   AdminTokenResponse,
+  HasBenefitsProgram,
   ProgramCategoryResponse,
   SendMessageRequestData,
   TranslationResponse,
@@ -22,9 +23,14 @@ const messageEndpoint = `${domain}/api/messages/`;
 const apiProgramCategoriesEndPoint = `${domain}/api/program_categories/`;
 const apiUrgentNeedTypesEndpoint = `${domain}/api/urgent_need_types/`;
 export const configEndpoint = `${domain}/api/configuration/`;
+const screenerOptionsEndpoint = `${domain}/api/screener-options/`;
 const eligibilityEndpoint = `${domain}/api/eligibility/`;
 const validationEndpoint = `${domain}/api/validations/`;
 const authTokenEndpoint = `${domain}/api/auth-token/`;
+const getNpsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/nps/`;
+const assistantConversationsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/assistant/conversations/`;
+const assistantMessagesEndpoint = (uuid: string, conversationId: string) =>
+  `${domain}/api/screens/${uuid}/assistant/conversations/${conversationId}/messages/`;
 
 export type ScreenApiResponse = ApiFormDataReadOnly & ApiFormData;
 
@@ -144,7 +150,11 @@ const getAllLongTermPrograms = async (whiteLabel: string) => {
 
   for (const category of data) {
     const programs: Program[] = category.programs.map((program) => {
-      return { name: program.name, description: program.website_description };
+      return {
+        name: program.name,
+        description: program.website_description,
+        link: program.learn_more_link,
+      };
     });
 
     categories.push({ ...category, programs });
@@ -168,7 +178,11 @@ const getAllNearTermPrograms = async (whiteLabel: string) => {
 
   for (const type of data) {
     const urgentNeeds: Program[] = type.urgent_needs.map((program) => {
-      return { name: program.name, description: program.website_description };
+      return {
+        name: program.name,
+        description: program.website_description,
+        link: program.link,
+      };
     });
 
     const { urgent_needs, ...rest } = type;
@@ -214,6 +228,44 @@ const deleteValidation = async (validationid: number, key: string) => {
   });
 };
 
+type NPSScoreData = {
+  uuid: string;
+  score: number;
+};
+
+type NPSReasonData = {
+  uuid: string;
+  score_reason: string;
+};
+
+const postNPSScore = async (data: NPSScoreData) => {
+  const { uuid, ...body } = data;
+  return fetch(getNpsEndpoint(uuid), {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: header,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json();
+  });
+};
+
+const patchNPSReason = async (data: NPSReasonData) => {
+  const { uuid, ...body } = data;
+  return fetch(getNpsEndpoint(uuid), {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+    headers: header,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json();
+  });
+};
+
 const getAuthToken = async (email: string, password: string) => {
   const header = {
     'Content-Type': 'application/json',
@@ -236,7 +288,102 @@ const getAuthToken = async (email: string, password: string) => {
   return data.token;
 };
 
+const getHasBenefitsPrograms = (whiteLabel: string): Promise<HasBenefitsProgram[]> => {
+  return fetch(`${screenerOptionsEndpoint}${whiteLabel}/has-benefits-programs/`, {
+    method: 'GET',
+    headers: header,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json() as Promise<HasBenefitsProgram[]>;
+  });
+};
+
+export interface ReferralOptionsResponse {
+  generic: Record<string, string>;
+  partners: Record<string, string>;
+}
+
+const getReferralOptions = async (whiteLabel: string, signal?: AbortSignal): Promise<ReferralOptionsResponse> => {
+  const response = await fetch(`${screenerOptionsEndpoint}${whiteLabel}/referral-options/`, {
+    method: 'GET',
+    headers: header,
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`);
+  }
+  return response.json() as Promise<ReferralOptionsResponse>;
+};
+
+export interface AssistantSuggestedAction {
+  type: string;
+  label: string;
+  url?: string;
+}
+
+export interface AssistantApiMessage {
+  message_id: string;
+  role: 'user' | 'assistant';
+  text: string;
+  created_at: string;
+  suggested_actions?: AssistantSuggestedAction[];
+}
+
+export interface AssistantConversationResponse {
+  conversation_id: string;
+  screen_uuid: string;
+  status: string;
+  mode: string;
+  prompt_version: string;
+  messages: AssistantApiMessage[];
+}
+
+export interface AssistantMessageResponse {
+  user_message: AssistantApiMessage;
+  assistant_message: AssistantApiMessage;
+}
+
+// Open (or resume) a Benbot conversation for a screen.
+const startAssistantConversation = async (
+  uuid: string,
+  locale?: string,
+): Promise<AssistantConversationResponse> => {
+  return fetch(assistantConversationsEndpoint(uuid), {
+    method: 'POST',
+    body: JSON.stringify({ locale }),
+    headers: header,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json() as Promise<AssistantConversationResponse>;
+  });
+};
+
+// Send a user message to an existing Benbot conversation.
+const sendAssistantMessage = async (
+  uuid: string,
+  conversationId: string,
+  text: string,
+  clientMessageId?: string,
+): Promise<AssistantMessageResponse> => {
+  return fetch(assistantMessagesEndpoint(uuid, conversationId), {
+    method: 'POST',
+    body: JSON.stringify({ text, client_message_id: clientMessageId }),
+    headers: header,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json() as Promise<AssistantMessageResponse>;
+  });
+};
+
 export {
+  startAssistantConversation,
+  sendAssistantMessage,
   getTranslations,
   postScreen,
   getScreen,
@@ -249,4 +396,8 @@ export {
   postValidation,
   deleteValidation,
   getAuthToken,
+  postNPSScore,
+  patchNPSReason,
+  getHasBenefitsPrograms,
+  getReferralOptions,
 };

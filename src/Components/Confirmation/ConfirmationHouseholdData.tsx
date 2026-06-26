@@ -2,13 +2,14 @@ import { ReactNode, useContext } from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { useFormatBirthMonthYear, hasBirthMonthYear } from '../../Assets/age';
 import { useTranslateNumber } from '../../Assets/languageOptions';
-import { Conditions } from '../../Types/FormData';
+import { HouseholdData, IncomeStream, Conditions } from '../../Types/FormData';
 import { FormattedMessageType } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
 import { formatToUSD } from './ConfirmationBlock';
 import { Context } from '../Wrapper/Wrapper';
 import { ReactComponent as Edit } from '../../Assets/icons/General/edit.svg';
 import { calcIncomeStreamAmount } from '../../Assets/income';
+import { useIsEnergyCalculator } from '../EnergyCalculator/hooks';
 import { Link, useParams } from 'react-router-dom';
 import { useStepNumber } from '../../Assets/stepDirectory';
 
@@ -21,226 +22,177 @@ type IconAndFormattedMessageMap = {
 
 type OptionMap = { [key: string]: FormattedMessageType };
 
+type ConditionEntry = { isActive: (m: HouseholdData) => boolean; id: string; defaultMessage: string };
+
+const MAIN_CONDITIONS: ConditionEntry[] = [
+  { isActive: (m) => m.conditions.student, id: 'confirmation.headOfHouseholdDataBlock-studentText', defaultMessage: 'Student' },
+  { isActive: (m) => m.conditions.pregnant, id: 'confirmation.headOfHouseholdDataBlock-pregnantText', defaultMessage: 'Pregnant' },
+  { isActive: (m) => m.conditions.blindOrVisuallyImpaired, id: 'confirmation.headOfHouseholdDataBlock-blindOrVisuallyImpairedText', defaultMessage: 'Blind or visually impaired' },
+  { isActive: (m) => m.conditions.disabled, id: 'confirmation.headOfHouseholdDataBlock-disabledText', defaultMessage: 'Disabled' },
+  { isActive: (m) => m.conditions.longTermDisability, id: 'confirmation.longTermDisability', defaultMessage: 'Has a medical or developmental condition that has lasted, or is expected to last, more than 12 months' },
+];
+
+const EC_CONDITIONS: ConditionEntry[] = [
+  { isActive: (m) => m.energyCalculator?.survivingSpouse ?? false, id: 'eCConditionOptions.survivingSpouse', defaultMessage: 'Surviving Spouse' },
+  { isActive: (m) => m.conditions.disabled, id: 'confirmationHHData.disability', defaultMessage: 'Disability' },
+  { isActive: (m) => m.energyCalculator?.medicalEquipment ?? false, id: 'confirmationHHData.medicalEquipment', defaultMessage: 'In-home medical equipment' },
+];
+
 const DefaultConfirmationHHData = () => {
   const { formData } = useContext(Context);
   const { householdData } = formData;
+  const isEnergyCalculator = useIsEnergyCalculator();
   const { whiteLabel, uuid } = useParams();
 
   const { formatMessage } = useIntl();
-
   const translateNumber = useTranslateNumber();
   const formatBirthMonthYear = useFormatBirthMonthYear();
 
   const relationshipOptions = useConfig<OptionMap>('relationship_options');
+  const incomeOptionsByCategory = useConfig<Record<string, OptionMap>>('income_options_by_category', {});
+  const incomeOptions = Object.values(incomeOptionsByCategory).reduce<OptionMap>(
+    (acc, category) => ({ ...acc, ...category }),
+    {},
+  );
+  const frequencyOptions = useConfig<OptionMap>('frequency_options');
   const healthInsuranceOptions = useConfig<{
     you: IconAndFormattedMessageMap;
     them: IconAndFormattedMessageMap;
   }>('health_insurance_options');
 
-  const conditionsString = (specialConditions: Conditions) => {
-    const conditionText = [];
-
-    if (specialConditions.student !== undefined && specialConditions.student) {
-      conditionText.push(
-        formatMessage({
-          id: 'confirmation.headOfHouseholdDataBlock-studentText',
-          defaultMessage: 'Student',
-        }),
-      );
-    }
-
-    if (specialConditions.pregnant) {
-      conditionText.push(
-        formatMessage({
-          id: 'confirmation.headOfHouseholdDataBlock-pregnantText',
-          defaultMessage: 'Pregnant',
-        }),
-      );
-    }
-
-    if (specialConditions.blindOrVisuallyImpaired) {
-      conditionText.push(
-        formatMessage({
-          id: 'confirmation.headOfHouseholdDataBlock-blindOrVisuallyImpairedText',
-          defaultMessage: 'Blind or visually impaired',
-        }),
-      );
-    }
-
-    if (specialConditions.disabled) {
-      conditionText.push(
-        formatMessage({
-          id: 'confirmation.headOfHouseholdDataBlock-disabledText',
-          defaultMessage: 'Disabled',
-        }),
-      );
-    }
-
-    if (specialConditions.longTermDisability) {
-      conditionText.push(
-        formatMessage({
-          id: 'confirmation.longTermDisability',
-          defaultMessage:
-            'Has a medical or developmental condition that has lasted, or is expected to last, more than 12 months',
-        }),
-      );
-    }
+  const conditionsDisplay = (member: HouseholdData) => {
+    const conditions = isEnergyCalculator ? EC_CONDITIONS : MAIN_CONDITIONS;
+    const conditionText = conditions
+      .filter(({ isActive }) => isActive(member))
+      .map(({ id, defaultMessage }) => formatMessage({ id, defaultMessage }));
 
     if (conditionText.length === 0) {
       return formatMessage({ id: 'confirmation.none', defaultMessage: 'None' });
     }
 
-    // NOTE: we might want to redesign this to be more like a bullet list because
-    // not every language will use commas to seperate a list.
-    return conditionText.join(', ');
+    return (
+      <ul>
+        {conditionText.map((text, idx) => (
+          <li key={idx}>{text}</li>
+        ))}
+      </ul>
+    );
   };
 
-  const editHouseholdMemberAriaLabel = {
-    id: 'confirmation.hhMember.edit-AL',
-    defaultMessage: 'edit household member',
-  };
+  const listAllIncomeStreams = (incomeStreams: IncomeStream[]) => {
+    const hrsPerWkText = formatMessage({ id: 'listAllIncomeStreams.hoursPerWeek', defaultMessage: ' hours/week ' });
+    const annualText = formatMessage({ id: 'displayAnnualIncome.annual', defaultMessage: ' annually' });
 
-  const displayHealthInsurance = (member: any, memberIndex: number) => {
-    const insurance = member.healthInsurance;
-    const selectedNone = insurance?.none === true;
+    return incomeStreams.map((incomeStream, index) => {
+      const incomeStreamName = incomeOptions[incomeStream.incomeStreamName];
+      const incomeAmount = formatToUSD(incomeStream.incomeAmount);
+      const incomeFrequency = frequencyOptions[incomeStream.incomeFrequency];
+      const annualAmount = `(${formatToUSD(calcIncomeStreamAmount(incomeStream), 0)}${annualText})`;
 
-    const youVsThemHealthInsuranceOptions = memberIndex === 0 ? healthInsuranceOptions.you : healthInsuranceOptions.them;
-
-    const allOtherSelectedOptions = Object.entries(insurance ?? {})
-      .filter((hHMemberInsEntry) => hHMemberInsEntry[1] === true)
-      .map((insurance) => {
-        const formattedMessageProp = youVsThemHealthInsuranceOptions[insurance[0]].text.props;
-        return formatMessage({ ...formattedMessageProp });
-      });
-
-    if (selectedNone) {
-      return youVsThemHealthInsuranceOptions.none.text;
-    }
-    return allOtherSelectedOptions.join(', ');
-  };
-
-  const calculateTotalAnnualIncome = (member: any) => {
-    const { hasIncome, incomeStreams } = member;
-    if (!hasIncome || incomeStreams.length === 0) {
-      return formatMessage({ id: 'confirmation.noIncome', defaultMessage: 'None' });
-    }
-
-    const totalAnnual = incomeStreams.reduce((total: number, stream: any) => {
-      return total + calcIncomeStreamAmount(stream);
-    }, 0);
-
-    return translateNumber(formatToUSD(totalAnnual, 0));
-  };
-
-  // Return just the table without the ConfirmationBlock wrapper
-  return (
-    <div className="household-member-table-wrapper">
-      {/* Desktop table view */}
-      <table className="household-member-table household-member-table-desktop">
-        <thead>
-          <tr>
-            <th><FormattedMessage id="confirmation.table.member" defaultMessage="Member" /></th>
-            <th><FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year" /></th>
-            <th><FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions" /></th>
-            <th><FormattedMessage id="confirmation.annualIncome" defaultMessage="Annual Income" /></th>
-            <th><FormattedMessage id="confirmation.headOfHouseholdDataBlock-healthInsuranceText" defaultMessage="Health Insurance" /></th>
-            <th style={{ width: '40px' }}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {householdData.map((member, i) => {
-            let relationship: string | FormattedMessageType;
-            if (i === 0) {
-              relationship = formatMessage({ id: "qcc.you", defaultMessage: "You" });
-            } else {
-              relationship = relationshipOptions[member.relationshipToHH];
+      return (
+        <li key={index}>
+          <ConfirmationItem
+            label={<>{incomeStreamName}:</>}
+            value={
+              incomeStream.incomeFrequency === 'hourly' ? (
+                <>
+                  {translateNumber(incomeAmount)} {incomeFrequency} ~{translateNumber(incomeStream.hoursPerWeek)}{' '}
+                  {hrsPerWkText} {translateNumber(annualAmount)}
+                </>
+              ) : (
+                <>
+                  {translateNumber(incomeAmount)} {incomeFrequency} {translateNumber(annualAmount)}
+                </>
+              )
             }
+          />
+        </li>
+      );
+    });
+  };
 
-            return (
-              <tr key={i}>
-                <td>{relationship}</td>
-                <td>{hasBirthMonthYear(member) ? formatBirthMonthYear(member) : '-'}</td>
-                <td>{conditionsString(member.specialConditions)}</td>
-                <td>{calculateTotalAnnualIncome(member)}</td>
-                <td>{displayHealthInsurance(member, i)}</td>
-                <td>
-                  <Link
-                    to={`/${whiteLabel}/${uuid}/step-${useStepNumber('householdData')}/${i + 1}`}
-                    state={{ routedFromConfirmationPg: true, isEditing: true }}
-                    className="edit-button-simple"
-                    aria-label={formatMessage(editHouseholdMemberAriaLabel)}
-                  >
-                    <Edit title={formatMessage(editHouseholdMemberAriaLabel)} />
-                  </Link>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+  const displayHealthInsurance = (member: HouseholdData, i: number) => {
+    const insurance = member.healthInsurance;
+    const youVsThemOptions = i === 0 ? healthInsuranceOptions.you : healthInsuranceOptions.them;
 
-      {/* Mobile card view */}
-      <div className="household-member-cards">
-        {householdData.map((member, i) => {
-          let relationship: string | FormattedMessageType;
-          if (i === 0) {
-            relationship = formatMessage({ id: "qcc.you", defaultMessage: "You" });
-          } else {
-            relationship = relationshipOptions[member.relationshipToHH];
-          }
+    if (insurance?.none === true) {
+      return <>{youVsThemOptions.none.text}</>;
+    }
 
-          return (
-            <div key={i} className="household-member-card">
-              <div className="household-member-card-header">
-                <h3 className="household-member-card-title">{relationship}</h3>
-                <Link
-                  to={`/${whiteLabel}/${uuid}/step-${useStepNumber('householdData')}/${i + 1}`}
-                  state={{ routedFromConfirmationPg: true, isEditing: true }}
-                  className="edit-button-simple"
-                  aria-label={formatMessage(editHouseholdMemberAriaLabel)}
-                >
-                  <Edit title={formatMessage(editHouseholdMemberAriaLabel)} />
-                </Link>
-              </div>
-              <div className="household-member-card-body">
-                <div className="household-member-card-field">
-                  <span className="household-member-card-label">
-                    <FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year" />
-                  </span>
-                  <span className="household-member-card-value">
-                    {hasBirthMonthYear(member) ? formatBirthMonthYear(member) : '-'}
-                  </span>
-                </div>
-                <div className="household-member-card-field">
-                  <span className="household-member-card-label">
-                    <FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions" />
-                  </span>
-                  <span className="household-member-card-value">
-                    {conditionsString(member.specialConditions)}
-                  </span>
-                </div>
-                <div className="household-member-card-field">
-                  <span className="household-member-card-label">
-                    <FormattedMessage id="confirmation.annualIncome" defaultMessage="Annual Income" />
-                  </span>
-                  <span className="household-member-card-value">
-                    {calculateTotalAnnualIncome(member)}
-                  </span>
-                </div>
-                <div className="household-member-card-field">
-                  <span className="household-member-card-label">
-                    <FormattedMessage id="confirmation.headOfHouseholdDataBlock-healthInsuranceText" defaultMessage="Health Insurance" />
-                  </span>
-                  <span className="household-member-card-value">
-                    {displayHealthInsurance(member, i)}
-                  </span>
-                </div>
-              </div>
-            </div>
+    const selectedOptions = Object.entries(insurance ?? {})
+      .filter(([, selected]) => selected === true)
+      .map(([key]) => formatMessage({ ...youVsThemOptions[key].text.props }));
+
+    return (
+      <ul>
+        {selectedOptions.map((option, idx) => (
+          <li key={idx}>{option}</li>
+        ))}
+      </ul>
+    );
+  };
+
+  return (
+    <>
+      {householdData.map((member, i) => {
+        const { hasIncome, incomeStreams } = member;
+        const relationship =
+          i === 0 ? (
+            <FormattedMessage id="qcc.hoh-text" defaultMessage="Head of Household (You)" />
+          ) : (
+            relationshipOptions[member.relationshipToHH]
           );
-        })}
-      </div>
-    </div>
+
+        return (
+          <ConfirmationBlock
+            icon={<Head title={formatMessage({ id: 'confirmation.hhMember.icon-AL', defaultMessage: 'household member' })} />}
+            title={relationship}
+            editAriaLabel={{ id: 'confirmation.hhMember.edit-AL', defaultMessage: 'edit household member' }}
+            stepName="householdData"
+            editUrlEnding={String(i + 1)}
+            key={i}
+          >
+            <ConfirmationItem
+              label={<FormattedMessage id="questions.age-inputLabel" defaultMessage="Age:" />}
+              value={translateNumber(calcAge(member))}
+            />
+            {hasBirthMonthYear(member) && (
+              <ConfirmationItem
+                label={<FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year:" />}
+                value={formatBirthMonthYear(member)}
+              />
+            )}
+            <ConfirmationItem
+              label={
+                <FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions:" />
+              }
+              value={conditionsDisplay(member)}
+            />
+            <ConfirmationItem
+              label={<FormattedMessage id="confirmation.headOfHouseholdDataBlock-incomeLabel" defaultMessage="Income:" />}
+              value={
+                hasIncome && incomeStreams.length > 0 ? (
+                  <ul>{listAllIncomeStreams(incomeStreams)}</ul>
+                ) : (
+                  <FormattedMessage id="confirmation.noIncome" defaultMessage="None" />
+                )
+              }
+            />
+            {!isEnergyCalculator && (
+              <ConfirmationItem
+                label={
+                  <FormattedMessage
+                    id="confirmation.headOfHouseholdDataBlock-healthInsuranceText"
+                    defaultMessage="Health Insurance: "
+                  />
+                }
+                value={displayHealthInsurance(member, i)}
+              />
+            )}
+          </ConfirmationBlock>
+        );
+      })}
+    </>
   );
 };
 

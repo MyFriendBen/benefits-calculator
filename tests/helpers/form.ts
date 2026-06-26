@@ -5,8 +5,7 @@
  * dropdowns, text fields, checkboxes, radio buttons, etc.
  */
 
-import { Page, expect } from '@playwright/test';
-import { OPTION } from './selectors';
+import { Page } from '@playwright/test';
 
 /**
  * Selects an option from a dropdown menu
@@ -64,10 +63,10 @@ export async function UncheckCheckbox(page: Page, labelText: string): Promise<vo
 }
 
 /**
- * Selects birth month and year with improved stability for flaky dropdowns
+ * Selects birth month and fills birth year text field
  * @param page - Playwright page instance
  * @param month - Month to select (e.g., 'January')
- * @param year - Year to select (e.g., '1990')
+ * @param year - Year to enter (e.g., '1990')
  */
 export async function selectDate(page: Page, month: string, year: string): Promise<void> {
   const isCI = process.env.CI === 'true';
@@ -84,20 +83,13 @@ export async function selectDate(page: Page, month: string, year: string): Promi
           console.log(`[FORM] ${context} selection attempt ${attempt}/${maxRetries}`);
         }
 
-        // Click the dropdown button with more specific targeting to avoid conflicts
-        let button;
-        if (buttonName === 'Open') {
-          // For birth year dropdown, be more specific to avoid hamburger menu conflict
-          button = page.locator('.age-input-container').getByRole('button', { name: 'Open' }).first();
-        } else {
-          button = page.getByRole('button', { name: buttonName });
-        }
+        const button = page.getByRole('button', { name: buttonName });
         await button.waitFor({ state: 'visible', timeout: renderTimeout });
         await button.click();
 
         // Wait for listbox to appear
         const listbox = page.locator('[role="listbox"]');
-        await expect(listbox).toBeVisible({ timeout: renderTimeout });
+        await listbox.waitFor({ state: 'visible', timeout: renderTimeout });
 
         // Wait for options to be available
         await listbox.locator('[role="option"]').first().waitFor({ state: 'visible', timeout: renderTimeout });
@@ -112,13 +104,13 @@ export async function selectDate(page: Page, month: string, year: string): Promi
         await option.click({ timeout: optionTimeout });
 
         // Verify selection by checking dropdown closes
-        await expect(listbox).not.toBeVisible({ timeout: 5000 });
+        await listbox.waitFor({ state: 'hidden', timeout: 5000 });
 
         return; // Success
       } catch (error) {
         if (attempt === maxRetries) {
           throw new Error(
-            `Failed to select ${optionText} from ${buttonName} after ${maxRetries} attempts: ${error.message}`,
+            `Failed to select ${optionText} from ${buttonName} after ${maxRetries} attempts: ${(error as Error).message}`,
           );
         }
 
@@ -128,18 +120,47 @@ export async function selectDate(page: Page, month: string, year: string): Promi
     }
   };
 
-  // Select month and year
+  // Select month; fill year via text input (birth year is now a NumericFormat text field)
   await selectDropdownOption('Birth Month', month, 'Month');
-  await selectDropdownOption('Open', year, 'Year');
+  await page.getByRole('textbox', { name: 'Birth Year' }).fill(year);
 }
 /**
- * Selects an income type
+ * Clicks a MUI Select and waits for the listbox + desired option to appear before clicking.
+ */
+async function selectMuiOption(page: Page, selectId: string, optionText: string): Promise<void> {
+  const isCI = process.env.CI === 'true';
+  const timeout = isCI ? 20000 : 10000;
+
+  await page.locator(selectId).click();
+  const listbox = page.locator('[role="listbox"]');
+  await listbox.waitFor({ state: 'visible', timeout });
+  const option = listbox.locator('[role="option"]').filter({ hasText: optionText }).first();
+  await option.waitFor({ state: 'visible', timeout });
+  await option.click();
+  await listbox.waitFor({ state: 'hidden', timeout: 5000 });
+}
+
+/**
+ * Selects an income category (the "Income Type" grouping dropdown)
  * @param page - Playwright page instance
- * @param incomeType - Income type to select
+ * @param incomeCategory - Category label to select (e.g. "Work & Self-Employment Income")
+ * @param index - Index of the income stream row (default 0)
+ */
+export async function selectIncomeCategory(page: Page, incomeCategory: string, index = 0): Promise<void> {
+  await selectMuiOption(page, `#income-category-select-${index}`, incomeCategory);
+}
+
+/**
+ * Selects an income source (the "Income Source" dropdown, enabled after category is chosen)
+ * @param page - Playwright page instance
+ * @param incomeType - Income source label to select (e.g. "Wages, salaries, or tips")
  */
 export async function selectIncomeType(page: Page, incomeType: string): Promise<void> {
-  await page.getByRole('button', { name: 'Income Type' }).click();
-  await page.getByRole(OPTION.byName(incomeType).role, { name: OPTION.byName(incomeType).name }).click();
+  const isCI = process.env.CI === 'true';
+  const timeout = isCI ? 20000 : 10000;
+  // Wait for the source dropdown to be enabled (it's disabled until a category is selected)
+  await page.locator('#income-source-select-0:not([aria-disabled="true"])').waitFor({ state: 'attached', timeout });
+  await selectMuiOption(page, '#income-source-select-0', incomeType);
 }
 
 /**
@@ -148,16 +169,5 @@ export async function selectIncomeType(page: Page, incomeType: string): Promise<
  * @param frequency - Frequency to select
  */
 export async function selectFrequency(page: Page, frequency: string): Promise<void> {
-  await page.getByRole('button', { name: 'Frequency' }).click();
-  await page.getByRole(OPTION.byName(frequency).role, { name: OPTION.byName(frequency).name }).click();
-}
-
-/**
- * Selects an expense type
- * @param page - Playwright page instance
- * @param expenseType - Expense type to select
- */
-export async function selectExpenseType(page: Page, expenseType: string): Promise<void> {
-  await page.getByRole('button', { name: 'Expense Type' }).click();
-  await page.getByRole(OPTION.byName(expenseType).role, { name: OPTION.byName(expenseType).name }).click();
+  await selectMuiOption(page, '#income-frequency-select-0', frequency);
 }

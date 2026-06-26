@@ -37,72 +37,9 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     request_language_code: languageCode,
     energy_calculator: getEnergyCalculatorFormDataBody(formData.energyCalculator),
     has_benefits: formData.hasBenefits,
-    has_acp: formData.benefits.acp ?? null,
-    has_andcs: formData.benefits.andcs ?? null,
-    has_coeitc: formData.benefits.coeitc ?? null,
-    has_chs: formData.benefits.coheadstart ?? null,
-    has_cpcr: formData.benefits.coPropTaxRentHeatCreditRebate ?? null,
-    has_ctc: formData.benefits.ctc ?? null,
-    has_cdhcs: formData.benefits.dentallowincseniors ?? null,
-    has_dpp: formData.benefits.denverpresc ?? null,
-    has_ede: formData.benefits.ede ?? null,
-    has_eitc: formData.benefits.eitc ?? null,
-    has_il_eitc: formData.benefits.il_eitc ?? null,
-    has_il_ctc: formData.benefits.il_ctc ?? null,
-    has_il_transit_reduced_fare: formData.benefits.il_transit_reduced_fare ?? null,
-    has_il_bap: formData.benefits.il_bap ?? null,
-    has_il_hbwd: formData.benefits.il_hbwd ?? null,
-    has_csfp: formData.benefits.csfp ?? null,
-    has_ccap: formData.benefits.ccap ?? null,
-    has_erc: null,
-    has_lifeline: formData.benefits.lifeline ?? null,
-    has_leap: formData.benefits.leap ?? null,
-    has_il_liheap: formData.benefits.il_liheap ?? null,
-    has_mydenver: formData.benefits.mydenver ?? null,
-    has_nslp: formData.benefits.nslp ?? null,
-    has_oap: formData.benefits.oap ?? null,
-    has_pell_grant: formData.benefits.pell ?? null,
-    has_nfp: formData.benefits.nfp ?? null,
-    has_rtdlive: formData.benefits.rtdlive ?? null,
-    has_snap: formData.benefits.snap ?? null,
-    has_sunbucks: formData.benefits.sunbucks ?? null,
-    has_ssdi: formData.benefits.ssdi ?? null,
-    has_ssi: formData.benefits.ssi ?? null,
-    has_cowap: formData.benefits.cowap ?? null,
-    has_ubp: formData.benefits.ubp ?? null,
-    has_tanf: formData.benefits.tanf ?? null,
-    has_wic: formData.benefits.wic ?? null,
-    has_upk: formData.benefits.upk ?? null,
-    has_coctc: formData.benefits.coctc ?? null,
-    has_fatc: formData.benefits.fatc ?? null,
-    has_section_8: formData.benefits.section_8 ?? null,
-    has_chp: formData.benefits.chp ?? null,
-    has_medicaid: formData.benefits.medicaid ?? null,
-    has_nc_medicare_savings: formData.benefits.nc_medicare_savings ?? null,
-    has_nc_lieap: formData.benefits.nc_lieap ?? null,
-    has_ncwap: formData.benefits.ncwap ?? null,
-    has_nccip: formData.benefits.nccip ?? null,
-    has_ccdf: formData.benefits.ccdf ?? null,
-    has_aca: formData.benefits.aca ?? null,
-    has_ma_eaedc: formData.benefits.ma_eaedc ?? null,
-    has_ma_ssp: formData.benefits.ma_ssp ?? null,
-    has_ma_mbta: formData.benefits.ma_mbta ?? null,
-    has_ma_maeitc: formData.benefits.ma_maeitc ?? null,
-    has_ma_macfc: formData.benefits.ma_macfc ?? null,
-    has_ma_homebridge: formData.benefits.ma_homebridge ?? null,
-    has_ma_dhsp_afterschool: formData.benefits.ma_dhsp_afterschool ?? null,
-    has_ma_door_to_door: formData.benefits.ma_door_to_door ?? null,
-    has_head_start: formData.benefits.head_start ?? null,
-    has_early_head_start: formData.benefits.early_head_start ?? null,
-    has_co_andso: formData.benefits.co_andso ?? null,
-    has_co_care: formData.benefits.co_care ?? null,
-    has_project_cope: formData.benefits.project_cope ?? null,
-    has_cesn_heap: formData.benefits.cesn_heap ?? null,
-    has_cfhc: formData.benefits.cfhc ?? null,
-    has_shitc: formData.benefits.shitc ?? null,
-    has_tx_dart: formData.benefits.tx_dart ?? null,
-    has_harris_county_rides: formData.benefits.harris_county_rides ?? null,
-    has_ccs: formData.benefits.ccs ?? null,
+    // Sent as a list of `name_abbreviated` strings; the backend resolves each to
+    // a Program in this white label.
+    current_benefits: Array.from(formData.benefits),
     referral_source: formData.referralSource ?? null,
     referrer_code: formData.immutableReferrer ?? null,
     path: formData.path ?? null,
@@ -117,6 +54,8 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     needs_legal_services: formData.acuteHHConditions.legalServices ?? null,
     needs_college_savings: formData.acuteHHConditions.savings ?? null,
     needs_veteran_services: formData.acuteHHConditions.veteranServices ?? null,
+    needs_disability_resources: formData.acuteHHConditions.disabilityResources ?? null,
+    needs_aging_resources: formData.acuteHHConditions.agingResources ?? null,
     utm_id: formData.utm?.id ?? null,
     utm_source: formData.utm?.source ?? null,
     utm_medium: formData.utm?.medium ?? null,
@@ -178,10 +117,14 @@ const getHouseholdMemberBody = (householdMemberData: HouseholdData): ApiHousehol
   return {
     frontend_id: householdMemberData.frontendId,
     age: householdMemberData.age ?? null,
-    birth_year: householdMemberData.birthYear ?? null,
-    birth_month: householdMemberData.birthMonth ?? null,
+    birth_year: householdMemberData.birthYear || null,
+    birth_month: householdMemberData.birthMonth || null,
     relationship: householdMemberData.relationshipToHH,
     student: householdMemberData.conditions.student ?? null,
+    student_full_time: householdMemberData.studentEligibility?.studentFullTime ?? null,
+    student_job_training_program: householdMemberData.studentEligibility?.studentJobTrainingProgram ?? null,
+    student_has_work_study: householdMemberData.studentEligibility?.studentHasWorkStudy ?? null,
+    student_works_20_plus_hrs: householdMemberData.studentEligibility?.studentWorks20PlusHrs ?? null,
     pregnant: householdMemberData.conditions.pregnant ?? null,
     visually_impaired: householdMemberData.conditions.blindOrVisuallyImpaired ?? null,
     disabled: householdMemberData.conditions.disabled ?? null,
@@ -197,21 +140,23 @@ const getIncomeStreamsBodies = (householdMemberData: HouseholdData): ApiIncome[]
   return householdMemberData.incomeStreams.map((incomeStream) => {
     return {
       type: incomeStream.incomeStreamName,
-      amount: Number(incomeStream.incomeAmount),
+      category: incomeStream.incomeCategory,
+      amount: incomeStream.incomeAmount,
       frequency: incomeStream.incomeFrequency,
-      hours_worked: Number(incomeStream.hoursPerWeek) ?? null,
+      // 0 is the default for non-hourly streams; send null so the API ignores it
+      hours_worked: incomeStream.hoursPerWeek === 0 ? null : incomeStream.hoursPerWeek,
     };
   });
 };
 
 const getExpensesBodies = (formData: FormData): ApiExpense[] => {
-  return formData.expenses.map((expense) => {
-    return {
+  return formData.expenses
+    .filter((expense) => expense.expenseAmount > 0)
+    .map((expense) => ({
       type: expense.expenseSourceName,
-      amount: expense.expenseAmount === '' ? 0 : Number(expense.expenseAmount),
-      frequency: 'monthly',
-    };
-  });
+      amount: expense.expenseAmount,
+      frequency: expense.expenseFrequency,
+    }));
 };
 
 type ApiUserBody = ApiUser & ApiUserWriteOnly;
@@ -241,11 +186,12 @@ export default function useScreenApi() {
   const updateFormData = useUpdateFormData();
 
   return {
-    fetchScreen: async () => {
-      if (uuid === undefined) {
+    fetchScreen: async (overrideUuid?: string) => {
+      const targetUuid = overrideUuid ?? uuid;
+      if (targetUuid === undefined) {
         return;
       }
-      const response = await getScreen(uuid);
+      const response = await getScreen(targetUuid);
       updateFormData(response);
       return response;
     },

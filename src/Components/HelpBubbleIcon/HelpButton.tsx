@@ -15,7 +15,7 @@ const HelpButton = ({ className, children }: HelpButtonProps) => {
     setShowHelpText((setShow) => !setShow);
   };
   const translatedAriaLabel = intl.formatMessage({ id: 'helpButton.ariaText', defaultMessage: 'help button' });
-  const alwaysOpen = getReferrer('featureFlags').includes('help_bubble_always_open');
+  const alwaysOpen = getReferrer('uiOptions').includes('help_bubble_always_open');
   const isOpen = showHelpText || alwaysOpen;
 
   return (

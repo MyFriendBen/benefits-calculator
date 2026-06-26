@@ -11,15 +11,14 @@ import {
   selectDropdownOption,
   fillTextField,
   checkCheckbox,
-  selectRadio,
   selectDate,
+  selectIncomeCategory,
   selectIncomeType,
   selectFrequency,
-  selectExpenseType,
 } from '../form';
-import { FORM_INPUTS, BUTTONS, DROPDOWN } from '../selectors';
+import { FORM_INPUTS, BUTTONS, DROPDOWN, BASIC_INFO_PAGE } from '../selectors';
 import { URL_PATTERNS } from '../utils/constants';
-import { FlowResult, PrimaryUserInfo, HouseholdMemberInfo, ExpenseInfo } from './types';
+import { FlowResult, PrimaryUserInfo, HouseholdMemberInfo, ExpenseInfo, BasicInfoMember } from './types';
 
 /**
  * Completes the state selection step
@@ -125,18 +124,68 @@ export async function completeHouseholdSize(page: Page, householdSize: string): 
 }
 
 /**
+ * Completes the basic info page (step-5/0) for multi-member households.
+ * Fills birth month/year for all members and relationship for non-primary members.
+ * @param page - Playwright page instance
+ * @param members - Array of basic info for each household member (index 0 = primary)
+ * @returns Promise with flow result
+ */
+export async function completeBasicInfoPage(page: Page, members: BasicInfoMember[]): Promise<FlowResult> {
+  try {
+    await verifyCurrentUrl(page, URL_PATTERNS.HOUSEHOLD_MEMBER);
+
+    for (let i = 0; i < members.length; i++) {
+      const member = members[i];
+
+      // Select birth month via the indexed MUI Select
+      const birthMonthSelect = page.locator(BASIC_INFO_PAGE.birthMonthSelect(i));
+      await expect(birthMonthSelect).toBeVisible();
+      await birthMonthSelect.click();
+      await page.getByRole('option', { name: member.birthMonth, exact: true }).click();
+
+      // Fill birth year via the indexed text input
+      const birthYearInput = page.locator(BASIC_INFO_PAGE.birthYearInput(i));
+      await expect(birthYearInput).toBeVisible();
+      await birthYearInput.fill(member.birthYear);
+
+      // Select relationship for non-primary members
+      if (i > 0 && member.relationship) {
+        const relationshipSelect = page.locator(BASIC_INFO_PAGE.relationshipSelect(i));
+        await expect(relationshipSelect).toBeVisible();
+        await relationshipSelect.click();
+        await page.getByRole('option', { name: member.relationship, exact: true }).click();
+      }
+    }
+
+    await clickContinue(page);
+    return { success: true, step: 'basic-info-page' };
+  } catch (error) {
+    return {
+      success: false,
+      step: 'basic-info-page',
+      error: error as Error,
+    };
+  }
+}
+
+/**
  * Completes primary user information
  * @param page - Playwright page instance
  * @param userInfo - Primary user information
  * @returns Promise with flow result
  */
-export async function completePrimaryUserInfo(page: Page, userInfo: PrimaryUserInfo): Promise<FlowResult> {
+export async function completePrimaryUserInfo(
+  page: Page,
+  userInfo: PrimaryUserInfo,
+  skipBasicInfo = false,
+): Promise<FlowResult> {
   try {
     await verifyCurrentUrl(page, URL_PATTERNS.HOUSEHOLD_MEMBER);
 
-    // Enter birth date
-    // Assuming selectDate handles its own internal waits.
-    await selectDate(page, userInfo.birthMonth, userInfo.birthYear);
+    // Enter birth date — skipped when basic info was already collected on step-5/0
+    if (!skipBasicInfo) {
+      await selectDate(page, userInfo.birthMonth, userInfo.birthYear);
+    }
 
     // Handle health insurance
     const healthInsuranceButtonLocator = page.getByRole('button', { name: "I don't have or know if I" });
@@ -144,28 +193,22 @@ export async function completePrimaryUserInfo(page: Page, userInfo: PrimaryUserI
     await healthInsuranceButtonLocator.click();
 
     // Handle income
-    if (userInfo.hasIncome && userInfo.income) {
-      const yesRadioLocator = page.getByRole(FORM_INPUTS.YES_RADIO.role, { name: FORM_INPUTS.YES_RADIO.name });
-      await expect(yesRadioLocator).toBeVisible();
-      // selectRadio will perform the click, ensure it handles actionability.
-      await selectRadio(page, FORM_INPUTS.YES_RADIO.name);
+    if (userInfo.income) {
+      const incomeCategoryDropdownLocator = page.locator(DROPDOWN.INCOME_CATEGORY);
+      await expect(incomeCategoryDropdownLocator).toBeVisible();
+      await selectIncomeCategory(page, userInfo.income.category);
 
-      // Wait for dropdown triggers to be visible before calling helpers
-      const incomeTypeDropdownTriggerLocator = page.getByRole(DROPDOWN.INCOME_TYPE.role, {
-        name: DROPDOWN.INCOME_TYPE.name,
-      });
-      await expect(incomeTypeDropdownTriggerLocator).toBeVisible();
+      const incomeTypeDropdownLocator = page.locator(DROPDOWN.INCOME_TYPE);
+      await expect(incomeTypeDropdownLocator).toBeVisible();
       await selectIncomeType(page, userInfo.income.type);
 
-      const frequencyDropdownTriggerLocator = page.getByRole(DROPDOWN.FREQUENCY.role, {
-        name: DROPDOWN.FREQUENCY.name,
-      });
-      await expect(frequencyDropdownTriggerLocator).toBeVisible();
+      const frequencyDropdownLocator = page.locator(DROPDOWN.FREQUENCY);
+      await expect(frequencyDropdownLocator).toBeVisible();
       await selectFrequency(page, userInfo.income.frequency);
 
-      const amountInputLocator = page.getByRole(FORM_INPUTS.AMOUNT.role, { name: FORM_INPUTS.AMOUNT.name });
+      const amountInputLocator = page.locator(FORM_INPUTS.AMOUNT);
       await expect(amountInputLocator).toBeVisible();
-      await fillTextField(page, FORM_INPUTS.AMOUNT.name, userInfo.income.amount);
+      await amountInputLocator.fill(userInfo.income.amount);
     }
 
     const continueButtonLocator = page.getByRole(BUTTONS.CONTINUE.role, { name: BUTTONS.CONTINUE.name });
@@ -189,32 +232,29 @@ export async function completePrimaryUserInfo(page: Page, userInfo: PrimaryUserI
  * @param memberInfo - Household member information
  * @returns Promise with flow result
  */
-export async function completeHouseholdMemberInfo(page: Page, memberInfo: HouseholdMemberInfo): Promise<FlowResult> {
+export async function completeHouseholdMemberInfo(
+  page: Page,
+  memberInfo: HouseholdMemberInfo,
+  skipBasicInfo = false,
+): Promise<FlowResult> {
   try {
     await verifyCurrentUrl(page, URL_PATTERNS.HOUSEHOLD_MEMBER);
 
-    // Enter birth date
-    await selectDate(page, memberInfo.birthMonth, memberInfo.birthYear);
-
-    // Select relationship - use exact matching to avoid ambiguity with similar options
-    await selectDropdownOption(page, FORM_INPUTS.RELATIONSHIP_SELECT, memberInfo.relationship, true);
+    // Enter birth date and relationship — skipped when basic info was already collected on step-5/0
+    if (!skipBasicInfo) {
+      await selectDate(page, memberInfo.birthMonth, memberInfo.birthYear);
+      await selectDropdownOption(page, FORM_INPUTS.RELATIONSHIP_SELECT, memberInfo.relationship, true);
+    }
 
     // Handle health insurance
     await page.getByRole('button', { name: "They don't have or know if" }).click();
 
     // Handle income if applicable
-    if (memberInfo.hasIncome && memberInfo.income) {
-      await selectRadio(page, FORM_INPUTS.YES_RADIO.name);
+    if (memberInfo.income) {
+      await selectIncomeCategory(page, memberInfo.income.category);
       await selectIncomeType(page, memberInfo.income.type);
       await selectFrequency(page, memberInfo.income.frequency);
-      await fillTextField(page, FORM_INPUTS.AMOUNT.name, memberInfo.income.amount);
-    } else {
-      // Check if we need to select "No" for income
-      const noRadio = page.getByRole('radio', { name: 'No' });
-      const isNoRadioVisible = await noRadio.isVisible().catch(() => false);
-      if (isNoRadioVisible) {
-        await selectRadio(page, 'No');
-      }
+      await page.locator(FORM_INPUTS.AMOUNT).fill(memberInfo.income.amount);
     }
 
     await clickContinue(page);
@@ -238,16 +278,15 @@ export async function completeExpenses(page: Page, expenseInfo: ExpenseInfo): Pr
   try {
     await verifyCurrentUrl(page, URL_PATTERNS.EXPENSES);
 
-    if (expenseInfo.hasExpenses) {
-      await selectRadio(page, FORM_INPUTS.YES_RADIO.name);
-      await selectExpenseType(page, expenseInfo.type);
-      await fillTextField(page, FORM_INPUTS.AMOUNT.name, expenseInfo.amount);
-    } else {
-      // Handle the case where hasExpenses is false
-      const noRadio = page.getByRole('radio', { name: 'No' });
-      const isNoRadioVisible = await noRadio.isVisible().catch(() => false);
-      if (isNoRadioVisible) {
-        await selectRadio(page, 'No');
+    if (expenseInfo.amount !== '0' && expenseInfo.amount !== '') {
+      // Find the expense row with the matching expense type label and fill in the amount
+      const row = page.locator('.expense-row', { has: page.locator(`label:text("${expenseInfo.type}")`) });
+      const amountInput = row.locator('input[inputmode="numeric"]');
+      await amountInput.fill(expenseInfo.amount);
+
+      if (expenseInfo.frequency === 'yearly') {
+        const frequencyBtn = row.getByRole('radio', { name: 'Yearly' });
+        await frequencyBtn.click();
       }
     }
 
@@ -291,6 +330,9 @@ export async function completeAssets(page: Page, assetAmount: string): Promise<F
 export async function completePublicBenefits(page: Page): Promise<FlowResult> {
   try {
     await verifyCurrentUrl(page, URL_PATTERNS.PUBLIC_BENEFITS);
+    // Continue is disabled until the program fetch resolves; wait for the
+    // has-benefits loading spinner to disappear before clicking.
+    await expect(page.locator('.hb-loading')).toBeHidden();
     await clickContinue(page);
     return { success: true, step: 'public-benefits' };
   } catch (error) {
@@ -354,9 +396,9 @@ export async function completeReferralSource(page: Page, referralSource: string)
  * @param page - Playwright page instance
  * @returns Promise with flow result
  */
-export async function completeAdditionalInfo(page: Page): Promise<FlowResult> {
+export async function completeAdditionalInfo(page: Page, urlPattern: RegExp = URL_PATTERNS.ADDITIONAL_INFO): Promise<FlowResult> {
   try {
-    await verifyCurrentUrl(page, URL_PATTERNS.ADDITIONAL_INFO);
+    await verifyCurrentUrl(page, urlPattern);
     await clickContinue(page);
     return { success: true, step: 'additional-info' };
   } catch (error) {

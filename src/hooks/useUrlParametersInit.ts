@@ -1,0 +1,52 @@
+import { useEffect, useContext, useRef } from 'react';
+import { useSearchParams, useLocation } from 'react-router-dom';
+import { Context } from '../Components/Wrapper/Wrapper';
+
+/**
+ * Initializes URL parameters on mount only.
+ * Parses referrer, utm_source, test, externalid, and path from URL query params
+ * and merges them with existing form data.
+ *
+ * Referrer priority: stored referrer -> referrer param -> utm_source param -> ''
+ */
+export const useUrlParametersInit = () => {
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const { setFormData } = useContext(Context);
+  const initializedRef = useRef(false);
+
+  useEffect(() => {
+    // Only run once on mount to avoid re-initializing on every render
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    // Capture URL params at initialization time
+    const urlSearchParams = location.search;
+    const referrerParam = searchParams.get('referrer');
+    const utmParam = searchParams.get('utm_source');
+    const testParam = searchParams.get('test') === 'true';
+    const externalIdParam = searchParams.get('externalid');
+    const pathParam = searchParams.get('path') ?? 'default';
+
+    // Use functional update to avoid stale closure and satisfy exhaustive-deps
+    setFormData((currentFormData) => {
+      // referrer priority = stored referrer -> referrer param -> utm_source param -> ''
+      const referrer = currentFormData.immutableReferrer ?? referrerParam ?? utmParam ?? '';
+      const referrerSource = currentFormData.referralSource || referrer;
+      const isTest = currentFormData.isTest || testParam;
+      const externalId = currentFormData.externalID ?? externalIdParam ?? undefined;
+      const path = currentFormData.path ?? pathParam;
+
+      return {
+        ...currentFormData,
+        isTest: isTest,
+        externalID: externalId,
+        referralSource: referrerSource,
+        immutableReferrer: referrer,
+        path: path,
+        urlSearchParams: urlSearchParams,
+      };
+    });
+  // eslint-disable-next-line
+  }, []); // Intentionally empty - this should only run once on mount
+};

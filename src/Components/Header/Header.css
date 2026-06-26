@@ -3,6 +3,7 @@
   display: flex;
   align-items: center;
   text-decoration: none;
+  color: inherit;
 }
 
 .logo-container {
@@ -49,6 +50,8 @@
   background-color: #ffffff;
   box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14),
     0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  position: relative;
+  z-index: 1;
 }
 
 .MuiPaper-root.header-full-width-container.frozen {
@@ -138,8 +141,16 @@
   top: 2px !important;
 }
 
-#select-language:focus-visible {
-  outline: -webkit-focus-ring-color auto 1px;
+#select-language:focus-visible,
+#select-language .MuiSelect-select:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.white-header #select-language:focus-visible,
+.white-header #select-language .MuiSelect-select:focus-visible {
+  outline: 2px solid var(--primary-color);
 }
 
 .header-frozen-message-container {

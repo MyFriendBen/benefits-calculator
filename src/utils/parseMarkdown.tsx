@@ -1,5 +1,13 @@
 import React from 'react';
 
+// Only allow safe link protocols in markdown links. Blocks javascript:, data:,
+// etc. so untrusted content (e.g. AI assistant output) can't inject executable
+// hrefs. Whitespace/control chars are stripped first so "java\nscript:" can't slip through.
+const SAFE_URL_PROTOCOL = /^(https?:\/\/|mailto:)/i;
+
+const isSafeUrl = (url: string): boolean =>
+  SAFE_URL_PROTOCOL.test(url.replace(/[\s\u0000-\u001f]/g, ''));
+
 /**
  * Parses simple markdown-like syntax and converts to React elements
  *
@@ -64,17 +72,24 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
           }
           const linkIdx = parseInt(linkIdxString, 10);
           const [, linkText, url] = linkMatches[linkIdx];
-          parts.push(
-            <a
-              key={`${lineIndex}-link-${keyCounter++}`}
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: primaryColor, textDecoration: 'underline' }}
-            >
-              {linkText}
-            </a>
-          );
+          if (isSafeUrl(url)) {
+            parts.push(
+              <a
+                key={`${lineIndex}-link-${keyCounter++}`}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: primaryColor, textDecoration: 'underline' }}
+              >
+                {linkText}
+              </a>
+            );
+          } else {
+            // Unsafe protocol (e.g. javascript:) — render the label as plain text, no href.
+            parts.push(
+              inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{linkText}</strong> : linkText,
+            );
+          }
           remaining = remaining.slice(placeholderIndex + placeholder.length);
         }
       }
