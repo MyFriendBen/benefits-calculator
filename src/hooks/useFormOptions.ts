@@ -24,15 +24,22 @@ export function useFormOptions(whiteLabel: string) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!whiteLabel) return;
+    if (!whiteLabel) {
+      setLoading(false);
+      return;
+    }
 
     const apiKey = 'Token ' + process.env.REACT_APP_API_KEY;
+    const controller = new AbortController();
+
+    setLoading(true);
 
     fetch(`${domain}/api/${whiteLabel}/form-options/`, {
       headers: {
         Accept: 'application/json',
         Authorization: apiKey,
       },
+      signal: controller.signal,
     })
       .then((res) => {
         if (!res.ok) throw new Error(`Failed to fetch form options: ${res.status}`);
@@ -43,9 +50,13 @@ export function useFormOptions(whiteLabel: string) {
         setLoading(false);
       })
       .catch((err: Error) => {
+        // Ignore aborts from a superseded white label / unmount.
+        if (err.name === 'AbortError') return;
         setError(err);
         setLoading(false);
       });
+
+    return () => controller.abort();
   }, [whiteLabel]);
 
   return { formOptions, loading, error };
