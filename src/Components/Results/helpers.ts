@@ -6,7 +6,7 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js';
  * Keys must be lower case. Values are kebab-case Lucide icon names.
  */
 export const ICON_NAME_MAP: Record<string, string> = {
-  aging: 'circle-dot', // placeholder — mapping pending
+  aging: 'tree-deciduous',
   baby_supplies: 'baby',
   behavioral_health: 'message-circle-heart',
   cash: 'circle-dollar-sign',
@@ -32,6 +32,7 @@ export const ICON_NAME_MAP: Record<string, string> = {
   transportation: 'bus-front',
   triangle_alert: 'triangle-alert',
   veteran_services: 'shield',
+  youth_development: 'shapes',
   default: 'circle-dot',
 };
 

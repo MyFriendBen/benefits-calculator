@@ -10,7 +10,7 @@ import { ReactComponent as HeartRate } from '../EnergyCalculator/Icons/HeartRate
 import { Language } from '../../Assets/languageOptions';
 import { Icon } from '../Icon/Icon';
 
-const OPTION_CARD_ICON_MAP: Record<string, string> = {
+export const OPTION_CARD_ICON_MAP: Record<string, string> = {
   // Health Insurance
   None: 'ban',
   Employer: 'briefcase',
@@ -38,8 +38,8 @@ const OPTION_CARD_ICON_MAP: Record<string, string> = {
   Legal_services: 'scale',
   Savings: 'piggy-bank',
   Military: 'shield',
-  Aging: 'circle-dot', // placeholder — mapping pending
-  Youth_development: 'circle-dot', // placeholder — mapping pending
+  Aging: 'tree-deciduous',
+  Youth_development: 'shapes',
 };
 
 
