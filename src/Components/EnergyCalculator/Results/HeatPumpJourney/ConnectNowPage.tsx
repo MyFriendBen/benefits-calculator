@@ -25,11 +25,12 @@ const EXPAND_SEARCH_URL = 'https://app.hvacree.net/LoveElectric' as const;
  * Regenerate the page images if this PDF changes — see the README.
  */
 export const CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL =
-  `${process.env.PUBLIC_URL}/documents/heat-pump-journey/how-to-find-hvac-contractor.pdf` as const;
+  `${process.env.PUBLIC_URL}/documents/heat-pump-journey/ElectrifyNow_heatpumpcontractor.pdf` as const;
 
 export const CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES = [
   `${process.env.PUBLIC_URL}/documents/heat-pump-journey/page-1.png`,
   `${process.env.PUBLIC_URL}/documents/heat-pump-journey/page-2.png`,
+  `${process.env.PUBLIC_URL}/documents/heat-pump-journey/page-3.png`,
 ] as const;
 
 export default function ConnectNowPage() {
@@ -128,7 +129,7 @@ export default function ConnectNowPage() {
         <Typography id={pdfSectionHeadingId} variant="h2" component="h2" className="connect-now-pdf-heading">
           <FormattedMessage
             id="energyCalculator.connectNow.pdfSectionHeading"
-            defaultMessage="How to find a good HVAC contractor, from our friends at Electrify Now."
+            defaultMessage="How to find a good HVAC contractor, from Electrify Now."
           />
         </Typography>
         <PagedDocumentViewer

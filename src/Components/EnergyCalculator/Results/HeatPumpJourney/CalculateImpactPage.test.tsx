@@ -15,9 +15,7 @@ jest.mock('../../../Common/usePageTitle', () => ({
 }));
 
 jest.mock('../../../Common/TrackedOutboundLink', () => ({
-  TrackedOutboundLink: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  ),
+  TrackedOutboundLink: ({ children, href }) => <a href={href}>{children}</a>,
 }));
 
 jest.mock('../../Icons/Coin.svg', () => ({
@@ -28,8 +26,46 @@ jest.mock('../../../Config/configHook', () => ({
   useFeatureFlag: jest.fn(),
 }));
 
-jest.mock('./fetchRemImpact', () => ({
-  fetchRemImpact: jest.fn(),
+jest.mock('./fetchRemImpact', () => {
+  class RemAddressNotSupportedError extends Error {
+    constructor() {
+      super('Address not supported');
+      this.name = 'RemAddressNotSupportedError';
+    }
+  }
+  return { fetchRemImpact: jest.fn(), RemAddressNotSupportedError };
+});
+
+jest.mock('../../../Common/GooglePlacesAddressInput', () => ({
+  GooglePlacesAddressInput: ({
+    id,
+    value,
+    onChange,
+    error,
+    helperText,
+    placeholder,
+    inputProps,
+  }: {
+    id?: string;
+    value: string;
+    onChange: (v: string) => void;
+    error?: boolean;
+    helperText?: React.ReactNode;
+    placeholder?: string;
+    inputProps?: Record<string, string>;
+  }) => (
+    <>
+      <input
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        aria-invalid={error}
+        {...inputProps}
+      />
+      {helperText && <span>{helperText}</span>}
+    </>
+  ),
 }));
 
 const MOCK_RESULT = {
@@ -89,12 +125,10 @@ describe('CalculateImpactPage', () => {
       expect(screen.getByTestId('coin-icon')).toBeInTheDocument();
     });
 
-    it('renders the intro paragraph with Rewiring America link', () => {
+    it('renders the Rewiring America intro paragraph', () => {
       renderPage();
-      expect(screen.getByRole('link', { name: /rewiring america/i })).toHaveAttribute(
-        'href',
-        'https://www.rewiringamerica.org',
-      );
+      expect(screen.getByText(/this data modeling is by/i)).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /rewiring america/i })).toBeInTheDocument();
     });
 
     it('renders the BACK TO RESULTS button', () => {
@@ -110,12 +144,13 @@ describe('CalculateImpactPage', () => {
       expect(screen.getByLabelText(/water heating type/i)).toBeInTheDocument();
     });
 
-    it('renders the Select upgrade section with all 4 radio options', () => {
+    it('renders the Select upgrade section with the two non-weatherization options', () => {
       renderPage();
       expect(screen.getByText('Heat pump')).toBeInTheDocument();
-      expect(screen.getByText('Weatherization')).toBeInTheDocument();
-      expect(screen.getByText('Heat pump + weatherization')).toBeInTheDocument();
       expect(screen.getByText('Heat pump water heater')).toBeInTheDocument();
+      // Weatherization-based options were removed per CESN SME guidance.
+      expect(screen.queryByText('Weatherization')).not.toBeInTheDocument();
+      expect(screen.queryByText('Heat pump + weatherization')).not.toBeInTheDocument();
     });
 
     it('renders the Calculate impact submit button', () => {
@@ -193,7 +228,48 @@ describe('CalculateImpactPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/please select an upgrade option/i)).toBeInTheDocument();
+        expect(screen.getByText(/please select one upgrade option/i)).toBeInTheDocument();
+      });
+    });
+
+    describe('upgrade selection helper text', () => {
+      it('shows the exact message "Please select one upgrade option." when no upgrade is selected', async () => {
+        renderPage();
+        fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+
+        await waitFor(() => {
+          expect(screen.getByText('Please select one upgrade option.')).toBeInTheDocument();
+        });
+      });
+
+      it('does not show upgrade error before the form is submitted', () => {
+        renderPage();
+        expect(screen.queryByText(/please select one upgrade option/i)).not.toBeInTheDocument();
+      });
+
+      it('clears the upgrade error after an upgrade is selected and the form is resubmitted', async () => {
+        renderPage();
+
+        fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+        await waitFor(() => {
+          expect(screen.getByText('Please select one upgrade option.')).toBeInTheDocument();
+        });
+
+        const householdSelect = screen.getByRole('button', { name: /household type/i });
+        await selectOption(householdSelect, 'House');
+
+        const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
+        fireEvent.change(addressInput, { target: { value: '789 Pine St, Denver, CO 80202' } });
+
+        const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
+        await selectOption(fuelSelect, 'Natural gas');
+
+        fireEvent.click(screen.getByRole('radio', { name: /^heat pump$/i }));
+        fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+
+        await waitFor(() => {
+          expect(screen.queryByText('Please select one upgrade option.')).not.toBeInTheDocument();
+        });
       });
     });
 
@@ -208,25 +284,39 @@ describe('CalculateImpactPage', () => {
       expect(screen.queryByText(/please select a water heating/i)).not.toBeInTheDocument();
     });
 
-    it('shows error for water heating fuel when heat pump water heater is selected without water heating fuel', async () => {
-      renderPage();
+    describe('HPWH radio disabled state', () => {
+      it('disables the HPWH radio when no water heating fuel is selected', () => {
+        renderPage();
+        expect(screen.getByRole('radio', { name: /heat pump water heater/i })).toBeDisabled();
+      });
 
-      const hpwhRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
-      fireEvent.click(hpwhRadio);
+      it('enables the HPWH radio after selecting a water heating fuel', async () => {
+        renderPage();
+        const hpwhRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
+        expect(hpwhRadio).toBeDisabled();
 
-      const householdSelect = screen.getByRole('button', { name: /household type/i });
-      await selectOption(householdSelect, 'House');
+        const waterFuelSelect = screen.getByRole('button', { name: /water heating type/i });
+        await selectOption(waterFuelSelect, 'Natural gas');
 
-      const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
-      fireEvent.change(addressInput, { target: { value: '789 Pine St, Denver, CO 80202' } });
+        expect(hpwhRadio).not.toBeDisabled();
+      });
 
-      const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
-      await selectOption(fuelSelect, 'Natural gas');
+      it('resets upgrade choice when water heating fuel is cleared after selecting HPWH', async () => {
+        renderPage();
 
-      fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+        const waterFuelSelect = screen.getByRole('button', { name: /water heating type/i });
+        await selectOption(waterFuelSelect, 'Natural gas');
 
-      await waitFor(() => {
-        expect(screen.getByText('Please select a water heating fuel for this upgrade.')).toBeInTheDocument();
+        const hpwhRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
+        fireEvent.click(hpwhRadio);
+        expect(hpwhRadio).toBeChecked();
+
+        await selectOption(waterFuelSelect, 'No selection');
+
+        await waitFor(() => {
+          expect(hpwhRadio).not.toBeChecked();
+          expect(hpwhRadio).toBeDisabled();
+        });
       });
     });
   });
@@ -255,10 +345,16 @@ describe('CalculateImpactPage', () => {
 
     it('allows selecting an upgrade option via radio button', () => {
       renderPage();
-      // Only "Heat pump water heater" is enabled in Step 3; other options are "Coming soon".
-      const hpwhRadio = screen.getByRole('radio', { name: /heat pump water heater/i });
-      fireEvent.click(hpwhRadio);
-      expect(hpwhRadio).toBeChecked();
+      const heatPumpRadio = screen.getByRole('radio', { name: /^heat pump$/i });
+      fireEvent.click(heatPumpRadio);
+      expect(heatPumpRadio).toBeChecked();
+    });
+
+    it('has heat pump enabled and HPWH disabled initially (no "Coming soon")', () => {
+      renderPage();
+      expect(screen.getByRole('radio', { name: /^heat pump$/i })).not.toBeDisabled();
+      expect(screen.getByRole('radio', { name: /heat pump water heater/i })).toBeDisabled();
+      expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
     });
   });
 
@@ -291,7 +387,7 @@ describe('CalculateImpactPage', () => {
         expect(screen.queryByText(/please select a household type/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/please enter a valid street address/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/please select a heating fuel/i)).not.toBeInTheDocument();
-        expect(screen.queryByText(/please select an upgrade option/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/please select one upgrade option/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/please select a water heating fuel/i)).not.toBeInTheDocument();
       });
     });
@@ -322,6 +418,70 @@ describe('CalculateImpactPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /edit household info/i }));
 
       expect(screen.getByRole('button', { name: /calculate impact/i })).toBeInTheDocument();
+    });
+
+    it('submits a non-HPWH upgrade without requiring water heating fuel', async () => {
+      (jest.requireMock('./fetchRemImpact').fetchRemImpact as jest.Mock).mockResolvedValue(MOCK_RESULT);
+      renderPage();
+
+      const householdSelect = screen.getByRole('button', { name: /household type/i });
+      await selectOption(householdSelect, 'House');
+
+      const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
+      fireEvent.change(addressInput, { target: { value: '789 Pine St, Denver, CO 80202' } });
+
+      const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
+      await selectOption(fuelSelect, 'Natural gas');
+
+      // No water heating fuel selected — should be valid for a whole-home heat pump upgrade.
+      const heatPumpRadio = screen.getByRole('radio', { name: /^heat pump$/i });
+      fireEvent.click(heatPumpRadio);
+
+      fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/bill and emissions impact/i)).toBeInTheDocument();
+      });
+      expect(screen.queryByText(/please select a water heating fuel/i)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('API error states', () => {
+    const fillAndSubmitHeatPumpForm = async () => {
+      renderPage();
+      const householdSelect = screen.getByRole('button', { name: /household type/i });
+      await selectOption(householdSelect, 'House');
+      const addressInput = screen.getByPlaceholderText('1234 Main St, Denver, CO 80014');
+      fireEvent.change(addressInput, { target: { value: '1777 Larimer St, Denver, CO 80202' } });
+      const fuelSelect = screen.getByRole('button', { name: /heating fuel/i });
+      await selectOption(fuelSelect, 'Natural gas');
+      fireEvent.click(screen.getByRole('radio', { name: /^heat pump$/i }));
+      fireEvent.click(screen.getByRole('button', { name: /calculate impact/i }));
+    };
+
+    it('shows the generic error alert on a non-address API failure', async () => {
+      (jest.requireMock('./fetchRemImpact').fetchRemImpact as jest.Mock).mockRejectedValue(
+        new Error('REM API error: 502'),
+      );
+      await fillAndSubmitHeatPumpForm();
+      await waitFor(() => {
+        expect(screen.getByText(/something went wrong calculating your impact/i)).toBeInTheDocument();
+      });
+      expect(screen.queryByText(/unable to calculate the impact for this address/i)).not.toBeInTheDocument();
+    });
+
+    it('shows the address-not-supported alert when RemAddressNotSupportedError is thrown', async () => {
+      const { RemAddressNotSupportedError } = jest.requireMock('./fetchRemImpact');
+      (jest.requireMock('./fetchRemImpact').fetchRemImpact as jest.Mock).mockRejectedValue(
+        new RemAddressNotSupportedError(),
+      );
+      await fillAndSubmitHeatPumpForm();
+      await waitFor(() => {
+        expect(
+          screen.getByText(/unable to calculate the impact for this address at this time/i),
+        ).toBeInTheDocument();
+      });
+      expect(screen.queryByText(/something went wrong calculating your impact/i)).not.toBeInTheDocument();
     });
   });
 

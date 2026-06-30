@@ -75,12 +75,14 @@ export const FUEL_TYPE_LABEL_MAP: Record<RemFuelType, { messageId: string; defau
 
 export const UPGRADE_LABEL_MAP: Record<CalculateImpactUpgradeChoice, { messageId: string; defaultMessage: string }> = {
   heat_pump: { messageId: 'energyCalculator.calculateImpact.upgrade.heatPump', defaultMessage: 'Heat pump' },
-  weatherization: { messageId: 'energyCalculator.calculateImpact.upgrade.weatherization', defaultMessage: 'Weatherization' },
-  heat_pump_weatherization: { messageId: 'energyCalculator.calculateImpact.upgrade.heatPumpWeatherization', defaultMessage: 'Heat pump + weatherization' },
   heat_pump_water_heater: { messageId: 'energyCalculator.calculateImpact.upgrade.heatPumpWaterHeater', defaultMessage: 'Heat pump water heater' },
 };
 
-/** `upgrade` query param on /api/v1/rem/address */
+/**
+ * `upgrade` query param on /api/v1/rem/address.
+ * The weatherization values remain valid REM API inputs even though no app-level
+ * upgrade choice currently maps to them — keep them so the REM contract stays complete.
+ */
 export type RemUpgrade =
   | 'hvac__heat_pump_seer24_hspf13'
   | 'weatherization__insulation_air_duct_sealing'
@@ -90,17 +92,16 @@ export type RemUpgrade =
 /** `heating_fuel` / `water_heater_fuel` query params */
 export type RemFuelType = 'electricity' | 'fuel_oil' | 'natural_gas' | 'propane';
 
-/** User-facing "select upgrade" options → REM `upgrade` enum */
-export type CalculateImpactUpgradeChoice =
-  | 'heat_pump'
-  | 'weatherization'
-  | 'heat_pump_weatherization'
-  | 'heat_pump_water_heater';
+/**
+ * User-facing "select upgrade" options → REM `upgrade` enum.
+ * Weatherization-based choices are intentionally excluded: per CESN SME guidance,
+ * their bill impact can't be modeled reliably without the home's current condition,
+ * so they're surfaced as a results note instead of an upgrade option.
+ */
+export type CalculateImpactUpgradeChoice = 'heat_pump' | 'heat_pump_water_heater';
 
 export const CALCULATE_IMPACT_UPGRADE_MAP: Record<CalculateImpactUpgradeChoice, RemUpgrade> = {
   heat_pump: 'hvac__heat_pump_seer24_hspf13',
-  weatherization: 'weatherization__insulation_air_duct_sealing',
-  heat_pump_weatherization: 'combination__hvac_seer18_hspf10__weatherization',
   heat_pump_water_heater: 'water_heater__heat_pump_uef3.35',
 };
 

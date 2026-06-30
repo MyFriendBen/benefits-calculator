@@ -57,7 +57,7 @@ describe('ConnectNowPage', () => {
     renderConnectNow();
     const firstPage = screen.getByRole('img', { name: /how to find a good hvac contractor/i });
     expect(firstPage).toHaveAttribute('src', CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES[0]);
-    expect(screen.getByText('1/2')).toBeInTheDocument();
+    expect(screen.getByText('1/3')).toBeInTheDocument();
   });
 
   it('points the viewer Print action at the real PDF', () => {

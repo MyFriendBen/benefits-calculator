@@ -122,7 +122,8 @@
 
 /* Push input to the bottom of the field so inputs align across columns regardless of helper text height */
 .calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiFormControl-root,
-.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiTextField-root {
+.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiTextField-root,
+.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiAutocomplete-root {
   margin-top: auto;
 }
 
@@ -133,7 +134,8 @@
 }
 
 .calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiFormControl-root,
-.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiTextField-root {
+.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiTextField-root,
+.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiAutocomplete-root {
   margin-top: auto;
   position: relative;
   margin-bottom: 0.75rem;
@@ -304,22 +306,21 @@
   line-height: 1.5;
 }
 
+.calculate-impact-page .calculate-impact-radio-option {
+  cursor: default;
+}
+
+.calculate-impact-page .calculate-impact-radio-option[data-disabled='true']:hover {
+  background-color: transparent;
+}
+
+.calculate-impact-page .calculate-impact-radio-option[data-disabled='true'] .calculate-impact-radio-label,
+.calculate-impact-page .calculate-impact-radio-option[data-disabled='true'] .calculate-impact-radio-description {
+  color: rgba(0, 0, 0, 0.38);
+}
+
 .calculate-impact-page .calculate-impact-submit {
   margin-top: 1.25rem;
-}
-
-/* ── "Coming soon" badge on disabled upgrade options ── */
-.calculate-impact-page .calculate-impact-coming-soon {
-  font-size: 0.72rem;
-  font-weight: 400;
-  font-style: italic;
-  color: #777;
-  margin-left: 0.5rem;
-}
-
-.calculate-impact-page .calculate-impact-radio-option[data-disabled='true'] {
-  opacity: 0.55;
-  cursor: default;
 }
 
 /* ── Loading / error states ── */
@@ -617,6 +618,18 @@
   font-size: 0.78rem;
   color: #777;
   margin: 0;
+}
+
+/* ── Weatherization note (shown in place of a weatherization upgrade option) ── */
+.calculate-impact-weatherization-note {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #555;
+  line-height: 1.55;
+  margin: 1.25rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
 }
 
 /* Form inputs sit on white inside the grey card */

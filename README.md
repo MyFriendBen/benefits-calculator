@@ -32,3 +32,22 @@ Install dependencies: `npm install`
   Run server: `npm run dev`
 
   See local environment at http://localhost:3000/
+
+## Benbot AI assistant (feature-flagged)
+
+The results page includes **Benbot**, an AI chat assistant that helps users act
+on their results. It is **off by default** and gated behind the `benbot` feature
+flag, so merging it to `main` exposes it to no one until the flag is enabled for
+a white label (in the backend admin).
+
+- Component: `src/Components/Results/Chatbot/Chatbot.tsx` (+ `Chatbot.css`).
+- Mounted in `src/Components/Results/Results.tsx` via `<BenbotWrapper enabled={isBenbotEnabled}>`,
+  where `isBenbotEnabled = useFeatureFlag('benbot')`. When the flag is off, the
+  results page renders exactly as before.
+
+To turn it on, set the `benbot` feature flag to `true` for the relevant white
+label in `benefits-api` (see that repo's README → "Benbot feature flag").
+
+> The widget calls `benefits-api`'s assistant endpoints (`startAssistantConversation` /
+> `sendAssistantMessage` in `src/apiCalls.ts`), which proxy to `mfb-ai-service`.
+> Replies are live; there are no scripted/canned messages in the widget.
