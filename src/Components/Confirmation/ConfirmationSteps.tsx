@@ -1,13 +1,7 @@
 import { ReactNode, useContext, useMemo } from 'react';
 import { Context } from '../Wrapper/Wrapper';
 import ConfirmationBlock, { ConfirmationItem, formatToUSD } from './ConfirmationBlock';
-import { ReactComponent as Residence } from '../../Assets/icons/General/residence.svg';
-import { ReactComponent as Household } from '../../Assets/icons/General/household.svg';
-import { ReactComponent as Expense } from '../../Assets/icons/General/expenses.svg';
-import { ReactComponent as Resources } from '../../Assets/icons/General/resources.svg';
-import { ReactComponent as Benefits } from '../../Assets/icons/General/benefits.svg';
-import { ReactComponent as Immediate } from '../../Assets/icons/General/alert.svg';
-import { ReactComponent as Referral } from '../../Assets/icons/General/referral.svg';
+import { Icon } from '../Icon/Icon';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useTranslateNumber } from '../../Assets/languageOptions';
 import { FormattedMessageType, QuestionName } from '../../Types/Questions';
@@ -38,7 +32,7 @@ function ZipCode() {
 
   return (
     <ConfirmationBlock
-      icon={<Residence title={formatMessage(zipcodeIconAlt)} />}
+      icon={<Icon name="house" className="confirmation-lucide-icon" aria-label={formatMessage(zipcodeIconAlt)} />}
       title={<FormattedMessage id="confirmation.residenceInfo" defaultMessage="Residence Information" />}
       editAriaLabel={editZipAriaLabel}
       stepName="zipcode"
@@ -83,7 +77,7 @@ function HouseholdSize() {
 
   return (
     <ConfirmationBlock
-      icon={<Household title={formatMessage(householdSizeIconAlt)} />}
+      icon={<Icon name="users" className="confirmation-lucide-icon" aria-label={formatMessage(householdSizeIconAlt)} />}
       title={
         <FormattedMessage id="confirmation.displayAllFormData-yourHouseholdLabel" defaultMessage="Household Members" />
       }
@@ -152,7 +146,7 @@ function Expenses() {
 
   return (
     <ConfirmationBlock
-      icon={<Expense title={formatMessage(expensesIconAlt)} />}
+      icon={<Icon name="receipt" className="confirmation-lucide-icon" aria-label={formatMessage(expensesIconAlt)} />}
       title={
         <FormattedMessage
           id="confirmation.headOfHouseholdDataBlock-expensesLabel"
@@ -183,7 +177,7 @@ function Assets() {
 
   return (
     <ConfirmationBlock
-      icon={<Resources title={formatMessage(assetsIconAlt)} />}
+      icon={<Icon name="piggy-bank" className="confirmation-lucide-icon" aria-label={formatMessage(assetsIconAlt)} />}
       title={
         <FormattedMessage
           id="confirmation.displayAllFormData-householdResourcesText"
@@ -265,7 +259,7 @@ function HasBenefits() {
 
   return (
     <ConfirmationBlock
-      icon={<Benefits title={formatMessage(hasBenefitsIconAlt)} />}
+      icon={<Icon name="clipboard-list" className="confirmation-lucide-icon" aria-label={formatMessage(hasBenefitsIconAlt)} />}
       title={
         <FormattedMessage
           id="confirmation.displayAllFormData-currentHHBenefitsText"
@@ -316,7 +310,7 @@ function AcuteConditions() {
 
   return (
     <ConfirmationBlock
-      icon={<Immediate title={formatMessage(acuteConditionsIconAlt)} />}
+      icon={<Icon name="package-plus" className="confirmation-lucide-icon" aria-label={formatMessage(acuteConditionsIconAlt)} />}
       title={
         <FormattedMessage
           id="confirmation.displayAllFormData-acuteHHConditions"
@@ -361,7 +355,7 @@ function ReferralSource() {
 
   return (
     <ConfirmationBlock
-      icon={<Referral title={formatMessage(referralSourceIconAlt)} />}
+      icon={<Icon name="messages-square" className="confirmation-lucide-icon" aria-label={formatMessage(referralSourceIconAlt)} />}
       title={
         <FormattedMessage id="confirmation.displayAllFormData-referralSourceText" defaultMessage="Referral Source" />
       }

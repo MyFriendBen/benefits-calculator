@@ -49,7 +49,7 @@ svg.confirmation-lucide-icon {
 }
 
 svg.confirmation-lucide-icon * {
-  fill: white !important;
+  fill: none !important;
   stroke: var(--secondary-icon-color);
 }
 
@@ -85,6 +85,16 @@ svg.edit-button rect,
 svg.edit-button polygon {
   stroke: var(--midBlue-color);
   fill: var(--midBlue-color);
+}
+
+svg.edit-pencil-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+svg.edit-pencil-icon * {
+  stroke: var(--midBlue-color);
+  fill: none;
 }
 
 .confirmation-acute-need-list {
