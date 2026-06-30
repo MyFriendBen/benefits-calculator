@@ -50,6 +50,7 @@
   color: #000;
   display: flex;
   align-items: center;
+  gap: 0.5rem;
 }
 
 .simple-section-header h2 svg {
@@ -290,6 +291,28 @@ svg.edit-button polygon,
 
 .confirmation-row-value strong {
   font-weight: 600;
+}
+
+.confirmation-row-value i {
+  color: #888;
+  font-size: 0.85rem;
+  font-style: italic;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.confirmation-expense-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.confirmation-expense-list li {
+  margin-bottom: 0.25rem;
+}
+
+.confirmation-expense-list li:last-child {
+  margin-bottom: 0;
 }
 
 /* Household member table styles */

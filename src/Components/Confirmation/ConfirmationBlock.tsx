@@ -16,47 +16,6 @@ type ConfirmationBlockParams = PropsWithChildren<{
   editUrlEnding?: string;
 }>;
 
-// Simple section wrapper without header styling (for basic sections)
-type ConfirmationSectionParams = PropsWithChildren<{
-  title: ReactNode;
-  stepName: QuestionName;
-  editAriaLabel: MessageDescriptor;
-  noReturn?: boolean;
-  editUrlEnding?: string;
-}>;
-
-export function ConfirmationSection({
-  title,
-  stepName,
-  editAriaLabel,
-  noReturn = false,
-  editUrlEnding = '',
-  children,
-}: ConfirmationSectionParams) {
-  const { whiteLabel, uuid } = useParams();
-  const { formatMessage } = useIntl();
-  const stepNumber = useStepNumber(stepName);
-  const locationState = noReturn ? undefined : { routedFromConfirmationPg: true };
-
-  return (
-    <div className="simple-confirmation-section">
-      <div className="simple-section-header">
-        <h2>{title}</h2>
-        <Link
-          to={`/${whiteLabel}/${uuid}/step-${stepNumber}/${editUrlEnding}`}
-          state={locationState}
-          className="edit-button-simple"
-          aria-label={formatMessage(editAriaLabel)}
-        >
-          <Edit title={formatMessage(editAriaLabel)} />
-        </Link>
-      </div>
-      <div className="simple-section-content">{children}</div>
-    </div>
-  );
-}
-
-// Full ConfirmationBlock with styled header (for household member details table)
 export default function ConfirmationBlock({
   icon,
   title,
