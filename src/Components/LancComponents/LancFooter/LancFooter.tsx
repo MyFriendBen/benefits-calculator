@@ -89,8 +89,8 @@ const LancFooter = () => {
 
   return (
     <>
-      <Box className="flex-row footer-paragraph first-paragraph">{displayFirstParagraph()}</Box>
-      <Box className="flex-row footer-paragraph second-paragraph">{displaySecondParagraph()}</Box>
+      <Box className="flex-row lanc-footer-paragraph first-paragraph">{displayFirstParagraph()}</Box>
+      <Box className="flex-row lanc-footer-paragraph second-paragraph">{displaySecondParagraph()}</Box>
       <Footer hideServiceLinks={true} />
       <Paper elevation={0} sx={{ width: '100%', backgroundColor: '#efefef', padding: '1rem 1rem' }} square={true}>
         {displayCopyrightPolicySection()}
