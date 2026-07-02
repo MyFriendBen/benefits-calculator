@@ -195,9 +195,17 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
 
   const backLink = useResultsLink(`results/benefits`);
   const displayLanguageFlags = (navigatorLanguages: Language[]) => {
+    // Only render flags for languages we have a label for; unknown codes
+    // (e.g. "uk", "ja", "de") would otherwise render as empty boxes.
+    const knownLanguages = navigatorLanguages.filter((lang) => allNavigatorLanguages[lang] !== undefined);
+
+    if (knownLanguages.length === 0) {
+      return null;
+    }
+
     return (
       <div className="navigator-langs-container">
-        {navigatorLanguages.map((lang) => {
+        {knownLanguages.map((lang) => {
           return (
             <p className="navigator-lang-flag" key={lang}>
               {allNavigatorLanguages[lang]}
