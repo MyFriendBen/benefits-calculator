@@ -12,7 +12,8 @@ import { findProgramById, findValidationForProgram, useResultsContext, useResult
 import { deleteValidation, postValidation } from '../../../apiCalls';
 import { Language } from '../../../Assets/languageOptions';
 import { allNavigatorLanguages } from './NavigatorLanguages';
-import { formatPhoneNumber, LUCIDE_ICONS, ICON_OPTIONS_MAP } from '../helpers';
+import { formatPhoneNumber, ICON_NAME_MAP } from '../helpers';
+import { Icon } from '../../Icon/Icon';
 import useScreenApi from '../../../Assets/updateScreen';
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import JsonView from '@uiw/react-json-view';
@@ -55,13 +56,8 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   };
 
   const IconRenderer: React.FC<IconRendererProps> = ({ headingType }) => {
-    const IconComponent = ICON_OPTIONS_MAP[headingType] ?? ICON_OPTIONS_MAP['default'];
-
-    if (!IconComponent) {
-      return null;
-    }
-
-    return <IconComponent />;
+    const lucideIconName = ICON_NAME_MAP[headingType] ?? ICON_NAME_MAP['default'];
+    return <Icon name={lucideIconName} />;
   };
   const currentValidation = findValidationForProgram(validations, program);
 
@@ -136,8 +132,7 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   const displayIconAndHeader = (program: Program) => {
     // Add lucide icon class for specific icons that need white fill
     const iconKey = category.icon.toLowerCase();
-    const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'default';
-    const iconClasses = `header-icon-box${LUCIDE_ICONS.includes(actualIconKey) ? ' header-icon-lucide' : ''}`;
+    const iconClasses = 'header-icon-box header-icon-lucide';
 
     return (
       <header className="program-icon-and-header">

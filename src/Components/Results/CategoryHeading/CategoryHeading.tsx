@@ -5,7 +5,8 @@ import { useTranslateNumber } from '../../../Assets/languageOptions';
 import { ProgramCategory } from '../../../Types/Results';
 import { useContext } from 'react';
 import { Context } from '../../Wrapper/Wrapper';
-import { LUCIDE_ICONS, ICON_OPTIONS_MAP } from '../helpers';
+import { ICON_NAME_MAP } from '../helpers';
+import { Icon } from '../../Icon/Icon';
 
 type CategoryHeadingProps = {
   category: ProgramCategory;
@@ -18,8 +19,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   const translateNumber = useTranslateNumber();
 
   const iconKey = category.icon.toLowerCase();
-  const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'default';  
-  const IconComponent = ICON_OPTIONS_MAP[actualIconKey];
+  const lucideIconName = ICON_NAME_MAP[iconKey] ?? ICON_NAME_MAP['default'];
 
   const monthlyCategoryAmt = calculateTotalValue(category) / 12;
   const shouldShowAmount = showAmount ?? !getReferrer('uiOptions').includes('dont_show_category_values');
@@ -30,19 +30,16 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
   };
   const iconTranslation = intl.formatMessage({ id: 'categoryHeading.icon', defaultMessage: 'icon' });
 
-  // Add lucide icon class for specific icons that need white fill
-  const iconClasses = `category-heading-icon${LUCIDE_ICONS.includes(actualIconKey) ? ' category-lucide-icon' : ''}`;
-
   return (
     <div>
       <div className="category-heading-container">
         <div className="category-heading-column">
           <div
-            className={iconClasses}
+            className="category-heading-icon category-lucide-icon"
             aria-label={`${intl.formatMessage(categoryImageAriaLabelProps)} ${iconTranslation}`}
             role="img"
           >
-            <IconComponent aria-hidden="true" />
+            <Icon name={lucideIconName} aria-hidden={true} />
           </div>
           <h2 className="category-heading-text-style">
             <ResultsTranslate translation={category.name} />
