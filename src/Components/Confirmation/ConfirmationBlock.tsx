@@ -1,4 +1,4 @@
-import { ReactComponent as Edit } from '../../Assets/icons/General/edit.svg';
+import { Pencil } from 'lucide-react';
 import { PropsWithChildren, ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { QuestionName } from '../../Types/Questions';
@@ -43,7 +43,7 @@ export default function ConfirmationBlock({
         className="edit-button"
         aria-label={formatMessage(editAriaLabel)}
       >
-        <Edit title={formatMessage(editAriaLabel)} />
+        <Pencil aria-label={formatMessage(editAriaLabel)} className="edit-pencil-icon" />
       </Link>
     </div>
   );

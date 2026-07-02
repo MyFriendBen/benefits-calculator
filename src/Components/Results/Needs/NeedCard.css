@@ -11,12 +11,16 @@
   font-weight: 400;
 }
 
-.result-resource-more-info svg,
-.result-resource-more-info svg path.cls-1 {
-  fill: var(--icon-color);
-  margin-right: 0.25rem;
-  height: 4.5rem;
-  width: 4.5rem;
+.result-resource-more-info svg {
+  margin-left: 0.75rem;
+  margin-right: 0.75rem;
+  height: 3rem;
+  width: 3rem;
+}
+
+svg.need-card-lucide-icon * {
+  fill: none !important;
+  stroke: var(--icon-color) !important;
 }
 
 .result-resource-more-info span {

@@ -7,7 +7,7 @@ import { FormattedMessageType } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
 import ConfirmationBlock, { formatToUSD, ConfirmationItem } from './ConfirmationBlock';
 import { Context } from '../Wrapper/Wrapper';
-import { ReactComponent as Head } from '../../Assets/icons/General/head.svg';
+import { Icon } from '../Icon/Icon';
 import { calcIncomeStreamAmount } from '../../Assets/income';
 import { useIsEnergyCalculator } from '../EnergyCalculator/hooks';
 
@@ -142,7 +142,7 @@ const DefaultConfirmationHHData = () => {
 
         return (
           <ConfirmationBlock
-            icon={<Head title={formatMessage({ id: 'confirmation.hhMember.icon-AL', defaultMessage: 'household member' })} />}
+            icon={<Icon name="user" className="confirmation-lucide-icon" aria-label={formatMessage({ id: 'confirmation.hhMember.icon-AL', defaultMessage: 'household member' })} />}
             title={relationship}
             editAriaLabel={{ id: 'confirmation.hhMember.edit-AL', defaultMessage: 'edit household member' }}
             stepName="householdData"

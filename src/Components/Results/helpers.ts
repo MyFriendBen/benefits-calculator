@@ -1,70 +1,39 @@
-import type { ComponentType, SVGProps } from 'react';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import { ReactComponent as Food } from '../../Assets/icons/UrgentNeeds/AcuteConditions/food.svg';
-import { ReactComponent as Residence } from '../../Assets/icons/General/residence.svg';
-import { ReactComponent as HealthCare } from '../../Assets/icons/Programs/CategoryHeading/healthcare.svg';
-import { ReactComponent as Transportation } from '../../Assets/icons/Programs/CategoryHeading/transportation.svg';
-import { ReactComponent as TaxCredits } from '../../Assets/icons/Programs/CategoryHeading/taxCredits.svg';
-import { ReactComponent as CashAssistance } from '../../Assets/icons/Programs/CategoryHeading/cashAssistant.svg';
-import { ReactComponent as ChildCareYouthEducation } from '../../Assets/icons/Programs/CategoryHeading/childCareYouthEducation.svg';
-import { ReactComponent as Coin } from '../EnergyCalculator/Icons/Coin.svg';
-import { ReactComponent as LightBulb } from '../EnergyCalculator/Icons/Lightbulb.svg';
-import { ReactComponent as Talk } from '../EnergyCalculator/Icons/Messages.svg';
-import { ReactComponent as TriangleAlert } from '../EnergyCalculator/Icons/TriangleAlert.svg';
-import { ReactComponent as Lightning } from '../EnergyCalculator/Icons/Lightning.svg';
-import { ReactComponent as HeartHand } from '../EnergyCalculator/Icons/HeartHand.svg';
-import { ReactComponent as BabySupplies } from '../../Assets/icons/UrgentNeeds/AcuteConditions/baby_supplies.svg';
-import { ReactComponent as ChildDevelopment } from '../../Assets/icons/UrgentNeeds/AcuteConditions/child_development.svg';
-import { ReactComponent as DentalCare } from '../../Assets/icons/UrgentNeeds/AcuteConditions/dental_care.svg';
-import { ReactComponent as FamilyPlanning } from '../../Assets/icons/UrgentNeeds/AcuteConditions/family_planning.svg';
-import { ReactComponent as Housing } from '../../Assets/icons/UrgentNeeds/AcuteConditions/housing.svg';
-import { ReactComponent as JobResources } from '../../Assets/icons/UrgentNeeds/AcuteConditions/job_resources.svg';
-import { ReactComponent as LegalServices } from '../../Assets/icons/UrgentNeeds/AcuteConditions/legal_services.svg';
-import { ReactComponent as Support } from '../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
-import { ReactComponent as Military } from '../../Assets/icons/UrgentNeeds/AcuteConditions/military.svg';
-import { ReactComponent as Aging } from '../../Assets/icons/UrgentNeeds/AcuteConditions/aging.svg';
-import { ReactComponent as Disabled } from '../../Assets/icons/General/OptionCard/Conditions/disabled.svg';
-import { ReactComponent as Resources } from '../../Assets/icons/General/resources.svg';
 
 /**
- * List of lucide-based icon names that require special styling (white fill with colored stroke)
- * Used across CategoryHeading and ProgramPage components
+ * Mapping of icon keys (from API/backend) to their corresponding Lucide icon names.
+ * Used across CategoryHeading, ProgramPage, CurrentBenefits, and NeedCard components.
+ * Keys must be lower case. Values are kebab-case Lucide icon names.
  */
-export const LUCIDE_ICONS = ['house_plug', 'light_bulb', 'talk', 'air_vent', 'coin', 'heart_hand', 'lightning', 'triangle_alert'];
-
-/**
- * Mapping of icon keys (from API/backend) to their corresponding React SVG components
- * Used across CategoryHeading, ProgramPage, and CurrentBenefits components
- * NOTE: keys must be lower case
- */
-export const ICON_OPTIONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
-  aging: Aging,
-  baby_supplies: BabySupplies,
-  behavioral_health: Support,
-  cash: CashAssistance,
-  coin: Coin,
-  child_care: ChildCareYouthEducation,
-  child_development: ChildDevelopment,
-  dental_care: DentalCare,
-  disability: Disabled,
-  family_planning: FamilyPlanning,
-  food: Food,
-  food_groceries: Food,
-  health_care: HealthCare,
-  heart_hand: HeartHand,
-  housing: Residence,
-  job_resources: JobResources,
-  legal_services: LegalServices,
-  light_bulb: LightBulb,
-  lightning: Lightning,
-  managing_housing: Housing,
-  savings: Resources,
-  talk: Talk,
-  tax_credit: TaxCredits,
-  transportation: Transportation,
-  triangle_alert: TriangleAlert,
-  veteran_services: Military,
-  default: CashAssistance,
+export const ICON_NAME_MAP: Record<string, string> = {
+  aging: 'tree-deciduous',
+  baby_supplies: 'baby',
+  behavioral_health: 'message-circle-heart',
+  cash: 'circle-dollar-sign',
+  child_care: 'blocks',
+  child_development: 'shapes',
+  coin: 'coins',
+  dental_care: 'smile',
+  disability: 'accessibility',
+  family_planning: 'heart-handshake',
+  food: 'apple',
+  food_groceries: 'apple',
+  health_care: 'square-activity',
+  heart_hand: 'heart-handshake',
+  housing: 'house',
+  job_resources: 'briefcase-business',
+  legal_services: 'scale',
+  light_bulb: 'lightbulb',
+  lightning: 'zap',
+  managing_housing: 'house',
+  savings: 'piggy-bank',
+  talk: 'message-circle',
+  tax_credit: 'banknote',
+  transportation: 'bus-front',
+  triangle_alert: 'triangle-alert',
+  veteran_services: 'shield',
+  youth_development: 'shapes',
+  default: 'circle-dot',
 };
 
 export const formatPhoneNumber = (phoneNumber: string): string => {
