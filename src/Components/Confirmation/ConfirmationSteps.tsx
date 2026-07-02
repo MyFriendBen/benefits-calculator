@@ -195,7 +195,7 @@ function BenefitsAndAdditionalInfo() {
 
   const hasBenefitsStepNumber = useStepNumber('hasBenefits');
   const acuteConditionsStepNumber = useStepNumber('acuteHHConditions');
-  const referralSourceStepNumber = useStepNumber('referralSource');
+  const referralSourceStepNumber = useStepNumber('referralSource', false);
 
   const benefitsIconAlt = {
     id: 'confirmation.benefitsAndAdditionalInfo.icon-AL',
@@ -269,7 +269,7 @@ function BenefitsAndAdditionalInfo() {
       : formData.referralSource;
   };
 
-  const showReferralSource = formData.referralSource !== undefined && !referralLoading;
+  const showReferralSource = formData.referralSource !== undefined && !referralLoading && referralSourceStepNumber !== -1;
 
   return (
     <div className="simple-confirmation-section">
