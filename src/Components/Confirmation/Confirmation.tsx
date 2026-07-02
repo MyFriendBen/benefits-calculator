@@ -20,7 +20,11 @@ const Confirmation = () => {
   useEffect(() => {
     const continueOnEnter = (event: KeyboardEvent) => {
       if (event.key === 'Enter') {
-        navigate(`/${whiteLabel}/${uuid}/results/benefits`);
+        const target = event.target as HTMLElement;
+        const isInteractive = target.closest('a, button, input, select, textarea, [role="button"]');
+        if (!isInteractive) {
+          navigate(`/${whiteLabel}/${uuid}/results/benefits`);
+        }
       }
     };
     document.addEventListener('keydown', continueOnEnter);

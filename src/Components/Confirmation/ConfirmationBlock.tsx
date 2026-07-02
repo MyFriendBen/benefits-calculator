@@ -43,7 +43,7 @@ export default function ConfirmationBlock({
           className="edit-button"
           aria-label={formatMessage(editAriaLabel)}
         >
-          <Edit title={formatMessage(editAriaLabel)} />
+          <Edit aria-hidden={true} />
         </Link>
       </div>
       <div className="confirmation-section-content">{children}</div>

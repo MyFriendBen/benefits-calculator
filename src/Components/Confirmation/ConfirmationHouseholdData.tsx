@@ -40,7 +40,7 @@ const EC_CONDITIONS: ConditionEntry[] = [
 ];
 
 const DefaultConfirmationHHData = () => {
-  const { formData, locale } = useContext(Context);
+  const { formData } = useContext(Context);
   const { householdData, householdSize } = formData;
   const { whiteLabel, uuid } = useParams();
   const isEnergyCalculator = useIsEnergyCalculator();
@@ -57,16 +57,10 @@ const DefaultConfirmationHHData = () => {
     them: IconAndFormattedMessageMap;
   }>('health_insurance_options');
 
-  let householdSizeDescriptor = { id: 'confirmation.displayAllFormData-personLabel', defaultMessage: 'person' };
-  if (householdSize >= 2) {
-    householdSizeDescriptor = { id: 'confirmation.displayAllFormData-peopleLabel', defaultMessage: 'people' };
-    // Russian uses the singular of people for 1-4 people
-    if (householdSize <= 4 && locale === 'ru') {
-      householdSizeDescriptor = { id: 'confirmation.displayAllFormData-personLabel', defaultMessage: 'person' };
-    }
-  }
-
-  const householdSizeText = `${translateNumber(householdSize)} ${formatMessage(householdSizeDescriptor)}`;
+  const householdSizeText = `${translateNumber(householdSize)} ${formatMessage(
+    { id: 'confirmation.householdSizeLabel', defaultMessage: '{count, plural, one {person} other {people}}' },
+    { count: householdSize },
+  )}`;
 
   const editHouseholdMemberAriaLabel = {
     id: 'confirmation.hhMember.edit-AL',
@@ -75,6 +69,15 @@ const DefaultConfirmationHHData = () => {
   const householdSizeIconAlt = {
     id: 'confirmation.hhsize.icon-AL',
     defaultMessage: 'household size',
+  };
+
+  const getRelationship = (member: HouseholdData, index: number): string => {
+    if (index === 0) {
+      return formatMessage({ id: 'householdDataBlock.basicInfo.you', defaultMessage: 'You' });
+    }
+    return relationshipOptions[member.relationshipToHH]?.props
+      ? formatMessage({ ...relationshipOptions[member.relationshipToHH].props })
+      : member.relationshipToHH;
   };
 
   const conditionsString = (member: HouseholdData): string => {
@@ -149,42 +152,44 @@ const DefaultConfirmationHHData = () => {
           <table className="household-member-table household-member-table-desktop">
             <thead>
               <tr>
-                <th>
+                <th scope="col">
                   <FormattedMessage id="confirmation.table.member" defaultMessage="Member" />
                 </th>
-                <th>
+                <th scope="col">
                   <FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year" />
                 </th>
-                <th>
+                <th scope="col">
                   <FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions" />
                 </th>
-                <th>
+                <th scope="col">
                   <FormattedMessage id="confirmation.annualIncome" defaultMessage="Annual Income" />
                 </th>
                 {!isEnergyCalculator && (
-                  <th>
+                  <th scope="col">
                     <FormattedMessage
                       id="confirmation.headOfHouseholdDataBlock-healthInsuranceText"
                       defaultMessage="Health Insurance"
                     />
                   </th>
                 )}
-                <th style={{ width: '40px' }}></th>
+                <th style={{ width: '40px' }} aria-hidden={true}></th>
               </tr>
             </thead>
             <tbody>
               {householdData.map((member, i) => {
-                const relationship =
-                  i === 0
-                    ? formatMessage({ id: 'householdDataBlock.basicInfo.you', defaultMessage: 'You' })
-                    : (relationshipOptions[member.relationshipToHH]?.props
-                        ? formatMessage({ ...relationshipOptions[member.relationshipToHH].props })
-                        : member.relationshipToHH);
+                const relationship = getRelationship(member, i);
+                const memberEditLabel = `${formatMessage(editHouseholdMemberAriaLabel)}: ${relationship}`;
 
                 return (
                   <tr key={i}>
                     <td>{relationship}</td>
-                    <td>{hasBirthMonthYear(member) ? formatBirthMonthYear(member) : '-'}</td>
+                    <td>
+                      {hasBirthMonthYear(member) ? (
+                        formatBirthMonthYear(member)
+                      ) : (
+                        <span aria-label={formatMessage({ id: 'confirmation.notProvided', defaultMessage: 'not provided' })}>-</span>
+                      )}
+                    </td>
                     <td>{conditionsString(member)}</td>
                     <td>{calculateTotalAnnualIncome(member)}</td>
                     {!isEnergyCalculator && <td>{displayHealthInsurance(member, i)}</td>}
@@ -193,9 +198,9 @@ const DefaultConfirmationHHData = () => {
                         to={`/${whiteLabel}/${uuid}/step-${householdDataStepNumber}/${i + 1}`}
                         state={{ routedFromConfirmationPg: true, isEditing: true }}
                         className="edit-button-simple"
-                        aria-label={formatMessage(editHouseholdMemberAriaLabel)}
+                        aria-label={memberEditLabel}
                       >
-                        <Edit title={formatMessage(editHouseholdMemberAriaLabel)} />
+                        <Edit aria-hidden={true} />
                       </Link>
                     </td>
                   </tr>
@@ -207,12 +212,8 @@ const DefaultConfirmationHHData = () => {
           {/* Mobile card view */}
           <div className="household-member-cards">
             {householdData.map((member, i) => {
-              const relationship =
-                i === 0
-                  ? formatMessage({ id: 'householdDataBlock.basicInfo.you', defaultMessage: 'You' })
-                  : (relationshipOptions[member.relationshipToHH]?.props
-                      ? formatMessage({ ...relationshipOptions[member.relationshipToHH].props })
-                      : member.relationshipToHH);
+              const relationship = getRelationship(member, i);
+              const memberEditLabel = `${formatMessage(editHouseholdMemberAriaLabel)}: ${relationship}`;
 
               return (
                 <div key={i} className="household-member-card">
@@ -222,9 +223,9 @@ const DefaultConfirmationHHData = () => {
                       to={`/${whiteLabel}/${uuid}/step-${householdDataStepNumber}/${i + 1}`}
                       state={{ routedFromConfirmationPg: true, isEditing: true }}
                       className="edit-button-simple"
-                      aria-label={formatMessage(editHouseholdMemberAriaLabel)}
+                      aria-label={memberEditLabel}
                     >
-                      <Edit title={formatMessage(editHouseholdMemberAriaLabel)} />
+                      <Edit aria-hidden={true} />
                     </Link>
                   </div>
                   <div className="household-member-card-body">
@@ -233,7 +234,11 @@ const DefaultConfirmationHHData = () => {
                         <FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year" />
                       </span>
                       <span className="household-member-card-value">
-                        {hasBirthMonthYear(member) ? formatBirthMonthYear(member) : '-'}
+                        {hasBirthMonthYear(member) ? (
+                          formatBirthMonthYear(member)
+                        ) : (
+                          <span aria-label={formatMessage({ id: 'confirmation.notProvided', defaultMessage: 'not provided' })}>-</span>
+                        )}
                       </span>
                     </div>
                     <div className="household-member-card-field">

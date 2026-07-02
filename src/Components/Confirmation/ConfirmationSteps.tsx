@@ -106,13 +106,14 @@ function FinancialInfo() {
               ? formatMessage({ id: 'confirmation.expense.perYear', defaultMessage: 'year' })
               : formatMessage({ id: 'confirmation.expense.perMonth', defaultMessage: 'month' });
 
-          // Get the expense name and simplify "(Non-Subsidized)" to just the base name
-          let expenseName = expenseOptions[expense.expenseSourceName]?.props?.defaultMessage || expense.expenseSourceName;
-          expenseName = expenseName.replace(/\s*\(Non-Subsidized\)\s*/gi, '');
+          const expenseOption = expenseOptions[expense.expenseSourceName];
+          const expenseName = expenseOption?.props && 'id' in expenseOption.props
+            ? formatMessage({ ...expenseOption.props })
+            : expense.expenseSourceName;
 
           return (
             <li key={index}>
-              {expenseName}: {translateNumber(formatToUSD(expense.expenseAmount, 2))}
+              {expenseName}: {translateNumber(formatToUSD(expense.expenseAmount, 2))} / {frequencyLabel}
             </li>
           );
         })}
@@ -134,8 +135,8 @@ function FinancialInfo() {
         <ConfirmationItem
           label={
             <FormattedMessage
-              id="confirmation.monthlyHouseholdExpenses"
-              defaultMessage="Monthly Household Expenses:"
+              id="confirmation.householdExpenses"
+              defaultMessage="Household Expenses:"
             />
           }
           value={expensesDisplay()}
@@ -146,7 +147,7 @@ function FinancialInfo() {
               className="edit-button-simple"
               aria-label={formatMessage(editExpensesAriaLabel)}
             >
-              <Edit title={formatMessage(editExpensesAriaLabel)} />
+              <Edit aria-hidden={true} />
             </Link>
           }
         />
@@ -176,7 +177,7 @@ function FinancialInfo() {
               className="edit-button-simple"
               aria-label={formatMessage(editAssetsAriaLabel)}
             >
-              <Edit title={formatMessage(editAssetsAriaLabel)} />
+              <Edit aria-hidden={true} />
             </Link>
           }
         />
@@ -245,7 +246,10 @@ function BenefitsAndAdditionalInfo() {
       <ul className="confirmation-acute-need-list">
         {allNeeds.map(([key, _], index) => {
           const option = acuteConditionOptions[key];
-          return <li key={index}>{option?.text?.props?.defaultMessage || key}</li>;
+          const label = option?.text?.props && 'id' in option.text.props
+            ? formatMessage({ ...option.text.props })
+            : key;
+          return <li key={index}>{label}</li>;
         })}
       </ul>
     );
@@ -296,7 +300,7 @@ function BenefitsAndAdditionalInfo() {
               className="edit-button-simple"
               aria-label={formatMessage(editHasBenefitsAriaLabel)}
             >
-              <Edit title={formatMessage(editHasBenefitsAriaLabel)} />
+              <Edit aria-hidden={true} />
             </Link>
           }
         />
@@ -315,7 +319,7 @@ function BenefitsAndAdditionalInfo() {
               className="edit-button-simple"
               aria-label={formatMessage(editAcuteConditionsAriaLabel)}
             >
-              <Edit title={formatMessage(editAcuteConditionsAriaLabel)} />
+              <Edit aria-hidden={true} />
             </Link>
           }
         />
@@ -332,7 +336,7 @@ function BenefitsAndAdditionalInfo() {
                 className="edit-button-simple"
                 aria-label={formatMessage(editReferralSourceAriaLabel)}
               >
-                <Edit title={formatMessage(editReferralSourceAriaLabel)} />
+                <Edit aria-hidden={true} />
               </Link>
             }
           />

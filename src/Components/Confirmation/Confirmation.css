@@ -26,10 +26,6 @@
   margin-top: 0;
 }
 
-.confirmation-section:first-child {
-  margin-top: 0;
-}
-
 .simple-confirmation-section:last-child {
   border-bottom: none;
 }
@@ -103,6 +99,10 @@ svg.edit-button-simple polygon,
   padding: 0 0 1rem 0;
   margin-top: 1rem;
   border-bottom: 1px solid #d0d0d0;
+}
+
+.confirmation-section:first-child {
+  margin-top: 0;
 }
 
 .confirmation-section:last-child {
