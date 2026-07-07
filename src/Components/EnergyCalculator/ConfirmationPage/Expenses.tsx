@@ -3,7 +3,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import ConfirmationBlock from '../../Confirmation/ConfirmationBlock';
 import { Context } from '../../Wrapper/Wrapper';
 import { EnergyCalculatorExpenseType, ENERGY_CALCULATOR_EXPENSE_NAME_MAP } from '../Steps/Expenses';
-import { ReactComponent as Bill } from '../../EnergyCalculator/Icons/Bill.svg';
+import { Icon } from '../../Icon/Icon';
 
 export default function EnergyCalculatorExpenses() {
   const { formData } = useContext(Context);
@@ -40,7 +40,13 @@ export default function EnergyCalculatorExpenses() {
 
   return (
     <ConfirmationBlock
-      icon={<Bill className='confirmation-lucide-icon' title={formatMessage(electricityProviderIconAlt)} />}
+      icon={
+        <Icon
+          name="receipt"
+          className="confirmation-lucide-icon"
+          aria-label={formatMessage(electricityProviderIconAlt)}
+        />
+      }
       title={<FormattedMessage id="energyCalculator.confirmation.expenses" defaultMessage="Utility Bills" />}
       editAriaLabel={editElectricityProviderAriaLabel}
       stepName="energyCalculatorExpenses"

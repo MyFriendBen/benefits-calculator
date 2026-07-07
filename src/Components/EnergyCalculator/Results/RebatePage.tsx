@@ -3,8 +3,7 @@ import { FormattedMessage } from 'react-intl';
 import BackAndSaveButtons from '../../Results/BackAndSaveButtons/BackAndSaveButtons';
 import { useResultsLink } from '../../Results/Results';
 import { EnergyCalculatorRebateCardTitle, rebateTypes } from './RebatePageMappings';
-import { ReactComponent as WarningIcon } from '../../../Assets/icons/General/warning.svg';
-import { ReactComponent as Coin } from '../Icons/Coin.svg';
+import { Icon } from '../../Icon/Icon';
 import { renderCategoryDescription } from './rebateTypes';
 import './RebatePage.css';
 import { useMemo, useContext } from 'react';
@@ -54,7 +53,7 @@ export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePag
       </section>
       <div className="energy-calculator-rebate-page-container">
         <h1>
-          <Coin />
+          <Icon name="circle-dollar-sign" />
           <span>{rebateCategory.name}</span>
         </h1>
         {renderCategoryDescription(rebateCategory.type, formData)}
@@ -62,7 +61,7 @@ export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePag
           <>
             <HeatPumpJourneyCards />
             <h2 className="energy-calculator-rebate-page-rebates-heading">
-              <Coin />
+              <Icon name="circle-dollar-sign" />
               <span>
                 <FormattedMessage id="energyCalculator.rebatePage.rebatesHeading" defaultMessage="Rebates" />
               </span>
@@ -115,7 +114,12 @@ function RebateCard({ rebate, rebateCategory }: RebateProps) {
           })}
           {rebate.end_date && (
             <div className="energy-calculator-expiration-badge">
-              <WarningIcon className="energy-calculator-expiration-icon" role="img" aria-label="Warning expiration end date"/>
+              <Icon
+                name="triangle-alert"
+                className="energy-calculator-expiration-icon"
+                role="img"
+                aria-label="Warning expiration end date"
+              />
               <FormattedMessage
                 id="energyCalculator.rebatePage.expiration.ending"
                 defaultMessage="Ending on {date}"

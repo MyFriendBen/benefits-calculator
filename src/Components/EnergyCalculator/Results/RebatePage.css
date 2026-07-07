@@ -149,10 +149,7 @@
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
-}
-
-.energy-calculator-expiration-badge .energy-calculator-expiration-icon path {
-  fill: #000000;
+  color: #000000;
 }
 
 /* Mobile breakpoint (0-767px) - matches BREAKPOINTS.desktop - 1 from src/utils/breakpoints.ts */

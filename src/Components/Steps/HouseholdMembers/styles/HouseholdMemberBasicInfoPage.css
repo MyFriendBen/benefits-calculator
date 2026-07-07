@@ -38,10 +38,7 @@
 .household-basic-info-page__person-icon {
   width: 2rem;
   height: 2rem;
-}
-
-.household-basic-info-page__person-icon path {
-  fill: var(--primary-color);
+  color: var(--primary-color);
 }
 
 .household-basic-info-page__person-title {

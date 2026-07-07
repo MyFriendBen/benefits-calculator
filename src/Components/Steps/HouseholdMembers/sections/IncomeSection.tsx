@@ -26,7 +26,7 @@ import {
   FieldErrors,
 } from 'react-hook-form';
 import { NumericFormat } from 'react-number-format';
-import { ReactComponent as HelpBubble } from '../../../../Assets/icons/General/helpBubble.svg';
+import { ReactComponent as HelpBubble } from '../../../../Assets/icons/helpBubble.svg';
 import QuestionQuestion from '../../../QuestionComponents/QuestionQuestion';
 import QuestionDescription from '../../../QuestionComponents/QuestionDescription';
 import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
