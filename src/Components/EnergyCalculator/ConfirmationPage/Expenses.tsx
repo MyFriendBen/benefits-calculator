@@ -44,6 +44,7 @@ export default function EnergyCalculatorExpenses() {
         <Icon
           name="receipt"
           className="confirmation-lucide-icon"
+          role="img"
           aria-label={formatMessage(electricityProviderIconAlt)}
         />
       }
