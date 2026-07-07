@@ -42,10 +42,13 @@
   stroke: var(--secondary-icon-color);
 }
 
-/* Lucide icons have the class directly on the SVG element */
+/* Lucide icons have the class directly on the SVG element.
+   Lucide glyphs fill their viewBox edge-to-edge, so we size them smaller
+   than the 6rem icon column to leave breathing room between the icon and
+   the surrounding content/card borders. */
 svg.confirmation-lucide-icon {
-  width: 4.75rem;
-  height: 4.75rem;
+  width: 4rem;
+  height: 4rem;
 }
 
 svg.confirmation-lucide-icon * {

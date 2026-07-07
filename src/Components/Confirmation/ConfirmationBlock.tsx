@@ -43,7 +43,7 @@ export default function ConfirmationBlock({
         className="edit-button"
         aria-label={formatMessage(editAriaLabel)}
       >
-        <Pencil aria-label={formatMessage(editAriaLabel)} className="edit-pencil-icon" />
+        <Pencil aria-label={formatMessage(editAriaLabel)} className="edit-pencil-icon" strokeWidth={1.5} />
       </Link>
     </div>
   );

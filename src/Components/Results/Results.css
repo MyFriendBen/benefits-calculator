@@ -96,6 +96,8 @@
   align-items: center;
   justify-content: space-between;
   margin-top: 0.5rem;
+  /* Breathing room between the heading (icon + title) and the program box border below */
+  margin-bottom: 0.5rem;
 }
 
 .category-heading-icon {
@@ -132,7 +134,8 @@
   width: fit-content;
   text-align: left;
   display: inline-flex;
-  align-items: center;
+  /* Align the bottom of the icon with the bottom of the category title text */
+  align-items: flex-end;
   margin-right: 1rem;
 }
 
@@ -144,6 +147,12 @@
   font-weight: 700;
   color: var(--secondary-color);
   font-size: 1.3rem;
+}
+
+/* Bottom-align the title with the icon inside the heading column
+   (the /month amount lives in .box-right, so it is unaffected) */
+.category-heading-column .category-heading-text-style {
+  align-self: flex-end;
 }
 
 .category-heading-text-style.normal-weight {

@@ -12,10 +12,16 @@
 }
 
 .result-resource-more-info svg {
-  margin-left: 0.75rem;
-  margin-right: 0.75rem;
+  /* Center the icon in the whitespace between the card border and the text.
+     The card adds 1rem of left padding, so a 0.25rem left margin + 1.25rem
+     right margin puts equal 1.25rem gaps on either side of the icon. */
+  margin-left: 0.25rem;
+  margin-right: 1.25rem;
   height: 3rem;
   width: 3rem;
+  /* Keep icons a uniform size: don't let flex shrink the SVG when a long
+     resource name wraps to multiple lines (the text wraps instead). */
+  flex-shrink: 0;
 }
 
 svg.need-card-lucide-icon * {
