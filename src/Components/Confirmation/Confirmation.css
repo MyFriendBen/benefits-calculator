@@ -31,34 +31,17 @@
   align-items: center;
 }
 
-.confirmation-icon svg {
-  width: 6rem;
-  height: 6rem;
-}
-
-.confirmation-icon svg path,
-.confirmation-icon svg circle {
-  fill: var(--secondary-icon-color);
-  stroke: var(--secondary-icon-color);
-}
-
-/* Lucide icons have the class directly on the SVG element.
-   Lucide glyphs fill their viewBox edge-to-edge, so we size them smaller
-   than the 6rem icon column to leave breathing room between the icon and
-   the surrounding content/card borders. */
+/* Every confirmation-block icon is a Lucide <svg> (the class sits directly on
+   the SVG). Lucide glyphs fill their viewBox edge-to-edge, so we size them
+   smaller than the 6rem icon column (.confirmation-icon) to leave breathing
+   room between the icon and the surrounding content/card borders. */
 svg.confirmation-lucide-icon {
   width: 4rem;
   height: 4rem;
 }
 
 svg.confirmation-lucide-icon * {
-  fill: none !important;
-  stroke: var(--secondary-icon-color);
-}
-
-svg.confirmation-icon path,
-svg.confirmation-icon circle {
-  fill: var(--secondary-icon-color);
+  fill: none;
   stroke: var(--secondary-icon-color);
 }
 
@@ -180,7 +163,7 @@ svg.edit-pencil-icon * {
     margin: 0 1rem 0 0;
   }
 
-  .confirmation-icon svg {
+  svg.confirmation-lucide-icon {
     width: 3rem;
     height: 3rem;
   }
