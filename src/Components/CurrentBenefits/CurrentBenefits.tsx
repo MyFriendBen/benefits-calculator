@@ -140,7 +140,7 @@ const CurrentBenefits = () => {
 
       const iconKey = icon.toLowerCase();
       const lucideIconName = ICON_NAME_MAP[iconKey] ?? ICON_NAME_MAP['default'];
-      const iconClassName = 'category-heading-icon category-lucide-icon';
+      const iconClassName = 'category-heading-icon';
 
       return (
         <div key={index} className="category-section-container">

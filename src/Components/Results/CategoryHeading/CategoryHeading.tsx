@@ -35,7 +35,7 @@ const CategoryHeading = ({ category, showAmount }: CategoryHeadingProps) => {
       <div className="category-heading-container">
         <div className="category-heading-column">
           <div
-            className="category-heading-icon category-lucide-icon"
+            className="category-heading-icon"
             aria-label={`${intl.formatMessage(categoryImageAriaLabelProps)} ${iconTranslation}`}
             role="img"
           >
