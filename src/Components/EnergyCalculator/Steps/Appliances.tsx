@@ -7,9 +7,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { ReactComponent as Shower } from '../Icons/Shower.svg';
-import { ReactComponent as AirVent } from '../Icons/AirVent.svg';
-import { ReactComponent as Pot } from '../Icons/Pot.svg';
+import { Icon } from '../../Icon/Icon';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
 import { useDefaultBackNavigationFunction } from '../../QuestionComponents/questionHooks';
 import { useContext } from 'react';
@@ -20,17 +18,17 @@ import useStepForm from '../../Steps/stepForm';
 
 export const applianceStatusOptions = {
   needsWaterHeater: {
-    icon: <Shower className="option-card-lucide-icon shower-icon-scaled" />,
+    icon: <Icon name="shower-head" className="option-card-lucide-icon shower-icon-scaled" />,
     text: <FormattedMessage id="applianceStatusOptions.needsWaterHeater" defaultMessage="Water Heater" />,
   },
   needsHvac: {
-    icon: <AirVent className="option-card-lucide-icon" />,
+    icon: <Icon name="air-vent" className="option-card-lucide-icon" />,
     text: (
       <FormattedMessage id="applianceStatusOptions.needsHvac" defaultMessage="Heating, ventilation, and/or cooling" />
     ),
   },
   needsStove: {
-    icon: <Pot className="option-card-lucide-icon" />,
+    icon: <Icon name="cooking-pot" className="option-card-lucide-icon" />,
     text: <FormattedMessage id="applianceStatusOptions.needsStove" defaultMessage="Cooking stove/range" />,
   },
 };

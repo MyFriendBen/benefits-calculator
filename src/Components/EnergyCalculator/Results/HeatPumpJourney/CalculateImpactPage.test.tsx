@@ -18,10 +18,6 @@ jest.mock('../../../Common/TrackedOutboundLink', () => ({
   TrackedOutboundLink: ({ children, href }) => <a href={href}>{children}</a>,
 }));
 
-jest.mock('../../Icons/Coin.svg', () => ({
-  ReactComponent: () => <svg data-testid="coin-icon" />,
-}));
-
 jest.mock('../../../Config/configHook', () => ({
   useFeatureFlag: jest.fn(),
 }));
@@ -122,7 +118,7 @@ describe('CalculateImpactPage', () => {
 
     it('renders the coin icon', () => {
       renderPage();
-      expect(screen.getByTestId('coin-icon')).toBeInTheDocument();
+      expect(document.querySelector('.calculate-impact-icon')).toBeInTheDocument();
     });
 
     it('renders the Rewiring America intro paragraph', () => {

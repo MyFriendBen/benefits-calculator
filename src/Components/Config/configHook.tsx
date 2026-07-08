@@ -4,9 +4,6 @@ import { configEndpoint, header } from '../../apiCalls';
 import { ConfigApiResponse, ConfigValue, FeatureFlags } from '../../Types/Config';
 import { Config } from '../../Types/Config';
 import { FormattedMessage } from 'react-intl';
-import { ReactComponent as SurvivingSpouse } from '../EnergyCalculator/Icons/Person.svg';
-import { ReactComponent as Wheelchair } from '../EnergyCalculator/Icons/Wheelchair.svg';
-import { ReactComponent as HeartRate } from '../EnergyCalculator/Icons/HeartRate.svg';
 import { Language } from '../../Assets/languageOptions';
 import { Icon } from '../Icon/Icon';
 
@@ -54,18 +51,18 @@ type IconItem = {
 };
 
 // Transforms objects with icon key to return a Lucide Icon component.
-// EnergyCalculator-specific icons (SurvivingSpouse, Wheelchair, HeartRate) retain their
-// custom SVG components since they are outside the scope of the Lucide migration.
+// The EnergyCalculator-specific icons (SurvivingSpouse, Wheelchair, HeartRate) preserve
+// their config-driven _classname; all other icons use the shared option-card class.
 function transformItemIcon(item: unknown): any {
   const icon = item as IconItem;
 
   switch (icon._icon) {
     case 'SurvivingSpouse':
-      return <SurvivingSpouse className={icon._classname} />;
+      return <Icon name="user-round" className={icon._classname} />;
     case 'Wheelchair':
-      return <Wheelchair className={icon._classname} />;
+      return <Icon name="accessibility" className={icon._classname} />;
     case 'HeartRate':
-      return <HeartRate className={icon._classname} />;
+      return <Icon name="square-activity" className={icon._classname} />;
     default: {
       const lucideName = OPTION_CARD_ICON_MAP[icon._icon] ?? 'circle-dot';
       return <Icon name={lucideName} className="option-card-lucide-icon" />;

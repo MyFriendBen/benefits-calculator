@@ -9,7 +9,7 @@ import PagedDocumentViewer from '../../../Common/PagedDocumentViewer';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
 import { addAdminToLink } from '../../../../Assets/adminLink';
-import { ReactComponent as Wrench } from '../../Icons/Wrench.svg';
+import { Icon } from '../../../Icon/Icon';
 import './ConnectNowPage.css';
 
 const CONTRACTOR_FINDER_URL = 'https://contractors.poweraheadcolorado.org/contractor-finder?utm_source=cesn' as const;
@@ -71,7 +71,7 @@ export default function ConnectNowPage() {
       </div>
 
       <header className="connect-now-header">
-        <Wrench aria-hidden="true" className="connect-now-icon" />
+        <Icon name="wrench" aria-hidden="true" className="connect-now-icon" />
         <div className="connect-now-header-text">
           <span className="connect-now-title-text">
             <FormattedMessage id="energyCalculator.connectNow.eyebrow" defaultMessage="Find a Contractor" />

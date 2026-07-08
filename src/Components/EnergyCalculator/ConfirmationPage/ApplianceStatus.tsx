@@ -1,6 +1,6 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import ConfirmationBlock from '../../Confirmation/ConfirmationBlock';
-import { ReactComponent as AirVent } from '../../EnergyCalculator/Icons/AirVent.svg';
+import { Icon } from '../../Icon/Icon';
 import { Context } from '../../Wrapper/Wrapper';
 import { useContext } from 'react';
 import { applianceStatusOptions } from '../Steps/Appliances';
@@ -41,7 +41,9 @@ const ApplianceStatus = () => {
 
   return (
     <ConfirmationBlock
-      icon={<AirVent className="confirmation-lucide-icon" title={formatMessage(applianceStatusIconAlt)} />}
+      icon={
+        <Icon name="air-vent" className="confirmation-lucide-icon" aria-label={formatMessage(applianceStatusIconAlt)} />
+      }
       title={
         <FormattedMessage
           id="energyCalculator.confirmation.applianceStatus"

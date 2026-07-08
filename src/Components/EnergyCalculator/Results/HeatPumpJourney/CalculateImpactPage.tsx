@@ -35,7 +35,7 @@ import { fetchRemImpact, RemAddressNotSupportedError } from './fetchRemImpact';
 import { buildCalculateImpactPayload } from './remCalculateImpactTypes';
 import CalculateImpactResults from './CalculateImpactResults';
 import { GooglePlacesAddressInput } from '../../../Common/GooglePlacesAddressInput';
-import { ReactComponent as Coin } from '../../Icons/Coin.svg';
+import { Icon } from '../../../Icon/Icon';
 import './CalculateImpactPage.css';
 
 const HOUSEHOLD_TYPE_OPTIONS: { value: CalculateImpactHouseholdType; messageId: string; defaultMessage: string }[] = [
@@ -246,7 +246,7 @@ export default function CalculateImpactPage() {
         </div>
 
         <header className="calculate-impact-header">
-          <Coin aria-hidden="true" className="calculate-impact-icon" />
+          <Icon name="circle-dollar-sign" aria-hidden="true" className="calculate-impact-icon" />
           <div className="calculate-impact-header-text">
             <span className="calculate-impact-title-text">
               <FormattedMessage
@@ -310,7 +310,7 @@ export default function CalculateImpactPage() {
       </div>
 
       <header className="calculate-impact-header">
-        <Coin aria-hidden="true" className="calculate-impact-icon" />
+        <Icon name="circle-dollar-sign" aria-hidden="true" className="calculate-impact-icon" />
         <div className="calculate-impact-header-text">
           <span className="calculate-impact-title-text">
             <FormattedMessage

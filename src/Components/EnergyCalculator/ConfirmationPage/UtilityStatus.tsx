@@ -1,6 +1,6 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import ConfirmationBlock from '../../Confirmation/ConfirmationBlock';
-import { ReactComponent as FileWarning } from '../../EnergyCalculator/Icons/FileWarning.svg';
+import { Icon } from '../../Icon/Icon';
 import { Context } from '../../Wrapper/Wrapper';
 import { useContext } from 'react';
 
@@ -23,7 +23,13 @@ const UtilityStatus = () => {
 
   return (
     <ConfirmationBlock
-      icon={<FileWarning className="confirmation-lucide-icon" title={formatMessage(utilityStatusIconAlt)} />}
+      icon={
+        <Icon
+          name="file-warning"
+          className="confirmation-lucide-icon"
+          aria-label={formatMessage(utilityStatusIconAlt)}
+        />
+      }
       title={
         <FormattedMessage
           id="energyCalculator.confirmation.utilityStatus"

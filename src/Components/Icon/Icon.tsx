@@ -16,5 +16,5 @@ export function Icon({ name, ...props }: IconProps) {
     return null;
   }
 
-  return <LucideIcon {...props} />;
+  return <LucideIcon strokeWidth={1.5} {...props} />;
 }

@@ -1,4 +1,4 @@
-import { ReactComponent as WarningIcon } from '../../Assets/icons/General/warning.svg';
+import { Icon } from '../Icon/Icon';
 import './WarningMessage.css';
 import ResultsTranslate from '../Results/Translate/Translate';
 import { WarningMsg } from '../../Types/Results';
@@ -21,7 +21,7 @@ const WarningMessage = ({ warning }: WarningMessageProps) => {
 
   return (
     <div className="warning-message">
-      <WarningIcon className="warning-icon" />
+      <Icon name="triangle-alert" className="warning-icon" />
       <p>
         <ResultsTranslate translation={warning.message} />
         {translatedLink !== '' && (

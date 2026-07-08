@@ -15,7 +15,7 @@ import useStepForm from '../../stepForm';
 import { FormattedMessageType } from '../../../../Types/Questions';
 import { useConfig } from '../../../Config/configHook';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
-import { ReactComponent as PersonIcon } from '../../../../Assets/icons/General/head.svg';
+import { Icon } from '../../../Icon/Icon';
 import { BASIC_INFO_GRID_STYLES } from '../utils/constants';
 import { createBasicInfoPageSchema, BasicInfoPageSchema } from '../utils/schema';
 import { UNSET_BIRTH_YEAR, createDefaultMember } from '../utils/defaultValues';
@@ -143,7 +143,7 @@ const HouseholdMemberBasicInfoPage = () => {
                 className="household-basic-info-page__person-card"
               >
                 <div className="household-basic-info-page__person-header">
-                  <PersonIcon className="household-basic-info-page__person-icon" />
+                  <Icon name="user-round" className="household-basic-info-page__person-icon" />
                   <Typography className="household-basic-info-page__person-title">
                     {isFirstMember ? (
                       <FormattedMessage id="householdDataBlock.basicInfo.you" defaultMessage="You" />

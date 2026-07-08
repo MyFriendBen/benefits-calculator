@@ -9,10 +9,7 @@
   margin: 3rem 0 1rem 0;
   width: 4rem;
   height: 4rem;
-}
-
-.error-icon path {
-  fill: var(--icon-color);
+  color: var(--icon-color);
 }
 
 .error-header {
