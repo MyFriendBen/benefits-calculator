@@ -110,9 +110,10 @@
   width: 2.5rem;
   height: 2rem;
   color: var(--icon-color);
+  fill: none;
+  stroke: currentColor;
 }
 
-.category-heading-icon svg,
 .category-heading-icon svg * {
   fill: none;
   stroke: currentColor;
