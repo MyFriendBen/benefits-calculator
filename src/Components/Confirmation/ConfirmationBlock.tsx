@@ -31,20 +31,22 @@ export default function ConfirmationBlock({
   const locationState = noReturn ? undefined : { routedFromConfirmationPg: true };
 
   return (
-    <div className="confirmation-block-container">
-      <div className="confirmation-icon">{icon}</div>
-      <div className="confirmation-block-content">
-        <p className="section-title">{title}</p>
-        {children}
+    <div className="confirmation-section">
+      <div className="confirmation-section-header">
+        <h2>
+          <div className="confirmation-icon">{icon}</div>
+          {title}
+        </h2>
+        <Link
+          to={`/${whiteLabel}/${uuid}/step-${stepNumber}/${editUrlEnding}`}
+          state={locationState}
+          className="edit-button-simple"
+          aria-label={formatMessage(editAriaLabel)}
+        >
+          <Pencil aria-hidden={true} />
+        </Link>
       </div>
-      <Link
-        to={`/${whiteLabel}/${uuid}/step-${stepNumber}/${editUrlEnding}`}
-        state={locationState}
-        className="edit-button"
-        aria-label={formatMessage(editAriaLabel)}
-      >
-        <Pencil className="edit-pencil-icon" aria-hidden={true} />
-      </Link>
+      <div className="confirmation-section-content">{children}</div>
     </div>
   );
 }
@@ -52,15 +54,17 @@ export default function ConfirmationBlock({
 type ConfirmationItemParams = {
   label?: ReactNode;
   value: ReactNode;
+  editLink?: ReactNode;
 };
 
 // be sure to include the ":" in the label
-export function ConfirmationItem({ label, value }: ConfirmationItemParams) {
+export function ConfirmationItem({ label, value, editLink }: ConfirmationItemParams) {
   return (
     <div className="confirmation-row">
       {label && <div className="confirmation-row-label">{label}</div>}
       <div className="confirmation-row-value">
         <div className="confirmation-row-value-content">{value}</div>
+        {editLink && <div className="confirmation-row-value-edit">{editLink}</div>}
       </div>
     </div>
   );

@@ -1,18 +1,8 @@
-.confirmation-section-underline {
-  margin-bottom: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--divider-color);
-}
-
 .confirmation-container {
   max-width: 1200px;
   margin: 1rem auto 2rem;
   background-color: transparent;
   border: none;
-}
-
-.confirmation-page-header {
-  display: none;
 }
 
 /* Simple section for basic info (no colored header) */
@@ -55,7 +45,7 @@
 
 .simple-section-header h2 svg path,
 .simple-section-header h2 svg circle {
-  fill: var(--secondary-color);
+  fill: none;
   stroke: var(--secondary-color);
 }
 
@@ -82,6 +72,10 @@
 .edit-button-simple:hover {
   cursor: pointer;
   opacity: 0.7;
+}
+
+[dir='rtl'] .edit-button-simple {
+  transform: scaleX(-1);
 }
 
 svg.edit-button-simple path,
@@ -137,20 +131,12 @@ svg.edit-button-simple polygon,
 
 .confirmation-section-header svg path,
 .confirmation-section-header svg circle {
-  fill: var(--secondary-color);
+  fill: none;
   stroke: var(--secondary-color);
 }
 
 .confirmation-section-content {
   padding: 0;
-}
-
-.confirmation-block-container {
-  background-color: white;
-  padding: 0;
-  margin-bottom: 0;
-  position: relative;
-  display: block;
 }
 
 .confirmation-container > div {
@@ -169,75 +155,25 @@ svg.edit-button-simple polygon,
 }
 
 .confirmation-icon svg {
-  width: 6rem;
-  height: 6rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .confirmation-icon svg path,
 .confirmation-icon svg circle {
-  fill: var(--secondary-icon-color);
-  stroke: var(--secondary-icon-color);
+  fill: none;
+  stroke: var(--secondary-color);
 }
 
 /* Lucide icons have the class directly on the SVG element */
 svg.confirmation-lucide-icon {
-  width: 4.75rem;
-  height: 4.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 svg.confirmation-lucide-icon * {
-  fill: white !important;
-  stroke: var(--secondary-icon-color);
-}
-
-svg.confirmation-icon path,
-svg.confirmation-icon circle {
-  fill: var(--secondary-icon-color);
-  stroke: var(--secondary-icon-color);
-}
-
-.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-2.css-1o7apob-MuiGrid-root.no-padding {
-  padding: 0;
-}
-
-.edit-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  padding: 0;
-  background: transparent;
-  border: none;
-}
-
-.edit-button:hover {
-  cursor: pointer;
-  opacity: 0.7;
-}
-
-[dir='rtl'] .edit-button {
-  transform: scaleX(-1);
-}
-
-svg.edit-button path,
-svg.edit-button rect,
-svg.edit-button polygon,
-.edit-button svg path,
-.edit-button svg rect,
-.edit-button svg polygon {
-  stroke: #999 !important;
-  fill: #999 !important;
-}
-
-svg.edit-pencil-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-svg.edit-pencil-icon * {
-  stroke: var(--midBlue-color);
-  fill: none;
+  fill: none !important;
+  stroke: var(--secondary-color);
 }
 
 .confirmation-acute-need-list {
@@ -248,16 +184,6 @@ svg.edit-pencil-icon * {
 .prev-continue-results-buttons.confirmation {
   display: flex;
   justify-content: space-between;
-}
-
-.section-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-
-.section-p {
-  line-height: 2rem;
 }
 
 /* Table-like layout for confirmation items */
@@ -394,33 +320,17 @@ svg.edit-pencil-icon * {
 }
 
 .household-member-table td .edit-button-simple {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1rem;
+  height: 1rem;
 }
 
 .household-member-table td .edit-button-simple svg {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.flip-horizontally {
-  transform: scaleX(-1);
+  width: 1rem;
+  height: 1rem;
 }
 
 .bottom-margin {
   margin-bottom: 0.5rem;
-}
-
-.MuiSvgIcon-root.home-icon {
-  color: #2a2b2a;
-  height: 4rem;
-  width: 4rem;
-}
-
-.confirmation-block-content {
-  display: block;
-  align-content: center;
-  padding-right: 2rem;
 }
 
 @media (max-width: 767px) {
@@ -471,25 +381,6 @@ svg.edit-pencil-icon * {
     font-size: 0.85rem;
   }
 
-  .edit-button {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-
-  .MuiSvgIcon-root.home-icon {
-    height: 1.25rem;
-    width: 1.25rem;
-  }
-
-  .section-title {
-    font-size: 1rem;
-  }
-
-  .section-p {
-    font-size: 0.9rem;
-    line-height: 1.5rem;
-  }
-
   h1.sub-header {
     font-size: 1.5rem;
   }
@@ -517,7 +408,7 @@ svg.edit-pencil-icon * {
   }
 
   .confirmation-icon svg {
-    width: 3rem;
-    height: 3rem;
+    width: 1.25rem;
+    height: 1.25rem;
   }
 }

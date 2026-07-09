@@ -14,6 +14,29 @@ import EnergyCalculatorGasProvider from '../EnergyCalculator/ConfirmationPage/Ga
 import EnergyCalculatorExpenses from '../EnergyCalculator/ConfirmationPage/Expenses';
 import EnergyCalculatorUtilityStatus from '../EnergyCalculator/ConfirmationPage/UtilityStatus';
 import EnergyCalculatorApplianceStatus from '../EnergyCalculator/ConfirmationPage/ApplianceStatus';
+import { Pencil } from 'lucide-react';
+import { Link, useParams } from 'react-router-dom';
+import { useStepNumber } from '../../Assets/stepDirectory';
+
+function RowEditLink({ stepName, ariaLabel }: { stepName: QuestionName; ariaLabel: string }) {
+  const { whiteLabel, uuid } = useParams();
+  const stepNumber = useStepNumber(stepName, false);
+
+  if (stepNumber === -1) {
+    return null;
+  }
+
+  return (
+    <Link
+      to={`/${whiteLabel}/${uuid}/step-${stepNumber}/`}
+      state={{ routedFromConfirmationPg: true }}
+      className="edit-button-simple"
+      aria-label={ariaLabel}
+    >
+      <Pencil aria-hidden={true} />
+    </Link>
+  );
+}
 
 function ZipCode() {
   const { formData, getReferrer } = useContext(Context);
@@ -50,44 +73,6 @@ function ZipCode() {
   );
 }
 
-function HouseholdSize() {
-  const { formData } = useContext(Context);
-  const { householdSize } = formData;
-  const { formatMessage } = useIntl();
-  const translateNumber = useTranslateNumber();
-
-  const householdSizeText = `${translateNumber(householdSize)} ${formatMessage(
-    { id: 'confirmation.householdSizeLabel', defaultMessage: '{count, plural, one {person} other {people}}' },
-    { count: householdSize },
-  )}`;
-
-  const editHouseholdSizeAriaLabel = {
-    id: 'confirmation.hhSize.edit-AL',
-    defaultMessage: 'edit household size',
-  };
-  const householdSizeIconAlt = {
-    id: 'confirmation.hhsize.icon-AL',
-    defaultMessage: 'household size',
-  };
-
-  return (
-    <ConfirmationBlock
-      icon={<Icon name="users" className="confirmation-lucide-icon" aria-label={formatMessage(householdSizeIconAlt)} />}
-      title={
-        <FormattedMessage id="confirmation.displayAllFormData-yourHouseholdLabel" defaultMessage="Household Members" />
-      }
-      editAriaLabel={editHouseholdSizeAriaLabel}
-      stepName="householdSize"
-      noReturn
-    >
-      <ConfirmationItem
-        label={<FormattedMessage id="confirmation.householdSize-inputLabel" defaultMessage="Household Size:" />}
-        value={householdSizeText}
-      />
-    </ConfirmationBlock>
-  );
-}
-
 type FormattedMessageMap = {
   [key: string]: FormattedMessageType;
 };
@@ -99,7 +84,7 @@ type IconAndFormattedMessageMap = {
   };
 };
 
-function Expenses() {
+function FinancialInfo() {
   const { formData } = useContext(Context);
   const { formatMessage } = useIntl();
   const translateNumber = useTranslateNumber();
@@ -109,107 +94,99 @@ function Expenses() {
     [expenseOptionsByCategory],
   );
 
-  const editExpensesAriaLabel = {
-    id: 'confirmation.expense.edit-AL',
-    defaultMessage: 'edit expenses',
-  };
-  const expensesIconAlt = {
-    id: 'confirmation.expense.icon-AL',
-    defaultMessage: 'expenses',
-  };
-
-  const allExpenses = () => {
+  const expensesValue = () => {
     if (formData.expenses.length === 0) {
-      return <ConfirmationItem value={<FormattedMessage id="confirmation.none" defaultMessage="None" />} />;
+      return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
     }
-    const mappedExpenses = formData.expenses.map((expense, i) => {
-      const frequencyLabel =
-        expense.expenseFrequency === 'yearly'
-          ? formatMessage({ id: 'confirmation.expense.perYear', defaultMessage: 'year' })
-          : formatMessage({ id: 'confirmation.expense.perMonth', defaultMessage: 'month' });
-      return (
-        <ConfirmationItem
-          label={<>{expenseOptions[expense.expenseSourceName]}:</>}
-          value={`${translateNumber(formatToUSD(expense.expenseAmount))} / ${frequencyLabel}`}
-          key={i}
-        />
-      );
-    });
-
-    return mappedExpenses;
+    return (
+      <ul className="confirmation-expense-list">
+        {formData.expenses.map((expense, i) => {
+          const frequencyLabel =
+            expense.expenseFrequency === 'yearly'
+              ? formatMessage({ id: 'confirmation.expense.perYear', defaultMessage: 'year' })
+              : formatMessage({ id: 'confirmation.expense.perMonth', defaultMessage: 'month' });
+          const expenseName =
+            expenseOptions[expense.expenseSourceName]?.props && 'id' in expenseOptions[expense.expenseSourceName].props
+              ? formatMessage({ ...expenseOptions[expense.expenseSourceName].props })
+              : expense.expenseSourceName;
+          return (
+            <li key={i}>
+              {expenseName}: {translateNumber(formatToUSD(expense.expenseAmount))} / {frequencyLabel}
+            </li>
+          );
+        })}
+      </ul>
+    );
   };
 
   return (
-    <ConfirmationBlock
-      icon={<Icon name="receipt" className="confirmation-lucide-icon" aria-label={formatMessage(expensesIconAlt)} />}
-      title={
-        <FormattedMessage
-          id="confirmation.headOfHouseholdDataBlock-expensesLabel"
-          defaultMessage="Household Expenses"
-        />
-      }
-      editAriaLabel={editExpensesAriaLabel}
-      stepName="hasExpenses"
-    >
-      {allExpenses()}
-    </ConfirmationBlock>
-  );
-}
-
-function Assets() {
-  const { formData } = useContext(Context);
-  const { formatMessage } = useIntl();
-  const translateNumber = useTranslateNumber();
-
-  const editAssetsAriaLabel = {
-    id: 'confirmation.assets.edit-AL',
-    defaultMessage: 'edit assets',
-  };
-  const assetsIconAlt = {
-    id: 'confirmation.assets.icon-AL',
-    defaultMessage: 'assets',
-  };
-
-  return (
-    <ConfirmationBlock
-      icon={<Icon name="piggy-bank" className="confirmation-lucide-icon" aria-label={formatMessage(assetsIconAlt)} />}
-      title={
-        <FormattedMessage
-          id="confirmation.displayAllFormData-householdResourcesText"
-          defaultMessage="Household resources"
-        />
-      }
-      editAriaLabel={editAssetsAriaLabel}
-      stepName="householdAssets"
-    >
-      <ConfirmationItem
-        label={
-          <FormattedMessage
-            id="confirmation.displayAllFormData-householdResourcesText"
-            defaultMessage="Household resources"
+    <div className="simple-confirmation-section">
+      <div className="simple-section-header">
+        <h2>
+          <Icon
+            name="receipt"
+            aria-label={formatMessage({
+              id: 'confirmation.financialInfo.icon-AL',
+              defaultMessage: 'financial information',
+            })}
           />
-        }
-        value={
-          <>
-            {translateNumber(formatToUSD(formData.householdAssets, 0))}
-            <i>
-              <FormattedMessage
-                id="confirmation.displayAllFormData-householdResourcesDescription"
-                defaultMessage="(This is cash on hand, checking or saving accounts, stocks, bonds or mutual funds.)"
-              />
-            </i>
-          </>
-        }
-      />
-    </ConfirmationBlock>
+          <FormattedMessage id="confirmation.financialInfo" defaultMessage="Financial Information" />
+        </h2>
+      </div>
+      <div className="simple-section-content">
+        <ConfirmationItem
+          label={
+            <FormattedMessage
+              id="confirmation.headOfHouseholdDataBlock-expensesLabel"
+              defaultMessage="Household Expenses"
+            />
+          }
+          value={expensesValue()}
+          editLink={
+            <RowEditLink
+              stepName="hasExpenses"
+              ariaLabel={formatMessage({ id: 'confirmation.expense.edit-AL', defaultMessage: 'edit expenses' })}
+            />
+          }
+        />
+        <ConfirmationItem
+          label={
+            <FormattedMessage
+              id="confirmation.displayAllFormData-householdResourcesText"
+              defaultMessage="Household resources"
+            />
+          }
+          value={
+            <>
+              {translateNumber(formatToUSD(formData.householdAssets, 0))}
+              <i>
+                <FormattedMessage
+                  id="confirmation.displayAllFormData-householdResourcesDescription"
+                  defaultMessage="(This is cash on hand, checking or saving accounts, stocks, bonds or mutual funds.)"
+                />
+              </i>
+            </>
+          }
+          editLink={
+            <RowEditLink
+              stepName="householdAssets"
+              ariaLabel={formatMessage({ id: 'confirmation.assets.edit-AL', defaultMessage: 'edit assets' })}
+            />
+          }
+        />
+      </div>
+    </div>
   );
 }
 
-function HasBenefits() {
+function BenefitsAndAdditionalInfo() {
   const { formData, hasBenefitsPrograms } = useContext(Context);
   const { formatMessage } = useIntl();
+  const acuteConditionOptions = useConfig<IconAndFormattedMessageMap>('acute_condition_options');
+  const { allOptions, loading } = useReferralOptions();
+  const referralSourceStepNumber = useStepNumber('referralSource', false);
 
-  const alreadyHasBenefits = () => {
+  const benefitsValue = () => {
     const selectedKeys = Array.from(formData.benefits);
 
     if (selectedKeys.length === 0) {
@@ -226,151 +203,136 @@ function HasBenefits() {
       return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
     }
 
-    return matched.map(({ key, program }) => (
-      <ConfirmationItem
-        key={key}
-        label={<FormattedMessage id={program.name.label} defaultMessage={program.name.default_message} />}
-        value={
-          <FormattedMessage
-            id={program.website_description.label}
-            defaultMessage={program.website_description.default_message}
-          />
-        }
-      />
-    ));
+    return (
+      <ul className="confirmation-expense-list">
+        {matched.map(({ key, program }) => (
+          <li key={key}>
+            <FormattedMessage id={program.name.label} defaultMessage={program.name.default_message} />
+          </li>
+        ))}
+      </ul>
+    );
   };
 
-  const editHasBenefitsAriaLabel = {
-    id: 'confirmation.currentBenefits.edit-AL',
-    defaultMessage: 'edit benefits you already have',
-  };
-  const hasBenefitsIconAlt = {
-    id: 'confirmation.currentBenefits.icon-AL',
-    defaultMessage: 'benefits you already have',
-  };
-
-  return (
-    <ConfirmationBlock
-      icon={<Icon name="shield-check" className="confirmation-lucide-icon" aria-label={formatMessage(hasBenefitsIconAlt)} />}
-      title={
-        <FormattedMessage
-          id="confirmation.displayAllFormData-currentHHBenefitsText"
-          defaultMessage="Current Household Benefits:"
-        />
-      }
-      editAriaLabel={editHasBenefitsAriaLabel}
-      stepName="hasBenefits"
-    >
-      {alreadyHasBenefits()}
-    </ConfirmationBlock>
-  );
-}
-
-function AcuteConditions() {
-  const { formData } = useContext(Context);
-  const { formatMessage } = useIntl();
-  const acuteConditionOptions = useConfig<IconAndFormattedMessageMap>('acute_condition_options');
-
-  const editAcuteConditionsAriaLabel = {
-    id: 'confirmation.acuteConditions.edit-AL',
-    defaultMessage: 'edit immediate needs',
-  };
-  const acuteConditionsIconAlt = {
-    id: 'confirmation.acuteConditions.icon-AL',
-    defaultMessage: 'immediate needs',
-  };
-
-  const formatedNeeds = () => {
-    const allNeeds = Object.entries(formData.acuteHHConditions).filter(([_, value]) => value === true);
+  const acuteConditionsValue = () => {
+    const allNeeds = Object.entries(formData.acuteHHConditions).filter(([, value]) => value === true);
 
     if (allNeeds.length === 0) {
       return <FormattedMessage id="confirmation.noIncome" defaultMessage="None" />;
     }
 
     return (
-      <ConfirmationItem
-        value={
-          <ul className="confirmation-acute-need-list">
-            {allNeeds.map(([key, _]) => {
-              const option = acuteConditionOptions[key];
-              const label =
-                option?.text?.props && 'id' in option.text.props
-                  ? formatMessage({ ...option.text.props })
-                  : key;
-              return <li key={key}>{label}</li>;
-            })}
-          </ul>
-        }
-      />
+      <ul className="confirmation-acute-need-list">
+        {allNeeds.map(([key]) => {
+          const option = acuteConditionOptions[key];
+          const label =
+            option?.text?.props && 'id' in option.text.props ? formatMessage({ ...option.text.props }) : key;
+          return <li key={key}>{label}</li>;
+        })}
+      </ul>
     );
   };
 
-  return (
-    <ConfirmationBlock
-      icon={<Icon name="triangle-alert" className="confirmation-lucide-icon" aria-label={formatMessage(acuteConditionsIconAlt)} />}
-      title={
-        <FormattedMessage
-          id="confirmation.displayAllFormData-acuteHHConditions"
-          defaultMessage="Additional Resources"
-        />
-      }
-      editAriaLabel={editAcuteConditionsAriaLabel}
-      stepName="acuteHHConditions"
-    >
-      {formatedNeeds()}
-    </ConfirmationBlock>
-  );
-}
-
-function ReferralSource() {
-  const { formData } = useContext(Context);
-  const { formatMessage } = useIntl();
-  const { allOptions, loading } = useReferralOptions();
-
-  if (formData.referralSource === undefined || loading) {
-    return null;
-  }
-
-  const editReferralSourceAriaLabel = {
-    id: 'confirmation.referralSource.edit-AL',
-    defaultMessage: 'edit referral source',
-  };
-  const referralSourceIconAlt = {
-    id: 'confirmation.referralSource.icon-AL',
-    defaultMessage: 'referral source',
-  };
-
-  const displayValue =
-    formData.referralSource in allOptions
+  const referralSourceValue = () => {
+    if (formData.referralSource === undefined || loading) {
+      return null;
+    }
+    return formData.referralSource in allOptions
       ? formatMessage({
           id: `referralOptions.${formData.referralSource}`,
           defaultMessage: allOptions[formData.referralSource],
         })
       : formData.referralSource;
+  };
 
   return (
-    <ConfirmationBlock
-      icon={<Icon name="share-2" className="confirmation-lucide-icon" aria-label={formatMessage(referralSourceIconAlt)} />}
-      title={
-        <FormattedMessage id="confirmation.displayAllFormData-referralSourceText" defaultMessage="Referral Source" />
-      }
-      editAriaLabel={editReferralSourceAriaLabel}
-      stepName="referralSource"
-    >
-      <ConfirmationItem value={displayValue} />
-    </ConfirmationBlock>
+    <div className="simple-confirmation-section">
+      <div className="simple-section-header">
+        <h2>
+          <Icon
+            name="shield-check"
+            aria-label={formatMessage({
+              id: 'confirmation.benefitsAndInfo.icon-AL',
+              defaultMessage: 'benefits and additional information',
+            })}
+          />
+          <FormattedMessage
+            id="confirmation.benefitsAndAdditionalInfo"
+            defaultMessage="Benefits & Additional Information"
+          />
+        </h2>
+      </div>
+      <div className="simple-section-content">
+        <ConfirmationItem
+          label={
+            <FormattedMessage
+              id="confirmation.displayAllFormData-currentHHBenefitsText"
+              defaultMessage="Current Household Benefits:"
+            />
+          }
+          value={benefitsValue()}
+          editLink={
+            <RowEditLink
+              stepName="hasBenefits"
+              ariaLabel={formatMessage({
+                id: 'confirmation.currentBenefits.edit-AL',
+                defaultMessage: 'edit benefits you already have',
+              })}
+            />
+          }
+        />
+        <ConfirmationItem
+          label={
+            <FormattedMessage
+              id="confirmation.displayAllFormData-acuteHHConditions"
+              defaultMessage="Additional Resources"
+            />
+          }
+          value={acuteConditionsValue()}
+          editLink={
+            <RowEditLink
+              stepName="acuteHHConditions"
+              ariaLabel={formatMessage({
+                id: 'confirmation.acuteConditions.edit-AL',
+                defaultMessage: 'edit immediate needs',
+              })}
+            />
+          }
+        />
+        {formData.referralSource !== undefined && !loading && referralSourceStepNumber !== -1 && (
+          <ConfirmationItem
+            label={
+              <FormattedMessage
+                id="confirmation.displayAllFormData-referralSourceText"
+                defaultMessage="Referral Source"
+              />
+            }
+            value={referralSourceValue()}
+            editLink={
+              <RowEditLink
+                stepName="referralSource"
+                ariaLabel={formatMessage({
+                  id: 'confirmation.referralSource.edit-AL',
+                  defaultMessage: 'edit referral source',
+                })}
+              />
+            }
+          />
+        )}
+      </div>
+    </div>
   );
 }
 
 const STEP_CONFIRMATIONS: Record<QuestionName, ReactNode | null> = {
   zipcode: <ZipCode key="zipcode" />,
-  householdSize: <HouseholdSize key="householdSize" />,
+  householdSize: null,
   householdData: <DefaultConfirmationHHData key="householdData" />,
-  hasExpenses: <Expenses key="hasExpenses" />,
-  householdAssets: <Assets key="householdAssets" />,
-  hasBenefits: <HasBenefits key="hasBenefits" />,
-  acuteHHConditions: <AcuteConditions key="acuteHHConditions" />,
-  referralSource: <ReferralSource key="referralSource" />,
+  hasExpenses: <FinancialInfo key="hasExpenses" />,
+  householdAssets: null,
+  hasBenefits: <BenefitsAndAdditionalInfo key="hasBenefits" />,
+  acuteHHConditions: null,
+  referralSource: null,
   energyCalculatorElectricityProvider: (
     <EnergyCalculatorElectricityProvider key="energyCalculatorElectricityProvider" />
   ),
