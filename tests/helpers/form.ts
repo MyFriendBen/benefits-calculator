@@ -131,13 +131,8 @@ async function selectMuiOption(page: Page, selectId: string, optionText: string)
   const isCI = process.env.CI === 'true';
   const timeout = isCI ? 20000 : 10000;
 
-  await page.locator(selectId).click();
-  const listbox = page.locator('[role="listbox"]');
-  await listbox.waitFor({ state: 'visible', timeout });
-  const option = listbox.locator('[role="option"]').filter({ hasText: optionText }).first();
-  await option.waitFor({ state: 'visible', timeout });
-  await option.click();
-  await listbox.waitFor({ state: 'hidden', timeout: 5000 });
+  await page.getByRole('button', { name: selectId, exact: true }).click();
+  await page.getByRole('option', { name: optionText }).click();
 }
 
 /**
@@ -147,20 +142,20 @@ async function selectMuiOption(page: Page, selectId: string, optionText: string)
  * @param index - Index of the income stream row (default 0)
  */
 export async function selectIncomeCategory(page: Page, incomeCategory: string, index = 0): Promise<void> {
-  await selectMuiOption(page, `#income-category-select-${index}`, incomeCategory);
+  await selectMuiOption(page, 'Income Category', incomeCategory);
 }
 
 /**
  * Selects an income source (the "Income Source" dropdown, enabled after category is chosen)
  * @param page - Playwright page instance
- * @param incomeType - Income source label to select (e.g. "Wages, salaries, or tips")
+ * @param incomeSource - Income source label to select (e.g. "Wages, salaries, or tips")
  */
-export async function selectIncomeType(page: Page, incomeType: string): Promise<void> {
+export async function selectIncomeType(page: Page, incomeSource: string): Promise<void> {
   const isCI = process.env.CI === 'true';
   const timeout = isCI ? 20000 : 10000;
   // Wait for the source dropdown to be enabled (it's disabled until a category is selected)
   await page.locator('#income-source-select-0:not([aria-disabled="true"])').waitFor({ state: 'attached', timeout });
-  await selectMuiOption(page, '#income-source-select-0', incomeType);
+  await selectMuiOption(page, 'Income Source', incomeSource);
 }
 
 /**
@@ -169,5 +164,5 @@ export async function selectIncomeType(page: Page, incomeType: string): Promise<
  * @param frequency - Frequency to select
  */
 export async function selectFrequency(page: Page, frequency: string): Promise<void> {
-  await selectMuiOption(page, '#income-frequency-select-0', frequency);
+  await selectMuiOption(page, 'Frequency', frequency);
 }
