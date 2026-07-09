@@ -69,3 +69,23 @@ export function ConfirmationItem({ label, value, editLink }: ConfirmationItemPar
     </div>
   );
 }
+
+export function RowEditLink({ stepName, ariaLabel }: { stepName: QuestionName; ariaLabel: string }) {
+  const { whiteLabel, uuid } = useParams();
+  const stepNumber = useStepNumber(stepName, false);
+
+  if (stepNumber === -1) {
+    return null;
+  }
+
+  return (
+    <Link
+      to={`/${whiteLabel}/${uuid}/step-${stepNumber}/`}
+      state={{ routedFromConfirmationPg: true }}
+      className="edit-button-simple"
+      aria-label={ariaLabel}
+    >
+      <Pencil aria-hidden={true} />
+    </Link>
+  );
+}

@@ -66,10 +66,6 @@ const DefaultConfirmationHHData = () => {
     id: 'confirmation.hhMember.edit-AL',
     defaultMessage: 'edit household member',
   };
-  const householdSizeIconAlt = {
-    id: 'confirmation.hhsize.icon-AL',
-    defaultMessage: 'household size',
-  };
 
   const getRelationship = (member: HouseholdData, index: number): string => {
     if (index === 0) {
@@ -136,7 +132,7 @@ const DefaultConfirmationHHData = () => {
       <div className="confirmation-section-header">
         <h2>
           <div className="confirmation-icon">
-            <Icon name="users" className="confirmation-lucide-icon" aria-label={formatMessage(householdSizeIconAlt)} />
+            <Icon name="users" className="confirmation-lucide-icon" aria-hidden={true} />
           </div>
           <FormattedMessage id="confirmation.displayAllFormData-yourHouseholdLabel" defaultMessage="Household Members" />
           {' '}
@@ -149,6 +145,12 @@ const DefaultConfirmationHHData = () => {
       <div className="confirmation-section-content">
         <div className="household-member-table-wrapper">
           <table className="household-member-table household-member-table-desktop">
+            <caption className="confirmation-sr-only">
+              <FormattedMessage
+                id="confirmation.householdTable.caption"
+                defaultMessage="Household member details"
+              />
+            </caption>
             <thead>
               <tr>
                 <th scope="col">
