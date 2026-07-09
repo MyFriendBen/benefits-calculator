@@ -71,8 +71,8 @@ const themes: Themes = {
       '--hover-color': '#ECDEED',
 
       // Colors - Icons
-      '--icon-color': '#D6743F',
-      '--secondary-icon-color': '#D6743F',
+      '--icon-color': '#B85A27',
+      '--secondary-icon-color': '#B85A27',
 
       // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',

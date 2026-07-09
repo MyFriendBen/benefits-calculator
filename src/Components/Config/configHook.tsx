@@ -4,36 +4,40 @@ import { configEndpoint, header } from '../../apiCalls';
 import { ConfigApiResponse, ConfigValue, FeatureFlags } from '../../Types/Config';
 import { Config } from '../../Types/Config';
 import { FormattedMessage } from 'react-intl';
-import { ReactComponent as Student } from '../../Assets/icons/General/OptionCard/Conditions/student.svg';
-import { ReactComponent as Pregnant } from '../../Assets/icons/General/OptionCard/Conditions/pregnant.svg';
-import { ReactComponent as BlindOrVisuallyImpaired } from '../../Assets/icons/General/OptionCard/Conditions/blindOrVisuallyImpaired.svg';
-import { ReactComponent as Disabled } from '../../Assets/icons/General/OptionCard/Conditions/disabled.svg';
-import { ReactComponent as LongTermDisability } from '../../Assets/icons/General/OptionCard/Conditions/longTermDisability.svg';
-import { ReactComponent as Chp } from '../../Assets/icons/General/OptionCard/HealthInsurance/chp.svg';
-import { ReactComponent as DontKnow } from '../../Assets/icons/General/OptionCard/HealthInsurance/dont_know.svg';
-import { ReactComponent as EmergencyMedicaid } from '../../Assets/icons/General/OptionCard/HealthInsurance/emergency_medicaid.svg';
-import { ReactComponent as Employer } from '../../Assets/icons/General/OptionCard/HealthInsurance/employer.svg';
-import { ReactComponent as FamilyPlanning } from '../../Assets/icons/UrgentNeeds/AcuteConditions/family_planning.svg';
-import { ReactComponent as Medicaid } from '../../Assets/icons/General/OptionCard/HealthInsurance/medicaid.svg';
-import { ReactComponent as Medicare } from '../../Assets/icons/General/OptionCard/HealthInsurance/medicare.svg';
-import { ReactComponent as None } from '../../Assets/icons/General/OptionCard/HealthInsurance/none.svg';
-import { ReactComponent as PrivateInsurance } from '../../Assets/icons/General/OptionCard/HealthInsurance/privateInsurance.svg';
-import { ReactComponent as BabySupplies } from '../../Assets/icons/UrgentNeeds/AcuteConditions/baby_supplies.svg';
-import { ReactComponent as ChildDevelopment } from '../../Assets/icons/UrgentNeeds/AcuteConditions/child_development.svg';
-import { ReactComponent as YouthDevelopment } from '../../Assets/icons/UrgentNeeds/AcuteConditions/Youth_development.svg';
-import { ReactComponent as DentalCare } from '../../Assets/icons/UrgentNeeds/AcuteConditions/dental_care.svg';
-import { ReactComponent as Food } from '../../Assets/icons/UrgentNeeds/AcuteConditions/food.svg';
-import { ReactComponent as Housing } from '../../Assets/icons/UrgentNeeds/AcuteConditions/housing.svg';
-import { ReactComponent as JobResources } from '../../Assets/icons/UrgentNeeds/AcuteConditions/job_resources.svg';
-import { ReactComponent as LegalServices } from '../../Assets/icons/UrgentNeeds/AcuteConditions/legal_services.svg';
-import { ReactComponent as Support } from '../../Assets/icons/UrgentNeeds/AcuteConditions/support.svg';
-import { ReactComponent as Military } from '../../Assets/icons/UrgentNeeds/AcuteConditions/military.svg';
-import { ReactComponent as Aging } from '../../Assets/icons/UrgentNeeds/AcuteConditions/aging.svg';
-import { ReactComponent as Resources } from '../../Assets/icons/General/resources.svg';
-import { ReactComponent as SurvivingSpouse } from '../EnergyCalculator/Icons/Person.svg';
-import { ReactComponent as Wheelchair } from '../EnergyCalculator/Icons/Wheelchair.svg';
-import { ReactComponent as HeartRate } from '../EnergyCalculator/Icons/HeartRate.svg';
 import { Language } from '../../Assets/languageOptions';
+import { Icon } from '../Icon/Icon';
+
+export const OPTION_CARD_ICON_MAP: Record<string, string> = {
+  // Health Insurance
+  None: 'ban',
+  Employer: 'briefcase',
+  PrivateInsurance: 'circle-user-round',
+  Medicaid: 'heart-pulse',
+  Medicare: 'stethoscope',
+  Chp: 'baby',
+  Emergency_medicaid: 'ambulance',
+  Family_planning: 'heart-handshake',
+  VA: 'shield-plus',
+  // Conditions
+  Student: 'graduation-cap',
+  Pregnant: 'sprout',
+  BlindOrVisuallyImpaired: 'glasses',
+  Disabled: 'accessibility',
+  LongTermDisability: 'calendar-clock',
+  // Acute needs
+  Food: 'apple',
+  Baby_supplies: 'baby',
+  Housing: 'house',
+  Support: 'messages-square',
+  Child_development: 'shapes',
+  Job_resources: 'briefcase-business',
+  Dental_care: 'smile',
+  Legal_services: 'scale',
+  Savings: 'piggy-bank',
+  Military: 'shield',
+  Aging: 'tree-deciduous',
+  Youth_development: 'shapes',
+};
 
 
 type Item = {
@@ -46,109 +50,24 @@ type IconItem = {
   _icon: string;
 };
 
-// Transforms objects with icon key to return Icon ReactComponent
+// Transforms objects with icon key to return a Lucide Icon component.
+// The EnergyCalculator-specific icons (SurvivingSpouse, Wheelchair, HeartRate) preserve
+// their config-driven _classname; all other icons use the shared option-card class.
 function transformItemIcon(item: unknown): any {
   const icon = item as IconItem;
 
-  let iconComponent;
   switch (icon._icon) {
-    // Acute Conditions
-    case 'Baby_supplies':
-      iconComponent = <BabySupplies className={icon._classname} />;
-      break;
-    case 'Child_development':
-      iconComponent = <ChildDevelopment className={icon._classname} />;
-      break;
-    case 'Youth_development':
-      iconComponent = <YouthDevelopment className={icon._classname}  />;      
-      break;    
-    case 'Dental_care':
-      iconComponent = <DentalCare className={icon._classname} />;
-      break;
-    case 'Food':
-      iconComponent = <Food className={icon._classname} />;
-      break;
-    case 'Housing':
-      iconComponent = <Housing className={icon._classname} />;
-      break;
-    case 'Job_resources':
-      iconComponent = <JobResources className={icon._classname} />;
-      break;
-    case 'Legal_services':
-      iconComponent = <LegalServices className={icon._classname} />;
-      break;
-    case 'Support':
-      iconComponent = <Support className={icon._classname} />;
-      break;
-    case 'Military':
-      iconComponent = <Military className={icon._classname} />;
-      break;
-    case 'Aging':
-      iconComponent = <Aging className={`${icon._classname} aging`} />;
-      break;
-    case 'Savings':
-      iconComponent = <Resources className={icon._classname} />;
-      break;
-    // Conditions
-    case 'BlindOrVisuallyImpaired':
-      iconComponent = <BlindOrVisuallyImpaired className={icon._classname} />;
-      break;
-    case 'Disabled':
-      iconComponent = <Disabled className={icon._classname} />;
-      break;
-    case 'LongTermDisability':
-      iconComponent = <LongTermDisability className={icon._classname} />;
-      break;
-    case 'Pregnant':
-      iconComponent = <Pregnant className={icon._classname} />;
-      break;
-    case 'Student':
-      iconComponent = <Student className={icon._classname} />;
-      break;
-    // Health Insurance
-    case 'Chp':
-      iconComponent = <Chp className={icon._classname} />;
-      break;
-    case 'Dont_know':
-      iconComponent = <DontKnow className={icon._classname} />;
-      break;
-    case 'Emergency_medicaid':
-      iconComponent = <EmergencyMedicaid className={icon._classname} />;
-      break;
-    case 'Employer':
-      iconComponent = <Employer className={icon._classname} />;
-      break;
-    case 'Family_planning':
-      iconComponent = <FamilyPlanning className={icon._classname} />;
-      break;
-    case 'Medicaid':
-      iconComponent = <Medicaid className={icon._classname} />;
-      break;
-    case 'Medicare':
-      iconComponent = <Medicare className={icon._classname} />;
-      break;
-    case 'None':
-      iconComponent = <None className={icon._classname} />;
-      break;
-    case 'PrivateInsurance':
-      iconComponent = <PrivateInsurance className={icon._classname} />;
-      break;
     case 'SurvivingSpouse':
-      iconComponent = <SurvivingSpouse className={icon._classname} />;
-      break;
+      return <Icon name="user-round" className={icon._classname} />;
     case 'Wheelchair':
-      iconComponent = <Wheelchair className={icon._classname} />;
-      break;
+      return <Icon name="accessibility" className={icon._classname} />;
     case 'HeartRate':
-      iconComponent = <HeartRate className={icon._classname} />;
-      break;
-    // Needs a generic catch-all
-    default:
-      iconComponent = <LongTermDisability className="option-card-icon" />;
-      break;
+      return <Icon name="square-activity" className={icon._classname} />;
+    default: {
+      const lucideName = OPTION_CARD_ICON_MAP[icon._icon] ?? 'circle-dot';
+      return <Icon name={lucideName} className="option-card-lucide-icon" />;
+    }
   }
-
-  return iconComponent;
 }
 
 // Recursively transform any object that has _label && _default_message as keys into a FormattedMessage

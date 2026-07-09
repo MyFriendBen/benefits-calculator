@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { UrgentNeed } from '../../../Types/Results';
 import ResultsTranslate from '../Translate/Translate';
-import { formatPhoneNumber, generateNeedId, ICON_OPTIONS_MAP } from '../helpers';
+import { formatPhoneNumber, generateNeedId, ICON_NAME_MAP } from '../helpers';
+import { Icon } from '../../Icon/Icon';
 import TrackedOutboundLink from '../../Common/TrackedOutboundLink/TrackedOutboundLink';
 import './NeedCard.css';
 
@@ -12,13 +13,8 @@ type NeedsCardProps = {
 };
 
 const getIcon = (messageType: string) => {
-  const Icon = ICON_OPTIONS_MAP[messageType] ?? ICON_OPTIONS_MAP['default'];
-
-  if (Icon !== undefined) {
-    return <Icon />;
-  }
-
-  return null;
+  const lucideIconName = ICON_NAME_MAP[messageType] ?? ICON_NAME_MAP['default'];
+  return <Icon name={lucideIconName} className="need-card-lucide-icon" />;
 };
 
 const NeedCard = ({ need }: NeedsCardProps) => {

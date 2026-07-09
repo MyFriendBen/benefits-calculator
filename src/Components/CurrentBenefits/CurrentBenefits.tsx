@@ -1,6 +1,5 @@
 import { useIntl } from 'react-intl';
 import { useState, useEffect } from 'react';
-import type { ComponentType, SVGProps } from 'react';
 import { getAllLongTermPrograms, getAllNearTermPrograms } from '../../apiCalls';
 import { Translation } from '../../Types/Results';
 import ResultsTranslate from '../Results/Translate/Translate';
@@ -11,7 +10,8 @@ import { useTranslateNumber } from '../../Assets/languageOptions';
 import { useParams } from 'react-router-dom';
 import { useConfig } from '../Config/configHook';
 import { FormattedMessageType } from '../../Types/Questions';
-import { ICON_OPTIONS_MAP, LUCIDE_ICONS } from '../Results/helpers';
+import { ICON_NAME_MAP } from '../Results/helpers';
+import { Icon } from '../Icon/Icon';
 
 
 export type Program = {
@@ -139,11 +139,8 @@ const CurrentBenefits = () => {
       const { name, programs, icon } = category;
 
       const iconKey = icon.toLowerCase();
-      const actualIconKey = ICON_OPTIONS_MAP[iconKey] ? iconKey : 'default';
-      const CategoryIcon = ICON_OPTIONS_MAP[actualIconKey];
-
-      const isLucideIcon = LUCIDE_ICONS.includes(actualIconKey);
-      const iconClassName = isLucideIcon ? 'category-heading-icon category-lucide-icon' : 'category-heading-icon';
+      const lucideIconName = ICON_NAME_MAP[iconKey] ?? ICON_NAME_MAP['default'];
+      const iconClassName = 'category-heading-icon';
 
       return (
         <div key={index} className="category-section-container">
@@ -156,7 +153,7 @@ const CurrentBenefits = () => {
               })}
               role="img"
             >
-              <CategoryIcon />
+              <Icon name={lucideIconName} />
             </div>
             <h2 className="category-heading-text-style">
               <ResultsTranslate translation={name} />

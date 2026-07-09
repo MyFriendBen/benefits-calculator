@@ -1,12 +1,14 @@
 import { Card, CardActionArea } from '@mui/material';
 import { ReactNode, useCallback } from 'react';
 import { FormattedMessageType } from '../../Types/Questions';
+import { Icon } from '../Icon/Icon';
 import './SelectTiles.css';
 
 export type MultiSelectTileOption<T extends string | number> = {
   value: T;
   text: FormattedMessageType;
-  icon: ReactNode;
+  /** Lucide icon name (kebab-case) or a ReactNode for legacy/EnergyCalculator icons */
+  icon: string | ReactNode;
 };
 
 type TileProps<T extends string | number> = {
@@ -29,7 +31,13 @@ function Tile<T extends string | number>({ option, selected, onClick, variant }:
     <CardActionArea className="card-action-area" onClick={onClick} aria-pressed={selected}>
       <Card className={containerClass}>
         <div className="option-card-content">
-          <div className="option-card-icon">{option.icon}</div>
+          <div className="option-card-icon">
+            {typeof option.icon === 'string' ? (
+              <Icon name={option.icon} className="option-card-lucide-icon" />
+            ) : (
+              option.icon
+            )}
+          </div>
           <span className={['option-card-label', selected && 'option-card-selected-text'].filter(Boolean).join(' ')}>
             {option.text}
           </span>

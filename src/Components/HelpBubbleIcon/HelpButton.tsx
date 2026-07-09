@@ -1,7 +1,7 @@
 import { IconButton } from '@mui/material';
 import { PropsWithChildren, useContext, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { ReactComponent as HelpBubble } from '../../Assets/icons/General/helpBubble.svg';
+import { ReactComponent as HelpBubble } from '../../Assets/icons/helpBubble.svg';
 import { Context } from '../Wrapper/Wrapper';
 import './HelpButton.css';
 
