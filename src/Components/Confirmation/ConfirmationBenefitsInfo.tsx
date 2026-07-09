@@ -56,7 +56,7 @@ export default function ConfirmationBenefitsInfo() {
     const allNeeds = Object.entries(formData.acuteHHConditions).filter(([, value]) => value === true);
 
     if (allNeeds.length === 0) {
-      return <FormattedMessage id="confirmation.noIncome" defaultMessage="None" />;
+      return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
     }
 
     return (
