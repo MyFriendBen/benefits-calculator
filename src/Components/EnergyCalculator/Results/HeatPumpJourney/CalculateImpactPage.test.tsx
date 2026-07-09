@@ -18,10 +18,6 @@ jest.mock('../../../Common/TrackedOutboundLink', () => ({
   TrackedOutboundLink: ({ children, href }) => <a href={href}>{children}</a>,
 }));
 
-jest.mock('../../Icons/Coin.svg', () => ({
-  ReactComponent: () => <svg data-testid="coin-icon" />,
-}));
-
 jest.mock('../../../Config/configHook', () => ({
   useFeatureFlag: jest.fn(),
 }));
@@ -35,6 +31,38 @@ jest.mock('./fetchRemImpact', () => {
   }
   return { fetchRemImpact: jest.fn(), RemAddressNotSupportedError };
 });
+
+jest.mock('../../../Common/GooglePlacesAddressInput', () => ({
+  GooglePlacesAddressInput: ({
+    id,
+    value,
+    onChange,
+    error,
+    helperText,
+    placeholder,
+    inputProps,
+  }: {
+    id?: string;
+    value: string;
+    onChange: (v: string) => void;
+    error?: boolean;
+    helperText?: React.ReactNode;
+    placeholder?: string;
+    inputProps?: Record<string, string>;
+  }) => (
+    <>
+      <input
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        aria-invalid={error}
+        {...inputProps}
+      />
+      {helperText && <span>{helperText}</span>}
+    </>
+  ),
+}));
 
 const MOCK_RESULT = {
   bill_delta: {
@@ -90,7 +118,7 @@ describe('CalculateImpactPage', () => {
 
     it('renders the coin icon', () => {
       renderPage();
-      expect(screen.getByTestId('coin-icon')).toBeInTheDocument();
+      expect(document.querySelector('.calculate-impact-icon')).toBeInTheDocument();
     });
 
     it('renders the Rewiring America intro paragraph', () => {

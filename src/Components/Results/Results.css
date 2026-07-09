@@ -96,34 +96,27 @@
   align-items: center;
   justify-content: space-between;
   margin-top: 0.5rem;
+  /* Breathing room between the heading (icon + title) and the program box border below */
+  margin-bottom: 0.5rem;
 }
 
 .category-heading-icon {
   display: inline-flex;
 }
 
+/* Every category-heading icon is a Lucide <svg>; size and color it directly. */
 .category-heading-icon svg {
   display: inline-flex;
   width: 2.5rem;
-}
-
-.category-heading-icon svg path,
-.category-heading-icon svg rect,
-.category-heading-icon svg circle {
-  fill: var(--icon-color);
-  stroke: var(--icon-color);
-}
-
-/* Lucide icons - both classes are on the same element */
-.category-heading-icon.category-lucide-icon svg {
   height: 2rem;
-  color: var(--icon-color) !important;
+  color: var(--icon-color);
+  fill: none;
+  stroke: currentColor;
 }
 
-.category-heading-icon.category-lucide-icon svg,
-.category-heading-icon.category-lucide-icon svg * {
-  fill: none !important;
-  stroke: currentColor !important;
+.category-heading-icon svg * {
+  fill: none;
+  stroke: currentColor;
 }
 
 .category-heading-column {
@@ -132,7 +125,10 @@
   width: fit-content;
   text-align: left;
   display: inline-flex;
-  align-items: center;
+  /* Top-align the icon with the first line of the category title so it stays
+     flush when the title wraps to multiple lines (e.g. "Child Care, Youth, and
+     Education") instead of dropping down beside the last line. */
+  align-items: flex-start;
   margin-right: 1rem;
 }
 
@@ -144,6 +140,12 @@
   font-weight: 700;
   color: var(--secondary-color);
   font-size: 1.3rem;
+}
+
+/* Top-align the title with the icon inside the heading column
+   (the /month amount lives in .box-right, so it is unaffected) */
+.category-heading-column .category-heading-text-style {
+  align-self: flex-start;
 }
 
 .category-heading-text-style.normal-weight {

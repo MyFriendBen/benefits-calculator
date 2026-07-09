@@ -14,7 +14,6 @@ import {
   Radio,
   RadioGroup,
   Select,
-  TextField,
   Typography,
 } from '@mui/material';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
@@ -35,7 +34,8 @@ import {
 import { fetchRemImpact, RemAddressNotSupportedError } from './fetchRemImpact';
 import { buildCalculateImpactPayload } from './remCalculateImpactTypes';
 import CalculateImpactResults from './CalculateImpactResults';
-import { ReactComponent as Coin } from '../../Icons/Coin.svg';
+import { GooglePlacesAddressInput } from '../../../Common/GooglePlacesAddressInput';
+import { Icon } from '../../../Icon/Icon';
 import './CalculateImpactPage.css';
 
 const HOUSEHOLD_TYPE_OPTIONS: { value: CalculateImpactHouseholdType; messageId: string; defaultMessage: string }[] = [
@@ -246,7 +246,7 @@ export default function CalculateImpactPage() {
         </div>
 
         <header className="calculate-impact-header">
-          <Coin aria-hidden="true" className="calculate-impact-icon" />
+          <Icon name="circle-dollar-sign" aria-hidden="true" className="calculate-impact-icon" />
           <div className="calculate-impact-header-text">
             <span className="calculate-impact-title-text">
               <FormattedMessage
@@ -310,7 +310,7 @@ export default function CalculateImpactPage() {
       </div>
 
       <header className="calculate-impact-header">
-        <Coin aria-hidden="true" className="calculate-impact-icon" />
+        <Icon name="circle-dollar-sign" aria-hidden="true" className="calculate-impact-icon" />
         <div className="calculate-impact-header-text">
           <span className="calculate-impact-title-text">
             <FormattedMessage
@@ -450,20 +450,21 @@ export default function CalculateImpactPage() {
                 name="address"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
+                  <GooglePlacesAddressInput
                     fullWidth
                     id="calculate-impact-address"
+                    value={field.value}
+                    onChange={field.onChange}
                     error={!!errors.address}
-                    inputProps={{
-                      autoComplete: 'street-address',
-                      'aria-describedby': 'calculate-impact-address-helper',
-                    }}
                     helperText={errors.address?.message}
                     placeholder={intl.formatMessage({
                       id: 'energyCalculator.calculateImpact.field.addressPlaceholder',
                       defaultMessage: '1234 Main St, Denver, CO 80014',
                     })}
+                    inputProps={{
+                      autoComplete: 'street-address',
+                      'aria-describedby': 'calculate-impact-address-helper',
+                    }}
                   />
                 )}
               />

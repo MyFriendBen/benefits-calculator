@@ -1,0 +1,1 @@
+export { GooglePlacesAddressInput } from './GooglePlacesAddressInput';

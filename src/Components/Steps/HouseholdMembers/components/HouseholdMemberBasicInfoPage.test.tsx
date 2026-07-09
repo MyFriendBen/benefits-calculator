@@ -52,11 +52,6 @@ jest.mock('../sections/BasicInfoFields', () => ({
   ),
 }));
 
-// Mock SVG icon
-jest.mock('../../../../Assets/icons/General/head.svg', () => ({
-  ReactComponent: () => <svg data-testid="person-icon" />,
-}));
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const messages = {

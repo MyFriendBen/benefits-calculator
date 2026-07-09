@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { WrapperContext } from '../../Types/WrapperContext';
 import { Context } from '../Wrapper/Wrapper';
 import { FormattedMessage } from 'react-intl';
-import { ReactComponent as WarningIcon } from '../../Assets/icons/General/warning.svg';
+import { Icon } from '../Icon/Icon';
 import './BackToScreen.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import dataLayerPush from '../../Assets/analytics';
@@ -13,7 +13,7 @@ const BackToScreen = () => {
   const navigate = useNavigate();
   return (
     <div className="back-to-screen-message">
-      <WarningIcon className="back-to-screen-warning-icon" />
+      <Icon name="triangle-alert" className="back-to-screen-warning-icon" />
       <p>
         <FormattedMessage
           id="backToScreen.message"

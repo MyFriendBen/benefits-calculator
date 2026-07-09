@@ -122,7 +122,8 @@
 
 /* Push input to the bottom of the field so inputs align across columns regardless of helper text height */
 .calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiFormControl-root,
-.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiTextField-root {
+.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiTextField-root,
+.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiAutocomplete-root {
   margin-top: auto;
 }
 
@@ -133,7 +134,8 @@
 }
 
 .calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiFormControl-root,
-.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiTextField-root {
+.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiTextField-root,
+.calculate-impact-page .calculate-impact-fields-grid > .calculate-impact-field > .MuiAutocomplete-root {
   margin-top: auto;
   position: relative;
   margin-bottom: 0.75rem;
