@@ -5,6 +5,7 @@ import { QuestionName } from '../../Types/Questions';
 import './Confirmation.css';
 import { useStepNumber } from '../../Assets/stepDirectory';
 import { MessageDescriptor, useIntl } from 'react-intl';
+import { useTrackEvent } from '../../Assets/analytics';
 export { formatToUSD } from '../../utils/formatCurrency';
 
 type ConfirmationBlockParams = PropsWithChildren<{
@@ -29,6 +30,7 @@ export default function ConfirmationBlock({
   const { formatMessage } = useIntl();
   const stepNumber = useStepNumber(stepName);
   const locationState = noReturn ? undefined : { routedFromConfirmationPg: true };
+  const track = useTrackEvent();
 
   return (
     <div className="confirmation-block-container">
@@ -42,6 +44,7 @@ export default function ConfirmationBlock({
         state={locationState}
         className="edit-button"
         aria-label={formatMessage(editAriaLabel)}
+        onClick={() => track('screener_confirmation_edit', { section: stepName })}
       >
         <Pencil aria-label={formatMessage(editAriaLabel)} className="edit-pencil-icon" strokeWidth={1.5} />
       </Link>

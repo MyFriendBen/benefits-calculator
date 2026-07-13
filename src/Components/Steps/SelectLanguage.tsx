@@ -12,6 +12,9 @@ import { STATES } from './SelectStatePage';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { useUpdateWhiteLabelAndNavigate } from '../RouterUtil/RedirectToWhiteLabel';
 import { usePageTitle } from '../Common/usePageTitle';
+import { useTrackEvent } from '../../Assets/analytics';
+
+const STEP_1_ANALYTICS_ID = 'language';
 
 const SelectLanguagePage = () => {
   const { locale, selectLanguage, configLoading } = useContext(Context);
@@ -20,8 +23,21 @@ const SelectLanguagePage = () => {
 
   const queryString = useQueryString();
   const navigate = useNavigate();
+  const track = useTrackEvent();
 
   usePageTitle(OTHER_PAGE_TITLES.language);
+
+  // This is the true first screen of the screener (step-1), so it's the single
+  // place to mark the start of the funnel, in addition to its own step view.
+  useEffect(() => {
+    track('screener_form_start', { screener_step_name: STEP_1_ANALYTICS_ID, screener_step_number: 1 });
+    track('screener_form_step', {
+      screener_step_name: STEP_1_ANALYTICS_ID,
+      screener_step_number: 1,
+      step_action: 'view',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const createMenuItems = (optionList: Record<string, string>, disabledFMId: string, disabledFMDefault: string) => {
     const disabledSelectMenuItem = (
@@ -58,6 +74,12 @@ const SelectLanguagePage = () => {
 
   const handleSubmit = (event: { preventDefault: () => void }) => {
     event.preventDefault();
+
+    track('screener_form_step', {
+      screener_step_name: STEP_1_ANALYTICS_ID,
+      screener_step_number: 1,
+      step_action: 'complete',
+    });
 
     if (uuid !== undefined) {
       navigate(`/${whiteLabel}/${uuid}/step-2${queryString}`);

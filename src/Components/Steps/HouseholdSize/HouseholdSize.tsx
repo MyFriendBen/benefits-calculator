@@ -16,6 +16,8 @@ import { OverrideableTranslation } from '../../../Assets/languageOptions';
 import useStepForm from '../stepForm';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
+import { useTrackEvent } from '../../../Assets/analytics';
+import { getStepAnalyticsId } from '../../../Assets/analytics/stepIds';
 import './HouseholdSize.css';
 
 const HouseholdSize = () => {
@@ -24,9 +26,11 @@ const HouseholdSize = () => {
   const backNavigationFunction = useDefaultBackNavigationFunction('householdSize');
   const navigate = useNavigate();
   const householdDataStepNumber = useStepNumber('householdData', false);
+  const householdSizeStepNumber = useStepNumber('householdSize', false);
   const intl = useIntl();
   const { updateScreen } = useScreenApi();
   const [showRoommateInfo, setShowRoommateInfo] = useState(false);
+  const track = useTrackEvent();
 
   const formSchema = z.object({
     householdSize: z
@@ -68,6 +72,13 @@ const HouseholdSize = () => {
         householdData: formData.householdData.slice(0, householdSize),
       };
       await updateScreen(updatedFormData);
+      // This step navigates manually (onSubmitSuccessfulOverride) instead of through
+      // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
+      track('screener_form_step', {
+        screener_step_name: getStepAnalyticsId('householdSize'),
+        screener_step_number: householdSizeStepNumber,
+        step_action: 'complete',
+      });
       const page = householdSize === 1 ? '1' : '0';
       navigate(`/${whiteLabel}/${uuid}/step-${householdDataStepNumber}/${page}`);
     }

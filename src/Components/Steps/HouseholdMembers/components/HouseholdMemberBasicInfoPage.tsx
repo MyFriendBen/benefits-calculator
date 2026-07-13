@@ -1,4 +1,4 @@
-import { useContext, useState, useMemo } from 'react';
+import { useContext, useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useFieldArray, SubmitHandler } from 'react-hook-form';
@@ -24,6 +24,8 @@ import BasicInfoFields from '../sections/BasicInfoFields';
 import DeleteConfirmationPopover from './DeleteConfirmationPopover';
 import '../styles/HouseholdMemberBasicInfoPage.css';
 import type { DeletePopoverState } from '../utils/types';
+import { useTrackEvent } from '../../../../Assets/analytics';
+import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
 
 const MAX_HOUSEHOLD_SIZE = 8;
 
@@ -34,6 +36,18 @@ const HouseholdMemberBasicInfoPage = () => {
   const { updateScreen } = useScreenApi();
   const currentStepId = useStepNumber('householdData');
   const [deletePopover, setDeletePopover] = useState<DeletePopoverState>(null);
+  const track = useTrackEvent();
+
+  // This sub-page is rendered by HouseholdMemberRouter, outside QuestionComponentContainer,
+  // so it tracks its own view.
+  useEffect(() => {
+    track('screener_form_step', {
+      screener_step_name: getStepAnalyticsId('householdData'),
+      screener_step_number: currentStepId,
+      step_action: 'view',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const relationshipOptions = useConfig<Record<string, FormattedMessageType>>('relationship_options');
   const deleteHHMemberAriaLabel = intl.formatMessage({
@@ -100,6 +114,14 @@ const HouseholdMemberBasicInfoPage = () => {
       householdData: updatedHouseholdData,
     });
 
+    // This page navigates manually (onSubmitSuccessfulOverride) instead of through
+    // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
+    track('screener_form_step', {
+      screener_step_name: getStepAnalyticsId('householdData'),
+      screener_step_number: currentStepId,
+      step_action: 'complete',
+    });
+
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/1`, { state: { basicInfoCollected: true } });
   };
 
@@ -107,6 +129,11 @@ const HouseholdMemberBasicInfoPage = () => {
     if (deletePopover === null) return;
     remove(deletePopover.index);
     setDeletePopover(null);
+    track('screener_household_member', {
+      screener_step_name: getStepAnalyticsId('householdData'),
+      screener_step_number: currentStepId,
+      action: 'delete',
+    });
   };
 
   const handleAddMember = () => {
@@ -115,7 +142,15 @@ const HouseholdMemberBasicInfoPage = () => {
       birthYear: UNSET_BIRTH_YEAR,
       relationshipToHH: '',
     });
+    track('screener_household_member', {
+      screener_step_name: getStepAnalyticsId('householdData'),
+      screener_step_number: currentStepId,
+      action: 'add',
+    });
   };
+
+  // Note: screener_form_error is tracked centrally in useStepForm (stepForm.tsx),
+  // which every screener step's form goes through — no need to duplicate it here.
 
   return (
     <main className="benefits-form" data-step-id="household-basics">

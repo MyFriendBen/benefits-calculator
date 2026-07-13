@@ -3,6 +3,9 @@ import { FieldValues, useForm, UseFormProps, UseFormReturn } from 'react-hook-fo
 import { Context } from '../Wrapper/Wrapper';
 import { QuestionName } from '../../Types/Questions';
 import { useGoToNextStep } from '../QuestionComponents/questionHooks';
+import { useStepNumber } from '../../Assets/stepDirectory';
+import { useTrackEvent } from '../../Assets/analytics';
+import { getStepAnalyticsId } from '../../Assets/analytics/stepIds';
 
 /**
  * This hook is used to create a form for screener steps.
@@ -23,12 +26,15 @@ export default function useStepForm<T extends FieldValues>({
 }) {
   const { setStepLoading } = useContext(Context);
   const nextPage = useGoToNextStep(questionName);
+  const stepNumber = useStepNumber(questionName, false);
+  const track = useTrackEvent();
 
   const form = useForm<T>({
     ...useFormProps,
   });
 
-  const { isSubmitting, isSubmitSuccessful } = form.formState;
+  const { isSubmitting, isSubmitSuccessful, isSubmitted, errors } = form.formState;
+  const errorCount = Object.keys(errors).length;
 
   useEffect(() => {
     setStepLoading(isSubmitting);
@@ -43,6 +49,20 @@ export default function useStepForm<T extends FieldValues>({
       }
     }
   }, [isSubmitSuccessful, nextPage, onSubmitSuccessfulOverride]);
+
+  // Every screener step's form goes through this hook, making it the single
+  // shared place to catch validation errors for the drop-off funnel — a failed
+  // submit attempt sets `isSubmitted` with a non-empty `errors` map.
+  useEffect(() => {
+    if (isSubmitted && !isSubmitSuccessful && errorCount > 0) {
+      track('screener_form_error', {
+        screener_step_name: getStepAnalyticsId(questionName),
+        screener_step_number: stepNumber >= 0 ? stepNumber : undefined,
+        form_error_count: errorCount,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSubmitted, isSubmitSuccessful, errorCount]);
 
   return form as UseFormReturn<T>;
 }
