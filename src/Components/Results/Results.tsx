@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import ResultsError from './ResultsError/ResultsError';
 import Loading from './Loading/Loading';
 import {
@@ -39,6 +39,8 @@ import { NPSWidget } from '../NPS';
 import ShareModalAutoPopup from '../Share/ShareModalAutoPopup';
 import { useFeatureFlag } from '../Config/configHook';
 import { ChatbotProvider } from './Chatbot/Chatbot';
+import { useTrackEvent } from '../../Assets/analytics';
+import { calculateTotalValue } from './FormattedValue';
 
 // Mounts the Benbot chat widget only when the flag is on; otherwise renders children unchanged.
 // Defined at module scope so its identity is stable across renders (no subtree remount).
@@ -111,10 +113,30 @@ const Results = ({ type }: ResultsProps) => {
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
   const [apiResults, setApiResults] = useState<EligibilityResults | undefined>();
+  const track = useTrackEvent();
+  const hasTrackedResultsLoaded = useRef(false);
 
   useEffect(() => {
     dataLayerPush({ event: 'config', user_id: uuid });
   }, [uuid]);
+
+  // Fire once per successful results fetch (not on later filter re-renders).
+  useEffect(() => {
+    if (apiResults === undefined || hasTrackedResultsLoaded.current) {
+      return;
+    }
+
+    hasTrackedResultsLoaded.current = true;
+    const totalEstimatedValue = apiResults.program_categories.reduce(
+      (sum, category) => sum + calculateTotalValue(category),
+      0,
+    );
+
+    track('screener_results_loaded', {
+      program_count: apiResults.programs.length,
+      total_estimated_value: totalEstimatedValue,
+    });
+  }, [apiResults, track]);
 
   usePageTitle(OTHER_PAGE_TITLES.results);
 

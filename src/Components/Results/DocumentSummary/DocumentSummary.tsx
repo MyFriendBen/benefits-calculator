@@ -4,6 +4,7 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import { Program, ProgramDocument } from '../../../Types/Results';
 import ResultsTranslate from '../Translate/Translate';
+import { useTrackEvent } from '../../../Assets/analytics';
 import './DocumentSummary.css';
 
 type DocumentWithCount = {
@@ -38,6 +39,7 @@ const COLLAPSED_ITEM_COUNT = 3;
 const DocumentSummary = ({ programs }: DocumentSummaryProps) => {
   const documentsWithCounts = useMemo(() => getUniqueDocumentsWithCounts(programs), [programs]);
   const [expanded, setExpanded] = useState(false);
+  const track = useTrackEvent();
 
   if (documentsWithCounts.length === 0) {
     return null;
@@ -77,7 +79,17 @@ const DocumentSummary = ({ programs }: DocumentSummaryProps) => {
         ))}
       </ul>
       {canExpand && (
-        <button className="document-summary-toggle" onClick={() => setExpanded((prev) => !prev)} aria-expanded={expanded}>
+        <button
+          className="document-summary-toggle"
+          onClick={() =>
+            setExpanded((prev) => {
+              const next = !prev;
+              track('screener_document_summary_toggle', { expanded: next });
+              return next;
+            })
+          }
+          aria-expanded={expanded}
+        >
           {expanded ? (
             <>
               <VisibilityOffOutlinedIcon fontSize="small" />

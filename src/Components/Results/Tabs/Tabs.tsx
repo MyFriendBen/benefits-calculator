@@ -5,6 +5,7 @@ import { Grid } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { useTranslateNumber } from '../../../Assets/languageOptions';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
+import { useTrackEvent } from '../../../Assets/analytics';
 
 const ResultsTabs = () => {
   const { programs, needs } = useResultsContext();
@@ -18,6 +19,7 @@ const ResultsTabs = () => {
   const isBenefitsActive = location.pathname.includes('benefits');
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const tabLinks = useMemo(() => [benefitsLink, needsLink], [benefitsLink, needsLink]);
+  const track = useTrackEvent();
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -61,6 +63,7 @@ const ResultsTabs = () => {
             aria-selected={isBenefitsActive}
             aria-controls="results-tabpanel"
             tabIndex={isBenefitsActive ? 0 : -1}
+            onClick={() => track('screener_results_tab_click', { tab_name: 'long_term_benefits' })}
           >
             <span className="results-tab-label">
               <FormattedMessage id="resultsOptions.longTermBenefits" defaultMessage="Long-Term Benefits " />(
@@ -79,6 +82,7 @@ const ResultsTabs = () => {
             aria-selected={!isBenefitsActive}
             aria-controls="results-tabpanel"
             tabIndex={!isBenefitsActive ? 0 : -1}
+            onClick={() => track('screener_results_tab_click', { tab_name: 'additional_resources' })}
           >
             <span className="results-tab-label">
               <FormattedMessage id="resultsOptions.nearTermBenefits" defaultMessage="Additional Resources " />(

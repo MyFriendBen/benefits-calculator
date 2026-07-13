@@ -9,6 +9,7 @@ import { calculateTotalValue, programValue } from '../FormattedValue';
 import { ResultsMessage } from '../../Referrer/Referrer';
 import { useFeatureFlag } from '../../Config/configHook';
 import { useChatbotContext } from '../Chatbot/Chatbot';
+import { useTrackEvent } from '../../../Assets/analytics';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorRebateCategoryList, {
   useEnergyCalculatorNeedsRebates,
@@ -84,15 +85,17 @@ const ValidationCategory = () => {
 const GuideMeButton = () => {
   const { openWithMessage } = useChatbotContext();
   const { formatMessage } = useIntl();
+  const track = useTrackEvent();
 
   const handleClick = useCallback(() => {
+    track('screener_benbot_opened', { entry: 'guide_me' });
     openWithMessage(
       formatMessage({
         id: 'chatbot.guideMeMessage',
         defaultMessage: 'Guide me through my benefits',
       }),
     );
-  }, [openWithMessage, formatMessage]);
+  }, [openWithMessage, formatMessage, track]);
 
   return (
     <button type="button" className="guide-me-button" onClick={handleClick}>

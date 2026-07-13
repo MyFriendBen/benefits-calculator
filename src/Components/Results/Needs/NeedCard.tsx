@@ -6,6 +6,7 @@ import ResultsTranslate from '../Translate/Translate';
 import { formatPhoneNumber, generateNeedId, ICON_NAME_MAP } from '../helpers';
 import { Icon } from '../../Icon/Icon';
 import TrackedOutboundLink from '../../Common/TrackedOutboundLink/TrackedOutboundLink';
+import { useTrackEvent } from '../../../Assets/analytics';
 import './NeedCard.css';
 
 type NeedsCardProps = {
@@ -21,6 +22,7 @@ const NeedCard = ({ need }: NeedsCardProps) => {
   const intl = useIntl();
   const location = useLocation();
   const [infoIsOpen, setInfoIsOpen] = useState(false);
+  const track = useTrackEvent();
 
   // Check if this need should be expanded based on URL hash
   useEffect(() => {
@@ -84,7 +86,15 @@ const NeedCard = ({ need }: NeedsCardProps) => {
             </a>
           )}
           {translatedLink !== '' && (
-            <div className="visit-website-btn-container">
+            <div
+              className="visit-website-btn-container"
+              onClickCapture={() =>
+                track('screener_additional_resource_click', {
+                  resource_name: need.name.default_message,
+                  url: translatedLink,
+                })
+              }
+            >
               <TrackedOutboundLink
                 href={translatedLink}
                 action="visit_website"
