@@ -172,7 +172,14 @@ const ShareModal = ({ open, onClose, shareLocation }: ShareModalProps) => {
               label={provider.name}
               href={provider.url}
               onClick={() => {
-                track('screener_share', { share_location: shareLocation, share_provider: provider.name, share_action: 'send' });
+                // Include share_channel: 'email' so all email sends group
+                // together without inferring from provider name.
+                track('screener_share', {
+                  share_location: shareLocation,
+                  share_channel: 'email',
+                  share_provider: provider.name,
+                  share_action: 'send',
+                });
                 setView('success');
               }}
             />

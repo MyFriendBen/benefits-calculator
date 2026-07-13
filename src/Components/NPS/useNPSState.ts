@@ -45,9 +45,11 @@ export function useNPSState(uuid?: string): UseNPSStateReturn {
 
     setIsSubmitting(true);
     setIsFullySubmitted(true);
-    track('screener_nps_reason_submitted', {});
 
     if (uuid && reason.trim()) {
+      // Only count a reason as submitted when there's actually a reason stored;
+      // an empty-reason submit is effectively a skip.
+      track('screener_nps_reason_submitted', {});
       patchNPSReason({ uuid, score_reason: reason.trim() })
         .catch((error) => {
           console.error('Failed to submit NPS reason:', error);

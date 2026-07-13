@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { STARTING_QUESTION_NUMBER, useStepDirectory } from '../../Assets/stepDirectory';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import PreviousButton from '../PreviousButton/PreviousButton';
 import './Confirmation.css';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
@@ -19,7 +19,12 @@ const Confirmation = () => {
 
   usePageTitle(OTHER_PAGE_TITLES.confirmation);
 
+  // Guard so holding Enter (repeated keydown before navigation unmounts) doesn't
+  // emit multiple confirmation_proceed / form_complete events.
+  const hasProceeded = useRef(false);
   const proceedToResults = () => {
+    if (hasProceeded.current) return;
+    hasProceeded.current = true;
     track('screener_confirmation_proceed', {});
     track('screener_form_complete', {});
     navigate(`/${whiteLabel}/${uuid}/results/benefits`);

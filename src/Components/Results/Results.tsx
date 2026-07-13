@@ -120,24 +120,6 @@ const Results = ({ type }: ResultsProps) => {
     dataLayerPush({ event: 'config', user_id: uuid });
   }, [uuid]);
 
-  // Fire once per successful results fetch (not on later filter re-renders).
-  useEffect(() => {
-    if (apiResults === undefined || hasTrackedResultsLoaded.current) {
-      return;
-    }
-
-    hasTrackedResultsLoaded.current = true;
-    const totalEstimatedValue = apiResults.program_categories.reduce(
-      (sum, category) => sum + calculateTotalValue(category),
-      0,
-    );
-
-    track('screener_results_loaded', {
-      program_count: apiResults.programs.length,
-      total_estimated_value: totalEstimatedValue,
-    });
-  }, [apiResults, track]);
-
   usePageTitle(OTHER_PAGE_TITLES.results);
 
   const fetchResults = async () => {
@@ -180,6 +162,35 @@ const Results = ({ type }: ResultsProps) => {
   const [missingPrograms, setMissingPrograms] = useState(false);
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
+
+  // Fire once per successful results fetch (not on later filter re-renders).
+  // Placed after energyCalculatorRebateCategories so the none-eligible check
+  // can read the unfiltered rebate set.
+  useEffect(() => {
+    if (apiResults === undefined || hasTrackedResultsLoaded.current) {
+      return;
+    }
+
+    hasTrackedResultsLoaded.current = true;
+    const totalEstimatedValue = apiResults.program_categories.reduce(
+      (sum, category) => sum + calculateTotalValue(category),
+      0,
+    );
+
+    track('screener_results_loaded', {
+      program_count: apiResults.programs.length,
+      total_estimated_value: totalEstimatedValue,
+    });
+
+    // "None eligible" is derived from the UNFILTERED result set here (not from
+    // the filtered `programs` in results context), so a citizenship filter that
+    // hides all programs doesn't get conflated with a screening that genuinely
+    // found nothing. Fires once, alongside results_loaded.
+    const noRebates = (energyCalculatorRebateCategories ?? []).length === 0;
+    if (apiResults.programs.length === 0 && noRebates) {
+      track('screener_results_none_eligible', {});
+    }
+  }, [apiResults, energyCalculatorRebateCategories, track]);
 
   // Benbot AI assistant — gated behind the 'benbot' feature flag (off by default).
   const isBenbotEnabled = useFeatureFlag('benbot');

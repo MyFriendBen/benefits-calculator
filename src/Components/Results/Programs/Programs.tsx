@@ -73,8 +73,11 @@ const ValidationCategory = () => {
   return (
     <>
       <CategoryHeading category={validationCategory} />
-      {validationPrograms.map((program, index) => {
-        return <ProgramCard program={program} key={index} />;
+      {validationPrograms.map((program) => {
+        // Key by identity, not index: filtering reorders programs, and an
+        // index key would reuse a card instance (and its already-tripped
+        // impression ref) for a different program, dropping its impression.
+        return <ProgramCard program={program} key={program.program_id} />;
       })}
     </>
   );
@@ -129,8 +132,8 @@ const Programs = () => {
         return (
           <div key={category.name.default_message}>
             <CategoryHeading category={category} />
-            {category.programs.map((program, index) => {
-              return <ProgramCard program={program} key={index} />;
+            {category.programs.map((program) => {
+              return <ProgramCard program={program} key={program.program_id} />;
             })}
           </div>
         );

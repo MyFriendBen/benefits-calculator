@@ -15,8 +15,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { usePageTitle } from '../Common/usePageTitle';
 import { useTrackEvent } from '../../Assets/analytics';
+import { PRE_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
 
-const SELECT_STATE_STEP_ANALYTICS_ID = 'select-state';
+const SELECT_STATE_STEP_ANALYTICS_ID = PRE_DIRECTORY_STEP_IDS.selectState;
 
 export const STATES: { [key: string]: string } = {
   co: 'Colorado',
