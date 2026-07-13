@@ -1,7 +1,7 @@
 import LinkIcon from '@mui/icons-material/Link';
 import CheckIcon from '@mui/icons-material/Check';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import ModalOption from './ModalOption';
 import { useCopyFeedback } from './useCopyFeedback';
 
@@ -17,10 +17,20 @@ type CopyLinkOptionProps = {
   errorLabel: ReactNode;
   /** Sublabel shown when the clipboard write fails */
   errorSublabel: ReactNode;
+  /** Called after a successful clipboard write. Not called on error. */
+  onCopy?: () => void;
 };
 
-const CopyLinkOption = ({ url, label, sublabel, copiedLabel, errorLabel, errorSublabel }: CopyLinkOptionProps) => {
+const CopyLinkOption = ({ url, label, sublabel, copiedLabel, errorLabel, errorSublabel, onCopy }: CopyLinkOptionProps) => {
   const { copied, copyError, handleCopy } = useCopyFeedback();
+
+  // Fire only once the clipboard write actually succeeds, not optimistically on click.
+  useEffect(() => {
+    if (copied) {
+      onCopy?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [copied]);
 
   return (
     <ModalOption
