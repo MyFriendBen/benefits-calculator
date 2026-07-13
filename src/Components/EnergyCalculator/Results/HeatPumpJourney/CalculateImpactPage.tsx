@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useEffect, useMemo, useState } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { FormattedMessage, useIntl } from 'react-intl';
@@ -14,7 +14,6 @@ import {
   Radio,
   RadioGroup,
   Select,
-  TextField,
   Typography,
 } from '@mui/material';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
@@ -32,10 +31,11 @@ import {
   type CalculateImpactFormValues,
   isValidRemImpactApiResponse,
 } from './remCalculateImpactTypes';
-import { fetchRemImpact } from './fetchRemImpact';
+import { fetchRemImpact, RemAddressNotSupportedError } from './fetchRemImpact';
 import { buildCalculateImpactPayload } from './remCalculateImpactTypes';
 import CalculateImpactResults from './CalculateImpactResults';
-import { ReactComponent as Coin } from '../../Icons/Coin.svg';
+import { GooglePlacesAddressInput } from '../../../Common/GooglePlacesAddressInput';
+import { Icon } from '../../../Icon/Icon';
 import './CalculateImpactPage.css';
 
 const HOUSEHOLD_TYPE_OPTIONS: { value: CalculateImpactHouseholdType; messageId: string; defaultMessage: string }[] = [
@@ -131,9 +131,9 @@ const calculateImpactSchema = z
     heatingFuel: z.enum(FUEL_TYPE_VALUES, {
       required_error: 'Please select a heating fuel.',
     }),
-    waterHeatingFuel: z.enum(FUEL_TYPE_VALUES).optional(),
+    waterHeatingFuel: z.preprocess((val) => (val === '' ? undefined : val), z.enum(FUEL_TYPE_VALUES).optional()),
     upgradeChoice: z.enum(UPGRADE_CHOICE_VALUES, {
-      required_error: 'Please select an upgrade option.',
+      required_error: 'Please select one upgrade option.',
     }),
   })
   .superRefine((data, ctx) => {
@@ -152,7 +152,8 @@ type SubmitState =
   | { status: 'idle' }
   | { status: 'loading' }
   | { status: 'success'; result: RemImpactApiResponse; formValues: CalculateImpactFormValues }
-  | { status: 'error'; message: string };
+  | { status: 'error'; message: string }
+  | { status: 'address_not_supported' };
 
 export default function CalculateImpactPage() {
   const intl = useIntl();
@@ -168,6 +169,7 @@ export default function CalculateImpactPage() {
   const {
     control,
     handleSubmit,
+    resetField,
     formState: { errors },
   } = useForm<CalculateImpactFormData>({
     resolver: zodResolver(calculateImpactSchema),
@@ -182,6 +184,16 @@ export default function CalculateImpactPage() {
 
   usePageTitle(OTHER_PAGE_TITLES.energyCalculatorCalculateImpact);
 
+  const watchedWaterHeatingFuel = useWatch({ control, name: 'waterHeatingFuel' });
+  const watchedUpgradeChoice = useWatch({ control, name: 'upgradeChoice' });
+  const isHpwhEnabled = !!watchedWaterHeatingFuel;
+
+  useEffect(() => {
+    if (!watchedWaterHeatingFuel && watchedUpgradeChoice === 'heat_pump_water_heater') {
+      resetField('upgradeChoice');
+    }
+  }, [watchedWaterHeatingFuel, watchedUpgradeChoice, resetField]);
+
   if (!showCalculateImpact) return null;
 
   const onSubmit = (data: CalculateImpactFormData) => {
@@ -195,6 +207,7 @@ export default function CalculateImpactPage() {
       householdType: data.householdType,
     });
     setSubmitState({ status: 'loading' });
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
     fetchRemImpact(whiteLabel, payload.remAddressQuery)
       .then((result) => {
         if (!isValidRemImpactApiResponse(result)) {
@@ -203,7 +216,13 @@ export default function CalculateImpactPage() {
         }
         setSubmitState({ status: 'success', result, formValues: data });
       })
-      .catch((err: Error) => setSubmitState({ status: 'error', message: err.message }));
+      .catch((err: Error) => {
+        if (err instanceof RemAddressNotSupportedError) {
+          setSubmitState({ status: 'address_not_supported' });
+        } else {
+          setSubmitState({ status: 'error', message: err.message });
+        }
+      });
   };
 
   if (submitState.status === 'success') {
@@ -227,7 +246,7 @@ export default function CalculateImpactPage() {
         </div>
 
         <header className="calculate-impact-header">
-          <Coin aria-hidden="true" className="calculate-impact-icon" />
+          <Icon name="circle-dollar-sign" aria-hidden="true" className="calculate-impact-icon" />
           <div className="calculate-impact-header-text">
             <span className="calculate-impact-title-text">
               <FormattedMessage
@@ -245,7 +264,7 @@ export default function CalculateImpactPage() {
         <Typography variant="body1" className="calculate-impact-intro energy-calculator-body-text">
           <FormattedMessage
             id="energyCalculator.calculateImpact.intro"
-            defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
+            defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
             values={{
               rewiringAmerica: (
                 <TrackedOutboundLink
@@ -291,7 +310,7 @@ export default function CalculateImpactPage() {
       </div>
 
       <header className="calculate-impact-header">
-        <Coin aria-hidden="true" className="calculate-impact-icon" />
+        <Icon name="circle-dollar-sign" aria-hidden="true" className="calculate-impact-icon" />
         <div className="calculate-impact-header-text">
           <span className="calculate-impact-title-text">
             <FormattedMessage
@@ -309,7 +328,7 @@ export default function CalculateImpactPage() {
       <Typography variant="body1" className="calculate-impact-intro energy-calculator-body-text">
         <FormattedMessage
           id="energyCalculator.calculateImpact.intro"
-          defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
+          defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
           values={{
             rewiringAmerica: (
               <TrackedOutboundLink
@@ -338,7 +357,15 @@ export default function CalculateImpactPage() {
         <Alert severity="error" className="calculate-impact-error">
           <FormattedMessage
             id="energyCalculator.calculateImpact.error"
-            defaultMessage="Something went wrong calculating your impact. Please try again."
+            defaultMessage="Something went wrong calculating your impact. Please try selecting a different heating fuel type."
+          />
+        </Alert>
+      )}
+      {submitState.status === 'address_not_supported' && (
+        <Alert severity="error" className="calculate-impact-error">
+          <FormattedMessage
+            id="energyCalculator.calculateImpact.error.addressNotSupported"
+            defaultMessage="We're unable to calculate the impact for this address at this time. Please try entering a different address."
           />
         </Alert>
       )}
@@ -354,7 +381,7 @@ export default function CalculateImpactPage() {
           <p className="calculate-impact-section-description">
             <FormattedMessage
               id="energyCalculator.calculateImpact.section.household.description"
-              defaultMessage="Enter your household information to see potential energy bill changes and emissions reductions by upgrade type."
+              defaultMessage="Enter your household information to see potential energy bill changes and emissions reductions by upgrade type. (Your information will not be saved.)"
             />
           </p>
 
@@ -423,20 +450,21 @@ export default function CalculateImpactPage() {
                 name="address"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
+                  <GooglePlacesAddressInput
                     fullWidth
                     id="calculate-impact-address"
+                    value={field.value}
+                    onChange={field.onChange}
                     error={!!errors.address}
-                    inputProps={{
-                      autoComplete: 'street-address',
-                      'aria-describedby': 'calculate-impact-address-helper',
-                    }}
                     helperText={errors.address?.message}
                     placeholder={intl.formatMessage({
                       id: 'energyCalculator.calculateImpact.field.addressPlaceholder',
                       defaultMessage: '1234 Main St, Denver, CO 80014',
                     })}
+                    inputProps={{
+                      autoComplete: 'street-address',
+                      'aria-describedby': 'calculate-impact-address-helper',
+                    }}
                   />
                 )}
               />
@@ -579,14 +607,17 @@ export default function CalculateImpactPage() {
                 <RadioGroup {...field} value={field.value ?? ''}>
                   {UPGRADE_OPTIONS.map((opt) => {
                     const isSelected = field.value === opt.value;
+                    const isDisabled = opt.value === 'heat_pump_water_heater' && !isHpwhEnabled;
                     return (
                       <div
                         key={opt.value}
                         className="calculate-impact-radio-option"
                         data-selected={isSelected ? 'true' : 'false'}
+                        data-disabled={isDisabled ? 'true' : 'false'}
                       >
                         <FormControlLabel
                           value={opt.value}
+                          disabled={isDisabled}
                           control={<Radio />}
                           label={
                             <span className="calculate-impact-radio-label">
@@ -603,7 +634,14 @@ export default function CalculateImpactPage() {
                 </RadioGroup>
               )}
             />
-            {errors.upgradeChoice && <FormHelperText>{errors.upgradeChoice.message}</FormHelperText>}
+            {errors.upgradeChoice && (
+              <FormHelperText>
+                {intl.formatMessage({
+                  id: 'energyCalculator.calculateImpact.upgrade.selectOne',
+                  defaultMessage: 'Please select one upgrade option.',
+                })}
+              </FormHelperText>
+            )}
           </FormControl>
 
           <Button
