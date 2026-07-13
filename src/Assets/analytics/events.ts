@@ -86,8 +86,10 @@ export interface ScreenerEventMap {
   screener_results_tab_click: { tab_name: string };
   screener_additional_resource_click: { resource_name?: string; url?: string };
   screener_required_program_click: ProgramContext;
-  // Generic filter engagement ONLY. Never record the citizenship value selected.
-  screener_filter_engaged: {};
+  // Which filter TYPE was engaged is safe to record; the selected VALUE is not
+  // (e.g. citizenship status is PII — never send it). `filter_type` is the
+  // category of filter touched, never the chosen option.
+  screener_filter_engaged: { filter_type?: string };
 
   // ---- Share MFB (share the tool with others) ----
   screener_share: {

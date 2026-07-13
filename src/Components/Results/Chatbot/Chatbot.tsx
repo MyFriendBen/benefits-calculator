@@ -155,12 +155,14 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
       try {
         const conversationId = await ensureConversation();
         setMessages((prev) => [...prev, { role: 'user', text }]);
-        track('screener_benbot_message_sent', {});
         if (!conversationId || !uuid) {
           setMessages((prev) => [...prev, { role: 'bot', text: errorMessage }]);
           track('screener_benbot_error', {});
           return;
         }
+        // Fire after the guard so this counts messages actually dispatched to
+        // the backend, not failed attempts (which emit screener_benbot_error).
+        track('screener_benbot_message_sent', {});
         const res = await sendAssistantMessage(uuid, conversationId, text, newClientMessageId());
         setMessages((prev) => [...prev, toWidgetMessage(res.assistant_message)]);
       } catch {

@@ -33,7 +33,7 @@ export default function useStepForm<T extends FieldValues>({
     ...useFormProps,
   });
 
-  const { isSubmitting, isSubmitSuccessful, isSubmitted, errors } = form.formState;
+  const { isSubmitting, isSubmitSuccessful, isSubmitted, submitCount, errors } = form.formState;
   const errorCount = Object.keys(errors).length;
 
   useEffect(() => {
@@ -51,18 +51,26 @@ export default function useStepForm<T extends FieldValues>({
   }, [isSubmitSuccessful, nextPage, onSubmitSuccessfulOverride]);
 
   // Every screener step's form goes through this hook, making it the single
-  // shared place to catch validation errors for the drop-off funnel — a failed
-  // submit attempt sets `isSubmitted` with a non-empty `errors` map.
+  // shared place to catch validation errors for the drop-off funnel.
+  //
+  // Keyed on `submitCount` (incremented once per submit *attempt*), NOT on
+  // `errorCount`: react-hook-form re-validates on every keystroke after the
+  // first failed submit (reValidateMode: 'onChange'), so gating on errorCount
+  // would refire this on each keystroke and also drop consecutive failures that
+  // happen to have the same count. `submitCount` changes exactly once per
+  // attempt, so we emit exactly one error event per failed submit.
   useEffect(() => {
-    if (isSubmitted && !isSubmitSuccessful && errorCount > 0) {
+    if (submitCount > 0 && isSubmitted && !isSubmitSuccessful && errorCount > 0) {
       track('screener_form_error', {
         screener_step_name: getStepAnalyticsId(questionName),
         screener_step_number: stepNumber >= 0 ? stepNumber : undefined,
         form_error_count: errorCount,
       });
     }
+    // Intentionally depend only on submitCount so this fires once per submit
+    // attempt, not on every keystroke-driven errorCount change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSubmitted, isSubmitSuccessful, errorCount]);
+  }, [submitCount]);
 
   return form as UseFormReturn<T>;
 }

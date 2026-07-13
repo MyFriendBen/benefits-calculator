@@ -9,8 +9,15 @@ import type { QuestionName } from '../../Types/Questions';
 // container (e.g. `questionHooks.ts`, household member steps) import this
 // instead, so they don't pull every step component into their module graph.
 //
-// Keep the stepId values here in sync with `QuestionComponentContainer.tsx`.
-export const STEP_ANALYTICS_ID_BY_QUESTION_NAME: Partial<Record<QuestionName, string>> = {
+// `QuestionComponentContainer.tsx` derives its per-step `stepId` from THIS map
+// (it imports it), so this is the single source of truth — there is no second
+// map to keep in sync. Typed as a total `Record` (not `Partial`) so every
+// QuestionName is guaranteed a stable slug: the `view` event (from the
+// container) and the `complete` event (from `getStepAnalyticsId` in
+// questionHooks) therefore always resolve the SAME `screener_step_name`, which
+// is what lets the drop-off funnel join view↔complete on step name. Adding a
+// new QuestionName without a slug here is now a compile error.
+export const STEP_ANALYTICS_ID_BY_QUESTION_NAME: Record<QuestionName, string> = {
   zipcode: 'zip-code',
   householdSize: 'household-size',
   householdData: 'household-members',

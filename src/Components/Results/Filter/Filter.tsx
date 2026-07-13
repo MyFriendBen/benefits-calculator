@@ -47,8 +47,9 @@ export const Filter = () => {
       calculatedFilters,
     });
 
-    // Privacy: never record the citizenship value selected — generic engagement only.
-    track('screener_filter_engaged', {});
+    // Privacy: record only the filter TYPE, never the selected citizenship
+    // value (that would be PII). `filter_type` is the category touched.
+    track('screener_filter_engaged', { filter_type: 'citizenship' });
   }, [formData.householdData, setFilterState, track]);
 
   const renderDesktopButtons = () => {
