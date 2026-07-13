@@ -53,8 +53,14 @@ export interface ScreenerEventMap {
   screener_form_step: StepContext & { step_action: 'view' | 'complete' };
   screener_form_complete: {};
   screener_form_error: StepContext & { form_error_message?: string; form_error_count?: number };
+  // NOT YET EMITTED — needs a shared form-field wrapper first. Wiring only some
+  // steps would produce a partial, misleading dataset, so it's deferred until a
+  // single field component exists to instrument once. Tracked in MFB-1268.
   screener_form_field_engaged: StepContext & { form_field_name: string };
   screener_form_back: StepContext;
+  // NOT YET EMITTED — reserved for backend submission/API failures (distinct
+  // from `screener_form_error`, which is field validation). Wire when there's a
+  // central submit handler to hook. Tracked in MFB-1268.
   screener_form_submit_failed: StepContext & { reason?: string };
 
   // ---- Step interactions ----
@@ -74,7 +80,6 @@ export interface ScreenerEventMap {
   // ---- Results: program interactions ----
   screener_apply_click: StepContext & ProgramContext & { url?: string };
   screener_program_more_info: StepContext & ProgramContext;
-  screener_resource_more_info: StepContext & { resource_name: string; category?: string };
   screener_program_visit_website: StepContext & ProgramContext & { url?: string };
   screener_program_phone_click: StepContext & ProgramContext;
   screener_program_document_download: StepContext & ProgramContext & { document_name?: string };

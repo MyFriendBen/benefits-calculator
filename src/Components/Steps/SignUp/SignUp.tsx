@@ -7,6 +7,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { z } from 'zod';
 import useScreenApi from '../../../Assets/updateScreen';
+import { useTrackEvent } from '../../../Assets/analytics';
 import { FormData } from '../../../Types/FormData';
 import { FormattedMessageType } from '../../../Types/Questions';
 import { useConfig, useLocalizedLink } from '../../Config/configHook';
@@ -199,6 +200,8 @@ function SignUp() {
   const privacyPolicyLink = useLocalizedLink('privacy_policy');
   const consentToContactLink = useLocalizedLink('consent_to_contact');
 
+  const track = useTrackEvent();
+
   const contactInfoSchema = buildContactInfoSchema(formatMessage);
 
   const someContactType = (contactType: { [key: string]: boolean }) => {
@@ -296,6 +299,12 @@ function SignUp() {
       await updateUser(newFormData);
       newFormData.signUpInfo.hasUser = true;
       setFormData(newFormData);
+      if (updatedSignUpInfo !== undefined) {
+        track('screener_signup_completed', {
+          email_consent: updatedSignUpInfo.emailConsent,
+          sms_consent: updatedSignUpInfo.tcpa,
+        });
+      }
     } catch (e) {
       setHasServerError(true);
       throw e;

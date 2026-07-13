@@ -6,6 +6,7 @@ import SendIcon from '@mui/icons-material/Send';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { parseMarkdown } from '../../../utils/parseMarkdown';
 import { startAssistantConversation, sendAssistantMessage, AssistantApiMessage } from '../../../apiCalls';
+import { useTrackEvent } from '../../../Assets/analytics';
 import './Chatbot.css';
 
 type Message = {
@@ -105,6 +106,7 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
   const startPromiseRef = useRef<Promise<string | null> | null>(null);
   const sendingRef = useRef(false);
   const { formatMessage } = useIntl();
+  const track = useTrackEvent();
 
   const errorMessage = formatMessage({
     id: 'chatbot.error',
@@ -153,20 +155,23 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
       try {
         const conversationId = await ensureConversation();
         setMessages((prev) => [...prev, { role: 'user', text }]);
+        track('screener_benbot_message_sent', {});
         if (!conversationId || !uuid) {
           setMessages((prev) => [...prev, { role: 'bot', text: errorMessage }]);
+          track('screener_benbot_error', {});
           return;
         }
         const res = await sendAssistantMessage(uuid, conversationId, text, newClientMessageId());
         setMessages((prev) => [...prev, toWidgetMessage(res.assistant_message)]);
       } catch {
         setMessages((prev) => [...prev, { role: 'bot', text: errorMessage }]);
+        track('screener_benbot_error', {});
       } finally {
         sendingRef.current = false;
         setIsSending(false);
       }
     },
-    [ensureConversation, uuid, errorMessage],
+    [ensureConversation, uuid, errorMessage, track],
   );
 
   const openWithMessage = useCallback(
@@ -196,13 +201,15 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
-  }, []);
+    track('screener_benbot_closed', {});
+  }, [track]);
 
   const handleOpen = useCallback(() => {
     // Open to a blank window; the conversation is created lazily on the first
     // user message (typed, or via the "Guide me" button), so no unsolicited reply.
     setIsOpen(true);
-  }, []);
+    track('screener_benbot_opened', { entry: 'fab' });
+  }, [track]);
 
   return (
     <ChatbotContext.Provider value={{ openWithMessage }}>

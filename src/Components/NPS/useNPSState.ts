@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { postNPSScore, patchNPSReason } from '../../apiCalls';
+import { useTrackEvent } from '../../Assets/analytics';
 
 type UseNPSStateReturn = {
   selectedScore: number | null;
@@ -25,10 +26,12 @@ export function useNPSState(uuid?: string): UseNPSStateReturn {
   const [isFullySubmitted, setIsFullySubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reason, setReason] = useState('');
+  const track = useTrackEvent();
 
   const submitScore = (score: number) => {
     setSelectedScore(score);
     setIsScoreSubmitted(true);
+    track('screener_nps_score_submitted', { score });
 
     if (uuid) {
       postNPSScore({ uuid, score }).catch((error) => {
@@ -42,6 +45,7 @@ export function useNPSState(uuid?: string): UseNPSStateReturn {
 
     setIsSubmitting(true);
     setIsFullySubmitted(true);
+    track('screener_nps_reason_submitted', {});
 
     if (uuid && reason.trim()) {
       patchNPSReason({ uuid, score_reason: reason.trim() })
@@ -60,6 +64,7 @@ export function useNPSState(uuid?: string): UseNPSStateReturn {
     if (isSubmitting) return; // Prevent double submission
     setIsSubmitting(true);
     setIsFullySubmitted(true);
+    track('screener_nps_reason_skipped', {});
     setIsSubmitting(false);
   };
 
