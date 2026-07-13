@@ -9,6 +9,7 @@ import { Checkbox, FormControlLabel } from '@mui/material';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { FormattedMessageType } from '../../../Types/Questions';
 import dataLayerPush, { useTrackEvent } from '../../../Assets/analytics';
+import { PRE_DIRECTORY_STEP_IDS } from '../../../Assets/analytics/stepIds';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import { useConfig, useLocalizedLink } from '../../Config/configHook';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
@@ -26,7 +27,7 @@ const isTrue = (value: boolean) => {
   return value;
 };
 
-const DISCLAIMER_STEP_ANALYTICS_ID = 'disclaimer';
+const DISCLAIMER_STEP_ANALYTICS_ID = PRE_DIRECTORY_STEP_IDS.disclaimer;
 
 const Disclaimer = () => {
   const { formData, setScreenLoading, locale, setStepLoading } = useContext(Context);

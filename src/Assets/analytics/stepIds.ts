@@ -37,3 +37,13 @@ export const STEP_ANALYTICS_ID_BY_QUESTION_NAME: Record<QuestionName, string> = 
 export function getStepAnalyticsId(questionName: QuestionName | undefined): string | undefined {
   return questionName ? STEP_ANALYTICS_ID_BY_QUESTION_NAME[questionName] : undefined;
 }
+
+// Steps that live BEFORE the numbered question directory (so they aren't
+// QuestionNames): the language and disclaimer screens, and the state-select
+// page. Kept here so every analytics step slug is discoverable in one place
+// for the GTM/GA4 handoff spec, rather than hardcoded across step components.
+export const PRE_DIRECTORY_STEP_IDS = {
+  language: 'language',
+  disclaimer: 'disclaimer',
+  selectState: 'select-state',
+} as const;

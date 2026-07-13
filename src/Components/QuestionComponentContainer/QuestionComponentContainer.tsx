@@ -80,7 +80,9 @@ const QuestionComponentContainer = () => {
     if (step !== undefined) {
       track('screener_form_step', {
         screener_step_name: step.stepId,
-        screener_step_number: stepNumber,
+        // Coerce a bad/NaN id to undefined (NaN serializes to null in GA4),
+        // matching how every other call site treats a missing step number.
+        screener_step_number: Number.isNaN(stepNumber) ? undefined : stepNumber,
         step_action: 'view',
       });
     }

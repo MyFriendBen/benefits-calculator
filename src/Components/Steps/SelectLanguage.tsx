@@ -13,8 +13,9 @@ import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { useUpdateWhiteLabelAndNavigate } from '../RouterUtil/RedirectToWhiteLabel';
 import { usePageTitle } from '../Common/usePageTitle';
 import { useTrackEvent } from '../../Assets/analytics';
+import { PRE_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
 
-const STEP_1_ANALYTICS_ID = 'language';
+const STEP_1_ANALYTICS_ID = PRE_DIRECTORY_STEP_IDS.language;
 
 const SelectLanguagePage = () => {
   const { locale, selectLanguage, configLoading } = useContext(Context);
@@ -29,8 +30,19 @@ const SelectLanguagePage = () => {
 
   // This is the true first screen of the screener (step-1), so it's the single
   // place to mark the start of the funnel, in addition to its own step view.
+  //
+  // form_start must fire ONCE per screening, or the funnel denominator inflates:
+  // step-1 has no remount key, and users can navigate back to it (Back from
+  // step-2, or re-entry), each of which remounts this effect. Guard on a
+  // per-uuid sessionStorage flag so a given screening counts one start, while a
+  // genuinely new screening (new uuid) still starts fresh. The step VIEW below
+  // is intentionally NOT guarded — every view should count toward drop-off.
   useEffect(() => {
-    track('screener_form_start', { screener_step_name: STEP_1_ANALYTICS_ID, screener_step_number: 1 });
+    const startKey = uuid ? `mfb_form_start_${uuid}` : 'mfb_form_start';
+    if (!sessionStorage.getItem(startKey)) {
+      sessionStorage.setItem(startKey, '1');
+      track('screener_form_start', { screener_step_name: STEP_1_ANALYTICS_ID, screener_step_number: 1 });
+    }
     track('screener_form_step', {
       screener_step_name: STEP_1_ANALYTICS_ID,
       screener_step_number: 1,
