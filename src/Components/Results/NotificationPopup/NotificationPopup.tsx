@@ -95,13 +95,19 @@ const NotificationPopup = ({
     }
   }, [isMinimized, isDismissed, shouldShow]);
 
-  // Fire the impression event once when the popup first becomes visible.
+  // Fire the impression event once, when the popup first becomes visible.
+  // Guarded by a ref (fires at most once) and keyed on the visibility boolean
+  // so it still fires if the popup becomes eligible after mount, not only on
+  // the initial render.
+  const isVisible = shouldShow();
+  const hasTrackedShown = useRef(false);
   useEffect(() => {
-    if (shouldShow()) {
+    if (isVisible && !hasTrackedShown.current) {
+      hasTrackedShown.current = true;
       track('screener_notification_popup', { action: 'shown' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isVisible]);
 
   // Don't render if condition not met or completely dismissed
   if (!shouldShow() || isDismissed) {

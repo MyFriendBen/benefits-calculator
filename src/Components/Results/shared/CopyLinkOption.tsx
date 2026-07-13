@@ -1,7 +1,7 @@
 import LinkIcon from '@mui/icons-material/Link';
 import CheckIcon from '@mui/icons-material/Check';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
 import ModalOption from './ModalOption';
 import { useCopyFeedback } from './useCopyFeedback';
 
@@ -22,15 +22,9 @@ type CopyLinkOptionProps = {
 };
 
 const CopyLinkOption = ({ url, label, sublabel, copiedLabel, errorLabel, errorSublabel, onCopy }: CopyLinkOptionProps) => {
-  const { copied, copyError, handleCopy } = useCopyFeedback();
-
-  // Fire only once the clipboard write actually succeeds, not optimistically on click.
-  useEffect(() => {
-    if (copied) {
-      onCopy?.();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [copied]);
+  // Fires in the clipboard-success branch, so every successful copy counts —
+  // including repeat copies while the "copied" feedback is still showing.
+  const { copied, copyError, handleCopy } = useCopyFeedback(onCopy);
 
   return (
     <ModalOption

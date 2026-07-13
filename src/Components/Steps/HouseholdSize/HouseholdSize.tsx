@@ -76,7 +76,9 @@ const HouseholdSize = () => {
       // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
       track('screener_form_step', {
         screener_step_name: getStepAnalyticsId('householdSize'),
-        screener_step_number: householdSizeStepNumber,
+        // useStepNumber returns -1 when the step isn't in this referrer's
+        // directory; normalize to undefined like the other call sites.
+        screener_step_number: householdSizeStepNumber >= 0 ? householdSizeStepNumber : undefined,
         step_action: 'complete',
       });
       const page = householdSize === 1 ? '1' : '0';

@@ -8,10 +8,13 @@ type UseCopyFeedbackReturn = {
   handleCopy: (text: string) => void;
 };
 
-export function useCopyFeedback(): UseCopyFeedbackReturn {
+export function useCopyFeedback(onSuccess?: () => void): UseCopyFeedbackReturn {
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Keep the latest callback without re-creating handleCopy each render.
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
 
   const handleCopy = useCallback((text: string) => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -19,6 +22,9 @@ export function useCopyFeedback(): UseCopyFeedbackReturn {
       () => {
         setCopied(true);
         setCopyError(false);
+        // Fire on every successful write (not derived from `copied` state, which
+        // wouldn't change on a repeat copy while feedback is still showing).
+        onSuccessRef.current?.();
         timerRef.current = setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
       },
       () => {

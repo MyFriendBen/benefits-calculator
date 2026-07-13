@@ -81,13 +81,13 @@ const DocumentSummary = ({ programs }: DocumentSummaryProps) => {
       {canExpand && (
         <button
           className="document-summary-toggle"
-          onClick={() =>
-            setExpanded((prev) => {
-              const next = !prev;
-              track('screener_document_summary_toggle', { expanded: next });
-              return next;
-            })
-          }
+          onClick={() => {
+            // Compute next outside the updater — side effects in a state updater
+            // run twice under React 18 StrictMode, double-firing the event.
+            const next = !expanded;
+            setExpanded(next);
+            track('screener_document_summary_toggle', { expanded: next });
+          }}
           aria-expanded={expanded}
         >
           {expanded ? (
