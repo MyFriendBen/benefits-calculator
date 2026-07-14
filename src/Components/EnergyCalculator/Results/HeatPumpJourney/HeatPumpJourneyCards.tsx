@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import { useResultsLink } from '../../../Results/Results';
+import { useTrackEvent } from '../../../../Assets/analytics';
 import './HeatPumpJourneyCards.css';
 
 // CESN-specific feature (Colorado Energy Savings Network). Caller is responsible
@@ -12,6 +13,7 @@ const POWER_AHEAD_LEARN_MORE_URL = 'https://poweraheadcolorado.org/why-heat-pump
 
 export default function HeatPumpJourneyCards() {
   const intl = useIntl();
+  const track = useTrackEvent();
   const billsImpactLink = useResultsLink('results/energy-rebates/waterHeater/calculate-impact');
   const contractorsLink = useResultsLink('results/energy-rebates/waterHeater/connect-now');
 
@@ -70,7 +72,11 @@ export default function HeatPumpJourneyCards() {
             defaultMessage="Learn how your household may see potential energy bill changes and emissions reductions."
           />
         </p>
-        <Link to={billsImpactLink} className="heat-pump-journey-card-cta">
+        <Link
+          to={billsImpactLink}
+          className="heat-pump-journey-card-cta"
+          onClick={() => track('heat_pump_cta_click', { cta: 'calculate_impact' })}
+        >
           <FormattedMessage id="energyCalculator.heatPumpJourney.card2.cta" defaultMessage="Calculate impact" />
         </Link>
       </article>
@@ -93,7 +99,11 @@ export default function HeatPumpJourneyCards() {
             defaultMessage="Heat pumps are an upgrade to your HVAC system. Consult with a registered contractor to help you plan your heat pump installation."
           />
         </p>
-        <Link to={contractorsLink} className="heat-pump-journey-card-cta">
+        <Link
+          to={contractorsLink}
+          className="heat-pump-journey-card-cta"
+          onClick={() => track('heat_pump_cta_click', { cta: 'connect_now' })}
+        >
           <FormattedMessage id="energyCalculator.heatPumpJourney.card3.cta" defaultMessage="Connect now" />
         </Link>
       </article>

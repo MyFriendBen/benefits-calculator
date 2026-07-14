@@ -19,6 +19,14 @@ export type PagedDocumentViewerProps = {
   /** Accessible name for the document (e.g. its title). Used for page alt text. */
   title: string;
   className?: string;
+  /**
+   * Called with the 1-based page number whenever the visible page changes via
+   * the pager controls or arrow keys. This is a reusable common component, so
+   * it never fires analytics itself — callers wire this to their own tracking.
+   */
+  onPageView?: (pageNumber: number) => void;
+  /** Called when the user triggers the Print/Download action. */
+  onPrint?: () => void;
 };
 
 /**
@@ -27,7 +35,14 @@ export type PagedDocumentViewerProps = {
  * the browser's native PDF viewer can't reproduce. Print/Download opens the
  * underlying PDF so the downloaded artifact is a real PDF.
  */
-export default function PagedDocumentViewer({ pageImages, pdfUrl, title, className }: PagedDocumentViewerProps) {
+export default function PagedDocumentViewer({
+  pageImages,
+  pdfUrl,
+  title,
+  className,
+  onPageView,
+  onPrint,
+}: PagedDocumentViewerProps) {
   const intl = useIntl();
   const [pageIndex, setPageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -38,8 +53,24 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
   const isFirst = pageIndex === 0;
   const isLast = pageIndex === pageCount - 1;
 
-  const goPrev = useCallback(() => setPageIndex((i) => Math.max(0, i - 1)), []);
-  const goNext = useCallback(() => setPageIndex((i) => Math.min(pageCount - 1, i + 1)), [pageCount]);
+  const goPrev = useCallback(() => {
+    setPageIndex((i) => {
+      const next = Math.max(0, i - 1);
+      if (next !== i) {
+        onPageView?.(next + 1);
+      }
+      return next;
+    });
+  }, [onPageView]);
+  const goNext = useCallback(() => {
+    setPageIndex((i) => {
+      const next = Math.min(pageCount - 1, i + 1);
+      if (next !== i) {
+        onPageView?.(next + 1);
+      }
+      return next;
+    });
+  }, [pageCount, onPageView]);
 
   const handlePagingKey = useCallback(
     (key: string): boolean => {
@@ -106,7 +137,8 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
   const printDocument = useCallback(() => {
     // Open the real PDF so the user prints/saves a PDF rather than the images.
     window.open(pdfUrl, '_blank', 'noopener,noreferrer');
-  }, [pdfUrl]);
+    onPrint?.();
+  }, [pdfUrl, onPrint]);
 
   const rootClass = ['paged-document-viewer', className].filter(Boolean).join(' ');
 
