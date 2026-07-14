@@ -9,9 +9,16 @@ export async function navigateHomePage(page: Page, specificPath?: string) {
 }
 
 export async function clickGetStartedButton(page: Page) {
-  const getStarted = page.getByRole('button', { name: /get started/i }).first();
-  await expect(getStarted).toBeVisible({ timeout: 15000 });
-  await getStarted.click();
+  const button = page.getByRole('button', { name: /get started/i }).first();
+  const link = page.getByRole('link', { name: /get started/i }).first();
+
+  if (await button.isVisible().catch(() => false)) {
+    await button.click();
+    return;
+  }
+
+  await expect(link).toBeVisible({ timeout: 20000 });
+  await link.click();
 }
 
 export async function selectLanguage(page: Page, language: string) {

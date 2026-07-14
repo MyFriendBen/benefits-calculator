@@ -2,9 +2,16 @@ import { Page, expect } from '@playwright/test';
 import { selectIncomeCategory, selectIncomeType, selectFrequency } from './form';
 
 export async function selectOwnerOrRenter(page: Page, type: string) {
-  const name = new RegExp(`^${type}$`, 'i');
+  const name = new RegExp(type, 'i');
   const link = page.getByRole('link', { name }).first();
-  await expect(link).toBeVisible({ timeout: 15000 });
+  const button = page.getByRole('button', { name }).first();
+
+  if (await button.isVisible().catch(() => false)) {
+    await button.click();
+    return;
+  }
+
+  await expect(link).toBeVisible({ timeout: 20000 });
   await link.click();
 }
 

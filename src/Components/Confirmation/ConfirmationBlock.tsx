@@ -36,7 +36,7 @@ export default function ConfirmationBlock({
     <div className="confirmation-block-container">
       <div className="confirmation-block-header">
         <h2>
-          <div className="confirmation-icon">{icon}</div>
+          <span className="confirmation-icon">{icon}</span>
           {title}
         </h2>
         <Link
@@ -46,7 +46,7 @@ export default function ConfirmationBlock({
           aria-label={formatMessage(editAriaLabel)}
           onClick={() => track('screener_confirmation_edit', { section: stepName })}
         >
-          <Pencil aria-label={formatMessage(editAriaLabel)} className="edit-pencil-icon" strokeWidth={1.5} />
+          <Pencil aria-hidden={true} className="edit-pencil-icon" strokeWidth={1.5} />
         </Link>
       </div>
       <div className="confirmation-block-content">
