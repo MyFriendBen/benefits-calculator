@@ -65,10 +65,7 @@ export interface ScreenerEventMap {
 
   // ---- Step interactions ----
   screener_household_member: StepContext & { action: 'add' | 'edit' | 'delete' };
-  // `source` distinguishes a user-clicked "Add income" ('user') from a row the
-  // form auto-appends for a 16+ member ('auto'). Filter to source='user' to
-  // measure genuine engagement; tracking both keeps add/delete counts balanced.
-  screener_income_source: StepContext & { action: 'add' | 'edit' | 'delete'; source?: 'user' | 'auto' };
+  screener_income_source: StepContext & { action: 'add' | 'edit' | 'delete' };
   screener_has_benefits_load_error: StepContext;
   screener_language_changed: StepContext & { language_name: string };
   screener_confirmation_edit: { section: string };

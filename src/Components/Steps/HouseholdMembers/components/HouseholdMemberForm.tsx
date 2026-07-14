@@ -142,16 +142,6 @@ const HouseholdMemberForm = () => {
     getValues,
     reset,
     append,
-    // The form auto-appends an income row for 16+ members. Track it as an add
-    // with source:'auto' so add/delete counts stay balanced (delete = trash
-    // click); filter source:'user' downstream for genuine engagement.
-    onAutoAppendIncome: () =>
-      track('screener_income_source', {
-        screener_step_name: getStepAnalyticsId('householdData'),
-        screener_step_number: currentStepId,
-        action: 'add',
-        source: 'auto',
-      }),
     calculateCurrentAgeStatus,
     watchBirthMonth,
     watchBirthYear,
