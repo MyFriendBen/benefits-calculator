@@ -9,7 +9,9 @@ export async function navigateHomePage(page: Page, specificPath?: string) {
 }
 
 export async function clickGetStartedButton(page: Page) {
-  await page.getByRole('button', { name: 'Get Started' }).click();
+  const getStarted = page.getByRole('button', { name: /get started/i }).first();
+  await expect(getStarted).toBeVisible({ timeout: 15000 });
+  await getStarted.click();
 }
 
 export async function selectLanguage(page: Page, language: string) {
