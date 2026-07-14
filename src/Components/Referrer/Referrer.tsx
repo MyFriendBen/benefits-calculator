@@ -11,6 +11,8 @@ import NcLink211Message from '../Results/NcLink211Message';
 import CcigResultsMessage from '../CcigComponents/CcigResultsMessage';
 import TwoOneOneHeaderNC from '../TwoOneOneNCComponents/TwoOneOneHeaderNC/TwoOneOneHeaderNC';
 import TwoOneOneFooterNC from '../TwoOneOneNCComponents/TwoOneOneFooterNC/TwoOneOneFooterNC';
+import TwoOneOneHeaderIL from '../TwoOneOneILComponents/TwoOneOneHeaderIL/TwoOneOneHeaderIL';
+import TwoOneOneFooterIL from '../TwoOneOneILComponents/TwoOneOneFooterIL/TwoOneOneFooterIL';
 import PoweredByFooter from '../Footer/PoweredByFooter';
 import EnergyCalculatorFooter from '../EnergyCalculator/Footer/Footer';
 import CesnBanner from '../EnergyCalculator/Banner/Banner';
@@ -41,6 +43,10 @@ export const BrandedHeader = () => {
     return <TwoOneOneHeaderNC />;
   }
 
+  if (uiOptions.includes('211il')) {
+    return <TwoOneOneHeaderIL />;
+  }
+
   if (uiOptions.includes('lanc')) {
     return <LancHeader />;
   }
@@ -60,6 +66,7 @@ export const BrandedFooter = () => {
   const footerMap = [
     { flag: '211co', component: TwoOneOneFooterCO },
     { flag: '211nc', component: TwoOneOneFooterNC },
+    { flag: '211il', component: TwoOneOneFooterIL },
     { flag: 'lanc', component: LancFooter },
     { flag: 'hfed', component: NCHispanicFederationFooter },
     { flag: 'powered_by_mfb_footer', component: PoweredByFooter },
