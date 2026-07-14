@@ -332,11 +332,12 @@ const IncomeSection = ({
   // step identity for analytics regardless of which member page is open.
   const householdDataStepNumber = useStepNumber('householdData', false);
 
-  const trackIncomeSource = (action: 'add' | 'delete') => {
+  const trackIncomeSource = (action: 'add' | 'delete', source: 'user' | 'auto' = 'user') => {
     track('screener_income_source', {
       screener_step_name: getStepAnalyticsId('householdData'),
       screener_step_number: householdDataStepNumber >= 0 ? householdDataStepNumber : undefined,
       action,
+      source,
     });
   };
 
@@ -347,7 +348,7 @@ const IncomeSection = ({
 
   const handleAddIncomeSource = () => {
     append(EMPTY_INCOME_STREAM);
-    trackIncomeSource('add');
+    trackIncomeSource('add', 'user');
   };
 
   return (

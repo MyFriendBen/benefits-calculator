@@ -14,6 +14,8 @@ interface UseHouseholdMemberFormEffectsParams {
   getValues: UseFormGetValues<any>;
   reset: UseFormReset<any>;
   append: (value: any) => void;
+  /** Fired when an income row is auto-appended for a 16+ member (system, not user). */
+  onAutoAppendIncome?: () => void;
   calculateCurrentAgeStatus: () => { is16OrOlder: boolean; isUnder16: boolean };
   watchBirthMonth: number;
   watchBirthYear: number;
@@ -34,6 +36,7 @@ export const useHouseholdMemberFormEffects = ({
   getValues,
   reset,
   append,
+  onAutoAppendIncome,
   calculateCurrentAgeStatus,
   watchBirthMonth,
   watchBirthYear,
@@ -81,8 +84,9 @@ export const useHouseholdMemberFormEffects = ({
 
     if (is16OrOlder && !hasStreams) {
       append(EMPTY_INCOME_STREAM);
+      onAutoAppendIncome?.();
     }
-  }, [watchBirthMonth, watchBirthYear, calculateCurrentAgeStatus, getValues, append]);
+  }, [watchBirthMonth, watchBirthYear, calculateCurrentAgeStatus, getValues, append, onAutoAppendIncome]);
 
   // EC-only: Reset receivesSsi when disabled is unchecked
   useEffect(() => {
