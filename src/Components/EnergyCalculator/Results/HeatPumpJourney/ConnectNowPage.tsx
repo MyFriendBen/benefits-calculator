@@ -9,6 +9,7 @@ import PagedDocumentViewer from '../../../Common/PagedDocumentViewer';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
 import { addAdminToLink } from '../../../../Assets/adminLink';
+import { useTrackEvent } from '../../../../Assets/analytics';
 import { Icon } from '../../../Icon/Icon';
 import './ConnectNowPage.css';
 
@@ -68,6 +69,7 @@ export default function ConnectNowPage() {
   const { whiteLabel, uuid } = useParams();
   const [searchParams] = useSearchParams();
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams]);
+  const track = useTrackEvent();
 
   const backLink = addAdminToLink(`/${whiteLabel}/${uuid}/results/energy-rebates/hvac`, isAdminView);
 
@@ -168,6 +170,14 @@ export default function ConnectNowPage() {
           pdfUrl={contractorGuide.pdfUrl}
           title={pdfDocumentTitle}
           className="connect-now-pdf-frame"
+          onPageView={(n) => {
+            // Ticket calls out pages 2 & 3 specifically (page 1 is the landing
+            // view, not a "turn"); still send the actual page number reached.
+            if (n >= 2) {
+              track('heat_pump_pdf_page', { page_number: n });
+            }
+          }}
+          onPrint={() => track('heat_pump_pdf_print', {})}
         />
       </section>
     </main>
