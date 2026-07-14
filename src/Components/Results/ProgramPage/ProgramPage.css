@@ -9,7 +9,7 @@
 .program-icon-and-header {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   width: 100%;
 }
 
@@ -228,7 +228,11 @@ li.apply-info {
 
 .icon-header-est-values {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
+  /* Span the full card width. Without this, the parent (a centered flex column)
+     shrinks this row to its content width and centers it, so the icon/title/
+     estimation spacing drifts based on program name and value length. */
+  width: 100%;
 }
 
 .content-width {

@@ -5,6 +5,7 @@ import { QuestionName } from '../../Types/Questions';
 import './Confirmation.css';
 import { useStepNumber } from '../../Assets/stepDirectory';
 import { MessageDescriptor, useIntl } from 'react-intl';
+import { useTrackEvent } from '../../Assets/analytics';
 export { formatToUSD } from '../../utils/formatCurrency';
 
 type ConfirmationBlockParams = PropsWithChildren<{
@@ -29,24 +30,24 @@ export default function ConfirmationBlock({
   const { formatMessage } = useIntl();
   const stepNumber = useStepNumber(stepName);
   const locationState = noReturn ? undefined : { routedFromConfirmationPg: true };
+  const track = useTrackEvent();
 
   return (
-    <div className="confirmation-section">
-      <div className="confirmation-section-header">
-        <h2>
-          <div className="confirmation-icon">{icon}</div>
-          {title}
-        </h2>
-        <Link
-          to={`/${whiteLabel}/${uuid}/step-${stepNumber}/${editUrlEnding}`}
-          state={locationState}
-          className="edit-button-simple"
-          aria-label={formatMessage(editAriaLabel)}
-        >
-          <Pencil aria-hidden={true} />
-        </Link>
+    <div className="confirmation-block-container">
+      <div className="confirmation-icon">{icon}</div>
+      <div className="confirmation-block-content">
+        <p className="section-title">{title}</p>
+        {children}
       </div>
-      <div className="confirmation-section-content">{children}</div>
+      <Link
+        to={`/${whiteLabel}/${uuid}/step-${stepNumber}/${editUrlEnding}`}
+        state={locationState}
+        className="edit-button"
+        aria-label={formatMessage(editAriaLabel)}
+        onClick={() => track('screener_confirmation_edit', { section: stepName })}
+      >
+        <Pencil aria-label={formatMessage(editAriaLabel)} className="edit-pencil-icon" strokeWidth={1.5} />
+      </Link>
     </div>
   );
 }

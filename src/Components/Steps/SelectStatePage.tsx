@@ -14,6 +14,10 @@ import QuestionDescription from '../QuestionComponents/QuestionDescription';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { usePageTitle } from '../Common/usePageTitle';
+import { useTrackEvent } from '../../Assets/analytics';
+import { PRE_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
+
+const SELECT_STATE_STEP_ANALYTICS_ID = PRE_DIRECTORY_STEP_IDS.selectState;
 
 export const STATES: { [key: string]: string } = {
   co: 'Colorado',
@@ -30,8 +34,19 @@ const SelectStatePage = () => {
 
   const queryString = useQueryString();
   const navigate = useNavigate();
+  const track = useTrackEvent();
 
   usePageTitle(OTHER_PAGE_TITLES.state);
+
+  // This page is outside QuestionComponentContainer (reached only when no
+  // whiteLabel is resolved yet), so it tracks its own view.
+  useEffect(() => {
+    track('screener_form_step', {
+      screener_step_name: SELECT_STATE_STEP_ANALYTICS_ID,
+      step_action: 'view',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { formatMessage } = useIntl();
 
@@ -61,6 +76,10 @@ const SelectStatePage = () => {
   const updateWhiteLabelAndNavigate = useUpdateWhiteLabelAndNavigate();
 
   const submitHandler: SubmitHandler<FormSchema> = ({ state }) => {
+    track('screener_form_step', {
+      screener_step_name: SELECT_STATE_STEP_ANALYTICS_ID,
+      step_action: 'complete',
+    });
     let navUrl = `/${state}/step-2${queryString}`;
     if (uuid !== undefined) {
       navUrl = `/${state}/${uuid}/step-2${queryString}`;

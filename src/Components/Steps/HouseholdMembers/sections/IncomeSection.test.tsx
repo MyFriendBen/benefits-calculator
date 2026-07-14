@@ -4,6 +4,15 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import IncomeSection from './IncomeSection';
 import { EMPTY_INCOME_STREAM } from '../utils/constants';
 
+// IncomeSection calls useStepNumber directly (for the screener_income_source
+// analytics event); stub stepDirectory so it doesn't need real Wrapper
+// Context (getReferrer) — this component isn't wrapped in Context in this
+// test file.
+jest.mock('../../../../Assets/stepDirectory', () => ({
+  useStepNumber: (_name: string, _required?: boolean) => 5,
+  useStepName: (_stepNumber: number) => undefined,
+}));
+
 // FormattedMessageType is ReactElement; plain strings work fine in JSDOM render tests
 const incomeCategories = { employment: 'Employment' as any, benefits: 'Benefits' as any };
 const incomeOptions = {

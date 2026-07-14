@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import ResultsError from './ResultsError/ResultsError';
 import Loading from './Loading/Loading';
 import {
@@ -39,6 +39,8 @@ import { NPSWidget } from '../NPS';
 import ShareModalAutoPopup from '../Share/ShareModalAutoPopup';
 import { useFeatureFlag } from '../Config/configHook';
 import { ChatbotProvider } from './Chatbot/Chatbot';
+import { useTrackEvent } from '../../Assets/analytics';
+import { calculateTotalValue } from './FormattedValue';
 
 // Mounts the Benbot chat widget only when the flag is on; otherwise renders children unchanged.
 // Defined at module scope so its identity is stable across renders (no subtree remount).
@@ -111,6 +113,8 @@ const Results = ({ type }: ResultsProps) => {
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
   const [apiResults, setApiResults] = useState<EligibilityResults | undefined>();
+  const track = useTrackEvent();
+  const hasTrackedResultsLoaded = useRef(false);
 
   useEffect(() => {
     dataLayerPush({ event: 'config', user_id: uuid });
@@ -158,6 +162,45 @@ const Results = ({ type }: ResultsProps) => {
   const [missingPrograms, setMissingPrograms] = useState(false);
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
+
+  // Fire screener_results_loaded once, as soon as the API result resolves —
+  // independent of rebate loading (not on later filter re-renders).
+  useEffect(() => {
+    if (apiResults === undefined || hasTrackedResultsLoaded.current) {
+      return;
+    }
+
+    hasTrackedResultsLoaded.current = true;
+    const totalEstimatedValue = apiResults.program_categories.reduce(
+      (sum, category) => sum + calculateTotalValue(category),
+      0,
+    );
+
+    track('screener_results_loaded', {
+      program_count: apiResults.programs.length,
+      total_estimated_value: totalEstimatedValue,
+    });
+  }, [apiResults, track]);
+
+  // "None eligible" needs BOTH result sets resolved, or we'd fire a false
+  // negative while rebates are still loading (and the once-guard would prevent
+  // correction). On the energy calculator, rebates load async and are undefined
+  // until resolved. Derived from the UNFILTERED sets so a citizenship filter
+  // hiding all programs isn't miscounted as "none eligible". Separate guard so
+  // it stays independent of screener_results_loaded above.
+  const hasTrackedNoneEligible = useRef(false);
+  useEffect(() => {
+    const rebatesLoading = whiteLabel === 'cesn' && energyCalculatorRebateCategories === undefined;
+    if (apiResults === undefined || rebatesLoading || hasTrackedNoneEligible.current) {
+      return;
+    }
+
+    hasTrackedNoneEligible.current = true;
+    const noRebates = (energyCalculatorRebateCategories ?? []).length === 0;
+    if (apiResults.programs.length === 0 && noRebates) {
+      track('screener_results_none_eligible', {});
+    }
+  }, [apiResults, energyCalculatorRebateCategories, whiteLabel, track]);
 
   // Benbot AI assistant — gated behind the 'benbot' feature flag (off by default).
   const isBenbotEnabled = useFeatureFlag('benbot');

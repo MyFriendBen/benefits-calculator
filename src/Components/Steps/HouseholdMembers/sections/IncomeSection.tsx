@@ -34,6 +34,9 @@ import { createMenuItems } from '../../SelectHelperFunctions/SelectHelperFunctio
 import { FormattedMessageType } from '../../../../Types/Questions';
 import { IncomeStreamFormData } from '../utils/types';
 import { EMPTY_INCOME_STREAM } from '../utils/constants';
+import { useStepNumber } from '../../../../Assets/stepDirectory';
+import { useTrackEvent } from '../../../../Assets/analytics';
+import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
 import '../styles/HouseholdMemberSections.css';
 import '../styles/IncomeSection.css';
 
@@ -324,6 +327,29 @@ const IncomeSection = ({
     return (errors.incomeStreams as FieldErrors<IncomeStreamFormData>[])?.[index]?.[fieldName];
   };
 
+  const track = useTrackEvent();
+  // Income streams live inside the household member step, so they share its
+  // step identity for analytics regardless of which member page is open.
+  const householdDataStepNumber = useStepNumber('householdData', false);
+
+  const trackIncomeSource = (action: 'add' | 'delete') => {
+    track('screener_income_source', {
+      screener_step_name: getStepAnalyticsId('householdData'),
+      screener_step_number: householdDataStepNumber >= 0 ? householdDataStepNumber : undefined,
+      action,
+    });
+  };
+
+  const trackedRemove: UseFieldArrayRemove = (index) => {
+    trackIncomeSource('delete');
+    remove(index);
+  };
+
+  const handleAddIncomeSource = () => {
+    append(EMPTY_INCOME_STREAM);
+    trackIncomeSource('add');
+  };
+
   return (
     <Box id="income-section">
       <QuestionQuestion>
@@ -350,7 +376,7 @@ const IncomeSection = ({
             index={index}
             control={control}
             setValue={setValue}
-            remove={remove}
+            remove={trackedRemove}
             getError={getError}
             incomeCategoriesMenuItems={incomeCategoriesMenuItems}
             incomeOptions={incomeOptions}
@@ -359,7 +385,7 @@ const IncomeSection = ({
         ))}
 
         <Box sx={{ paddingBottom: '1rem' }}>
-          <button onClick={() => append(EMPTY_INCOME_STREAM)} type="button" className="income-add-button">
+          <button onClick={handleAddIncomeSource} type="button" className="income-add-button">
             <AddIcon fontSize="small" />
             <strong><FormattedMessage id="personIncomeBlock.addIncomeSourceButton" defaultMessage="Add An Income Source" /></strong>
           </button>
