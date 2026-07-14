@@ -189,7 +189,7 @@ export function useGetConfig(screenLoading: boolean, whiteLabel: string) {
         console.error(`Failed to load config for white label '${whiteLabel}':`, error);
         // Fallback to default config if white label config doesn't exist
         if (whiteLabel !== '_default') {
-          console.log(`Falling back to _default config`);
+          console.warn(`Falling back to _default config`);
           getConfig('_default')
             .then((value: ConfigApiResponse[]) => {
               try {

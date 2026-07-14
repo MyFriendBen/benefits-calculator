@@ -96,6 +96,8 @@ function AlreadyHasBenefits() {
         screener_step_number: hasBenefitsStepNumber >= 0 ? hasBenefitsStepNumber : undefined,
       });
     }
+    // Fire once per error transition: depends only on the error flag so the
+    // event doesn't re-fire on unrelated re-renders (`track`/step number excluded).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasBenefitsProgramsError]);
 
