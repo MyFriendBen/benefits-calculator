@@ -3,6 +3,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import IosShareIcon from '@mui/icons-material/IosShare';
 import { FormattedMessage } from 'react-intl';
 import { useFeatureFlag } from '../Config/configHook';
+import { useTrackEvent } from '../../Assets/analytics';
 import ShareModal from './ShareModal';
 import './ShareModal.css';
 
@@ -11,11 +12,20 @@ const ShareModalAutoPopup = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isMinimized, setIsMinimized] = useState(true);
   const [isDismissed, setIsDismissed] = useState(false);
+  const track = useTrackEvent();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 5000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (isShareEnabled && isVisible && !isDismissed) {
+      track('screener_share_popup_shown', {});
+    }
+    // Fire once per impression — exclude `track` so it doesn't re-fire on unrelated re-renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isShareEnabled, isVisible, isDismissed]);
 
   const handleRestore = useCallback(() => {
     setIsMinimized(false);
@@ -60,7 +70,7 @@ const ShareModalAutoPopup = () => {
     );
   }
 
-  return <ShareModal open={true} onClose={handleMinimize} />;
+  return <ShareModal open={true} onClose={handleMinimize} shareLocation="results_popup" />;
 };
 
 export default ShareModalAutoPopup;

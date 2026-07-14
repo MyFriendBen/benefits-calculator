@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
 import ShareModal from './ShareModal';
 
 jest.mock('../Results/shared/ModalShell.css', () => ({}));
@@ -8,7 +9,9 @@ jest.mock('./ShareModal.css', () => ({}));
 const renderModal = (open: boolean, onClose = jest.fn()) =>
   render(
     <IntlProvider locale="en">
-      <ShareModal open={open} onClose={onClose} />
+      <MemoryRouter>
+        <ShareModal open={open} onClose={onClose} shareLocation="results_popup" />
+      </MemoryRouter>
     </IntlProvider>,
   );
 
@@ -107,7 +110,9 @@ describe('ShareModal', () => {
     const onClose = jest.fn();
     const { rerender } = render(
       <IntlProvider locale="en">
-        <ShareModal open={true} onClose={onClose} />
+        <MemoryRouter>
+          <ShareModal open={true} onClose={onClose} shareLocation="results_popup" />
+        </MemoryRouter>
       </IntlProvider>,
     );
     fireEvent.click(screen.getByText('Email'));
@@ -117,7 +122,9 @@ describe('ShareModal', () => {
 
     rerender(
       <IntlProvider locale="en">
-        <ShareModal open={true} onClose={onClose} />
+        <MemoryRouter>
+          <ShareModal open={true} onClose={onClose} shareLocation="results_popup" />
+        </MemoryRouter>
       </IntlProvider>,
     );
     expect(screen.queryByText('Gmail')).not.toBeInTheDocument();

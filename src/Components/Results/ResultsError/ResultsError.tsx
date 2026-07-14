@@ -1,14 +1,22 @@
+import { useEffect } from 'react';
 import { Button } from '@mui/material';
 import { Icon } from '../../Icon/Icon';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import './ResultsError.css';
 import { useConfig } from '../../Config/configHook';
+import { useTrackEvent } from '../../../Assets/analytics';
 
 const ResultsError = () => {
   const { uuid, whiteLabel } = useParams();
   const { email } = useConfig<{ email: string; survey: string }>('feedback_links');
   const navigate = useNavigate();
+  const track = useTrackEvent();
+
+  useEffect(() => {
+    track('screener_results_error', { reference_id: uuid });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <main className="benefits-form">
@@ -31,6 +39,7 @@ const ResultsError = () => {
         <Button
           className="error-button"
           onClick={() => {
+            track('screener_results_error_recovery', {});
             navigate(`/${whiteLabel}/${uuid}/confirm-information`);
           }}
           variant="contained"
