@@ -15,6 +15,8 @@ const ResultsError = () => {
 
   useEffect(() => {
     track('screener_results_error', { reference_id: uuid });
+    // Fire once on mount: this error event should count one impression per
+    // error-screen view, so `track`/`uuid` are intentionally excluded.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
