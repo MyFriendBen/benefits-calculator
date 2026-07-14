@@ -40,6 +40,10 @@ const Confirmation = () => {
     return () => {
       document.removeEventListener('keydown', continueOnEnter); // remove event listener on onmount
     };
+    // Intentionally excludes `proceedToResults`/`track`: the handler is recreated
+    // whenever the listener re-binds, and depending on the route identifiers it
+    // reads (navigate/whiteLabel/uuid) re-binds it exactly when its behavior
+    // would change — without re-binding on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, whiteLabel, uuid]);
 
