@@ -70,16 +70,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1rem;
-  height: 1rem;
   padding: 0;
   background: transparent;
   border: none;
-}
-
-.edit-button-simple svg {
-  width: 1rem;
-  height: 1rem;
 }
 
 .edit-button-simple:hover {
@@ -91,17 +84,70 @@
   transform: scaleX(-1);
 }
 
-svg.edit-button-simple path,
-svg.edit-button-simple rect,
-svg.edit-button-simple polygon,
-.edit-button-simple svg path,
-.edit-button-simple svg rect,
-.edit-button-simple svg polygon {
-  stroke: #999 !important;
-  fill: #999 !important;
+/* ConfirmationBlock layout: header row (icon + title + pencil), content below */
+.confirmation-block-container {
+  padding: 0 0 1rem 0;
+  margin-top: 1rem;
+  border-bottom: 1px solid #d0d0d0;
 }
 
-/* Full ConfirmationBlock section (for household member table with colored header) */
+.confirmation-block-container:first-child {
+  margin-top: 0;
+}
+
+.confirmation-block-container:last-child {
+  border-bottom: none;
+}
+
+.confirmation-block-header {
+  padding: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #999;
+  margin-bottom: 0;
+}
+
+.confirmation-block-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #000;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.confirmation-block-content {
+  padding: 0;
+}
+
+.edit-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.edit-button:hover {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.edit-pencil-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #999;
+}
+
+[dir='rtl'] .edit-button {
+  transform: scaleX(-1);
+}
+
+/* Household Members section (table-based layout, not using ConfirmationBlock) */
 .confirmation-section {
   padding: 0 0 1rem 0;
   margin-top: 1rem;
@@ -332,15 +378,6 @@ svg.confirmation-lucide-icon * {
   text-align: center;
 }
 
-.household-member-table td .edit-button-simple {
-  width: 1rem;
-  height: 1rem;
-}
-
-.household-member-table td .edit-button-simple svg {
-  width: 1rem;
-  height: 1rem;
-}
 
 .bottom-margin {
   margin-bottom: 0.5rem;
@@ -362,6 +399,19 @@ svg.confirmation-lucide-icon * {
   }
 
   .simple-section-header h2 {
+    font-size: 0.95rem;
+  }
+
+  .confirmation-block-container {
+    padding: 0 0 0.75rem 0;
+    margin-top: 0.75rem;
+  }
+
+  .confirmation-block-header {
+    padding: 0 0 0.35rem 0;
+  }
+
+  .confirmation-block-header h2 {
     font-size: 0.95rem;
   }
 

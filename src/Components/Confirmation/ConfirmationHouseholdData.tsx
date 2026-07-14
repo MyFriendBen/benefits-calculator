@@ -208,7 +208,7 @@ const DefaultConfirmationHHData = () => {
                         className="edit-button-simple"
                         aria-label={memberEditLabel}
                       >
-                        <Pencil aria-hidden={true} />
+                        <Pencil aria-hidden={true} className="edit-pencil-icon" strokeWidth={1.5} />
                       </Link>
                     </td>
                   </tr>

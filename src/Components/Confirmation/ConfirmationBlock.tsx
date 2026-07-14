@@ -34,20 +34,24 @@ export default function ConfirmationBlock({
 
   return (
     <div className="confirmation-block-container">
-      <div className="confirmation-icon">{icon}</div>
+      <div className="confirmation-block-header">
+        <h2>
+          <div className="confirmation-icon">{icon}</div>
+          {title}
+        </h2>
+        <Link
+          to={`/${whiteLabel}/${uuid}/step-${stepNumber}/${editUrlEnding}`}
+          state={locationState}
+          className="edit-button"
+          aria-label={formatMessage(editAriaLabel)}
+          onClick={() => track('screener_confirmation_edit', { section: stepName })}
+        >
+          <Pencil aria-label={formatMessage(editAriaLabel)} className="edit-pencil-icon" strokeWidth={1.5} />
+        </Link>
+      </div>
       <div className="confirmation-block-content">
-        <p className="section-title">{title}</p>
         {children}
       </div>
-      <Link
-        to={`/${whiteLabel}/${uuid}/step-${stepNumber}/${editUrlEnding}`}
-        state={locationState}
-        className="edit-button"
-        aria-label={formatMessage(editAriaLabel)}
-        onClick={() => track('screener_confirmation_edit', { section: stepName })}
-      >
-        <Pencil aria-label={formatMessage(editAriaLabel)} className="edit-pencil-icon" strokeWidth={1.5} />
-      </Link>
     </div>
   );
 }
@@ -86,7 +90,7 @@ export function RowEditLink({ stepName, ariaLabel }: { stepName: QuestionName; a
       className="edit-button-simple"
       aria-label={ariaLabel}
     >
-      <Pencil aria-hidden={true} />
+      <Pencil aria-hidden={true} className="edit-pencil-icon" strokeWidth={1.5} />
     </Link>
   );
 }
