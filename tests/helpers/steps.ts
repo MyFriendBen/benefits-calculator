@@ -9,16 +9,16 @@ export async function navigateHomePage(page: Page, specificPath?: string) {
 }
 
 export async function clickGetStartedButton(page: Page) {
-  const button = page.getByRole('button', { name: /get started/i }).first();
-  const link = page.getByRole('link', { name: /get started/i }).first();
-
-  if (await button.isVisible().catch(() => false)) {
-    await button.click();
-    return;
+  await page.getByRole('button', { name: 'Get Started' }).waitFor({ state: 'visible' });
+  //retry click 3 times, if click succsesfull break the loop
+  for (let i = 0; i < 3; i++) {
+    try {
+      await page.getByRole('button', { name: 'Get Started' }).click();
+      break;
+    } catch (error) {
+      if (i === 2) throw error;
+    }
   }
-
-  await expect(link).toBeVisible({ timeout: 20000 });
-  await link.click();
 }
 
 export async function selectLanguage(page: Page, language: string) {

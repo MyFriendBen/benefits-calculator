@@ -2,17 +2,16 @@ import { Page, expect } from '@playwright/test';
 import { selectIncomeCategory, selectIncomeType, selectFrequency } from './form';
 
 export async function selectOwnerOrRenter(page: Page, type: string) {
-  const name = new RegExp(type, 'i');
-  const link = page.getByRole('link', { name }).first();
-  const button = page.getByRole('button', { name }).first();
-
-  if (await button.isVisible().catch(() => false)) {
-    await button.click();
-    return;
+  await page.getByRole('link', { name: type }).waitFor({ state: 'visible' });
+  //retry click 3 times, if click succsesfull break the loop
+  for (let i = 0; i < 3; i++) {
+    try {
+      await page.getByRole('link', { name: type }).click();
+      break;
+    } catch (error) {
+      if (i === 2) throw error;
+    }
   }
-
-  await expect(link).toBeVisible({ timeout: 20000 });
-  await link.click();
 }
 
 export async function selectUtility(page: Page, utilityType: string) {
