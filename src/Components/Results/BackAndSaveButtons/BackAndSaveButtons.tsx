@@ -5,6 +5,7 @@ import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
 import SaveIcon from '@mui/icons-material/SaveOutlined';
 import { FormattedMessageType } from '../../../Types/Questions';
 import SaveMyResultsModal from '../SaveMyResultsModal/SaveMyResultsModal';
+import { useTrackEvent } from '../../../Assets/analytics';
 import './BackAndSaveButtons.css';
 
 type BackAndSaveButtons = {
@@ -15,8 +16,19 @@ type BackAndSaveButtons = {
 const BackAndSaveButtons = ({ navigateToLink, BackToThisPageText }: BackAndSaveButtons) => {
   const navigate = useNavigate();
   const intl = useIntl();
+  const track = useTrackEvent();
 
   const [openSaveModal, setOpenSaveModal] = useState(false);
+
+  const handleToggleSaveModal = () => {
+    setOpenSaveModal((prevOpen) => {
+      const nextOpen = !prevOpen;
+      if (nextOpen) {
+        track('screener_results_save', { save_action: 'open' });
+      }
+      return nextOpen;
+    });
+  };
   const backBtnALProps = {
     id: 'backAndSaveBtns.backBtnAL',
     defaultMessage: 'back',
@@ -42,7 +54,7 @@ const BackAndSaveButtons = ({ navigateToLink, BackToThisPageText }: BackAndSaveB
       </button>
       <button
         className="results-back-save-buttons"
-        onClick={() => setOpenSaveModal(!openSaveModal)}
+        onClick={handleToggleSaveModal}
         aria-label={intl.formatMessage(saveMyResultsBtnALProps)}
       >
         <div className="btn-icon-text-container">

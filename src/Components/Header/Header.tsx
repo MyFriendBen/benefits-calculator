@@ -10,6 +10,7 @@ import './Header.css';
 import { useLogo } from '../Referrer/useLogo';
 import { DEFAULT_WHITE_LABEL } from '../Wrapper/Wrapper';
 import { useQueryString } from '../QuestionComponents/questionHooks';
+import { useTrackEvent } from '../../Assets/analytics';
 
 const Header = () => {
   const context = useContext(Context);
@@ -37,6 +38,8 @@ const Header = () => {
     id: 'header.selectLang-AL',
     defaultMessage: 'select a language',
   };
+
+  const track = useTrackEvent();
 
   const [isLanguageSelectOpen, setIsLanguageSelectOpen] = useState(false);
 
@@ -84,7 +87,7 @@ const Header = () => {
     <nav>
       <Paper className={containerClass} square={true} elevation={0}>
         <AppBar id="nav-container" position="sticky" elevation={0}>
-          <a href={homeUrl} className="home-link">
+          <a href={homeUrl} className="home-link" onClick={() => track('screener_logo_click', { location: 'header' })}>
             <div className="logo-container">
               {useLogo('logoSource', 'logoAlt', logoClass)}
               {stateName && <div className="state-name">{stateName}</div>}
@@ -98,7 +101,13 @@ const Header = () => {
               placeholder="Change Language"
               value={context.locale}
               label="Language"
-              onChange={(event) => context.selectLanguage(event.target.value)}
+              onChange={(event) => {
+                const newLanguageCode = event.target.value;
+                track('screener_language_changed', {
+                  language_name: languageOptions[newLanguageCode] ?? newLanguageCode,
+                });
+                context.selectLanguage(newLanguageCode);
+              }}
               aria-label={intl.formatMessage(selectLangAriaLabelProps)}
               variant="standard"
               disableUnderline={true}

@@ -2,13 +2,14 @@ import { useContext, useEffect } from 'react';
 import { Context } from '../../Wrapper/Wrapper';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { useForm, Controller, SubmitHandler, SubmitErrorHandler } from 'react-hook-form';
 import { useParams, useNavigate } from 'react-router-dom';
 import { STARTING_QUESTION_NUMBER } from '../../../Assets/stepDirectory';
 import { Checkbox, FormControlLabel } from '@mui/material';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { FormattedMessageType } from '../../../Types/Questions';
-import dataLayerPush from '../../../Assets/analytics';
+import dataLayerPush, { useTrackEvent } from '../../../Assets/analytics';
+import { PRE_DIRECTORY_STEP_IDS } from '../../../Assets/analytics/stepIds';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import { useConfig, useLocalizedLink } from '../../Config/configHook';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
@@ -26,11 +27,25 @@ const isTrue = (value: boolean) => {
   return value;
 };
 
+const DISCLAIMER_STEP_ANALYTICS_ID = PRE_DIRECTORY_STEP_IDS.disclaimer;
+
 const Disclaimer = () => {
   const { formData, setScreenLoading, locale, setStepLoading } = useContext(Context);
   const isEnergyCalculator = useIsEnergyCalculator();
   let { whiteLabel, uuid } = useParams();
   const navigate = useNavigate();
+  const track = useTrackEvent();
+
+  // This step lives outside QuestionComponentContainer (it's rendered on the
+  // fixed `step-2` route before a screen/uuid exists), so it tracks its own view.
+  useEffect(() => {
+    track('screener_form_step', {
+      screener_step_name: DISCLAIMER_STEP_ANALYTICS_ID,
+      screener_step_number: 2,
+      step_action: 'view',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // use defaults for the config on this page because the config won't be loaded
   // when the page is first rendered when coming from /select-state
   const publicChargeOption = useConfig<{ link: string; text: FormattedMessageType }>('public_charge_rule', {
@@ -86,6 +101,12 @@ const Disclaimer = () => {
     const updatedFormData = { ...formData, ...termsOfServiceAndAgeData };
     setStepLoading(true);
 
+    track('screener_form_step', {
+      screener_step_name: DISCLAIMER_STEP_ANALYTICS_ID,
+      screener_step_number: 2,
+      step_action: 'complete',
+    });
+
     if (uuid) {
       await updateScreen(updatedFormData);
       startScreen(uuid);
@@ -94,6 +115,14 @@ const Disclaimer = () => {
       setScreenLoading(false);
       startScreen(response.uuid);
     }
+  };
+
+  const handleFormError: SubmitErrorHandler<FormSchema> = (formErrors) => {
+    track('screener_form_error', {
+      screener_step_name: DISCLAIMER_STEP_ANALYTICS_ID,
+      screener_step_number: 2,
+      form_error_count: Object.keys(formErrors).length,
+    });
   };
 
   const startScreen = async (uuid: string) => {
@@ -170,7 +199,7 @@ const Disclaimer = () => {
           <FormattedMessage id="disclaimer.header" defaultMessage="What you should know: " />
         </QuestionHeader>
         {renderDisclaimerText()}
-        <form onSubmit={handleSubmit(formSubmitHandler)}>
+        <form onSubmit={handleSubmit(formSubmitHandler, handleFormError)}>
           <div className="checkbox-container">
             <Controller
               name="agreeToTermsOfService"

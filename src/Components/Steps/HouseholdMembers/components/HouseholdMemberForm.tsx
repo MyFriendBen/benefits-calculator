@@ -1,7 +1,7 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useParams, useLocation } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { HouseholdData } from '../../../../Types/FormData';
 import { Box } from '@mui/material';
 import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
@@ -28,6 +28,8 @@ import SpecialConditionsSection from '../sections/SpecialConditionsSection';
 import StudentEligibilitySection from '../sections/StudentEligibilitySection';
 import IncomeSection from '../sections/IncomeSection';
 import BasicInfoSection from '../sections/BasicInfoSection';
+import { useTrackEvent } from '../../../../Assets/analytics';
+import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
 
 const HouseholdMemberForm = () => {
   const isEnergyCalculator = useIsEnergyCalculator();
@@ -65,6 +67,19 @@ const HouseholdMemberForm = () => {
 
   const redirectToConfirmationPage = useShouldRedirectToConfirmation();
   const currentStepId = useStepNumber(questionName);
+  const track = useTrackEvent();
+
+  // This sub-page is rendered by HouseholdMemberRouter, outside QuestionComponentContainer,
+  // so it tracks its own view per member page (pageNumber changes as the user moves
+  // between members, so this intentionally re-fires on each pageNumber change).
+  useEffect(() => {
+    track('screener_form_step', {
+      screener_step_name: getStepAnalyticsId(questionName),
+      screener_step_number: currentStepId,
+      step_action: 'view',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageNumber]);
 
   // NAVIGATION
   const { navigateBack, navigateNext } = useHouseholdMembersNavigation({
@@ -159,10 +174,31 @@ const HouseholdMemberForm = () => {
     // Wait for the API call to complete and context to update before navigating
     await updateScreen(updatedFormData);
 
+    // This page navigates manually (onSubmitSuccessfulOverride) instead of through
+    // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
+    // (Edits entered via the summary cards' edit button already fire their own
+    // 'edit' screener_household_member event on entry — see HouseholdMemberSummaryCards
+    // — so this submit only reports a new-member 'add' the first time a member's
+    // details are saved, to avoid double-counting the same edit.)
+    if (!isEditing) {
+      track('screener_household_member', {
+        screener_step_name: getStepAnalyticsId(questionName),
+        screener_step_number: currentStepId,
+        action: 'add',
+      });
+    }
+    track('screener_form_step', {
+      screener_step_name: getStepAnalyticsId(questionName),
+      screener_step_number: currentStepId,
+      step_action: 'complete',
+    });
+
     // Now navigate after data is saved
     navigateNext();
   };
 
+  // Note: screener_form_error is tracked centrally in useStepForm (stepForm.tsx),
+  // which every screener step's form goes through — no need to duplicate it here.
   const handleFormError = (formErrors: typeof errors) => {
     scrollToFirstError(formErrors, workflowType);
   };

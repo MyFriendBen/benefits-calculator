@@ -17,6 +17,8 @@ import { calcMemberYearlyIncome } from '../../../../Assets/income';
 import { formatToUSD } from '../../../../utils/formatCurrency';
 import useScreenApi from '../../../../Assets/updateScreen';
 import type { DeletePopoverState } from '../utils/types';
+import { useTrackEvent } from '../../../../Assets/analytics';
+import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
 
 type HHMSummariesProps = {
   questionName: QuestionName;
@@ -45,12 +47,18 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   const [deletePopover, setDeletePopover] = useState<DeletePopoverState>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const isMountedRef = useRef(true);
+  const track = useTrackEvent();
   useEffect(() => {
     isMountedRef.current = true;
     return () => { isMountedRef.current = false; };
   }, []);
 
   const handleEditBtnSubmit = (memberIndex: number) => {
+    track('screener_household_member', {
+      screener_step_name: getStepAnalyticsId(questionName),
+      screener_step_number: currentStepId,
+      action: 'edit',
+    });
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, {
       state: { isEditing: true, returnToPage: pageNumber },
     });
@@ -66,6 +74,11 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
         ...formData,
         householdSize: updatedHouseholdData.length,
         householdData: updatedHouseholdData,
+      });
+      track('screener_household_member', {
+        screener_step_name: getStepAnalyticsId(questionName),
+        screener_step_number: currentStepId,
+        action: 'delete',
       });
       // The delete button is hidden for the current member (memberIndex !== 0 guard + slice(0, pageNumber-1)),
       // so deletedIndex will always be < pageNumber in practice. The +1 guard is a safeguard.
