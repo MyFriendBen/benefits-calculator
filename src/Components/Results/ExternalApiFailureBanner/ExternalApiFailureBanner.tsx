@@ -43,7 +43,7 @@ const ExternalApiFailureBanner = () => {
         >
           <FormattedMessage
             id="results.externalApiFailure.message"
-            defaultMessage="Some results may be temporarily unavailable due to a technical issue. Please check back later."
+            defaultMessage="Something went wrong. You may be eligible for more programs than those listed. Please refresh the page, and contact us if the problem continues."
           />
         </Typography>
       </Alert>
