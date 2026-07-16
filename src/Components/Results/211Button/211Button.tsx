@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { useResultsLink } from '../Results';
 import './211Button.css';
 
-const HelpButton = () => {
+// Results-page "More Help / 211" CTA — NOT the inline "?" tooltip (that is
+// HelpButton in HelpBubbleIcon/).
+const MoreHelpButton = () => {
   const intl = useIntl();
   const moreHelpALProps = {
     id: 'helpButton.AL',
@@ -24,4 +26,4 @@ const HelpButton = () => {
   );
 };
 
-export default HelpButton;
+export default MoreHelpButton;

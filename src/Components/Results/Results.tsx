@@ -21,7 +21,7 @@ import ProgramPage from './ProgramPage/ProgramPage';
 import ResultsTabs from './Tabs/Tabs';
 import { FilterState, createInitialFilterState } from './Filter/citizenshipFilterConfig';
 import dataLayerPush from '../../Assets/analytics';
-import HelpButton from './211Button/211Button';
+import MoreHelpButton from './211Button/211Button';
 import MoreHelp from '../MoreHelp/MoreHelp';
 import BackAndSaveButtons from './BackAndSaveButtons/BackAndSaveButtons';
 import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
@@ -355,7 +355,7 @@ const Results = ({ type }: ResultsProps) => {
                     {type === 'need' ? <Needs /> : <Programs />}
                   </Grid>
                 </Grid>
-                {!noHelpButton && <HelpButton />}
+                {!noHelpButton && <MoreHelpButton />}
                 <NPSWidget uuid={uuid} />
                 <ShareModalAutoPopup />
               </div>
