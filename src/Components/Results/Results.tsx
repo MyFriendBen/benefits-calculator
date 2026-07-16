@@ -25,6 +25,7 @@ import MoreHelpButton from './211Button/211Button';
 import MoreHelp from '../MoreHelp/MoreHelp';
 import BackAndSaveButtons from './BackAndSaveButtons/BackAndSaveButtons';
 import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
+import ExternalApiFailureBanner from './ExternalApiFailureBanner/ExternalApiFailureBanner';
 import { FormattedMessage } from 'react-intl';
 import './Results.css';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
@@ -59,6 +60,7 @@ type WrapperResultsContext = {
   setValidations: (validations: Validation[]) => void;
   energyCalculatorRebateCategories: EnergyCalculatorRebateCategory[];
   policyEngineData: PolicyEngineData | undefined;
+  externalApiFailures: string[];
 };
 
 type ResultsProps = {
@@ -160,6 +162,7 @@ const Results = ({ type }: ResultsProps) => {
   const [programCategories, setProgramCategories] = useState<ProgramCategory[]>([]);
   const [needs, setNeeds] = useState<UrgentNeed[]>([]);
   const [missingPrograms, setMissingPrograms] = useState(false);
+  const [externalApiFailures, setExternalApiFailures] = useState<string[]>([]);
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
 
@@ -218,6 +221,7 @@ const Results = ({ type }: ResultsProps) => {
       setPrograms([]);
       setProgramCategories([]);
       setMissingPrograms(false);
+      setExternalApiFailures([]);
       setValidations([]);
       setPolicyEngineData(undefined);
       return;
@@ -240,6 +244,7 @@ const Results = ({ type }: ResultsProps) => {
       }),
     );
     setMissingPrograms(apiResults.missing_programs);
+    setExternalApiFailures(apiResults.external_api_failures ?? []);
     setValidations(apiResults.validations);
     setLoading(false);
     setPolicyEngineData(apiResults.pe_data);
@@ -260,6 +265,7 @@ const Results = ({ type }: ResultsProps) => {
           setValidations,
           energyCalculatorRebateCategories: energyCalculatorRebateCategories ?? [],
           policyEngineData,
+          externalApiFailures,
         }}
       >
         {children}
@@ -302,6 +308,7 @@ const Results = ({ type }: ResultsProps) => {
             <div className="results-card-wrapper">
               <ResultsTabs />
               <div id="results-tabpanel" role="tabpanel" aria-labelledby={type === 'program' ? 'long-term-benefits-tab' : 'near-term-benefits-tab'} className="benefits-form results-card-body">
+                {type === 'program' && <ExternalApiFailureBanner />}
                 {type === 'program' && <UrgentNeedBanner />}
                 <Grid container sx={{ pt: '1rem' }}>
                   <Grid item xs={12}>
