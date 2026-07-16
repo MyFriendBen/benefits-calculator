@@ -3,17 +3,25 @@ import { PropsWithChildren, useContext, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { ReactComponent as HelpBubble } from '../../Assets/icons/helpBubble.svg';
 import { Context } from '../Wrapper/Wrapper';
+import { useTrackEvent } from '../../Assets/analytics';
 import './HelpButton.css';
 
-// `helpTopic` identifies which tooltip this is, so a step's different tooltips
-// stay distinguishable in analytics.
+// `helpTopic` (e.g. "income-frequency") is the slice dimension for
+// screener_help_click — the confusion metric is grouped by topic. Passed by
+// every site so no tooltip logs as 'unknown'.
 type HelpButtonProps = PropsWithChildren<{ className?: string; helpTopic?: string }>;
 
-const HelpButton = ({ className, children }: HelpButtonProps) => {
+const HelpButton = ({ className, children, helpTopic }: HelpButtonProps) => {
   const { getReferrer } = useContext(Context);
   const intl = useIntl();
+  const track = useTrackEvent();
   const [showHelpText, setShowHelpText] = useState(false);
   const handleClick = () => {
+    // Fire on open only (the confusion signal), not close. Single chokepoint, so
+    // no inline "?" tooltip goes untracked.
+    if (!showHelpText) {
+      track('screener_help_click', { help_topic: helpTopic ?? 'unknown' });
+    }
     setShowHelpText((setShow) => !setShow);
   };
   const translatedAriaLabel = intl.formatMessage({ id: 'helpButton.ariaText', defaultMessage: 'help button' });

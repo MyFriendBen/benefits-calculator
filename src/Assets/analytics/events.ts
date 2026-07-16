@@ -70,14 +70,11 @@ export interface ScreenerEventMap {
   screener_language_changed: StepContext & { language_name: string };
   screener_confirmation_edit: { section: string };
   screener_confirmation_proceed: {};
-  // Inline "?" help-tooltip click (per-step confusion signal). Emitted from ONE
-  // shared tooltip component so every tooltip is tracked identically. help_topic
-  // is REQUIRED so a step's different tooltips stay distinguishable. This is NOT
-  // the results-page "get more help / 211" CTA — that is screener_get_help_click.
-  screener_help_click: StepContext & { help_topic: string };
-  // Results-page "get more help / call 211" CTA. Semantically distinct from inline
-  // field tooltips (screener_help_click) — kept separate so the per-step confusion
-  // metric isn't polluted by a results-page live-help action.
+  // Inline "?" tooltip click, sliced by `help_topic` (a step-identifying slug like
+  // 'income-frequency'). Not the results-page "More Help / 211" CTA below.
+  screener_help_click: { help_topic: string };
+  // Results-page "More Help / 211" CTA — kept separate from screener_help_click so
+  // it doesn't pollute the inline-tooltip confusion metric.
   screener_get_help_click: { location?: string };
 
   // ---- Results: outcomes (fired once on results load) ----
