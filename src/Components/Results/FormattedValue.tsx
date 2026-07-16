@@ -147,12 +147,11 @@ export function useFormatDisplayValue(program: Program) {
   const validation = findValidationForProgram(validations, program);
   const translateNumber = useTranslateNumber();
 
-  if (validation !== undefined) {
-    const expextedValue = translateNumber(formatToUSD(Number(validation.value) / 12));
-    return useOverrideValue(program, value, expextedValue);
-  }
-
-  return useOverrideValue(program, value);
+  // Call the hook unconditionally (rules-of-hooks): expectedValue is simply
+  // undefined when there's no validation, which useOverrideValue handles.
+  const expectedValue =
+    validation !== undefined ? translateNumber(formatToUSD(Number(validation.value) / 12)) : undefined;
+  return useOverrideValue(program, value, expectedValue);
 }
 
 export function YearlyValueLabel({ program }: { program: Program }) {
@@ -182,9 +181,8 @@ export function useFormatYearlyValue(program: Program) {
 
   const value = translateNumber(formatToUSD(programValue(program)));
 
-  if (validation !== undefined) {
-    const expextedValue = translateNumber(formatToUSD(Number(validation.value)));
-    return useOverrideValue(program, value, expextedValue);
-  }
-  return useOverrideValue(program, value);
+  // Call the hook unconditionally (rules-of-hooks): expectedValue is simply
+  // undefined when there's no validation, which useOverrideValue handles.
+  const expectedValue = validation !== undefined ? translateNumber(formatToUSD(Number(validation.value))) : undefined;
+  return useOverrideValue(program, value, expectedValue);
 }

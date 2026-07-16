@@ -46,6 +46,8 @@ const HouseholdMemberBasicInfoPage = () => {
       screener_step_number: currentStepId,
       step_action: 'view',
     });
+    // Fire once on mount (one view event per page visit); `track`/`currentStepId`
+    // are intentionally excluded so re-renders don't re-fire the view.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
