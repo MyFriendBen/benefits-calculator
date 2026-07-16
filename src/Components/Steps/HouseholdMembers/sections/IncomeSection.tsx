@@ -1,7 +1,6 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import {
   Box,
-  ClickAwayListener,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -14,7 +13,6 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useState } from 'react';
 import {
   Control,
   Controller,
@@ -26,7 +24,7 @@ import {
   FieldErrors,
 } from 'react-hook-form';
 import { NumericFormat } from 'react-number-format';
-import { ReactComponent as HelpBubble } from '../../../../Assets/icons/helpBubble.svg';
+import HelpButton from '../../../HelpBubbleIcon/HelpButton';
 import QuestionQuestion from '../../../QuestionComponents/QuestionQuestion';
 import QuestionDescription from '../../../QuestionComponents/QuestionDescription';
 import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
@@ -79,7 +77,6 @@ const IncomeStreamRow = ({
   incomeOptions,
   frequencyMenuItems,
 }: IncomeStreamRowProps) => {
-  const [showFreqHelp, setShowFreqHelp] = useState(false);
   const intl = useIntl();
 
   // useWatch with a field-scoped name subscribes only this row to its own fields,
@@ -176,28 +173,18 @@ const IncomeStreamRow = ({
             </FormControl>
           </Box>
 
-          <ClickAwayListener onClickAway={() => setShowFreqHelp(false)}>
           <Box className="income-field-frequency">
             <div className="income-frequency-label-row">
               <FormLabel id={`income-frequency-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, color: 'text.primary' }}>
                 <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
               </FormLabel>
-              <IconButton
-                size="small"
-                onClick={() => setShowFreqHelp((v) => !v)}
-                aria-label={intl.formatMessage({ id: 'helpButton.ariaText', defaultMessage: 'help button' })}
-              >
-                <HelpBubble style={{ height: '16px', width: '16px' }} className="help-button-icon-color" />
-              </IconButton>
-            </div>
-            {showFreqHelp && (
-              <p className="help-text">
+              <HelpButton helpTopic="income-frequency">
                 <FormattedMessage
                   id="personIncomeBlock.income-freq-help-text"
                   defaultMessage='"Every 2 weeks" means you get paid every other week. "Twice a month" means you get paid two times a month on the same dates each month.'
                 />
-              </p>
-            )}
+              </HelpButton>
+            </div>
             <FormControl fullWidth size="small" error={incomeFrequencyError !== undefined}>
               <Controller
                 name={`incomeStreams.${index}.incomeFrequency`}
@@ -220,7 +207,6 @@ const IncomeStreamRow = ({
               )}
             </FormControl>
           </Box>
-          </ClickAwayListener>
 
           {isHourly && (
             <Box className="income-field-hours">
