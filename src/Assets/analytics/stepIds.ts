@@ -47,3 +47,11 @@ export const PRE_DIRECTORY_STEP_IDS = {
   disclaimer: 'disclaimer',
   selectState: 'select-state',
 } as const;
+
+// Steps that live AFTER the numbered question directory (so they aren't
+// QuestionNames either): the confirmation page, which sits between the last
+// question and the results page. Kept alongside PRE_DIRECTORY_STEP_IDS so every
+// analytics step slug lives in one place.
+export const POST_DIRECTORY_STEP_IDS = {
+  confirmInformation: 'confirm-information',
+} as const;
