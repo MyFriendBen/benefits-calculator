@@ -20,7 +20,10 @@ const HelpButton = ({ className, children }: HelpButtonProps) => {
     setShowHelpText((setShow) => !setShow);
   };
   const translatedAriaLabel = intl.formatMessage({ id: 'helpButton.ariaText', defaultMessage: 'help button' });
-  const alwaysOpen = getReferrer('uiOptions').includes('help_bubble_always_open');
+  // Defensive: getReferrer is absent if this shared component is rendered outside
+  // the Wrapper Context (e.g. a unit test of a host component that doesn't mount
+  // the full provider tree). Fall back to "not forced open" rather than crashing.
+  const alwaysOpen = getReferrer?.('uiOptions')?.includes('help_bubble_always_open') ?? false;
   const isOpen = showHelpText || alwaysOpen;
 
   // Close the bubble when the user clicks outside it (unless it's forced open via

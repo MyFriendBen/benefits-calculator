@@ -5,9 +5,10 @@ import IncomeSection from './IncomeSection';
 import { EMPTY_INCOME_STREAM } from '../utils/constants';
 
 // IncomeSection calls useStepNumber directly (for the screener_income_source
-// analytics event); stub stepDirectory so it doesn't need real Wrapper
-// Context (getReferrer) — this component isn't wrapped in Context in this
-// test file.
+// analytics event); stub stepDirectory. The frequency "?" tooltip now routes
+// through the shared HelpButton, which reads Wrapper Context (getReferrer);
+// HelpButton falls back safely when that Context is absent (as here), so no
+// Context provider is needed in this test.
 jest.mock('../../../../Assets/stepDirectory', () => ({
   useStepNumber: (_name: string, _required?: boolean) => 5,
   useStepName: (_stepNumber: number) => undefined,
