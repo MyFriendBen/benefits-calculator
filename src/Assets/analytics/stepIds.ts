@@ -48,14 +48,3 @@ export const PRE_DIRECTORY_STEP_IDS = {
   selectState: 'select-state',
 } as const;
 
-// Household-member sub-flow steps. These render inside the household-members step
-// (via HouseholdMemberRouter) but are distinct analytics steps: the basic-info
-// page and the per-member detail page. Their slugs match the `data-step-id` on
-// each page and the name the back-navigation event already resolves to, so a
-// step's view and back events agree (which lets the drop-off / back-nav rate join
-// them). Previously the VIEW event mislabeled both as the parent
-// 'household-members', breaking that join.
-export const HOUSEHOLD_SUBSTEP_IDS = {
-  householdBasics: 'household-basics',
-  memberDetails: 'member-details',
-} as const;

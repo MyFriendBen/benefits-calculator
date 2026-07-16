@@ -78,8 +78,11 @@ export default function useStepForm<T extends FieldValues>({
       };
       const errorFields = Object.entries(errors)
         .map(([field, err]) => {
-          const code = (err as { type?: string })?.type ?? 'unknown';
-          return `${field}: ${RULE_LABELS[code] ?? code}`;
+          // Nested/array field errors (e.g. household member forms) can have an
+          // undefined top-level type; fall back to a generic 'Invalid' label so
+          // the payload stays human-readable (never the raw zod code or a value).
+          const code = (err as { type?: string })?.type;
+          return `${field}: ${(code && RULE_LABELS[code]) ?? 'Invalid'}`;
         })
         .join(', ');
       track('screener_form_error', {

@@ -25,7 +25,7 @@ import DeleteConfirmationPopover from './DeleteConfirmationPopover';
 import '../styles/HouseholdMemberBasicInfoPage.css';
 import type { DeletePopoverState } from '../utils/types';
 import { useTrackEvent } from '../../../../Assets/analytics';
-import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
+import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
 
 const MAX_HOUSEHOLD_SIZE = 8;
 
@@ -39,12 +39,14 @@ const HouseholdMemberBasicInfoPage = () => {
   const track = useTrackEvent();
 
   // This sub-page is rendered by HouseholdMemberRouter, outside QuestionComponentContainer,
-  // so it tracks its own view. Emits the DISTINCT 'household-basics' slug (not the
-  // parent 'household-members') so its view matches the name its back-navigation
-  // event resolves to — letting the drop-off / back-nav rate join them.
+  // so it tracks its own view. Emits 'household-members' (the parent slug) to stay
+  // consistent with the complete/back events for this step, which both resolve to
+  // 'household-members' via getStepAnalyticsId('householdData'). (Distinct sub-step
+  // slugs would require making PreviousButton/questionHooks sub-step-aware too, so
+  // view/complete/back all agree — a separate change.)
   useEffect(() => {
     track('screener_form_step', {
-      screener_step_name: HOUSEHOLD_SUBSTEP_IDS.householdBasics,
+      screener_step_name: getStepAnalyticsId('householdData'),
       screener_step_number: currentStepId,
       step_action: 'view',
     });
