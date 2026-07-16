@@ -61,7 +61,9 @@ export async function selectCondition(page: Page, condition: string) {
 }
 
 export async function selectIncome(page: Page, incomeCategory: string, incomeType: string, frequency: string, amount: number) {
-  await page.locator('button.income-add-button').click();
+  // DOB change triggers an async useEffect that auto-appends an empty income stream
+  // for working-age members. Wait for it rather than clicking the add button —
+  // clicking would create a duplicate stream if the effect already fired.
   await page.locator('#income-stream-0').waitFor({ state: 'visible' });
   await selectIncomeCategory(page, incomeCategory);
   await selectIncomeType(page, incomeType);
