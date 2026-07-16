@@ -140,7 +140,7 @@ const HouseholdSize = () => {
               &mdash;{' '}
               <OverrideableTranslation
                 id="questions.householdSize-helpText-others-description"
-                defaultMessage="Only include them if you buy and prepare the majority of meals together."
+                defaultMessage="Only include them if you buy and prepare the majority of your food together."
               />
             </li>
           </ul>
