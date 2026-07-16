@@ -181,10 +181,8 @@ const Results = ({ type }: ResultsProps) => {
       total_estimated_value: totalEstimatedValue,
     });
 
-    // Per-program impression: one event per program shown on results, so a true
-    // per-program conversion rate (more-info / apply ÷ shown) is computable
-    // downstream. Guarded by the same hasTrackedResultsLoaded ref so it fires
-    // once per screening, not on filter re-renders.
+    // Per-program impression (the "shown" denominator for conversion). Guarded by
+    // the same ref, so once per screening — not on filter re-renders.
     apiResults.programs.forEach((program) => {
       track('screener_program_shown', {
         program_id: String(program.program_id),
@@ -193,19 +191,16 @@ const Results = ({ type }: ResultsProps) => {
     });
   }, [apiResults, track]);
 
-  // Results-page scroll depth. Only meaningful on results (a browsable page with
-  // no forced "Continue") and only for the two browsable tabs; the form steps are
-  // excluded (they force scrolling, redundant with the funnel). Fires each 25/50/
-  // 75/100% threshold once per tab per screening. tab_name derives from the route
-  // `type` (program = long-term benefits, need = additional resources).
+  // Results-page scroll depth, only on the two browsable tabs (program =
+  // long-term benefits, need = additional resources). Each threshold fires once
+  // per tab per screening.
   const firedScrollDepths = useRef<Set<number>>(new Set());
   useEffect(() => {
     const tabName = type === 'program' ? 'long_term_benefits' : type === 'need' ? 'additional_resources' : null;
     if (tabName === null) {
-      return; // other result routes (program detail, more-help, rebates) aren't browsable tabs
+      return; // program detail / more-help / rebates aren't browsable tabs
     }
-    // New tab → reset the once-per-tab guard.
-    firedScrollDepths.current = new Set();
+    firedScrollDepths.current = new Set(); // new tab → reset the once-per-tab guard
 
     const thresholds: (25 | 50 | 75 | 100)[] = [25, 50, 75, 100];
     const onScroll = () => {

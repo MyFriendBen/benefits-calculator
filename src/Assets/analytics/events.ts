@@ -93,33 +93,25 @@ export interface ScreenerEventMap {
   screener_program_phone_click: StepContext & ProgramContext;
   screener_program_document_download: StepContext & ProgramContext & { document_name?: string };
   screener_results_tab_click: { tab_name: string };
-  // contact_method distinguishes the website link from the phone (tel:) link on a
-  // resource card; both now fire this event (the phone link was previously
-  // untracked). Mirrors screener_program_phone_click for programs.
-  // Resource card "More Info" expand — the first step of the resource engagement
-  // funnel (expand → website/phone click). Fires once when the card is opened,
-  // not on collapse. Mirrors screener_program_more_info for programs.
+  // Resource card "More Info" expand — first step of the resource funnel.
   screener_additional_resource_more_info: { resource_name?: string };
+  // contact_method distinguishes the website vs phone (tel:) link; phone was
+  // previously untracked.
   screener_additional_resource_click: { resource_name?: string; url?: string; contact_method?: 'website' | 'phone' };
   screener_required_program_click: ProgramContext;
-  // Per-program impression: fired once per program rendered on the results page,
-  // so downstream can compute a true per-program conversion rate (more-info and
-  // apply clicks ÷ programs shown). Without this "shown" denominator, only
-  // interaction counts and interaction-to-interaction ratios are possible.
+  // Per-program impression (once per program shown on results) — the "shown"
+  // denominator for a true more-info/apply ÷ shown conversion rate.
   screener_program_shown: ProgramContext;
-  // Navigator ("Get Help Applying") engagement, linked to BOTH the program and
-  // the specific navigator. Fires INSTEAD of the generic
-  // screener_program_visit_website / screener_program_phone_click for navigator
-  // links (so navigator clicks aren't double-counted) and ADDS the email link,
-  // which was previously untracked.
+  // Navigator ("Get Help Applying") click, tied to program + specific navigator.
+  // Fires INSTEAD of the generic program website/phone events for navigator links
+  // (no double-count) and adds the previously-untracked email link.
   screener_navigator_engaged: ProgramContext & {
     navigator_id: number;
     navigator_name: string;
     contact_method: 'website' | 'email' | 'phone';
     url?: string;
   };
-  // Results-page scroll depth. Only meaningful on results (a browsable page with
-  // no forced "Continue"); form steps force scrolling so are excluded. Fired once
+  // Results-page scroll depth (results only — form steps force scrolling). Once
   // per depth threshold per tab per screening.
   screener_results_scroll_depth: { depth: 25 | 50 | 75 | 100; tab_name: string };
   // Which filter TYPE was engaged is safe to record; the selected VALUE is not
