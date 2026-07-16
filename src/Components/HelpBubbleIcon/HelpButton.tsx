@@ -5,8 +5,8 @@ import { ReactComponent as HelpBubble } from '../../Assets/icons/helpBubble.svg'
 import { Context } from '../Wrapper/Wrapper';
 import './HelpButton.css';
 
-// `helpTopic` identifies which tooltip this is (unused here; consumed by the
-// analytics instrumentation in the follow-up PR — passed now so that stays additive).
+// `helpTopic` identifies which tooltip this is, so a step's different tooltips
+// stay distinguishable in analytics.
 type HelpButtonProps = PropsWithChildren<{ className?: string; helpTopic?: string }>;
 
 const HelpButton = ({ className, children }: HelpButtonProps) => {

@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { useResultsLink } from '../Results';
 import './211Button.css';
 
-// Results-page "More Help / 211" CTA — NOT the inline "?" tooltip (HelpButton in
-// HelpBubbleIcon/). Renamed from the colliding `HelpButton`.
+// Results-page "More Help / 211" CTA — NOT the inline "?" tooltip (that is
+// HelpButton in HelpBubbleIcon/).
 const MoreHelpButton = () => {
   const intl = useIntl();
   const moreHelpALProps = {

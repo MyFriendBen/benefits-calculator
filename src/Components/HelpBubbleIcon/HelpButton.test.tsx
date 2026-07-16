@@ -2,9 +2,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import HelpButton from './HelpButton';
 
-// Covers the toggle (what the refactor changed). Close-on-outside-click isn't
-// tested here — JSDOM doesn't reliably simulate MUI's document listener; that's a
-// Playwright check. HelpButton falls back safely without Wrapper Context.
+// Covers the open/close toggle. Close-on-outside-click isn't tested here — JSDOM
+// doesn't reliably simulate MUI's document listener; that's a Playwright check.
+// HelpButton falls back safely without Wrapper Context.
 const renderHelpButton = () =>
   render(
     <IntlProvider locale="en" messages={{}}>
