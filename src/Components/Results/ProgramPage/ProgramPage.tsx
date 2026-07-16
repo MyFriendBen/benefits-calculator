@@ -378,9 +378,12 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                           target="_blank"
                           className="link-color"
                           onClick={() =>
-                            track('screener_program_visit_website', {
+                            track('screener_navigator_engaged', {
                               program_name: program.name.default_message,
                               program_id: String(program.program_id),
+                              navigator_id: navigator.id,
+                              navigator_name: navigator.name.default_message,
+                              contact_method: 'website',
                               url: navigator.assistance_link.default_message,
                             })
                           }
@@ -391,7 +394,19 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                     )}
                     {navigator.email.default_message && (
                       <div>
-                        <a href={`mailto:${navigator.email}`} className="link-color email-link">
+                        <a
+                          href={`mailto:${navigator.email.default_message}`}
+                          className="link-color email-link"
+                          onClick={() =>
+                            track('screener_navigator_engaged', {
+                              program_name: program.name.default_message,
+                              program_id: String(program.program_id),
+                              navigator_id: navigator.id,
+                              navigator_name: navigator.name.default_message,
+                              contact_method: 'email',
+                            })
+                          }
+                        >
                           <ResultsTranslate translation={navigator.email} />
                         </a>
                       </div>
@@ -402,9 +417,12 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                           href={`tel:${navigator.phone_number}`}
                           className="link-color phone-link"
                           onClick={() =>
-                            track('screener_program_phone_click', {
+                            track('screener_navigator_engaged', {
                               program_name: program.name.default_message,
                               program_id: String(program.program_id),
+                              navigator_id: navigator.id,
+                              navigator_name: navigator.name.default_message,
+                              contact_method: 'phone',
                             })
                           }
                         >

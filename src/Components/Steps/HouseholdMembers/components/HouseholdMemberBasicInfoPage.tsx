@@ -39,7 +39,11 @@ const HouseholdMemberBasicInfoPage = () => {
   const track = useTrackEvent();
 
   // This sub-page is rendered by HouseholdMemberRouter, outside QuestionComponentContainer,
-  // so it tracks its own view.
+  // so it tracks its own view. Emits 'household-members' (the parent slug) to stay
+  // consistent with the complete/back events for this step, which both resolve to
+  // 'household-members' via getStepAnalyticsId('householdData'). (Distinct sub-step
+  // slugs would require making PreviousButton/questionHooks sub-step-aware too, so
+  // view/complete/back all agree — a separate change.)
   useEffect(() => {
     track('screener_form_step', {
       screener_step_name: getStepAnalyticsId('householdData'),
