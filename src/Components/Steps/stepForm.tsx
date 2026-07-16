@@ -61,14 +61,26 @@ export default function useStepForm<T extends FieldValues>({
   // attempt, so we emit exactly one error event per failed submit.
   useEffect(() => {
     if (submitCount > 0 && isSubmitted && !isSubmitSuccessful && errorCount > 0) {
-      // Which fields failed, and the validation rule each broke (e.g.
-      // "zipcode:required, birthYear:pattern"). PRIVACY: this sends the field
-      // NAME and the react-hook-form error TYPE only — never the user's entered
-      // value or the localized message (either could carry PII). This is what
-      // lets "Form Errors by Step" show WHICH validation is tripping people up,
-      // not just a count.
+      // Which fields failed, and a FRIENDLY label for the validation each broke
+      // (e.g. "zipcode: Required, birthYear: Invalid format"). Validation is zod
+      // (via zodResolver), so err.type is a zod issue code — mapped to a readable
+      // label below. PRIVACY: this sends the field NAME and the rule LABEL only —
+      // never the user's entered value or the localized message (either could
+      // carry PII). This is what lets "Form Errors by Step" show WHICH validation
+      // is tripping people up, not just a count.
+      const RULE_LABELS: Record<string, string> = {
+        too_small: 'Required', // zod fires too_small for empty/short required fields
+        invalid_type: 'Required',
+        too_big: 'Too long',
+        invalid_string: 'Invalid format',
+        invalid_enum_value: 'Invalid selection',
+        custom: 'Failed validation', // .refine() checks (e.g. invalid zip/county)
+      };
       const errorFields = Object.entries(errors)
-        .map(([field, err]) => `${field}:${(err as { type?: string })?.type ?? 'unknown'}`)
+        .map(([field, err]) => {
+          const code = (err as { type?: string })?.type ?? 'unknown';
+          return `${field}: ${RULE_LABELS[code] ?? code}`;
+        })
         .join(', ');
       track('screener_form_error', {
         screener_step_name: getStepAnalyticsId(questionName),
