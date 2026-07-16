@@ -30,16 +30,21 @@ const HelpButton = ({ className, children }: HelpButtonProps) => {
   // the help_bubble_always_open referrer option). Consolidated here so every
   // tooltip site gets the same click-away behavior the inlined income-frequency
   // tooltip previously had.
+  //
+  // MUST wrap the children in a real element (not a Fragment): MUI's
+  // ClickAwayListener attaches a ref to its single child and no-ops if that ref
+  // is null — a Fragment can't hold a ref, so onClickAway would silently never
+  // fire. A `span` keeps this inline (the icon sits inside a flex label row).
   return (
     <ClickAwayListener onClickAway={() => setShowHelpText(false)}>
-      <>
+      <span className="help-button-wrapper">
         {!alwaysOpen && (
           <IconButton onClick={handleClick} aria-label={translatedAriaLabel}>
-            <HelpBubble style={{ height: '20px', width: '20px' }} className="help-button-icon-color" />
+            <HelpBubble style={{ height: '18px', width: '18px' }} className="help-button-icon-color" />
           </IconButton>
         )}
-        {isOpen && <p className={`help-text ${className}`}>{children}</p>}
-      </>
+        {isOpen && <p className={`help-text ${className ?? ''}`.trim()}>{children}</p>}
+      </span>
     </ClickAwayListener>
   );
 };
