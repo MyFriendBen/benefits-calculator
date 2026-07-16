@@ -61,8 +61,6 @@ export async function selectCondition(page: Page, condition: string) {
 }
 
 export async function selectIncome(page: Page, incomeCategory: string, incomeType: string, frequency: string, amount: number) {
-  await page.locator('button.income-add-button').click();
-  await page.locator('#income-stream-0').waitFor({ state: 'visible' });
   await selectIncomeCategory(page, incomeCategory);
   await selectIncomeType(page, incomeType);
   await selectFrequency(page, frequency);
