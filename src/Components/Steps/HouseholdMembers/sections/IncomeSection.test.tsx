@@ -4,11 +4,9 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import IncomeSection from './IncomeSection';
 import { EMPTY_INCOME_STREAM } from '../utils/constants';
 
-// IncomeSection calls useStepNumber directly (for the screener_income_source
-// analytics event); stub stepDirectory. The frequency "?" tooltip now routes
-// through the shared HelpButton, which reads Wrapper Context (getReferrer);
-// HelpButton falls back safely when that Context is absent (as here), so no
-// Context provider is needed in this test.
+// Stub stepDirectory (IncomeSection calls useStepNumber for analytics). The
+// frequency "?" now uses the shared HelpButton, which falls back safely without
+// Wrapper Context, so no provider is needed here.
 jest.mock('../../../../Assets/stepDirectory', () => ({
   useStepNumber: (_name: string, _required?: boolean) => 5,
   useStepName: (_stepNumber: number) => undefined,

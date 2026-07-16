@@ -5,11 +5,8 @@ import { ReactComponent as HelpBubble } from '../../Assets/icons/helpBubble.svg'
 import { Context } from '../Wrapper/Wrapper';
 import './HelpButton.css';
 
-// `helpTopic` identifies which tooltip this is, so a step's different tooltips
-// stay distinguishable. It is not used yet — the analytics instrumentation that
-// consumes it lands in a separate follow-up PR (kept out of this behavior-
-// preserving refactor). Callers should pass it now so the instrumentation PR is
-// a pure addition.
+// `helpTopic` identifies which tooltip this is (unused here; consumed by the
+// analytics instrumentation in the follow-up PR — passed now so that stays additive).
 type HelpButtonProps = PropsWithChildren<{ className?: string; helpTopic?: string }>;
 
 const HelpButton = ({ className, children }: HelpButtonProps) => {
@@ -20,21 +17,14 @@ const HelpButton = ({ className, children }: HelpButtonProps) => {
     setShowHelpText((setShow) => !setShow);
   };
   const translatedAriaLabel = intl.formatMessage({ id: 'helpButton.ariaText', defaultMessage: 'help button' });
-  // Defensive: getReferrer is absent if this shared component is rendered outside
-  // the Wrapper Context (e.g. a unit test of a host component that doesn't mount
-  // the full provider tree). Fall back to "not forced open" rather than crashing.
+  // Optional-chained: getReferrer is absent when rendered outside Wrapper Context
+  // (e.g. host-component unit tests). Fall back to "not forced open".
   const alwaysOpen = getReferrer?.('uiOptions')?.includes('help_bubble_always_open') ?? false;
   const isOpen = showHelpText || alwaysOpen;
 
-  // Close the bubble when the user clicks outside it (unless it's forced open via
-  // the help_bubble_always_open referrer option). Consolidated here so every
-  // tooltip site gets the same click-away behavior the inlined income-frequency
-  // tooltip previously had.
-  //
-  // MUST wrap the children in a real element (not a Fragment): MUI's
-  // ClickAwayListener attaches a ref to its single child and no-ops if that ref
-  // is null — a Fragment can't hold a ref, so onClickAway would silently never
-  // fire. A `span` keeps this inline (the icon sits inside a flex label row).
+  // ClickAwayListener closes the bubble on outside click. Its child MUST be a real
+  // element (not a Fragment) — MUI attaches a ref and no-ops if it's null. `span`
+  // keeps it inline within the flex label row.
   return (
     <ClickAwayListener onClickAway={() => setShowHelpText(false)}>
       <span className="help-button-wrapper">

@@ -2,15 +2,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import HelpButton from './HelpButton';
 
-// HelpButton reads getReferrer from Wrapper Context; it falls back safely when
-// the Context is absent (guarded with optional chaining), so no provider is
-// needed here.
-//
-// NOTE: close-on-outside-click (MUI ClickAwayListener) is intentionally NOT
-// tested here — JSDOM does not reliably simulate MUI's document-level click
-// listener. That path is covered by Playwright on the income-frequency and
-// household-assets tooltips. This suite covers the toggle behavior, which is
-// what the tooltip-unification refactor changed.
+// Covers the toggle (what the refactor changed). Close-on-outside-click isn't
+// tested here — JSDOM doesn't reliably simulate MUI's document listener; that's a
+// Playwright check. HelpButton falls back safely without Wrapper Context.
 const renderHelpButton = () =>
   render(
     <IntlProvider locale="en" messages={{}}>
