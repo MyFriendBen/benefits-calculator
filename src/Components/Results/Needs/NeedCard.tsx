@@ -71,6 +71,12 @@ const NeedCard = ({ need }: NeedsCardProps) => {
         <button
           className={infoIsOpen ? 'more-info-btn-open' : 'more-info-btn'}
           onClick={() => {
+            // Fire the funnel's "expand" step only when opening, not collapsing.
+            if (!infoIsOpen) {
+              track('screener_additional_resource_more_info', {
+                resource_name: need.name.default_message,
+              });
+            }
             setInfoIsOpen(!infoIsOpen);
           }}
         >
@@ -81,7 +87,16 @@ const NeedCard = ({ need }: NeedsCardProps) => {
         <>
           <p className="need-desc-paragraph">{translatedNeedDesc}</p>
           {need.phone_number && (
-            <a href={`tel:${need.phone_number}`} className="phone-number">
+            <a
+              href={`tel:${need.phone_number}`}
+              className="phone-number"
+              onClick={() =>
+                track('screener_additional_resource_click', {
+                  resource_name: need.name.default_message,
+                  contact_method: 'phone',
+                })
+              }
+            >
               {formatPhoneNumber(need.phone_number)}
             </a>
           )}
@@ -92,6 +107,7 @@ const NeedCard = ({ need }: NeedsCardProps) => {
                 track('screener_additional_resource_click', {
                   resource_name: need.name.default_message,
                   url: translatedLink,
+                  contact_method: 'website',
                 })
               }
             >

@@ -70,6 +70,15 @@ export interface ScreenerEventMap {
   screener_language_changed: StepContext & { language_name: string };
   screener_confirmation_edit: { section: string };
   screener_confirmation_proceed: {};
+  // Inline "?" help-tooltip click (per-step confusion signal). Emitted from ONE
+  // shared tooltip component so every tooltip is tracked identically. help_topic
+  // is REQUIRED so a step's different tooltips stay distinguishable. This is NOT
+  // the results-page "get more help / 211" CTA — that is screener_get_help_click.
+  screener_help_click: StepContext & { help_topic: string };
+  // Results-page "get more help / call 211" CTA. Semantically distinct from inline
+  // field tooltips (screener_help_click) — kept separate so the per-step confusion
+  // metric isn't polluted by a results-page live-help action.
+  screener_get_help_click: { location?: string };
 
   // ---- Results: outcomes (fired once on results load) ----
   screener_results_loaded: { program_count: number; total_estimated_value?: number };
@@ -84,8 +93,35 @@ export interface ScreenerEventMap {
   screener_program_phone_click: StepContext & ProgramContext;
   screener_program_document_download: StepContext & ProgramContext & { document_name?: string };
   screener_results_tab_click: { tab_name: string };
-  screener_additional_resource_click: { resource_name?: string; url?: string };
+  // contact_method distinguishes the website link from the phone (tel:) link on a
+  // resource card; both now fire this event (the phone link was previously
+  // untracked). Mirrors screener_program_phone_click for programs.
+  // Resource card "More Info" expand — the first step of the resource engagement
+  // funnel (expand → website/phone click). Fires once when the card is opened,
+  // not on collapse. Mirrors screener_program_more_info for programs.
+  screener_additional_resource_more_info: { resource_name?: string };
+  screener_additional_resource_click: { resource_name?: string; url?: string; contact_method?: 'website' | 'phone' };
   screener_required_program_click: ProgramContext;
+  // Per-program impression: fired once per program rendered on the results page,
+  // so downstream can compute a true per-program conversion rate (more-info and
+  // apply clicks ÷ programs shown). Without this "shown" denominator, only
+  // interaction counts and interaction-to-interaction ratios are possible.
+  screener_program_shown: ProgramContext;
+  // Navigator ("Get Help Applying") engagement, linked to BOTH the program and
+  // the specific navigator. Fires INSTEAD of the generic
+  // screener_program_visit_website / screener_program_phone_click for navigator
+  // links (so navigator clicks aren't double-counted) and ADDS the email link,
+  // which was previously untracked.
+  screener_navigator_engaged: ProgramContext & {
+    navigator_id: number;
+    navigator_name: string;
+    contact_method: 'website' | 'email' | 'phone';
+    url?: string;
+  };
+  // Results-page scroll depth. Only meaningful on results (a browsable page with
+  // no forced "Continue"); form steps force scrolling so are excluded. Fired once
+  // per depth threshold per tab per screening.
+  screener_results_scroll_depth: { depth: 25 | 50 | 75 | 100; tab_name: string };
   // Which filter TYPE was engaged is safe to record; the selected VALUE is not
   // (e.g. citizenship status is PII — never send it). `filter_type` is the
   // category of filter touched, never the chosen option.

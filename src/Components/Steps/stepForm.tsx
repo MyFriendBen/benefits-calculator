@@ -61,10 +61,20 @@ export default function useStepForm<T extends FieldValues>({
   // attempt, so we emit exactly one error event per failed submit.
   useEffect(() => {
     if (submitCount > 0 && isSubmitted && !isSubmitSuccessful && errorCount > 0) {
+      // Which fields failed, and the validation rule each broke (e.g.
+      // "zipcode:required, birthYear:pattern"). PRIVACY: this sends the field
+      // NAME and the react-hook-form error TYPE only — never the user's entered
+      // value or the localized message (either could carry PII). This is what
+      // lets "Form Errors by Step" show WHICH validation is tripping people up,
+      // not just a count.
+      const errorFields = Object.entries(errors)
+        .map(([field, err]) => `${field}:${(err as { type?: string })?.type ?? 'unknown'}`)
+        .join(', ');
       track('screener_form_error', {
         screener_step_name: getStepAnalyticsId(questionName),
         screener_step_number: stepNumber >= 0 ? stepNumber : undefined,
         form_error_count: errorCount,
+        form_error_message: errorFields,
       });
     }
     // Intentionally depend only on submitCount so this fires once per submit

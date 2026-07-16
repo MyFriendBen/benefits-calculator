@@ -29,7 +29,7 @@ import StudentEligibilitySection from '../sections/StudentEligibilitySection';
 import IncomeSection from '../sections/IncomeSection';
 import BasicInfoSection from '../sections/BasicInfoSection';
 import { useTrackEvent } from '../../../../Assets/analytics';
-import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
+import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
 
 const HouseholdMemberForm = () => {
   const isEnergyCalculator = useIsEnergyCalculator();
@@ -74,7 +74,9 @@ const HouseholdMemberForm = () => {
   // between members, so this intentionally re-fires on each pageNumber change).
   useEffect(() => {
     track('screener_form_step', {
-      screener_step_name: getStepAnalyticsId(questionName),
+      // DISTINCT 'member-details' slug (not the parent 'household-members') so this
+      // view matches the name its back-navigation event resolves to.
+      screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberDetails,
       screener_step_number: currentStepId,
       step_action: 'view',
     });
