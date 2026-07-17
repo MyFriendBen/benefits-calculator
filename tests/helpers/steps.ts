@@ -60,9 +60,9 @@ export async function selectCondition(page: Page, condition: string) {
   await page.locator('.option-cards-container').last().getByRole('button', { name: condition }).click();
 }
 
-export async function selectIncome(page: Page, incomeCategory: string, incomeSource: string, frequency: string, amount: number) {
+export async function selectIncome(page: Page, incomeCategory: string, incomeType: string, frequency: string, amount: number) {
   await selectIncomeCategory(page, incomeCategory);
-  await selectIncomeType(page, incomeSource);
+  await selectIncomeType(page, incomeType);
   await selectFrequency(page, frequency);
   await page.locator('#income-amount-input-0').fill(amount.toString());
 }

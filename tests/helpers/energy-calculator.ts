@@ -34,11 +34,11 @@ export async function selectNoBenefit(page: Page) {
   await expect(page.locator('.hb-loading')).toBeHidden();
 }
 
-export async function selectECIncome(page: Page, incomeCategory: string, incomeSource: string, frequency: string, amount: number) {
+export async function selectECIncome(page: Page, incomeCategory: string, incomeType: string, frequency: string, amount: number) {
   // For energy calculator household member form, income radio is already set to 'Yes' for 16+ users
   // Just fill in the income details
   await selectIncomeCategory(page, incomeCategory);
-  await selectIncomeType(page, incomeSource);
+  await selectIncomeType(page, incomeType);
   await selectFrequency(page, frequency);
   await page.locator('#income-amount-input-0').fill(amount.toString());
 }

@@ -194,24 +194,15 @@ export async function completePrimaryUserInfo(
 
     // Handle income
     if (userInfo.income) {
-      const incomeCategoryDropdownLocator = page.getByRole('button', {
-        name: DROPDOWN.INCOME_CATEGORY,
-        exact: true,
-      });
+      const incomeCategoryDropdownLocator = page.locator(DROPDOWN.INCOME_CATEGORY);
       await expect(incomeCategoryDropdownLocator).toBeVisible();
       await selectIncomeCategory(page, userInfo.income.category);
 
-      const incomeTypeDropdownLocator = page.getByRole('button', {
-        name: DROPDOWN.INCOME_TYPE,
-        exact: true,
-      });
+      const incomeTypeDropdownLocator = page.locator(DROPDOWN.INCOME_TYPE);
       await expect(incomeTypeDropdownLocator).toBeVisible();
       await selectIncomeType(page, userInfo.income.type);
 
-      const frequencyDropdownLocator = page.getByRole('button', {
-        name: DROPDOWN.FREQUENCY,
-        exact: true,
-      });
+      const frequencyDropdownLocator = page.locator(DROPDOWN.FREQUENCY);
       await expect(frequencyDropdownLocator).toBeVisible();
       await selectFrequency(page, userInfo.income.frequency);
 

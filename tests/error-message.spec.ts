@@ -34,8 +34,8 @@ const userInfo = {
   dobMonth: 'January',
   dobYear: '1989',
   insurance: "I don't have or know if I have health insurance",
-  incomeCategory: 'Employment Income',
-  incomeSource: 'Wages, salaries, tips',
+  incomeCategory: 'Work & Self-Employment Income',
+  incomeType: 'Wages, salaries, or tips',
   incomeFrequency: 'every month',
   incomeAmount: '2000',
   expenseType: 'Rent',
@@ -123,7 +123,7 @@ test.describe('Error Messages Test', () => {
     ]);
 
     await selectIncomeCategory(page, userInfo.incomeCategory);
-    await selectIncomeType(page, userInfo.incomeSource);
+    await selectIncomeType(page, userInfo.incomeType);
     await selectFrequency(page, userInfo.incomeFrequency);
     await page.locator(FORM_INPUTS.AMOUNT).fill(userInfo.incomeAmount);
 
