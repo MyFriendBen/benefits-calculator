@@ -100,8 +100,8 @@ const HouseholdSize = () => {
             <li>
               <strong>
                 <OverrideableTranslation id="questions.householdSize-helpText-you-label" defaultMessage="You" />
-              </strong>{' '}
-              &mdash;{' '}
+              </strong>
+              {' — '}
               <OverrideableTranslation
                 id="questions.householdSize-helpText-you-description"
                 defaultMessage="Always include yourself."
@@ -110,8 +110,8 @@ const HouseholdSize = () => {
             <li>
               <strong>
                 <OverrideableTranslation id="questions.householdSize-helpText-spouse-label" defaultMessage="Spouse" />
-              </strong>{' '}
-              &mdash;{' '}
+              </strong>
+              {' — '}
               <OverrideableTranslation
                 id="questions.householdSize-helpText-spouse-description"
                 defaultMessage="Include them even if you file taxes separately or live apart."
@@ -123,8 +123,8 @@ const HouseholdSize = () => {
                   id="questions.householdSize-helpText-dependents-label"
                   defaultMessage="Dependents"
                 />
-              </strong>{' '}
-              &mdash;{' '}
+              </strong>
+              {' — '}
               <OverrideableTranslation
                 id="questions.householdSize-helpText-dependents-description"
                 defaultMessage="Include everyone under 18 who lives with you and adults you live with who rely on your income."
@@ -136,8 +136,8 @@ const HouseholdSize = () => {
                   id="questions.householdSize-helpText-others-label"
                   defaultMessage="Others you live with"
                 />
-              </strong>{' '}
-              &mdash;{' '}
+              </strong>
+              {' — '}
               <OverrideableTranslation
                 id="questions.householdSize-helpText-others-description"
                 defaultMessage="Only include them if you buy and prepare the majority of your food together."
