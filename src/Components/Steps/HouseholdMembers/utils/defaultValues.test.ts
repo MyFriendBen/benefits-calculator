@@ -1,4 +1,4 @@
-import { createDefaultValues, createEnergyCalculatorDefaultValues, DEFAULT_HEALTH_INSURANCE, DEFAULT_SPECIAL_CONDITIONS, DEFAULT_STUDENT_ELIGIBILITY } from './defaultValues';
+import { createDefaultValues, createEnergyCalculatorDefaultValues, getDefaultIncomeAnswers, DEFAULT_HEALTH_INSURANCE, DEFAULT_SPECIAL_CONDITIONS, DEFAULT_STUDENT_ELIGIBILITY } from './defaultValues';
 import { HouseholdData } from '../../../../Types/FormData';
 import { calculateAgeStatus } from '../../../AgeCalculation/AgeCalculation';
 
@@ -186,6 +186,51 @@ describe('createDefaultValues', () => {
       const result = createDefaultValues(member);
       expect(result.birthYear).toBe(0);
     });
+  });
+});
+
+describe('getDefaultIncomeAnswers (MFB-1178)', () => {
+  const progressed = (overrides: Partial<HouseholdData> = {}): HouseholdData =>
+    memberWithHealthIns(overrides); // health insurance set => completed the form
+
+  it('returns all null for a brand-new (not progressed) member', () => {
+    const result = getDefaultIncomeAnswers({ incomeStreams: [] } as unknown as HouseholdData);
+    expect(result).toEqual({ incomeEmployed: null, incomeGig: null, incomeOther: null });
+  });
+
+  it('treats empty buckets as explicit "No" for a completed member', () => {
+    // No streams + progressed + no persisted is_employed => all answered No.
+    const result = getDefaultIncomeAnswers(progressed({ incomeStreams: [] }));
+    expect(result).toEqual({ incomeEmployed: false, incomeGig: false, incomeOther: false });
+  });
+
+  it('prefers the persisted is_employed answer over derivation', () => {
+    // Employed=true persisted, but only a self-employment stream exists.
+    const member = progressed({
+      isEmployed: true,
+      incomeStreams: [{ incomeCategory: 'employment', incomeStreamName: 'selfEmployment' }] as any,
+    });
+    const result = getDefaultIncomeAnswers(member);
+    expect(result.incomeEmployed).toBe(true);
+    // Gig is not applicable when employed.
+    expect(result.incomeGig).toBeNull();
+  });
+
+  it('derives gig=Yes (employed=No) from a self-employment-only stream when is_employed is unset', () => {
+    const member = progressed({
+      incomeStreams: [{ incomeCategory: 'employment', incomeStreamName: 'selfEmployment' }] as any,
+    });
+    const result = getDefaultIncomeAnswers(member);
+    expect(result.incomeEmployed).toBe(false);
+    expect(result.incomeGig).toBe(true);
+  });
+
+  it('derives other=Yes from a non-employment stream', () => {
+    const member = progressed({
+      isEmployed: true,
+      incomeStreams: [{ incomeCategory: 'government', incomeStreamName: 'sSI' }] as any,
+    });
+    expect(getDefaultIncomeAnswers(member).incomeOther).toBe(true);
   });
 });
 

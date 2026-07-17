@@ -131,8 +131,6 @@ const getHouseholdMemberBody = (householdMemberData: HouseholdData): ApiHousehol
     long_term_disability: householdMemberData.conditions.longTermDisability ?? null,
     has_income: householdMemberData.hasIncome,
     is_employed: householdMemberData.isEmployed ?? null,
-    has_gig_income: householdMemberData.hasGigIncome ?? null,
-    has_other_income: householdMemberData.hasOtherIncome ?? null,
     income_streams: incomes,
     energy_calculator: getEnergyCalculatorMemberBody(householdMemberData.energyCalculator),
     insurance: householdMemberData.healthInsurance ?? null,

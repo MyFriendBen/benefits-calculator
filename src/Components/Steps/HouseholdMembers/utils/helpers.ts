@@ -169,26 +169,23 @@ export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParam
   }));
   const hasIncome = incomeStreams.length > 0;
 
-  // The three income-question answers (MFB-1178) are form fields; persist them on
-  // the member. Q2 (gig) is only asked when Q1=No, so normalize gig to null when
-  // employed to avoid persisting a stale answer.
-  const md = memberData as typeof memberData & {
-    incomeEmployed?: boolean | null;
-    incomeGig?: boolean | null;
-    incomeOther?: boolean | null;
-  };
-  const isEmployed = md.incomeEmployed ?? null;
-  const hasGigIncome = isEmployed === false ? md.incomeGig ?? null : null;
-  const hasOtherIncome = md.incomeOther ?? null;
+  // The income-question answers are form-only fields. Only `is_employed` is
+  // persisted (MFB-1178) — gig and other are re-derived from the streams on load.
+  // Strip the form-only answer fields from the spread so they don't leak onto the
+  // persisted member object.
+  const { incomeEmployed, incomeGig: _gig, incomeOther: _other, ...restMemberData } =
+    memberData as typeof memberData & {
+      incomeEmployed?: boolean | null;
+      incomeGig?: boolean | null;
+      incomeOther?: boolean | null;
+    };
 
   const base = {
-    ...memberData,
+    ...restMemberData,
     id: existingHouseholdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
     frontendId: existingHouseholdData[currentMemberIndex]?.frontendId ?? crypto.randomUUID(),
     hasIncome,
-    isEmployed,
-    hasGigIncome,
-    hasOtherIncome,
+    isEmployed: incomeEmployed ?? null,
     incomeStreams,
   };
 
