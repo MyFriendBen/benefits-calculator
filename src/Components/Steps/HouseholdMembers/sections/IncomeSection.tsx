@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import {
   Box,
@@ -37,7 +37,7 @@ import {
   EMPTY_GIG_INCOME_STREAM,
   EMPTY_INCOME_STREAM,
 } from '../utils/constants';
-import { deriveIncomeAnswers, isEmploymentStream } from '../utils/helpers';
+import { isEmploymentStream } from '../utils/helpers';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { useTrackEvent } from '../../../../Assets/analytics';
 import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
@@ -410,15 +410,21 @@ const IncomeSection = ({
   const employmentRows = rows.filter((r) => isEmploymentStream(r.value));
   const otherRows = rows.filter((r) => !isEmploymentStream(r.value));
 
-  // Seed the three toggles from the persisted streams once, on mount. Streams stay
-  // the source of truth; the toggles are a UI mirror that drives add/remove.
-  const initialAnswers = useRef(deriveIncomeAnswers(fields as IncomeStreamFormData[])).current;
-  const [employed, setEmployed] = useState<boolean | null>(
-    // If gig income exists, the member answered "No" to employment (Q2 only shows then).
-    initialAnswers.employed ? true : initialAnswers.gig ? false : null,
-  );
-  const [gig, setGig] = useState<boolean | null>(initialAnswers.gig ? true : null);
-  const [other, setOther] = useState<boolean | null>(initialAnswers.other ? true : null);
+  // The three Yes/No answers live in RHF form state (incomeEmployed/Gig/Other) so
+  // they are required by the schema and participate in scroll-to-error. They are
+  // seeded from the persisted streams (deriveIncomeAnswers) in defaultValues and
+  // stripped before saving — the backend still derives income from the streams.
+  const employed = (useWatch({ control, name: 'incomeEmployed' as any }) ?? null) as boolean | null;
+  const gig = (useWatch({ control, name: 'incomeGig' as any }) ?? null) as boolean | null;
+  const other = (useWatch({ control, name: 'incomeOther' as any }) ?? null) as boolean | null;
+
+  const setEmployed = (v: boolean | null) => setValue('incomeEmployed' as any, v as any, { shouldValidate: true });
+  const setGig = (v: boolean | null) => setValue('incomeGig' as any, v as any, { shouldValidate: true });
+  const setOther = (v: boolean | null) => setValue('incomeOther' as any, v as any, { shouldValidate: true });
+
+  const employedError = (errors as FieldErrors<any>)?.incomeEmployed as { message?: string } | undefined;
+  const gigError = (errors as FieldErrors<any>)?.incomeGig as { message?: string } | undefined;
+  const otherError = (errors as FieldErrors<any>)?.incomeOther as { message?: string } | undefined;
 
   // Q2 (gig) is only asked when Q1 (employed) is "No".
   const showGigQuestion = employed === false;
@@ -555,6 +561,11 @@ const IncomeSection = ({
             onChange={handleEmployedChange}
             ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-employed', defaultMessage: 'Are you currently employed?' })}
           />
+          {employedError && (
+            <FormHelperText sx={{ ml: 0 }}>
+              <ErrorMessageWrapper fontSize="0.875rem">{employedError.message ?? ''}</ErrorMessageWrapper>
+            </FormHelperText>
+          )}
           {employed && (
             <Stack spacing={2} className="income-streams-stack">
               {employedRows.map((r) => renderRow(r, 'sourceOnly'))}
@@ -583,6 +594,11 @@ const IncomeSection = ({
               onChange={handleGigChange}
               ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-gig', defaultMessage: 'Do you earn any money from freelance, gig, or occasional work?' })}
             />
+            {gigError && (
+              <FormHelperText sx={{ ml: 0 }}>
+                <ErrorMessageWrapper fontSize="0.875rem">{gigError.message ?? ''}</ErrorMessageWrapper>
+              </FormHelperText>
+            )}
             {gig && (
               <Stack spacing={2} className="income-streams-stack">
                 {gigRows.map((r) => renderRow(r, 'amountOnly'))}
@@ -605,6 +621,11 @@ const IncomeSection = ({
             onChange={handleOtherChange}
             ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-other', defaultMessage: 'Do you receive any government benefits, child support, alimony, or other recurring payments?' })}
           />
+          {otherError && (
+            <FormHelperText sx={{ ml: 0 }}>
+              <ErrorMessageWrapper fontSize="0.875rem">{otherError.message ?? ''}</ErrorMessageWrapper>
+            </FormHelperText>
+          )}
           {other && (
             <Stack spacing={2} className="income-streams-stack">
               {otherRows.map((r) => renderRow(r, 'full'))}

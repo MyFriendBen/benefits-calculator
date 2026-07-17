@@ -108,6 +108,13 @@ export const renderRelationshipToHHHelperText = (intlHook: IntlShape) => {
   });
 };
 
+export const renderIncomeQuestionHelperText = (intlHook: IntlShape) => {
+  return intlHook.formatMessage({
+    id: 'errorMessage-incomeQuestion',
+    defaultMessage: 'Please select an answer.',
+  });
+};
+
 export const renderIncomeStreamNameHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
     id: 'errorMessage-incomeStreamName',

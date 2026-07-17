@@ -50,6 +50,10 @@ export type HouseholdData = {
   conditions: Conditions;
   studentEligibility?: StudentEligibility;
   hasIncome: boolean;
+  /** Answers to the three Income Sources questions (MFB-1178). null = unanswered. */
+  isEmployed?: boolean | null;
+  hasGigIncome?: boolean | null;
+  hasOtherIncome?: boolean | null;
   incomeStreams: IncomeStream[];
   energyCalculator?: EnergyCalculatorMember;
   healthInsurance?: HealthInsurance;

@@ -21,7 +21,7 @@
   display: flex;
   flex-direction: column;
   background-color: var(--secondary-background-color, #f7f7f7);
-  border: 1px solid #e3e5e9;
+  border: 1px solid #d4d7dd;
   border-radius: 12px;
   padding: 1.5rem;
   margin-top: 0.5rem;
@@ -105,6 +105,7 @@
   align-items: flex-start;
   padding: 1rem;
   background-color: var(--income-card-background);
+  border: 1px solid #d4d7dd;
   border-radius: 8px;
   overflow: visible;
   min-width: 0;

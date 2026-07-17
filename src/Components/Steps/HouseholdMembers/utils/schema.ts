@@ -17,6 +17,7 @@ import {
   renderInvalidBirthYearHelperText,
   renderRelationshipToHHHelperText,
   renderIncomeCategoryHelperText,
+  renderIncomeQuestionHelperText,
   hasAtLeastOneTrue,
   validateNoneExclusive,
   validateHourlyIncome,
@@ -156,8 +157,22 @@ export const createHouseholdMemberSchema = (
     healthInsurance: createHealthInsuranceSchema(intl, pageNumber),
     conditions: createSpecialConditionsSchema(intl),
     studentEligibility: studentEligibilitySchema,
+    incomeEmployed: z.boolean().nullable(),
+    incomeGig: z.boolean().nullable(),
+    incomeOther: z.boolean().nullable(),
     incomeStreams: incomeStreamsSchema,
-  }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility }, ctx) => {
+  }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility, incomeEmployed, incomeGig, incomeOther }, ctx) => {
+    // The three income questions are required. Q2 (gig) is only asked when Q1=No.
+    if (incomeEmployed === null) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeEmployed'] });
+    }
+    if (incomeEmployed === false && incomeGig === null) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeGig'] });
+    }
+    if (incomeOther === null) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeOther'] });
+    }
+
     const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
     if (birthYear === CURRENT_YEAR && birthMonth > CURRENT_MONTH) {
       ctx.addIssue({
@@ -255,6 +270,9 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
           (value) => [...Object.keys(relationshipOptions)].includes(value) || pageNumber === 1,
           { message: renderRelationshipToHHHelperText(intl) },
         ),
+      incomeEmployed: z.boolean().nullable(),
+      incomeGig: z.boolean().nullable(),
+      incomeOther: z.boolean().nullable(),
       incomeStreams: incomeStreamsSchema,
     })
     .refine(
@@ -265,5 +283,17 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
         return true;
       },
       { message: renderFutureBirthMonthHelperText(intl), path: ['birthMonth'] },
-    );
+    )
+    .superRefine(({ incomeEmployed, incomeGig, incomeOther }, ctx) => {
+      // The three income questions are required. Q2 (gig) is only asked when Q1=No.
+      if (incomeEmployed === null) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeEmployed'] });
+      }
+      if (incomeEmployed === false && incomeGig === null) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeGig'] });
+      }
+      if (incomeOther === null) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeOther'] });
+      }
+    });
 };

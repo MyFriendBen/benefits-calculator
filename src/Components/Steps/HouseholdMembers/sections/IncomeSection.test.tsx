@@ -3,6 +3,7 @@ import { IntlProvider } from 'react-intl';
 import { useForm, useFieldArray } from 'react-hook-form';
 import IncomeSection from './IncomeSection';
 import { EMPTY_INCOME_STREAM } from '../utils/constants';
+import { deriveIncomeAnswers } from '../utils/helpers';
 import { IncomeStreamFormData } from '../utils/types';
 
 // Stub stepDirectory (IncomeSection calls useStepNumber for analytics). The
@@ -39,8 +40,16 @@ const Wrapper = ({
   defaultStreams?: IncomeStreamFormData[];
   errors?: Record<string, any>;
 }) => {
+  // Mirror how defaultValues seeds the three answer fields from persisted streams,
+  // so rehydration behavior can be exercised by passing defaultStreams alone.
+  const derived = deriveIncomeAnswers(defaultStreams);
   const { control, setValue } = useForm({
-    defaultValues: { incomeStreams: defaultStreams },
+    defaultValues: {
+      incomeEmployed: derived.employed ? true : derived.gig ? false : null,
+      incomeGig: derived.gig ? true : null,
+      incomeOther: derived.other ? true : null,
+      incomeStreams: defaultStreams,
+    },
   });
   const { fields, append, remove } = useFieldArray({ control, name: 'incomeStreams' });
 

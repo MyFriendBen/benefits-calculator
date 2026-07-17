@@ -77,6 +77,9 @@ export const ERROR_SECTION_MAP = [
   { key: 'healthInsurance', id: 'health-insurance-section' },
   { key: 'conditions', id: 'conditions-section' },
   { key: 'studentEligibility', id: 'student-eligibility-section' },
+  { key: 'incomeEmployed', id: 'income-section' },
+  { key: 'incomeGig', id: 'income-section' },
+  { key: 'incomeOther', id: 'income-section' },
   { key: 'incomeStreams', id: 'income-stream' },
 ] as const;
 
@@ -87,5 +90,8 @@ export const ENERGY_CALCULATOR_ERROR_SECTION_MAP = [
   { key: 'relationshipToHH', id: 'basic-info-section' },
   { key: 'conditions', id: 'conditions-section' },
   { key: 'receivesSsi', id: 'conditions-section' },
+  { key: 'incomeEmployed', id: 'income-section' },
+  { key: 'incomeGig', id: 'income-section' },
+  { key: 'incomeOther', id: 'income-section' },
   { key: 'incomeStreams', id: 'income-stream' },
 ] as const;

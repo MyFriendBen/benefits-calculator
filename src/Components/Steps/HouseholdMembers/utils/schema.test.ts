@@ -14,6 +14,11 @@ const validMainData = {
   healthInsurance: { none: true, employer: false, private: false, medicaid: false, medicare: false, chp: false, emergency_medicaid: false, family_planning: false, va: false, mass_health: false },
   conditions: { student: false, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false },
   studentEligibility: { studentFullTime: undefined, studentJobTrainingProgram: undefined, studentHasWorkStudy: undefined, studentWorks20PlusHrs: undefined },
+  // The three income questions are required (MFB-1178); answered here so the
+  // fixture is valid. incomeGig can stay null because incomeEmployed is true.
+  incomeEmployed: false,
+  incomeGig: false,
+  incomeOther: false,
   incomeStreams: [],
 };
 
@@ -23,6 +28,9 @@ const validEcData = {
   conditions: { survivingSpouse: false, disabled: false, medicalEquipment: false },
   receivesSsi: 'false' as const,
   relationshipToHH: 'spouse',
+  incomeEmployed: false,
+  incomeGig: false,
+  incomeOther: false,
   incomeStreams: [],
 };
 
@@ -176,6 +184,31 @@ describe('createHouseholdMemberSchema (main)', () => {
       expect(paths).toContain('studentWorks20PlusHrs');
       expect(paths).not.toContain('studentFullTime');
       expect(paths).not.toContain('studentHasWorkStudy');
+    });
+  });
+
+  describe('income question validation (MFB-1178)', () => {
+    it('rejects when incomeEmployed is unanswered (null)', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: null });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeEmployed')).toBe(true);
+    });
+
+    it('rejects when incomeOther is unanswered (null)', () => {
+      const result = schema.safeParse({ ...validMainData, incomeOther: null });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeOther')).toBe(true);
+    });
+
+    it('requires incomeGig only when incomeEmployed is false', () => {
+      // employed=false + gig unanswered → invalid
+      const missingGig = schema.safeParse({ ...validMainData, incomeEmployed: false, incomeGig: null });
+      expect(missingGig.success).toBe(false);
+      expect(missingGig.error?.issues.some(i => i.path.at(-1) === 'incomeGig')).toBe(true);
+
+      // employed=true + gig unanswered → valid (Q2 not asked)
+      const gigNotAsked = schema.safeParse({ ...validMainData, incomeEmployed: true, incomeGig: null });
+      expect(gigNotAsked.success).toBe(true);
     });
   });
 

@@ -169,11 +169,26 @@ export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParam
   }));
   const hasIncome = incomeStreams.length > 0;
 
+  // The three income-question answers (MFB-1178) are form fields; persist them on
+  // the member. Q2 (gig) is only asked when Q1=No, so normalize gig to null when
+  // employed to avoid persisting a stale answer.
+  const md = memberData as typeof memberData & {
+    incomeEmployed?: boolean | null;
+    incomeGig?: boolean | null;
+    incomeOther?: boolean | null;
+  };
+  const isEmployed = md.incomeEmployed ?? null;
+  const hasGigIncome = isEmployed === false ? md.incomeGig ?? null : null;
+  const hasOtherIncome = md.incomeOther ?? null;
+
   const base = {
     ...memberData,
     id: existingHouseholdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
     frontendId: existingHouseholdData[currentMemberIndex]?.frontendId ?? crypto.randomUUID(),
     hasIncome,
+    isEmployed,
+    hasGigIncome,
+    hasOtherIncome,
     incomeStreams,
   };
 

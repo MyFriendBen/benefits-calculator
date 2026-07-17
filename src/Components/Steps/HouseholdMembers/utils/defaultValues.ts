@@ -1,4 +1,5 @@
 import { HouseholdData } from '../../../../Types/FormData';
+import { deriveIncomeAnswers } from './helpers';
 
 export const UNSET_BIRTH_YEAR: number | '' = '';
 
@@ -99,6 +100,25 @@ export const DEFAULT_STUDENT_ELIGIBILITY = {
 };
 
 /**
+ * Resolves the three income-question answers (MFB-1178). Prefers the persisted
+ * answers; for legacy screens saved before these fields existed, falls back to
+ * deriving them from the income streams so a member with income still shows the
+ * right questions answered "Yes".
+ */
+export const getDefaultIncomeAnswers = (data?: HouseholdData) => {
+  const derived = deriveIncomeAnswers(data?.incomeStreams as any);
+  // Derived employment: Yes if there are wages; No (not null) if the only
+  // employment income is gig/self-employment, since Q2 is only asked when Q1=No.
+  const derivedEmployed = derived.employed ? true : derived.gig ? false : null;
+
+  return {
+    incomeEmployed: data?.isEmployed ?? derivedEmployed,
+    incomeGig: data?.hasGigIncome ?? (derived.gig ? true : null),
+    incomeOther: data?.hasOtherIncome ?? (derived.other ? true : null),
+  };
+};
+
+/**
  * Creates default form values for household member
  */
 export const createDefaultValues = (
@@ -108,6 +128,7 @@ export const createDefaultValues = (
   const incomeStreams = getDefaultIncomeStreams(householdMemberFormData);
 
   return {
+    ...getDefaultIncomeAnswers(householdMemberFormData),
     birthMonth: householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
       ? householdMemberFormData.birthMonth
       : 0,
@@ -174,6 +195,7 @@ export const createEnergyCalculatorDefaultValues = (
     receivesSsi: householdMemberFormData?.energyCalculator?.receivesSsi ? 'true' : 'false',
     relationshipToHH: householdMemberFormData?.relationshipToHH
       ?? (pageNumber === 1 ? 'headOfHousehold' : ''),
+    ...getDefaultIncomeAnswers(householdMemberFormData),
     incomeStreams,
   };
 };
