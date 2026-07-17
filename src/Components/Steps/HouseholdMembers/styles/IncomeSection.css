@@ -9,31 +9,48 @@
 
 /* Income stream card layout */
 :root {
-  --income-card-background: #f5f5f5;
+  /* Income input rows are white cards sitting inside the shaded question
+     container (MFB-1178 design), so the card background is white, not gray. */
+  --income-card-background: #ffffff;
 }
 
-/* Three-question income layout (MFB-1203) */
+/* Three-question income layout (MFB-1203 / MFB-1178).
+   The whole set of questions sits in one shaded, rounded container that groups
+   them visually and separates them from the rest of the form. */
 .income-questions-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  background-color: var(--secondary-background-color, #f7f7f7);
+  border: 1px solid #e3e5e9;
+  border-radius: 12px;
+  padding: 1.5rem;
   margin-top: 0.5rem;
 }
 
+/* A thin divider between questions, matching the design's grouping. */
 .income-question-block {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  padding: 1.25rem 0;
+}
+
+.income-question-block:first-of-type {
+  padding-top: 0;
+}
+
+.income-question-block:not(:last-child) {
+  border-bottom: 1px solid #e3e5e9;
 }
 
 .income-question-label.MuiFormLabel-root {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--primary-color, #037a93);
+  color: var(--primary-color, #293457);
 }
 
 .income-question-label.MuiFormLabel-root.Mui-focused {
-  color: var(--primary-color, #037a93);
+  color: var(--primary-color, #293457);
 }
 
 .income-question-subtext {
@@ -42,27 +59,40 @@
   color: #5c6470;
 }
 
-/* Segmented Yes/No toggle */
+/* Yes/No toggle: two bordered pill buttons side by side that fill the width of
+   the question container, filled with the primary color when selected. */
 .income-yes-no-toggle {
-  max-width: 32rem;
+  display: flex;
+  gap: 1rem;
+  width: 100%;
 }
 
-.income-yes-no-toggle .MuiButton-root {
+.income-yes-no-button {
   flex: 1;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   font-weight: 700;
-  text-transform: none;
-  font-size: 1rem;
+  font-size: 0.9375rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  color: var(--primary-color, #293457);
+  background-color: #ffffff;
+  border: 1px solid #c4c8d0;
+  border-radius: 12px;
 }
 
-/* Selected side uses the white-label primary color as its fill */
-.income-yes-no-toggle .income-yes-no-selected.MuiButton-contained {
-  background-color: var(--primary-color, #037a93);
+.income-yes-no-button:hover {
+  border-color: var(--primary-color, #293457);
+}
+
+.income-yes-no-button:focus-visible {
+  outline: 3px solid var(--primary-color, #293457);
+  outline-offset: 2px;
+}
+
+.income-yes-no-button.income-yes-no-selected {
+  background-color: var(--primary-color, #293457);
   color: #ffffff;
-}
-
-.income-yes-no-toggle .income-yes-no-selected.MuiButton-contained:hover {
-  background-color: var(--primary-color, #037a93);
+  border-color: var(--primary-color, #293457);
 }
 
 .income-streams-stack {
@@ -128,9 +158,33 @@
   white-space: nowrap;
 }
 
+/* Trash icon with "Remove" label beneath it, top-right of the income card. */
 .income-delete-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   margin-top: 0;
   padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #5c6470;
+}
+
+.income-delete-button:hover {
+  color: var(--primary-color, #293457);
+}
+
+.income-delete-button:focus-visible {
+  outline: 2px solid var(--primary-color, #293457);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.income-delete-label {
+  font-size: 0.75rem;
+  font-family: var(--font-body);
 }
 
 .income-frequency-label-row {
@@ -146,35 +200,31 @@
 
 
 
+/* De-emphasized secondary action (MFB-1178): an inline text link with a "+"
+   icon in the secondary/accent color, so it no longer reads as the primary
+   action (was a full-width filled button competing with Continue). */
 .income-add-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: 8px;
-  text-transform: uppercase;
-  font-size: 0.875rem;
-  letter-spacing: 0.05em;
+  gap: 0.375rem;
+  padding: 0.25rem 0;
+  background: none;
+  border: none;
   cursor: pointer;
-  background-color: var(--secondary-color);
-  color: #ffffff;
-  border: 1px solid transparent;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  color: var(--secondary-color);
 }
 
 .income-add-button:hover {
-  background-color: var(--hover-color);
   color: var(--primary-color);
-  border-color: var(--primary-color);
 }
 
 .income-add-button:focus-visible {
-  background-color: var(--hover-color);
-  color: var(--primary-color);
-  border-color: var(--primary-color);
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .income-field-frequency .MuiIconButton-root {

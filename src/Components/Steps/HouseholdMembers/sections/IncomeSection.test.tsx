@@ -193,6 +193,12 @@ describe('IncomeSection (three-question design)', () => {
   });
 
   describe('add / remove within a bucket', () => {
+    it('offers an add-income-source link on the gig question', () => {
+      render(<Wrapper defaultStreams={[employmentStream('selfEmployment')]} />);
+      // Gig question is active (self-employment-only stream) and can add more rows.
+      expect(screen.getByRole('button', { name: /add an income source/i })).toBeInTheDocument();
+    });
+
     it('appends another employment row via Add An Income Source', async () => {
       render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
       const before = screen.getAllByRole('button', { name: /delete income source/i }).length;

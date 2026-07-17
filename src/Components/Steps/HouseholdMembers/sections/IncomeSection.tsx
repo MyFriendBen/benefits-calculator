@@ -2,12 +2,9 @@ import { useMemo, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import {
   Box,
-  Button,
-  ButtonGroup,
   FormControl,
   FormHelperText,
   FormLabel,
-  IconButton,
   InputAdornment,
   Select,
   Stack,
@@ -310,13 +307,17 @@ const IncomeStreamRow = ({
         </Box>
       </Box>
 
-      <IconButton
+      <button
+        type="button"
         onClick={() => remove(index)}
         className="income-delete-button"
         aria-label={intl.formatMessage({ id: 'personIncomeBlock.deleteIncomeAria', defaultMessage: 'Delete income source' })}
       >
         <DeleteIcon />
-      </IconButton>
+        <span className="income-delete-label">
+          <FormattedMessage id="personIncomeBlock.removeIncomeLabel" defaultMessage="Remove" />
+        </span>
+      </button>
     </Box>
   );
 };
@@ -328,27 +329,43 @@ interface YesNoToggleProps {
 }
 
 /**
- * Segmented Yes/No toggle matching the MFB-1203 design (filled when selected).
+ * Yes/No toggle matching the MFB-1203 design: two bordered pill buttons side by
+ * side, filled with the primary color when selected. Uses plain buttons rather
+ * than MUI Button variants because the app theme neutralizes the outlined
+ * border (border: none), which would render them as borderless text.
  */
 const YesNoToggle = ({ value, onChange, ariaLabel }: YesNoToggleProps) => (
-  <ButtonGroup className="income-yes-no-toggle" fullWidth aria-label={ariaLabel} disableElevation>
-    <Button
-      className={value === true ? 'income-yes-no-selected' : ''}
-      variant={value === true ? 'contained' : 'outlined'}
+  <div className="income-yes-no-toggle" role="group" aria-label={ariaLabel}>
+    <button
+      type="button"
+      className={`income-yes-no-button${value === true ? ' income-yes-no-selected' : ''}`}
       onClick={() => onChange(true)}
       aria-pressed={value === true}
     >
       <FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />
-    </Button>
-    <Button
-      className={value === false ? 'income-yes-no-selected' : ''}
-      variant={value === false ? 'contained' : 'outlined'}
+    </button>
+    <button
+      type="button"
+      className={`income-yes-no-button${value === false ? ' income-yes-no-selected' : ''}`}
       onClick={() => onChange(false)}
       aria-pressed={value === false}
     >
       <FormattedMessage id="radiofield.label-no" defaultMessage="No" />
-    </Button>
-  </ButtonGroup>
+    </button>
+  </div>
+);
+
+/**
+ * De-emphasized "+ Add an income source" link (MFB-1178) — no longer a
+ * full-width filled button competing with Continue.
+ */
+const AddIncomeSourceLink = ({ onClick }: { onClick: () => void }) => (
+  <Box>
+    <button onClick={onClick} type="button" className="income-add-button">
+      <AddIcon fontSize="small" />
+      <FormattedMessage id="personIncomeBlock.addIncomeSourceButton" defaultMessage="Add an income source" />
+    </button>
+  </Box>
 );
 
 const IncomeSection = ({
@@ -483,6 +500,11 @@ const IncomeSection = ({
     trackIncomeSource('add');
   };
 
+  const handleAddGigSource = () => {
+    append(EMPTY_GIG_INCOME_STREAM);
+    trackIncomeSource('add');
+  };
+
   const handleAddOtherSource = () => {
     append(EMPTY_INCOME_STREAM);
     trackIncomeSource('add');
@@ -536,12 +558,7 @@ const IncomeSection = ({
           {employed && (
             <Stack spacing={2} className="income-streams-stack">
               {employedRows.map((r) => renderRow(r, 'sourceOnly'))}
-              <Box sx={{ paddingBottom: '1rem' }}>
-                <button onClick={handleAddEmploymentSource} type="button" className="income-add-button">
-                  <AddIcon fontSize="small" />
-                  <strong><FormattedMessage id="personIncomeBlock.addIncomeSourceButton" defaultMessage="Add An Income Source" /></strong>
-                </button>
-              </Box>
+              <AddIncomeSourceLink onClick={handleAddEmploymentSource} />
             </Stack>
           )}
         </Box>
@@ -569,6 +586,7 @@ const IncomeSection = ({
             {gig && (
               <Stack spacing={2} className="income-streams-stack">
                 {gigRows.map((r) => renderRow(r, 'amountOnly'))}
+                <AddIncomeSourceLink onClick={handleAddGigSource} />
               </Stack>
             )}
           </Box>
@@ -590,12 +608,7 @@ const IncomeSection = ({
           {other && (
             <Stack spacing={2} className="income-streams-stack">
               {otherRows.map((r) => renderRow(r, 'full'))}
-              <Box sx={{ paddingBottom: '1rem' }}>
-                <button onClick={handleAddOtherSource} type="button" className="income-add-button">
-                  <AddIcon fontSize="small" />
-                  <strong><FormattedMessage id="personIncomeBlock.addIncomeSourceButton" defaultMessage="Add An Income Source" /></strong>
-                </button>
-              </Box>
+              <AddIncomeSourceLink onClick={handleAddOtherSource} />
             </Stack>
           )}
         </Box>

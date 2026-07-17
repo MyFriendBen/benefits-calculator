@@ -316,7 +316,8 @@ const HouseholdMemberForm = () => {
 
       <form onSubmit={handleSubmit(formSubmitHandler, handleFormError)}>
         {renderFormSections()}
-        <PrevAndContinueButtons backNavigationFunction={navigateBack} />
+        {/* Promote Continue to the primary action on the income step (MFB-1178). */}
+        <PrevAndContinueButtons backNavigationFunction={navigateBack} continueVariant="contained" />
       </form>
     </main>
   );
