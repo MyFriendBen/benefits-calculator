@@ -31,7 +31,6 @@ export async function clickContinue(page: Page): Promise<void> {
  * @param page - Playwright page instance
  */
 export async function clickGetStarted(page: Page): Promise<void> {
-  await page.getByRole(BUTTONS.GET_STARTED.role, { name: BUTTONS.GET_STARTED.name }).waitFor({ state: 'visible' });
   await page.getByRole(BUTTONS.GET_STARTED.role, { name: BUTTONS.GET_STARTED.name }).click();
 }
 

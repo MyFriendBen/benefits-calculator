@@ -2,7 +2,6 @@ import { Page, expect } from '@playwright/test';
 import { selectIncomeCategory, selectIncomeType, selectFrequency } from './form';
 
 export async function selectOwnerOrRenter(page: Page, type: string) {
-  await page.getByRole('link', { name: type }).waitFor({ state: 'visible' });
   await page.getByRole('link', { name: type }).click();
 }
 

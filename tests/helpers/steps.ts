@@ -9,7 +9,6 @@ export async function navigateHomePage(page: Page, specificPath?: string) {
 }
 
 export async function clickGetStartedButton(page: Page) {
-  await page.getByRole('button', { name: 'Get Started' }).waitFor({ state: 'visible' });
   await page.getByRole('button', { name: 'Get Started' }).click();
 }
 
