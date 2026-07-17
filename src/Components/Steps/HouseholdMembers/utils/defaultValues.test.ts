@@ -22,8 +22,6 @@ const memberWithHealthIns = (overrides: Partial<HouseholdData> = {}): HouseholdD
   ...overrides,
 } as unknown as HouseholdData);
 
-// Helper for under-16 age status
-const under16AgeStatus = () => ({ age: 10, is16OrOlder: false, isUnder16: true });
 // Helper for working-age status
 const workingAgeStatus = () => ({ age: 30, is16OrOlder: true, isUnder16: false });
 
@@ -70,17 +68,17 @@ describe('createDefaultValues', () => {
       expect(result.studentEligibility).toEqual(DEFAULT_STUDENT_ELIGIBILITY);
     });
 
-    it('seeds one empty income stream for working-age eligible member on first visit', () => {
-      mockCalculateAgeStatus.mockReturnValue(workingAgeStatus());
-      // Must pass birthYear and birthMonth so isWorkingAge doesn't short-circuit.
-      // No healthInsurance = not yet progressed, so seeding is allowed.
+    // Since MFB-1203, income is gated behind three Yes/No questions, so no blank
+    // income stream is auto-seeded regardless of age (an empty-category stream
+    // would be orphaned from every question bucket).
+    it('does not seed an income stream for a working-age member on first visit', () => {
       const workingAgeMember: HouseholdData = {
         id: '1', frontendId: 'f1',
         birthYear: 1990, birthMonth: 6,
         relationshipToHH: '', hasIncome: false, incomeStreams: [],
       } as unknown as HouseholdData;
       const result = createDefaultValues(workingAgeMember);
-      expect(result.incomeStreams).toHaveLength(1);
+      expect(result.incomeStreams).toHaveLength(0);
     });
 
     it('seeds no income stream when there is no birth data at all', () => {
@@ -89,7 +87,6 @@ describe('createDefaultValues', () => {
     });
 
     it('seeds no income stream for under-16 member', () => {
-      mockCalculateAgeStatus.mockReturnValue(under16AgeStatus());
       const youngMember: HouseholdData = {
         id: '1', frontendId: 'f1',
         birthYear: 2018, birthMonth: 6,

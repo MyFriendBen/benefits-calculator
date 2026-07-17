@@ -1,10 +1,69 @@
 import { HouseholdData } from '../../../../Types/FormData';
 import { FormattedMessageType } from '../../../../Types/Questions';
 import { calcAge } from '../../../../Assets/age';
-import { FREQUENCY_ORDER, ERROR_SECTION_MAP, ENERGY_CALCULATOR_ERROR_SECTION_MAP } from './constants';
-import { WorkflowType } from './types';
+import {
+  FREQUENCY_ORDER,
+  ERROR_SECTION_MAP,
+  ENERGY_CALCULATOR_ERROR_SECTION_MAP,
+  EMPLOYMENT_CATEGORY,
+  WAGES_SOURCE,
+} from './constants';
+import { IncomeStreamFormData, WorkflowType } from './types';
 import { HouseholdMemberFormSchema, EnergyCalculatorHouseholdMemberFormSchema } from './schema';
 export { formatToUSD } from '../../../../utils/formatCurrency';
+
+// ============================================================================
+// INCOME QUESTION BUCKETING (MFB-1203)
+// ============================================================================
+
+/**
+ * The three income questions shown per household member. Each gates whether its
+ * income input(s) appear:
+ * - employed: "Are you currently employed?" — employment-category streams.
+ * - gig: "Do you earn any money from freelance, gig, or occasional work?" —
+ *   only shown when `employed` is No; a single self-employment stream.
+ * - other: "Do you receive any government benefits, child support, alimony...?" —
+ *   all non-employment-category streams.
+ */
+export type IncomeAnswers = {
+  employed: boolean;
+  gig: boolean;
+  other: boolean;
+};
+
+/** Streams under the "Are you currently employed?" question (employment category). */
+export const isEmploymentStream = (s: Pick<IncomeStreamFormData, 'incomeCategory'>): boolean =>
+  s.incomeCategory === EMPLOYMENT_CATEGORY;
+
+/** Streams under the "government benefits / other recurring payments" question. */
+export const isOtherStream = (s: Pick<IncomeStreamFormData, 'incomeCategory'>): boolean =>
+  !!s.incomeCategory && s.incomeCategory !== EMPLOYMENT_CATEGORY;
+
+/**
+ * Derives the three Yes/No answers from persisted income streams so the toggles
+ * rehydrate correctly on edit/reload. Streams remain the source of truth.
+ *
+ * Rules (mirror the design in MFB-1203):
+ * - `other` is Yes if any non-employment-category stream exists.
+ * - Employment streams are attributed to Q1 vs Q2 by the "Q2 only when Q1 is No"
+ *   rule: if any employment stream is `wages`, the member is treated as employed
+ *   (Q1 Yes) and Q2 stays hidden. If the only employment income is
+ *   self-employment, it is treated as gig income (Q1 No, Q2 Yes).
+ */
+export const deriveIncomeAnswers = (
+  streams: Pick<IncomeStreamFormData, 'incomeCategory' | 'incomeStreamName'>[] = [],
+): IncomeAnswers => {
+  const employmentStreams = streams.filter(isEmploymentStream);
+  const hasWages = employmentStreams.some((s) => s.incomeStreamName === WAGES_SOURCE);
+  const hasEmployment = employmentStreams.length > 0;
+
+  const employed = hasWages;
+  // Gig only surfaces when not employed; treat employment-only-self-employment as gig.
+  const gig = !employed && hasEmployment;
+  const other = streams.some(isOtherStream);
+
+  return { employed, gig, other };
+};
 
 // ============================================================================
 // GENERIC FORM HELPERS

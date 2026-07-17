@@ -8,7 +8,6 @@ import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
 import HouseholdMemberSummaryCards from './HouseholdMemberSummaryCards';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { SubmitHandler, useFieldArray, useWatch } from 'react-hook-form';
-import { useAgeCalculation } from '../../../AgeCalculation/useAgeCalculation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import PrevAndContinueButtons from '../../../PrevAndContinueButtons/PrevAndContinueButtons';
 import useScreenApi from '../../../../Assets/updateScreen';
@@ -127,11 +126,6 @@ const HouseholdMemberForm = () => {
     name: 'incomeStreams',
   });
 
-  // AGE CALCULATION
-  const { calculateCurrentAgeStatus } = useAgeCalculation(watch);
-
-  const watchBirthMonth = useWatch({ control, name: 'birthMonth' });
-  const watchBirthYear = useWatch({ control, name: 'birthYear' });
   const watchIsStudent = useWatch({ control, name: 'conditions.student' });
   const watchIsDisabled = useWatch({ control, name: 'conditions.disabled' });
 
@@ -144,10 +138,6 @@ const HouseholdMemberForm = () => {
     setValue,
     getValues,
     reset,
-    append,
-    calculateCurrentAgeStatus,
-    watchBirthMonth,
-    watchBirthYear,
     watchIsStudent,
     watchIsDisabled,
   });

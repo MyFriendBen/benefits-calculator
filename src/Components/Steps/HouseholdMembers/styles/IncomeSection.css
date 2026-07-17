@@ -12,6 +12,59 @@
   --income-card-background: #f5f5f5;
 }
 
+/* Three-question income layout (MFB-1203) */
+.income-questions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.income-question-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.income-question-label.MuiFormLabel-root {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary-color, #037a93);
+}
+
+.income-question-label.MuiFormLabel-root.Mui-focused {
+  color: var(--primary-color, #037a93);
+}
+
+.income-question-subtext {
+  margin: -0.5rem 0 0;
+  font-size: 0.875rem;
+  color: #5c6470;
+}
+
+/* Segmented Yes/No toggle */
+.income-yes-no-toggle {
+  max-width: 32rem;
+}
+
+.income-yes-no-toggle .MuiButton-root {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  text-transform: none;
+  font-size: 1rem;
+}
+
+/* Selected side uses the white-label primary color as its fill */
+.income-yes-no-toggle .income-yes-no-selected.MuiButton-contained {
+  background-color: var(--primary-color, #037a93);
+  color: #ffffff;
+}
+
+.income-yes-no-toggle .income-yes-no-selected.MuiButton-contained:hover {
+  background-color: var(--primary-color, #037a93);
+}
+
 .income-streams-stack {
   margin-top: 0;
 }

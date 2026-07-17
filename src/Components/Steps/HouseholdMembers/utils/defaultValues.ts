@@ -1,7 +1,4 @@
 import { HouseholdData } from '../../../../Types/FormData';
-import { calculateAgeStatus } from '../../../AgeCalculation/AgeCalculation';
-import { EMPTY_INCOME_STREAM } from './constants';
-import { getDefaultFormItems } from './helpers';
 
 export const UNSET_BIRTH_YEAR: number | '' = '';
 
@@ -50,33 +47,15 @@ const hasProgressedThroughForm = (data?: HouseholdData): boolean => {
 };
 
 /**
- * Helper to check if member is working age (16-70)
- */
-const isWorkingAge = (birthYear?: number, birthMonth?: number): boolean => {
-  if (!birthYear || !birthMonth) return false;
-  const { age } = calculateAgeStatus(birthMonth, birthYear);
-  return age !== null && age >= 16 && age <= 70;
-};
-
-/**
- * Determines default income streams - auto-adds for working-age members on first visit
+ * Determines default income streams.
+ *
+ * Since MFB-1203 the income section is gated behind three Yes/No questions, so we
+ * no longer auto-seed a blank income row for working-age members: an empty-category
+ * stream belongs to none of the question buckets (it would be orphaned/invisible and
+ * fail validation). Any persisted streams are still loaded as-is for editing.
  */
 const getDefaultIncomeStreams = (data?: HouseholdData): any[] => {
-  const progressed = hasProgressedThroughForm(data);
-  // Normalize [] to undefined when not yet progressed — the API always returns [] for
-  // brand-new members, but getDefaultFormItems needs undefined to distinguish
-  // "never visited" from "visited and intentionally cleared".
-  const existingStreams =
-    Array.isArray(data?.incomeStreams) && data!.incomeStreams.length === 0 && !progressed
-      ? undefined
-      : data?.incomeStreams;
-
-  const streams = getDefaultFormItems(
-    existingStreams,
-    progressed,
-    isWorkingAge(data?.birthYear, data?.birthMonth),
-    EMPTY_INCOME_STREAM as any
-  );
+  const streams = Array.isArray(data?.incomeStreams) ? data!.incomeStreams : [];
   return streams.map((stream: any) => ({
     ...stream,
     incomeAmount: stream.incomeAmount == null || stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),

@@ -1,6 +1,9 @@
+import { useMemo, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import {
   Box,
+  Button,
+  ButtonGroup,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -31,7 +34,13 @@ import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
 import { createMenuItems } from '../../SelectHelperFunctions/SelectHelperFunctions';
 import { FormattedMessageType } from '../../../../Types/Questions';
 import { IncomeStreamFormData } from '../utils/types';
-import { EMPTY_INCOME_STREAM } from '../utils/constants';
+import {
+  EMPLOYMENT_CATEGORY,
+  EMPTY_EMPLOYMENT_INCOME_STREAM,
+  EMPTY_GIG_INCOME_STREAM,
+  EMPTY_INCOME_STREAM,
+} from '../utils/constants';
+import { deriveIncomeAnswers, isEmploymentStream } from '../utils/helpers';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { useTrackEvent } from '../../../../Assets/analytics';
 import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
@@ -42,6 +51,14 @@ import '../styles/IncomeSection.css';
 type IncomeFormValues = {
   incomeStreams: IncomeStreamFormData[];
 };
+
+// Row layout variants, keyed to the three income questions (MFB-1203):
+// - 'full': category + source dropdowns (government benefits / other payments).
+// - 'sourceOnly': category is fixed to employment; only the source dropdown shows
+//   (the "Are you currently employed?" question).
+// - 'amountOnly': category and source are both implied (self-employment); only
+//   frequency + amount show (the "freelance, gig, or occasional work?" question).
+type IncomeRowVariant = 'full' | 'sourceOnly' | 'amountOnly';
 
 interface IncomeSectionProps {
   control: Control<IncomeFormValues>;
@@ -58,6 +75,7 @@ interface IncomeSectionProps {
 
 interface IncomeStreamRowProps {
   index: number;
+  variant: IncomeRowVariant;
   control: Control<IncomeFormValues>;
   setValue: UseFormSetValue<IncomeFormValues>;
   remove: UseFieldArrayRemove;
@@ -69,6 +87,7 @@ interface IncomeStreamRowProps {
 
 const IncomeStreamRow = ({
   index,
+  variant,
   control,
   setValue,
   remove,
@@ -83,7 +102,13 @@ const IncomeStreamRow = ({
   // avoiding re-renders of sibling rows when unrelated streams change.
   const selectedType = useWatch({ control, name: `incomeStreams.${index}.incomeCategory` });
   const isHourly = useWatch({ control, name: `incomeStreams.${index}.incomeFrequency` }) === 'hourly';
-  const sourceOptions = selectedType && incomeOptions[selectedType] ? incomeOptions[selectedType] : {};
+
+  const showCategory = variant === 'full';
+  const showSource = variant === 'full' || variant === 'sourceOnly';
+
+  // sourceOnly rows have a fixed employment category, so scope the source options to it.
+  const effectiveCategory = variant === 'sourceOnly' ? EMPLOYMENT_CATEGORY : selectedType;
+  const sourceOptions = effectiveCategory && incomeOptions[effectiveCategory] ? incomeOptions[effectiveCategory] : {};
   const specificTypeMenuItems = createMenuItems(
     sourceOptions,
     <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectType" defaultMessage="Select source" />,
@@ -98,80 +123,84 @@ const IncomeStreamRow = ({
   return (
     <Box id={`income-stream-${index}`} className="income-box">
       <Box className="income-fields-container">
-        {/* Income Type */}
-        <Box className="income-category-container">
-          <FormControl fullWidth size="small" error={incomeCategoryError !== undefined}>
-            <FormLabel id={`income-category-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
-              <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Category" />
-            </FormLabel>
-            <Controller
-              name={`incomeStreams.${index}.incomeCategory`}
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.incomeCategory', defaultMessage: 'Income Category' }) }}
-                  id={`income-category-select-${index}`}
-                  sx={{ backgroundColor: '#fff' }}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    // Dynamic indexed path — cast required since RHF can't narrow template literals
-                    setValue(`incomeStreams.${index}.incomeStreamName` as any, '');
-                  }}
-                >
-                  {incomeCategoriesMenuItems}
-                </Select>
-              )}
-            />
-            {incomeCategoryError && (
-              <FormHelperText sx={{ ml: 0 }}>
-                <ErrorMessageWrapper fontSize="0.75rem">{incomeCategoryError.message ?? ''}</ErrorMessageWrapper>
-              </FormHelperText>
-            )}
-          </FormControl>
-        </Box>
-
-        {/* Income Source, Frequency, Hours (if hourly), Amount */}
-        <Box className="income-fields-row">
-          <Box className="income-field-specific-type">
-            <FormControl fullWidth size="small" error={!!selectedType && incomeStreamNameError !== undefined}>
-              <FormLabel id={`income-source-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
-                <FormattedMessage id="personIncomeBlock.incomeStreamName" defaultMessage="Income Source" />
+        {/* Income Category (only for the "other recurring payments" question) */}
+        {showCategory && (
+          <Box className="income-category-container">
+            <FormControl fullWidth size="small" error={incomeCategoryError !== undefined}>
+              <FormLabel id={`income-category-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
+                <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Category" />
               </FormLabel>
               <Controller
-                name={`incomeStreams.${index}.incomeStreamName`}
+                name={`incomeStreams.${index}.incomeCategory`}
                 control={control}
                 render={({ field }) => (
-                  // Tooltip needs a non-disabled span wrapper — disabled elements swallow pointer events
-                  <Tooltip
-                    title={selectedType ? '' : <FormattedMessage id="personIncomeBlock.specificType-tooltip" defaultMessage="Select an income category first" />}
-                    disableHoverListener={!!selectedType}
-                    disableFocusListener={!!selectedType}
-                    disableTouchListener={!!selectedType}
+                  <Select
+                    {...field}
+                    inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.incomeCategory', defaultMessage: 'Income Category' }) }}
+                    id={`income-category-select-${index}`}
+                    sx={{ backgroundColor: '#fff' }}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      // Dynamic indexed path — cast required since RHF can't narrow template literals
+                      setValue(`incomeStreams.${index}.incomeStreamName` as any, '');
+                    }}
                   >
-                    <span>
-                      <Select
-                        {...field}
-                        inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.incomeStreamName', defaultMessage: 'Income Source' }) }}
-                        id={`income-source-select-${index}`}
-                        sx={{ backgroundColor: '#fff' }}
-                        disabled={!selectedType}
-                        fullWidth
-                        MenuProps={{ MenuListProps: { sx: { '& .MuiMenuItem-root': { whiteSpace: 'normal' } } } }}
-                      >
-                        {specificTypeMenuItems}
-                      </Select>
-                    </span>
-                  </Tooltip>
+                    {incomeCategoriesMenuItems}
+                  </Select>
                 )}
               />
-              {selectedType && incomeStreamNameError && (
+              {incomeCategoryError && (
                 <FormHelperText sx={{ ml: 0 }}>
-                  <ErrorMessageWrapper fontSize="0.75rem">{incomeStreamNameError.message ?? ''}</ErrorMessageWrapper>
+                  <ErrorMessageWrapper fontSize="0.75rem">{incomeCategoryError.message ?? ''}</ErrorMessageWrapper>
                 </FormHelperText>
               )}
             </FormControl>
           </Box>
+        )}
+
+        {/* Income Source, Frequency, Hours (if hourly), Amount */}
+        <Box className="income-fields-row">
+          {showSource && (
+            <Box className="income-field-specific-type">
+              <FormControl fullWidth size="small" error={!!effectiveCategory && incomeStreamNameError !== undefined}>
+                <FormLabel id={`income-source-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
+                  <FormattedMessage id="personIncomeBlock.incomeStreamName" defaultMessage="Income Source" />
+                </FormLabel>
+                <Controller
+                  name={`incomeStreams.${index}.incomeStreamName`}
+                  control={control}
+                  render={({ field }) => (
+                    // Tooltip needs a non-disabled span wrapper — disabled elements swallow pointer events
+                    <Tooltip
+                      title={effectiveCategory ? '' : <FormattedMessage id="personIncomeBlock.specificType-tooltip" defaultMessage="Select an income category first" />}
+                      disableHoverListener={!!effectiveCategory}
+                      disableFocusListener={!!effectiveCategory}
+                      disableTouchListener={!!effectiveCategory}
+                    >
+                      <span>
+                        <Select
+                          {...field}
+                          inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.incomeStreamName', defaultMessage: 'Income Source' }) }}
+                          id={`income-source-select-${index}`}
+                          sx={{ backgroundColor: '#fff' }}
+                          disabled={!effectiveCategory}
+                          fullWidth
+                          MenuProps={{ MenuListProps: { sx: { '& .MuiMenuItem-root': { whiteSpace: 'normal' } } } }}
+                        >
+                          {specificTypeMenuItems}
+                        </Select>
+                      </span>
+                    </Tooltip>
+                  )}
+                />
+                {!!effectiveCategory && incomeStreamNameError && (
+                  <FormHelperText sx={{ ml: 0 }}>
+                    <ErrorMessageWrapper fontSize="0.75rem">{incomeStreamNameError.message ?? ''}</ErrorMessageWrapper>
+                  </FormHelperText>
+                )}
+              </FormControl>
+            </Box>
+          )}
 
           <Box className="income-field-frequency">
             <div className="income-frequency-label-row">
@@ -292,6 +321,36 @@ const IncomeStreamRow = ({
   );
 };
 
+interface YesNoToggleProps {
+  value: boolean | null;
+  onChange: (value: boolean) => void;
+  ariaLabel: string;
+}
+
+/**
+ * Segmented Yes/No toggle matching the MFB-1203 design (filled when selected).
+ */
+const YesNoToggle = ({ value, onChange, ariaLabel }: YesNoToggleProps) => (
+  <ButtonGroup className="income-yes-no-toggle" fullWidth aria-label={ariaLabel} disableElevation>
+    <Button
+      className={value === true ? 'income-yes-no-selected' : ''}
+      variant={value === true ? 'contained' : 'outlined'}
+      onClick={() => onChange(true)}
+      aria-pressed={value === true}
+    >
+      <FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />
+    </Button>
+    <Button
+      className={value === false ? 'income-yes-no-selected' : ''}
+      variant={value === false ? 'contained' : 'outlined'}
+      onClick={() => onChange(false)}
+      aria-pressed={value === false}
+    >
+      <FormattedMessage id="radiofield.label-no" defaultMessage="No" />
+    </Button>
+  </ButtonGroup>
+);
+
 const IncomeSection = ({
   control,
   errors,
@@ -304,14 +363,51 @@ const IncomeSection = ({
   frequencyMenuItems,
   pageNumber,
 }: IncomeSectionProps) => {
+  const intl = useIntl();
+
+  // Only non-employment categories belong to the "government benefits / other
+  // recurring payments" question; employment is collected via Q1/Q2.
+  const otherIncomeCategories = useMemo(
+    () => Object.fromEntries(Object.entries(incomeCategories).filter(([key]) => key !== EMPLOYMENT_CATEGORY)),
+    [incomeCategories],
+  );
+
   const incomeCategoriesMenuItems = createMenuItems(
-    incomeCategories,
+    otherIncomeCategories,
     <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectCategory" defaultMessage="Select category" />,
   );
 
   const getError = (index: number, fieldName: keyof IncomeStreamFormData) => {
     return (errors.incomeStreams as FieldErrors<IncomeStreamFormData>[])?.[index]?.[fieldName];
   };
+
+  // Watch the whole array so rows re-bucket when a category/source changes.
+  const watchedStreams = useWatch({ control, name: 'incomeStreams' }) ?? [];
+  // useFieldArray fields carry stable ids; pair them with the watched values so we
+  // can bucket by live category/source while keeping RHF's stable keys.
+  const rows = fields.map((field, index) => ({ field, index, value: watchedStreams[index] ?? field }));
+
+  // Employment rows always carry the fixed 'employment' category; everything else
+  // (including a freshly-appended blank row whose category isn't chosen yet) belongs
+  // to the "other recurring payments" question.
+  const employmentRows = rows.filter((r) => isEmploymentStream(r.value));
+  const otherRows = rows.filter((r) => !isEmploymentStream(r.value));
+
+  // Seed the three toggles from the persisted streams once, on mount. Streams stay
+  // the source of truth; the toggles are a UI mirror that drives add/remove.
+  const initialAnswers = useRef(deriveIncomeAnswers(fields as IncomeStreamFormData[])).current;
+  const [employed, setEmployed] = useState<boolean | null>(
+    // If gig income exists, the member answered "No" to employment (Q2 only shows then).
+    initialAnswers.employed ? true : initialAnswers.gig ? false : null,
+  );
+  const [gig, setGig] = useState<boolean | null>(initialAnswers.gig ? true : null);
+  const [other, setOther] = useState<boolean | null>(initialAnswers.other ? true : null);
+
+  // Q2 (gig) is only asked when Q1 (employed) is "No".
+  const showGigQuestion = employed === false;
+  // A gig row is any employment row (self-employment) that surfaces while not employed.
+  const gigRows = showGigQuestion ? employmentRows : [];
+  const employedRows = showGigQuestion ? [] : employmentRows;
 
   const track = useTrackEvent();
   // Income streams live inside the household member step, so they share its
@@ -331,52 +427,179 @@ const IncomeSection = ({
     remove(index);
   };
 
-  const handleAddIncomeSource = () => {
+  // Remove all rows matching a predicate, deleting from the highest index down so
+  // earlier indices stay valid as we splice.
+  const removeMatching = (predicate: (value: IncomeStreamFormData) => boolean) => {
+    const indices = rows
+      .filter((r) => predicate(r.value))
+      .map((r) => r.index)
+      .sort((a, b) => b - a);
+    indices.forEach((i) => remove(i));
+  };
+
+  const handleEmployedChange = (answer: boolean) => {
+    setEmployed(answer);
+    if (answer) {
+      // Turning employment on hides the gig question; fold any existing gig income
+      // back under the (now visible) employment question rather than dropping it.
+      setGig(null);
+      if (employmentRows.length === 0) {
+        append(EMPTY_EMPLOYMENT_INCOME_STREAM);
+        trackIncomeSource('add');
+      }
+    } else {
+      removeMatching(isEmploymentStream);
+    }
+  };
+
+  const handleGigChange = (answer: boolean) => {
+    setGig(answer);
+    if (answer) {
+      if (employmentRows.length === 0) {
+        append(EMPTY_GIG_INCOME_STREAM);
+        trackIncomeSource('add');
+      }
+    } else {
+      removeMatching(isEmploymentStream);
+    }
+  };
+
+  const handleOtherChange = (answer: boolean) => {
+    setOther(answer);
+    if (answer) {
+      if (otherRows.length === 0) {
+        append(EMPTY_INCOME_STREAM);
+        trackIncomeSource('add');
+      }
+    } else {
+      // Remove every non-employment row, including any blank rows the user added
+      // but never assigned a category.
+      removeMatching((value) => !isEmploymentStream(value));
+    }
+  };
+
+  const handleAddEmploymentSource = () => {
+    append(EMPTY_EMPLOYMENT_INCOME_STREAM);
+    trackIncomeSource('add');
+  };
+
+  const handleAddOtherSource = () => {
     append(EMPTY_INCOME_STREAM);
     trackIncomeSource('add');
   };
 
+  const renderRow = (r: { field: { id: string }; index: number }, variant: IncomeRowVariant) => (
+    <IncomeStreamRow
+      key={r.field.id}
+      index={r.index}
+      variant={variant}
+      control={control}
+      setValue={setValue}
+      remove={trackedRemove}
+      getError={getError}
+      incomeCategoriesMenuItems={incomeCategoriesMenuItems}
+      incomeOptions={incomeOptions}
+      frequencyMenuItems={frequencyMenuItems}
+    />
+  );
+
   return (
-    <Box id="income-section">
+    <Box id="income-section" className="section">
       <QuestionQuestion>
         <FormattedMessage id="householdDataBlock.createIncomeRadioQuestion-questionLabel" defaultMessage="Income Sources" />
       </QuestionQuestion>
       <QuestionDescription>
         {pageNumber === 1 ? (
           <FormattedMessage
-            id="householdDataBlock.incomeDescription-you"
-            defaultMessage="Start with your own income only. Click '+ Add an Income Source' to add each income type you receive. This includes wages, self-employment, current benefits, child support, and any other regular payments. You'll enter income for each household member separately."
+            id="householdDataBlock.incomeDescription-you-questions"
+            defaultMessage="Answer each question for yourself only. You'll enter income for each household member separately."
           />
         ) : (
           <FormattedMessage
-            id="householdDataBlock.incomeDescription-them"
-            defaultMessage="Click '+ Add an Income Source' to add each income type they receive. Include their wages, benefits, child support, and any other regular payments. If you don't know the exact amount, add your best estimate. It will help make your results more accurate."
+            id="householdDataBlock.incomeDescription-them-questions"
+            defaultMessage="Answer each question for this person. If you don't know the exact amount, add your best estimate. It will help make your results more accurate."
           />
         )}
       </QuestionDescription>
 
-      <Stack spacing={2} className="income-streams-stack">
-        {fields.map((field, index) => (
-          <IncomeStreamRow
-            key={field.id}
-            index={index}
-            control={control}
-            setValue={setValue}
-            remove={trackedRemove}
-            getError={getError}
-            incomeCategoriesMenuItems={incomeCategoriesMenuItems}
-            incomeOptions={incomeOptions}
-            frequencyMenuItems={frequencyMenuItems}
+      <Box className="income-questions-container">
+        {/* Q1 — Are you currently employed? */}
+        <Box className="income-question-block">
+          <FormLabel className="income-question-label">
+            <FormattedMessage id="householdDataBlock.incomeQuestion-employed" defaultMessage="Are you currently employed?" />
+          </FormLabel>
+          <YesNoToggle
+            value={employed}
+            onChange={handleEmployedChange}
+            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-employed', defaultMessage: 'Are you currently employed?' })}
           />
-        ))}
-
-        <Box sx={{ paddingBottom: '1rem' }}>
-          <button onClick={handleAddIncomeSource} type="button" className="income-add-button">
-            <AddIcon fontSize="small" />
-            <strong><FormattedMessage id="personIncomeBlock.addIncomeSourceButton" defaultMessage="Add An Income Source" /></strong>
-          </button>
+          {employed && (
+            <Stack spacing={2} className="income-streams-stack">
+              {employedRows.map((r) => renderRow(r, 'sourceOnly'))}
+              <Box sx={{ paddingBottom: '1rem' }}>
+                <button onClick={handleAddEmploymentSource} type="button" className="income-add-button">
+                  <AddIcon fontSize="small" />
+                  <strong><FormattedMessage id="personIncomeBlock.addIncomeSourceButton" defaultMessage="Add An Income Source" /></strong>
+                </button>
+              </Box>
+            </Stack>
+          )}
         </Box>
-      </Stack>
+
+        {/* Q2 — Freelance/gig/occasional work (only when Q1 is No) */}
+        {showGigQuestion && (
+          <Box className="income-question-block">
+            <FormLabel className="income-question-label">
+              <FormattedMessage
+                id="householdDataBlock.incomeQuestion-gig"
+                defaultMessage="Do you earn any money from freelance, gig, or occasional work?"
+              />
+            </FormLabel>
+            <p className="income-question-subtext">
+              <FormattedMessage
+                id="householdDataBlock.incomeQuestion-gig-subtext"
+                defaultMessage="For example: driving for a rideshare, odd jobs, selling goods, or any other irregular paid work."
+              />
+            </p>
+            <YesNoToggle
+              value={gig}
+              onChange={handleGigChange}
+              ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-gig', defaultMessage: 'Do you earn any money from freelance, gig, or occasional work?' })}
+            />
+            {gig && (
+              <Stack spacing={2} className="income-streams-stack">
+                {gigRows.map((r) => renderRow(r, 'amountOnly'))}
+              </Stack>
+            )}
+          </Box>
+        )}
+
+        {/* Q3 — Government benefits / child support / alimony / other recurring payments */}
+        <Box className="income-question-block">
+          <FormLabel className="income-question-label">
+            <FormattedMessage
+              id="householdDataBlock.incomeQuestion-other"
+              defaultMessage="Do you receive any government benefits, child support, alimony, or other recurring payments?"
+            />
+          </FormLabel>
+          <YesNoToggle
+            value={other}
+            onChange={handleOtherChange}
+            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-other', defaultMessage: 'Do you receive any government benefits, child support, alimony, or other recurring payments?' })}
+          />
+          {other && (
+            <Stack spacing={2} className="income-streams-stack">
+              {otherRows.map((r) => renderRow(r, 'full'))}
+              <Box sx={{ paddingBottom: '1rem' }}>
+                <button onClick={handleAddOtherSource} type="button" className="income-add-button">
+                  <AddIcon fontSize="small" />
+                  <strong><FormattedMessage id="personIncomeBlock.addIncomeSourceButton" defaultMessage="Add An Income Source" /></strong>
+                </button>
+              </Box>
+            </Stack>
+          )}
+        </Box>
+      </Box>
     </Box>
   );
 };
