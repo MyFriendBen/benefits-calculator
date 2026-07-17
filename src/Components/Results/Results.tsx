@@ -21,7 +21,7 @@ import ProgramPage from './ProgramPage/ProgramPage';
 import ResultsTabs from './Tabs/Tabs';
 import { FilterState, createInitialFilterState } from './Filter/citizenshipFilterConfig';
 import dataLayerPush from '../../Assets/analytics';
-import HelpButton from './211Button/211Button';
+import MoreHelpButton from './211Button/211Button';
 import MoreHelp from '../MoreHelp/MoreHelp';
 import BackAndSaveButtons from './BackAndSaveButtons/BackAndSaveButtons';
 import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
@@ -183,7 +183,47 @@ const Results = ({ type }: ResultsProps) => {
       program_count: apiResults.programs.length,
       total_estimated_value: totalEstimatedValue,
     });
+
+    // Per-program impression (the "shown" denominator for conversion). Guarded by
+    // the same ref, so once per screening — not on filter re-renders.
+    apiResults.programs.forEach((program) => {
+      track('screener_program_shown', {
+        program_id: String(program.program_id),
+        program_name: program.name.default_message,
+      });
+    });
   }, [apiResults, track]);
+
+  // Results-page scroll depth, only on the two browsable tabs (program =
+  // long-term benefits, need = additional resources). Each threshold fires once
+  // per tab per screening.
+  const firedScrollDepths = useRef<Set<number>>(new Set());
+  useEffect(() => {
+    const tabName = type === 'program' ? 'long_term_benefits' : type === 'need' ? 'additional_resources' : null;
+    if (tabName === null) {
+      return; // program detail / more-help / rebates aren't browsable tabs
+    }
+    firedScrollDepths.current = new Set(); // new tab → reset the once-per-tab guard
+
+    const thresholds: (25 | 50 | 75 | 100)[] = [25, 50, 75, 100];
+    const onScroll = () => {
+      const doc = document.documentElement;
+      const scrollable = doc.scrollHeight - doc.clientHeight;
+      if (scrollable <= 0) {
+        return;
+      }
+      const pct = (doc.scrollTop / scrollable) * 100;
+      for (const depth of thresholds) {
+        if (pct >= depth && !firedScrollDepths.current.has(depth)) {
+          firedScrollDepths.current.add(depth);
+          track('screener_results_scroll_depth', { depth, tab_name: tabName });
+        }
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [type, track]);
 
   // "None eligible" needs BOTH result sets resolved, or we'd fire a false
   // negative while rebates are still loading (and the once-guard would prevent
@@ -315,7 +355,7 @@ const Results = ({ type }: ResultsProps) => {
                     {type === 'need' ? <Needs /> : <Programs />}
                   </Grid>
                 </Grid>
-                {!noHelpButton && <HelpButton />}
+                {!noHelpButton && <MoreHelpButton />}
                 <NPSWidget uuid={uuid} />
                 <ShareModalAutoPopup />
               </div>

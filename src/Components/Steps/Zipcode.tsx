@@ -20,10 +20,13 @@ import { OverrideableTranslation } from '../../Assets/languageOptions';
 import QuestionDescription from '../QuestionComponents/QuestionDescription';
 import useStepForm from './stepForm';
 import { helperText } from '../HelperText/HelperText';
+import { useTrackEvent } from '../../Assets/analytics';
+import { getStepAnalyticsId } from '../../Assets/analytics/stepIds';
 
 export const Zipcode = () => {
   const { formData, getReferrer } = useContext(Context);
   const { uuid } = useParams();
+  const track = useTrackEvent();
   const backNavigationFunction = useDefaultBackNavigationFunction('zipcode');
   const { updateScreen } = useScreenApi();
 
@@ -179,7 +182,17 @@ export const Zipcode = () => {
           />
           {state.name}
           <FormattedMessage id="questions.zipcode.description.2" defaultMessage=", please click " />
-          <a href="/select-state" className="link-color">
+          <a
+            href="/select-state"
+            className="link-color"
+            onClick={() =>
+              track('screener_link_click', {
+                link_name: 'Other State Options',
+                url: '/select-state',
+                screener_step_name: getStepAnalyticsId('zipcode'),
+              })
+            }
+          >
             <FormattedMessage id="questions.zipcode.description.link" defaultMessage="here" />
           </a>
           <FormattedMessage id="questions.zipcode.description.3" defaultMessage=" for other state options." />

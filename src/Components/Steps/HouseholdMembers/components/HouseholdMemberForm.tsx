@@ -74,6 +74,9 @@ const HouseholdMemberForm = () => {
   // between members, so this intentionally re-fires on each pageNumber change).
   useEffect(() => {
     track('screener_form_step', {
+      // 'household-members' (parent slug) to stay consistent with this step's
+      // complete/back events. Distinct sub-step slugs need PreviousButton/
+      // questionHooks made sub-step-aware first (separate change).
       screener_step_name: getStepAnalyticsId(questionName),
       screener_step_number: currentStepId,
       step_action: 'view',
