@@ -32,15 +32,7 @@ export async function clickContinue(page: Page): Promise<void> {
  */
 export async function clickGetStarted(page: Page): Promise<void> {
   await page.getByRole(BUTTONS.GET_STARTED.role, { name: BUTTONS.GET_STARTED.name }).waitFor({ state: 'visible' });
-  //retry click 3 times, if click succsesfull break the loop
-  for (let i = 0; i < 3; i++) {
-    try {
-      await page.getByRole(BUTTONS.GET_STARTED.role, { name: BUTTONS.GET_STARTED.name }).click();
-      break;
-    } catch (error) {
-      if (i === 2) throw error;
-    }
-  }
+  await page.getByRole(BUTTONS.GET_STARTED.role, { name: BUTTONS.GET_STARTED.name }).click();
 }
 
 /**

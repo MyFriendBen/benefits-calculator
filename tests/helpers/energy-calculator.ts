@@ -3,15 +3,7 @@ import { selectIncomeCategory, selectIncomeType, selectFrequency } from './form'
 
 export async function selectOwnerOrRenter(page: Page, type: string) {
   await page.getByRole('link', { name: type }).waitFor({ state: 'visible' });
-  //retry click 3 times, if click succsesfull break the loop
-  for (let i = 0; i < 3; i++) {
-    try {
-      await page.getByRole('link', { name: type }).click();
-      break;
-    } catch (error) {
-      if (i === 2) throw error;
-    }
-  }
+  await page.getByRole('link', { name: type }).click();
 }
 
 export async function selectUtility(page: Page, utilityType: string) {
