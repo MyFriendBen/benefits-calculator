@@ -61,10 +61,35 @@ export default function useStepForm<T extends FieldValues>({
   // attempt, so we emit exactly one error event per failed submit.
   useEffect(() => {
     if (submitCount > 0 && isSubmitted && !isSubmitSuccessful && errorCount > 0) {
+      // "field: label" pairs for which validations failed (e.g.
+      // "zipcode: Required, members.0.birthYear: Invalid format"). PRIVACY: field
+      // path + friendly rule label only — never the entered value or localized
+      // message (either could carry PII). Zod issue codes map to labels below.
+      const RULE_LABELS: Record<string, string> = {
+        too_small: 'Required',
+        invalid_type: 'Required',
+        too_big: 'Too long',
+        invalid_string: 'Invalid format',
+        invalid_enum_value: 'Invalid selection',
+        custom: 'Failed validation',
+      };
+      // Walk into nested/array errors (RHF mirrors the form shape, so household
+      // field arrays like members[0].birthYear have no `type` at the top level)
+      // to report the real leaf field + rule rather than a generic 'Invalid'.
+      const collectErrors = (node: unknown, path: string): string[] => {
+        if (!node || typeof node !== 'object') return [];
+        const t = (node as { type?: string }).type;
+        if (typeof t === 'string') return [`${path}: ${RULE_LABELS[t] ?? 'Invalid'}`];
+        return Object.entries(node as Record<string, unknown>)
+          .filter(([key]) => key !== 'ref' && key !== 'message')
+          .flatMap(([key, child]) => collectErrors(child, path ? `${path}.${key}` : key));
+      };
+      const errorFields = collectErrors(errors, '').join(', ');
       track('screener_form_error', {
         screener_step_name: getStepAnalyticsId(questionName),
         screener_step_number: stepNumber >= 0 ? stepNumber : undefined,
         form_error_count: errorCount,
+        form_error_message: errorFields,
       });
     }
     // Intentionally depend only on submitCount so this fires once per submit
