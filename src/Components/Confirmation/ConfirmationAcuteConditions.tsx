@@ -4,6 +4,7 @@ import { FormattedMessageType } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
 import { ConfirmationItem } from './ConfirmationBlock';
 import { RowEditLink } from './ConfirmationBlock';
+import { Icon } from '../Icon/Icon';
 import { Context } from '../Wrapper/Wrapper';
 
 type IconAndFormattedMessageMap = {
@@ -38,23 +39,36 @@ export default function ConfirmationAcuteConditions() {
   };
 
   return (
-    <ConfirmationItem
-      label={
-        <FormattedMessage
-          id="confirmation.displayAllFormData-acuteHHConditions"
-          defaultMessage="Additional Resources"
+    <div className="simple-confirmation-section">
+      <div className="simple-section-header">
+        <h2>
+          <Icon name="shield-check" aria-hidden={true} />
+          <FormattedMessage
+            id="confirmation.benefitsAndAdditionalInfo"
+            defaultMessage="Benefits & Additional Information"
+          />
+        </h2>
+      </div>
+      <div className="simple-section-content">
+        <ConfirmationItem
+          label={
+            <FormattedMessage
+              id="confirmation.displayAllFormData-acuteHHConditions"
+              defaultMessage="Additional Resources"
+            />
+          }
+          value={acuteConditionsValue()}
+          editLink={
+            <RowEditLink
+              stepName="acuteHHConditions"
+              ariaLabel={formatMessage({
+                id: 'confirmation.acuteConditions.edit-AL',
+                defaultMessage: 'edit immediate needs',
+              })}
+            />
+          }
         />
-      }
-      value={acuteConditionsValue()}
-      editLink={
-        <RowEditLink
-          stepName="acuteHHConditions"
-          ariaLabel={formatMessage({
-            id: 'confirmation.acuteConditions.edit-AL',
-            defaultMessage: 'edit immediate needs',
-          })}
-        />
-      }
-    />
+      </div>
+    </div>
   );
 }
