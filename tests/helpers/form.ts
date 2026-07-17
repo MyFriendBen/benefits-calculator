@@ -160,7 +160,7 @@ export async function selectIncomeType(page: Page, incomeType: string): Promise<
   const timeout = isCI ? 20000 : 10000;
   // Wait for the source dropdown to be enabled (it's disabled until a category is selected)
   await page.locator('#income-source-select-0:not([aria-disabled="true"])').waitFor({ state: 'attached', timeout });
-   await selectMuiOption(page, '#income-source-select-0', incomeType);
+  await selectMuiOption(page, '#income-source-select-0', incomeType);
 }
 
 /**

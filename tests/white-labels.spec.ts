@@ -145,6 +145,7 @@ test.describe('Basic e2e tests for each white label', () => {
       await fillDateOfBirth(page, config.dobMonth, config.dobYear);
       await selectInsurance(page, config.insurance);
       await selectIncome(page, config.incomeCategory, config.incomeType, config.incomeFrequency, config.incomeAmount);
+      await clickContinueButton(page);
       await verifyCurrentUrl(page, URL_PATTERNS.EXPENSES);
 
       await clickContinueButton(page);
