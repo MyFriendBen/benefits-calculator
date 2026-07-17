@@ -14,7 +14,7 @@ const validMainData = {
   healthInsurance: { none: true, employer: false, private: false, medicaid: false, medicare: false, chp: false, emergency_medicaid: false, family_planning: false, va: false, mass_health: false },
   conditions: { student: false, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false },
   studentEligibility: { studentFullTime: undefined, studentJobTrainingProgram: undefined, studentHasWorkStudy: undefined, studentWorks20PlusHrs: undefined },
-  // The three income questions are required (MFB-1178); answered here so the
+  // The three income questions are required; answered here so the
   // fixture is valid. incomeGig can stay null because incomeEmployed is true.
   incomeEmployed: false,
   incomeGig: false,
@@ -187,7 +187,7 @@ describe('createHouseholdMemberSchema (main)', () => {
     });
   });
 
-  describe('income question validation (MFB-1178)', () => {
+  describe('income question validation', () => {
     it('rejects when incomeEmployed is unanswered (null)', () => {
       const result = schema.safeParse({ ...validMainData, incomeEmployed: null });
       expect(result.success).toBe(false);

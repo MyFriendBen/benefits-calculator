@@ -70,7 +70,7 @@ describe('getDefaultFormItems', () => {
 });
 
 // ============================================================================
-// income question bucketing (MFB-1203)
+// income question bucketing
 // ============================================================================
 
 describe('isEmploymentStream / isOtherStream', () => {

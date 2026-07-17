@@ -50,7 +50,7 @@ const hasProgressedThroughForm = (data?: HouseholdData): boolean => {
 /**
  * Determines default income streams.
  *
- * Since MFB-1203 the income section is gated behind three Yes/No questions, so we
+ * The income section is gated behind three Yes/No questions, so we
  * no longer auto-seed a blank income row for working-age members: an empty-category
  * stream belongs to none of the question buckets (it would be orphaned/invisible and
  * fail validation). Any persisted streams are still loaded as-is for editing.
@@ -100,7 +100,7 @@ export const DEFAULT_STUDENT_ELIGIBILITY = {
 };
 
 /**
- * Resolves the three income-question answers (MFB-1178) for form seeding.
+ * Resolves the three income-question answers for form seeding.
  *
  * Only `is_employed` is persisted — it can't be reconstructed from the streams
  * alone (a self-employment-only member could have answered "employed" or "gig").

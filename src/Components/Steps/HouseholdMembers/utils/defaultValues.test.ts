@@ -68,7 +68,7 @@ describe('createDefaultValues', () => {
       expect(result.studentEligibility).toEqual(DEFAULT_STUDENT_ELIGIBILITY);
     });
 
-    // Since MFB-1203, income is gated behind three Yes/No questions, so no blank
+    // Income is gated behind three Yes/No questions, so no blank
     // income stream is auto-seeded regardless of age (an empty-category stream
     // would be orphaned from every question bucket).
     it('does not seed an income stream for a working-age member on first visit', () => {
@@ -189,7 +189,7 @@ describe('createDefaultValues', () => {
   });
 });
 
-describe('getDefaultIncomeAnswers (MFB-1178)', () => {
+describe('getDefaultIncomeAnswers', () => {
   const progressed = (overrides: Partial<HouseholdData> = {}): HouseholdData =>
     memberWithHealthIns(overrides); // health insurance set => completed the form
 

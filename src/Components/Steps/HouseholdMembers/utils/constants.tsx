@@ -48,7 +48,7 @@ export const EMPTY_INCOME_STREAM: IncomeStreamFormData = {
 };
 
 // Income category/source keys used to bucket streams behind the three income
-// questions (MFB-1203). These mirror the keys in the benefits-api config
+// questions. These mirror the keys in the benefits-api config
 // (configuration/white_labels/base.py `income_options_by_category`).
 export const EMPLOYMENT_CATEGORY = 'employment';
 export const WAGES_SOURCE = 'wages';

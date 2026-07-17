@@ -49,7 +49,7 @@ type IncomeFormValues = {
   incomeStreams: IncomeStreamFormData[];
 };
 
-// Row layout variants, keyed to the three income questions (MFB-1203):
+// Row layout variants, keyed to the three income questions:
 // - 'full': category + source dropdowns (government benefits / other payments).
 // - 'sourceOnly': category is fixed to employment; only the source dropdown shows
 //   (the "Are you currently employed?" question).
@@ -329,7 +329,7 @@ interface YesNoToggleProps {
 }
 
 /**
- * Yes/No toggle matching the MFB-1203 design: two bordered pill buttons side by
+ * Yes/No toggle: two bordered pill buttons side by
  * side, filled with the primary color when selected. Uses plain buttons rather
  * than MUI Button variants because the app theme neutralizes the outlined
  * border (border: none), which would render them as borderless text.
@@ -356,7 +356,7 @@ const YesNoToggle = ({ value, onChange, ariaLabel }: YesNoToggleProps) => (
 );
 
 /**
- * De-emphasized "+ Add an income source" link (MFB-1178) — no longer a
+ * De-emphasized "+ Add an income source" link — no longer a
  * full-width filled button competing with Continue.
  */
 const AddIncomeSourceLink = ({ onClick }: { onClick: () => void }) => (

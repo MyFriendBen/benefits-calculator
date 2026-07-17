@@ -13,7 +13,7 @@ import { HouseholdMemberFormSchema, EnergyCalculatorHouseholdMemberFormSchema } 
 export { formatToUSD } from '../../../../utils/formatCurrency';
 
 // ============================================================================
-// INCOME QUESTION BUCKETING (MFB-1203)
+// INCOME QUESTION BUCKETING
 // ============================================================================
 
 /**
@@ -43,7 +43,7 @@ export const isOtherStream = (s: Pick<IncomeStreamFormData, 'incomeCategory'>): 
  * Derives the three Yes/No answers from persisted income streams so the toggles
  * rehydrate correctly on edit/reload. Streams remain the source of truth.
  *
- * Rules (mirror the design in MFB-1203):
+ * Rules:
  * - `other` is Yes if any non-employment-category stream exists.
  * - Employment streams are attributed to Q1 vs Q2 by the "Q2 only when Q1 is No"
  *   rule: if any employment stream is `wages`, the member is treated as employed
@@ -170,7 +170,7 @@ export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParam
   const hasIncome = incomeStreams.length > 0;
 
   // The income-question answers are form-only fields. Only `is_employed` is
-  // persisted (MFB-1178) — gig and other are re-derived from the streams on load.
+  // persisted — gig and other are re-derived from the streams on load.
   // Strip the form-only answer fields from the spread so they don't leak onto the
   // persisted member object.
   const { incomeEmployed, incomeGig: _gig, incomeOther: _other, ...restMemberData } =

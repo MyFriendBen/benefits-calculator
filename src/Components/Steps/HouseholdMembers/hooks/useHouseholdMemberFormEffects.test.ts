@@ -51,7 +51,7 @@ describe('useHouseholdMemberFormEffects', () => {
     });
   });
 
-  // Note: since MFB-1203 this hook no longer auto-appends income streams based on
+  // Note: this hook no longer auto-appends income streams based on
   // age — income is gated behind the three Yes/No questions in IncomeSection, which
   // manage their own stream add/remove. The former age-based auto-append tests were
   // removed with that effect.

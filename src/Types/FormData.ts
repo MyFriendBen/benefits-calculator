@@ -51,7 +51,7 @@ export type HouseholdData = {
   studentEligibility?: StudentEligibility;
   hasIncome: boolean;
   /**
-   * Answer to the "Are you currently employed?" income question (MFB-1178).
+   * Answer to the "Are you currently employed?" income question.
    * null = unanswered. Persisted because it can't be derived from the streams
    * alone (a self-employment-only member could be employed OR gig). The gig and
    * other-income answers are derived from the streams instead.

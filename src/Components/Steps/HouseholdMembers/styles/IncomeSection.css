@@ -10,11 +10,11 @@
 /* Income stream card layout */
 :root {
   /* Income input rows are white cards sitting inside the shaded question
-     container (MFB-1178 design), so the card background is white, not gray. */
+     container, so the card background is white, not gray. */
   --income-card-background: #ffffff;
 }
 
-/* Three-question income layout (MFB-1203 / MFB-1178).
+/* Three-question income layout.
    The whole set of questions sits in one shaded, rounded container that groups
    them visually and separates them from the rest of the form. */
 .income-questions-container {
@@ -201,7 +201,7 @@
 
 
 
-/* De-emphasized secondary action (MFB-1178): an inline text link with a "+"
+/* De-emphasized secondary action: an inline text link with a "+"
    icon in the secondary/accent color, so it no longer reads as the primary
    action (was a full-width filled button competing with Continue). */
 .income-add-button {
