@@ -3,6 +3,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { HasBenefitsProgram } from '../../Types/ApiCalls';
 import { ConfirmationItem } from './ConfirmationBlock';
 import { RowEditLink } from './ConfirmationBlock';
+import { Icon } from '../Icon/Icon';
 import { Context } from '../Wrapper/Wrapper';
 
 export default function ConfirmationBenefitsInfo() {
@@ -38,23 +39,36 @@ export default function ConfirmationBenefitsInfo() {
   };
 
   return (
-    <ConfirmationItem
-      label={
-        <FormattedMessage
-          id="confirmation.displayAllFormData-currentHHBenefitsText"
-          defaultMessage="Current Household Benefits"
+    <div className="simple-confirmation-section">
+      <div className="simple-section-header">
+        <h2>
+          <Icon name="shield-check" aria-hidden={true} />
+          <FormattedMessage
+            id="confirmation.benefitsAndAdditionalInfo"
+            defaultMessage="Benefits & Additional Information"
+          />
+        </h2>
+      </div>
+      <div className="simple-section-content">
+        <ConfirmationItem
+          label={
+            <FormattedMessage
+              id="confirmation.displayAllFormData-currentHHBenefitsText"
+              defaultMessage="Current Household Benefits"
+            />
+          }
+          value={benefitsValue()}
+          editLink={
+            <RowEditLink
+              stepName="hasBenefits"
+              ariaLabel={formatMessage({
+                id: 'confirmation.currentBenefits.edit-AL',
+                defaultMessage: 'edit benefits you already have',
+              })}
+            />
+          }
         />
-      }
-      value={benefitsValue()}
-      editLink={
-        <RowEditLink
-          stepName="hasBenefits"
-          ariaLabel={formatMessage({
-            id: 'confirmation.currentBenefits.edit-AL',
-            defaultMessage: 'edit benefits you already have',
-          })}
-        />
-      }
-    />
+      </div>
+    </div>
   );
 }
