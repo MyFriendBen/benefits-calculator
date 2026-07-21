@@ -2,8 +2,7 @@
 // the walker that turns an RHF error tree into a "field: label" list for the
 // screener_form_error event's form_error_message. Centralized here so every emit
 // path (the useStepForm hook and any step with its own useForm, e.g. Disclaimer)
-// produces the SAME vocabulary — otherwise the dashboard, which groups on
-// form_error_message, would see divergent text for the same rule.
+// produces the SAME vocabulary for the same rule.
 //
 // PRIVACY: only field path + rule label travel — never the entered value or the
 // localized message (either could carry PII).

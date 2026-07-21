@@ -185,8 +185,8 @@ const Results = ({ type }: ResultsProps) => {
       total_estimated_value: totalEstimatedValue,
     });
 
-    // Results as a first-class funnel step, so it joins the step funnel on the
-    // same event/grain as every other step (view only — results is terminal).
+    // Emit results as a step view (terminal — view only) so it's tracked on the
+    // same event as every other step.
     track('screener_form_step', {
       screener_step_name: POST_DIRECTORY_STEP_IDS.results,
       step_action: 'view',

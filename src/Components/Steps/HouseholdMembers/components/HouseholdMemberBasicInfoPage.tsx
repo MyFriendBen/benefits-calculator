@@ -38,11 +38,10 @@ const HouseholdMemberBasicInfoPage = () => {
   const [deletePopover, setDeletePopover] = useState<DeletePopoverState>(null);
   const track = useTrackEvent();
 
-  // This sub-page is rendered by HouseholdMemberRouter, outside QuestionComponentContainer,
-  // The roster page (page 0). Its funnel step events use the 'member-basics'
-  // sub-slug; back-navigation from the next page resolves the same slug (see the
-  // household nav / PreviousButton). The screener_household_member action events
-  // below keep the parent 'household-members' slug (their mart groups on it).
+  // Roster page (page 0), rendered outside QuestionComponentContainer, so it
+  // tracks its own view. Emits the 'member-basics' sub-slug; complete/back use the
+  // same slug. The screener_household_member action events below keep the parent
+  // 'household-members' slug.
   useEffect(() => {
     track('screener_form_step', {
       screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberBasics,

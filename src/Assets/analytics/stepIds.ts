@@ -61,9 +61,9 @@ export const POST_DIRECTORY_STEP_IDS = {
 // screens under one QuestionName ('householdData'): the roster (birth/relationship
 // per member, page 0, shown only when household size > 1) and the per-member
 // detail page (insurance/conditions/income, pages 1..N). Each screen emits its own
-// slug on view/complete/back so the funnel can separate them; the ACTION events
+// slug on the step view/complete/back events; the ACTION events
 // (screener_household_member / screener_income_source) keep the parent
-// 'household-members' slug (their mart groups on it).
+// 'household-members' slug.
 export const HOUSEHOLD_SUBSTEP_IDS = {
   memberBasics: 'member-basics',
   memberDetails: 'member-details',

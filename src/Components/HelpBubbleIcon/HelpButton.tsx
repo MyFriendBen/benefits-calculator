@@ -10,8 +10,7 @@ import './HelpButton.css';
 // screener_help_click — the confusion metric is grouped by topic. Passed by
 // every site so no tooltip logs as 'unknown'.
 // `stepName` is the analytics step slug of the page hosting the tooltip; the
-// host step passes it (leaf can't resolve it) so the dashboard can compute a
-// per-step help rate. Omit only where no step context applies.
+// host step passes it (the leaf can't resolve it). Omit where no step applies.
 type HelpButtonProps = PropsWithChildren<{ className?: string; helpTopic?: string; stepName?: string }>;
 
 const HelpButton = ({ className, children, helpTopic, stepName }: HelpButtonProps) => {

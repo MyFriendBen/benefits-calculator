@@ -69,11 +69,8 @@ const HouseholdMemberForm = () => {
   const currentStepId = useStepNumber(questionName);
   const track = useTrackEvent();
 
-  // The per-member detail page (pages 1..N). Fires a view per member as pageNumber
-  // changes. Uses the 'member-details' sub-slug; complete/back resolve the same
-  // slug so the funnel joins cleanly. (Per-member views make this non-monotonic in
-  // a strict funnel — the dashboard treats member-details as "reached page 1" for
-  // the funnel rung and uses the per-page count only for back-navigation.)
+  // Per-member detail page (pages 1..N): emits the 'member-details' sub-slug,
+  // re-firing per member as pageNumber changes. complete/back use the same slug.
   useEffect(() => {
     track('screener_form_step', {
       screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberDetails,
