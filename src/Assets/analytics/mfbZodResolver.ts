@@ -43,7 +43,9 @@ export function mfbZodResolver<T extends FieldValues>(schema: ZodType<any, any, 
       // Deliberate second parse: the base resolver has already discarded params,
       // so there's no way to recover the codes from its output — re-parsing to
       // read them is the whole reason this wrapper exists. Error path only, cheap.
-      const parsed = schema.safeParse(values);
+      // safeParseAsync (matching zodResolver's own parse) so an async refine/
+      // transform added later doesn't throw here.
+      const parsed = await schema.safeParseAsync(values);
       if (!parsed.success) {
         for (const issue of parsed.error.issues) {
           // `params` exists only on custom issues; read it defensively since the
