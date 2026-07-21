@@ -71,8 +71,9 @@ export interface ScreenerEventMap {
   screener_confirmation_edit: { section: string };
   screener_confirmation_proceed: {};
   // Inline "?" tooltip click, sliced by `help_topic` (a step-identifying slug like
-  // 'income-frequency'). Not the results-page "More Help / 211" CTA below.
-  screener_help_click: { help_topic: string };
+  // 'income-frequency'). screener_step_name lets the dashboard compute a per-step
+  // help rate (clicks ÷ step viewers). Not the results-page "More Help / 211" CTA below.
+  screener_help_click: StepContext & { help_topic: string };
   // Results-page "More Help / 211" CTA — kept separate from screener_help_click so
   // it doesn't pollute the inline-tooltip confusion metric.
   screener_get_help_click: { location?: string };

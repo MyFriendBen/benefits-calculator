@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Controller } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { mfbZodResolver } from '../../Assets/analytics/mfbZodResolver';
 import { FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { PatternFormat } from 'react-number-format';
 import { FormattedMessageType } from '../../Types/Questions';
@@ -62,14 +62,18 @@ export const Zipcode = () => {
     )
     .trim()
     .regex(numberMustBeFiveDigitsLongRegex)
-    .refine((data) => data in countiesByZipcode, { message: errorMessage }); // refine does not use the error map
+    .refine((data) => data in countiesByZipcode, { message: errorMessage, params: { code: 'out_of_area' } }); // refine does not use the error map
 
   const formSchema = z
     .object({
       zipcode: zipcodeSchema,
       county: z.string(),
     })
-    .refine((data) => checkCountyIsValid(data), { message: 'Invalid county', path: ['county'] });
+    .refine((data) => checkCountyIsValid(data), {
+      message: 'Invalid county',
+      path: ['county'],
+      params: { code: 'invalid_selection' },
+    });
 
   type FormSchema = z.infer<typeof formSchema>;
 
@@ -81,7 +85,7 @@ export const Zipcode = () => {
     setValue,
     getValues,
   } = useStepForm<FormSchema>({
-    resolver: zodResolver(formSchema),
+    resolver: mfbZodResolver(formSchema),
     defaultValues: {
       zipcode: formData.zipcode ?? '',
       county: formData.county ?? 'disabled-select',

@@ -5,7 +5,7 @@ import { useFieldArray, SubmitHandler } from 'react-hook-form';
 import { Box, Typography, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { mfbZodResolver } from '../../../../Assets/analytics/mfbZodResolver';
 import { Context } from '../../../Wrapper/Wrapper';
 import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
 import QuestionDescription from '../../../QuestionComponents/QuestionDescription';
@@ -25,7 +25,7 @@ import DeleteConfirmationPopover from './DeleteConfirmationPopover';
 import '../styles/HouseholdMemberBasicInfoPage.css';
 import type { DeletePopoverState } from '../utils/types';
 import { useTrackEvent } from '../../../../Assets/analytics';
-import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
+import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
 
 const MAX_HOUSEHOLD_SIZE = 8;
 
@@ -39,14 +39,13 @@ const HouseholdMemberBasicInfoPage = () => {
   const track = useTrackEvent();
 
   // This sub-page is rendered by HouseholdMemberRouter, outside QuestionComponentContainer,
-  // so it tracks its own view. Emits 'household-members' (the parent slug) to stay
-  // consistent with the complete/back events for this step, which both resolve to
-  // 'household-members' via getStepAnalyticsId('householdData'). (Distinct sub-step
-  // slugs would require making PreviousButton/questionHooks sub-step-aware too, so
-  // view/complete/back all agree — a separate change.)
+  // The roster page (page 0). Its funnel step events use the 'member-basics'
+  // sub-slug; back-navigation from the next page resolves the same slug (see the
+  // household nav / PreviousButton). The screener_household_member action events
+  // below keep the parent 'household-members' slug (their mart groups on it).
   useEffect(() => {
     track('screener_form_step', {
-      screener_step_name: getStepAnalyticsId('householdData'),
+      screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberBasics,
       screener_step_number: currentStepId,
       step_action: 'view',
     });
@@ -94,7 +93,7 @@ const HouseholdMemberBasicInfoPage = () => {
     formState: { errors },
     handleSubmit,
   } = useStepForm<BasicInfoPageSchema>({
-    resolver: zodResolver(formSchema),
+    resolver: mfbZodResolver(formSchema),
     defaultValues: { members: defaultMembers },
     questionName: 'householdData',
     onSubmitSuccessfulOverride: () => {},
@@ -123,7 +122,7 @@ const HouseholdMemberBasicInfoPage = () => {
     // This page navigates manually (onSubmitSuccessfulOverride) instead of through
     // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
     track('screener_form_step', {
-      screener_step_name: getStepAnalyticsId('householdData'),
+      screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberBasics,
       screener_step_number: currentStepId,
       step_action: 'complete',
     });
@@ -238,7 +237,7 @@ const HouseholdMemberBasicInfoPage = () => {
           </Box>
         )}
 
-        <PrevAndContinueButtons backNavigationFunction={navigateBack} />
+        <PrevAndContinueButtons backNavigationFunction={navigateBack} stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberBasics} />
       </form>
 
       <DeleteConfirmationPopover

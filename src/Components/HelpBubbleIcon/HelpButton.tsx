@@ -9,9 +9,12 @@ import './HelpButton.css';
 // `helpTopic` (e.g. "income-frequency") is the slice dimension for
 // screener_help_click — the confusion metric is grouped by topic. Passed by
 // every site so no tooltip logs as 'unknown'.
-type HelpButtonProps = PropsWithChildren<{ className?: string; helpTopic?: string }>;
+// `stepName` is the analytics step slug of the page hosting the tooltip; the
+// host step passes it (leaf can't resolve it) so the dashboard can compute a
+// per-step help rate. Omit only where no step context applies.
+type HelpButtonProps = PropsWithChildren<{ className?: string; helpTopic?: string; stepName?: string }>;
 
-const HelpButton = ({ className, children, helpTopic }: HelpButtonProps) => {
+const HelpButton = ({ className, children, helpTopic, stepName }: HelpButtonProps) => {
   const { getReferrer } = useContext(Context);
   const intl = useIntl();
   const track = useTrackEvent();
@@ -20,7 +23,7 @@ const HelpButton = ({ className, children, helpTopic }: HelpButtonProps) => {
     // Fire on open only (the confusion signal), not close. Single chokepoint, so
     // no inline "?" tooltip goes untracked.
     if (!showHelpText) {
-      track('screener_help_click', { help_topic: helpTopic ?? 'unknown' });
+      track('screener_help_click', { help_topic: helpTopic ?? 'unknown', screener_step_name: stepName });
     }
     setShowHelpText((setShow) => !setShow);
   };

@@ -9,7 +9,7 @@ import HouseholdMemberSummaryCards from './HouseholdMemberSummaryCards';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { SubmitHandler, useFieldArray, useWatch } from 'react-hook-form';
 import { useAgeCalculation } from '../../../AgeCalculation/useAgeCalculation';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { mfbZodResolver } from '../../../../Assets/analytics/mfbZodResolver';
 import PrevAndContinueButtons from '../../../PrevAndContinueButtons/PrevAndContinueButtons';
 import useScreenApi from '../../../../Assets/updateScreen';
 import '../styles/IncomeSection.css';
@@ -29,7 +29,7 @@ import StudentEligibilitySection from '../sections/StudentEligibilitySection';
 import IncomeSection from '../sections/IncomeSection';
 import BasicInfoSection from '../sections/BasicInfoSection';
 import { useTrackEvent } from '../../../../Assets/analytics';
-import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
+import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
 
 const HouseholdMemberForm = () => {
   const isEnergyCalculator = useIsEnergyCalculator();
@@ -69,15 +69,14 @@ const HouseholdMemberForm = () => {
   const currentStepId = useStepNumber(questionName);
   const track = useTrackEvent();
 
-  // This sub-page is rendered by HouseholdMemberRouter, outside QuestionComponentContainer,
-  // so it tracks its own view per member page (pageNumber changes as the user moves
-  // between members, so this intentionally re-fires on each pageNumber change).
+  // The per-member detail page (pages 1..N). Fires a view per member as pageNumber
+  // changes. Uses the 'member-details' sub-slug; complete/back resolve the same
+  // slug so the funnel joins cleanly. (Per-member views make this non-monotonic in
+  // a strict funnel — the dashboard treats member-details as "reached page 1" for
+  // the funnel rung and uses the per-page count only for back-navigation.)
   useEffect(() => {
     track('screener_form_step', {
-      // 'household-members' (parent slug) to stay consistent with this step's
-      // complete/back events. Distinct sub-step slugs need PreviousButton/
-      // questionHooks made sub-step-aware first (separate change).
-      screener_step_name: getStepAnalyticsId(questionName),
+      screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberDetails,
       screener_step_number: currentStepId,
       step_action: 'view',
     });
@@ -115,7 +114,7 @@ const HouseholdMemberForm = () => {
     clearErrors,
     reset,
   } = useStepForm<any>({
-    resolver: zodResolver(formSchema),
+    resolver: mfbZodResolver(formSchema),
     defaultValues,
     questionName,
     // Provide empty override to prevent automatic navigation - we'll navigate manually in formSubmitHandler
@@ -191,7 +190,7 @@ const HouseholdMemberForm = () => {
       });
     }
     track('screener_form_step', {
-      screener_step_name: getStepAnalyticsId(questionName),
+      screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberDetails,
       screener_step_number: currentStepId,
       step_action: 'complete',
     });
@@ -326,7 +325,7 @@ const HouseholdMemberForm = () => {
 
       <form onSubmit={handleSubmit(formSubmitHandler, handleFormError)}>
         {renderFormSections()}
-        <PrevAndContinueButtons backNavigationFunction={navigateBack} />
+        <PrevAndContinueButtons backNavigationFunction={navigateBack} stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberDetails} />
       </form>
     </main>
   );

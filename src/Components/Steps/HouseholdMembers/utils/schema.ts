@@ -81,11 +81,12 @@ const createIncomeSourceSchema = (intl: IntlShape) => {
         .trim()
         .refine(validateIncomeAmount, {
           message: renderIncomeAmountHelperText(intl),
+          params: { code: 'invalid_amount' },
         }),
     })
     .refine(
       (data) => validateHourlyIncome(data.incomeFrequency, data.hoursPerWeek),
-      { message: renderHoursWorkedHelperText(intl), path: ['hoursPerWeek'] }
+      { message: renderHoursWorkedHelperText(intl), path: ['hoursPerWeek'], params: { code: 'hours_required' } }
     );
 };
 
@@ -111,9 +112,11 @@ const createHealthInsuranceSchema = (intl: IntlShape, pageNumber: number) => {
     })
     .refine(hasAtLeastOneTrue, {
       message: renderHealthInsSelectOneHelperText(intl),
+      params: { code: 'select_one' },
     })
     .refine(validateNoneExclusive, {
       message: healthInsNonePlusHelperText,
+      params: { code: 'none_exclusive' },
     });
 };
 
@@ -164,6 +167,7 @@ export const createHouseholdMemberSchema = (
         code: z.ZodIssueCode.custom,
         message: renderFutureBirthMonthHelperText(intl),
         path: ['birthMonth'],
+        params: { code: 'future_date' },
       });
     }
 
@@ -174,6 +178,7 @@ export const createHouseholdMemberSchema = (
             code: z.ZodIssueCode.custom,
             message: renderStudentEligibilityErrorMessage(intl),
             path: ['studentEligibility', name],
+            params: { code: 'incomplete' },
           });
         }
       });

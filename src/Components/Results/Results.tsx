@@ -41,6 +41,7 @@ import ShareModalAutoPopup from '../Share/ShareModalAutoPopup';
 import { useFeatureFlag } from '../Config/configHook';
 import { ChatbotProvider } from './Chatbot/Chatbot';
 import { useTrackEvent } from '../../Assets/analytics';
+import { POST_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
 import { calculateTotalValue } from './FormattedValue';
 
 // Mounts the Benbot chat widget only when the flag is on; otherwise renders children unchanged.
@@ -182,6 +183,13 @@ const Results = ({ type }: ResultsProps) => {
     track('screener_results_loaded', {
       program_count: apiResults.programs.length,
       total_estimated_value: totalEstimatedValue,
+    });
+
+    // Results as a first-class funnel step, so it joins the step funnel on the
+    // same event/grain as every other step (view only — results is terminal).
+    track('screener_form_step', {
+      screener_step_name: POST_DIRECTORY_STEP_IDS.results,
+      step_action: 'view',
     });
 
     // Per-program impression (the "shown" denominator for conversion). Guarded by
