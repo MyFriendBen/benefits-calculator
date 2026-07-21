@@ -20,10 +20,14 @@ import { collectFieldErrors } from '../../Assets/analytics/errorLabels';
 export default function useStepForm<T extends FieldValues>({
   questionName,
   onSubmitSuccessfulOverride,
+  stepNameOverride,
   ...useFormProps
 }: UseFormProps<T> & {
   questionName: QuestionName;
   onSubmitSuccessfulOverride?: () => void;
+  // Overrides the step slug on the error event. The household sub-pages pass their
+  // sub-step slug so errors attribute to the same slug as their view/back events.
+  stepNameOverride?: string;
 }) {
   const { setStepLoading } = useContext(Context);
   const nextPage = useGoToNextStep(questionName);
@@ -67,7 +71,7 @@ export default function useStepForm<T extends FieldValues>({
       // collectFieldErrors/RULE_LABELS so every emit path uses one vocabulary.
       const errorFields = collectFieldErrors(errors).join(', ');
       track('screener_form_error', {
-        screener_step_name: getStepAnalyticsId(questionName),
+        screener_step_name: stepNameOverride ?? getStepAnalyticsId(questionName),
         screener_step_number: stepNumber >= 0 ? stepNumber : undefined,
         form_error_count: errorCount,
         form_error_message: errorFields,

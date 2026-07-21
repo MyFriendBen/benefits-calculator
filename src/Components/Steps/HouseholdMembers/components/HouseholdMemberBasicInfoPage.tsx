@@ -95,6 +95,7 @@ const HouseholdMemberBasicInfoPage = () => {
     resolver: mfbZodResolver(formSchema),
     defaultValues: { members: defaultMembers },
     questionName: 'householdData',
+    stepNameOverride: HOUSEHOLD_SUBSTEP_IDS.memberBasics,
     onSubmitSuccessfulOverride: () => {},
   });
 
