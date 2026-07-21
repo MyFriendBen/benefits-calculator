@@ -183,13 +183,13 @@
   color: #000;
 }
 
-.confirmation-section-header svg {
+.confirmation-section-header h2 svg {
   width: 2rem;
   height: 2rem;
 }
 
-.confirmation-section-header svg path,
-.confirmation-section-header svg circle {
+.confirmation-section-header h2 svg path,
+.confirmation-section-header h2 svg circle {
   fill: none;
   stroke: var(--secondary-color);
 }

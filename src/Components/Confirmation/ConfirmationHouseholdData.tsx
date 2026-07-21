@@ -13,6 +13,7 @@ import { calcMemberYearlyIncome } from '../../Assets/income';
 import { Link, useParams } from 'react-router-dom';
 import { useStepNumber } from '../../Assets/stepDirectory';
 import { useIsEnergyCalculator } from '../EnergyCalculator/hooks';
+import { useTrackEvent } from '../../Assets/analytics';
 
 type IconAndFormattedMessageMap = {
   [key: string]: {
@@ -48,6 +49,7 @@ const DefaultConfirmationHHData = () => {
   const { formatMessage } = useIntl();
   const translateNumber = useTranslateNumber();
   const formatBirthMonthYear = useFormatBirthMonthYear();
+  const track = useTrackEvent();
 
   const householdDataStepNumber = useStepNumber('householdData');
 
@@ -141,6 +143,18 @@ const DefaultConfirmationHHData = () => {
             <span className="household-member-count-short">({translateNumber(householdSize)})</span>
           </span>
         </h2>
+        <Link
+          to={`/${whiteLabel}/${uuid}/step-${householdDataStepNumber - 1}`}
+          state={{ routedFromConfirmationPg: true, isEditing: true }}
+          className="edit-button"
+          aria-label={formatMessage({
+            id: 'confirmation.household.edit-AL',
+            defaultMessage: 'edit household members',
+          })}
+          onClick={() => track('screener_confirmation_edit', { section: 'householdData' })}
+        >
+          <Pencil aria-hidden={true} className="edit-pencil-icon" strokeWidth={1.5} />
+        </Link>
       </div>
       <div className="confirmation-section-content">
         <div className="household-member-table-wrapper">
