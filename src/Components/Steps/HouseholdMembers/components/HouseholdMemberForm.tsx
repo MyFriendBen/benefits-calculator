@@ -114,6 +114,7 @@ const HouseholdMemberForm = () => {
     resolver: mfbZodResolver(formSchema),
     defaultValues,
     questionName,
+    stepNameOverride: HOUSEHOLD_SUBSTEP_IDS.memberDetails,
     // Provide empty override to prevent automatic navigation - we'll navigate manually in formSubmitHandler
     onSubmitSuccessfulOverride: () => {},
   });
