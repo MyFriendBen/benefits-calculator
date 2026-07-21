@@ -16,6 +16,10 @@ import type { ZodType } from 'zod';
 //
 // PRIVACY: only the code token travels (e.g. 'select_one'), never the localized
 // message or the entered value.
+//
+// Depends on react-hook-form passing the resolver's error objects through
+// verbatim (it does not strip unknown keys like `errorCode`). True as of RHF 7;
+// re-verify if that dependency is upgraded.
 
 const setByPath = (obj: Record<string, any>, path: (string | number)[], code: string) => {
   let node = obj;
@@ -36,6 +40,9 @@ export function mfbZodResolver<T extends FieldValues>(schema: ZodType<any, any, 
     const result = await base(values, context, options);
     // Only enrich when there are errors to enrich.
     if (result.errors && Object.keys(result.errors).length > 0) {
+      // Deliberate second parse: the base resolver has already discarded params,
+      // so there's no way to recover the codes from its output — re-parsing to
+      // read them is the whole reason this wrapper exists. Error path only, cheap.
       const parsed = schema.safeParse(values);
       if (!parsed.success) {
         for (const issue of parsed.error.issues) {

@@ -60,20 +60,11 @@ export const POST_DIRECTORY_STEP_IDS = {
 // Sub-step slugs for the household-members flow. The member section spans two
 // screens under one QuestionName ('householdData'): the roster (birth/relationship
 // per member, page 0, shown only when household size > 1) and the per-member
-// detail page (insurance/conditions/income, pages 1..N). They emit distinct slugs
-// so the funnel can separate them; view/complete/back all resolve the SAME slug
-// per screen via the household navigation hook.
+// detail page (insurance/conditions/income, pages 1..N). Each screen emits its own
+// slug on view/complete/back so the funnel can separate them; the ACTION events
+// (screener_household_member / screener_income_source) keep the parent
+// 'household-members' slug (their mart groups on it).
 export const HOUSEHOLD_SUBSTEP_IDS = {
   memberBasics: 'member-basics',
   memberDetails: 'member-details',
 } as const;
-
-// The household step routes by page: page 0 is the roster (member-basics), pages
-// 1..N are per-member detail (member-details). Funnel step events (view / complete
-// / back) resolve their slug through this one function so all three agree per page.
-// NOTE: the screener_household_member / screener_income_source ACTION events keep
-// the parent 'household-members' slug (their mart groups on it) — only the funnel
-// step events use these sub-slugs.
-export function getHouseholdSubstepId(pageNumber: number): string {
-  return pageNumber === 0 ? HOUSEHOLD_SUBSTEP_IDS.memberBasics : HOUSEHOLD_SUBSTEP_IDS.memberDetails;
-}

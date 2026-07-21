@@ -10,6 +10,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { FormattedMessageType } from '../../../Types/Questions';
 import { useTrackEvent } from '../../../Assets/analytics';
 import { PRE_DIRECTORY_STEP_IDS } from '../../../Assets/analytics/stepIds';
+import { collectFieldErrors } from '../../../Assets/analytics/errorLabels';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import { useConfig, useLocalizedLink } from '../../Config/configHook';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
@@ -118,16 +119,14 @@ const Disclaimer = () => {
   };
 
   const handleFormError: SubmitErrorHandler<FormSchema> = (formErrors) => {
-    // Build a PII-safe "field: rule" message like the central collectErrors
-    // (stepForm.tsx) — this form uses a plain useForm, so it isn't covered by that.
-    const message = Object.entries(formErrors)
-      .map(([field, err]) => `${field}: ${(err as { errorCode?: string })?.errorCode ?? 'Invalid'}`)
-      .join(', ');
+    // This step uses a plain useForm (not useStepForm), so it emits its own error
+    // event — via the shared collectFieldErrors so form_error_message matches the
+    // rest of the app's vocabulary (the dashboard groups on it).
     track('screener_form_error', {
       screener_step_name: DISCLAIMER_STEP_ANALYTICS_ID,
       screener_step_number: 2,
       form_error_count: Object.keys(formErrors).length,
-      form_error_message: message,
+      form_error_message: collectFieldErrors(formErrors).join(', '),
     });
   };
 
