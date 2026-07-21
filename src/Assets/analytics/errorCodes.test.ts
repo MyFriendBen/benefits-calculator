@@ -40,6 +40,19 @@ describe('mfbZodResolver', () => {
     expect(errors.members?.[0]).toBeUndefined();
   });
 
+  it('is first-wins when a path has two coded refines (matches zodResolver)', async () => {
+    // Two custom refines on the same field. zodResolver keeps the first issue;
+    // the stamped errorCode should align with it, not the last one in the loop.
+    const schema = z.object({
+      v: z
+        .string()
+        .refine(() => false, { message: 'a', params: { code: 'first_code' } })
+        .refine(() => false, { message: 'b', params: { code: 'second_code' } }),
+    });
+    const errors = await call(schema, { v: 'x' });
+    expect(errors.v?.errorCode).toBe('first_code');
+  });
+
   it('leaves standard (non-custom) errors untouched — no errorCode', async () => {
     const schema = z.object({ name: z.string().min(1) });
     const errors = await call(schema, { name: '' });

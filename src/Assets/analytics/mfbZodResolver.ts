@@ -21,13 +21,19 @@ import type { ZodType } from 'zod';
 // verbatim (it does not strip unknown keys like `errorCode`). True as of RHF 7;
 // re-verify if that dependency is upgraded.
 
+// Stamp `code` onto the error node at `path`, but only if it has no errorCode yet
+// — first-wins, matching zodResolver, which keeps the FIRST issue per path. If a
+// path ever gets two coded refines, this keeps our code aligned with the type/
+// message zodResolver kept, instead of letting the last issue in the loop win.
 const setByPath = (obj: Record<string, any>, path: (string | number)[], code: string) => {
   let node = obj;
   for (let i = 0; i < path.length; i++) {
     const key = path[i];
     if (node == null || typeof node !== 'object') return;
     if (i === path.length - 1) {
-      if (node[key] && typeof node[key] === 'object') node[key].errorCode = code;
+      if (node[key] && typeof node[key] === 'object' && node[key].errorCode === undefined) {
+        node[key].errorCode = code;
+      }
     } else {
       node = node[key];
     }
