@@ -157,6 +157,41 @@ export interface ScreenerEventMap {
   // ---- Low-priority UI ----
   screener_document_summary_toggle: { expanded: boolean };
   screener_eligibility_tags_shown: ProgramContext;
+
+  // ---- CESN Heat Pump Journey (MFB-1182) ----
+  // Separate product surface (the energy-calculator heat-pump flow). These are
+  // typed like everything else so GTM only relays them. The pre-existing
+  // heat_pump_journey_* / *_connect_now_* / rebate_link_click events are
+  // outbound_click actions (not in this map) and stay as-is.
+  //
+  // PRIVACY: the calculator collects a street address — NEVER send its value.
+  // Record only THAT an address was entered. Household/fuel/project enums and
+  // computed savings/emissions aggregates are non-identifying and safe.
+  // Income/geographic segmentation (Story 4) is done downstream by joining on
+  // screener_uid in dbt/Metabase, not via GA4 params.
+  heat_pump_cta_click: { cta: 'calculate_impact' | 'connect_now' };
+  heat_pump_calculator_field: {
+    field: 'household_type' | 'address' | 'heating_fuel' | 'water_heating' | 'project_type';
+  };
+  heat_pump_calculator_submit: {
+    household_type?: string;
+    heating_fuel?: string;
+    water_heating?: string;
+    project_type?: string;
+  };
+  heat_pump_calculator_edit: {};
+  heat_pump_calculator_error: { error_type: 'address_not_supported' | 'error' | 'invalid_response' };
+  // Fired once when results render (post-API-resolution). Deltas are annual;
+  // negative bill_delta = savings, negative emissions_delta = reduction.
+  heat_pump_calculator_result: {
+    annual_bill_delta_median?: number;
+    annual_bill_delta_p20?: number;
+    annual_bill_delta_p80?: number;
+    annual_emissions_delta_median?: number;
+    project_type?: string;
+  };
+  heat_pump_pdf_page: { page_number: number };
+  heat_pump_pdf_print: {};
 }
 
 export type ScreenerEventName = keyof ScreenerEventMap;

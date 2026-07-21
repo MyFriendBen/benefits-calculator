@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
 import CalculateImpactResults from './CalculateImpactResults';
 import type { RemImpactApiResponse, CalculateImpactFormValues } from './remCalculateImpactTypes';
 
@@ -78,7 +79,9 @@ const renderResults = (
 ) =>
   render(
     <IntlProvider locale="en" defaultLocale="en">
-      <CalculateImpactResults result={result} formValues={formValues} onEdit={onEdit} />
+      <MemoryRouter>
+        <CalculateImpactResults result={result} formValues={formValues} onEdit={onEdit} />
+      </MemoryRouter>
     </IntlProvider>,
   );
 

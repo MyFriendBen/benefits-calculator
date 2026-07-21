@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -23,6 +23,7 @@ import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
 import { addAdminToLink } from '../../../../Assets/adminLink';
 import { useFeatureFlag } from '../../../Config/configHook';
+import { useTrackEvent } from '../../../../Assets/analytics';
 import {
   type CalculateImpactHouseholdType,
   type CalculateImpactUpgradeChoice,
@@ -163,6 +164,10 @@ export default function CalculateImpactPage() {
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams]);
   const showCalculateImpact = useFeatureFlag('cesn_heat_pump_journey');
   const [submitState, setSubmitState] = useState<SubmitState>({ status: 'idle' });
+  const track = useTrackEvent();
+  // Guards the address field event so re-selecting/re-typing an address doesn't
+  // refire it — we only want to record that the field was engaged, once.
+  const hasTrackedAddressFieldRef = useRef(false);
 
   const backLink = addAdminToLink(`/${whiteLabel}/${uuid}/results/energy-rebates/hvac`, isAdminView);
 
@@ -208,10 +213,17 @@ export default function CalculateImpactPage() {
     });
     setSubmitState({ status: 'loading' });
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
+    track('heat_pump_calculator_submit', {
+      household_type: data.householdType,
+      heating_fuel: data.heatingFuel,
+      water_heating: data.waterHeatingFuel,
+      project_type: data.upgradeChoice,
+    });
     fetchRemImpact(whiteLabel, payload.remAddressQuery)
       .then((result) => {
         if (!isValidRemImpactApiResponse(result)) {
           setSubmitState({ status: 'error', message: 'Unexpected response from Rewiring America.' });
+          track('heat_pump_calculator_error', { error_type: 'invalid_response' });
           return;
         }
         setSubmitState({ status: 'success', result, formValues: data });
@@ -219,8 +231,10 @@ export default function CalculateImpactPage() {
       .catch((err: Error) => {
         if (err instanceof RemAddressNotSupportedError) {
           setSubmitState({ status: 'address_not_supported' });
+          track('heat_pump_calculator_error', { error_type: 'address_not_supported' });
         } else {
           setSubmitState({ status: 'error', message: err.message });
+          track('heat_pump_calculator_error', { error_type: 'error' });
         }
       });
   };
@@ -284,7 +298,10 @@ export default function CalculateImpactPage() {
         <CalculateImpactResults
           result={submitState.result}
           formValues={submitState.formValues}
-          onEdit={() => setSubmitState({ status: 'idle' })}
+          onEdit={() => {
+            track('heat_pump_calculator_edit', {});
+            setSubmitState({ status: 'idle' });
+          }}
         />
       </main>
     );
@@ -400,6 +417,10 @@ export default function CalculateImpactPage() {
                   render={({ field }) => (
                     <Select
                       {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        track('heat_pump_calculator_field', { field: 'household_type' });
+                      }}
                       id="calculate-impact-household-type"
                       value={field.value ?? ''}
                       displayEmpty
@@ -454,7 +475,13 @@ export default function CalculateImpactPage() {
                     fullWidth
                     id="calculate-impact-address"
                     value={field.value}
-                    onChange={field.onChange}
+                    onChange={(value) => {
+                      field.onChange(value);
+                      if (!hasTrackedAddressFieldRef.current) {
+                        hasTrackedAddressFieldRef.current = true;
+                        track('heat_pump_calculator_field', { field: 'address' });
+                      }
+                    }}
                     error={!!errors.address}
                     helperText={errors.address?.message}
                     placeholder={intl.formatMessage({
@@ -484,6 +511,10 @@ export default function CalculateImpactPage() {
                   render={({ field }) => (
                     <Select
                       {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        track('heat_pump_calculator_field', { field: 'heating_fuel' });
+                      }}
                       id="calculate-impact-heating-fuel"
                       value={field.value ?? ''}
                       displayEmpty
@@ -540,6 +571,10 @@ export default function CalculateImpactPage() {
                   render={({ field }) => (
                     <Select
                       {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        track('heat_pump_calculator_field', { field: 'water_heating' });
+                      }}
                       id="calculate-impact-water-heating-fuel"
                       value={field.value ?? ''}
                       displayEmpty
@@ -604,7 +639,14 @@ export default function CalculateImpactPage() {
               name="upgradeChoice"
               control={control}
               render={({ field }) => (
-                <RadioGroup {...field} value={field.value ?? ''}>
+                <RadioGroup
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    track('heat_pump_calculator_field', { field: 'project_type' });
+                  }}
+                  value={field.value ?? ''}
+                >
                   {UPGRADE_OPTIONS.map((opt) => {
                     const isSelected = field.value === opt.value;
                     const isDisabled = opt.value === 'heat_pump_water_heater' && !isHpwhEnabled;
