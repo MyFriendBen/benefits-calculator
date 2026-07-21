@@ -10,9 +10,13 @@ import { getStepAnalyticsId } from '../../Assets/analytics/stepIds';
 
 type Props = {
   navFunction: () => void;
+  // Overrides the route-derived step slug for the back event. Used by the
+  // household sub-pages, whose slug (member-basics / member-details) depends on
+  // the page number, which the route-based resolution here can't see.
+  stepNameOverride?: string;
 };
 
-const PreviousButton = ({ navFunction }: Props) => {
+const PreviousButton = ({ navFunction, stepNameOverride }: Props) => {
   const { formData } = useContext(Context);
   const { whiteLabel, id, uuid } = useParams();
   let stepNumberId = Number(id);
@@ -41,7 +45,7 @@ const PreviousButton = ({ navFunction }: Props) => {
 
   const handleClick = () => {
     track('screener_form_back', {
-      screener_step_name: getStepAnalyticsId(currentStepName),
+      screener_step_name: stepNameOverride ?? getStepAnalyticsId(currentStepName),
       screener_step_number: id ? stepNumberId : undefined,
     });
     navigationFunction();

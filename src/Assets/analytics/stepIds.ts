@@ -49,9 +49,22 @@ export const PRE_DIRECTORY_STEP_IDS = {
 } as const;
 
 // Steps that live AFTER the numbered question directory (so they aren't
-// QuestionNames either): the confirmation page, which sits between the last
-// question and the results page. Kept alongside PRE_DIRECTORY_STEP_IDS so every
-// analytics step slug lives in one place.
+// QuestionNames either): the confirmation page and the results page, which sit
+// between the last question and the end of the flow. Kept alongside
+// PRE_DIRECTORY_STEP_IDS so every analytics step slug lives in one place.
 export const POST_DIRECTORY_STEP_IDS = {
   confirmInformation: 'confirm-information',
+  results: 'results',
+} as const;
+
+// Sub-step slugs for the household-members flow. The member section spans two
+// screens under one QuestionName ('householdData'): the roster (birth/relationship
+// per member, page 0, shown only when household size > 1) and the per-member
+// detail page (insurance/conditions/income, pages 1..N). Each screen emits its own
+// slug on the step view/complete/back events; the ACTION events
+// (screener_household_member / screener_income_source) keep the parent
+// 'household-members' slug.
+export const HOUSEHOLD_SUBSTEP_IDS = {
+  memberBasics: 'member-basics',
+  memberDetails: 'member-details',
 } as const;
