@@ -185,3 +185,11 @@
   display: block;
   max-height: 90%;
 }
+
+/* CU Denver: horizontal ~2:1 campus mark — height-constrained. Tune once the
+   final white transparent asset lands (see MFB-1317). */
+.cudenver-logo-size {
+  display: block;
+  max-height: 55%;
+  max-width: 95%;
+}
