@@ -116,6 +116,9 @@ export type EligibilityResults = {
   validations: Validation[];
   created_date: string;
   pe_data: PolicyEngineData;
+  // Ids of external APIs (e.g. "policy_engine") that failed while the backend computed
+  // these results; when non-empty the results page shows an "incomplete results" banner.
+  external_api_failures?: string[];
 };
 
 export interface PolicyEngineData {

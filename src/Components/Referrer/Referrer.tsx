@@ -18,6 +18,8 @@ import { useIsEnergyCalculator } from '../EnergyCalculator/hooks';
 import LancHeader from '../LancComponents/LancHeader/LancHeader';
 import LancFooter from '../LancComponents/LancFooter/LancFooter';
 import NCHispanicFederationFooter from '../NCHispanicFederation/NCHispanicFederationFooter/NCHispanicFederationFooter';
+import CclaHeader from '../CclaComponents/CclaHeader/CclaHeader';
+import CclaFooter from '../CclaComponents/CclaFooter/CclaFooter';
 
 export const BrandedHeader = () => {
   const { getReferrer } = useContext(Context);
@@ -45,6 +47,10 @@ export const BrandedHeader = () => {
     return <LancHeader />;
   }
 
+  if (uiOptions.includes('ccla')) {
+    return <CclaHeader />;
+  }
+
   return <Header />;
 };
 
@@ -61,6 +67,7 @@ export const BrandedFooter = () => {
     { flag: '211co', component: TwoOneOneFooterCO },
     { flag: '211nc', component: TwoOneOneFooterNC },
     { flag: 'lanc', component: LancFooter },
+    { flag: 'ccla', component: CclaFooter },
     { flag: 'hfed', component: NCHispanicFederationFooter },
     { flag: 'powered_by_mfb_footer', component: PoweredByFooter },
   ];

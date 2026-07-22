@@ -21,6 +21,7 @@ jest.mock('../../../../Assets/updateScreen', () => ({
 
 jest.mock('../../../../Assets/stepDirectory', () => ({
   useStepNumber: () => 5,
+  useStepName: (_stepNumber: number) => undefined,
 }));
 
 jest.mock('../../../QuestionComponents/questionHooks', () => ({

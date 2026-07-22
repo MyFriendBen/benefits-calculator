@@ -22,3 +22,27 @@ jobs:
         with:
           eslint: true
           prettier: true
+
+  # Runs the same `react-scripts build` Heroku runs at deploy time, so
+  # build-breaking lint/compile errors are caught on the PR instead of at
+  # the prod push (see MFB-1305 — lint-action alone missed this class of
+  # failure because `eslint .` doesn't lint .tsx and uses a different config
+  # than the CRA build).
+  production-build:
+    name: Production build (Heroku parity)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and dependencies
+        uses: ./.github/actions/setup-node-dependencies
+
+      - name: Run production build
+        run: npm run build
+        env:
+          # Match Heroku's build environment (no CI var): hard errors fail the
+          # build, pre-existing warnings don't. Flip to true once the ~31
+          # legacy react-hooks/exhaustive-deps warnings are cleaned up.
+          CI: false

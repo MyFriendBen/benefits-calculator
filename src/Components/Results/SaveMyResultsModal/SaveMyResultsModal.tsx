@@ -7,6 +7,7 @@ import ModalShell from '../shared/ModalShell';
 import ModalOption from '../shared/ModalOption';
 import CopyLinkOption from '../shared/CopyLinkOption';
 import SuccessView from '../shared/SuccessView';
+import { useTrackEvent } from '../../../Assets/analytics';
 import '../shared/ModalShell.css';
 import SaveViaEmailForm from './SaveViaEmailForm';
 import SaveViaSMSForm from './SaveViaSMSForm';
@@ -26,6 +27,17 @@ const subtitles: Record<SaveView, React.ReactNode> = {
 
 const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
   const [view, setView] = useState<SaveView>('options');
+  const track = useTrackEvent();
+
+  const handleClose = () => {
+    track('screener_results_save', { save_action: 'close' });
+    onClose();
+  };
+
+  const handleBack = () => {
+    track('screener_results_save', { save_action: 'back' });
+    setView('options');
+  };
 
   if (view === 'success') {
     return (
@@ -33,7 +45,7 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
         title={<FormattedMessage id="saveMyResults.successTitle" defaultMessage="Results Sent" />}
         subtitle={subtitles.success}
         doneLabel={<FormattedMessage id="saveMyResults.successClose" defaultMessage="Done" />}
-        onClose={onClose}
+        onClose={handleClose}
       />
     );
   }
@@ -43,8 +55,8 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
       headerIcon={<SaveIcon />}
       title={<FormattedMessage id="saveMyResults.title" defaultMessage="Save My Results" />}
       subtitle={subtitles[view]}
-      onClose={onClose}
-      onBack={view !== 'options' ? () => setView('options') : undefined}
+      onClose={handleClose}
+      onBack={view !== 'options' ? handleBack : undefined}
     >
       {view === 'options' && (
         <>
@@ -53,13 +65,19 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
               icon={<span className="modal-option-icon-circle"><EmailIcon /></span>}
               label={<FormattedMessage id="saveMyResults.email" defaultMessage="Email" />}
               sublabel={<FormattedMessage id="saveMyResults.emailSublabel" defaultMessage="Email a link to your results" />}
-              onClick={() => setView('email')}
+              onClick={() => {
+                track('screener_results_save', { save_channel: 'email', save_action: 'open' });
+                setView('email');
+              }}
             />
             <ModalOption
               icon={<span className="modal-option-icon-circle"><SmsIcon /></span>}
               label={<FormattedMessage id="saveMyResults.sms" defaultMessage="SMS" />}
               sublabel={<FormattedMessage id="saveMyResults.smsSublabel" defaultMessage="Text a link to your results" />}
-              onClick={() => setView('sms')}
+              onClick={() => {
+                track('screener_results_save', { save_channel: 'sms', save_action: 'open' });
+                setView('sms');
+              }}
             />
             <CopyLinkOption
               url={window.location.href}
@@ -68,6 +86,7 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
               copiedLabel={<FormattedMessage id="saveMyResults.copied" defaultMessage="Copied!" />}
               errorLabel={<FormattedMessage id="saveMyResults.copyFailed" defaultMessage="Copy failed" />}
               errorSublabel={<FormattedMessage id="saveMyResults.copyFailedSublabel" defaultMessage="Could not access clipboard" />}
+              onCopy={() => track('screener_results_save', { save_channel: 'copy_link', save_action: 'send' })}
             />
           </div>
           <p className="save-my-results-privacy-note">
@@ -79,8 +98,22 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
         </>
       )}
 
-      {view === 'email' && <SaveViaEmailForm onSuccess={() => setView('success')} />}
-      {view === 'sms' && <SaveViaSMSForm onSuccess={() => setView('success')} />}
+      {view === 'email' && (
+        <SaveViaEmailForm
+          onSuccess={() => {
+            track('screener_results_save', { save_channel: 'email', save_action: 'send' });
+            setView('success');
+          }}
+        />
+      )}
+      {view === 'sms' && (
+        <SaveViaSMSForm
+          onSuccess={() => {
+            track('screener_results_save', { save_channel: 'sms', save_action: 'send' });
+            setView('success');
+          }}
+        />
+      )}
 
       {(view === 'email' || view === 'sms') && (
         <p className="save-my-results-privacy-note">

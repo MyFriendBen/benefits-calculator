@@ -31,7 +31,6 @@ import CESN_Logo_Spanish from '../../Assets/States/CO/WhiteLabels/cesn/CESN_logo
 import CESN_DORA_Color from '../../Assets/States/CO/WhiteLabels/cesn/co_dora_comm_pu_reverse_rgb.png';
 import CESN_Colorado_White from '../../Assets/States/CO/WhiteLabels/cesn/colorado_logo_white.png';
 import HispanicFederation_MFBLogo from '../../Assets/States/NC/WhiteLabels/HispanicFederation/HispanicFederation_MFBLogo.png';
-import { useIntl } from 'react-intl';
 
 const logoMap: { [key: string]: string | undefined } = {
   MFB_COLogo: MFBCOLogo,
@@ -69,9 +68,11 @@ const logoMap: { [key: string]: string | undefined } = {
   HispanicFederation_MFBLogo: HispanicFederation_MFBLogo,
 };
 
-export const renderLogoSource = (sourceLabel: string, logoAlt: string, logoClass: string) => {
-  const intl = useIntl();
-  const currentLanguage = intl.locale;
+// Plain render helper — NOT a hook/component, so it must not call hooks itself
+// (see MFB-1305: useIntl here violated rules-of-hooks). Callers obtain the
+// locale via useIntl() and pass it in.
+export const renderLogoSource = (sourceLabel: string, logoAlt: string, logoClass: string, locale: string) => {
+  const currentLanguage = locale;
 
   let logoSrc = logoMap[sourceLabel] ?? MFBDEFAULT;
 

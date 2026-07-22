@@ -18,6 +18,7 @@ import useScreenApi from '../../../Assets/updateScreen';
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import JsonView from '@uiw/react-json-view';
 import { redactPolicyEngineData } from '../../../Assets/policyEngineRedaction';
+import { useTrackEvent } from '../../../Assets/analytics';
 
 type ProgramPageProps = {
   program: Program;
@@ -33,6 +34,7 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   const { isAdminView, validations, setValidations, programCategories, filterState } = useResultsContext();
   const intl = useIntl();
   const { fetchScreen } = useScreenApi();
+  const track = useTrackEvent();
   const [openPEmodal, setOpenPEModal] = useState(false);
   const { policyEngineData } = useResultsContext();
 
@@ -243,7 +245,18 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
       )}
       <div className="apply-button-container">
         {program.apply_button_link.default_message !== '' && (
-          <a className="apply-online-button" href={programApplyButtonLink} target="_blank">
+          <a
+            className="apply-online-button"
+            href={programApplyButtonLink}
+            target="_blank"
+            onClick={() =>
+              track('screener_apply_click', {
+                program_name: program.name.default_message,
+                program_id: String(program.program_id),
+                url: programApplyButtonLink,
+              })
+            }
+          >
             {program.apply_button_description.default_message == '' ? (
               <FormattedMessage id="results.apply-online" defaultMessage="Apply Online" />
             ) : (
@@ -360,21 +373,59 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                     )}
                     {navigator.assistance_link.default_message && (
                       <div>
-                        <a href={navigator.assistance_link.default_message} target="_blank" className="link-color">
+                        <a
+                          href={navigator.assistance_link.default_message}
+                          target="_blank"
+                          className="link-color"
+                          onClick={() =>
+                            track('screener_navigator_engaged', {
+                              program_name: program.name.default_message,
+                              program_id: String(program.program_id),
+                              navigator_id: navigator.id,
+                              navigator_name: navigator.name.default_message,
+                              contact_method: 'website',
+                              url: navigator.assistance_link.default_message,
+                            })
+                          }
+                        >
                           <FormattedMessage id="results.visit-webiste" defaultMessage="Visit Website" />
                         </a>
                       </div>
                     )}
                     {navigator.email.default_message && (
                       <div>
-                        <a href={`mailto:${navigator.email}`} className="link-color email-link">
+                        <a
+                          href={`mailto:${navigator.email.default_message}`}
+                          className="link-color email-link"
+                          onClick={() =>
+                            track('screener_navigator_engaged', {
+                              program_name: program.name.default_message,
+                              program_id: String(program.program_id),
+                              navigator_id: navigator.id,
+                              navigator_name: navigator.name.default_message,
+                              contact_method: 'email',
+                            })
+                          }
+                        >
                           <ResultsTranslate translation={navigator.email} />
                         </a>
                       </div>
                     )}
                     {navigator.phone_number && (
                       <div>
-                        <a href={`tel:${navigator.phone_number}`} className="link-color phone-link">
+                        <a
+                          href={`tel:${navigator.phone_number}`}
+                          className="link-color phone-link"
+                          onClick={() =>
+                            track('screener_navigator_engaged', {
+                              program_name: program.name.default_message,
+                              program_id: String(program.program_id),
+                              navigator_id: navigator.id,
+                              navigator_name: navigator.name.default_message,
+                              contact_method: 'phone',
+                            })
+                          }
+                        >
                           {formatPhoneNumber(navigator.phone_number)}
                         </a>
                       </div>
@@ -399,7 +450,18 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                   {<ResultsTranslate translation={document.text} />}
                   {document.link_url.default_message && document.link_text.default_message && (
                     <span className="required-docs-link">
-                      <a href={document.link_url.default_message} target="_blank" className="link-color">
+                      <a
+                        href={document.link_url.default_message}
+                        target="_blank"
+                        className="link-color"
+                        onClick={() =>
+                          track('screener_program_document_download', {
+                            program_name: program.name.default_message,
+                            program_id: String(program.program_id),
+                            document_name: document.text.default_message || undefined,
+                          })
+                        }
+                      >
                         <ResultsTranslate translation={document.link_text} />
                       </a>
                     </span>
@@ -439,6 +501,7 @@ type RequiredProgramProps = {
 
 function RequiredProgram({ programId }: RequiredProgramProps) {
   const { programs } = useResultsContext();
+  const track = useTrackEvent();
 
   const program = findProgramById(programs, programId);
   const programLink = useResultsLink(`results/benefits/${programId}`);
@@ -462,7 +525,15 @@ function RequiredProgram({ programId }: RequiredProgramProps) {
         <ResultsTranslate translation={program.description} />
       </p>
       <div className="result-program-learn-more-button">
-        <Link to={programLink}>
+        <Link
+          to={programLink}
+          onClick={() =>
+            track('screener_required_program_click', {
+              program_name: program.name.default_message,
+              program_id: String(program.program_id),
+            })
+          }
+        >
           <FormattedMessage id="programPage.requiredPrograms.link" defaultMessage="Learn More" />
         </Link>
       </div>

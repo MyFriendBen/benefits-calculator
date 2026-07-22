@@ -1,7 +1,6 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import {
   Box,
-  ClickAwayListener,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -14,7 +13,6 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useState } from 'react';
 import {
   Control,
   Controller,
@@ -26,7 +24,7 @@ import {
   FieldErrors,
 } from 'react-hook-form';
 import { NumericFormat } from 'react-number-format';
-import { ReactComponent as HelpBubble } from '../../../../Assets/icons/helpBubble.svg';
+import HelpButton from '../../../HelpBubbleIcon/HelpButton';
 import QuestionQuestion from '../../../QuestionComponents/QuestionQuestion';
 import QuestionDescription from '../../../QuestionComponents/QuestionDescription';
 import ErrorMessageWrapper from '../../../ErrorMessage/ErrorMessageWrapper';
@@ -34,6 +32,9 @@ import { createMenuItems } from '../../SelectHelperFunctions/SelectHelperFunctio
 import { FormattedMessageType } from '../../../../Types/Questions';
 import { IncomeStreamFormData } from '../utils/types';
 import { EMPTY_INCOME_STREAM } from '../utils/constants';
+import { useStepNumber } from '../../../../Assets/stepDirectory';
+import { useTrackEvent } from '../../../../Assets/analytics';
+import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
 import '../styles/HouseholdMemberSections.css';
 import '../styles/IncomeSection.css';
 
@@ -76,7 +77,6 @@ const IncomeStreamRow = ({
   incomeOptions,
   frequencyMenuItems,
 }: IncomeStreamRowProps) => {
-  const [showFreqHelp, setShowFreqHelp] = useState(false);
   const intl = useIntl();
 
   // useWatch with a field-scoped name subscribes only this row to its own fields,
@@ -173,28 +173,18 @@ const IncomeStreamRow = ({
             </FormControl>
           </Box>
 
-          <ClickAwayListener onClickAway={() => setShowFreqHelp(false)}>
           <Box className="income-field-frequency">
             <div className="income-frequency-label-row">
               <FormLabel id={`income-frequency-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, color: 'text.primary' }}>
                 <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
               </FormLabel>
-              <IconButton
-                size="small"
-                onClick={() => setShowFreqHelp((v) => !v)}
-                aria-label={intl.formatMessage({ id: 'helpButton.ariaText', defaultMessage: 'help button' })}
-              >
-                <HelpBubble style={{ height: '16px', width: '16px' }} className="help-button-icon-color" />
-              </IconButton>
-            </div>
-            {showFreqHelp && (
-              <p className="help-text">
+              <HelpButton helpTopic="income-frequency" stepName={HOUSEHOLD_SUBSTEP_IDS.memberDetails}>
                 <FormattedMessage
                   id="personIncomeBlock.income-freq-help-text"
                   defaultMessage='"Every 2 weeks" means you get paid every other week. "Twice a month" means you get paid two times a month on the same dates each month.'
                 />
-              </p>
-            )}
+              </HelpButton>
+            </div>
             <FormControl fullWidth size="small" error={incomeFrequencyError !== undefined}>
               <Controller
                 name={`incomeStreams.${index}.incomeFrequency`}
@@ -217,7 +207,6 @@ const IncomeStreamRow = ({
               )}
             </FormControl>
           </Box>
-          </ClickAwayListener>
 
           {isHourly && (
             <Box className="income-field-hours">
@@ -324,6 +313,29 @@ const IncomeSection = ({
     return (errors.incomeStreams as FieldErrors<IncomeStreamFormData>[])?.[index]?.[fieldName];
   };
 
+  const track = useTrackEvent();
+  // Income streams live inside the household member step, so they share its
+  // step identity for analytics regardless of which member page is open.
+  const householdDataStepNumber = useStepNumber('householdData', false);
+
+  const trackIncomeSource = (action: 'add' | 'delete') => {
+    track('screener_income_source', {
+      screener_step_name: getStepAnalyticsId('householdData'),
+      screener_step_number: householdDataStepNumber >= 0 ? householdDataStepNumber : undefined,
+      action,
+    });
+  };
+
+  const trackedRemove: UseFieldArrayRemove = (index) => {
+    trackIncomeSource('delete');
+    remove(index);
+  };
+
+  const handleAddIncomeSource = () => {
+    append(EMPTY_INCOME_STREAM);
+    trackIncomeSource('add');
+  };
+
   return (
     <Box id="income-section">
       <QuestionQuestion>
@@ -350,7 +362,7 @@ const IncomeSection = ({
             index={index}
             control={control}
             setValue={setValue}
-            remove={remove}
+            remove={trackedRemove}
             getError={getError}
             incomeCategoriesMenuItems={incomeCategoriesMenuItems}
             incomeOptions={incomeOptions}
@@ -359,7 +371,7 @@ const IncomeSection = ({
         ))}
 
         <Box sx={{ paddingBottom: '1rem' }}>
-          <button onClick={() => append(EMPTY_INCOME_STREAM)} type="button" className="income-add-button">
+          <button onClick={handleAddIncomeSource} type="button" className="income-add-button">
             <AddIcon fontSize="small" />
             <strong><FormattedMessage id="personIncomeBlock.addIncomeSourceButton" defaultMessage="Add An Income Source" /></strong>
           </button>

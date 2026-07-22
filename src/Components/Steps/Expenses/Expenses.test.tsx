@@ -41,6 +41,13 @@ jest.mock('../../QuestionComponents/questionHooks', () => ({
   useGoToNextStep: () => jest.fn(),
 }));
 
+// useStepForm calls useStepNumber (for the screener_form_error analytics event);
+// stub stepDirectory so it doesn't need real Wrapper Context (getReferrer).
+jest.mock('../../../Assets/stepDirectory', () => ({
+  useStepNumber: (_name: string, _required?: boolean) => 5,
+  useStepName: (_stepNumber: number) => undefined,
+}));
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const baseFormData: FormData = {

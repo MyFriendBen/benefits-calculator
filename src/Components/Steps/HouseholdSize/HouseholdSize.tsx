@@ -1,7 +1,7 @@
 import { TextField } from '@mui/material';
 import { Controller, SubmitHandler } from 'react-hook-form';
 import { Context } from '../../Wrapper/Wrapper';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import * as z from 'zod';
 import { FormattedMessage, useIntl } from 'react-intl';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
@@ -16,6 +16,8 @@ import { OverrideableTranslation } from '../../../Assets/languageOptions';
 import useStepForm from '../stepForm';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
+import { useTrackEvent } from '../../../Assets/analytics';
+import { getStepAnalyticsId } from '../../../Assets/analytics/stepIds';
 import './HouseholdSize.css';
 
 const HouseholdSize = () => {
@@ -24,9 +26,10 @@ const HouseholdSize = () => {
   const backNavigationFunction = useDefaultBackNavigationFunction('householdSize');
   const navigate = useNavigate();
   const householdDataStepNumber = useStepNumber('householdData', false);
+  const householdSizeStepNumber = useStepNumber('householdSize', false);
   const intl = useIntl();
   const { updateScreen } = useScreenApi();
-  const [showRoommateInfo, setShowRoommateInfo] = useState(false);
+  const track = useTrackEvent();
 
   const formSchema = z.object({
     householdSize: z
@@ -68,6 +71,15 @@ const HouseholdSize = () => {
         householdData: formData.householdData.slice(0, householdSize),
       };
       await updateScreen(updatedFormData);
+      // This step navigates manually (onSubmitSuccessfulOverride) instead of through
+      // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
+      track('screener_form_step', {
+        screener_step_name: getStepAnalyticsId('householdSize'),
+        // useStepNumber returns -1 when the step isn't in this referrer's
+        // directory; normalize to undefined like the other call sites.
+        screener_step_number: householdSizeStepNumber >= 0 ? householdSizeStepNumber : undefined,
+        step_action: 'complete',
+      });
       const page = householdSize === 1 ? '1' : '0';
       navigate(`/${whiteLabel}/${uuid}/step-${householdDataStepNumber}/${page}`);
     }
@@ -87,56 +99,51 @@ const HouseholdSize = () => {
           <ul className="household-size-help-list">
             <li>
               <strong>
-                <OverrideableTranslation
-                  id="questions.householdSize-helpText-fileTaxes-label"
-                  defaultMessage="If you file taxes:"
-                />
-              </strong>{' '}
+                <OverrideableTranslation id="questions.householdSize-helpText-you-label" defaultMessage="You" />
+              </strong>
+              {' — '}
               <OverrideableTranslation
-                id="questions.householdSize-helpText-fileTaxes-description"
-                defaultMessage="Count everyone on your tax return. Also count your spouse, even if you file taxes apart."
+                id="questions.householdSize-helpText-you-description"
+                defaultMessage="Always include yourself."
+              />
+            </li>
+            <li>
+              <strong>
+                <OverrideableTranslation id="questions.householdSize-helpText-spouse-label" defaultMessage="Spouse" />
+              </strong>
+              {' — '}
+              <OverrideableTranslation
+                id="questions.householdSize-helpText-spouse-description"
+                defaultMessage="Include them even if you file taxes separately or live apart."
               />
             </li>
             <li>
               <strong>
                 <OverrideableTranslation
-                  id="questions.householdSize-helpText-noFileTaxes-label"
-                  defaultMessage="If you don't file taxes:"
+                  id="questions.householdSize-helpText-dependents-label"
+                  defaultMessage="Dependents"
                 />
-              </strong>{' '}
+              </strong>
+              {' — '}
               <OverrideableTranslation
-                id="questions.householdSize-helpText-noFileTaxes-description"
-                defaultMessage="Count the people you live with and also buy and prepare food with."
+                id="questions.householdSize-helpText-dependents-description"
+                defaultMessage="Include everyone under 18 who lives with you and adults you live with who rely on your income."
+              />
+            </li>
+            <li>
+              <strong>
+                <OverrideableTranslation
+                  id="questions.householdSize-helpText-others-label"
+                  defaultMessage="Others you live with"
+                />
+              </strong>
+              {' — '}
+              <OverrideableTranslation
+                id="questions.householdSize-helpText-others-description"
+                defaultMessage="Only include them if you buy and prepare the majority of your food together."
               />
             </li>
           </ul>
-          <button
-            type="button"
-            className="household-size-roommate-link link-color"
-            onClick={() => setShowRoommateInfo(!showRoommateInfo)}
-            aria-expanded={showRoommateInfo}
-            aria-controls="roommate-info-content"
-          >
-            <span className={`chevron ${showRoommateInfo ? 'chevron-expanded' : ''}`}>▶</span>
-            <span className="roommate-link-text">
-              <OverrideableTranslation
-                id="questions.householdSize-roommateToggle"
-                defaultMessage="What about roommates?"
-              />
-            </span>
-          </button>
-          {showRoommateInfo && (
-            <p
-              id="roommate-info-content"
-              className="household-size-roommate-info"
-              aria-live="polite"
-            >
-              <OverrideableTranslation
-                id="questions.householdSize-roommateInfo"
-                defaultMessage="If you have a roommate but don't share food costs with them, don't count them. They should use this tool on their own to check their benefits."
-              />
-            </p>
-          )}
         </>
       </QuestionQuestion>
       <form onSubmit={handleSubmit(formSubmitHandler)}>

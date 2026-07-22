@@ -9,6 +9,7 @@ import { calculateTotalValue, programValue } from '../FormattedValue';
 import { ResultsMessage } from '../../Referrer/Referrer';
 import { useFeatureFlag } from '../../Config/configHook';
 import { useChatbotContext } from '../Chatbot/Chatbot';
+import { useTrackEvent } from '../../../Assets/analytics';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorRebateCategoryList, {
   useEnergyCalculatorNeedsRebates,
@@ -72,8 +73,11 @@ const ValidationCategory = () => {
   return (
     <>
       <CategoryHeading category={validationCategory} />
-      {validationPrograms.map((program, index) => {
-        return <ProgramCard program={program} key={index} />;
+      {validationPrograms.map((program) => {
+        // Key by identity, not index: filtering reorders programs, and an
+        // index key would reuse a card instance (and its already-tripped
+        // impression ref) for a different program, dropping its impression.
+        return <ProgramCard program={program} key={program.program_id} />;
       })}
     </>
   );
@@ -84,15 +88,17 @@ const ValidationCategory = () => {
 const GuideMeButton = () => {
   const { openWithMessage } = useChatbotContext();
   const { formatMessage } = useIntl();
+  const track = useTrackEvent();
 
   const handleClick = useCallback(() => {
+    track('screener_benbot_opened', { entry: 'guide_me' });
     openWithMessage(
       formatMessage({
         id: 'chatbot.guideMeMessage',
         defaultMessage: 'Guide me through my benefits',
       }),
     );
-  }, [openWithMessage, formatMessage]);
+  }, [openWithMessage, formatMessage, track]);
 
   return (
     <button type="button" className="guide-me-button" onClick={handleClick}>
@@ -126,8 +132,8 @@ const Programs = () => {
         return (
           <div key={category.name.default_message}>
             <CategoryHeading category={category} />
-            {category.programs.map((program, index) => {
-              return <ProgramCard program={program} key={index} />;
+            {category.programs.map((program) => {
+              return <ProgramCard program={program} key={program.program_id} />;
             })}
           </div>
         );

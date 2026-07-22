@@ -29,6 +29,7 @@ jest.mock('../hooks/useHouseholdMembersNavigation', () => ({
 
 jest.mock('../../../../Assets/stepDirectory', () => ({
   useStepNumber: () => 5,
+  useStepName: (_stepNumber: number) => undefined,
 }));
 
 jest.mock('../../../Config/configHook', () => ({
