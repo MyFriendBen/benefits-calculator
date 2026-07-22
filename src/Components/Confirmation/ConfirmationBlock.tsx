@@ -33,8 +33,8 @@ export default function ConfirmationBlock({
   const track = useTrackEvent();
 
   return (
-    <div className="confirmation-block-container">
-      <div className="confirmation-block-header">
+    <div className="confirmation-section-container">
+      <div className="confirmation-section-header">
         <h2>
           <span className="confirmation-icon">{icon}</span>
           {title}
@@ -49,7 +49,7 @@ export default function ConfirmationBlock({
           <Pencil aria-hidden={true} className="edit-pencil-icon" strokeWidth={1.5} />
         </Link>
       </div>
-      <div className="confirmation-block-content">
+      <div className="confirmation-section-content">
         {children}
       </div>
     </div>

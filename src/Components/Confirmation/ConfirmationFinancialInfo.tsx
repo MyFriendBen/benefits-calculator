@@ -48,14 +48,16 @@ export default function ConfirmationFinancialInfo() {
   };
 
   return (
-    <div className="simple-confirmation-section">
-      <div className="simple-section-header">
+    <div className="confirmation-section-container">
+      <div className="confirmation-section-header">
         <h2>
-          <Icon name="receipt" aria-hidden={true} />
+          <span className="confirmation-icon">
+            <Icon name="receipt" aria-hidden={true} />
+          </span>
           <FormattedMessage id="confirmation.financialInfo" defaultMessage="Financial Information" />
         </h2>
       </div>
-      <div className="simple-section-content">
+      <div className="confirmation-section-content">
         <ConfirmationItem
           label={
             <FormattedMessage
@@ -75,7 +77,7 @@ export default function ConfirmationFinancialInfo() {
           label={
             <FormattedMessage
               id="confirmation.displayAllFormData-householdResourcesText"
-              defaultMessage="Household resources"
+              defaultMessage="Household Resources"
             />
           }
           value={

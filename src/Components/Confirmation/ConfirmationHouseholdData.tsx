@@ -130,12 +130,12 @@ const DefaultConfirmationHHData = () => {
   };
 
   return (
-    <div className="confirmation-section">
+    <div className="confirmation-section-container">
       <div className="confirmation-section-header">
         <h2>
-          <div className="confirmation-icon">
+          <span className="confirmation-icon">
             <Icon name="users" className="confirmation-lucide-icon" aria-hidden={true} />
-          </div>
+          </span>
           <FormattedMessage id="confirmation.displayAllFormData-yourHouseholdLabel" defaultMessage="Household Members" />
           {' '}
           <span className="household-member-count">
