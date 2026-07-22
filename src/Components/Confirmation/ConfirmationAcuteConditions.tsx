@@ -79,5 +79,5 @@ export default function ConfirmationAcuteConditions() {
     );
   }
 
-  return row;
+  return <div className="confirmation-continuation-row">{row}</div>;
 }

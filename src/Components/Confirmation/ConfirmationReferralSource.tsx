@@ -23,23 +23,25 @@ export default function ConfirmationReferralSource() {
       : formData.referralSource;
 
   return (
-    <ConfirmationItem
-      label={
-        <FormattedMessage
-          id="confirmation.displayAllFormData-referralSourceText"
-          defaultMessage="Referral Source"
-        />
-      }
-      value={displayValue}
-      editLink={
-        <RowEditLink
-          stepName="referralSource"
-          ariaLabel={formatMessage({
-            id: 'confirmation.referralSource.edit-AL',
-            defaultMessage: 'edit referral source',
-          })}
-        />
-      }
-    />
+    <div className="confirmation-continuation-row">
+      <ConfirmationItem
+        label={
+          <FormattedMessage
+            id="confirmation.displayAllFormData-referralSourceText"
+            defaultMessage="Referral Source"
+          />
+        }
+        value={displayValue}
+        editLink={
+          <RowEditLink
+            stepName="referralSource"
+            ariaLabel={formatMessage({
+              id: 'confirmation.referralSource.edit-AL',
+              defaultMessage: 'edit referral source',
+            })}
+          />
+        }
+      />
+    </div>
   );
 }
