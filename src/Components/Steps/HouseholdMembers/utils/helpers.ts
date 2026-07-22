@@ -40,8 +40,11 @@ export const isOtherStream = (s: Pick<IncomeStreamFormData, 'incomeCategory'>): 
   !!s.incomeCategory && s.incomeCategory !== EMPLOYMENT_CATEGORY;
 
 /**
- * Derives the three Yes/No answers from persisted income streams so the toggles
- * rehydrate correctly on edit/reload. Streams remain the source of truth.
+ * Derives the three Yes/No answers from income streams. Used by
+ * getDefaultIncomeAnswers to seed the toggles on edit/reload, and as the legacy
+ * fallback for the employed answer on screens saved before is_employed was
+ * persisted. (The persisted is_employed is authoritative for Q1 when present;
+ * gig and other are always derived here.)
  *
  * Rules:
  * - `other` is Yes if any non-employment-category stream exists.
