@@ -82,11 +82,12 @@ const createIncomeSourceSchema = (intl: IntlShape) => {
         .trim()
         .refine(validateIncomeAmount, {
           message: renderIncomeAmountHelperText(intl),
+          params: { code: 'invalid_amount' },
         }),
     })
     .refine(
       (data) => validateHourlyIncome(data.incomeFrequency, data.hoursPerWeek),
-      { message: renderHoursWorkedHelperText(intl), path: ['hoursPerWeek'] }
+      { message: renderHoursWorkedHelperText(intl), path: ['hoursPerWeek'], params: { code: 'hours_required' } }
     );
 };
 
@@ -112,9 +113,11 @@ const createHealthInsuranceSchema = (intl: IntlShape, pageNumber: number) => {
     })
     .refine(hasAtLeastOneTrue, {
       message: renderHealthInsSelectOneHelperText(intl),
+      params: { code: 'select_one' },
     })
     .refine(validateNoneExclusive, {
       message: healthInsNonePlusHelperText,
+      params: { code: 'none_exclusive' },
     });
 };
 
@@ -164,13 +167,13 @@ export const createHouseholdMemberSchema = (
   }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility, incomeEmployed, incomeGig, incomeOther }, ctx) => {
     // The three income questions are required. Q2 (gig) is only asked when Q1=No.
     if (incomeEmployed === null) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeEmployed'] });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeEmployed'], params: { code: 'required' } });
     }
     if (incomeEmployed === false && incomeGig === null) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeGig'] });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeGig'], params: { code: 'required' } });
     }
     if (incomeOther === null) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeOther'] });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeOther'], params: { code: 'required' } });
     }
 
     const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
@@ -179,6 +182,7 @@ export const createHouseholdMemberSchema = (
         code: z.ZodIssueCode.custom,
         message: renderFutureBirthMonthHelperText(intl),
         path: ['birthMonth'],
+        params: { code: 'future_date' },
       });
     }
 
@@ -189,6 +193,7 @@ export const createHouseholdMemberSchema = (
             code: z.ZodIssueCode.custom,
             message: renderStudentEligibilityErrorMessage(intl),
             path: ['studentEligibility', name],
+            params: { code: 'incomplete' },
           });
         }
       });
@@ -287,13 +292,13 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
     .superRefine(({ incomeEmployed, incomeGig, incomeOther }, ctx) => {
       // The three income questions are required. Q2 (gig) is only asked when Q1=No.
       if (incomeEmployed === null) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeEmployed'] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeEmployed'], params: { code: 'required' } });
       }
       if (incomeEmployed === false && incomeGig === null) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeGig'] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeGig'], params: { code: 'required' } });
       }
       if (incomeOther === null) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeOther'] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeOther'], params: { code: 'required' } });
       }
     });
 };

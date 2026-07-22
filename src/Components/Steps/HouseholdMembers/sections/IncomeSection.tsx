@@ -40,7 +40,7 @@ import {
 import { isEmploymentStream } from '../utils/helpers';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { useTrackEvent } from '../../../../Assets/analytics';
-import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
+import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
 import '../styles/HouseholdMemberSections.css';
 import '../styles/IncomeSection.css';
 
@@ -204,7 +204,7 @@ const IncomeStreamRow = ({
               <FormLabel id={`income-frequency-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, color: 'text.primary' }}>
                 <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
               </FormLabel>
-              <HelpButton helpTopic="income-frequency">
+              <HelpButton helpTopic="income-frequency" stepName={HOUSEHOLD_SUBSTEP_IDS.memberDetails}>
                 <FormattedMessage
                   id="personIncomeBlock.income-freq-help-text"
                   defaultMessage='"Every 2 weeks" means you get paid every other week. "Twice a month" means you get paid two times a month on the same dates each month.'
