@@ -185,3 +185,10 @@
   display: block;
   max-height: 90%;
 }
+
+/* CU Denver: wide horizontal reversed mark (316x96, ~3.3:1) on the black header. */
+.cudenver-logo-size {
+  display: block;
+  max-height: 60%;
+  max-width: 95%;
+}

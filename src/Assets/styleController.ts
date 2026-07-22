@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useState } from 'react';
 
-export type ThemeName = 'default' | 'twoOneOne' | 'twoOneOneNC' | 'co_energy' | 'nc_lanc' | 'nc_ccla';
+export type ThemeName = 'default' | 'twoOneOne' | 'twoOneOneNC' | 'co_energy' | 'nc_lanc' | 'nc_ccla' | 'cu_denver';
 
 export interface ITheme {
   primaryColor: string;
@@ -276,6 +276,45 @@ const themes: Themes = {
       // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#E87511',
+
+      // Typography
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
+      'font-size': '18px',
+
+      // Layout
+      '--main-max-width': '1310px',
+      '--content-max-width': '900px',
+    },
+  },
+  cu_denver: {
+    primaryColor: '#000000', // black — header bg, headings, primary buttons
+    secondaryColor: '#000000', // black — keep text/buttons high-contrast
+    midBlueColor: '#000000',
+    footerColor: '#000000',
+    secondaryBackgroundColor: '#FBFBFB',
+    hoverColor: '#F2ECD9', // light CU-gold tint
+    outlineHoverBackgroundColor: '#F2ECD9',
+    outlineHoverColor: '#000000',
+    progressBarColor: '#CFB87C', // CU gold accent
+    cssVariables: {
+      // Colors - Primary & Secondary
+      '--primary-color': '#000000',
+      '--secondary-color': '#000000',
+      '--midBlue-color': '#000000',
+      '--footer-color': '#000000',
+
+      // Colors - Background
+      '--secondary-background-color': '#FBFBFB',
+      '--hover-color': '#F2ECD9',
+
+      // Colors - Icons
+      '--icon-color': '#A2884E', // accessible dark gold on white
+      '--secondary-icon-color': '#000000',
+
+      // Colors - Interactive States
+      '--option-card-hover-font-color': '#1D1C1E',
+      '--active-border-color': '#CFB87C', // CU gold selection accent
 
       // Typography
       '--font-heading': "'Roboto Slab', serif",
