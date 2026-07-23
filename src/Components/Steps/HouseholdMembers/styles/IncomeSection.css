@@ -14,33 +14,24 @@
   --income-card-background: #ffffff;
 }
 
-/* Three-question income layout.
-   The whole set of questions sits in one shaded, rounded container that groups
-   them visually and separates them from the rest of the form. */
+/* Three-question income layout: each question sits in its own shaded, rounded
+   box, with a gap between the three, so they read as distinct without the busier
+   single-container-plus-dividers look. */
 .income-questions-container {
   display: flex;
   flex-direction: column;
-  background-color: var(--secondary-background-color, #f7f7f7);
-  border: 1px solid #d4d7dd;
-  border-radius: 12px;
-  padding: 1.5rem;
+  gap: 1rem;
   margin-top: 0.5rem;
 }
 
-/* A thin divider between questions, matching the design's grouping. */
 .income-question-block {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding: 1.25rem 0;
-}
-
-.income-question-block:first-of-type {
-  padding-top: 0;
-}
-
-.income-question-block:not(:last-child) {
-  border-bottom: 1px solid #e3e5e9;
+  background-color: var(--secondary-background-color, #f7f7f7);
+  border: 1px solid #d4d7dd;
+  border-radius: 12px;
+  padding: 1.5rem;
 }
 
 .income-question-label.MuiFormLabel-root {
