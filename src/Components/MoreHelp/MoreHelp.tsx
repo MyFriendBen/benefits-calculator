@@ -1,5 +1,6 @@
 import { FormattedMessage } from 'react-intl';
 import { useConfig } from '../Config/configHook';
+import { useTrackEvent } from '../../Assets/analytics';
 import './MoreHelp.css';
 
 type Resource = {
@@ -13,6 +14,7 @@ type Resource = {
 const MoreHelp = () => {
   const { moreHelpOptions } = useConfig<{ moreHelpOptions: Resource[] }>('more_help_options');
   const resources: Resource[] = moreHelpOptions;
+  const track = useTrackEvent();
 
   const displayResources = (resources: Resource[]) => {
     return resources.map((resource, index) => {
@@ -25,7 +27,21 @@ const MoreHelp = () => {
           {resource.phone && <p className="resource-phone">{resource.phone}</p>}
           <div className="resource-link-container">
             {resource.link && (
-              <a href={resource.link} className="visit-website-btn" target="_blank">
+              <a
+                href={resource.link}
+                className="visit-website-btn"
+                target="_blank"
+                onClick={() =>
+                  // `name` is a JSX.Element, so use the config `label` (a plain
+                  // string, PII-free) as the id; resource_index carries the
+                  // ordinal independently (label may be undefined).
+                  track('screener_more_help_resource_click', {
+                    resource_name: resource.label,
+                    resource_index: index,
+                    url: resource.link,
+                  })
+                }
+              >
                 <FormattedMessage id="visit-website-btn" defaultMessage="Visit Website" />
               </a>
             )}

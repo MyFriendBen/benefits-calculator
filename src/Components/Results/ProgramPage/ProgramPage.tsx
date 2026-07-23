@@ -6,7 +6,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { YearlyValueLabel, programValue, useFormatYearlyValue } from '../FormattedValue';
 import './ProgramPage.css';
 import WarningMessage from '../../WarningComponent/WarningMessage';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Context } from '../../Wrapper/Wrapper';
 import { findProgramById, findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
 import { deleteValidation, postValidation } from '../../../apiCalls';
@@ -37,6 +37,42 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   const track = useTrackEvent();
   const [openPEmodal, setOpenPEModal] = useState(false);
   const { policyEngineData } = useResultsContext();
+
+  // Navigator + document impression events. One batched event each (not one per
+  // item — GA4 drops same-name events fired together in a tick), fired once per
+  // program page: the ref keyed on program id re-fires when the user opens a
+  // different program but not on re-renders of the same one. Documents mirror the
+  // download link's own render guard below — only docs with both a link_url and
+  // link_text are shown as downloadable, so only those are counted here.
+  const shownImpressionsProgramId = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    if (shownImpressionsProgramId.current === program.program_id) {
+      return;
+    }
+    shownImpressionsProgramId.current = program.program_id;
+
+    if (program.navigators.length > 0) {
+      track('screener_navigators_shown', {
+        program_name: program.name.default_message,
+        program_id: String(program.program_id),
+        navigator_ids: program.navigators.map((navigator) => navigator.id),
+        navigator_names: program.navigators.map((navigator) => navigator.name.default_message),
+        navigator_count: program.navigators.length,
+      });
+    }
+
+    const downloadableDocuments = program.documents.filter(
+      (document) => document.link_url.default_message && document.link_text.default_message,
+    );
+    if (downloadableDocuments.length > 0) {
+      track('screener_program_documents_shown', {
+        program_name: program.name.default_message,
+        program_id: String(program.program_id),
+        document_names: downloadableDocuments.map((document) => document.text.default_message),
+        document_count: downloadableDocuments.length,
+      });
+    }
+  }, [program, track]);
 
   const openPolicyEngineRequest = () => setOpenPEModal(true);
   const closePolicyEngineRequest = () => setOpenPEModal(false);
