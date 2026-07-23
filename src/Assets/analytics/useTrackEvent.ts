@@ -1,7 +1,7 @@
 import { useCallback, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { trackEvent } from './index';
-import { Context } from '../../Components/Wrapper/Wrapper';
+import { Context, DEFAULT_WHITE_LABEL } from '../../Components/Wrapper/Wrapper';
 import type { ScreenerContext, ScreenerEventMap, ScreenerEventName } from './events';
 
 /**
@@ -31,7 +31,7 @@ export function useTrackEvent() {
   const contextWhiteLabel = useContext(Context)?.whiteLabel;
 
   const screenerState =
-    whiteLabel ?? (contextWhiteLabel && contextWhiteLabel !== '_default' ? contextWhiteLabel : undefined);
+    whiteLabel ?? (contextWhiteLabel && contextWhiteLabel !== DEFAULT_WHITE_LABEL ? contextWhiteLabel : undefined);
 
   return useCallback(
     <E extends ScreenerEventName>(event: E, params: ScreenerEventMap[E]) => {

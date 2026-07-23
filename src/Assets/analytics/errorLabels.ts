@@ -75,3 +75,35 @@ export const collectFieldErrors = (node: unknown, path = ''): FieldError[] => {
 // GA4 truncates at 100 chars.
 export const formatFieldErrors = (errors: FieldError[]): string =>
   errors.map(({ field, reason }) => `${field}: ${reason}`).join(', ');
+
+// The event-specific params for one screener_form_error emission (step context
+// is added by the caller). Each failed field is its own event.
+export interface FormErrorEventParams {
+  form_field_name?: string;
+  form_error_reason?: string;
+  form_error_count?: number;
+}
+
+// Turn an RHF error tree into the list of screener_form_error payloads to emit:
+// one per failed field (B1 — no joined message that GA4 would truncate), with
+// form_error_count = the number of failed fields.
+//
+// `topLevelErrorCount` is RHF's own top-level key count (the value that gates
+// emission at the call site). When collectFieldErrors resolves NO leaf but the
+// caller says there are errors, we still emit ONE fallback event carrying that
+// count, so a failed submit can't silently vanish from the drop-off funnel.
+//
+// Extracted as a pure function so the two call sites (useStepForm and
+// Disclaimer's own useForm) share identical emit logic and it's unit-testable
+// without a component render harness.
+export const buildFormErrorEvents = (errors: unknown, topLevelErrorCount: number): FormErrorEventParams[] => {
+  const fieldErrors = collectFieldErrors(errors);
+  if (fieldErrors.length === 0) {
+    return topLevelErrorCount > 0 ? [{ form_error_count: topLevelErrorCount }] : [];
+  }
+  return fieldErrors.map(({ field, reason }) => ({
+    form_field_name: field,
+    form_error_reason: reason,
+    form_error_count: fieldErrors.length,
+  }));
+};

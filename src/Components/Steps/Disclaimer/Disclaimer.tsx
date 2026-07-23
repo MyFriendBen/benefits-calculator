@@ -10,7 +10,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { FormattedMessageType } from '../../../Types/Questions';
 import { useTrackEvent } from '../../../Assets/analytics';
 import { PRE_DIRECTORY_STEP_IDS } from '../../../Assets/analytics/stepIds';
-import { collectFieldErrors } from '../../../Assets/analytics/errorLabels';
+import { buildFormErrorEvents } from '../../../Assets/analytics/errorLabels';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import { useConfig, useLocalizedLink } from '../../Config/configHook';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
@@ -120,17 +120,14 @@ const Disclaimer = () => {
 
   const handleFormError: SubmitErrorHandler<FormSchema> = (formErrors) => {
     // This step uses a plain useForm (not useStepForm), so it emits its own error
-    // events — via the shared collectFieldErrors so field/reason match the rest
-    // of the app's vocabulary. One event per failed field (not one joined
-    // message) to stay under GA4's 100-char param cap.
-    const fieldErrors = collectFieldErrors(formErrors);
-    fieldErrors.forEach(({ field, reason }) => {
+    // events — via the shared buildFormErrorEvents so field/reason and the
+    // per-field/one-event-each behavior match the rest of the app (stays under
+    // GA4's 100-char param cap).
+    buildFormErrorEvents(formErrors, Object.keys(formErrors).length).forEach((params) => {
       track('screener_form_error', {
         screener_step_name: DISCLAIMER_STEP_ANALYTICS_ID,
         screener_step_number: 2,
-        form_field_name: field,
-        form_error_reason: reason,
-        form_error_count: fieldErrors.length,
+        ...params,
       });
     });
   };

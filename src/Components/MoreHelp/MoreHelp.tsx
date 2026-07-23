@@ -34,7 +34,8 @@ const MoreHelp = () => {
                 onClick={() =>
                   // gap #7: this link was previously untracked. `name` is a
                   // JSX.Element, so use the config `label` (a plain string) as the
-                  // PII-free id, falling back to the ordinal.
+                  // PII-free id; resource_index carries the ordinal independently
+                  // (label may be undefined; the two are separate params).
                   track('screener_more_help_resource_click', {
                     resource_name: resource.label,
                     resource_index: index,

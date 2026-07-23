@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { mfbZodResolver } from './mfbZodResolver';
-import { collectFieldErrors, formatFieldErrors, labelForCode } from './errorLabels';
+import { buildFormErrorEvents, collectFieldErrors, formatFieldErrors, labelForCode } from './errorLabels';
 
 // The two pieces that make specific error reasons flow to screener_form_error:
 // mfbZodResolver stamps each custom rule's params.code onto the RHF error as
@@ -109,5 +109,50 @@ describe('formatFieldErrors', () => {
   it('joins field errors into the legacy "field: reason" string for back-compat', () => {
     const tree = { zip: { type: 'too_small', message: 'x' }, tcpa: { errorCode: 'consent_required' } };
     expect(formatFieldErrors(collectFieldErrors(tree))).toBe('zip: Required, tcpa: Consent required');
+  });
+});
+
+describe('buildFormErrorEvents', () => {
+  it('emits one event per failed field, each with field/reason and the field count', () => {
+    const tree = {
+      birthYear: { type: 'too_small', message: 'x' },
+      healthInsurance: { errorCode: 'select_one', message: 'y' },
+    };
+    const events = buildFormErrorEvents(tree, 2);
+    expect(events).toEqual([
+      { form_field_name: 'birthYear', form_error_reason: 'Required', form_error_count: 2 },
+      { form_field_name: 'healthInsurance', form_error_reason: 'Must select an option', form_error_count: 2 },
+    ]);
+  });
+
+  it('counts failed field instances, not RHF top-level keys', () => {
+    // Three members failing birthYear: RHF has ONE top-level `members` key, but
+    // there are three failed field instances. Paths are normalized to the same
+    // canonical field (they aggregate to one row downstream via GROUP BY), and
+    // the count reflects the three instances — NOT RHF's top-level key count.
+    const tree = {
+      members: {
+        0: { birthYear: { type: 'too_small', message: 'x' } },
+        1: { birthYear: { type: 'too_small', message: 'x' } },
+        2: { birthYear: { type: 'too_small', message: 'x' } },
+      },
+    };
+    const events = buildFormErrorEvents(tree, 1);
+    expect(events).toHaveLength(3);
+    expect(events.every((e) => e.form_field_name === 'members.birthYear')).toBe(true);
+    expect(events.every((e) => e.form_error_count === 3)).toBe(true);
+  });
+
+  it('emits one fallback event when errors exist but no leaf resolves (submit not lost)', () => {
+    // An error node with no type/errorCode anywhere: collectFieldErrors returns
+    // []. The gate said there ARE errors, so a single fallback carries the
+    // top-level count instead of the submit vanishing from the funnel.
+    const unresolvable = { weird: { message: 'no type or code here' } };
+    expect(collectFieldErrors(unresolvable)).toEqual([]);
+    expect(buildFormErrorEvents(unresolvable, 3)).toEqual([{ form_error_count: 3 }]);
+  });
+
+  it('emits nothing when there are no errors at all', () => {
+    expect(buildFormErrorEvents({}, 0)).toEqual([]);
   });
 });
