@@ -33,21 +33,25 @@ export default function ConfirmationBlock({
   const track = useTrackEvent();
 
   return (
-    <div className="confirmation-block-container">
-      <div className="confirmation-icon">{icon}</div>
-      <div className="confirmation-block-content">
-        <p className="section-title">{title}</p>
+    <div className="confirmation-section-container">
+      <div className="confirmation-section-header">
+        <h2>
+          <span className="confirmation-icon">{icon}</span>
+          {title}
+        </h2>
+        <Link
+          to={`/${whiteLabel}/${uuid}/step-${stepNumber}/${editUrlEnding}`}
+          state={locationState}
+          className="edit-button"
+          aria-label={formatMessage(editAriaLabel)}
+          onClick={() => track('screener_confirmation_edit', { section: stepName })}
+        >
+          <Pencil aria-hidden={true} className="edit-pencil-icon" strokeWidth={1.5} />
+        </Link>
+      </div>
+      <div className="confirmation-section-content">
         {children}
       </div>
-      <Link
-        to={`/${whiteLabel}/${uuid}/step-${stepNumber}/${editUrlEnding}`}
-        state={locationState}
-        className="edit-button"
-        aria-label={formatMessage(editAriaLabel)}
-        onClick={() => track('screener_confirmation_edit', { section: stepName })}
-      >
-        <Pencil aria-label={formatMessage(editAriaLabel)} className="edit-pencil-icon" strokeWidth={1.5} />
-      </Link>
     </div>
   );
 }
@@ -55,14 +59,38 @@ export default function ConfirmationBlock({
 type ConfirmationItemParams = {
   label?: ReactNode;
   value: ReactNode;
+  editLink?: ReactNode;
 };
 
 // be sure to include the ":" in the label
-export function ConfirmationItem({ label, value }: ConfirmationItemParams) {
+export function ConfirmationItem({ label, value, editLink }: ConfirmationItemParams) {
   return (
-    <div className="section-p">
-      {label && <strong>{label}</strong>} {value}
+    <div className="confirmation-row">
+      {label && <div className="confirmation-row-label">{label}</div>}
+      <div className="confirmation-row-value">
+        <div className="confirmation-row-value-content">{value}</div>
+        {editLink && <div className="confirmation-row-value-edit">{editLink}</div>}
+      </div>
     </div>
   );
 }
 
+export function RowEditLink({ stepName, ariaLabel }: { stepName: QuestionName; ariaLabel: string }) {
+  const { whiteLabel, uuid } = useParams();
+  const stepNumber = useStepNumber(stepName, false);
+
+  if (stepNumber === -1) {
+    return null;
+  }
+
+  return (
+    <Link
+      to={`/${whiteLabel}/${uuid}/step-${stepNumber}/`}
+      state={{ routedFromConfirmationPg: true }}
+      className="edit-button-simple"
+      aria-label={ariaLabel}
+    >
+      <Pencil aria-hidden={true} className="edit-pencil-icon" strokeWidth={1.5} />
+    </Link>
+  );
+}

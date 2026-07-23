@@ -1,86 +1,138 @@
-.confirmation-section-underline {
-  margin-bottom: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #505c66;
+/* Visually hidden but announced to screen readers */
+.confirmation-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 .confirmation-container {
-  margin: 2rem 10% 2rem 10%;
+  max-width: 1200px;
+  margin: 1rem auto 2rem;
+  background-color: transparent;
+  border: none;
 }
 
-.confirmation-block-container {
-  background-color: var(--secondary-background-color);
-  padding: 2rem;
-  margin-bottom: 2rem;
-  position: relative;
+.confirmation-section-container {
+  padding: 0 0 1rem 0;
+  margin-top: 1rem;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.confirmation-section-container:first-child {
+  margin-top: 0;
+}
+
+.confirmation-section-container:last-child {
+  border-bottom: none;
+}
+
+.confirmation-section-header {
+  padding: 0 0 0.5rem 0;
   display: flex;
-}
-
-.confirmation-container > div {
-  background-color: var(--secondary-background-color);
-  padding: 1rem;
-  margin-bottom: 2rem;
-  position: relative;
-}
-
-.confirmation-icon {
-  min-width: 6rem;
-  margin: 0 2rem;
-  display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #999;
+  margin-bottom: 0;
 }
 
-/* Every confirmation-block icon is a Lucide <svg> (the class sits directly on
-   the SVG). Lucide glyphs fill their viewBox edge-to-edge, so we size them
-   smaller than the 6rem icon column (.confirmation-icon) to leave breathing
-   room between the icon and the surrounding content/card borders. */
-svg.confirmation-lucide-icon {
-  width: 4rem;
-  height: 4rem;
+.confirmation-section-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #000;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-svg.confirmation-lucide-icon * {
-  fill: none;
-  stroke: var(--secondary-icon-color);
-}
-
-.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-2.css-1o7apob-MuiGrid-root.no-padding {
+.confirmation-section-content {
   padding: 0;
 }
 
+.edit-button-simple {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.edit-button-simple:hover {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+[dir='rtl'] .edit-button-simple {
+  transform: scaleX(-1);
+}
+
 .edit-button {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
-  width: 1.5rem;
-  transform: translate(50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
 }
 
 .edit-button:hover {
   cursor: pointer;
+  opacity: 0.7;
+}
+
+.edit-pencil-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #999;
 }
 
 [dir='rtl'] .edit-button {
-  left: 2rem;
-  right: unset;
+  transform: scaleX(-1);
 }
 
-svg.edit-button path,
-svg.edit-button rect,
-svg.edit-button polygon {
-  stroke: var(--midBlue-color);
-  fill: var(--midBlue-color);
+.confirmation-container > div {
+  background-color: white;
+  padding: 0;
+  margin-bottom: 0;
+  position: relative;
 }
 
-svg.edit-pencil-icon {
-  width: 1.25rem;
-  height: 1.25rem;
+.confirmation-icon {
+  min-width: auto;
+  margin: 0;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
 
-svg.edit-pencil-icon * {
-  stroke: var(--midBlue-color);
+.confirmation-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.confirmation-icon svg path,
+.confirmation-icon svg circle {
   fill: none;
+  stroke: var(--secondary-color);
+}
+
+/* Lucide icons have the class directly on the SVG element */
+svg.confirmation-lucide-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+svg.confirmation-lucide-icon * {
+  fill: none !important;
+  stroke: var(--secondary-color);
 }
 
 .confirmation-acute-need-list {
@@ -93,57 +145,177 @@ svg.edit-pencil-icon * {
   justify-content: space-between;
 }
 
-.section-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
+/* Table-like layout for confirmation items */
+.confirmation-row {
+  display: grid;
+  grid-template-columns: minmax(200px, 20%) 1fr;
+  padding: 0.5rem 0;
+  border-top: 1px solid #e8e8e8;
+  align-items: start;
+  gap: 3rem;
 }
 
-.section-p {
-  line-height: 2rem;
+.confirmation-row:first-child {
+  border-top: none;
 }
 
-.flip-horizontally {
-  transform: scaleX(-1);
+.confirmation-row-label {
+  font-weight: 400;
+  color: #555;
+  padding-top: 0;
+  font-size: 0.95rem;
 }
+
+.confirmation-row-value {
+  color: #000;
+  font-weight: 400;
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.confirmation-row-value-content {
+  flex: 1;
+}
+
+.confirmation-row-value-edit {
+  flex-shrink: 0;
+}
+
+.confirmation-row-value strong {
+  font-weight: 600;
+}
+
+.confirmation-row-value i {
+  color: #888;
+  font-size: 0.85rem;
+  font-style: italic;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.confirmation-expense-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.confirmation-expense-list li {
+  margin-bottom: 0.25rem;
+}
+
+.confirmation-expense-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Household member table styles */
+.household-member-table-wrapper {
+  padding: 0;
+  overflow-x: auto;
+  margin-top: 0.75rem;
+}
+
+/* Desktop table gets border */
+.household-member-table-desktop {
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+}
+
+/* Hide mobile cards on desktop */
+.household-member-cards {
+  display: none;
+}
+
+/* Show full count on desktop, hide short version */
+.household-member-count-full {
+  display: inline;
+}
+
+.household-member-count-short {
+  display: none;
+}
+
+.household-member-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.household-member-table thead {
+  background-color: #f5f5f5;
+}
+
+.household-member-table th {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #d0d0d0;
+  color: #333;
+}
+
+.household-member-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e8e8e8;
+  vertical-align: top;
+  font-size: 0.9rem;
+}
+
+.household-member-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.household-member-table tbody tr:hover {
+  background-color: #fafafa;
+}
+
+.household-member-table td:last-child {
+  padding: 0.5rem 0.25rem;
+  text-align: center;
+}
+
 
 .bottom-margin {
   margin-bottom: 0.5rem;
 }
 
-.MuiSvgIcon-root.home-icon {
-  color: #2a2b2a;
-  height: 4rem;
-  width: 4rem;
-}
-
-.confirmation-block-content {
-  display: block;
-  align-content: center;
-  padding-right: 2rem;
-}
-
-@media (max-width: 630px) {
+@media (max-width: 767px) {
   .confirmation-container {
-    margin: 0;
+    margin: 0.5rem 0;
+    padding: 0;
   }
 
-  .edit-button {
-    width: 1rem;
+  .confirmation-section-container {
+    padding: 0 0 0.75rem 0;
+    margin-top: 0.75rem;
   }
 
-  .MuiSvgIcon-root.home-icon {
-    height: 2rem;
-    width: 2rem;
+  .confirmation-section-header {
+    padding: 0 0 0.35rem 0;
   }
 
-  .section-title {
-    font-size: 1rem;
+  .confirmation-section-header h2 {
+    font-size: 0.95rem;
   }
 
-  .section-p {
-    font-size: 0.9rem;
-    line-height: 1.5rem;
+  .confirmation-row {
+    grid-template-columns: 1fr;
+    padding: 0.5rem 0;
+    gap: 0.25rem;
+  }
+
+  .confirmation-row-label {
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+    font-size: 0.85rem;
+  }
+
+  .confirmation-row-value {
+    font-size: 0.85rem;
   }
 
   h1.sub-header {
@@ -151,20 +323,29 @@ svg.edit-pencil-icon * {
   }
 
   .prev-continue-results-buttons.confirmation {
-    margin: 1rem 0 0 0;
+    margin: 1rem 0;
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .prev-continue-results-buttons.confirmation button {
+    flex: 1;
   }
 
   .bottom-margin {
     margin-bottom: 0.5rem;
   }
 
-  .confirmation-icon {
-    min-width: 4rem;
-    margin: 0 1rem 0 0;
+  .household-member-count-full {
+    display: none;
   }
 
-  svg.confirmation-lucide-icon {
-    width: 3rem;
-    height: 3rem;
+  .household-member-count-short {
+    display: inline;
+  }
+
+  .confirmation-icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
   }
 }

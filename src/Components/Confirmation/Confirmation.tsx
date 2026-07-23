@@ -6,7 +6,8 @@ import { useEffect, useRef } from 'react';
 import PreviousButton from '../PreviousButton/PreviousButton';
 import './Confirmation.css';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
-import STEP_CONFIRMATIONS from './ConfirmationSteps';
+import STEP_CONFIRMATIONS, { BENEFITS_GROUP_STEPS } from './ConfirmationSteps';
+import ConfirmationBenefitsInfo from './ConfirmationBenefitsInfo';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { usePageTitle } from '../Common/usePageTitle';
 import { useTrackEvent } from '../../Assets/analytics';
@@ -56,7 +57,11 @@ const Confirmation = () => {
   useEffect(() => {
     const continueOnEnter = (event: KeyboardEvent) => {
       if (event.key === 'Enter') {
-        proceedToResults();
+        const target = event.target as HTMLElement;
+        const isInteractive = target.closest('a, button, input, select, textarea, [role="button"]');
+        if (!isInteractive) {
+          proceedToResults();
+        }
       }
     };
     document.addEventListener('keydown', continueOnEnter);
@@ -71,7 +76,12 @@ const Confirmation = () => {
   }, [navigate, whiteLabel, uuid]);
 
   const displayAllFormData = () => {
+    const benefitsGroupAnchorStep = stepDirectory.find((step) => BENEFITS_GROUP_STEPS.includes(step));
+
     return stepDirectory.map((step) => {
+      if (BENEFITS_GROUP_STEPS.includes(step)) {
+        return step === benefitsGroupAnchorStep ? <ConfirmationBenefitsInfo key={step} /> : null;
+      }
       return STEP_CONFIRMATIONS[step];
     });
   };
