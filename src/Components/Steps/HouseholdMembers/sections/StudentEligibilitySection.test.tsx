@@ -28,11 +28,7 @@ const Wrapper = ({
 
   return (
     <IntlProvider locale="en" messages={{}}>
-      <StudentEligibilitySection
-        control={control as any}
-        errors={errors as any}
-        pageNumber={pageNumber}
-      />
+      <StudentEligibilitySection control={control as any} errors={errors as any} pageNumber={pageNumber} />
     </IntlProvider>
   );
 };
@@ -61,16 +57,23 @@ describe('StudentEligibilitySection', () => {
       expect(noRadios).toHaveLength(STUDENT_QUESTIONS.length);
     });
 
-    it('uses "you" subject for page 1', () => {
+    it('uses the "-you" message variant for page 1', () => {
       render(<Wrapper pageNumber={1} />);
-      // The first question references "you" (enrolled half-time...)
-      expect(screen.getByText(/enrolled half-time or more/i)).toBeInTheDocument();
+      expect(screen.getByText(/are you enrolled half-time or more/i)).toBeInTheDocument();
+      expect(screen.getByText(/do you have a federal or state work study program/i)).toBeInTheDocument();
+      expect(screen.queryByText(/are they enrolled/i)).not.toBeInTheDocument();
     });
 
-    it('uses "they" subject for page > 1', () => {
+    it('uses the "-they" message variant for page > 1', () => {
       render(<Wrapper pageNumber={2} />);
-      // Subject is injected into question text — verify the section still renders
-      expect(screen.getAllByRole('radiogroup')).toHaveLength(STUDENT_QUESTIONS.length);
+      expect(screen.getByText(/are they enrolled half-time or more/i)).toBeInTheDocument();
+      expect(screen.getByText(/do they have a federal or state work study program/i)).toBeInTheDocument();
+      expect(screen.queryByText(/are you enrolled/i)).not.toBeInTheDocument();
+    });
+
+    it('does not leave an untranslated {subject} placeholder in question text (MFB-1308)', () => {
+      render(<Wrapper pageNumber={2} />);
+      expect(screen.queryByText(/\{subject\}/)).not.toBeInTheDocument();
     });
   });
 

@@ -23,44 +23,66 @@ import {
   validateIncomeAmount,
 } from './validation';
 
-export type StudentQuestionName = 'studentFullTime' | 'studentJobTrainingProgram' | 'studentHasWorkStudy' | 'studentWorks20PlusHrs';
+export type StudentQuestionName =
+  | 'studentFullTime'
+  | 'studentJobTrainingProgram'
+  | 'studentHasWorkStudy'
+  | 'studentWorks20PlusHrs';
 
 export type StudentQuestion = {
   name: StudentQuestionName;
-  messageId: string;
-  defaultMessage: string;
+  /** Translation key/default when asking about the head of household (page 1). */
+  messageIdYou: string;
+  defaultMessageYou: string;
+  /** Translation key/default when asking about another household member. */
+  messageIdThey: string;
+  defaultMessageThey: string;
   ariaLabelId: string;
   ariaLabelDefault: string;
 };
 
+// Note: each question has separate "-you" and "-they" translation keys
+// (matching the ecHHMF.you-receiveSsi / ecHHMF.they-receiveSsi pattern) so the
+// full sentence can be translated per language. Do not interpolate an English
+// pronoun into the translated string — see MFB-1308.
 export const STUDENT_QUESTIONS: StudentQuestion[] = [
   {
     name: 'studentFullTime',
-    messageId: 'studentEligibility.enrolledHalfTime',
-    defaultMessage:
-      'Are {subject} enrolled half-time or more in a university, college, or community college as defined by the educational institution?',
+    messageIdYou: 'studentEligibility.enrolledHalfTime-you',
+    defaultMessageYou:
+      'Are you enrolled half-time or more in a university, college, or community college as defined by the educational institution?',
+    messageIdThey: 'studentEligibility.enrolledHalfTime-they',
+    defaultMessageThey:
+      'Are they enrolled half-time or more in a university, college, or community college as defined by the educational institution?',
     ariaLabelId: 'studentEligibility.enrolledHalfTime-ariaLabel',
     ariaLabelDefault: 'enrolled half-time or more',
   },
   {
     name: 'studentJobTrainingProgram',
-    messageId: 'studentEligibility.jobTraining',
-    defaultMessage: 'Is the program that {subject} are enrolled in a job training program?',
+    messageIdYou: 'studentEligibility.jobTraining-you',
+    defaultMessageYou: 'Is the program that you are enrolled in a job training program?',
+    messageIdThey: 'studentEligibility.jobTraining-they',
+    defaultMessageThey: 'Is the program that they are enrolled in a job training program?',
     ariaLabelId: 'studentEligibility.jobTraining-ariaLabel',
     ariaLabelDefault: 'job training program',
   },
   {
     name: 'studentHasWorkStudy',
-    messageId: 'studentEligibility.workStudy',
-    defaultMessage: 'Do {subject} have a federal or state work study program?',
+    messageIdYou: 'studentEligibility.workStudy-you',
+    defaultMessageYou: 'Do you have a federal or state work study program?',
+    messageIdThey: 'studentEligibility.workStudy-they',
+    defaultMessageThey: 'Do they have a federal or state work study program?',
     ariaLabelId: 'studentEligibility.workStudy-ariaLabel',
     ariaLabelDefault: 'work study program',
   },
   {
     name: 'studentWorks20PlusHrs',
-    messageId: 'studentEligibility.works20Hours',
-    defaultMessage:
-      'Do {subject} work 20 or more hours per week in other employment, including self-employment? (If the hours {subject} work changes each week, do {subject} work at least 80 hours in a month?)',
+    messageIdYou: 'studentEligibility.works20Hours-you',
+    defaultMessageYou:
+      'Do you work 20 or more hours per week in other employment, including self-employment? (If the hours you work changes each week, do you work at least 80 hours in a month?)',
+    messageIdThey: 'studentEligibility.works20Hours-they',
+    defaultMessageThey:
+      'Do they work 20 or more hours per week in other employment, including self-employment? (If the hours they work changes each week, do they work at least 80 hours in a month?)',
     ariaLabelId: 'studentEligibility.works20Hours-ariaLabel',
     ariaLabelDefault: 'works 20 hours or more',
   },
@@ -84,10 +106,11 @@ const createIncomeSourceSchema = (intl: IntlShape) => {
           params: { code: 'invalid_amount' },
         }),
     })
-    .refine(
-      (data) => validateHourlyIncome(data.incomeFrequency, data.hoursPerWeek),
-      { message: renderHoursWorkedHelperText(intl), path: ['hoursPerWeek'], params: { code: 'hours_required' } }
-    );
+    .refine((data) => validateHourlyIncome(data.incomeFrequency, data.hoursPerWeek), {
+      message: renderHoursWorkedHelperText(intl),
+      path: ['hoursPerWeek'],
+      params: { code: 'hours_required' },
+    });
 };
 
 /**
@@ -138,10 +161,7 @@ const createSpecialConditionsSchema = (_intl: IntlShape) => {
  * @param intl - React Intl instance for internationalized error messages
  * @param pageNumber - Current page number (affects validation messages)
  */
-export const createHouseholdMemberSchema = (
-  intl: IntlShape,
-  pageNumber: number
-) => {
+export const createHouseholdMemberSchema = (intl: IntlShape, pageNumber: number) => {
   const incomeSourcesSchema = createIncomeSourceSchema(intl);
   const incomeStreamsSchema = z.array(incomeSourcesSchema);
 
@@ -152,38 +172,47 @@ export const createHouseholdMemberSchema = (
     studentWorks20PlusHrs: z.union([z.boolean(), z.undefined()]),
   });
 
-  return z.object({
-    birthMonth: z.number().min(1, { message: renderMissingBirthMonthHelperText(intl) }).max(12, { message: renderMissingBirthMonthHelperText(intl) }),
-    birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl) }).int().min(new Date().getFullYear() - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) }).max(new Date().getFullYear(), { message: renderInvalidBirthYearHelperText(intl) }),
-    relationshipToHH: z.string().min(1, { message: renderRelationshipToHHHelperText(intl) }),
-    healthInsurance: createHealthInsuranceSchema(intl, pageNumber),
-    conditions: createSpecialConditionsSchema(intl),
-    studentEligibility: studentEligibilitySchema,
-    incomeStreams: incomeStreamsSchema,
-  }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility }, ctx) => {
-    const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
-    if (birthYear === CURRENT_YEAR && birthMonth > CURRENT_MONTH) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: renderFutureBirthMonthHelperText(intl),
-        path: ['birthMonth'],
-        params: { code: 'future_date' },
-      });
-    }
+  return z
+    .object({
+      birthMonth: z
+        .number()
+        .min(1, { message: renderMissingBirthMonthHelperText(intl) })
+        .max(12, { message: renderMissingBirthMonthHelperText(intl) }),
+      birthYear: z
+        .number({ invalid_type_error: renderBirthYearHelperText(intl) })
+        .int()
+        .min(new Date().getFullYear() - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
+        .max(new Date().getFullYear(), { message: renderInvalidBirthYearHelperText(intl) }),
+      relationshipToHH: z.string().min(1, { message: renderRelationshipToHHHelperText(intl) }),
+      healthInsurance: createHealthInsuranceSchema(intl, pageNumber),
+      conditions: createSpecialConditionsSchema(intl),
+      studentEligibility: studentEligibilitySchema,
+      incomeStreams: incomeStreamsSchema,
+    })
+    .superRefine(({ birthMonth, birthYear, conditions, studentEligibility }, ctx) => {
+      const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
+      if (birthYear === CURRENT_YEAR && birthMonth > CURRENT_MONTH) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: renderFutureBirthMonthHelperText(intl),
+          path: ['birthMonth'],
+          params: { code: 'future_date' },
+        });
+      }
 
-    if (conditions.student) {
-      STUDENT_QUESTIONS.forEach(({ name }) => {
-        if (studentEligibility[name] === undefined) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: renderStudentEligibilityErrorMessage(intl),
-            path: ['studentEligibility', name],
-            params: { code: 'incomplete' },
-          });
-        }
-      });
-    }
-  });
+      if (conditions.student) {
+        STUDENT_QUESTIONS.forEach(({ name }) => {
+          if (studentEligibility[name] === undefined) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: renderStudentEligibilityErrorMessage(intl),
+              path: ['studentEligibility', name],
+              params: { code: 'incomplete' },
+            });
+          }
+        });
+      }
+    });
 };
 
 /**
@@ -199,7 +228,8 @@ export const createBasicInfoPageSchema = (intl: IntlShape) => {
         .number()
         .min(1, { message: renderMissingBirthMonthHelperText(intl) })
         .max(12, { message: renderMissingBirthMonthHelperText(intl) }),
-      birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl) })
+      birthYear: z
+        .number({ invalid_type_error: renderBirthYearHelperText(intl) })
         .int()
         .min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
         .max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
@@ -224,7 +254,9 @@ export type BasicInfoPageSchema = z.infer<ReturnType<typeof createBasicInfoPageS
  * Type helper to infer the schema type
  */
 export type HouseholdMemberFormSchema = z.infer<ReturnType<typeof createHouseholdMemberSchema>>;
-export type EnergyCalculatorHouseholdMemberFormSchema = z.infer<ReturnType<typeof createEnergyCalculatorHouseholdMemberSchema>>;
+export type EnergyCalculatorHouseholdMemberFormSchema = z.infer<
+  ReturnType<typeof createEnergyCalculatorHouseholdMemberSchema>
+>;
 
 // ============================================================================
 // ENERGY CALCULATOR SCHEMA
@@ -246,8 +278,15 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
 
   return z
     .object({
-      birthMonth: z.number().min(1, { message: renderMissingBirthMonthHelperText(intl) }).max(12, { message: renderMissingBirthMonthHelperText(intl) }),
-      birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl) }).int().min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) }).max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
+      birthMonth: z
+        .number()
+        .min(1, { message: renderMissingBirthMonthHelperText(intl) })
+        .max(12, { message: renderMissingBirthMonthHelperText(intl) }),
+      birthYear: z
+        .number({ invalid_type_error: renderBirthYearHelperText(intl) })
+        .int()
+        .min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
+        .max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
       conditions: z.object({
         survivingSpouse: z.boolean().optional().default(false),
         disabled: z.boolean().optional().default(false),
@@ -256,10 +295,9 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
       receivesSsi: z.enum(['true', 'false']).optional(),
       relationshipToHH: z
         .string()
-        .refine(
-          (value) => [...Object.keys(relationshipOptions)].includes(value) || pageNumber === 1,
-          { message: renderRelationshipToHHHelperText(intl) },
-        ),
+        .refine((value) => [...Object.keys(relationshipOptions)].includes(value) || pageNumber === 1, {
+          message: renderRelationshipToHHHelperText(intl),
+        }),
       incomeStreams: incomeStreamsSchema,
     })
     .refine(
