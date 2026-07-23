@@ -44,8 +44,12 @@ import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/an
 import '../styles/HouseholdMemberSections.css';
 import '../styles/IncomeSection.css';
 
-// Both main and EC workflows share the same incomeStreams shape.
+// Both main and EC workflows share the same incomeStreams shape plus the three
+// income-question answers (null = unanswered).
 type IncomeFormValues = {
+  incomeEmployed: boolean | null;
+  incomeGig: boolean | null;
+  incomeOther: boolean | null;
   incomeStreams: IncomeStreamFormData[];
 };
 
@@ -326,34 +330,64 @@ interface YesNoToggleProps {
   value: boolean | null;
   onChange: (value: boolean) => void;
   ariaLabel: string;
+  /** id of an error message element, wired to the group via aria-describedby. */
+  errorId?: string;
+  hasError?: boolean;
 }
 
 /**
- * Yes/No toggle: two bordered pill buttons side by
- * side, filled with the primary color when selected. Uses plain buttons rather
- * than MUI Button variants because the app theme neutralizes the outlined
- * border (border: none), which would render them as borderless text.
+ * Accessible Yes/No single-select, styled as two bordered pill buttons (filled
+ * with the primary color when selected). Implemented as a radiogroup with two
+ * role="radio" options — the semantically correct pattern for a one-of-two
+ * choice — with roving tabindex and Left/Right/Up/Down arrow navigation.
+ *
+ * Plain buttons (not MUI Radio/Button) so the pill design survives: the app
+ * theme neutralizes MUI's outlined border, and MUI Radio can't render as a pill.
  */
-const YesNoToggle = ({ value, onChange, ariaLabel }: YesNoToggleProps) => (
-  <div className="income-yes-no-toggle" role="group" aria-label={ariaLabel}>
-    <button
-      type="button"
-      className={`income-yes-no-button${value === true ? ' income-yes-no-selected' : ''}`}
-      onClick={() => onChange(true)}
-      aria-pressed={value === true}
+const YES_NO_OPTIONS: { key: 'yes' | 'no'; answer: boolean; id: string; defaultMessage: string }[] = [
+  { key: 'yes', answer: true, id: 'radiofield.label-yes', defaultMessage: 'Yes' },
+  { key: 'no', answer: false, id: 'radiofield.label-no', defaultMessage: 'No' },
+];
+
+const YesNoToggle = ({ value, onChange, ariaLabel, errorId, hasError }: YesNoToggleProps) => {
+  // Move selection with arrow keys (wrapping), matching native radiogroup behavior.
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'].includes(e.key)) {
+      e.preventDefault();
+      onChange(!(value === true));
+    }
+  };
+
+  return (
+    <div
+      className="income-yes-no-toggle"
+      role="radiogroup"
+      aria-label={ariaLabel}
+      aria-describedby={hasError ? errorId : undefined}
+      aria-invalid={hasError || undefined}
+      onKeyDown={handleKeyDown}
     >
-      <FormattedMessage id="radiofield.label-yes" defaultMessage="Yes" />
-    </button>
-    <button
-      type="button"
-      className={`income-yes-no-button${value === false ? ' income-yes-no-selected' : ''}`}
-      onClick={() => onChange(false)}
-      aria-pressed={value === false}
-    >
-      <FormattedMessage id="radiofield.label-no" defaultMessage="No" />
-    </button>
-  </div>
-);
+      {YES_NO_OPTIONS.map(({ key, answer, id, defaultMessage }) => {
+        const checked = value === answer;
+        return (
+          <button
+            key={key}
+            type="button"
+            role="radio"
+            aria-checked={checked}
+            // Roving tabindex: the checked option (or Yes when unanswered) is the
+            // single tab stop; arrow keys move between options once focused.
+            tabIndex={checked || (value === null && answer === true) ? 0 : -1}
+            className={`income-yes-no-button${checked ? ' income-yes-no-selected' : ''}`}
+            onClick={() => onChange(answer)}
+          >
+            <FormattedMessage id={id} defaultMessage={defaultMessage} />
+          </button>
+        );
+      })}
+    </div>
+  );
+};
 
 /**
  * De-emphasized "+ Add an income source" link — no longer a
@@ -414,17 +448,17 @@ const IncomeSection = ({
   // they are required by the schema and participate in scroll-to-error. They are
   // seeded from the persisted streams (deriveIncomeAnswers) in defaultValues and
   // stripped before saving — the backend still derives income from the streams.
-  const employed = (useWatch({ control, name: 'incomeEmployed' as any }) ?? null) as boolean | null;
-  const gig = (useWatch({ control, name: 'incomeGig' as any }) ?? null) as boolean | null;
-  const other = (useWatch({ control, name: 'incomeOther' as any }) ?? null) as boolean | null;
+  const employed = useWatch({ control, name: 'incomeEmployed' }) ?? null;
+  const gig = useWatch({ control, name: 'incomeGig' }) ?? null;
+  const other = useWatch({ control, name: 'incomeOther' }) ?? null;
 
-  const setEmployed = (v: boolean | null) => setValue('incomeEmployed' as any, v as any, { shouldValidate: true });
-  const setGig = (v: boolean | null) => setValue('incomeGig' as any, v as any, { shouldValidate: true });
-  const setOther = (v: boolean | null) => setValue('incomeOther' as any, v as any, { shouldValidate: true });
+  const setEmployed = (v: boolean | null) => setValue('incomeEmployed', v, { shouldValidate: true });
+  const setGig = (v: boolean | null) => setValue('incomeGig', v, { shouldValidate: true });
+  const setOther = (v: boolean | null) => setValue('incomeOther', v, { shouldValidate: true });
 
-  const employedError = (errors as FieldErrors<any>)?.incomeEmployed as { message?: string } | undefined;
-  const gigError = (errors as FieldErrors<any>)?.incomeGig as { message?: string } | undefined;
-  const otherError = (errors as FieldErrors<any>)?.incomeOther as { message?: string } | undefined;
+  const employedError = errors.incomeEmployed as { message?: string } | undefined;
+  const gigError = errors.incomeGig as { message?: string } | undefined;
+  const otherError = errors.incomeOther as { message?: string } | undefined;
 
   // Q2 (gig) is only asked when Q1 (employed) is "No".
   const showGigQuestion = employed === false;
@@ -460,41 +494,67 @@ const IncomeSection = ({
     indices.forEach((i) => remove(i));
   };
 
+  // A row "has data" once the user has entered an amount or picked a source —
+  // i.e. answering "No" would discard real input.
+  const streamHasData = (s: IncomeStreamFormData) =>
+    (s.incomeAmount !== '' && s.incomeAmount != null) || !!s.incomeStreamName;
+
+  // Confirm before discarding rows that contain entered data. Returns false if
+  // the user cancels, so the caller can abort the toggle. Empty rows are removed
+  // without a prompt.
+  const confirmDiscardIfFilled = (predicate: (value: IncomeStreamFormData) => boolean): boolean => {
+    const hasFilledRows = rows.some((r) => predicate(r.value) && streamHasData(r.value));
+    if (!hasFilledRows) return true;
+    return window.confirm(
+      intl.formatMessage({
+        id: 'personIncomeBlock.discardIncomeConfirm',
+        defaultMessage: 'This will remove the income you entered for this question. Continue?',
+      }),
+    );
+  };
+
   const handleEmployedChange = (answer: boolean) => {
-    setEmployed(answer);
     if (answer) {
-      // Turning employment on hides the gig question; fold any existing gig income
-      // back under the (now visible) employment question rather than dropping it.
+      setEmployed(answer);
+      // Turning employment on hides the gig question; any self-employment stream
+      // already entered stays and is folded under the (now visible) employment
+      // question rather than dropped.
       setGig(null);
       if (employmentRows.length === 0) {
         append(EMPTY_EMPLOYMENT_INCOME_STREAM);
         trackIncomeSource('add');
       }
     } else {
+      if (!confirmDiscardIfFilled(isEmploymentStream)) return;
+      setEmployed(answer);
       removeMatching(isEmploymentStream);
     }
   };
 
   const handleGigChange = (answer: boolean) => {
-    setGig(answer);
     if (answer) {
+      setGig(answer);
       if (employmentRows.length === 0) {
         append(EMPTY_GIG_INCOME_STREAM);
         trackIncomeSource('add');
       }
     } else {
+      if (!confirmDiscardIfFilled(isEmploymentStream)) return;
+      setGig(answer);
       removeMatching(isEmploymentStream);
     }
   };
 
   const handleOtherChange = (answer: boolean) => {
-    setOther(answer);
     if (answer) {
+      setOther(answer);
       if (otherRows.length === 0) {
         append(EMPTY_INCOME_STREAM);
         trackIncomeSource('add');
       }
     } else {
+      if (!confirmDiscardIfFilled((value) => !isEmploymentStream(value))) return;
+      setOther(answer);
       // Remove every non-employment row, including any blank rows the user added
       // but never assigned a category.
       removeMatching((value) => !isEmploymentStream(value));
@@ -560,9 +620,11 @@ const IncomeSection = ({
             value={employed}
             onChange={handleEmployedChange}
             ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-employed', defaultMessage: 'Are you currently employed?' })}
+            errorId="income-employed-error"
+            hasError={!!employedError}
           />
           {employedError && (
-            <FormHelperText sx={{ ml: 0 }}>
+            <FormHelperText id="income-employed-error" sx={{ ml: 0 }}>
               <ErrorMessageWrapper fontSize="0.875rem">{employedError.message ?? ''}</ErrorMessageWrapper>
             </FormHelperText>
           )}
@@ -593,9 +655,11 @@ const IncomeSection = ({
               value={gig}
               onChange={handleGigChange}
               ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-gig', defaultMessage: 'Do you earn any money from freelance, gig, or occasional work?' })}
+              errorId="income-gig-error"
+              hasError={!!gigError}
             />
             {gigError && (
-              <FormHelperText sx={{ ml: 0 }}>
+              <FormHelperText id="income-gig-error" sx={{ ml: 0 }}>
                 <ErrorMessageWrapper fontSize="0.875rem">{gigError.message ?? ''}</ErrorMessageWrapper>
               </FormHelperText>
             )}
@@ -620,9 +684,11 @@ const IncomeSection = ({
             value={other}
             onChange={handleOtherChange}
             ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-other', defaultMessage: 'Do you receive any government benefits, child support, alimony, or other recurring payments?' })}
+            errorId="income-other-error"
+            hasError={!!otherError}
           />
           {otherError && (
-            <FormHelperText sx={{ ml: 0 }}>
+            <FormHelperText id="income-other-error" sx={{ ml: 0 }}>
               <ErrorMessageWrapper fontSize="0.875rem">{otherError.message ?? ''}</ErrorMessageWrapper>
             </FormHelperText>
           )}

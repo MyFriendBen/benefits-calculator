@@ -92,6 +92,26 @@ const createIncomeSourceSchema = (intl: IntlShape) => {
 };
 
 /**
+ * The three income questions are required. Q2 (gig) is only asked when Q1 (employed)
+ * is "No". Shared by both the main and Energy Calculator schemas so the rule can't
+ * drift between them.
+ */
+const validateIncomeQuestions = (
+  { incomeEmployed, incomeGig, incomeOther }: { incomeEmployed: boolean | null; incomeGig: boolean | null; incomeOther: boolean | null },
+  ctx: z.RefinementCtx,
+  intl: IntlShape,
+) => {
+  const requireAnswer = (value: boolean | null, path: string) => {
+    if (value === null) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: [path], params: { code: 'required' } });
+    }
+  };
+  requireAnswer(incomeEmployed, 'incomeEmployed');
+  if (incomeEmployed === false) requireAnswer(incomeGig, 'incomeGig');
+  requireAnswer(incomeOther, 'incomeOther');
+};
+
+/**
  * Creates health insurance validation schema
  */
 const createHealthInsuranceSchema = (intl: IntlShape, pageNumber: number) => {
@@ -165,16 +185,7 @@ export const createHouseholdMemberSchema = (
     incomeOther: z.boolean().nullable(),
     incomeStreams: incomeStreamsSchema,
   }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility, incomeEmployed, incomeGig, incomeOther }, ctx) => {
-    // The three income questions are required. Q2 (gig) is only asked when Q1=No.
-    if (incomeEmployed === null) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeEmployed'], params: { code: 'required' } });
-    }
-    if (incomeEmployed === false && incomeGig === null) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeGig'], params: { code: 'required' } });
-    }
-    if (incomeOther === null) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeOther'], params: { code: 'required' } });
-    }
+    validateIncomeQuestions({ incomeEmployed, incomeGig, incomeOther }, ctx, intl);
 
     const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
     if (birthYear === CURRENT_YEAR && birthMonth > CURRENT_MONTH) {
@@ -290,15 +301,6 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
       { message: renderFutureBirthMonthHelperText(intl), path: ['birthMonth'] },
     )
     .superRefine(({ incomeEmployed, incomeGig, incomeOther }, ctx) => {
-      // The three income questions are required. Q2 (gig) is only asked when Q1=No.
-      if (incomeEmployed === null) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeEmployed'], params: { code: 'required' } });
-      }
-      if (incomeEmployed === false && incomeGig === null) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeGig'], params: { code: 'required' } });
-      }
-      if (incomeOther === null) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: ['incomeOther'], params: { code: 'required' } });
-      }
+      validateIncomeQuestions({ incomeEmployed, incomeGig, incomeOther }, ctx, intl);
     });
 };

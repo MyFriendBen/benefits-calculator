@@ -87,12 +87,12 @@ const otherStream = (): IncomeStreamFormData => ({
 const getSelectDivs = () =>
   document.querySelectorAll('[aria-haspopup="listbox"]') as NodeListOf<HTMLElement>;
 
-// Grabs the Yes/No toggle group for a question by its accessible name.
-const yesNoGroup = (namePattern: RegExp) => screen.getByRole('group', { name: namePattern });
+// Grabs the Yes/No radiogroup for a question by its accessible name.
+const yesNoGroup = (namePattern: RegExp) => screen.getByRole('radiogroup', { name: namePattern });
 const clickYes = (namePattern: RegExp) =>
-  fireEvent.click(within(yesNoGroup(namePattern)).getByRole('button', { name: /^yes$/i }));
+  fireEvent.click(within(yesNoGroup(namePattern)).getByRole('radio', { name: /^yes$/i }));
 const clickNo = (namePattern: RegExp) =>
-  fireEvent.click(within(yesNoGroup(namePattern)).getByRole('button', { name: /^no$/i }));
+  fireEvent.click(within(yesNoGroup(namePattern)).getByRole('radio', { name: /^no$/i }));
 
 describe('IncomeSection (three-question design)', () => {
   describe('question visibility', () => {
@@ -217,13 +217,65 @@ describe('IncomeSection (three-question design)', () => {
       });
     });
 
-    it('removes all employment rows when employed is switched to "No"', async () => {
+    it('removes all employment rows when employed is switched to "No" (after confirm)', async () => {
+      const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
       render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
       expect(screen.getAllByRole('button', { name: /delete income source/i })).toHaveLength(1);
       clickNo(/are you currently employed/i);
       await waitFor(() => {
         expect(screen.queryByRole('button', { name: /delete income source/i })).not.toBeInTheDocument();
       });
+      confirmSpy.mockRestore();
+    });
+  });
+
+  describe('confirm before discarding filled income (destructive toggle)', () => {
+    it('prompts before removing a filled row when switching to "No", and keeps data if cancelled', () => {
+      const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(false);
+      render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
+      clickNo(/are you currently employed/i);
+      // Cancelled → row is preserved and the question stays "Yes".
+      expect(confirmSpy).toHaveBeenCalled();
+      expect(screen.getByRole('button', { name: /delete income source/i })).toBeInTheDocument();
+      expect(within(yesNoGroup(/are you currently employed/i)).getByRole('radio', { name: /^yes$/i })).toHaveAttribute('aria-checked', 'true');
+      confirmSpy.mockRestore();
+    });
+
+    it('does not prompt when the employment rows are empty', () => {
+      const confirmSpy = jest.spyOn(window, 'confirm');
+      render(<Wrapper />);
+      clickYes(/are you currently employed/i); // appends an empty employment row
+      clickNo(/are you currently employed/i); // empty row → no prompt
+      expect(confirmSpy).not.toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
+  });
+
+  describe('accessibility', () => {
+    it('renders each question as a radiogroup with two radios', () => {
+      render(<Wrapper />);
+      const group = yesNoGroup(/are you currently employed/i);
+      expect(within(group).getAllByRole('radio')).toHaveLength(2);
+    });
+
+    it('associates the required-answer error with the toggle via aria-describedby + aria-invalid', () => {
+      // Force the employed error via the errors prop.
+      render(<Wrapper errors={{ incomeEmployed: { message: 'Please select an answer.' } }} />);
+      const group = yesNoGroup(/are you currently employed/i);
+      expect(group).toHaveAttribute('aria-invalid', 'true');
+      const describedBy = group.getAttribute('aria-describedby');
+      expect(describedBy).toBe('income-employed-error');
+      expect(document.getElementById(describedBy!)).toHaveTextContent(/please select an answer/i);
+    });
+
+    it('moves the selection with arrow keys', () => {
+      render(<Wrapper />);
+      const group = yesNoGroup(/are you currently employed/i);
+      fireEvent.keyDown(group, { key: 'ArrowRight' });
+      // From unanswered, ArrowRight selects "Yes".
+      expect(within(group).getByRole('radio', { name: /^yes$/i })).toHaveAttribute('aria-checked', 'true');
+      fireEvent.keyDown(group, { key: 'ArrowRight' });
+      expect(within(group).getByRole('radio', { name: /^no$/i })).toHaveAttribute('aria-checked', 'true');
     });
   });
 
