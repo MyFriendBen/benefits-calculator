@@ -2,6 +2,7 @@ import * as z from 'zod';
 import { IntlShape } from 'react-intl';
 import { MAX_AGE, getCurrentMonthYear } from '../../../../Assets/age';
 import { FormattedMessageType } from '../../../../Types/Questions';
+import { EMPLOYMENT_CATEGORY } from './constants';
 import {
   renderHealthInsSelectOneHelperText,
   renderHealthInsNonePlusHelperText,
@@ -18,6 +19,7 @@ import {
   renderRelationshipToHHHelperText,
   renderIncomeCategoryHelperText,
   renderIncomeQuestionHelperText,
+  renderIncomeSourceRequiredHelperText,
   hasAtLeastOneTrue,
   validateNoneExclusive,
   validateHourlyIncome,
@@ -91,24 +93,54 @@ const createIncomeSourceSchema = (intl: IntlShape) => {
     );
 };
 
+type IncomeQuestionValues = {
+  incomeEmployed: boolean | null;
+  incomeGig: boolean | null;
+  incomeOther: boolean | null;
+  incomeStreams: { incomeCategory: string }[];
+};
+
 /**
- * The three income questions are required. Q2 (gig) is only asked when Q1 (employed)
- * is "No". Shared by both the main and Energy Calculator schemas so the rule can't
- * drift between them.
+ * Validates the three income questions. Shared by both the main and Energy
+ * Calculator schemas so the rules can't drift between them.
+ *
+ * Two rules per question:
+ * 1. Required — each must be answered Yes/No. Q2 (gig) is only asked when Q1
+ *    (employed) is "No".
+ * 2. Answering "Yes" must be backed by at least one income source of that kind —
+ *    otherwise a user could answer Yes, remove the seeded row, and continue with
+ *    no income entered. Employment streams back Q1/Q2; non-employment streams
+ *    back Q3.
  */
 const validateIncomeQuestions = (
-  { incomeEmployed, incomeGig, incomeOther }: { incomeEmployed: boolean | null; incomeGig: boolean | null; incomeOther: boolean | null },
+  { incomeEmployed, incomeGig, incomeOther, incomeStreams }: IncomeQuestionValues,
   ctx: z.RefinementCtx,
   intl: IntlShape,
 ) => {
+  const employmentStreamCount = incomeStreams.filter((s) => s.incomeCategory === EMPLOYMENT_CATEGORY).length;
+  const otherStreamCount = incomeStreams.length - employmentStreamCount;
+
   const requireAnswer = (value: boolean | null, path: string) => {
     if (value === null) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: [path], params: { code: 'required' } });
     }
   };
+  const requireStream = (value: boolean | null, count: number, path: string) => {
+    if (value === true && count === 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeSourceRequiredHelperText(intl), path: [path], params: { code: 'source_required' } });
+    }
+  };
+
   requireAnswer(incomeEmployed, 'incomeEmployed');
-  if (incomeEmployed === false) requireAnswer(incomeGig, 'incomeGig');
+  requireStream(incomeEmployed, employmentStreamCount, 'incomeEmployed');
+
+  if (incomeEmployed === false) {
+    requireAnswer(incomeGig, 'incomeGig');
+    requireStream(incomeGig, employmentStreamCount, 'incomeGig');
+  }
+
   requireAnswer(incomeOther, 'incomeOther');
+  requireStream(incomeOther, otherStreamCount, 'incomeOther');
 };
 
 /**
@@ -184,8 +216,8 @@ export const createHouseholdMemberSchema = (
     incomeGig: z.boolean().nullable(),
     incomeOther: z.boolean().nullable(),
     incomeStreams: incomeStreamsSchema,
-  }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility, incomeEmployed, incomeGig, incomeOther }, ctx) => {
-    validateIncomeQuestions({ incomeEmployed, incomeGig, incomeOther }, ctx, intl);
+  }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility, incomeEmployed, incomeGig, incomeOther, incomeStreams }, ctx) => {
+    validateIncomeQuestions({ incomeEmployed, incomeGig, incomeOther, incomeStreams }, ctx, intl);
 
     const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
     if (birthYear === CURRENT_YEAR && birthMonth > CURRENT_MONTH) {
@@ -300,7 +332,7 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
       },
       { message: renderFutureBirthMonthHelperText(intl), path: ['birthMonth'] },
     )
-    .superRefine(({ incomeEmployed, incomeGig, incomeOther }, ctx) => {
-      validateIncomeQuestions({ incomeEmployed, incomeGig, incomeOther }, ctx, intl);
+    .superRefine(({ incomeEmployed, incomeGig, incomeOther, incomeStreams }, ctx) => {
+      validateIncomeQuestions({ incomeEmployed, incomeGig, incomeOther, incomeStreams }, ctx, intl);
     });
 };

@@ -1,15 +1,18 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import {
   Box,
+  Button,
   FormControl,
   FormHelperText,
   FormLabel,
   InputAdornment,
+  Popover,
   Select,
   Stack,
   TextField,
   Tooltip,
+  Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -43,6 +46,7 @@ import { useTrackEvent } from '../../../../Assets/analytics';
 import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
 import '../styles/HouseholdMemberSections.css';
 import '../styles/IncomeSection.css';
+import '../styles/popover.css';
 
 // Both main and EC workflows share the same incomeStreams shape plus the three
 // income-question answers (null = unanswered).
@@ -327,8 +331,10 @@ const IncomeStreamRow = ({
 };
 
 interface YesNoToggleProps {
+  // `anchorEl` is the clicked option element, used to position the discard-confirm
+  // popover when answering "No" would remove entered income.
   value: boolean | null;
-  onChange: (value: boolean) => void;
+  onChange: (value: boolean, anchorEl: HTMLElement) => void;
   ariaLabel: string;
   /** id of an error message element, wired to the group via aria-describedby. */
   errorId?: string;
@@ -354,7 +360,7 @@ const YesNoToggle = ({ value, onChange, ariaLabel, errorId, hasError }: YesNoTog
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'].includes(e.key)) {
       e.preventDefault();
-      onChange(!(value === true));
+      onChange(!(value === true), e.currentTarget);
     }
   };
 
@@ -379,7 +385,7 @@ const YesNoToggle = ({ value, onChange, ariaLabel, errorId, hasError }: YesNoTog
             // single tab stop; arrow keys move between options once focused.
             tabIndex={checked || (value === null && answer === true) ? 0 : -1}
             className={`income-yes-no-button${checked ? ' income-yes-no-selected' : ''}`}
-            onClick={() => onChange(answer)}
+            onClick={(e) => onChange(answer, e.currentTarget)}
           >
             <FormattedMessage id={id} defaultMessage={defaultMessage} />
           </button>
@@ -499,21 +505,34 @@ const IncomeSection = ({
   const streamHasData = (s: IncomeStreamFormData) =>
     (s.incomeAmount !== '' && s.incomeAmount != null) || !!s.incomeStreamName;
 
-  // Confirm before discarding rows that contain entered data. Returns false if
-  // the user cancels, so the caller can abort the toggle. Empty rows are removed
-  // without a prompt.
-  const confirmDiscardIfFilled = (predicate: (value: IncomeStreamFormData) => boolean): boolean => {
+  // Discard-confirmation popover state: the option element it anchors to, plus the
+  // removal to run if the user confirms. Anchoring to the clicked "No" button
+  // mirrors the household-member delete confirmation.
+  const [discardConfirm, setDiscardConfirm] = useState<{ anchorEl: HTMLElement; onConfirm: () => void } | null>(null);
+  const closeDiscardConfirm = () => setDiscardConfirm(null);
+
+  // Runs `applyNo` immediately if answering "No" wouldn't lose entered data;
+  // otherwise opens the confirm popover anchored to the clicked option.
+  const confirmDiscardOrApply = (
+    predicate: (value: IncomeStreamFormData) => boolean,
+    anchorEl: HTMLElement,
+    applyNo: () => void,
+  ) => {
     const hasFilledRows = rows.some((r) => predicate(r.value) && streamHasData(r.value));
-    if (!hasFilledRows) return true;
-    return window.confirm(
-      intl.formatMessage({
-        id: 'personIncomeBlock.discardIncomeConfirm',
-        defaultMessage: 'This will remove the income you entered for this question. Continue?',
-      }),
-    );
+    if (!hasFilledRows) {
+      applyNo();
+      return;
+    }
+    setDiscardConfirm({
+      anchorEl,
+      onConfirm: () => {
+        applyNo();
+        closeDiscardConfirm();
+      },
+    });
   };
 
-  const handleEmployedChange = (answer: boolean) => {
+  const handleEmployedChange = (answer: boolean, anchorEl: HTMLElement) => {
     if (answer) {
       setEmployed(answer);
       // Turning employment on hides the gig question; any self-employment stream
@@ -525,13 +544,14 @@ const IncomeSection = ({
         trackIncomeSource('add');
       }
     } else {
-      if (!confirmDiscardIfFilled(isEmploymentStream)) return;
-      setEmployed(answer);
-      removeMatching(isEmploymentStream);
+      confirmDiscardOrApply(isEmploymentStream, anchorEl, () => {
+        setEmployed(answer);
+        removeMatching(isEmploymentStream);
+      });
     }
   };
 
-  const handleGigChange = (answer: boolean) => {
+  const handleGigChange = (answer: boolean, anchorEl: HTMLElement) => {
     if (answer) {
       setGig(answer);
       if (employmentRows.length === 0) {
@@ -539,13 +559,14 @@ const IncomeSection = ({
         trackIncomeSource('add');
       }
     } else {
-      if (!confirmDiscardIfFilled(isEmploymentStream)) return;
-      setGig(answer);
-      removeMatching(isEmploymentStream);
+      confirmDiscardOrApply(isEmploymentStream, anchorEl, () => {
+        setGig(answer);
+        removeMatching(isEmploymentStream);
+      });
     }
   };
 
-  const handleOtherChange = (answer: boolean) => {
+  const handleOtherChange = (answer: boolean, anchorEl: HTMLElement) => {
     if (answer) {
       setOther(answer);
       if (otherRows.length === 0) {
@@ -553,11 +574,12 @@ const IncomeSection = ({
         trackIncomeSource('add');
       }
     } else {
-      if (!confirmDiscardIfFilled((value) => !isEmploymentStream(value))) return;
-      setOther(answer);
       // Remove every non-employment row, including any blank rows the user added
       // but never assigned a category.
-      removeMatching((value) => !isEmploymentStream(value));
+      confirmDiscardOrApply((value) => !isEmploymentStream(value), anchorEl, () => {
+        setOther(answer);
+        removeMatching((value) => !isEmploymentStream(value));
+      });
     }
   };
 
@@ -700,6 +722,33 @@ const IncomeSection = ({
           )}
         </Box>
       </Box>
+
+      {/* Confirm before discarding entered income when switching a question to "No".
+          Anchored to the clicked option, matching the household-member delete popover. */}
+      <Popover
+        open={discardConfirm !== null}
+        anchorEl={discardConfirm?.anchorEl}
+        onClose={closeDiscardConfirm}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Box className="household-basic-info-page__delete-popover">
+          <Typography variant="body2">
+            <FormattedMessage
+              id="personIncomeBlock.discardIncomeConfirm"
+              defaultMessage="This will remove the income you entered for this question. Continue?"
+            />
+          </Typography>
+          <Box className="household-basic-info-page__delete-popover-actions">
+            <Button size="small" variant="outlined" onClick={closeDiscardConfirm}>
+              <FormattedMessage id="householdDataBlock.basicInfo.deleteCancel" defaultMessage="Cancel" />
+            </Button>
+            <Button size="small" color="error" variant="contained" onClick={() => discardConfirm?.onConfirm()}>
+              <FormattedMessage id="personIncomeBlock.discardIncomeConfirmButton" defaultMessage="Remove" />
+            </Button>
+          </Box>
+        </Box>
+      </Popover>
     </Box>
   );
 };

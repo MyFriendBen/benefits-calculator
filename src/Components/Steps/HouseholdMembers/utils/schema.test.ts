@@ -34,6 +34,10 @@ const validEcData = {
   incomeStreams: [],
 };
 
+// Fully valid income stream fixtures for the "Yes requires >=1 source" rule.
+const validEmploymentStream = { incomeCategory: 'employment', incomeStreamName: 'wages', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '1000' };
+const validOtherStream = { incomeCategory: 'government', incomeStreamName: 'sSI', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '500' };
+
 // ============================================================================
 // createHouseholdMemberSchema — main workflow
 // ============================================================================
@@ -207,8 +211,36 @@ describe('createHouseholdMemberSchema (main)', () => {
       expect(missingGig.error?.issues.some(i => i.path.at(-1) === 'incomeGig')).toBe(true);
 
       // employed=true + gig unanswered → valid (Q2 not asked)
-      const gigNotAsked = schema.safeParse({ ...validMainData, incomeEmployed: true, incomeGig: null });
+      const gigNotAsked = schema.safeParse({ ...validMainData, incomeEmployed: true, incomeGig: null, incomeStreams: [validEmploymentStream] });
       expect(gigNotAsked.success).toBe(true);
+    });
+
+    it('rejects "employed = Yes" with no employment income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: true, incomeStreams: [] });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeEmployed')).toBe(true);
+    });
+
+    it('accepts "employed = Yes" with an employment income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: true, incomeStreams: [validEmploymentStream] });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects "other = Yes" with no non-employment income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeOther: true, incomeStreams: [] });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeOther')).toBe(true);
+    });
+
+    it('accepts "other = Yes" with a non-employment income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeOther: true, incomeStreams: [validOtherStream] });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects "gig = Yes" (employed No) with no employment income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: false, incomeGig: true, incomeStreams: [] });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeGig')).toBe(true);
     });
   });
 

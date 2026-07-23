@@ -115,6 +115,13 @@ export const renderIncomeQuestionHelperText = (intlHook: IntlShape) => {
   });
 };
 
+export const renderIncomeSourceRequiredHelperText = (intlHook: IntlShape) => {
+  return intlHook.formatMessage({
+    id: 'errorMessage-incomeSourceRequired',
+    defaultMessage: 'Please add at least one income source or select "No".',
+  });
+};
+
 export const renderIncomeStreamNameHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
     id: 'errorMessage-incomeStreamName',

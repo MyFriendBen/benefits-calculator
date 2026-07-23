@@ -217,37 +217,43 @@ describe('IncomeSection (three-question design)', () => {
       });
     });
 
-    it('removes all employment rows when employed is switched to "No" (after confirm)', async () => {
-      const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
+    it('removes all employment rows when employed is switched to "No" (after confirming in the popover)', async () => {
       render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
       expect(screen.getAllByRole('button', { name: /delete income source/i })).toHaveLength(1);
       clickNo(/are you currently employed/i);
+      // A confirmation popover appears; confirm the removal.
+      fireEvent.click(await screen.findByRole('button', { name: /^remove$/i }));
       await waitFor(() => {
         expect(screen.queryByRole('button', { name: /delete income source/i })).not.toBeInTheDocument();
       });
-      confirmSpy.mockRestore();
     });
   });
 
   describe('confirm before discarding filled income (destructive toggle)', () => {
-    it('prompts before removing a filled row when switching to "No", and keeps data if cancelled', () => {
-      const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(false);
+    it('opens a confirmation popover before removing a filled row when switching to "No"', async () => {
       render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
       clickNo(/are you currently employed/i);
-      // Cancelled → row is preserved and the question stays "Yes".
-      expect(confirmSpy).toHaveBeenCalled();
+      expect(await screen.findByText(/this will remove the income you entered/i)).toBeInTheDocument();
+    });
+
+    it('keeps the data and the "Yes" answer if the popover is cancelled', async () => {
+      render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
+      clickNo(/are you currently employed/i);
+      fireEvent.click(await screen.findByRole('button', { name: /^cancel$/i }));
+      await waitFor(() => {
+        expect(screen.queryByText(/this will remove the income you entered/i)).not.toBeInTheDocument();
+      });
       expect(screen.getByRole('button', { name: /delete income source/i })).toBeInTheDocument();
       expect(within(yesNoGroup(/are you currently employed/i)).getByRole('radio', { name: /^yes$/i })).toHaveAttribute('aria-checked', 'true');
-      confirmSpy.mockRestore();
     });
 
     it('does not prompt when the employment rows are empty', () => {
-      const confirmSpy = jest.spyOn(window, 'confirm');
       render(<Wrapper />);
       clickYes(/are you currently employed/i); // appends an empty employment row
-      clickNo(/are you currently employed/i); // empty row → no prompt
-      expect(confirmSpy).not.toHaveBeenCalled();
-      confirmSpy.mockRestore();
+      clickNo(/are you currently employed/i); // empty row → removed with no popover
+      expect(screen.queryByText(/this will remove the income you entered/i)).not.toBeInTheDocument();
+      // Gig question appears (employed is now No), confirming the toggle applied.
+      expect(screen.getByText(/freelance, gig, or occasional work/i)).toBeInTheDocument();
     });
   });
 
