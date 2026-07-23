@@ -36,14 +36,16 @@ const frequencyMenuItems = [
 const Wrapper = ({
   defaultStreams = [],
   errors = {},
+  clearErrorsSpy,
 }: {
   defaultStreams?: IncomeStreamFormData[];
   errors?: Record<string, any>;
+  clearErrorsSpy?: (name: string) => void;
 }) => {
   // Mirror how defaultValues seeds the three answer fields from persisted streams,
   // so rehydration behavior can be exercised by passing defaultStreams alone.
   const derived = deriveIncomeAnswers(defaultStreams);
-  const { control, setValue } = useForm({
+  const { control, setValue, clearErrors } = useForm({
     defaultValues: {
       incomeEmployed: derived.employed ? true : derived.gig ? false : null,
       incomeGig: derived.gig ? true : null,
@@ -62,6 +64,7 @@ const Wrapper = ({
         append={append as any}
         remove={remove}
         setValue={setValue as any}
+        clearErrors={(clearErrorsSpy ?? clearErrors) as any}
         incomeCategories={incomeCategories}
         incomeOptions={incomeOptions}
         frequencyMenuItems={frequencyMenuItems as any}
@@ -272,6 +275,16 @@ describe('IncomeSection (three-question design)', () => {
       const describedBy = group.getAttribute('aria-describedby');
       expect(describedBy).toBe('income-employed-error');
       expect(document.getElementById(describedBy!)).toHaveTextContent(/please select an answer/i);
+    });
+
+    it('clears the stale question error when the answer is changed', () => {
+      // Reproduces the confusing case: after a failed submit the "Yes" question
+      // shows an error; toggling No then Yes should clear it rather than persist.
+      const clearErrorsSpy = jest.fn();
+      render(<Wrapper clearErrorsSpy={clearErrorsSpy} />);
+      clickNo(/are you currently employed/i);
+      clickYes(/are you currently employed/i);
+      expect(clearErrorsSpy).toHaveBeenCalledWith('incomeEmployed');
     });
 
     it('moves the selection with arrow keys', () => {

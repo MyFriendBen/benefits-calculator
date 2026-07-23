@@ -20,6 +20,7 @@ import {
   Control,
   Controller,
   UseFormSetValue,
+  UseFormClearErrors,
   useWatch,
   UseFieldArrayAppend,
   UseFieldArrayRemove,
@@ -72,6 +73,7 @@ interface IncomeSectionProps {
   append: UseFieldArrayAppend<IncomeFormValues, 'incomeStreams'>;
   remove: UseFieldArrayRemove;
   setValue: UseFormSetValue<IncomeFormValues>;
+  clearErrors: UseFormClearErrors<IncomeFormValues>;
   incomeCategories: Record<string, FormattedMessageType>;
   incomeOptions: Record<string, Record<string, FormattedMessageType>>;
   frequencyMenuItems: (JSX.Element | JSX.Element[])[];
@@ -415,6 +417,7 @@ const IncomeSection = ({
   append,
   remove,
   setValue,
+  clearErrors,
   incomeCategories,
   incomeOptions,
   frequencyMenuItems,
@@ -458,9 +461,22 @@ const IncomeSection = ({
   const gig = useWatch({ control, name: 'incomeGig' }) ?? null;
   const other = useWatch({ control, name: 'incomeOther' }) ?? null;
 
-  const setEmployed = (v: boolean | null) => setValue('incomeEmployed', v, { shouldValidate: true });
-  const setGig = (v: boolean | null) => setValue('incomeGig', v, { shouldValidate: true });
-  const setOther = (v: boolean | null) => setValue('incomeOther', v, { shouldValidate: true });
+  // Changing an answer clears that question's stale validation message immediately
+  // (e.g. the "add at least one income source" error shown after a failed submit).
+  // The schema re-checks on the next submit, so a still-invalid state is re-flagged
+  // then rather than lingering while the user is mid-correction.
+  const setEmployed = (v: boolean | null) => {
+    clearErrors('incomeEmployed');
+    setValue('incomeEmployed', v, { shouldValidate: false });
+  };
+  const setGig = (v: boolean | null) => {
+    clearErrors('incomeGig');
+    setValue('incomeGig', v, { shouldValidate: false });
+  };
+  const setOther = (v: boolean | null) => {
+    clearErrors('incomeOther');
+    setValue('incomeOther', v, { shouldValidate: false });
+  };
 
   const employedError = errors.incomeEmployed as { message?: string } | undefined;
   const gigError = errors.incomeGig as { message?: string } | undefined;

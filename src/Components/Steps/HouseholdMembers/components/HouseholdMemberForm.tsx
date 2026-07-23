@@ -294,6 +294,7 @@ const HouseholdMemberForm = () => {
         append={append}
         remove={remove}
         setValue={setValue}
+        clearErrors={clearErrors}
         incomeCategories={incomeCategories}
         incomeOptions={incomeOptions}
         frequencyMenuItems={frequencyMenuItems}
