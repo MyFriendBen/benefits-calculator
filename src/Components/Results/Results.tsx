@@ -192,13 +192,14 @@ const Results = ({ type }: ResultsProps) => {
       step_action: 'view',
     });
 
-    // Per-program impression (the "shown" denominator for conversion). Guarded by
-    // the same ref, so once per screening — not on filter re-renders.
-    apiResults.programs.forEach((program) => {
-      track('screener_program_shown', {
-        program_id: String(program.program_id),
-        program_name: program.name.default_message,
-      });
+    // One batched impression event with parallel id/name arrays, rather than a
+    // forEach firing one event per program: GA4 coalesces same-name events fired
+    // in a single synchronous tick, dropping most of a ~44-program burst. Guarded
+    // by the same ref, so once per screening — not on filter re-renders.
+    track('screener_programs_shown', {
+      program_ids: apiResults.programs.map((program) => String(program.program_id)),
+      program_names: apiResults.programs.map((program) => program.name.default_message),
+      program_count: apiResults.programs.length,
     });
   }, [apiResults, track]);
 

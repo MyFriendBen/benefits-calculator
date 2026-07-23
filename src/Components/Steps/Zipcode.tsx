@@ -194,6 +194,7 @@ export const Zipcode = () => {
                 link_name: 'Other State Options',
                 url: '/select-state',
                 screener_step_name: getStepAnalyticsId('zipcode'),
+                link_location: 'zip_code_inline',
               })
             }
           >

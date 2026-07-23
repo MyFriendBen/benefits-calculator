@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { mfbZodResolver } from './mfbZodResolver';
-import { collectFieldErrors, labelForCode } from './errorLabels';
+import { buildFormErrorEvents, collectFieldErrors, labelForCode } from './errorLabels';
 
 // The two pieces that make specific error reasons flow to screener_form_error:
 // mfbZodResolver stamps each custom rule's params.code onto the RHF error as
@@ -64,21 +64,87 @@ describe('mfbZodResolver', () => {
 describe('collectFieldErrors', () => {
   it('prefers errorCode over a bare custom type', () => {
     const tree = { tcpa: { type: 'custom', message: 'x', errorCode: 'consent_required' } };
-    expect(collectFieldErrors(tree)).toEqual(['tcpa: Consent required']);
+    expect(collectFieldErrors(tree)).toEqual([{ field: 'tcpa', reason: 'Consent required' }]);
   });
 
   it('falls back to the zod type when there is no errorCode', () => {
     const tree = { zip: { type: 'too_small', message: 'x' } };
-    expect(collectFieldErrors(tree)).toEqual(['zip: Required']);
+    expect(collectFieldErrors(tree)).toEqual([{ field: 'zip', reason: 'Required' }]);
   });
 
-  it('recurses into nested/array errors to the real leaf', () => {
+  it('recurses into nested/array errors to the real leaf, normalizing the array index', () => {
     const tree = { members: { 0: { birthYear: { type: 'too_big', message: 'x' } } } };
-    expect(collectFieldErrors(tree)).toEqual(['members.0.birthYear: Too long']);
+    // The `0` index segment is dropped so the field path is canonical.
+    expect(collectFieldErrors(tree)).toEqual([{ field: 'members.birthYear', reason: 'Too long' }]);
+  });
+
+  it('collapses indexed and array-level paths to the same canonical field', () => {
+    // The same field can surface two ways: an indexed element error and an
+    // array-level error. Both must report the identical `field`.
+    const indexed = { members: { 2: { birthYear: { type: 'too_small', message: 'x' } } } };
+    const arrayLevel = { members: { birthYear: { type: 'too_small', message: 'x' } } };
+    expect(collectFieldErrors(indexed)[0].field).toBe('members.birthYear');
+    expect(collectFieldErrors(arrayLevel)[0].field).toBe('members.birthYear');
+  });
+
+  it('emits one entry per failed field (no joined string) so no param is truncated', () => {
+    const tree = {
+      birthYear: { type: 'too_small', message: 'x' },
+      healthInsurance: { errorCode: 'select_one', message: 'y' },
+    };
+    const result = collectFieldErrors(tree);
+    expect(result).toHaveLength(2);
+    expect(result).toContainEqual({ field: 'birthYear', reason: 'Required' });
+    expect(result).toContainEqual({ field: 'healthInsurance', reason: 'Must select an option' });
   });
 
   it('maps an unknown code to Invalid', () => {
     expect(labelForCode('something_new')).toBe('Invalid');
-    expect(collectFieldErrors({ f: { errorCode: 'something_new' } })).toEqual(['f: Invalid']);
+    expect(collectFieldErrors({ f: { errorCode: 'something_new' } })).toEqual([{ field: 'f', reason: 'Invalid' }]);
+  });
+});
+
+describe('buildFormErrorEvents', () => {
+  it('emits one event per failed field, each with field/reason and the field count', () => {
+    const tree = {
+      birthYear: { type: 'too_small', message: 'x' },
+      healthInsurance: { errorCode: 'select_one', message: 'y' },
+    };
+    const events = buildFormErrorEvents(tree, 2);
+    expect(events).toEqual([
+      { form_field_name: 'birthYear', form_error_reason: 'Required', form_error_count: 2 },
+      { form_field_name: 'healthInsurance', form_error_reason: 'Must select an option', form_error_count: 2 },
+    ]);
+  });
+
+  it('counts failed field instances, not RHF top-level keys', () => {
+    // Three members failing birthYear: RHF has ONE top-level `members` key, but
+    // there are three failed field instances. Paths normalize to the same
+    // canonical field, and the count reflects the three instances — NOT RHF's
+    // top-level key count.
+    const tree = {
+      members: {
+        0: { birthYear: { type: 'too_small', message: 'x' } },
+        1: { birthYear: { type: 'too_small', message: 'x' } },
+        2: { birthYear: { type: 'too_small', message: 'x' } },
+      },
+    };
+    const events = buildFormErrorEvents(tree, 1);
+    expect(events).toHaveLength(3);
+    expect(events.every((e) => e.form_field_name === 'members.birthYear')).toBe(true);
+    expect(events.every((e) => e.form_error_count === 3)).toBe(true);
+  });
+
+  it('emits one fallback event when errors exist but no leaf resolves', () => {
+    // An error node with no type/errorCode anywhere: collectFieldErrors returns
+    // []. Since the caller says there ARE errors, a single fallback carries the
+    // top-level count so the submit still registers rather than emitting nothing.
+    const unresolvable = { weird: { message: 'no type or code here' } };
+    expect(collectFieldErrors(unresolvable)).toEqual([]);
+    expect(buildFormErrorEvents(unresolvable, 3)).toEqual([{ form_error_count: 3 }]);
+  });
+
+  it('emits nothing when there are no errors at all', () => {
+    expect(buildFormErrorEvents({}, 0)).toEqual([]);
   });
 });
