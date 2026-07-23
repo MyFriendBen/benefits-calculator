@@ -120,13 +120,18 @@ const Disclaimer = () => {
 
   const handleFormError: SubmitErrorHandler<FormSchema> = (formErrors) => {
     // This step uses a plain useForm (not useStepForm), so it emits its own error
-    // event — via the shared collectFieldErrors so form_error_message matches the
-    // rest of the app's vocabulary (the dashboard groups on it).
-    track('screener_form_error', {
-      screener_step_name: DISCLAIMER_STEP_ANALYTICS_ID,
-      screener_step_number: 2,
-      form_error_count: Object.keys(formErrors).length,
-      form_error_message: collectFieldErrors(formErrors).join(', '),
+    // events — via the shared collectFieldErrors so field/reason match the rest
+    // of the app's vocabulary. One event per failed field (not one joined
+    // message) to stay under GA4's 100-char param cap.
+    const fieldErrors = collectFieldErrors(formErrors);
+    fieldErrors.forEach(({ field, reason }) => {
+      track('screener_form_error', {
+        screener_step_name: DISCLAIMER_STEP_ANALYTICS_ID,
+        screener_step_number: 2,
+        form_field_name: field,
+        form_error_reason: reason,
+        form_error_count: fieldErrors.length,
+      });
     });
   };
 

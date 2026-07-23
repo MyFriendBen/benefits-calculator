@@ -76,6 +76,9 @@ const HouseholdMemberForm = () => {
       screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberDetails,
       screener_step_number: currentStepId,
       step_action: 'view',
+      // 0-based member ordinal (gap #1) so a member-detail page view joins to the
+      // income actions fired on that same page for a per-member-page rate.
+      member_index: currentMemberIndex,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageNumber]);

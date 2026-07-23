@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { mfbZodResolver } from './mfbZodResolver';
-import { collectFieldErrors, labelForCode } from './errorLabels';
+import { collectFieldErrors, formatFieldErrors, labelForCode } from './errorLabels';
 
 // The two pieces that make specific error reasons flow to screener_form_error:
 // mfbZodResolver stamps each custom rule's params.code onto the RHF error as
@@ -64,21 +64,50 @@ describe('mfbZodResolver', () => {
 describe('collectFieldErrors', () => {
   it('prefers errorCode over a bare custom type', () => {
     const tree = { tcpa: { type: 'custom', message: 'x', errorCode: 'consent_required' } };
-    expect(collectFieldErrors(tree)).toEqual(['tcpa: Consent required']);
+    expect(collectFieldErrors(tree)).toEqual([{ field: 'tcpa', reason: 'Consent required' }]);
   });
 
   it('falls back to the zod type when there is no errorCode', () => {
     const tree = { zip: { type: 'too_small', message: 'x' } };
-    expect(collectFieldErrors(tree)).toEqual(['zip: Required']);
+    expect(collectFieldErrors(tree)).toEqual([{ field: 'zip', reason: 'Required' }]);
   });
 
-  it('recurses into nested/array errors to the real leaf', () => {
+  it('recurses into nested/array errors to the real leaf, normalizing the array index', () => {
     const tree = { members: { 0: { birthYear: { type: 'too_big', message: 'x' } } } };
-    expect(collectFieldErrors(tree)).toEqual(['members.0.birthYear: Too long']);
+    // The `0` index segment is dropped so the field is canonical (B2).
+    expect(collectFieldErrors(tree)).toEqual([{ field: 'members.birthYear', reason: 'Too long' }]);
+  });
+
+  it('collapses indexed and array-level paths to the same canonical field (B2)', () => {
+    // Same conceptual field surfacing two ways: an indexed element error and an
+    // array-level error. Both must report the identical `field` so they
+    // aggregate downstream instead of splitting into two rows.
+    const indexed = { members: { 2: { birthYear: { type: 'too_small', message: 'x' } } } };
+    const arrayLevel = { members: { birthYear: { type: 'too_small', message: 'x' } } };
+    expect(collectFieldErrors(indexed)[0].field).toBe('members.birthYear');
+    expect(collectFieldErrors(arrayLevel)[0].field).toBe('members.birthYear');
+  });
+
+  it('emits one entry per failed field (no joined string) so no param is truncated', () => {
+    const tree = {
+      birthYear: { type: 'too_small', message: 'x' },
+      healthInsurance: { errorCode: 'select_one', message: 'y' },
+    };
+    const result = collectFieldErrors(tree);
+    expect(result).toHaveLength(2);
+    expect(result).toContainEqual({ field: 'birthYear', reason: 'Required' });
+    expect(result).toContainEqual({ field: 'healthInsurance', reason: 'Must select an option' });
   });
 
   it('maps an unknown code to Invalid', () => {
     expect(labelForCode('something_new')).toBe('Invalid');
-    expect(collectFieldErrors({ f: { errorCode: 'something_new' } })).toEqual(['f: Invalid']);
+    expect(collectFieldErrors({ f: { errorCode: 'something_new' } })).toEqual([{ field: 'f', reason: 'Invalid' }]);
+  });
+});
+
+describe('formatFieldErrors', () => {
+  it('joins field errors into the legacy "field: reason" string for back-compat', () => {
+    const tree = { zip: { type: 'too_small', message: 'x' }, tcpa: { errorCode: 'consent_required' } };
+    expect(formatFieldErrors(collectFieldErrors(tree))).toBe('zip: Required, tcpa: Consent required');
   });
 });

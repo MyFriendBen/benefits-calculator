@@ -322,6 +322,10 @@ const IncomeSection = ({
     track('screener_income_source', {
       screener_step_name: getStepAnalyticsId('householdData'),
       screener_step_number: householdDataStepNumber >= 0 ? householdDataStepNumber : undefined,
+      // 0-based member ordinal (gap #1): pageNumber is the 1-based member page,
+      // matching member_index on the member-details step-view event, so income
+      // actions join to the page they happened on for a per-member-page rate.
+      member_index: pageNumber - 1,
       action,
     });
   };

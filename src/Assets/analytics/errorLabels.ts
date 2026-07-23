@@ -33,20 +33,45 @@ export const RULE_LABELS: Record<string, string> = {
 };
 
 // Map a rule code (or zod type) to its friendly label; unknown -> 'Invalid'.
-export const labelForCode = (code: string | undefined): string =>
-  (code && RULE_LABELS[code]) || 'Invalid';
+export const labelForCode = (code: string | undefined): string => (code && RULE_LABELS[code]) || 'Invalid';
 
-// Walk an RHF error tree into "field: label" strings. RHF mirrors the form shape,
-// so field arrays (members[0].birthYear) have no `type` at the top level — recurse
-// to the real leaf. A leaf carries an `errorCode` (custom rule, checked first so a
-// refine's bare 'custom' type doesn't win) or a `type` (standard rule).
-export const collectFieldErrors = (node: unknown, path = ''): string[] => {
+// One failed field: its canonical path and the friendly rule label. Emitted as
+// separate params on screener_form_error so neither hits GA4's 100-char cap.
+export interface FieldError {
+  field: string;
+  reason: string;
+}
+
+// Walk an RHF error tree into one FieldError per failed leaf. RHF mirrors the
+// form shape, so field arrays (members[0].birthYear) have no `type` at the top
+// level — recurse to the real leaf. A leaf carries an `errorCode` (custom rule,
+// checked first so a refine's bare 'custom' type doesn't win) or a `type`
+// (standard rule).
+//
+// PATH NORMALIZATION (gap B2): numeric array-index segments are dropped, so
+// `members.0.birthYear` and an array-level `members.birthYear` both canonicalize
+// to `members.birthYear`. Without this the same field aggregates under multiple
+// labels downstream (per-member index + array-level + bare leaf).
+export const collectFieldErrors = (node: unknown, path = ''): FieldError[] => {
   if (!node || typeof node !== 'object') return [];
   const code = (node as { errorCode?: string }).errorCode;
   const t = (node as { type?: string }).type;
   const rule = code ?? t;
-  if (typeof rule === 'string') return [`${path}: ${labelForCode(rule)}`];
+  if (typeof rule === 'string') return [{ field: path, reason: labelForCode(rule) }];
   return Object.entries(node as Record<string, unknown>)
     .filter(([key]) => key !== 'ref' && key !== 'message' && key !== 'errorCode')
-    .flatMap(([key, child]) => collectFieldErrors(child, path ? `${path}.${key}` : key));
+    .flatMap(([key, child]) => {
+      // Drop numeric index segments (e.g. the `0` in members.0.birthYear) so the
+      // same field always reports the same canonical path.
+      const isIndex = /^\d+$/.test(key);
+      const nextPath = isIndex ? path : path ? `${path}.${key}` : key;
+      return collectFieldErrors(child, nextPath);
+    });
 };
+
+// Legacy "field: label, field: label" joined form of collectFieldErrors, kept
+// for the optional back-compat `form_error_message` param. Prefer emitting one
+// event per FieldError (own field/reason params) over this joined string, which
+// GA4 truncates at 100 chars.
+export const formatFieldErrors = (errors: FieldError[]): string =>
+  errors.map(({ field, reason }) => `${field}: ${reason}`).join(', ');

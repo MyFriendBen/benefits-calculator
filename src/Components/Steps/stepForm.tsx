@@ -66,15 +66,19 @@ export default function useStepForm<T extends FieldValues>({
   // attempt, so we emit exactly one error event per failed submit.
   useEffect(() => {
     if (submitCount > 0 && isSubmitted && !isSubmitSuccessful && errorCount > 0) {
-      // "field: label" pairs for the failed validations (e.g.
-      // "zipcode: Required, members.0.birthYear: Invalid format"), via the shared
-      // collectFieldErrors/RULE_LABELS so every emit path uses one vocabulary.
-      const errorFields = collectFieldErrors(errors).join(', ');
-      track('screener_form_error', {
-        screener_step_name: stepNameOverride ?? getStepAnalyticsId(questionName),
-        screener_step_number: stepNumber >= 0 ? stepNumber : undefined,
-        form_error_count: errorCount,
-        form_error_message: errorFields,
+      // One event PER failed field (not one joined message) so no param hits
+      // GA4's 100-char cap. Field path + reason are separate params, via the
+      // shared collectFieldErrors/RULE_LABELS so every emit path uses one
+      // vocabulary and canonical (index-normalized) field paths.
+      const fieldErrors = collectFieldErrors(errors);
+      fieldErrors.forEach(({ field, reason }) => {
+        track('screener_form_error', {
+          screener_step_name: stepNameOverride ?? getStepAnalyticsId(questionName),
+          screener_step_number: stepNumber >= 0 ? stepNumber : undefined,
+          form_field_name: field,
+          form_error_reason: reason,
+          form_error_count: fieldErrors.length,
+        });
       });
     }
     // Intentionally depend only on submitCount so this fires once per submit
