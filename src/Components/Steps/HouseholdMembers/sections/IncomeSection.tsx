@@ -425,6 +425,11 @@ const IncomeSection = ({
 }: IncomeSectionProps) => {
   const intl = useIntl();
 
+  // First member is the applicant ("you"); later members are asked about in the
+  // third person ("they"). Matches the you/them convention used elsewhere in the
+  // household form (e.g. StudentEligibilitySection).
+  const subject = pageNumber === 1 ? 'you' : 'they';
+
   // Only non-employment categories belong to the "government benefits / other
   // recurring payments" question; employment is collected via Q1/Q2.
   const otherIncomeCategories = useMemo(
@@ -652,12 +657,12 @@ const IncomeSection = ({
         {/* Q1 — Are you currently employed? */}
         <Box className="income-question-block">
           <FormLabel className="income-question-label">
-            <FormattedMessage id="householdDataBlock.incomeQuestion-employed" defaultMessage="Are you currently employed?" />
+            <FormattedMessage id="householdDataBlock.incomeQuestion-employed" defaultMessage="Are {subject} currently employed?" values={{ subject }} />
           </FormLabel>
           <YesNoToggle
             value={employed}
             onChange={handleEmployedChange}
-            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-employed', defaultMessage: 'Are you currently employed?' })}
+            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-employed', defaultMessage: 'Are {subject} currently employed?' }, { subject })}
             errorId="income-employed-error"
             hasError={!!employedError}
           />
@@ -680,7 +685,8 @@ const IncomeSection = ({
             <FormLabel className="income-question-label">
               <FormattedMessage
                 id="householdDataBlock.incomeQuestion-gig"
-                defaultMessage="Do you earn any money from freelance, gig, or occasional work?"
+                defaultMessage="Do {subject} earn any money from freelance, gig, or occasional work?"
+                values={{ subject }}
               />
             </FormLabel>
             <p className="income-question-subtext">
@@ -692,7 +698,7 @@ const IncomeSection = ({
             <YesNoToggle
               value={gig}
               onChange={handleGigChange}
-              ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-gig', defaultMessage: 'Do you earn any money from freelance, gig, or occasional work?' })}
+              ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-gig', defaultMessage: 'Do {subject} earn any money from freelance, gig, or occasional work?' }, { subject })}
               errorId="income-gig-error"
               hasError={!!gigError}
             />
@@ -715,13 +721,14 @@ const IncomeSection = ({
           <FormLabel className="income-question-label">
             <FormattedMessage
               id="householdDataBlock.incomeQuestion-other"
-              defaultMessage="Do you receive any government benefits, child support, alimony, or other recurring payments?"
+              defaultMessage="Do {subject} receive any government benefits, child support, alimony, or other recurring payments?"
+              values={{ subject }}
             />
           </FormLabel>
           <YesNoToggle
             value={other}
             onChange={handleOtherChange}
-            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-other', defaultMessage: 'Do you receive any government benefits, child support, alimony, or other recurring payments?' })}
+            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-other', defaultMessage: 'Do {subject} receive any government benefits, child support, alimony, or other recurring payments?' }, { subject })}
             errorId="income-other-error"
             hasError={!!otherError}
           />

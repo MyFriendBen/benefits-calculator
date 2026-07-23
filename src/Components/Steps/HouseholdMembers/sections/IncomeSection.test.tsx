@@ -37,10 +37,12 @@ const Wrapper = ({
   defaultStreams = [],
   errors = {},
   clearErrorsSpy,
+  pageNumber = 1,
 }: {
   defaultStreams?: IncomeStreamFormData[];
   errors?: Record<string, any>;
   clearErrorsSpy?: (name: string) => void;
+  pageNumber?: number;
 }) => {
   // Mirror how defaultValues seeds the three answer fields from persisted streams,
   // so rehydration behavior can be exercised by passing defaultStreams alone.
@@ -68,7 +70,7 @@ const Wrapper = ({
         incomeCategories={incomeCategories}
         incomeOptions={incomeOptions}
         frequencyMenuItems={frequencyMenuItems as any}
-        pageNumber={1}
+        pageNumber={pageNumber}
       />
     </IntlProvider>
   );
@@ -104,6 +106,17 @@ describe('IncomeSection (three-question design)', () => {
       expect(screen.getByText(/are you currently employed\?/i)).toBeInTheDocument();
       expect(screen.getByText(/government benefits, child support, alimony/i)).toBeInTheDocument();
       expect(screen.queryByText(/freelance, gig, or occasional work/i)).not.toBeInTheDocument();
+    });
+
+    it('phrases the questions in the first person for member 1 ("you")', () => {
+      render(<Wrapper pageNumber={1} />);
+      expect(screen.getByText(/are you currently employed\?/i)).toBeInTheDocument();
+    });
+
+    it('phrases the questions in the third person for later members ("they")', () => {
+      render(<Wrapper pageNumber={2} />);
+      expect(screen.getByText(/are they currently employed\?/i)).toBeInTheDocument();
+      expect(screen.queryByText(/are you currently employed\?/i)).not.toBeInTheDocument();
     });
 
     it('shows the gig question only after answering "No" to employed', () => {
