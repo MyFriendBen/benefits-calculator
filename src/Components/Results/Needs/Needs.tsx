@@ -4,9 +4,11 @@ import { useResultsContext, useResultsLink } from '../Results';
 import NeedCard from './NeedCard';
 import { ResultsMessageForNeeds } from '../../Referrer/Referrer';
 import InformationalText from '../../Common/InformationalText/InformationalText';
+import { useTrackEvent } from '../../../Assets/analytics';
 
 const Needs = () => {
   const { needs } = useResultsContext();
+  const track = useTrackEvent();
   const needsSortedByCategory = needs.sort((a, b) => {
     if (a.category_type.default_message > b.category_type.default_message) {
       return 1;
@@ -28,7 +30,16 @@ const Needs = () => {
           defaultMessage="If you would like to see additional types of resources, please edit your selections in <link>this step</link>."
           values={{
             link: (chunks) => (
-              <Link to={immediateNeedsLink} state={{ routeBackToResults: true }}>
+              <Link
+                to={immediateNeedsLink}
+                state={{ routeBackToResults: true }}
+                onClick={() =>
+                  track('screener_link_click', {
+                    link_name: 'Additional Resources — Edit Step',
+                    url: immediateNeedsLink,
+                  })
+                }
+              >
                 {chunks}
               </Link>
             ),

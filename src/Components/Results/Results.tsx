@@ -21,10 +21,11 @@ import ProgramPage from './ProgramPage/ProgramPage';
 import ResultsTabs from './Tabs/Tabs';
 import { FilterState, createInitialFilterState } from './Filter/citizenshipFilterConfig';
 import dataLayerPush from '../../Assets/analytics';
-import HelpButton from './211Button/211Button';
+import MoreHelpButton from './211Button/211Button';
 import MoreHelp from '../MoreHelp/MoreHelp';
 import BackAndSaveButtons from './BackAndSaveButtons/BackAndSaveButtons';
 import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
+import ExternalApiFailureBanner from './ExternalApiFailureBanner/ExternalApiFailureBanner';
 import { FormattedMessage } from 'react-intl';
 import './Results.css';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
@@ -40,6 +41,7 @@ import ShareModalAutoPopup from '../Share/ShareModalAutoPopup';
 import { useFeatureFlag } from '../Config/configHook';
 import { ChatbotProvider } from './Chatbot/Chatbot';
 import { useTrackEvent } from '../../Assets/analytics';
+import { POST_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
 import { calculateTotalValue } from './FormattedValue';
 
 // Mounts the Benbot chat widget only when the flag is on; otherwise renders children unchanged.
@@ -59,6 +61,7 @@ type WrapperResultsContext = {
   setValidations: (validations: Validation[]) => void;
   energyCalculatorRebateCategories: EnergyCalculatorRebateCategory[];
   policyEngineData: PolicyEngineData | undefined;
+  externalApiFailures: string[];
 };
 
 type ResultsProps = {
@@ -160,6 +163,7 @@ const Results = ({ type }: ResultsProps) => {
   const [programCategories, setProgramCategories] = useState<ProgramCategory[]>([]);
   const [needs, setNeeds] = useState<UrgentNeed[]>([]);
   const [missingPrograms, setMissingPrograms] = useState(false);
+  const [externalApiFailures, setExternalApiFailures] = useState<string[]>([]);
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
 
@@ -180,7 +184,54 @@ const Results = ({ type }: ResultsProps) => {
       program_count: apiResults.programs.length,
       total_estimated_value: totalEstimatedValue,
     });
+
+    // Emit results as a step view (terminal — view only) so it's tracked on the
+    // same event as every other step.
+    track('screener_form_step', {
+      screener_step_name: POST_DIRECTORY_STEP_IDS.results,
+      step_action: 'view',
+    });
+
+    // Per-program impression (the "shown" denominator for conversion). Guarded by
+    // the same ref, so once per screening — not on filter re-renders.
+    apiResults.programs.forEach((program) => {
+      track('screener_program_shown', {
+        program_id: String(program.program_id),
+        program_name: program.name.default_message,
+      });
+    });
   }, [apiResults, track]);
+
+  // Results-page scroll depth, only on the two browsable tabs (program =
+  // long-term benefits, need = additional resources). Each threshold fires once
+  // per tab per screening.
+  const firedScrollDepths = useRef<Set<number>>(new Set());
+  useEffect(() => {
+    const tabName = type === 'program' ? 'long_term_benefits' : type === 'need' ? 'additional_resources' : null;
+    if (tabName === null) {
+      return; // program detail / more-help / rebates aren't browsable tabs
+    }
+    firedScrollDepths.current = new Set(); // new tab → reset the once-per-tab guard
+
+    const thresholds: (25 | 50 | 75 | 100)[] = [25, 50, 75, 100];
+    const onScroll = () => {
+      const doc = document.documentElement;
+      const scrollable = doc.scrollHeight - doc.clientHeight;
+      if (scrollable <= 0) {
+        return;
+      }
+      const pct = (doc.scrollTop / scrollable) * 100;
+      for (const depth of thresholds) {
+        if (pct >= depth && !firedScrollDepths.current.has(depth)) {
+          firedScrollDepths.current.add(depth);
+          track('screener_results_scroll_depth', { depth, tab_name: tabName });
+        }
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [type, track]);
 
   // "None eligible" needs BOTH result sets resolved, or we'd fire a false
   // negative while rebates are still loading (and the once-guard would prevent
@@ -218,6 +269,7 @@ const Results = ({ type }: ResultsProps) => {
       setPrograms([]);
       setProgramCategories([]);
       setMissingPrograms(false);
+      setExternalApiFailures([]);
       setValidations([]);
       setPolicyEngineData(undefined);
       return;
@@ -240,6 +292,7 @@ const Results = ({ type }: ResultsProps) => {
       }),
     );
     setMissingPrograms(apiResults.missing_programs);
+    setExternalApiFailures(apiResults.external_api_failures ?? []);
     setValidations(apiResults.validations);
     setLoading(false);
     setPolicyEngineData(apiResults.pe_data);
@@ -260,6 +313,7 @@ const Results = ({ type }: ResultsProps) => {
           setValidations,
           energyCalculatorRebateCategories: energyCalculatorRebateCategories ?? [],
           policyEngineData,
+          externalApiFailures,
         }}
       >
         {children}
@@ -302,13 +356,14 @@ const Results = ({ type }: ResultsProps) => {
             <div className="results-card-wrapper">
               <ResultsTabs />
               <div id="results-tabpanel" role="tabpanel" aria-labelledby={type === 'program' ? 'long-term-benefits-tab' : 'near-term-benefits-tab'} className="benefits-form results-card-body">
+                {type === 'program' && <ExternalApiFailureBanner />}
                 {type === 'program' && <UrgentNeedBanner />}
                 <Grid container sx={{ pt: '1rem' }}>
                   <Grid item xs={12}>
                     {type === 'need' ? <Needs /> : <Programs />}
                   </Grid>
                 </Grid>
-                {!noHelpButton && <HelpButton />}
+                {!noHelpButton && <MoreHelpButton />}
                 <NPSWidget uuid={uuid} />
                 <ShareModalAutoPopup />
               </div>
