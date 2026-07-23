@@ -17,10 +17,14 @@ type CopyLinkOptionProps = {
   errorLabel: ReactNode;
   /** Sublabel shown when the clipboard write fails */
   errorSublabel: ReactNode;
+  /** Called after a successful clipboard write. Not called on error. */
+  onCopy?: () => void;
 };
 
-const CopyLinkOption = ({ url, label, sublabel, copiedLabel, errorLabel, errorSublabel }: CopyLinkOptionProps) => {
-  const { copied, copyError, handleCopy } = useCopyFeedback();
+const CopyLinkOption = ({ url, label, sublabel, copiedLabel, errorLabel, errorSublabel, onCopy }: CopyLinkOptionProps) => {
+  // Fires in the clipboard-success branch, so every successful copy counts —
+  // including repeat copies while the "copied" feedback is still showing.
+  const { copied, copyError, handleCopy } = useCopyFeedback(onCopy);
 
   return (
     <ModalOption

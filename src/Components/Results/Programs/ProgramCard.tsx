@@ -3,7 +3,7 @@ import { Program } from '../../../Types/Results';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useFormatDisplayValue } from '../FormattedValue';
 import ResultsTranslate from '../Translate/Translate';
-import { useContext, useMemo } from 'react';
+import { useContext, useEffect, useMemo, useRef } from 'react';
 import { useMediaQuery } from '@mui/material';
 import './ProgramCard.css';
 import { findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
@@ -12,6 +12,7 @@ import { BREAKPOINTS } from '../../../utils/breakpoints';
 import { Context } from '../../Wrapper/Wrapper';
 import { useConfig, useFeatureFlag } from '../../Config/configHook';
 import { calcAge } from '../../../Assets/age';
+import { useTrackEvent } from '../../../Assets/analytics';
 
 type ResultsCardDetail = {
   title: FormattedMessageType;
@@ -47,6 +48,8 @@ type ResultsCardProps = {
   flags?: ResultsCardFlag[];
   containerClassNames?: string[];
   eligibleMembers?: EligibleMemberTag[];
+  // Fired when the user clicks into the card's detail page (name link or "More Info").
+  onMoreInfoClick?: () => void;
 };
 
 function EligibleMemberTags({ members }: { members: EligibleMemberTag[] }) {
@@ -79,6 +82,7 @@ export function ResultsCard({
   flags = [],
   containerClassNames = [],
   eligibleMembers = [],
+  onMoreInfoClick,
 }: ResultsCardProps) {
   // Mobile is below desktop breakpoint (0-767px)
   const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.desktop - 1}px)`);
@@ -103,10 +107,12 @@ export function ResultsCard({
         <div className="result-program-mobile-header">
           <div className="result-program-more-info-wrapper">
             <div className="result-program-more-info">
-              <Link to={link}>{name}</Link>
+              <Link to={link} onClick={onMoreInfoClick}>
+                {name}
+              </Link>
             </div>
             <div className="result-program-more-info-button">
-              <Link to={link} data-testid="more-info-link" aria-label={moreInfoLabel}>
+              <Link to={link} data-testid="more-info-link" aria-label={moreInfoLabel} onClick={onMoreInfoClick}>
                 <FormattedMessage id="more-info" defaultMessage="More Info" />
               </Link>
             </div>
@@ -115,7 +121,9 @@ export function ResultsCard({
         </div>
       ) : (
         <div className="result-program-more-info">
-          <Link to={link}>{name}</Link>
+          <Link to={link} onClick={onMoreInfoClick}>
+            {name}
+          </Link>
           <EligibleMemberTags members={eligibleMembers} />
         </div>
       )}
@@ -126,7 +134,7 @@ export function ResultsCard({
       </div>
       {!isMobile && (
         <div className="result-program-more-info-button">
-          <Link to={link} data-testid="more-info-link" aria-label={moreInfoLabel}>
+          <Link to={link} data-testid="more-info-link" aria-label={moreInfoLabel} onClick={onMoreInfoClick}>
             <FormattedMessage id="more-info" defaultMessage="More Info" />
           </Link>
         </div>
@@ -148,6 +156,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
   const { formData } = useContext(Context);
   const relationshipOptions = useConfig<{ [key: string]: FormattedMessageType }>('relationship_options');
   const showEligibilityTags = useFeatureFlag('eligibility_tags');
+  const track = useTrackEvent();
 
   const containerClass = useMemo(() => {
     const classNames = [];
@@ -258,6 +267,30 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
 
   const nameString = intl.formatMessage({ id: programName.label, defaultMessage: programName.default_message });
 
+  // Impression: fire once per mounted card that renders eligibility tags.
+  // Guarded by a ref so a re-render (e.g. filter/results changes remount the
+  // card) doesn't re-fire and inflate the impression count — same pattern as
+  // Results.tsx's hasTrackedResultsLoaded.
+  const isEligible = eligibleMembers.length > 0;
+  const hasTrackedEligibilityTags = useRef(false);
+  useEffect(() => {
+    if (isEligible && !hasTrackedEligibilityTags.current) {
+      hasTrackedEligibilityTags.current = true;
+      track('screener_eligibility_tags_shown', {
+        program_name: programName.default_message,
+        program_id: String(programId),
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEligible]);
+
+  const handleMoreInfoClick = () => {
+    track('screener_program_more_info', {
+      program_name: programName.default_message,
+      program_id: String(programId),
+    });
+  };
+
   return (
     <ResultsCard
       name={<ResultsTranslate translation={programName} />}
@@ -274,6 +307,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
       link={programPageLink}
       containerClassNames={containerClass}
       eligibleMembers={eligibleMembers}
+      onMoreInfoClick={handleMoreInfoClick}
     />
   );
 };

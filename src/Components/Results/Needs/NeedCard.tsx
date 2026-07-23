@@ -6,6 +6,7 @@ import ResultsTranslate from '../Translate/Translate';
 import { formatPhoneNumber, generateNeedId, ICON_NAME_MAP } from '../helpers';
 import { Icon } from '../../Icon/Icon';
 import TrackedOutboundLink from '../../Common/TrackedOutboundLink/TrackedOutboundLink';
+import { useTrackEvent } from '../../../Assets/analytics';
 import './NeedCard.css';
 
 type NeedsCardProps = {
@@ -21,6 +22,7 @@ const NeedCard = ({ need }: NeedsCardProps) => {
   const intl = useIntl();
   const location = useLocation();
   const [infoIsOpen, setInfoIsOpen] = useState(false);
+  const track = useTrackEvent();
 
   // Check if this need should be expanded based on URL hash
   useEffect(() => {
@@ -69,6 +71,12 @@ const NeedCard = ({ need }: NeedsCardProps) => {
         <button
           className={infoIsOpen ? 'more-info-btn-open' : 'more-info-btn'}
           onClick={() => {
+            // Fire the funnel's "expand" step only when opening, not collapsing.
+            if (!infoIsOpen) {
+              track('screener_additional_resource_more_info', {
+                resource_name: need.name.default_message,
+              });
+            }
             setInfoIsOpen(!infoIsOpen);
           }}
         >
@@ -79,12 +87,30 @@ const NeedCard = ({ need }: NeedsCardProps) => {
         <>
           <p className="need-desc-paragraph">{translatedNeedDesc}</p>
           {need.phone_number && (
-            <a href={`tel:${need.phone_number}`} className="phone-number">
+            <a
+              href={`tel:${need.phone_number}`}
+              className="phone-number"
+              onClick={() =>
+                track('screener_additional_resource_click', {
+                  resource_name: need.name.default_message,
+                  contact_method: 'phone',
+                })
+              }
+            >
               {formatPhoneNumber(need.phone_number)}
             </a>
           )}
           {translatedLink !== '' && (
-            <div className="visit-website-btn-container">
+            <div
+              className="visit-website-btn-container"
+              onClickCapture={() =>
+                track('screener_additional_resource_click', {
+                  resource_name: need.name.default_message,
+                  url: translatedLink,
+                  contact_method: 'website',
+                })
+              }
+            >
               <TrackedOutboundLink
                 href={translatedLink}
                 action="visit_website"

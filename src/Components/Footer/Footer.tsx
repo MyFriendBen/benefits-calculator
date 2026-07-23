@@ -9,6 +9,7 @@ import { FormattedMessage } from 'react-intl';
 import './Footer.css';
 import { useLogo } from '../Referrer/useLogo';
 import ShareModal from '../Share/ShareModal';
+import { useTrackEvent } from '../../Assets/analytics';
 
 const InstagramIcon = () => (
   <SvgIcon sx={{ color: '#fff', fontSize: '1.25rem' }} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -34,6 +35,7 @@ const Footer = ({ hideServiceLinks }: FooterProps) => {
   const { email, survey } = useConfig<{ email: string; survey: string }>('feedback_links');
 
   const [shareOpen, setShareOpen] = useState(false);
+  const track = useTrackEvent();
 
   const baseLogoClass = 'logo footer-logo';
   const footerLogoClass = getReferrer('footerLogoClass', '');
@@ -44,41 +46,94 @@ const Footer = ({ hideServiceLinks }: FooterProps) => {
     <footer>
       <Paper elevation={0} sx={{ width: '100%', backgroundColor: theme.footerColor, color: '#ffffff' }} square={true}>
         <div className="footer-content-container">
-          <div>{logo}</div>
+          <div onClick={() => track('screener_logo_click', { location: 'footer' })}>{logo}</div>
           <div className="footer-feedback-buttons">
             <button className="footer-feedback-button" aria-label="Share MyFriendBen" onClick={() => setShareOpen(true)}>
               <FormattedMessage id="shareMfbButton" defaultMessage="SHARE MFB" />
             </button>
-            <a className="footer-feedback-button" href={survey} target="_blank" rel="noreferrer">
+            <a
+              className="footer-feedback-button"
+              href={survey}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => track('screener_feedback_click', { channel: 'survey' })}
+            >
               <FormattedMessage id="reportABugButton" defaultMessage="REPORT AN ISSUE" />
             </a>
-            <a className="footer-feedback-button" href={`mailto:${email}`}>
+            <a
+              className="footer-feedback-button"
+              href={`mailto:${email}`}
+              onClick={() => track('screener_feedback_click', { channel: 'email' })}
+            >
               <FormattedMessage id="contactUsButton" defaultMessage="CONTACT US" />
             </a>
           </div>
-          <ShareModal open={shareOpen} onClose={() => setShareOpen(false)} />
+          <ShareModal open={shareOpen} onClose={() => setShareOpen(false)} shareLocation="footer" />
         </div>
         {!hideServiceLinks && (
           <div className="footer-bottom-bar">
             <div className="footer-policy-links">
-              <a href="https://www.myfriendben.org/about-us/" target="_blank" rel="noreferrer" className="policy-link">
+              <a
+                href="https://www.myfriendben.org/about-us/"
+                target="_blank"
+                rel="noreferrer"
+                className="policy-link"
+                onClick={() =>
+                  track('screener_link_click', {
+                    link_name: 'About Us',
+                    url: 'https://www.myfriendben.org/about-us/',
+                  })
+                }
+              >
                 <FormattedMessage id="footer.aboutUs" defaultMessage="About Us" />
               </a>
-              <a href={privacyPolicyLink} target="_blank" rel="noreferrer" className="policy-link">
+              <a
+                href={privacyPolicyLink}
+                target="_blank"
+                rel="noreferrer"
+                className="policy-link"
+                onClick={() => track('screener_link_click', { link_name: 'Privacy Policy', url: privacyPolicyLink })}
+              >
                 <FormattedMessage id="footer.privacyPolicy" defaultMessage="Privacy Policy" />
               </a>
-              <a href={termsAndConditionsLink} target="_blank" rel="noreferrer" className="policy-link">
+              <a
+                href={termsAndConditionsLink}
+                target="_blank"
+                rel="noreferrer"
+                className="policy-link"
+                onClick={() =>
+                  track('screener_link_click', { link_name: 'Terms and Conditions', url: termsAndConditionsLink })
+                }
+              >
                 <FormattedMessage id="footer.termsAndConditions" defaultMessage="Terms and Conditions" />
               </a>
             </div>
             <div className="footer-social-icons">
-              <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn">
+              <a
+                href={SOCIAL_LINKS.linkedin}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="LinkedIn"
+                onClick={() => track('screener_social_click', { network: 'linkedin' })}
+              >
                 <LinkedInIcon sx={{ color: '#fff', fontSize: '1.5rem' }} />
               </a>
-              <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
+              <a
+                href={SOCIAL_LINKS.facebook}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Facebook"
+                onClick={() => track('screener_social_click', { network: 'facebook' })}
+              >
                 <FacebookIcon sx={{ color: '#fff', fontSize: '1.5rem' }} />
               </a>
-              <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noreferrer" aria-label="Instagram">
+              <a
+                href={SOCIAL_LINKS.instagram}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+                onClick={() => track('screener_social_click', { network: 'instagram' })}
+              >
                 <InstagramIcon />
               </a>
             </div>

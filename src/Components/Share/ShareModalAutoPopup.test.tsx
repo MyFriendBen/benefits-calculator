@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
 import ShareModalAutoPopup from './ShareModalAutoPopup';
 
 jest.mock('../Config/configHook', () => ({
@@ -12,7 +13,9 @@ jest.mock('./ShareModal.css', () => ({}));
 const renderAutoPopup = () =>
   render(
     <IntlProvider locale="en">
-      <ShareModalAutoPopup />
+      <MemoryRouter>
+        <ShareModalAutoPopup />
+      </MemoryRouter>
     </IntlProvider>,
   );
 
