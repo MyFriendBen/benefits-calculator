@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { mfbZodResolver } from './mfbZodResolver';
-import { buildFormErrorEvents, collectFieldErrors, formatFieldErrors, labelForCode } from './errorLabels';
+import { buildFormErrorEvents, collectFieldErrors, labelForCode } from './errorLabels';
 
 // The two pieces that make specific error reasons flow to screener_form_error:
 // mfbZodResolver stamps each custom rule's params.code onto the RHF error as
@@ -74,14 +74,13 @@ describe('collectFieldErrors', () => {
 
   it('recurses into nested/array errors to the real leaf, normalizing the array index', () => {
     const tree = { members: { 0: { birthYear: { type: 'too_big', message: 'x' } } } };
-    // The `0` index segment is dropped so the field is canonical (B2).
+    // The `0` index segment is dropped so the field path is canonical.
     expect(collectFieldErrors(tree)).toEqual([{ field: 'members.birthYear', reason: 'Too long' }]);
   });
 
-  it('collapses indexed and array-level paths to the same canonical field (B2)', () => {
-    // Same conceptual field surfacing two ways: an indexed element error and an
-    // array-level error. Both must report the identical `field` so they
-    // aggregate downstream instead of splitting into two rows.
+  it('collapses indexed and array-level paths to the same canonical field', () => {
+    // The same field can surface two ways: an indexed element error and an
+    // array-level error. Both must report the identical `field`.
     const indexed = { members: { 2: { birthYear: { type: 'too_small', message: 'x' } } } };
     const arrayLevel = { members: { birthYear: { type: 'too_small', message: 'x' } } };
     expect(collectFieldErrors(indexed)[0].field).toBe('members.birthYear');
@@ -105,13 +104,6 @@ describe('collectFieldErrors', () => {
   });
 });
 
-describe('formatFieldErrors', () => {
-  it('joins field errors into the legacy "field: reason" string for back-compat', () => {
-    const tree = { zip: { type: 'too_small', message: 'x' }, tcpa: { errorCode: 'consent_required' } };
-    expect(formatFieldErrors(collectFieldErrors(tree))).toBe('zip: Required, tcpa: Consent required');
-  });
-});
-
 describe('buildFormErrorEvents', () => {
   it('emits one event per failed field, each with field/reason and the field count', () => {
     const tree = {
@@ -127,9 +119,9 @@ describe('buildFormErrorEvents', () => {
 
   it('counts failed field instances, not RHF top-level keys', () => {
     // Three members failing birthYear: RHF has ONE top-level `members` key, but
-    // there are three failed field instances. Paths are normalized to the same
-    // canonical field (they aggregate to one row downstream via GROUP BY), and
-    // the count reflects the three instances — NOT RHF's top-level key count.
+    // there are three failed field instances. Paths normalize to the same
+    // canonical field, and the count reflects the three instances — NOT RHF's
+    // top-level key count.
     const tree = {
       members: {
         0: { birthYear: { type: 'too_small', message: 'x' } },
@@ -143,10 +135,10 @@ describe('buildFormErrorEvents', () => {
     expect(events.every((e) => e.form_error_count === 3)).toBe(true);
   });
 
-  it('emits one fallback event when errors exist but no leaf resolves (submit not lost)', () => {
+  it('emits one fallback event when errors exist but no leaf resolves', () => {
     // An error node with no type/errorCode anywhere: collectFieldErrors returns
-    // []. The gate said there ARE errors, so a single fallback carries the
-    // top-level count instead of the submit vanishing from the funnel.
+    // []. Since the caller says there ARE errors, a single fallback carries the
+    // top-level count so the submit still registers rather than emitting nothing.
     const unresolvable = { weird: { message: 'no type or code here' } };
     expect(collectFieldErrors(unresolvable)).toEqual([]);
     expect(buildFormErrorEvents(unresolvable, 3)).toEqual([{ form_error_count: 3 }]);

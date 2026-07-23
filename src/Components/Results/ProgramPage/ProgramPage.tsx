@@ -38,14 +38,12 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   const [openPEmodal, setOpenPEModal] = useState(false);
   const { policyEngineData } = useResultsContext();
 
-  // Navigator + document impressions (gap #6) — the "shown" denominators for
-  // navigator-engagement and document-download rates. One batched event each,
-  // fired once per program page (ref keyed on program id so it re-fires when the
-  // user opens a different program, but not on re-renders of the same one).
-  // Batched rather than per-item to avoid the GA4 burst-drop that hit
-  // screener_program_shown (gap #5). Documents mirror the download link's own
-  // guard: only docs with both a link_url and link_text are actually shown as
-  // downloadable, so only those count as impressions.
+  // Navigator + document impression events. One batched event each (not one per
+  // item — GA4 drops same-name events fired together in a tick), fired once per
+  // program page: the ref keyed on program id re-fires when the user opens a
+  // different program but not on re-renders of the same one. Documents mirror the
+  // download link's own render guard below — only docs with both a link_url and
+  // link_text are shown as downloadable, so only those are counted here.
   const shownImpressionsProgramId = useRef<number | undefined>(undefined);
   useEffect(() => {
     if (shownImpressionsProgramId.current === program.program_id) {

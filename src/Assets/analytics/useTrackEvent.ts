@@ -23,11 +23,10 @@ export function useTrackEvent() {
   const { whiteLabel, uuid } = useParams();
   // App chrome (Header/Footer) renders ABOVE the matched route, so useParams()
   // returns no whiteLabel there and chrome events (logo/language/social/feedback/
-  // footer links) fired with no screener_state — a state filter dropped 100% of
-  // them (gap #2). Wrapper's context holds the whiteLabel parsed from the URL
-  // even outside a matched route, so fall back to it. Its "_default" sentinel
-  // (no white label resolved yet) is treated as unknown — better a null state
-  // than a fake one.
+  // footer links) would fire with no screener_state. Wrapper's context holds the
+  // whiteLabel parsed from the URL even outside a matched route, so fall back to
+  // it. Its DEFAULT_WHITE_LABEL sentinel (nothing resolved yet) is treated as
+  // unknown — better an absent state than a fake one.
   const contextWhiteLabel = useContext(Context)?.whiteLabel;
 
   const screenerState =

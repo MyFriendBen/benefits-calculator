@@ -66,14 +66,8 @@ export default function useStepForm<T extends FieldValues>({
   // attempt, so we emit exactly one error event per failed submit.
   useEffect(() => {
     if (submitCount > 0 && isSubmitted && !isSubmitSuccessful && errorCount > 0) {
-      // One event PER failed field (not one joined message) so no param hits
-      // GA4's 100-char cap. Field path + reason are separate params, via the
-      // shared buildFormErrorEvents/collectFieldErrors so every emit path uses
-      // one vocabulary and canonical (index-normalized) field paths. Note
-      // form_error_count is the number of failed *fields*, which differs from
-      // RHF's top-level key count for array steps (three members failing
-      // birthYear collapse to one members.birthYear field) — intentional, it
-      // matches the per-field events emitted here.
+      // One event per failed field via the shared builder (see
+      // buildFormErrorEvents), so every emit path uses the same vocabulary.
       buildFormErrorEvents(errors, errorCount).forEach((params) => {
         track('screener_form_error', {
           screener_step_name: stepNameOverride ?? getStepAnalyticsId(questionName),

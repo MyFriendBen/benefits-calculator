@@ -1,7 +1,7 @@
 // Shared, PII-safe mapping from validation rule codes to friendly labels, and
-// the walker that turns an RHF error tree into a "field: label" list for the
-// screener_form_error event's form_error_message. Centralized here so every emit
-// path (the useStepForm hook and any step with its own useForm, e.g. Disclaimer)
+// the walker that turns an RHF error tree into one {field, reason} per failed
+// field for the screener_form_error event. Centralized here so every emit path
+// (the useStepForm hook and any step with its own useForm, e.g. Disclaimer)
 // produces the SAME vocabulary for the same rule.
 //
 // PRIVACY: only field path + rule label travel — never the entered value or the
@@ -48,10 +48,10 @@ export interface FieldError {
 // checked first so a refine's bare 'custom' type doesn't win) or a `type`
 // (standard rule).
 //
-// PATH NORMALIZATION (gap B2): numeric array-index segments are dropped, so
+// PATH NORMALIZATION: numeric array-index segments are dropped, so
 // `members.0.birthYear` and an array-level `members.birthYear` both canonicalize
-// to `members.birthYear`. Without this the same field aggregates under multiple
-// labels downstream (per-member index + array-level + bare leaf).
+// to `members.birthYear`. Without this the same field would report under several
+// different paths (per-member index, array-level, bare leaf).
 export const collectFieldErrors = (node: unknown, path = ''): FieldError[] => {
   if (!node || typeof node !== 'object') return [];
   const code = (node as { errorCode?: string }).errorCode;
@@ -69,13 +69,6 @@ export const collectFieldErrors = (node: unknown, path = ''): FieldError[] => {
     });
 };
 
-// Legacy "field: label, field: label" joined form of collectFieldErrors, kept
-// for the optional back-compat `form_error_message` param. Prefer emitting one
-// event per FieldError (own field/reason params) over this joined string, which
-// GA4 truncates at 100 chars.
-export const formatFieldErrors = (errors: FieldError[]): string =>
-  errors.map(({ field, reason }) => `${field}: ${reason}`).join(', ');
-
 // The event-specific params for one screener_form_error emission (step context
 // is added by the caller). Each failed field is its own event.
 export interface FormErrorEventParams {
@@ -85,17 +78,16 @@ export interface FormErrorEventParams {
 }
 
 // Turn an RHF error tree into the list of screener_form_error payloads to emit:
-// one per failed field (B1 — no joined message that GA4 would truncate), with
-// form_error_count = the number of failed fields.
+// one per failed field (no joined message, which GA4 would truncate at 100
+// chars), with form_error_count = the number of failed fields.
 //
-// `topLevelErrorCount` is RHF's own top-level key count (the value that gates
-// emission at the call site). When collectFieldErrors resolves NO leaf but the
-// caller says there are errors, we still emit ONE fallback event carrying that
-// count, so a failed submit can't silently vanish from the drop-off funnel.
+// `topLevelErrorCount` is RHF's own top-level key count — the value the caller
+// uses to gate emission. When collectFieldErrors resolves no leaf but the caller
+// says there are errors, emit one fallback event carrying that count so a failed
+// submit still registers rather than emitting nothing.
 //
-// Extracted as a pure function so the two call sites (useStepForm and
-// Disclaimer's own useForm) share identical emit logic and it's unit-testable
-// without a component render harness.
+// Pure so the two call sites (useStepForm and Disclaimer's own useForm) share
+// identical emit logic and it's testable without a component render harness.
 export const buildFormErrorEvents = (errors: unknown, topLevelErrorCount: number): FormErrorEventParams[] => {
   const fieldErrors = collectFieldErrors(errors);
   if (fieldErrors.length === 0) {

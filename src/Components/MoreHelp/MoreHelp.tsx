@@ -32,10 +32,9 @@ const MoreHelp = () => {
                 className="visit-website-btn"
                 target="_blank"
                 onClick={() =>
-                  // gap #7: this link was previously untracked. `name` is a
-                  // JSX.Element, so use the config `label` (a plain string) as the
-                  // PII-free id; resource_index carries the ordinal independently
-                  // (label may be undefined; the two are separate params).
+                  // `name` is a JSX.Element, so use the config `label` (a plain
+                  // string, PII-free) as the id; resource_index carries the
+                  // ordinal independently (label may be undefined).
                   track('screener_more_help_resource_click', {
                     resource_name: resource.label,
                     resource_index: index,

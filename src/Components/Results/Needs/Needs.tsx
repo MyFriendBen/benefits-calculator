@@ -20,10 +20,9 @@ const Needs = () => {
     return 0;
   });
 
-  // Batched resource impression (gap #6) — one event listing every resource
-  // shown, so a per-resource "shown -> clicked" rate is computable. Fired once
-  // per mount (ref-guarded) as a single event, not one-per-resource, to avoid
-  // the GA4 burst-drop that hit screener_program_shown (gap #5).
+  // One impression event listing every resource shown, fired once per mount
+  // (ref-guarded). A single event rather than one per resource, since GA4 drops
+  // same-name events fired together in a tick.
   const hasTrackedResourcesShown = useRef(false);
   useEffect(() => {
     if (hasTrackedResourcesShown.current || needs.length === 0) {
