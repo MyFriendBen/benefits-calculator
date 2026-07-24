@@ -54,15 +54,16 @@ export const EMPLOYMENT_CATEGORY = 'employment';
 export const WAGES_SOURCE = 'wages';
 export const SELF_EMPLOYMENT_SOURCE = 'selfEmployment';
 
-// Empty stream pre-scoped to the "Are you currently employed?" question.
-// Category is fixed to employment; the source dropdown offers wages/selfEmployment.
+// Fully-scoped stream for the "Are they currently employed?" question — category
+// and source (wages) are implied, so no dropdowns are shown.
 export const EMPTY_EMPLOYMENT_INCOME_STREAM: IncomeStreamFormData = {
   ...EMPTY_INCOME_STREAM,
   incomeCategory: EMPLOYMENT_CATEGORY,
+  incomeStreamName: WAGES_SOURCE,
 };
 
 // Fully-scoped stream for the "freelance, gig, or occasional work?" question —
-// both category and source are implied, so no dropdowns are shown.
+// category and source (self-employment) are implied, so no dropdowns are shown.
 export const EMPTY_GIG_INCOME_STREAM: IncomeStreamFormData = {
   ...EMPTY_INCOME_STREAM,
   incomeCategory: EMPLOYMENT_CATEGORY,

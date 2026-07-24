@@ -7,6 +7,7 @@ import {
   ENERGY_CALCULATOR_ERROR_SECTION_MAP,
   EMPLOYMENT_CATEGORY,
   WAGES_SOURCE,
+  SELF_EMPLOYMENT_SOURCE,
 } from './constants';
 import { IncomeStreamFormData, WorkflowType } from './types';
 import { HouseholdMemberFormSchema, EnergyCalculatorHouseholdMemberFormSchema } from './schema';
@@ -17,12 +18,12 @@ export { formatToUSD } from '../../../../utils/formatCurrency';
 // ============================================================================
 
 /**
- * The three income questions shown per household member. Each gates whether its
- * income input(s) appear:
- * - employed: "Are you currently employed?" — employment-category streams.
- * - gig: "Do you earn any money from freelance, gig, or occasional work?" —
- *   only shown when `employed` is No; a single self-employment stream.
- * - other: "Do you receive any government benefits, child support, alimony...?" —
+ * The three income questions shown per household member. Each is answered
+ * independently and gates its own income input(s):
+ * - employed: "Are they currently employed?" — wages-source streams.
+ * - gig: "Do they earn any money from freelance, gig, or occasional work?" —
+ *   self-employment-source streams.
+ * - other: "Do they receive any government benefits, child support, alimony...?" —
  *   all non-employment-category streams.
  */
 export type IncomeAnswers = {
@@ -31,42 +32,32 @@ export type IncomeAnswers = {
   other: boolean;
 };
 
-/** Streams under the "Are you currently employed?" question (employment category). */
-export const isEmploymentStream = (s: Pick<IncomeStreamFormData, 'incomeCategory'>): boolean =>
-  s.incomeCategory === EMPLOYMENT_CATEGORY;
+/** Wages streams — the "Are they currently employed?" question (Q1). */
+export const isWagesStream = (s: Pick<IncomeStreamFormData, 'incomeCategory' | 'incomeStreamName'>): boolean =>
+  s.incomeCategory === EMPLOYMENT_CATEGORY && s.incomeStreamName === WAGES_SOURCE;
 
-/** Streams under the "government benefits / other recurring payments" question. */
+/** Self-employment streams — the "freelance, gig, or occasional work?" question (Q2). */
+export const isSelfEmploymentStream = (s: Pick<IncomeStreamFormData, 'incomeCategory' | 'incomeStreamName'>): boolean =>
+  s.incomeCategory === EMPLOYMENT_CATEGORY && s.incomeStreamName === SELF_EMPLOYMENT_SOURCE;
+
+/** Non-employment streams — the "government benefits / other recurring payments" question (Q3). */
 export const isOtherStream = (s: Pick<IncomeStreamFormData, 'incomeCategory'>): boolean =>
   !!s.incomeCategory && s.incomeCategory !== EMPLOYMENT_CATEGORY;
 
 /**
- * Derives the three Yes/No answers from income streams. Used by
- * getDefaultIncomeAnswers to seed the toggles on edit/reload, and as the legacy
- * fallback for the employed answer on screens saved before is_employed was
- * persisted. (The persisted is_employed is authoritative for Q1 when present;
- * gig and other are always derived here.)
- *
- * Rules:
- * - `other` is Yes if any non-employment-category stream exists.
- * - Employment streams are attributed to Q1 vs Q2 by the "Q2 only when Q1 is No"
- *   rule: if any employment stream is `wages`, the member is treated as employed
- *   (Q1 Yes) and Q2 stays hidden. If the only employment income is
- *   self-employment, it is treated as gig income (Q1 No, Q2 Yes).
+ * Derives the three Yes/No answers from income streams so the toggles rehydrate
+ * on edit/reload. Each answer is independent and keyed to its source:
+ * - employed: any wages stream exists.
+ * - gig: any self-employment stream exists.
+ * - other: any non-employment-category stream exists.
  */
 export const deriveIncomeAnswers = (
   streams: Pick<IncomeStreamFormData, 'incomeCategory' | 'incomeStreamName'>[] = [],
-): IncomeAnswers => {
-  const employmentStreams = streams.filter(isEmploymentStream);
-  const hasWages = employmentStreams.some((s) => s.incomeStreamName === WAGES_SOURCE);
-  const hasEmployment = employmentStreams.length > 0;
-
-  const employed = hasWages;
-  // Gig only surfaces when not employed; treat employment-only-self-employment as gig.
-  const gig = !employed && hasEmployment;
-  const other = streams.some(isOtherStream);
-
-  return { employed, gig, other };
-};
+): IncomeAnswers => ({
+  employed: streams.some(isWagesStream),
+  gig: streams.some(isSelfEmploymentStream),
+  other: streams.some(isOtherStream),
+});
 
 // ============================================================================
 // GENERIC FORM HELPERS
@@ -172,11 +163,10 @@ export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParam
   }));
   const hasIncome = incomeStreams.length > 0;
 
-  // The income-question answers are form-only fields. Only `is_employed` is
-  // persisted — gig and other are re-derived from the streams on load.
-  // Strip the form-only answer fields from the spread so they don't leak onto the
-  // persisted member object.
-  const { incomeEmployed, incomeGig: _gig, incomeOther: _other, ...restMemberData } =
+  // The three income-question answers are form-only fields — the answers are
+  // re-derived from the streams on load, so strip them from the spread rather
+  // than persist them on the member object.
+  const { incomeEmployed: _e, incomeGig: _g, incomeOther: _o, ...restMemberData } =
     memberData as typeof memberData & {
       incomeEmployed?: boolean | null;
       incomeGig?: boolean | null;
@@ -188,7 +178,6 @@ export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParam
     id: existingHouseholdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
     frontendId: existingHouseholdData[currentMemberIndex]?.frontendId ?? crypto.randomUUID(),
     hasIncome,
-    isEmployed: incomeEmployed ?? null,
     incomeStreams,
   };
 

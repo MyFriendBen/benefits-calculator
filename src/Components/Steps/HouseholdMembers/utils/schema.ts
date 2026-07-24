@@ -2,7 +2,7 @@ import * as z from 'zod';
 import { IntlShape } from 'react-intl';
 import { MAX_AGE, getCurrentMonthYear } from '../../../../Assets/age';
 import { FormattedMessageType } from '../../../../Types/Questions';
-import { EMPLOYMENT_CATEGORY } from './constants';
+import { EMPLOYMENT_CATEGORY, WAGES_SOURCE, SELF_EMPLOYMENT_SOURCE } from './constants';
 import {
   renderHealthInsSelectOneHelperText,
   renderHealthInsNonePlusHelperText,
@@ -97,28 +97,28 @@ type IncomeQuestionValues = {
   incomeEmployed: boolean | null;
   incomeGig: boolean | null;
   incomeOther: boolean | null;
-  incomeStreams: { incomeCategory: string }[];
+  incomeStreams: { incomeCategory: string; incomeStreamName: string }[];
 };
 
 /**
- * Validates the three income questions. Shared by both the main and Energy
- * Calculator schemas so the rules can't drift between them.
+ * Validates the three (independently answered) income questions. Shared by both
+ * the main and Energy Calculator schemas so the rules can't drift.
  *
  * Two rules per question:
- * 1. Required — each must be answered Yes/No. Q2 (gig) is only asked when Q1
- *    (employed) is "No".
- * 2. Answering "Yes" must be backed by at least one income source of that kind —
- *    otherwise a user could answer Yes, remove the seeded row, and continue with
- *    no income entered. Employment streams back Q1/Q2; non-employment streams
- *    back Q3.
+ * 1. Required — each must be answered Yes/No.
+ * 2. Answering "Yes" must be backed by at least one income source of that kind,
+ *    so a user can't answer Yes, remove the seeded row, and continue with no
+ *    income. Sources: wages back Q1, self-employment backs Q2, non-employment
+ *    categories back Q3.
  */
 const validateIncomeQuestions = (
   { incomeEmployed, incomeGig, incomeOther, incomeStreams }: IncomeQuestionValues,
   ctx: z.RefinementCtx,
   intl: IntlShape,
 ) => {
-  const employmentStreamCount = incomeStreams.filter((s) => s.incomeCategory === EMPLOYMENT_CATEGORY).length;
-  const otherStreamCount = incomeStreams.length - employmentStreamCount;
+  const wagesCount = incomeStreams.filter((s) => s.incomeCategory === EMPLOYMENT_CATEGORY && s.incomeStreamName === WAGES_SOURCE).length;
+  const selfEmploymentCount = incomeStreams.filter((s) => s.incomeCategory === EMPLOYMENT_CATEGORY && s.incomeStreamName === SELF_EMPLOYMENT_SOURCE).length;
+  const otherCount = incomeStreams.filter((s) => s.incomeCategory && s.incomeCategory !== EMPLOYMENT_CATEGORY).length;
 
   const requireAnswer = (value: boolean | null, path: string) => {
     if (value === null) {
@@ -132,15 +132,13 @@ const validateIncomeQuestions = (
   };
 
   requireAnswer(incomeEmployed, 'incomeEmployed');
-  requireStream(incomeEmployed, employmentStreamCount, 'incomeEmployed');
+  requireStream(incomeEmployed, wagesCount, 'incomeEmployed');
 
-  if (incomeEmployed === false) {
-    requireAnswer(incomeGig, 'incomeGig');
-    requireStream(incomeGig, employmentStreamCount, 'incomeGig');
-  }
+  requireAnswer(incomeGig, 'incomeGig');
+  requireStream(incomeGig, selfEmploymentCount, 'incomeGig');
 
   requireAnswer(incomeOther, 'incomeOther');
-  requireStream(incomeOther, otherStreamCount, 'incomeOther');
+  requireStream(incomeOther, otherCount, 'incomeOther');
 };
 
 /**

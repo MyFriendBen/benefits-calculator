@@ -199,24 +199,20 @@ describe('getDefaultIncomeAnswers', () => {
   });
 
   it('treats empty buckets as explicit "No" for a completed member', () => {
-    // No streams + progressed + no persisted is_employed => all answered No.
     const result = getDefaultIncomeAnswers(progressed({ incomeStreams: [] }));
     expect(result).toEqual({ incomeEmployed: false, incomeGig: false, incomeOther: false });
   });
 
-  it('prefers the persisted is_employed answer over derivation', () => {
-    // Employed=true persisted, but only a self-employment stream exists.
+  it('derives employed=Yes from a wages stream', () => {
     const member = progressed({
-      isEmployed: true,
-      incomeStreams: [{ incomeCategory: 'employment', incomeStreamName: 'selfEmployment' }] as any,
+      incomeStreams: [{ incomeCategory: 'employment', incomeStreamName: 'wages' }] as any,
     });
     const result = getDefaultIncomeAnswers(member);
     expect(result.incomeEmployed).toBe(true);
-    // Gig is not applicable when employed.
-    expect(result.incomeGig).toBeNull();
+    expect(result.incomeGig).toBe(false);
   });
 
-  it('derives gig=Yes (employed=No) from a self-employment-only stream when is_employed is unset', () => {
+  it('derives gig=Yes from a self-employment stream, independent of employed', () => {
     const member = progressed({
       incomeStreams: [{ incomeCategory: 'employment', incomeStreamName: 'selfEmployment' }] as any,
     });
@@ -225,9 +221,20 @@ describe('getDefaultIncomeAnswers', () => {
     expect(result.incomeGig).toBe(true);
   });
 
+  it('derives both employed and gig when both wages and self-employment exist', () => {
+    const member = progressed({
+      incomeStreams: [
+        { incomeCategory: 'employment', incomeStreamName: 'wages' },
+        { incomeCategory: 'employment', incomeStreamName: 'selfEmployment' },
+      ] as any,
+    });
+    const result = getDefaultIncomeAnswers(member);
+    expect(result.incomeEmployed).toBe(true);
+    expect(result.incomeGig).toBe(true);
+  });
+
   it('derives other=Yes from a non-employment stream', () => {
     const member = progressed({
-      isEmployed: true,
       incomeStreams: [{ incomeCategory: 'government', incomeStreamName: 'sSI' }] as any,
     });
     expect(getDefaultIncomeAnswers(member).incomeOther).toBe(true);

@@ -97,43 +97,25 @@ export const DEFAULT_STUDENT_ELIGIBILITY = {
 };
 
 /**
- * Resolves the three income-question answers for form seeding.
- *
- * Only `is_employed` is persisted — it can't be reconstructed from the streams
- * alone (a self-employment-only member could have answered "employed" or "gig").
- * The gig and other answers are derived from the streams:
+ * Resolves the three income-question answers for form seeding, derived from the
+ * income streams (each keyed to its source: wages -> employed, self-employment ->
+ * gig, non-employment -> other):
  * - Yes when a stream of that kind exists.
  * - No when the member has completed the form (progressed) but has no such
  *   stream — because the questions are required, "completed + empty" means the
  *   user explicitly answered No, not that they skipped it.
  * - null (unanswered) for a brand-new member who hasn't reached the form yet.
- *
- * `incomeEmployed` prefers the persisted value; for legacy screens saved before
- * the field existed it falls back to deriving from the streams.
  */
 export const getDefaultIncomeAnswers = (data?: HouseholdData) => {
   const derived = deriveIncomeAnswers(data?.incomeStreams as any);
   const progressed = hasProgressedThroughForm(data);
-
   // For a completed member, an empty bucket is an explicit "No"; otherwise unanswered.
-  const derivedNo = progressed ? false : null;
-
-  // Legacy fallback for incomeEmployed: Yes if wages exist, No if only gig income.
-  // A screen saved before is_employed existed whose only income was self-employment
-  // reclassifies from "employed" to "gig" here. That's benign: the same
-  // self-employment stream is preserved and income eligibility derives from the
-  // streams, not this answer — only the question the row appears under changes.
-  const derivedEmployed = derived.employed ? true : derived.gig ? false : derivedNo;
-  const incomeEmployed = data?.isEmployed ?? derivedEmployed;
-
-  // Q2 (gig) is only asked when employed is No. When employed, any employment
-  // stream belongs to Q1, so gig is not applicable (null).
-  const incomeGig = incomeEmployed === false ? (derived.gig ? true : derivedNo) : null;
+  const answer = (hasStream: boolean) => (hasStream ? true : progressed ? false : null);
 
   return {
-    incomeEmployed,
-    incomeGig,
-    incomeOther: derived.other ? true : derivedNo,
+    incomeEmployed: answer(derived.employed),
+    incomeGig: answer(derived.gig),
+    incomeOther: answer(derived.other),
   };
 };
 

@@ -42,7 +42,7 @@ import {
   EMPTY_GIG_INCOME_STREAM,
   EMPTY_INCOME_STREAM,
 } from '../utils/constants';
-import { isEmploymentStream } from '../utils/helpers';
+import { isWagesStream, isSelfEmploymentStream } from '../utils/helpers';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { useTrackEvent } from '../../../../Assets/analytics';
 import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
@@ -463,16 +463,16 @@ const IncomeSection = ({
   // can bucket by live category/source while keeping RHF's stable keys.
   const rows = fields.map((field, index) => ({ field, index, value: watchedStreams[index] ?? field }));
 
-  // Employment rows always carry the fixed 'employment' category; everything else
-  // (including a freshly-appended blank row whose category isn't chosen yet) belongs
-  // to the "other recurring payments" question.
-  const employmentRows = rows.filter((r) => isEmploymentStream(r.value));
-  const otherRows = rows.filter((r) => !isEmploymentStream(r.value));
+  // Bucket rows by source: wages -> Q1 (employed), self-employment -> Q2 (gig).
+  // Q1/Q2 rows are always seeded with their source, so everything else — including
+  // a freshly-appended blank row whose category isn't chosen yet — belongs to Q3.
+  const employedRows = rows.filter((r) => isWagesStream(r.value));
+  const gigRows = rows.filter((r) => isSelfEmploymentStream(r.value));
+  const otherRows = rows.filter((r) => !isWagesStream(r.value) && !isSelfEmploymentStream(r.value));
 
   // The three Yes/No answers live in RHF form state (incomeEmployed/Gig/Other) so
   // they are required by the schema and participate in scroll-to-error. They are
-  // seeded from the persisted streams (deriveIncomeAnswers) in defaultValues and
-  // stripped before saving — the backend still derives income from the streams.
+  // seeded from the persisted streams (deriveIncomeAnswers) in defaultValues.
   const employed = useWatch({ control, name: 'incomeEmployed' }) ?? null;
   const gig = useWatch({ control, name: 'incomeGig' }) ?? null;
   const other = useWatch({ control, name: 'incomeOther' }) ?? null;
@@ -497,12 +497,6 @@ const IncomeSection = ({
   const employedError = errors.incomeEmployed;
   const gigError = errors.incomeGig;
   const otherError = errors.incomeOther;
-
-  // Q2 (gig) is only asked when Q1 (employed) is "No".
-  const showGigQuestion = employed === false;
-  // A gig row is any employment row (self-employment) that surfaces while not employed.
-  const gigRows = showGigQuestion ? employmentRows : [];
-  const employedRows = showGigQuestion ? [] : employmentRows;
 
   const track = useTrackEvent();
   // Income streams live inside the household member step, so they share its
@@ -576,18 +570,14 @@ const IncomeSection = ({
   const handleEmployedChange = (answer: boolean, anchorEl: HTMLElement) => {
     if (answer) {
       setEmployed(answer);
-      // Turning employment on hides the gig question; any self-employment stream
-      // already entered stays and is folded under the (now visible) employment
-      // question rather than dropped.
-      setGig(null);
-      if (employmentRows.length === 0) {
+      if (employedRows.length === 0) {
         append(EMPTY_EMPLOYMENT_INCOME_STREAM);
         trackIncomeSource('add');
       }
     } else {
-      confirmDiscardOrApply(isEmploymentStream, anchorEl, () => {
+      confirmDiscardOrApply(isWagesStream, anchorEl, () => {
         setEmployed(answer);
-        removeMatching(isEmploymentStream);
+        removeMatching(isWagesStream);
       });
     }
   };
@@ -595,14 +585,14 @@ const IncomeSection = ({
   const handleGigChange = (answer: boolean, anchorEl: HTMLElement) => {
     if (answer) {
       setGig(answer);
-      if (employmentRows.length === 0) {
+      if (gigRows.length === 0) {
         append(EMPTY_GIG_INCOME_STREAM);
         trackIncomeSource('add');
       }
     } else {
-      confirmDiscardOrApply(isEmploymentStream, anchorEl, () => {
+      confirmDiscardOrApply(isSelfEmploymentStream, anchorEl, () => {
         setGig(answer);
-        removeMatching(isEmploymentStream);
+        removeMatching(isSelfEmploymentStream);
       });
     }
   };
@@ -615,11 +605,12 @@ const IncomeSection = ({
         trackIncomeSource('add');
       }
     } else {
-      // Remove every non-employment row, including any blank rows the user added
-      // but never assigned a category.
-      confirmDiscardOrApply((value) => !isEmploymentStream(value), anchorEl, () => {
+      // Remove every Q3 row — non-employment rows plus any blank row the user
+      // added but never assigned a category.
+      const isOtherBucket = (v: IncomeStreamFormData) => !isWagesStream(v) && !isSelfEmploymentStream(v);
+      confirmDiscardOrApply(isOtherBucket, anchorEl, () => {
         setOther(answer);
-        removeMatching((value) => !isEmploymentStream(value));
+        removeMatching(isOtherBucket);
       });
     }
   };
@@ -694,50 +685,48 @@ const IncomeSection = ({
           )}
           {employed && (
             <Stack spacing={2} className="income-streams-stack">
-              {employedRows.map((r) => renderRow(r, 'sourceOnly'))}
+              {employedRows.map((r) => renderRow(r, 'amountOnly'))}
               <AddIncomeSourceLink onClick={handleAddEmploymentSource} />
             </Stack>
           )}
         </Box>
 
-        {/* Q2 — Freelance/gig/occasional work (only when Q1 is No) */}
-        {showGigQuestion && (
-          <Box className={`income-question-block${gig ? ' income-question-block--active' : ''}`}>
-            <FormLabel className="income-question-label">
-              <Icon name="car" size={26} className="income-question-icon" aria-hidden />
-              <FormattedMessage
-                id="householdDataBlock.incomeQuestion-gig"
-                defaultMessage="Do {subject} earn any money from freelance, gig, or occasional work?"
-                values={{ subject }}
-              />
-            </FormLabel>
-            <p id="income-gig-subtext" className="income-question-subtext">
-              <FormattedMessage
-                id="householdDataBlock.incomeQuestion-gig-subtext"
-                defaultMessage="For example: driving for a rideshare, odd jobs, selling goods, or any other irregular paid work."
-              />
-            </p>
-            <YesNoToggle
-              value={gig}
-              onChange={handleGigChange}
-              ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-gig', defaultMessage: 'Do {subject} earn any money from freelance, gig, or occasional work?' }, { subject })}
-              errorId="income-gig-error"
-              hasError={!!gigError}
-              descriptionId="income-gig-subtext"
+        {/* Q2 — Freelance/gig/occasional work */}
+        <Box className={`income-question-block${gig ? ' income-question-block--active' : ''}`}>
+          <FormLabel className="income-question-label">
+            <Icon name="car" size={26} className="income-question-icon" aria-hidden />
+            <FormattedMessage
+              id="householdDataBlock.incomeQuestion-gig"
+              defaultMessage="Do {subject} earn any money from freelance, gig, or occasional work?"
+              values={{ subject }}
             />
-            {gigError && (
-              <FormHelperText id="income-gig-error" sx={{ ml: 0 }}>
-                <ErrorMessageWrapper fontSize="0.875rem">{gigError.message ?? ''}</ErrorMessageWrapper>
-              </FormHelperText>
-            )}
-            {gig && (
-              <Stack spacing={2} className="income-streams-stack">
-                {gigRows.map((r) => renderRow(r, 'amountOnly'))}
-                <AddIncomeSourceLink onClick={handleAddGigSource} />
-              </Stack>
-            )}
-          </Box>
-        )}
+          </FormLabel>
+          <p id="income-gig-subtext" className="income-question-subtext">
+            <FormattedMessage
+              id="householdDataBlock.incomeQuestion-gig-subtext"
+              defaultMessage="For example: driving for a rideshare, odd jobs, selling goods, or any other irregular paid work."
+            />
+          </p>
+          <YesNoToggle
+            value={gig}
+            onChange={handleGigChange}
+            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-gig', defaultMessage: 'Do {subject} earn any money from freelance, gig, or occasional work?' }, { subject })}
+            errorId="income-gig-error"
+            hasError={!!gigError}
+            descriptionId="income-gig-subtext"
+          />
+          {gigError && (
+            <FormHelperText id="income-gig-error" sx={{ ml: 0 }}>
+              <ErrorMessageWrapper fontSize="0.875rem">{gigError.message ?? ''}</ErrorMessageWrapper>
+            </FormHelperText>
+          )}
+          {gig && (
+            <Stack spacing={2} className="income-streams-stack">
+              {gigRows.map((r) => renderRow(r, 'amountOnly'))}
+              <AddIncomeSourceLink onClick={handleAddGigSource} />
+            </Stack>
+          )}
+        </Box>
 
         {/* Q3 — Government benefits / child support / alimony / other recurring payments */}
         <Box className={`income-question-block${other ? ' income-question-block--active' : ''}`}>

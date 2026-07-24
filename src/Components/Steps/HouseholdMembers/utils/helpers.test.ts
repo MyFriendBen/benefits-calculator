@@ -6,7 +6,8 @@ import {
   createHouseholdMemberData,
   scrollToFirstError,
   deriveIncomeAnswers,
-  isEmploymentStream,
+  isWagesStream,
+  isSelfEmploymentStream,
   isOtherStream,
 } from './helpers';
 import { FREQUENCY_ORDER } from './constants';
@@ -73,22 +74,32 @@ describe('getDefaultFormItems', () => {
 // income question bucketing
 // ============================================================================
 
-describe('isEmploymentStream / isOtherStream', () => {
-  it('classifies employment-category streams as employment, not other', () => {
-    const stream = { incomeCategory: 'employment' };
-    expect(isEmploymentStream(stream)).toBe(true);
+describe('isWagesStream / isSelfEmploymentStream / isOtherStream', () => {
+  it('classifies a wages stream as wages only', () => {
+    const stream = { incomeCategory: 'employment', incomeStreamName: 'wages' };
+    expect(isWagesStream(stream)).toBe(true);
+    expect(isSelfEmploymentStream(stream)).toBe(false);
     expect(isOtherStream(stream)).toBe(false);
   });
 
-  it('classifies non-employment categories as other, not employment', () => {
-    const stream = { incomeCategory: 'government' };
-    expect(isEmploymentStream(stream)).toBe(false);
-    expect(isOtherStream(stream)).toBe(true);
+  it('classifies a self-employment stream as self-employment only', () => {
+    const stream = { incomeCategory: 'employment', incomeStreamName: 'selfEmployment' };
+    expect(isSelfEmploymentStream(stream)).toBe(true);
+    expect(isWagesStream(stream)).toBe(false);
+    expect(isOtherStream(stream)).toBe(false);
   });
 
-  it('treats an empty category as neither bucket', () => {
-    const stream = { incomeCategory: '' };
-    expect(isEmploymentStream(stream)).toBe(false);
+  it('classifies non-employment categories as other', () => {
+    const stream = { incomeCategory: 'government', incomeStreamName: 'sSI' };
+    expect(isOtherStream(stream)).toBe(true);
+    expect(isWagesStream(stream)).toBe(false);
+    expect(isSelfEmploymentStream(stream)).toBe(false);
+  });
+
+  it('treats an empty category as no bucket', () => {
+    const stream = { incomeCategory: '', incomeStreamName: '' };
+    expect(isWagesStream(stream)).toBe(false);
+    expect(isSelfEmploymentStream(stream)).toBe(false);
     expect(isOtherStream(stream)).toBe(false);
   });
 });
@@ -104,18 +115,17 @@ describe('deriveIncomeAnswers', () => {
     expect(answers).toEqual({ employed: true, gig: false, other: false });
   });
 
-  it('marks gig (not employed) when the only employment income is self-employment', () => {
+  it('marks gig when a self-employment stream exists', () => {
     const answers = deriveIncomeAnswers([{ incomeCategory: 'employment', incomeStreamName: 'selfEmployment' }]);
     expect(answers).toEqual({ employed: false, gig: true, other: false });
   });
 
-  it('prefers employed over gig when both wages and self-employment exist', () => {
-    // Q2 is only asked when Q1 is No, so any wages income means employed=true, gig=false.
+  it('marks both employed and gig independently when both sources exist', () => {
     const answers = deriveIncomeAnswers([
       { incomeCategory: 'employment', incomeStreamName: 'wages' },
       { incomeCategory: 'employment', incomeStreamName: 'selfEmployment' },
     ]);
-    expect(answers).toEqual({ employed: true, gig: false, other: false });
+    expect(answers).toEqual({ employed: true, gig: true, other: false });
   });
 
   it('marks other when a non-employment stream exists', () => {
@@ -123,12 +133,13 @@ describe('deriveIncomeAnswers', () => {
     expect(answers).toEqual({ employed: false, gig: false, other: true });
   });
 
-  it('combines employed and other independently', () => {
+  it('combines all three independently', () => {
     const answers = deriveIncomeAnswers([
       { incomeCategory: 'employment', incomeStreamName: 'wages' },
+      { incomeCategory: 'employment', incomeStreamName: 'selfEmployment' },
       { incomeCategory: 'support', incomeStreamName: 'childSupport' },
     ]);
-    expect(answers).toEqual({ employed: true, gig: false, other: true });
+    expect(answers).toEqual({ employed: true, gig: true, other: true });
   });
 });
 

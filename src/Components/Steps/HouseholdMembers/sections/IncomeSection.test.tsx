@@ -49,7 +49,7 @@ const Wrapper = ({
   const derived = deriveIncomeAnswers(defaultStreams);
   const { control, setValue, clearErrors } = useForm({
     defaultValues: {
-      incomeEmployed: derived.employed ? true : derived.gig ? false : null,
+      incomeEmployed: derived.employed ? true : null,
       incomeGig: derived.gig ? true : null,
       incomeOther: derived.other ? true : null,
       incomeStreams: defaultStreams,
@@ -108,11 +108,11 @@ const clickNo = (namePattern: RegExp) =>
 
 describe('IncomeSection (three-question design)', () => {
   describe('question visibility', () => {
-    it('renders the employed and other questions, but hides the gig question initially', () => {
+    it('renders all three questions up front (gig is not gated on employed)', () => {
       render(<Wrapper />);
       expect(screen.getByText(/are you currently employed\?/i)).toBeInTheDocument();
+      expect(screen.getByText(/freelance, gig, or occasional work/i)).toBeInTheDocument();
       expect(screen.getByText(/government benefits, child support, alimony/i)).toBeInTheDocument();
-      expect(screen.queryByText(/freelance, gig, or occasional work/i)).not.toBeInTheDocument();
     });
 
     it('phrases the questions in the first person for member 1 ("you")', () => {
@@ -126,53 +126,28 @@ describe('IncomeSection (three-question design)', () => {
       expect(screen.queryByText(/are you currently employed\?/i)).not.toBeInTheDocument();
     });
 
-    it('shows the gig question only after answering "No" to employed', () => {
+    it('answering employed does not affect the gig question (both stay visible)', () => {
       render(<Wrapper />);
-      clickNo(/are you currently employed/i);
-      expect(screen.getByText(/freelance, gig, or occasional work/i)).toBeInTheDocument();
-    });
-
-    it('hides the gig question again when employed is switched to "Yes"', () => {
-      render(<Wrapper />);
-      clickNo(/are you currently employed/i);
-      expect(screen.getByText(/freelance, gig, or occasional work/i)).toBeInTheDocument();
       clickYes(/are you currently employed/i);
-      expect(screen.queryByText(/freelance, gig, or occasional work/i)).not.toBeInTheDocument();
+      expect(screen.getByText(/freelance, gig, or occasional work/i)).toBeInTheDocument();
     });
   });
 
   describe('employed question (Q1) fields', () => {
-    it('reveals a source-only row (no category dropdown) on "Yes"', async () => {
+    it('reveals an amount-only row (no category or source dropdown) on "Yes"', async () => {
       render(<Wrapper />);
       clickYes(/are you currently employed/i);
       await waitFor(() => {
-        expect(document.getElementById('income-source-label-0')).toBeInTheDocument();
+        expect(document.getElementById('income-amount-label-0')).toBeInTheDocument();
       });
-      // No Income Category label for employment rows.
       expect(document.getElementById('income-category-label-0')).not.toBeInTheDocument();
-    });
-
-    it('offers both wages and self-employment as source options', async () => {
-      // Employment rows show only when the question is Yes; seed one wages stream
-      // to auto-answer employed and surface the row.
-      render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
-      const sourceSelect = Array.from(getSelectDivs()).find(
-        (el) => el.getAttribute('aria-label') === 'Income Source',
-      )!;
-      fireEvent.mouseDown(sourceSelect);
-      await waitFor(() => {
-        expect(screen.getByRole('option', { name: /wages, salaries, or tips/i })).toBeInTheDocument();
-        expect(
-          screen.getByRole('option', { name: /self-employment, freelance, gig, or contract work/i }),
-        ).toBeInTheDocument();
-      });
+      expect(document.getElementById('income-source-label-0')).not.toBeInTheDocument();
     });
   });
 
   describe('gig question (Q2) fields', () => {
     it('shows only frequency + amount (no category or source dropdowns) on "Yes"', async () => {
       render(<Wrapper />);
-      clickNo(/are you currently employed/i);
       clickYes(/freelance, gig, or occasional work/i);
       await waitFor(() => {
         expect(document.getElementById('income-amount-label-0')).toBeInTheDocument();
@@ -206,16 +181,18 @@ describe('IncomeSection (three-question design)', () => {
   });
 
   describe('rehydration from existing streams', () => {
-    it('auto-answers employed=Yes and renders the employment row for a saved wages stream', () => {
+    it('auto-answers employed=Yes and renders an amount-only row for a saved wages stream', () => {
       render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
-      expect(document.getElementById('income-source-label-0')).toBeInTheDocument();
-      // Gig question stays hidden because employed is Yes.
-      expect(screen.queryByText(/freelance, gig, or occasional work/i)).not.toBeInTheDocument();
+      // Employed row is amount-only (no source/category dropdown).
+      expect(document.getElementById('income-amount-label-0')).toBeInTheDocument();
+      expect(document.getElementById('income-source-label-0')).not.toBeInTheDocument();
+      // Employed Yes doesn't hide the gig question.
+      expect(within(yesNoGroup(/are you currently employed/i)).getByRole('radio', { name: /^yes$/i })).toHaveAttribute('aria-checked', 'true');
     });
 
-    it('auto-answers gig=Yes (employed=No) for a saved self-employment-only stream', () => {
+    it('auto-answers gig=Yes for a saved self-employment stream', () => {
       render(<Wrapper defaultStreams={[employmentStream('selfEmployment')]} />);
-      expect(screen.getByText(/freelance, gig, or occasional work/i)).toBeInTheDocument();
+      expect(within(yesNoGroup(/freelance, gig, or occasional work/i)).getByRole('radio', { name: /^yes$/i })).toHaveAttribute('aria-checked', 'true');
     });
 
     it('auto-answers other=Yes for a saved non-employment stream', () => {
