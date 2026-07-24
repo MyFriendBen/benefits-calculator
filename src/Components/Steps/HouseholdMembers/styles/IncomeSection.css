@@ -35,6 +35,9 @@
 }
 
 .income-question-label.MuiFormLabel-root {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 1rem;
   font-weight: 700;
   color: var(--primary-color, #293457);
@@ -42,6 +45,12 @@
 
 .income-question-label.MuiFormLabel-root.Mui-focused {
   color: var(--primary-color, #293457);
+}
+
+/* Small accent icon before each income question. */
+.income-question-icon {
+  flex-shrink: 0;
+  color: var(--secondary-color, #b85a27);
 }
 
 .income-question-subtext {

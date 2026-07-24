@@ -28,6 +28,7 @@ import {
   FieldErrors,
 } from 'react-hook-form';
 import { NumericFormat } from 'react-number-format';
+import { Icon } from '../../../Icon/Icon';
 import HelpButton from '../../../HelpBubbleIcon/HelpButton';
 import QuestionQuestion from '../../../QuestionComponents/QuestionQuestion';
 import QuestionDescription from '../../../QuestionComponents/QuestionDescription';
@@ -676,6 +677,7 @@ const IncomeSection = ({
         {/* Q1 — Are you currently employed? */}
         <Box className="income-question-block">
           <FormLabel className="income-question-label">
+            <Icon name="briefcase" size={20} className="income-question-icon" aria-hidden />
             <FormattedMessage id="householdDataBlock.incomeQuestion-employed" defaultMessage="Are {subject} currently employed?" values={{ subject }} />
           </FormLabel>
           <YesNoToggle
@@ -702,6 +704,7 @@ const IncomeSection = ({
         {showGigQuestion && (
           <Box className="income-question-block">
             <FormLabel className="income-question-label">
+              <Icon name="car" size={20} className="income-question-icon" aria-hidden />
               <FormattedMessage
                 id="householdDataBlock.incomeQuestion-gig"
                 defaultMessage="Do {subject} earn any money from freelance, gig, or occasional work?"
@@ -739,6 +742,7 @@ const IncomeSection = ({
         {/* Q3 — Government benefits / child support / alimony / other recurring payments */}
         <Box className="income-question-block">
           <FormLabel className="income-question-label">
+            <Icon name="banknote" size={20} className="income-question-icon" aria-hidden />
             <FormattedMessage
               id="householdDataBlock.incomeQuestion-other"
               defaultMessage="Do {subject} receive any government benefits, child support, alimony, or other recurring payments?"
