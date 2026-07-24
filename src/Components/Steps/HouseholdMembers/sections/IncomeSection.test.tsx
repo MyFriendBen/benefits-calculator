@@ -88,6 +88,13 @@ const otherStream = (): IncomeStreamFormData => ({
   incomeStreamName: 'sSI',
 });
 
+// A stream with an actual amount entered — "has data" for the discard-confirm.
+const filledEmploymentStream = (source = 'wages'): IncomeStreamFormData => ({
+  ...employmentStream(source),
+  incomeFrequency: 'monthly',
+  incomeAmount: '1000',
+});
+
 // MUI Select renders as role="button" with aria-haspopup="listbox" in JSDOM
 const getSelectDivs = () =>
   document.querySelectorAll('[aria-haspopup="listbox"]') as NodeListOf<HTMLElement>;
@@ -234,10 +241,10 @@ describe('IncomeSection (three-question design)', () => {
     });
 
     it('removes all employment rows when employed is switched to "No" (after confirming in the popover)', async () => {
-      render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
+      render(<Wrapper defaultStreams={[filledEmploymentStream()]} />);
       expect(screen.getAllByRole('button', { name: /delete income source/i })).toHaveLength(1);
       clickNo(/are you currently employed/i);
-      // A confirmation popover appears; confirm the removal.
+      // The row has an entered amount, so a confirmation popover appears; confirm.
       fireEvent.click(await screen.findByRole('button', { name: /^remove$/i }));
       await waitFor(() => {
         expect(screen.queryByRole('button', { name: /delete income source/i })).not.toBeInTheDocument();
@@ -246,14 +253,14 @@ describe('IncomeSection (three-question design)', () => {
   });
 
   describe('confirm before discarding filled income (destructive toggle)', () => {
-    it('opens a confirmation popover before removing a filled row when switching to "No"', async () => {
-      render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
+    it('opens a confirmation popover before removing a row with an entered amount', async () => {
+      render(<Wrapper defaultStreams={[filledEmploymentStream()]} />);
       clickNo(/are you currently employed/i);
       expect(await screen.findByText(/this will remove the income you entered/i)).toBeInTheDocument();
     });
 
     it('keeps the data and the "Yes" answer if the popover is cancelled', async () => {
-      render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
+      render(<Wrapper defaultStreams={[filledEmploymentStream()]} />);
       clickNo(/are you currently employed/i);
       fireEvent.click(await screen.findByRole('button', { name: /^cancel$/i }));
       await waitFor(() => {
@@ -270,6 +277,23 @@ describe('IncomeSection (three-question design)', () => {
       expect(screen.queryByText(/this will remove the income you entered/i)).not.toBeInTheDocument();
       // Gig question appears (employed is now No), confirming the toggle applied.
       expect(screen.getByText(/freelance, gig, or occasional work/i)).toBeInTheDocument();
+    });
+
+    it('does not prompt when the answered row only has a seeded source/category, no amount', () => {
+      // Regression: a wages/selfEmployment source is either user- or auto-seeded,
+      // but with no amount/frequency the box is effectively empty — no prompt.
+      render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
+      clickNo(/are you currently employed/i);
+      expect(screen.queryByText(/this will remove the income you entered/i)).not.toBeInTheDocument();
+    });
+
+    it('does not prompt on the gig question when its seeded (amount-less) row is present', () => {
+      // The gig "Yes" seeds a selfEmployment source with no amount. Clicking "No"
+      // on that empty box should NOT trigger the confirm (the reported bug).
+      render(<Wrapper defaultStreams={[employmentStream('selfEmployment')]} />);
+      // employed derives to No + gig Yes for a self-employment-only stream.
+      clickNo(/freelance, gig, or occasional work/i);
+      expect(screen.queryByText(/this will remove the income you entered/i)).not.toBeInTheDocument();
     });
   });
 

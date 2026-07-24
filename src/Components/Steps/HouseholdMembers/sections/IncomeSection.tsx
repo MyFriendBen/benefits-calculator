@@ -535,10 +535,15 @@ const IncomeSection = ({
     indices.forEach((i) => remove(i));
   };
 
-  // A row "has data" once the user has entered an amount or picked a source —
-  // i.e. answering "No" would discard real input.
+  // A row "has data" once the user has entered an amount, frequency, or hours —
+  // i.e. answering "No" would discard real input. We intentionally do NOT count
+  // incomeStreamName/incomeCategory: the gig row is seeded with a source, and the
+  // employment/other rows are seeded with a category, so those are pre-filled by
+  // us, not typed by the user. Amount/frequency/hours are blank in every seed.
   const streamHasData = (s: IncomeStreamFormData) =>
-    (s.incomeAmount !== '' && s.incomeAmount != null) || !!s.incomeStreamName;
+    (s.incomeAmount !== '' && s.incomeAmount != null) ||
+    !!s.incomeFrequency ||
+    (s.hoursPerWeek !== '' && s.hoursPerWeek != null);
 
   // Discard-confirmation popover state: the option element it anchors to, plus the
   // removal to run if the user confirms. Anchoring to the clicked "No" button
