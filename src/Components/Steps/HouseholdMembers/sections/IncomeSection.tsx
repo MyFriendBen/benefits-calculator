@@ -675,9 +675,9 @@ const IncomeSection = ({
 
       <Box className="income-questions-container">
         {/* Q1 — Are you currently employed? */}
-        <Box className="income-question-block">
+        <Box className={`income-question-block${employed ? ' income-question-block--active' : ''}`}>
           <FormLabel className="income-question-label">
-            <Icon name="briefcase" size={20} className="income-question-icon" aria-hidden />
+            <Icon name="briefcase" size={26} className="income-question-icon" aria-hidden />
             <FormattedMessage id="householdDataBlock.incomeQuestion-employed" defaultMessage="Are {subject} currently employed?" values={{ subject }} />
           </FormLabel>
           <YesNoToggle
@@ -702,9 +702,9 @@ const IncomeSection = ({
 
         {/* Q2 — Freelance/gig/occasional work (only when Q1 is No) */}
         {showGigQuestion && (
-          <Box className="income-question-block">
+          <Box className={`income-question-block${gig ? ' income-question-block--active' : ''}`}>
             <FormLabel className="income-question-label">
-              <Icon name="car" size={20} className="income-question-icon" aria-hidden />
+              <Icon name="car" size={26} className="income-question-icon" aria-hidden />
               <FormattedMessage
                 id="householdDataBlock.incomeQuestion-gig"
                 defaultMessage="Do {subject} earn any money from freelance, gig, or occasional work?"
@@ -740,9 +740,9 @@ const IncomeSection = ({
         )}
 
         {/* Q3 — Government benefits / child support / alimony / other recurring payments */}
-        <Box className="income-question-block">
+        <Box className={`income-question-block${other ? ' income-question-block--active' : ''}`}>
           <FormLabel className="income-question-label">
-            <Icon name="banknote" size={20} className="income-question-icon" aria-hidden />
+            <Icon name="banknote" size={26} className="income-question-icon" aria-hidden />
             <FormattedMessage
               id="householdDataBlock.incomeQuestion-other"
               defaultMessage="Do {subject} receive any government benefits, child support, alimony, or other recurring payments?"

@@ -34,6 +34,14 @@
   padding: 1.5rem;
 }
 
+/* Orange accent bar on the left when the question is answered "Yes". The left
+   border grows 1px -> 4px; left padding drops by the same 3px so content doesn't
+   shift. */
+.income-question-block--active {
+  border-left: 4px solid var(--secondary-color, #b85a27);
+  padding-left: calc(1.5rem - 3px);
+}
+
 .income-question-label.MuiFormLabel-root {
   display: flex;
   align-items: center;
