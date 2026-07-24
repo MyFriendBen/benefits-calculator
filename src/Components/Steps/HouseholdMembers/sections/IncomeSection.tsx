@@ -84,6 +84,9 @@ interface IncomeSectionProps {
 interface IncomeStreamRowProps {
   index: number;
   variant: IncomeRowVariant;
+  // 1-based position within its question's rows; shown as a heading on amount-only
+  // rows (which have no source field to identify them).
+  rowNumber?: number;
   control: Control<IncomeFormValues>;
   setValue: UseFormSetValue<IncomeFormValues>;
   remove: UseFieldArrayRemove;
@@ -96,6 +99,7 @@ interface IncomeStreamRowProps {
 const IncomeStreamRow = ({
   index,
   variant,
+  rowNumber,
   control,
   setValue,
   remove,
@@ -131,6 +135,17 @@ const IncomeStreamRow = ({
   return (
     <Box id={`income-stream-${index}`} className="income-box">
       <Box className="income-fields-container">
+        {/* Amount-only rows (wages/self-employment) have no source field, so a
+            numbered heading identifies what the frequency + amount describe. */}
+        {variant === 'amountOnly' && rowNumber !== undefined && (
+          <div className="income-row-heading">
+            <FormattedMessage
+              id="personIncomeBlock.incomeSourceNumber"
+              defaultMessage="Income Source {number}"
+              values={{ number: rowNumber }}
+            />
+          </div>
+        )}
         {/* Income Category (only for the "other recurring payments" question) */}
         {showCategory && (
           <Box className="income-category-container">
@@ -630,11 +645,12 @@ const IncomeSection = ({
     trackIncomeSource('add');
   };
 
-  const renderRow = (r: { field: { id: string }; index: number }, variant: IncomeRowVariant) => (
+  const renderRow = (r: { field: { id: string }; index: number }, variant: IncomeRowVariant, rowNumber?: number) => (
     <IncomeStreamRow
       key={r.field.id}
       index={r.index}
       variant={variant}
+      rowNumber={rowNumber}
       control={control}
       setValue={setValue}
       remove={trackedRemove}
@@ -669,12 +685,12 @@ const IncomeSection = ({
         <Box className={`income-question-block${employed ? ' income-question-block--active' : ''}`}>
           <FormLabel className="income-question-label">
             <Icon name="briefcase" size={26} className="income-question-icon" aria-hidden />
-            <FormattedMessage id="householdDataBlock.incomeQuestion-employed" defaultMessage="Are {subject} currently employed?" values={{ subject }} />
+            <FormattedMessage id="householdDataBlock.incomeQuestion-employed" defaultMessage="Are {subject} employed (receiving consistent wages, salary, or tips)?" values={{ subject }} />
           </FormLabel>
           <YesNoToggle
             value={employed}
             onChange={handleEmployedChange}
-            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-employed', defaultMessage: 'Are {subject} currently employed?' }, { subject })}
+            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-employed', defaultMessage: 'Are {subject} employed (receiving consistent wages, salary, or tips)?' }, { subject })}
             errorId="income-employed-error"
             hasError={!!employedError}
           />
@@ -685,7 +701,7 @@ const IncomeSection = ({
           )}
           {employed && (
             <Stack spacing={2} className="income-streams-stack">
-              {employedRows.map((r) => renderRow(r, 'amountOnly'))}
+              {employedRows.map((r, i) => renderRow(r, 'amountOnly', i + 1))}
               <AddIncomeSourceLink onClick={handleAddEmploymentSource} />
             </Stack>
           )}
@@ -697,7 +713,7 @@ const IncomeSection = ({
             <Icon name="car" size={26} className="income-question-icon" aria-hidden />
             <FormattedMessage
               id="householdDataBlock.incomeQuestion-gig"
-              defaultMessage="Do {subject} earn any money from freelance, gig, or occasional work?"
+              defaultMessage="Do {subject} earn any money from self-employment, freelance, gig, or occasional work?"
               values={{ subject }}
             />
           </FormLabel>
@@ -710,7 +726,7 @@ const IncomeSection = ({
           <YesNoToggle
             value={gig}
             onChange={handleGigChange}
-            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-gig', defaultMessage: 'Do {subject} earn any money from freelance, gig, or occasional work?' }, { subject })}
+            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-gig', defaultMessage: 'Do {subject} earn any money from self-employment, freelance, gig, or occasional work?' }, { subject })}
             errorId="income-gig-error"
             hasError={!!gigError}
             descriptionId="income-gig-subtext"
@@ -722,7 +738,7 @@ const IncomeSection = ({
           )}
           {gig && (
             <Stack spacing={2} className="income-streams-stack">
-              {gigRows.map((r) => renderRow(r, 'amountOnly'))}
+              {gigRows.map((r, i) => renderRow(r, 'amountOnly', i + 1))}
               <AddIncomeSourceLink onClick={handleAddGigSource} />
             </Stack>
           )}

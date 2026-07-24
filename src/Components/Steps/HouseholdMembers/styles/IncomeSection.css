@@ -129,6 +129,13 @@
   min-width: 0;
 }
 
+/* Numbered heading on amount-only income rows (wages / self-employment). */
+.income-row-heading {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--primary-color, #293457);
+}
+
 .income-category-container {
   width: 100%;
 }
