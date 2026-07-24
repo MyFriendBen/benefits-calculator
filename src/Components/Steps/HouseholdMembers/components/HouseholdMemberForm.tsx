@@ -8,7 +8,6 @@ import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
 import HouseholdMemberSummaryCards from './HouseholdMemberSummaryCards';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { SubmitHandler, useFieldArray, useWatch } from 'react-hook-form';
-import { useAgeCalculation } from '../../../AgeCalculation/useAgeCalculation';
 import { mfbZodResolver } from '../../../../Assets/analytics/mfbZodResolver';
 import PrevAndContinueButtons from '../../../PrevAndContinueButtons/PrevAndContinueButtons';
 import useScreenApi from '../../../../Assets/updateScreen';
@@ -127,11 +126,6 @@ const HouseholdMemberForm = () => {
     name: 'incomeStreams',
   });
 
-  // AGE CALCULATION
-  const { calculateCurrentAgeStatus } = useAgeCalculation(watch);
-
-  const watchBirthMonth = useWatch({ control, name: 'birthMonth' });
-  const watchBirthYear = useWatch({ control, name: 'birthYear' });
   const watchIsStudent = useWatch({ control, name: 'conditions.student' });
   const watchIsDisabled = useWatch({ control, name: 'conditions.disabled' });
 
@@ -144,10 +138,6 @@ const HouseholdMemberForm = () => {
     setValue,
     getValues,
     reset,
-    append,
-    calculateCurrentAgeStatus,
-    watchBirthMonth,
-    watchBirthYear,
     watchIsStudent,
     watchIsDisabled,
   });
@@ -307,6 +297,7 @@ const HouseholdMemberForm = () => {
         append={append}
         remove={remove}
         setValue={setValue}
+        clearErrors={clearErrors}
         incomeCategories={incomeCategories}
         incomeOptions={incomeOptions}
         frequencyMenuItems={frequencyMenuItems}
@@ -326,7 +317,12 @@ const HouseholdMemberForm = () => {
 
       <form onSubmit={handleSubmit(formSubmitHandler, handleFormError)}>
         {renderFormSections()}
-        <PrevAndContinueButtons backNavigationFunction={navigateBack} stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberDetails} />
+        {/* Promote Continue to the primary action on the income step. */}
+        <PrevAndContinueButtons
+          backNavigationFunction={navigateBack}
+          continueVariant="contained"
+          stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberDetails}
+        />
       </form>
     </main>
   );

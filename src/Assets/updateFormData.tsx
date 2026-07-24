@@ -135,6 +135,7 @@ export function useUpdateFormData() {
         },
         studentEligibility: studentEligibility,
         hasIncome: member.has_income ?? false,
+        isEmployed: member.is_employed ?? null,
         incomeStreams: incomes,
         energyCalculator: energyCalculator,
         healthInsurance: member.insurance ?? initialHHMHealthInsurance,

@@ -2,8 +2,6 @@ import { useEffect, useRef } from 'react';
 import { UseFormSetValue, UseFormGetValues, UseFormReset } from 'react-hook-form';
 import { QuestionName } from '../../../../Types/Questions';
 import { QUESTION_TITLES } from '../../../../Assets/pageTitleTags';
-import { EMPTY_INCOME_STREAM } from '../utils/constants';
-import { MAX_AGE } from '../../../../Assets/age';
 
 interface UseHouseholdMemberFormEffectsParams {
   isEnergyCalculator: boolean;
@@ -13,10 +11,6 @@ interface UseHouseholdMemberFormEffectsParams {
   setValue: UseFormSetValue<any>;
   getValues: UseFormGetValues<any>;
   reset: UseFormReset<any>;
-  append: (value: any) => void;
-  calculateCurrentAgeStatus: () => { is16OrOlder: boolean; isUnder16: boolean };
-  watchBirthMonth: number;
-  watchBirthYear: number;
   watchIsStudent: boolean;
   watchIsDisabled: boolean;
 }
@@ -33,10 +27,6 @@ export const useHouseholdMemberFormEffects = ({
   setValue,
   getValues,
   reset,
-  append,
-  calculateCurrentAgeStatus,
-  watchBirthMonth,
-  watchBirthYear,
   watchIsStudent,
   watchIsDisabled,
 }: UseHouseholdMemberFormEffectsParams) => {
@@ -55,34 +45,10 @@ export const useHouseholdMemberFormEffects = ({
     prevIsStudentRef.current = watchIsStudent;
   }, [watchIsStudent, setValue, isEnergyCalculator]);
 
-  // Shared: When the user changes their birth date and becomes 16+, auto-append one
-  // empty income stream if none exist. If they become under 16, do nothing — any
-  // streams they added intentionally are preserved, and empty state is fine too.
-  // On mount (no birth change) we do nothing — defaultValues already seeded correctly.
-  const prevBirthRef = useRef({ month: watchBirthMonth, year: watchBirthYear });
-  useEffect(() => {
-    const birthChanged =
-      prevBirthRef.current.month !== watchBirthMonth ||
-      prevBirthRef.current.year !== watchBirthYear;
-    prevBirthRef.current = { month: watchBirthMonth, year: watchBirthYear };
-
-    if (!birthChanged) return;
-
-    const currentYear = new Date().getFullYear();
-    const yearIsComplete =
-      watchBirthYear !== undefined &&
-      watchBirthYear !== null &&
-      watchBirthYear >= currentYear - MAX_AGE + 1 &&
-      watchBirthYear <= currentYear;
-    if (!yearIsComplete) return;
-
-    const { is16OrOlder } = calculateCurrentAgeStatus();
-    const hasStreams = getValues('incomeStreams').length > 0;
-
-    if (is16OrOlder && !hasStreams) {
-      append(EMPTY_INCOME_STREAM);
-    }
-  }, [watchBirthMonth, watchBirthYear, calculateCurrentAgeStatus, getValues, append]);
+  // Note: the income section is gated behind three Yes/No questions,
+  // so we no longer auto-append a blank income stream when a member becomes 16+.
+  // The questions themselves prompt the user to enter income; an auto-seeded
+  // empty-category stream would be orphaned (belongs to no question bucket).
 
   // EC-only: Reset receivesSsi when disabled is unchecked
   useEffect(() => {
@@ -103,9 +69,6 @@ export const useHouseholdMemberFormEffects = ({
     if (prevPageRef.current !== pageNumber) {
       reset(defaultValues);
       prevPageRef.current = pageNumber;
-      // Sync prevBirthRef to the new page's default values so the birth-change
-      // effect doesn't mistake the reset as a user-initiated birth date change
-      prevBirthRef.current = { month: defaultValues.birthMonth, year: defaultValues.birthYear };
     }
   }, [pageNumber, reset, defaultValues]);
 };

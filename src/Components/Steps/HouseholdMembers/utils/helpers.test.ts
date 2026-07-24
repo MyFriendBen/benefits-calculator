@@ -1,4 +1,14 @@
-import { getDefaultFormItems, sortFrequencyOptions, calculateAge, formatToUSD, createHouseholdMemberData, scrollToFirstError } from './helpers';
+import {
+  getDefaultFormItems,
+  sortFrequencyOptions,
+  calculateAge,
+  formatToUSD,
+  createHouseholdMemberData,
+  scrollToFirstError,
+  deriveIncomeAnswers,
+  isEmploymentStream,
+  isOtherStream,
+} from './helpers';
 import { FREQUENCY_ORDER } from './constants';
 import { calcAge } from '../../../../Assets/age';
 
@@ -56,6 +66,69 @@ describe('getDefaultFormItems', () => {
   it('does not seed when existing is an empty array and user has progressed', () => {
     // Empty array = user intentionally cleared; respect their choice
     expect(getDefaultFormItems([], true, true, template)).toEqual([]);
+  });
+});
+
+// ============================================================================
+// income question bucketing
+// ============================================================================
+
+describe('isEmploymentStream / isOtherStream', () => {
+  it('classifies employment-category streams as employment, not other', () => {
+    const stream = { incomeCategory: 'employment' };
+    expect(isEmploymentStream(stream)).toBe(true);
+    expect(isOtherStream(stream)).toBe(false);
+  });
+
+  it('classifies non-employment categories as other, not employment', () => {
+    const stream = { incomeCategory: 'government' };
+    expect(isEmploymentStream(stream)).toBe(false);
+    expect(isOtherStream(stream)).toBe(true);
+  });
+
+  it('treats an empty category as neither bucket', () => {
+    const stream = { incomeCategory: '' };
+    expect(isEmploymentStream(stream)).toBe(false);
+    expect(isOtherStream(stream)).toBe(false);
+  });
+});
+
+describe('deriveIncomeAnswers', () => {
+  it('returns all-false for no streams', () => {
+    expect(deriveIncomeAnswers([])).toEqual({ employed: false, gig: false, other: false });
+    expect(deriveIncomeAnswers()).toEqual({ employed: false, gig: false, other: false });
+  });
+
+  it('marks employed when a wages stream exists', () => {
+    const answers = deriveIncomeAnswers([{ incomeCategory: 'employment', incomeStreamName: 'wages' }]);
+    expect(answers).toEqual({ employed: true, gig: false, other: false });
+  });
+
+  it('marks gig (not employed) when the only employment income is self-employment', () => {
+    const answers = deriveIncomeAnswers([{ incomeCategory: 'employment', incomeStreamName: 'selfEmployment' }]);
+    expect(answers).toEqual({ employed: false, gig: true, other: false });
+  });
+
+  it('prefers employed over gig when both wages and self-employment exist', () => {
+    // Q2 is only asked when Q1 is No, so any wages income means employed=true, gig=false.
+    const answers = deriveIncomeAnswers([
+      { incomeCategory: 'employment', incomeStreamName: 'wages' },
+      { incomeCategory: 'employment', incomeStreamName: 'selfEmployment' },
+    ]);
+    expect(answers).toEqual({ employed: true, gig: false, other: false });
+  });
+
+  it('marks other when a non-employment stream exists', () => {
+    const answers = deriveIncomeAnswers([{ incomeCategory: 'government', incomeStreamName: 'sSI' }]);
+    expect(answers).toEqual({ employed: false, gig: false, other: true });
+  });
+
+  it('combines employed and other independently', () => {
+    const answers = deriveIncomeAnswers([
+      { incomeCategory: 'employment', incomeStreamName: 'wages' },
+      { incomeCategory: 'support', incomeStreamName: 'childSupport' },
+    ]);
+    expect(answers).toEqual({ employed: true, gig: false, other: true });
   });
 });
 

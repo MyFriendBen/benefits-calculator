@@ -9,7 +9,100 @@
 
 /* Income stream card layout */
 :root {
-  --income-card-background: #f5f5f5;
+  /* Income input rows are white cards sitting inside the shaded question
+     container, so the card background is white, not gray. */
+  --income-card-background: #ffffff;
+}
+
+/* Three-question income layout: each question sits in its own shaded, rounded
+   box, with a gap between the three, so they read as distinct without the busier
+   single-container-plus-dividers look. */
+.income-questions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.income-question-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background-color: var(--secondary-background-color, #f7f7f7);
+  border: 1px solid #d4d7dd;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+/* Orange accent bar on the left when the question is answered "Yes". The left
+   border grows 1px -> 4px; left padding drops by the same 3px so content doesn't
+   shift. */
+.income-question-block--active {
+  border-left: 4px solid var(--secondary-color, #b85a27);
+  padding-left: calc(1.5rem - 3px);
+}
+
+.income-question-label.MuiFormLabel-root {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary-color, #293457);
+}
+
+.income-question-label.MuiFormLabel-root.Mui-focused {
+  color: var(--primary-color, #293457);
+}
+
+/* Small accent icon before each income question. */
+.income-question-icon {
+  flex-shrink: 0;
+  color: var(--secondary-color, #b85a27);
+}
+
+.income-question-subtext {
+  margin: -0.5rem 0 0;
+  font-size: 0.875rem;
+  color: #5c6470;
+}
+
+/* Yes/No toggle: two bordered pill buttons side by side that fill the width of
+   the question container, filled with the primary color when selected. */
+.income-yes-no-toggle {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.income-yes-no-button {
+  flex: 1;
+  /* min-height keeps the tap target >= 44px on mobile. */
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  color: var(--primary-color, #293457);
+  background-color: #ffffff;
+  border: 1px solid #c4c8d0;
+  border-radius: 12px;
+}
+
+.income-yes-no-button:hover {
+  border-color: var(--primary-color, #293457);
+}
+
+.income-yes-no-button:focus-visible {
+  outline: 3px solid var(--primary-color, #293457);
+  outline-offset: 2px;
+}
+
+.income-yes-no-button.income-yes-no-selected {
+  background-color: var(--primary-color, #293457);
+  color: #ffffff;
+  border-color: var(--primary-color, #293457);
 }
 
 .income-streams-stack {
@@ -22,6 +115,7 @@
   align-items: flex-start;
   padding: 1rem;
   background-color: var(--income-card-background);
+  border: 1px solid #d4d7dd;
   border-radius: 8px;
   overflow: visible;
   min-width: 0;
@@ -75,9 +169,37 @@
   white-space: nowrap;
 }
 
+/* Trash icon with "Remove" label beneath it, top-right of the income card. */
 .income-delete-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  /* min dimensions keep the tap target >= 44px on mobile. */
+  min-height: 44px;
+  min-width: 44px;
   margin-top: 0;
   padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #5c6470;
+}
+
+.income-delete-button:hover {
+  color: var(--primary-color, #293457);
+}
+
+.income-delete-button:focus-visible {
+  outline: 2px solid var(--primary-color, #293457);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.income-delete-label {
+  font-size: 0.75rem;
+  font-family: var(--font-body);
 }
 
 .income-frequency-label-row {
@@ -93,35 +215,31 @@
 
 
 
+/* De-emphasized secondary action: an inline text link with a "+"
+   icon in the secondary/accent color, so it no longer reads as the primary
+   action (was a full-width filled button competing with Continue). */
 .income-add-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: 8px;
-  text-transform: uppercase;
-  font-size: 0.875rem;
-  letter-spacing: 0.05em;
+  gap: 0.375rem;
+  padding: 0.25rem 0;
+  background: none;
+  border: none;
   cursor: pointer;
-  background-color: var(--secondary-color);
-  color: #ffffff;
-  border: 1px solid transparent;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  color: var(--secondary-color);
 }
 
 .income-add-button:hover {
-  background-color: var(--hover-color);
   color: var(--primary-color);
-  border-color: var(--primary-color);
 }
 
 .income-add-button:focus-visible {
-  background-color: var(--hover-color);
-  color: var(--primary-color);
-  border-color: var(--primary-color);
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .income-field-frequency .MuiIconButton-root {

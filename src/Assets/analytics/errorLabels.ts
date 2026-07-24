@@ -19,6 +19,7 @@ export const RULE_LABELS: Record<string, string> = {
   custom: 'Failed validation',
   // custom rule codes
   required: 'Required',
+  source_required: 'Add at least one income source',
   select_one: 'Must select an option',
   none_exclusive: "Can't combine None with others",
   invalid_amount: 'Invalid amount',

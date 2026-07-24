@@ -1,4 +1,4 @@
-import { createDefaultValues, createEnergyCalculatorDefaultValues, DEFAULT_HEALTH_INSURANCE, DEFAULT_SPECIAL_CONDITIONS, DEFAULT_STUDENT_ELIGIBILITY } from './defaultValues';
+import { createDefaultValues, createEnergyCalculatorDefaultValues, getDefaultIncomeAnswers, DEFAULT_HEALTH_INSURANCE, DEFAULT_SPECIAL_CONDITIONS, DEFAULT_STUDENT_ELIGIBILITY } from './defaultValues';
 import { HouseholdData } from '../../../../Types/FormData';
 import { calculateAgeStatus } from '../../../AgeCalculation/AgeCalculation';
 
@@ -22,8 +22,6 @@ const memberWithHealthIns = (overrides: Partial<HouseholdData> = {}): HouseholdD
   ...overrides,
 } as unknown as HouseholdData);
 
-// Helper for under-16 age status
-const under16AgeStatus = () => ({ age: 10, is16OrOlder: false, isUnder16: true });
 // Helper for working-age status
 const workingAgeStatus = () => ({ age: 30, is16OrOlder: true, isUnder16: false });
 
@@ -70,17 +68,17 @@ describe('createDefaultValues', () => {
       expect(result.studentEligibility).toEqual(DEFAULT_STUDENT_ELIGIBILITY);
     });
 
-    it('seeds one empty income stream for working-age eligible member on first visit', () => {
-      mockCalculateAgeStatus.mockReturnValue(workingAgeStatus());
-      // Must pass birthYear and birthMonth so isWorkingAge doesn't short-circuit.
-      // No healthInsurance = not yet progressed, so seeding is allowed.
+    // Income is gated behind three Yes/No questions, so no blank
+    // income stream is auto-seeded regardless of age (an empty-category stream
+    // would be orphaned from every question bucket).
+    it('does not seed an income stream for a working-age member on first visit', () => {
       const workingAgeMember: HouseholdData = {
         id: '1', frontendId: 'f1',
         birthYear: 1990, birthMonth: 6,
         relationshipToHH: '', hasIncome: false, incomeStreams: [],
       } as unknown as HouseholdData;
       const result = createDefaultValues(workingAgeMember);
-      expect(result.incomeStreams).toHaveLength(1);
+      expect(result.incomeStreams).toHaveLength(0);
     });
 
     it('seeds no income stream when there is no birth data at all', () => {
@@ -89,7 +87,6 @@ describe('createDefaultValues', () => {
     });
 
     it('seeds no income stream for under-16 member', () => {
-      mockCalculateAgeStatus.mockReturnValue(under16AgeStatus());
       const youngMember: HouseholdData = {
         id: '1', frontendId: 'f1',
         birthYear: 2018, birthMonth: 6,
@@ -189,6 +186,51 @@ describe('createDefaultValues', () => {
       const result = createDefaultValues(member);
       expect(result.birthYear).toBe(0);
     });
+  });
+});
+
+describe('getDefaultIncomeAnswers', () => {
+  const progressed = (overrides: Partial<HouseholdData> = {}): HouseholdData =>
+    memberWithHealthIns(overrides); // health insurance set => completed the form
+
+  it('returns all null for a brand-new (not progressed) member', () => {
+    const result = getDefaultIncomeAnswers({ incomeStreams: [] } as unknown as HouseholdData);
+    expect(result).toEqual({ incomeEmployed: null, incomeGig: null, incomeOther: null });
+  });
+
+  it('treats empty buckets as explicit "No" for a completed member', () => {
+    // No streams + progressed + no persisted is_employed => all answered No.
+    const result = getDefaultIncomeAnswers(progressed({ incomeStreams: [] }));
+    expect(result).toEqual({ incomeEmployed: false, incomeGig: false, incomeOther: false });
+  });
+
+  it('prefers the persisted is_employed answer over derivation', () => {
+    // Employed=true persisted, but only a self-employment stream exists.
+    const member = progressed({
+      isEmployed: true,
+      incomeStreams: [{ incomeCategory: 'employment', incomeStreamName: 'selfEmployment' }] as any,
+    });
+    const result = getDefaultIncomeAnswers(member);
+    expect(result.incomeEmployed).toBe(true);
+    // Gig is not applicable when employed.
+    expect(result.incomeGig).toBeNull();
+  });
+
+  it('derives gig=Yes (employed=No) from a self-employment-only stream when is_employed is unset', () => {
+    const member = progressed({
+      incomeStreams: [{ incomeCategory: 'employment', incomeStreamName: 'selfEmployment' }] as any,
+    });
+    const result = getDefaultIncomeAnswers(member);
+    expect(result.incomeEmployed).toBe(false);
+    expect(result.incomeGig).toBe(true);
+  });
+
+  it('derives other=Yes from a non-employment stream', () => {
+    const member = progressed({
+      isEmployed: true,
+      incomeStreams: [{ incomeCategory: 'government', incomeStreamName: 'sSI' }] as any,
+    });
+    expect(getDefaultIncomeAnswers(member).incomeOther).toBe(true);
   });
 });
 

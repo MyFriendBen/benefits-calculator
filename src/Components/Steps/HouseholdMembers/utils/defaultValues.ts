@@ -1,7 +1,5 @@
 import { HouseholdData } from '../../../../Types/FormData';
-import { calculateAgeStatus } from '../../../AgeCalculation/AgeCalculation';
-import { EMPTY_INCOME_STREAM } from './constants';
-import { getDefaultFormItems } from './helpers';
+import { deriveIncomeAnswers } from './helpers';
 
 export const UNSET_BIRTH_YEAR: number | '' = '';
 
@@ -50,33 +48,15 @@ const hasProgressedThroughForm = (data?: HouseholdData): boolean => {
 };
 
 /**
- * Helper to check if member is working age (16-70)
- */
-const isWorkingAge = (birthYear?: number, birthMonth?: number): boolean => {
-  if (!birthYear || !birthMonth) return false;
-  const { age } = calculateAgeStatus(birthMonth, birthYear);
-  return age !== null && age >= 16 && age <= 70;
-};
-
-/**
- * Determines default income streams - auto-adds for working-age members on first visit
+ * Determines default income streams.
+ *
+ * The income section is gated behind three Yes/No questions, so we
+ * no longer auto-seed a blank income row for working-age members: an empty-category
+ * stream belongs to none of the question buckets (it would be orphaned/invisible and
+ * fail validation). Any persisted streams are still loaded as-is for editing.
  */
 const getDefaultIncomeStreams = (data?: HouseholdData): any[] => {
-  const progressed = hasProgressedThroughForm(data);
-  // Normalize [] to undefined when not yet progressed — the API always returns [] for
-  // brand-new members, but getDefaultFormItems needs undefined to distinguish
-  // "never visited" from "visited and intentionally cleared".
-  const existingStreams =
-    Array.isArray(data?.incomeStreams) && data!.incomeStreams.length === 0 && !progressed
-      ? undefined
-      : data?.incomeStreams;
-
-  const streams = getDefaultFormItems(
-    existingStreams,
-    progressed,
-    isWorkingAge(data?.birthYear, data?.birthMonth),
-    EMPTY_INCOME_STREAM as any
-  );
+  const streams = Array.isArray(data?.incomeStreams) ? data!.incomeStreams : [];
   return streams.map((stream: any) => ({
     ...stream,
     incomeAmount: stream.incomeAmount == null || stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
@@ -120,6 +100,47 @@ export const DEFAULT_STUDENT_ELIGIBILITY = {
 };
 
 /**
+ * Resolves the three income-question answers for form seeding.
+ *
+ * Only `is_employed` is persisted — it can't be reconstructed from the streams
+ * alone (a self-employment-only member could have answered "employed" or "gig").
+ * The gig and other answers are derived from the streams:
+ * - Yes when a stream of that kind exists.
+ * - No when the member has completed the form (progressed) but has no such
+ *   stream — because the questions are required, "completed + empty" means the
+ *   user explicitly answered No, not that they skipped it.
+ * - null (unanswered) for a brand-new member who hasn't reached the form yet.
+ *
+ * `incomeEmployed` prefers the persisted value; for legacy screens saved before
+ * the field existed it falls back to deriving from the streams.
+ */
+export const getDefaultIncomeAnswers = (data?: HouseholdData) => {
+  const derived = deriveIncomeAnswers(data?.incomeStreams as any);
+  const progressed = hasProgressedThroughForm(data);
+
+  // For a completed member, an empty bucket is an explicit "No"; otherwise unanswered.
+  const derivedNo = progressed ? false : null;
+
+  // Legacy fallback for incomeEmployed: Yes if wages exist, No if only gig income.
+  // A screen saved before is_employed existed whose only income was self-employment
+  // reclassifies from "employed" to "gig" here. That's benign: the same
+  // self-employment stream is preserved and income eligibility derives from the
+  // streams, not this answer — only the question the row appears under changes.
+  const derivedEmployed = derived.employed ? true : derived.gig ? false : derivedNo;
+  const incomeEmployed = data?.isEmployed ?? derivedEmployed;
+
+  // Q2 (gig) is only asked when employed is No. When employed, any employment
+  // stream belongs to Q1, so gig is not applicable (null).
+  const incomeGig = incomeEmployed === false ? (derived.gig ? true : derivedNo) : null;
+
+  return {
+    incomeEmployed,
+    incomeGig,
+    incomeOther: derived.other ? true : derivedNo,
+  };
+};
+
+/**
  * Creates default form values for household member
  */
 export const createDefaultValues = (
@@ -129,6 +150,7 @@ export const createDefaultValues = (
   const incomeStreams = getDefaultIncomeStreams(householdMemberFormData);
 
   return {
+    ...getDefaultIncomeAnswers(householdMemberFormData),
     birthMonth: householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
       ? householdMemberFormData.birthMonth
       : 0,
@@ -195,6 +217,7 @@ export const createEnergyCalculatorDefaultValues = (
     receivesSsi: householdMemberFormData?.energyCalculator?.receivesSsi ? 'true' : 'false',
     relationshipToHH: householdMemberFormData?.relationshipToHH
       ?? (pageNumber === 1 ? 'headOfHousehold' : ''),
+    ...getDefaultIncomeAnswers(householdMemberFormData),
     incomeStreams,
   };
 };
