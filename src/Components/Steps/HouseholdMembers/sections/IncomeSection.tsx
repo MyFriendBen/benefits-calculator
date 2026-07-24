@@ -333,14 +333,16 @@ const IncomeStreamRow = ({
 };
 
 interface YesNoToggleProps {
-  // `anchorEl` is the clicked option element, used to position the discard-confirm
-  // popover when answering "No" would remove entered income.
+  // `anchorEl` is the clicked/selected option element, used to position the
+  // discard-confirm popover when answering "No" would remove entered income.
   value: boolean | null;
   onChange: (value: boolean, anchorEl: HTMLElement) => void;
   ariaLabel: string;
   /** id of an error message element, wired to the group via aria-describedby. */
   errorId?: string;
   hasError?: boolean;
+  /** id of always-present descriptive text (e.g. the gig examples), announced with the group. */
+  descriptionId?: string;
 }
 
 /**
@@ -357,21 +359,29 @@ const YES_NO_OPTIONS: { key: 'yes' | 'no'; answer: boolean; id: string; defaultM
   { key: 'no', answer: false, id: 'radiofield.label-no', defaultMessage: 'No' },
 ];
 
-const YesNoToggle = ({ value, onChange, ariaLabel, errorId, hasError }: YesNoToggleProps) => {
+const YesNoToggle = ({ value, onChange, ariaLabel, errorId, hasError, descriptionId }: YesNoToggleProps) => {
   // Move selection with arrow keys (wrapping), matching native radiogroup behavior.
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'].includes(e.key)) {
       e.preventDefault();
-      onChange(!(value === true), e.currentTarget);
+      const nextAnswer = !(value === true);
+      // Anchor the discard popover to the option being selected (not the group
+      // wrapper) so keyboard and mouse position it the same way.
+      const optionButtons = e.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]');
+      const anchor = optionButtons[nextAnswer ? 0 : 1] ?? e.currentTarget;
+      onChange(nextAnswer, anchor);
     }
   };
+
+  // Combine the always-present description (e.g. gig examples) with the error id.
+  const describedBy = [descriptionId, hasError ? errorId : undefined].filter(Boolean).join(' ') || undefined;
 
   return (
     <div
       className="income-yes-no-toggle"
       role="radiogroup"
       aria-label={ariaLabel}
-      aria-describedby={hasError ? errorId : undefined}
+      aria-describedby={describedBy}
       aria-invalid={hasError || undefined}
       onKeyDown={handleKeyDown}
     >
@@ -483,9 +493,9 @@ const IncomeSection = ({
     setValue('incomeOther', v, { shouldValidate: false });
   };
 
-  const employedError = errors.incomeEmployed as { message?: string } | undefined;
-  const gigError = errors.incomeGig as { message?: string } | undefined;
-  const otherError = errors.incomeOther as { message?: string } | undefined;
+  const employedError = errors.incomeEmployed;
+  const gigError = errors.incomeGig;
+  const otherError = errors.incomeOther;
 
   // Q2 (gig) is only asked when Q1 (employed) is "No".
   const showGigQuestion = employed === false;
@@ -689,7 +699,7 @@ const IncomeSection = ({
                 values={{ subject }}
               />
             </FormLabel>
-            <p className="income-question-subtext">
+            <p id="income-gig-subtext" className="income-question-subtext">
               <FormattedMessage
                 id="householdDataBlock.incomeQuestion-gig-subtext"
                 defaultMessage="For example: driving for a rideshare, odd jobs, selling goods, or any other irregular paid work."
@@ -701,6 +711,7 @@ const IncomeSection = ({
               ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-gig', defaultMessage: 'Do {subject} earn any money from freelance, gig, or occasional work?' }, { subject })}
               errorId="income-gig-error"
               hasError={!!gigError}
+              descriptionId="income-gig-subtext"
             />
             {gigError && (
               <FormHelperText id="income-gig-error" sx={{ ml: 0 }}>

@@ -290,6 +290,15 @@ describe('IncomeSection (three-question design)', () => {
       expect(document.getElementById(describedBy!)).toHaveTextContent(/please select an answer/i);
     });
 
+    it('describes the gig toggle with its example subtext for screen readers', () => {
+      render(<Wrapper />);
+      clickNo(/are you currently employed/i); // reveal the gig question
+      const group = yesNoGroup(/freelance, gig, or occasional work/i);
+      const describedBy = group.getAttribute('aria-describedby') ?? '';
+      expect(describedBy.split(' ')).toContain('income-gig-subtext');
+      expect(document.getElementById('income-gig-subtext')).toHaveTextContent(/rideshare/i);
+    });
+
     it('clears the stale question error when the answer is changed', () => {
       // Reproduces the confusing case: after a failed submit the "Yes" question
       // shows an error; toggling No then Yes should clear it rather than persist.

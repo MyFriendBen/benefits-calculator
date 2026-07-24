@@ -122,6 +122,10 @@ export const getDefaultIncomeAnswers = (data?: HouseholdData) => {
   const derivedNo = progressed ? false : null;
 
   // Legacy fallback for incomeEmployed: Yes if wages exist, No if only gig income.
+  // A screen saved before is_employed existed whose only income was self-employment
+  // reclassifies from "employed" to "gig" here. That's benign: the same
+  // self-employment stream is preserved and income eligibility derives from the
+  // streams, not this answer — only the question the row appears under changes.
   const derivedEmployed = derived.employed ? true : derived.gig ? false : derivedNo;
   const incomeEmployed = data?.isEmployed ?? derivedEmployed;
 

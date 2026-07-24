@@ -192,6 +192,11 @@ describe('createHouseholdMemberSchema (main)', () => {
   });
 
   describe('income question validation', () => {
+    it('accepts the "currently unemployed" path: all three answered No, no income streams', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: false, incomeGig: false, incomeOther: false, incomeStreams: [] });
+      expect(result.success).toBe(true);
+    });
+
     it('rejects when incomeEmployed is unanswered (null)', () => {
       const result = schema.safeParse({ ...validMainData, incomeEmployed: null });
       expect(result.success).toBe(false);
