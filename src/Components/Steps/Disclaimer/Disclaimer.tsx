@@ -167,6 +167,7 @@ const Disclaimer = () => {
                     url: publicChargeOption.link,
                     screener_step_name: DISCLAIMER_STEP_ANALYTICS_ID,
                     screener_step_number: 2,
+                    link_location: 'disclaimer_inline',
                   })
                 }
               >
@@ -197,6 +198,7 @@ const Disclaimer = () => {
               url: privacyPolicyLink,
               screener_step_name: DISCLAIMER_STEP_ANALYTICS_ID,
               screener_step_number: 2,
+              link_location: 'disclaimer_inline',
             })
           }
         >
@@ -213,6 +215,7 @@ const Disclaimer = () => {
               url: consentToContactLinks,
               screener_step_name: DISCLAIMER_STEP_ANALYTICS_ID,
               screener_step_number: 2,
+              link_location: 'disclaimer_inline',
             })
           }
         >
