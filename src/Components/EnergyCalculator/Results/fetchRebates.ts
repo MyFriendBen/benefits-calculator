@@ -180,14 +180,22 @@ export default function useFetchEnergyCalculatorRebates() {
   const isEnergyCalculator = useIsEnergyCalculator();
 
   useEffect(() => {
+    let cancelled = false;
+
     if (!isEnergyCalculator || (!formData.energyCalculator?.isHomeOwner && !formData.energyCalculator?.isRenter)) {
       setRebates([]);
       return;
     }
 
     getRebates(formData, locale).then((rebates) => {
-      setRebates(rebates);
+      if (!cancelled) {
+        setRebates(rebates);
+      }
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [isEnergyCalculator, formData, locale]);
 
   return rebates;

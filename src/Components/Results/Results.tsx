@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import ResultsError from './ResultsError/ResultsError';
 import Loading from './Loading/Loading';
 import {
@@ -126,7 +126,7 @@ const Results = ({ type }: ResultsProps) => {
 
   usePageTitle(OTHER_PAGE_TITLES.results);
 
-  const fetchResults = useCallback(async () => {
+  const fetchResults = async () => {
     try {
       if (uuid === undefined) {
         throw new Error('can not find uuid');
@@ -153,11 +153,15 @@ const Results = ({ type }: ResultsProps) => {
       setApiError(true);
       setLoading(false);
     }
-  }, [uuid, isAdminView]);
+  };
 
   useEffect(() => {
     fetchResults();
-  }, [fetchResults]);
+    // Fetch results once on mount. `fetchResults` is intentionally excluded so a
+    // mid-mount change to the admin query param or uuid can't trigger an
+    // unguarded refetch — this preserves the original mount-only behavior.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [filterState, setFilterState] = useState<FilterState>(createInitialFilterState());
   const [programs, setPrograms] = useState<Program[]>([]);
