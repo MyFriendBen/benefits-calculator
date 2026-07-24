@@ -11,9 +11,13 @@ import './BackAndSaveButtons.css';
 type BackAndSaveButtons = {
   navigateToLink: string;
   BackToThisPageText: FormattedMessageType;
+  // Fired on back-button click before navigating. Optional because this
+  // component renders in several places ("Back to Screener", "Back to Results");
+  // only the caller that wants analytics passes it (gap #8).
+  onBack?: () => void;
 };
 
-const BackAndSaveButtons = ({ navigateToLink, BackToThisPageText }: BackAndSaveButtons) => {
+const BackAndSaveButtons = ({ navigateToLink, BackToThisPageText, onBack }: BackAndSaveButtons) => {
   const navigate = useNavigate();
   const intl = useIntl();
   const track = useTrackEvent();
@@ -43,6 +47,7 @@ const BackAndSaveButtons = ({ navigateToLink, BackToThisPageText }: BackAndSaveB
         data-testid="back-to-results-button"
         className="results-back-save-buttons"
         onClick={() => {
+          onBack?.();
           navigate(navigateToLink);
         }}
         aria-label={intl.formatMessage(backBtnALProps)}
