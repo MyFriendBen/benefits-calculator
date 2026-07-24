@@ -3,7 +3,7 @@ import { useConfig } from '../Config/configHook';
 import { useTrackEvent } from '../../Assets/analytics';
 import './MoreHelp.css';
 
-type Resource = {
+export type Resource = {
   name: JSX.Element;
   description?: JSX.Element;
   link?: string;
@@ -13,13 +13,17 @@ type Resource = {
 
 // The config transform turns each resource's `name` ({_label, _default_message})
 // into a <FormattedMessage>, so its `props.id` is the stable translation label —
-// a PII-free identifier we can use when a resource has no explicit `label`.
-const resourceNameFromConfig = (resource: Resource): string | undefined => {
+// a PII-free identifier we can use when a resource has no explicit `label`. Guard
+// on the element type being FormattedMessage so a differently-shaped `name` (any
+// element with an unrelated `id`) can't leak the wrong value.
+export const resourceNameFromConfig = (resource: Resource): string | undefined => {
   if (resource.label) {
     return resource.label;
   }
-  const nameProps = resource.name?.props as { id?: string } | undefined;
-  return nameProps?.id;
+  if (resource.name?.type === FormattedMessage) {
+    return (resource.name.props as { id?: string }).id;
+  }
+  return undefined;
 };
 
 const MoreHelp = () => {
