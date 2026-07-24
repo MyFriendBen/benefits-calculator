@@ -6,7 +6,7 @@ import { useGoToNextStep } from '../QuestionComponents/questionHooks';
 import { useStepNumber } from '../../Assets/stepDirectory';
 import { useTrackEvent } from '../../Assets/analytics';
 import { getStepAnalyticsId } from '../../Assets/analytics/stepIds';
-import { collectFieldErrors } from '../../Assets/analytics/errorLabels';
+import { buildFormErrorEvents } from '../../Assets/analytics/errorLabels';
 
 /**
  * This hook is used to create a form for screener steps.
@@ -66,15 +66,14 @@ export default function useStepForm<T extends FieldValues>({
   // attempt, so we emit exactly one error event per failed submit.
   useEffect(() => {
     if (submitCount > 0 && isSubmitted && !isSubmitSuccessful && errorCount > 0) {
-      // "field: label" pairs for the failed validations (e.g.
-      // "zipcode: Required, members.0.birthYear: Invalid format"), via the shared
-      // collectFieldErrors/RULE_LABELS so every emit path uses one vocabulary.
-      const errorFields = collectFieldErrors(errors).join(', ');
-      track('screener_form_error', {
-        screener_step_name: stepNameOverride ?? getStepAnalyticsId(questionName),
-        screener_step_number: stepNumber >= 0 ? stepNumber : undefined,
-        form_error_count: errorCount,
-        form_error_message: errorFields,
+      // One event per failed field via the shared builder (see
+      // buildFormErrorEvents), so every emit path uses the same vocabulary.
+      buildFormErrorEvents(errors, errorCount).forEach((params) => {
+        track('screener_form_error', {
+          screener_step_name: stepNameOverride ?? getStepAnalyticsId(questionName),
+          screener_step_number: stepNumber >= 0 ? stepNumber : undefined,
+          ...params,
+        });
       });
     }
     // Intentionally depend only on submitCount so this fires once per submit
