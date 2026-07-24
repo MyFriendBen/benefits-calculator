@@ -48,12 +48,9 @@ const hasProgressedThroughForm = (data?: HouseholdData): boolean => {
 };
 
 /**
- * Determines default income streams.
- *
- * The income section is gated behind three Yes/No questions, so we
- * no longer auto-seed a blank income row for working-age members: an empty-category
- * stream belongs to none of the question buckets (it would be orphaned/invisible and
- * fail validation). Any persisted streams are still loaded as-is for editing.
+ * Loads the member's saved income streams for editing. Returns them as-is (no
+ * blank row is seeded): the three Yes/No questions gate income entry, and an
+ * empty-category stream would belong to no question bucket.
  */
 const getDefaultIncomeStreams = (data?: HouseholdData): any[] => {
   const streams = Array.isArray(data?.incomeStreams) ? data!.incomeStreams : [];

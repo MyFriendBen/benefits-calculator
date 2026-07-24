@@ -51,11 +51,6 @@ describe('useHouseholdMemberFormEffects', () => {
     });
   });
 
-  // Note: this hook no longer auto-appends income streams based on
-  // age — income is gated behind the three Yes/No questions in IncomeSection, which
-  // manage their own stream add/remove. The former age-based auto-append tests were
-  // removed with that effect.
-
   // ============================================================================
   // Student eligibility reset (main workflow only)
   // ============================================================================

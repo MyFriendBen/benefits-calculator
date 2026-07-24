@@ -215,9 +215,8 @@
 
 
 
-/* De-emphasized secondary action: an inline text link with a "+"
-   icon in the secondary/accent color, so it no longer reads as the primary
-   action (was a full-width filled button competing with Continue). */
+/* De-emphasized secondary action: an inline text link with a "+" icon in the
+   secondary/accent color, kept visually subordinate to the primary Continue. */
 .income-add-button {
   display: inline-flex;
   align-items: center;

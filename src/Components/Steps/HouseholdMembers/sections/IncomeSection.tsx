@@ -409,8 +409,8 @@ const YesNoToggle = ({ value, onChange, ariaLabel, errorId, hasError, descriptio
 };
 
 /**
- * De-emphasized "+ Add an income source" link — no longer a
- * full-width filled button competing with Continue.
+ * Secondary "+ Add an income source" action, styled as a de-emphasized inline
+ * text link so it sits below the primary Continue action.
  */
 const AddIncomeSourceLink = ({ onClick }: { onClick: () => void }) => (
   <Box>

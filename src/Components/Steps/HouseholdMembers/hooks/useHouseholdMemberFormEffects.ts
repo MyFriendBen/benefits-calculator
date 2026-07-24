@@ -45,11 +45,6 @@ export const useHouseholdMemberFormEffects = ({
     prevIsStudentRef.current = watchIsStudent;
   }, [watchIsStudent, setValue, isEnergyCalculator]);
 
-  // Note: the income section is gated behind three Yes/No questions,
-  // so we no longer auto-append a blank income stream when a member becomes 16+.
-  // The questions themselves prompt the user to enter income; an auto-seeded
-  // empty-category stream would be orphaned (belongs to no question bucket).
-
   // EC-only: Reset receivesSsi when disabled is unchecked
   useEffect(() => {
     if (!isEnergyCalculator) return;
