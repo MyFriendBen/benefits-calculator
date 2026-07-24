@@ -11,6 +11,17 @@ type Resource = {
   label?: string;
 };
 
+// The config transform turns each resource's `name` ({_label, _default_message})
+// into a <FormattedMessage>, so its `props.id` is the stable translation label —
+// a PII-free identifier we can use when a resource has no explicit `label`.
+const resourceNameFromConfig = (resource: Resource): string | undefined => {
+  if (resource.label) {
+    return resource.label;
+  }
+  const nameProps = resource.name?.props as { id?: string } | undefined;
+  return nameProps?.id;
+};
+
 const MoreHelp = () => {
   const { moreHelpOptions } = useConfig<{ moreHelpOptions: Resource[] }>('more_help_options');
   const resources: Resource[] = moreHelpOptions;
@@ -32,11 +43,11 @@ const MoreHelp = () => {
                 className="visit-website-btn"
                 target="_blank"
                 onClick={() =>
-                  // `name` is a JSX.Element, so use the config `label` (a plain
-                  // string, PII-free) as the id; resource_index carries the
-                  // ordinal independently (label may be undefined).
+                  // resource_name is the explicit config `label` if set, else the
+                  // translation id behind `name` (both PII-free strings);
+                  // resource_index carries the ordinal as a fallback.
                   track('screener_more_help_resource_click', {
-                    resource_name: resource.label,
+                    resource_name: resourceNameFromConfig(resource),
                     resource_index: index,
                     url: resource.link,
                   })
