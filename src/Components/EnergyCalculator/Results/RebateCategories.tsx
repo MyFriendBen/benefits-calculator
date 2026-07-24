@@ -34,24 +34,21 @@ const PAST_DUE_UTILITIES = ['electricityIsDisconnected', 'hasPastDueEnergyBills'
 export function useEnergyCalculatorNeedsRebates() {
   const { formData } = useContext(Context);
 
-  return useMemo(
-    () => {
-      for (const field of PAST_DUE_UTILITIES) {
-        if (formData.energyCalculator?.[field] === true) {
-          return false;
-        }
+  return useMemo(() => {
+    for (const field of PAST_DUE_UTILITIES) {
+      if (formData.energyCalculator?.[field] === true) {
+        return false;
       }
+    }
 
-      for (const field of NEEDS_REBATE_FIELDS) {
-        if (formData.energyCalculator?.[field] === true) {
-          return true;
-        }
+    for (const field of NEEDS_REBATE_FIELDS) {
+      if (formData.energyCalculator?.[field] === true) {
+        return true;
       }
+    }
 
-      return false;
-    },
-    NEEDS_REBATE_FIELDS.map((field) => formData.energyCalculator?.[field]),
-  );
+    return false;
+  }, [formData.energyCalculator]);
 }
 
 const REBATE_CATEGORY_HEADING: ProgramCategory = {

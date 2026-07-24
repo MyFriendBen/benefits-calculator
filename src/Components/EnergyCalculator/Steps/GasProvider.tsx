@@ -42,7 +42,7 @@ export default function GasProvider() {
     }
 
     return options;
-  }, [formData.zipcode, providers]);
+  }, [providers, hasProviderError]);
 
   const formSchema = z.object({
     gasProvider: z
@@ -116,7 +116,7 @@ export default function GasProvider() {
 
       trigger('gasProvider');
     }
-  }, [providerOptions, providers]);
+  }, [providerOptions, providers, getValues, trigger]);
 
   return (
     <div>

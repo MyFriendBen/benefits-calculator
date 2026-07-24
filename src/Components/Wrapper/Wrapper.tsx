@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, PropsWithChildren } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, PropsWithChildren } from 'react';
 import useStyle from '../../Assets/styleController';
 import { IntlProvider } from 'react-intl';
 import { WrapperContext } from '../../Types/WrapperContext';
@@ -154,14 +154,14 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
 
   const { configLoading, configResponse: config } = useGetConfig(screenLoading, whiteLabel);
   const { language_options: languageOptions = {} } = config ?? {};
-  const languages = Object.keys(languageOptions) as Language[];
+  const languages = useMemo(() => Object.keys(languageOptions) as Language[], [languageOptions]);
   const { referrer_data: referrerData = undefined } = config ?? {};
 
   const { getReferrer, setReferrer } = useReferrer(formData.immutableReferrer, referrerData as ReferrerData);
 
   useEffect(() => {
     setReferrer(formData.immutableReferrer);
-  }, [formData.immutableReferrer]);
+  }, [formData.immutableReferrer, setReferrer]);
 
   useEffect(() => {
     if (!screenLoading && !translationsLoading && !configLoading) {
@@ -223,6 +223,12 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
         return { ...translations, ...value };
       });
     });
+    // Keyed on `locale` only: fetch the bundle for the active locale the first
+    // time it's selected. `translations` is read as a load-once guard, not a
+    // trigger — the effect already re-creates with a fresh `translations`
+    // closure whenever `locale` changes, and re-running on every `translations`
+    // change would add redundant fetch cycles without changing what's loaded.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locale]);
 
   useEffect(() => {
@@ -267,16 +273,25 @@ const Wrapper = (props: PropsWithChildren<{}>) => {
     if (defaultLanguage !== 'en-us') {
       setLocale(defaultLanguage as Language);
     }
+    // Runs when the white-label config (referrerData) loads, to apply the
+    // referrer's default language. `getReferrer` is intentionally excluded: it's
+    // re-created every render and reads only from `referrerData` (already a dep)
+    // and `referrer`; re-running on those would let a later `referrer` change
+    // clobber a language the user picked manually.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [referrerData]);
 
-  const selectLanguage = (newLocale: string) => {
-    if (languages.every((lang) => lang !== newLocale)) {
-      setLocale('en-us');
-      return;
-    }
+  const selectLanguage = useCallback(
+    (newLocale: string) => {
+      if (languages.every((lang) => lang !== newLocale)) {
+        setLocale('en-us');
+        return;
+      }
 
-    setLocale(newLocale as Language);
-  };
+      setLocale(newLocale as Language);
+    },
+    [languages],
+  );
 
   // Memoize context value to prevent unnecessary re-renders of all consumers
   const contextValue = useMemo(

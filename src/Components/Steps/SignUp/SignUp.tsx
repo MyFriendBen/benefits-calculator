@@ -259,9 +259,10 @@ function SignUp() {
   });
 
   const contactType = watch('contactType');
+  const hasSelectedContactType = someContactType(contactType);
 
   useEffect(() => {
-    if (someContactType(contactType) && !formData.signUpInfo.hasUser) {
+    if (hasSelectedContactType && !formData.signUpInfo.hasUser) {
       setValue('contactInfo', { firstName: '', lastName: '', email: '', cell: '', emailConsent: false, tcpa: false });
       if (isSubmitted) {
         trigger('contactInfo');
@@ -271,7 +272,13 @@ function SignUp() {
       setValue('contactInfo', undefined);
       setHasServerError(false);
     }
-  }, [someContactType(contactType), formData.signUpInfo.hasUser]);
+    // Re-runs only when the contact-type selection flips or `hasUser` changes.
+    // `isSubmitted`, `setValue`, and `trigger` are intentionally excluded:
+    // setValue/trigger are stable react-hook-form refs, and depending on
+    // `isSubmitted` would re-fire this on submit and reset `contactInfo` to
+    // blanks, wiping the contact details the user just entered.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasSelectedContactType, formData.signUpInfo.hasUser]);
 
   const submitHandler = async (data: FormSchema) => {
     if (uuid === undefined) {

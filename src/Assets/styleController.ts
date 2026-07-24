@@ -467,9 +467,9 @@ export default function useStyle(initialStyle: ThemeName): ThemeReturnType {
     for (const [key, value] of Object.entries(theme.cssVariables)) {
       style.setProperty(key, value);
     }
-  }, [themeName]);
+  }, [theme.cssVariables]);
 
-  const styleOverrides = useMemo(() => generateMuiOverides(theme), [themeName]);
+  const styleOverrides = useMemo(() => generateMuiOverides(theme), [theme]);
 
   return [theme, setTheme, styleOverrides];
 }

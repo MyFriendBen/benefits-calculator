@@ -41,7 +41,7 @@ export default function ElectricityProvider() {
     }
 
     return options;
-  }, [formData.zipcode, providers]);
+  }, [providers, hasProviderError]);
 
   const formSchema = z.object({
     electricityProvider: z
@@ -115,7 +115,7 @@ export default function ElectricityProvider() {
 
       trigger('electricityProvider');
     }
-  }, [providerOptions, providers]);
+  }, [providerOptions, providers, getValues, trigger]);
 
   return (
     <div>

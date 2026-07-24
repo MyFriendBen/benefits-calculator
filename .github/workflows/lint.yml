@@ -42,7 +42,8 @@ jobs:
       - name: Run production build
         run: npm run build
         env:
-          # Match Heroku's build environment (no CI var): hard errors fail the
-          # build, pre-existing warnings don't. Flip to true once the ~31
-          # legacy react-hooks/exhaustive-deps warnings are cleaned up.
-          CI: false
+          # Treat lint warnings as errors (a zero-warning ratchet): any new
+          # react-hooks/exhaustive-deps warning fails the PR build instead of
+          # silently accumulating. Heroku still deploys fine because it doesn't
+          # set CI, so this gate applies to PRs only.
+          CI: true

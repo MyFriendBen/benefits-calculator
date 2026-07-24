@@ -9,11 +9,21 @@ export function useEnergyFormData(
 ): formData is FormData & Required<Pick<FormData, 'energyCalculator'>> {
   const { setFormData } = useContext(Context);
 
+  const energyCalculatorNeedsInit = formData.energyCalculator === undefined;
+
   useEffect(() => {
-    if (formData.energyCalculator === undefined) {
+    if (!energyCalculatorNeedsInit) {
+      return;
+    }
+
+    setFormData((prevFormData) => {
+      if (prevFormData.energyCalculator !== undefined) {
+        return prevFormData;
+      }
+
       const initialEnergyCalculator: EnergyCalculatorFormData = {
-        isRenter: formData.path === 'renter',
-        isHomeOwner: formData.path !== 'renter',
+        isRenter: prevFormData.path === 'renter',
+        isHomeOwner: prevFormData.path !== 'renter',
         electricProvider: '',
         electricProviderName: '',
         gasProvider: '',
@@ -26,9 +36,9 @@ export function useEnergyFormData(
         needsWaterHeater: false,
       };
 
-      setFormData({ ...formData, energyCalculator: initialEnergyCalculator });
-    }
-  }, [formData.energyCalculator === undefined]);
+      return { ...prevFormData, energyCalculator: initialEnergyCalculator };
+    });
+  }, [energyCalculatorNeedsInit, setFormData]);
 
   return formData.energyCalculator !== undefined;
 }

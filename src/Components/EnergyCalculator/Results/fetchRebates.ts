@@ -188,7 +188,7 @@ export default function useFetchEnergyCalculatorRebates() {
     getRebates(formData, locale).then((rebates) => {
       setRebates(rebates);
     });
-  }, [isEnergyCalculator, formData.energyCalculator, locale]);
+  }, [isEnergyCalculator, formData, locale]);
 
   return rebates;
 }

@@ -8,14 +8,14 @@ import { Context } from '../Wrapper/Wrapper';
 import './CcigLandingPage.css';
 
 export default function CcigLandingPage() {
-  const { formData, setFormData } = useContext(Context);
+  const { setFormData } = useContext(Context);
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const queryString = useQueryString();
 
   useEffect(() => {
-    setFormData({ ...formData, immutableReferrer: 'ccig', referralSource: 'ccig' });
-  }, []);
+    setFormData((prevFormData) => ({ ...prevFormData, immutableReferrer: 'ccig', referralSource: 'ccig' }));
+  }, [setFormData]);
 
   const handleGetStarted = () => {
     navigate(`/co/step-1${queryString}`);

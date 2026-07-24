@@ -139,7 +139,7 @@ const ShareModal = ({ open, onClose, shareLocation }: ShareModalProps) => {
         ),
       },
     ],
-    [shareSubject, emailBody],
+    [shareSubject, emailBody, formatMessage],
   );
 
   if (!open) return null;
