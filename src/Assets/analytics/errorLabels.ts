@@ -22,6 +22,8 @@ export const RULE_LABELS: Record<string, string> = {
   select_one: 'Must select an option',
   none_exclusive: "Can't combine None with others",
   invalid_amount: 'Invalid amount',
+  invalid_format: 'Invalid format',
+  must_be_positive: 'Must be greater than 0',
   hours_required: 'Enter hours worked',
   future_date: "Date can't be in the future",
   incomplete: 'Answer all questions',

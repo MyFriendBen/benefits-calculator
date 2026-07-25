@@ -10,6 +10,8 @@ import {
   renderIncomeFrequencyHelperText,
   renderHoursWorkedHelperText,
   renderIncomeAmountHelperText,
+  renderIncomeAmountRequiredHelperText,
+  renderIncomeAmountFormatHelperText,
   renderStudentEligibilityErrorMessage,
   renderMissingBirthMonthHelperText,
   renderFutureBirthMonthHelperText,
@@ -20,7 +22,7 @@ import {
   hasAtLeastOneTrue,
   validateNoneExclusive,
   validateHourlyIncome,
-  validateIncomeAmount,
+  INCOME_AMOUNT_REGEX,
 } from './validation';
 
 export type StudentQuestionName = 'studentFullTime' | 'studentJobTrainingProgram' | 'studentHasWorkStudy' | 'studentWorks20PlusHrs';
@@ -79,9 +81,14 @@ const createIncomeSourceSchema = (intl: IntlShape) => {
       incomeAmount: z
         .string()
         .trim()
-        .refine(validateIncomeAmount, {
+        .min(1, { message: renderIncomeAmountRequiredHelperText(intl) })
+        .refine((value) => INCOME_AMOUNT_REGEX.test(value), {
+          message: renderIncomeAmountFormatHelperText(intl),
+          params: { code: 'invalid_format' },
+        })
+        .refine((value) => Number(value) > 0, {
           message: renderIncomeAmountHelperText(intl),
-          params: { code: 'invalid_amount' },
+          params: { code: 'must_be_positive' },
         }),
     })
     .refine(

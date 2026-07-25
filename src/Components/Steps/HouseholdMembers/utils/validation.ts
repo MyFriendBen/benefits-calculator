@@ -139,6 +139,20 @@ export const renderIncomeAmountHelperText = (intlHook: IntlShape) => {
   });
 };
 
+export const renderIncomeAmountRequiredHelperText = (intlHook: IntlShape) => {
+  return intlHook.formatMessage({
+    id: 'errorMessage-incomeAmountRequired',
+    defaultMessage: 'Please enter an income amount.',
+  });
+};
+
+export const renderIncomeAmountFormatHelperText = (intlHook: IntlShape) => {
+  return intlHook.formatMessage({
+    id: 'errorMessage-incomeAmountFormat',
+    defaultMessage: 'Please enter a valid dollar amount.',
+  });
+};
+
 export const renderIncomeCategoryHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
     id: 'errorMessage-incomeCategory',

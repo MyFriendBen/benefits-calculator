@@ -37,12 +37,20 @@ const SelectLanguagePage = () => {
   // per-uuid sessionStorage flag so a given screening counts one start, while a
   // genuinely new screening (new uuid) still starts fresh. The step VIEW below
   // is intentionally NOT guarded — every view should count toward drop-off.
-  useEffect(() => {
+  // form_start marks that the user actually began the screener, so it fires on the
+  // first real interaction (language change or Continue), not on page load — a
+  // load-time fire would just equal the step-1 view count. Guarded to once per
+  // screening (per uuid) via sessionStorage.
+  const markFormStarted = () => {
     const startKey = uuid ? `mfb_form_start_${uuid}` : 'mfb_form_start';
     if (!sessionStorage.getItem(startKey)) {
       sessionStorage.setItem(startKey, '1');
       track('screener_form_start', { screener_step_name: STEP_1_ANALYTICS_ID, screener_step_number: 1 });
     }
+  };
+
+  // The step VIEW is intentionally NOT guarded — every view should count toward drop-off.
+  useEffect(() => {
     track('screener_form_step', {
       screener_step_name: STEP_1_ANALYTICS_ID,
       screener_step_number: 1,
@@ -86,6 +94,9 @@ const SelectLanguagePage = () => {
 
   const handleSubmit = (event: { preventDefault: () => void }) => {
     event.preventDefault();
+
+    // Continuing counts as starting even if the user kept the default language.
+    markFormStarted();
 
     track('screener_form_step', {
       screener_step_name: STEP_1_ANALYTICS_ID,
@@ -138,7 +149,10 @@ const SelectLanguagePage = () => {
             id="language-select"
             value={locale}
             label={<FormattedMessage id="selectLang.text" defaultMessage="Language" />}
-            onChange={(event) => selectLanguage(event.target.value)}
+            onChange={(event) => {
+              markFormStarted();
+              selectLanguage(event.target.value);
+            }}
           >
             {createMenuItems(languageOptions, 'selectLang.disabledSelectMenuItemText', 'Select a language')}
           </Select>

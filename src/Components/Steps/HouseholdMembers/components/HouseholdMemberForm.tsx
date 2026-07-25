@@ -317,7 +317,11 @@ const HouseholdMemberForm = () => {
 
       <form onSubmit={handleSubmit(formSubmitHandler, handleFormError)}>
         {renderFormSections()}
-        <PrevAndContinueButtons backNavigationFunction={navigateBack} stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberDetails} />
+        <PrevAndContinueButtons
+          backNavigationFunction={navigateBack}
+          stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberDetails}
+          stepNumberOverride={currentStepId}
+        />
       </form>
     </main>
   );
