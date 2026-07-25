@@ -288,7 +288,6 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
             target="_blank"
             onClick={() =>
               track('screener_apply_click', {
-                program_name: program.name.default_message,
                 program_id: String(program.program_id),
                 url: programApplyButtonLink,
               })
@@ -416,7 +415,6 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                           className="link-color"
                           onClick={() =>
                             track('screener_navigator_engaged', {
-                              program_name: program.name.default_message,
                               program_id: String(program.program_id),
                               navigator_id: navigator.id,
                               navigator_name: navigator.name.default_message,
@@ -436,7 +434,6 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                           className="link-color email-link"
                           onClick={() =>
                             track('screener_navigator_engaged', {
-                              program_name: program.name.default_message,
                               program_id: String(program.program_id),
                               navigator_id: navigator.id,
                               navigator_name: navigator.name.default_message,
@@ -455,7 +452,6 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                           className="link-color phone-link"
                           onClick={() =>
                             track('screener_navigator_engaged', {
-                              program_name: program.name.default_message,
                               program_id: String(program.program_id),
                               navigator_id: navigator.id,
                               navigator_name: navigator.name.default_message,
@@ -493,7 +489,6 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                         className="link-color"
                         onClick={() =>
                           track('screener_program_document_download', {
-                            program_name: program.name.default_message,
                             program_id: String(program.program_id),
                             document_name: document.text.default_message || undefined,
                           })
@@ -566,7 +561,6 @@ function RequiredProgram({ programId }: RequiredProgramProps) {
           to={programLink}
           onClick={() =>
             track('screener_required_program_click', {
-              program_name: program.name.default_message,
               program_id: String(program.program_id),
             })
           }

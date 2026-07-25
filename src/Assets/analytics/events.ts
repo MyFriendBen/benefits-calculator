@@ -38,11 +38,11 @@ interface MemberIndexContext {
   member_index?: number;
 }
 
-// Params that identify a specific benefit program.
+// Identifies a specific benefit program. Only the stable id is sent; the display
+// name is resolved from the id downstream (dbt), so it isn't duplicated onto
+// every program event.
 interface ProgramContext {
-  program_name: string;
-  /** Stable program id — preferred over program_name for grouping. */
-  program_id?: string;
+  program_id: string;
 }
 
 // Which results-page list a view_item_list impression is for.

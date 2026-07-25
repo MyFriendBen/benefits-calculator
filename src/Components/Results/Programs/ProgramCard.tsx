@@ -269,7 +269,6 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
 
   const handleMoreInfoClick = () => {
     track('screener_program_more_info', {
-      program_name: programName.default_message,
       program_id: String(programId),
     });
   };
