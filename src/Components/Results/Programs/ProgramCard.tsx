@@ -3,7 +3,7 @@ import { Program } from '../../../Types/Results';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useFormatDisplayValue } from '../FormattedValue';
 import ResultsTranslate from '../Translate/Translate';
-import { useContext, useEffect, useMemo, useRef } from 'react';
+import { useContext, useMemo } from 'react';
 import { useMediaQuery } from '@mui/material';
 import './ProgramCard.css';
 import { findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
@@ -266,23 +266,6 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
   const value = useFormatDisplayValue(program);
 
   const nameString = intl.formatMessage({ id: programName.label, defaultMessage: programName.default_message });
-
-  // Impression: fire once per mounted card that renders eligibility tags.
-  // Guarded by a ref so a re-render (e.g. filter/results changes remount the
-  // card) doesn't re-fire and inflate the impression count — same pattern as
-  // Results.tsx's hasTrackedResultsLoaded.
-  const isEligible = eligibleMembers.length > 0;
-  const hasTrackedEligibilityTags = useRef(false);
-  useEffect(() => {
-    if (isEligible && !hasTrackedEligibilityTags.current) {
-      hasTrackedEligibilityTags.current = true;
-      track('screener_eligibility_tags_shown', {
-        program_name: programName.default_message,
-        program_id: String(programId),
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEligible]);
 
   const handleMoreInfoClick = () => {
     track('screener_program_more_info', {

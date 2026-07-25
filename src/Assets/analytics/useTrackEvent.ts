@@ -1,8 +1,8 @@
 import { useCallback, useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { trackEvent } from './index';
+import { trackEvent, trackItemList } from './index';
 import { Context, DEFAULT_WHITE_LABEL } from '../../Components/Wrapper/Wrapper';
-import type { ScreenerContext, ScreenerEventMap, ScreenerEventName } from './events';
+import type { ItemListItem, ItemListName, ScreenerContext, ScreenerEventMap, ScreenerEventName } from './events';
 
 /**
  * Returns a `track` function that emits a typed screener event with router
@@ -39,6 +39,29 @@ export function useTrackEvent() {
         screener_uid: uuid,
       };
       trackEvent(event, { ...context, ...params });
+    },
+    [screenerState, uuid],
+  );
+}
+
+/**
+ * `useTrackEvent`'s counterpart for GA4 view_item_list impressions: returns a
+ * `trackItemList(itemListName, items)` with router context attached.
+ */
+export function useTrackItemList() {
+  const { whiteLabel, uuid } = useParams();
+  const contextWhiteLabel = useContext(Context)?.whiteLabel;
+  const screenerState =
+    whiteLabel ?? (contextWhiteLabel && contextWhiteLabel !== DEFAULT_WHITE_LABEL ? contextWhiteLabel : undefined);
+
+  return useCallback(
+    (itemListName: ItemListName, items: ItemListItem[]) => {
+      trackItemList({
+        screener_state: screenerState,
+        screener_uid: uuid,
+        item_list_name: itemListName,
+        items,
+      });
     },
     [screenerState, uuid],
   );

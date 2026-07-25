@@ -45,6 +45,22 @@ interface ProgramContext {
   program_id?: string;
 }
 
+// Which results-page list a view_item_list impression is for.
+export type ItemListName = 'results_programs' | 'results_resources' | 'results_navigators' | 'results_documents';
+
+// One entry in a view_item_list `items` array. These are GA4 ecommerce reserved
+// keys, so GA4/BigQuery populate the native `items` RECORD. Per list:
+//   programs   — item_id = program_id, item_name = program name
+//   resources  — item_name = resource org name (no stable id)
+//   navigators — item_id = navigator_id, item_name = name, item_category = parent program_id
+//   documents  — item_name = document name, item_category = parent program_id
+export interface ItemListItem {
+  item_id?: string;
+  item_name: string;
+  item_category?: string;
+  item_list_index?: number;
+}
+
 /**
  * The full event map: event name -> its parameter payload.
  *
@@ -125,27 +141,13 @@ export interface ScreenerEventMap {
   // previously untracked.
   screener_additional_resource_click: { resource_name?: string; url?: string; contact_method?: 'website' | 'phone' };
   screener_required_program_click: ProgramContext;
-  // The set of programs shown on results, as ONE event with parallel
-  // `program_ids`/`program_names` arrays rather than one event per program. GA4
-  // coalesces same-name events fired in a single synchronous tick, so emitting
-  // ~44 separate impressions loses most of them; a single array event doesn't.
-  // `program_count` is the array length.
-  screener_programs_shown: { program_ids: string[]; program_names: string[]; program_count: number };
-  // The set of additional resources shown on the results tab, batched into one
-  // event for the same reason as screener_programs_shown.
-  screener_resources_shown: { resource_names: string[]; resource_count: number };
-  // The set of navigators shown in a program's "Get Help Applying" section,
-  // batched into one event; fired when a program page with navigators renders.
-  screener_navigators_shown: ProgramContext & {
-    navigator_ids: number[];
-    navigator_names: string[];
-    navigator_count: number;
-  };
-  // The set of downloadable documents shown in a program page's "Required Key
-  // Documents Checklist", batched into one event.
-  screener_program_documents_shown: ProgramContext & {
-    document_names: string[];
-    document_count: number;
+  // Impressions of a results-page list (programs / resources / navigators /
+  // documents), as the GA4 ecommerce `view_item_list` event — one event with a
+  // native `items` array. Emitted via `trackItemList`, which pushes the required
+  // `ecommerce` shape (plain `track` can't).
+  view_item_list: {
+    item_list_name: ItemListName;
+    items: ItemListItem[];
   };
   // Navigator ("Get Help Applying") click, tied to program + specific navigator.
   // Fires INSTEAD of the generic program website/phone events for navigator links
@@ -213,7 +215,6 @@ export interface ScreenerEventMap {
 
   // ---- Low-priority UI ----
   screener_document_summary_toggle: { expanded: boolean };
-  screener_eligibility_tags_shown: ProgramContext;
 }
 
 export type ScreenerEventName = keyof ScreenerEventMap;

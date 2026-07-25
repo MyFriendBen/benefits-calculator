@@ -1,8 +1,9 @@
 import TagManager from 'react-gtm-module';
-import type { ScreenerContext, ScreenerEventMap, ScreenerEventName } from './events';
+import type { ItemListItem, ItemListName, ScreenerContext, ScreenerEventMap, ScreenerEventName } from './events';
 
 export type { ScreenerEventName } from './events';
-export { useTrackEvent } from './useTrackEvent';
+export type { ItemListItem, ItemListName } from './events';
+export { useTrackEvent, useTrackItemList } from './useTrackEvent';
 
 /**
  * Low-level push to the GTM dataLayer. Prefer `useTrackEvent` for screener
@@ -32,6 +33,25 @@ export function trackEvent<E extends ScreenerEventName>(
   params: ScreenerEventMap[E] & ScreenerContext,
 ) {
   dataLayerPush({ event, ...params });
+}
+
+/**
+ * Emit a GA4 ecommerce `view_item_list` impression. The payload nests under
+ * `ecommerce` (not flat like `trackEvent`) so GA4 populates the native items
+ * RECORD; a `{ ecommerce: null }` clear is pushed first so a prior event's items
+ * can't merge in. Prefer `useTrackItemList` at call sites for router context.
+ */
+export function trackItemList(
+  params: { item_list_name: ItemListName; items: ItemListItem[] } & ScreenerContext,
+) {
+  const { item_list_name, items, ...context } = params;
+  // Clear any ecommerce object left on the dataLayer so items don't merge.
+  dataLayerPush({ ecommerce: null });
+  dataLayerPush({
+    event: 'view_item_list',
+    ...context,
+    ecommerce: { item_list_name, items },
+  });
 }
 
 export function initializeGTM() {
