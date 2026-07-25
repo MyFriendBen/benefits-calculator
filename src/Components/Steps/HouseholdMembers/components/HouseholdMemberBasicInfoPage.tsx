@@ -237,11 +237,7 @@ const HouseholdMemberBasicInfoPage = () => {
           </Box>
         )}
 
-        <PrevAndContinueButtons
-          backNavigationFunction={navigateBack}
-          stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberBasics}
-          stepNumberOverride={currentStepId}
-        />
+        <PrevAndContinueButtons backNavigationFunction={navigateBack} stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberBasics} />
       </form>
 
       <DeleteConfirmationPopover

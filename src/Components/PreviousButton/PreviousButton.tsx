@@ -10,15 +10,13 @@ import { getStepAnalyticsId } from '../../Assets/analytics/stepIds';
 
 type Props = {
   navFunction: () => void;
-  // Overrides the route-derived step slug/number for the back event. Used by the
-  // household sub-pages, which route on `step-N/:page` (so useParams has no `id`)
-  // and whose slug (member-basics / member-details) depends on the page number —
-  // neither is recoverable from the route here.
+  // Overrides the route-derived step slug for the back event. Used by the
+  // household sub-pages, whose slug (member-basics / member-details) depends on
+  // the page number, which the route-based resolution here can't see.
   stepNameOverride?: string;
-  stepNumberOverride?: number;
 };
 
-const PreviousButton = ({ navFunction, stepNameOverride, stepNumberOverride }: Props) => {
+const PreviousButton = ({ navFunction, stepNameOverride }: Props) => {
   const { formData } = useContext(Context);
   const { whiteLabel, id, uuid } = useParams();
   let stepNumberId = Number(id);
@@ -48,7 +46,7 @@ const PreviousButton = ({ navFunction, stepNameOverride, stepNumberOverride }: P
   const handleClick = () => {
     track('screener_form_back', {
       screener_step_name: stepNameOverride ?? getStepAnalyticsId(currentStepName),
-      screener_step_number: stepNumberOverride ?? (id ? stepNumberId : undefined),
+      screener_step_number: id ? stepNumberId : undefined,
     });
     navigationFunction();
   };
