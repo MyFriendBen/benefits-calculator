@@ -75,8 +75,13 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
         householdSize: updatedHouseholdData.length,
         householdData: updatedHouseholdData,
       });
-      // Member add/delete counts come only from the household-basics roster, so no
-      // screener_household_member 'delete' fires here on the summary-card delete.
+      // Distinct from the basics-roster 'delete': this removes an already-detailed
+      // member from the summary cards, which is a different user behavior.
+      track('screener_household_member', {
+        screener_step_name: getStepAnalyticsId(questionName),
+        screener_step_number: currentStepId,
+        action: 'delete_from_summary',
+      });
       // The delete button is hidden for the current member (memberIndex !== 0 guard + slice(0, pageNumber-1)),
       // so deletedIndex will always be < pageNumber in practice. The +1 guard is a safeguard.
       if (deletedIndex + 1 <= pageNumber) {
