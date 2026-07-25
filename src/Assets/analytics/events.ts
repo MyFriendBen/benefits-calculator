@@ -141,14 +141,9 @@ export interface ScreenerEventMap {
   // previously untracked.
   screener_additional_resource_click: { resource_name?: string; url?: string; contact_method?: 'website' | 'phone' };
   screener_required_program_click: ProgramContext;
-  // Impressions of a results-page list (programs / resources / navigators /
-  // documents), as the GA4 ecommerce `view_item_list` event — one event with a
-  // native `items` array. Emitted via `trackItemList`, which pushes the required
-  // `ecommerce` shape (plain `track` can't).
-  view_item_list: {
-    item_list_name: ItemListName;
-    items: ItemListItem[];
-  };
+  // NOTE: results-page list impressions use the GA4 `view_item_list` event, which
+  // is intentionally NOT in this map — it must be emitted via `trackItemList`
+  // (which nests items under `ecommerce`), never through `track`/`trackEvent`.
   // Navigator ("Get Help Applying") click, tied to program + specific navigator.
   // Fires INSTEAD of the generic program website/phone events for navigator links
   // (no double-count) and adds the previously-untracked email link.

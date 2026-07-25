@@ -10,7 +10,7 @@ import type { ItemListItem, ItemListName, ScreenerContext, ScreenerEventMap, Scr
  *
  * Usage:
  *   const track = useTrackEvent();
- *   track('screener_apply_click', { program_name: program.name.default_message });
+ *   track('screener_apply_click', { program_id: String(program.program_id), url });
  *
  * Call sites only pass the event-specific params — screener_state / screener_uid
  * come from the route, so they're consistent on every event and no component
