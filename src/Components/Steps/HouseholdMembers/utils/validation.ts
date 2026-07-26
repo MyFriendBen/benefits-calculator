@@ -41,13 +41,6 @@ export const validateHourlyIncome = (incomeFrequency: string, hoursPerWeek: stri
   return true;
 };
 
-/**
- * Validates income amount format and > 0
- */
-export const validateIncomeAmount = (value: string): boolean => {
-  return INCOME_AMOUNT_REGEX.test(value) && Number(value) > 0;
-};
-
 // ============================================================================
 // INTERNATIONALIZED ERROR MESSAGES
 // ============================================================================

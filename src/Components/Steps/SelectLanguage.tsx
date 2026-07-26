@@ -28,19 +28,11 @@ const SelectLanguagePage = () => {
 
   usePageTitle(OTHER_PAGE_TITLES.language);
 
-  // This is the true first screen of the screener (step-1), so it's the single
-  // place to mark the start of the funnel, in addition to its own step view.
-  //
-  // form_start must fire ONCE per screening, or the funnel denominator inflates:
-  // step-1 has no remount key, and users can navigate back to it (Back from
-  // step-2, or re-entry), each of which remounts this effect. Guard on a
-  // per-uuid sessionStorage flag so a given screening counts one start, while a
-  // genuinely new screening (new uuid) still starts fresh. The step VIEW below
-  // is intentionally NOT guarded — every view should count toward drop-off.
   // form_start marks that the user actually began the screener, so it fires on the
-  // first real interaction (language change or Continue), not on page load — a
-  // load-time fire would just equal the step-1 view count. Guarded to once per
-  // screening (per uuid) via sessionStorage.
+  // first real interaction (language change or Continue) — not on page load, which
+  // would just equal the step-1 view count. Guarded to once per screening via a
+  // per-uuid sessionStorage flag, since users can navigate back to step-1 and
+  // remount; a genuinely new screening (new uuid) still counts a fresh start.
   const markFormStarted = () => {
     const startKey = uuid ? `mfb_form_start_${uuid}` : 'mfb_form_start';
     if (!sessionStorage.getItem(startKey)) {

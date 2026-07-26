@@ -81,12 +81,15 @@ const createIncomeSourceSchema = (intl: IntlShape) => {
       incomeAmount: z
         .string()
         .trim()
+        // Refines run even when .min fails (zod doesn't short-circuit them), so
+        // both skip the empty case — otherwise a blank amount would report
+        // must_be_positive instead of the .min 'required'.
         .min(1, { message: renderIncomeAmountRequiredHelperText(intl) })
-        .refine((value) => INCOME_AMOUNT_REGEX.test(value), {
+        .refine((value) => value === '' || INCOME_AMOUNT_REGEX.test(value), {
           message: renderIncomeAmountFormatHelperText(intl),
           params: { code: 'invalid_format' },
         })
-        .refine((value) => Number(value) > 0, {
+        .refine((value) => value === '' || Number(value) > 0, {
           message: renderIncomeAmountHelperText(intl),
           params: { code: 'must_be_positive' },
         }),
