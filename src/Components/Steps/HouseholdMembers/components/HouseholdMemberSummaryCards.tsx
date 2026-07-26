@@ -57,7 +57,7 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
     track('screener_household_member', {
       screener_step_name: getStepAnalyticsId(questionName),
       screener_step_number: currentStepId,
-      action: 'edit',
+      action: 'edit_from_summary',
     });
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, {
       state: { isEditing: true, returnToPage: pageNumber },
@@ -75,10 +75,12 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
         householdSize: updatedHouseholdData.length,
         householdData: updatedHouseholdData,
       });
+      // Distinct from the basics-roster 'delete': this removes an already-detailed
+      // member from the summary cards, which is a different user behavior.
       track('screener_household_member', {
         screener_step_name: getStepAnalyticsId(questionName),
         screener_step_number: currentStepId,
-        action: 'delete',
+        action: 'delete_from_summary',
       });
       // The delete button is hidden for the current member (memberIndex !== 0 guard + slice(0, pageNumber-1)),
       // so deletedIndex will always be < pageNumber in practice. The +1 guard is a safeguard.

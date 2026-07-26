@@ -2,7 +2,7 @@ import { useConfig } from '../Config/configHook';
 import { FormControl, Select, InputLabel, MenuItem, SelectChangeEvent } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { Context } from '../Wrapper/Wrapper';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import { useQueryString } from '../QuestionComponents/questionHooks';
@@ -28,21 +28,21 @@ const SelectLanguagePage = () => {
 
   usePageTitle(OTHER_PAGE_TITLES.language);
 
-  // This is the true first screen of the screener (step-1), so it's the single
-  // place to mark the start of the funnel, in addition to its own step view.
-  //
-  // form_start must fire ONCE per screening, or the funnel denominator inflates:
-  // step-1 has no remount key, and users can navigate back to it (Back from
-  // step-2, or re-entry), each of which remounts this effect. Guard on a
-  // per-uuid sessionStorage flag so a given screening counts one start, while a
-  // genuinely new screening (new uuid) still starts fresh. The step VIEW below
-  // is intentionally NOT guarded — every view should count toward drop-off.
+  // form_start marks that the user actually began the screener, so it fires on the
+  // first real interaction (language change or Continue), not on page load. Fired
+  // at most once per mount: a screening has no uuid yet on step-1 (it's created at
+  // the disclaimer step), so there's no per-screening key to dedupe on here — and
+  // the funnel mart dedupes form_start by screening downstream, so a re-fire on
+  // back-navigation to step-1 is harmless.
+  const hasMarkedFormStarted = useRef(false);
+  const markFormStarted = () => {
+    if (hasMarkedFormStarted.current) return;
+    hasMarkedFormStarted.current = true;
+    track('screener_form_start', { screener_step_name: STEP_1_ANALYTICS_ID, screener_step_number: 1 });
+  };
+
+  // The step VIEW is intentionally NOT guarded — every view should count toward drop-off.
   useEffect(() => {
-    const startKey = uuid ? `mfb_form_start_${uuid}` : 'mfb_form_start';
-    if (!sessionStorage.getItem(startKey)) {
-      sessionStorage.setItem(startKey, '1');
-      track('screener_form_start', { screener_step_name: STEP_1_ANALYTICS_ID, screener_step_number: 1 });
-    }
     track('screener_form_step', {
       screener_step_name: STEP_1_ANALYTICS_ID,
       screener_step_number: 1,
@@ -86,6 +86,9 @@ const SelectLanguagePage = () => {
 
   const handleSubmit = (event: { preventDefault: () => void }) => {
     event.preventDefault();
+
+    // Continuing counts as starting even if the user kept the default language.
+    markFormStarted();
 
     track('screener_form_step', {
       screener_step_name: STEP_1_ANALYTICS_ID,
@@ -138,7 +141,10 @@ const SelectLanguagePage = () => {
             id="language-select"
             value={locale}
             label={<FormattedMessage id="selectLang.text" defaultMessage="Language" />}
-            onChange={(event) => selectLanguage(event.target.value)}
+            onChange={(event) => {
+              markFormStarted();
+              selectLanguage(event.target.value);
+            }}
           >
             {createMenuItems(languageOptions, 'selectLang.disabledSelectMenuItemText', 'Select a language')}
           </Select>
