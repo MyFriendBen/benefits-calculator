@@ -2,7 +2,7 @@ import { useConfig } from '../Config/configHook';
 import { FormControl, Select, InputLabel, MenuItem, SelectChangeEvent } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { Context } from '../Wrapper/Wrapper';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import { useQueryString } from '../QuestionComponents/questionHooks';
@@ -29,16 +29,16 @@ const SelectLanguagePage = () => {
   usePageTitle(OTHER_PAGE_TITLES.language);
 
   // form_start marks that the user actually began the screener, so it fires on the
-  // first real interaction (language change or Continue) — not on page load, which
-  // would just equal the step-1 view count. Guarded to once per screening via a
-  // per-uuid sessionStorage flag, since users can navigate back to step-1 and
-  // remount; a genuinely new screening (new uuid) still counts a fresh start.
+  // first real interaction (language change or Continue), not on page load. Fired
+  // at most once per mount: a screening has no uuid yet on step-1 (it's created at
+  // the disclaimer step), so there's no per-screening key to dedupe on here — and
+  // the funnel mart dedupes form_start by screening downstream, so a re-fire on
+  // back-navigation to step-1 is harmless.
+  const hasMarkedFormStarted = useRef(false);
   const markFormStarted = () => {
-    const startKey = uuid ? `mfb_form_start_${uuid}` : 'mfb_form_start';
-    if (!sessionStorage.getItem(startKey)) {
-      sessionStorage.setItem(startKey, '1');
-      track('screener_form_start', { screener_step_name: STEP_1_ANALYTICS_ID, screener_step_number: 1 });
-    }
+    if (hasMarkedFormStarted.current) return;
+    hasMarkedFormStarted.current = true;
+    track('screener_form_start', { screener_step_name: STEP_1_ANALYTICS_ID, screener_step_number: 1 });
   };
 
   // The step VIEW is intentionally NOT guarded — every view should count toward drop-off.
