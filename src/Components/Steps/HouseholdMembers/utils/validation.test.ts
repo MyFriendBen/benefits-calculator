@@ -1,5 +1,3 @@
-import { z } from 'zod';
-import { mfbZodResolver } from '../../../../Assets/analytics/mfbZodResolver';
 import {
   hasAtLeastOneTrue,
   validateNoneExclusive,
@@ -103,51 +101,9 @@ describe('validateHourlyIncome', () => {
   });
 });
 
-// The income-amount field is validated as an ordered chain (min → format regex →
-// > 0), each rung emitting a distinct code so the Validation Errors card can tell
-// a blank amount from a malformed one from a zero. This mirrors the chain in
-// schema.ts and asserts the code a given input actually produces (zod reports the
-// first failing rung).
-describe('income amount validation codes', () => {
-  const amountSchema = z.object({
-    incomeAmount: z
-      .string()
-      .trim()
-      .min(1, { message: 'required' })
-      .refine((v) => v === '' || INCOME_AMOUNT_REGEX.test(v), { message: 'format', params: { code: 'invalid_format' } })
-      .refine((v) => v === '' || Number(v) > 0, { message: 'positive', params: { code: 'must_be_positive' } }),
-  });
-
-  const codeFor = async (incomeAmount: string): Promise<string | undefined> => {
-    const { errors } = (await mfbZodResolver(amountSchema)({ incomeAmount }, undefined, {
-      fields: {},
-      shouldUseNativeValidation: false,
-    } as any)) as any;
-    // .min(1) is a native zod rule → surfaces as `type` (too_small); the refines
-    // stamp `errorCode`. collectFieldErrors reads errorCode first, else type.
-    return errors.incomeAmount?.errorCode ?? errors.incomeAmount?.type;
-  };
-
-  it('blank → required (too_small)', async () => {
-    expect(await codeFor('')).toBe('too_small');
-  });
-
-  it('malformed → invalid_format', async () => {
-    expect(await codeFor('abc')).toBe('invalid_format');
-    expect(await codeFor('$100')).toBe('invalid_format');
-    expect(await codeFor('10.123')).toBe('invalid_format');
-    expect(await codeFor('12345678')).toBe('invalid_format');
-  });
-
-  it('zero → must_be_positive (well-formed but not > 0)', async () => {
-    expect(await codeFor('0')).toBe('must_be_positive');
-  });
-
-  it('valid amount → no error', async () => {
-    expect(await codeFor('100')).toBeUndefined();
-    expect(await codeFor('100.50')).toBeUndefined();
-  });
-});
+// The income-amount distinct-code behavior (required / invalid_format /
+// must_be_positive) is tested against the real production schema in schema.test.ts,
+// not duplicated here.
 
 describe('ONE_OR_MORE_DIGITS_BUT_NOT_ALL_ZERO regex', () => {
   it('matches positive integers', () => {
