@@ -57,7 +57,7 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
     track('screener_household_member', {
       screener_step_name: getStepAnalyticsId(questionName),
       screener_step_number: currentStepId,
-      action: 'edit',
+      action: 'edit_from_summary',
     });
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, {
       state: { isEditing: true, returnToPage: pageNumber },

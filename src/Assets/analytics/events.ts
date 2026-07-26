@@ -99,10 +99,10 @@ export interface ScreenerEventMap {
   screener_form_submit_failed: StepContext & { reason?: string };
 
   // ---- Step interactions ----
-  // add / delete = roster changes on the household-basics page. edit = reopening a
-  // member from the summary cards. delete_from_summary = removing an already-
-  // detailed member from the summary cards — distinct from a basics-page delete.
-  screener_household_member: StepContext & { action: 'add' | 'edit' | 'delete' | 'delete_from_summary' };
+  // add / delete = roster changes on the household-basics page.
+  // edit_from_summary / delete_from_summary = reopening or removing an already-
+  // detailed member from the summary cards — distinct from the basics-page roster.
+  screener_household_member: StepContext & { action: 'add' | 'delete' | 'edit_from_summary' | 'delete_from_summary' };
   // `member_index` ties an income add/edit/delete to the member-detail page it
   // happened on (shares the ordinal with that page's screener_form_step view).
   screener_income_source: StepContext & MemberIndexContext & { action: 'add' | 'edit' | 'delete' };
