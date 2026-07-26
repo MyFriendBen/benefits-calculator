@@ -18,7 +18,7 @@ import useScreenApi from '../../../Assets/updateScreen';
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import JsonView from '@uiw/react-json-view';
 import { redactPolicyEngineData } from '../../../Assets/policyEngineRedaction';
-import { useTrackEvent } from '../../../Assets/analytics';
+import { useTrackEvent, useTrackItemList } from '../../../Assets/analytics';
 
 type ProgramPageProps = {
   program: Program;
@@ -35,44 +35,45 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   const intl = useIntl();
   const { fetchScreen } = useScreenApi();
   const track = useTrackEvent();
+  const trackItemList = useTrackItemList();
   const [openPEmodal, setOpenPEModal] = useState(false);
   const { policyEngineData } = useResultsContext();
 
-  // Navigator + document impression events. One batched event each (not one per
-  // item — GA4 drops same-name events fired together in a tick), fired once per
-  // program page: the ref keyed on program id re-fires when the user opens a
-  // different program but not on re-renders of the same one. Documents mirror the
-  // download link's own render guard below — only docs with both a link_url and
-  // link_text are shown as downloadable, so only those are counted here.
+  // Navigator + document impressions, once per program page (ref re-fires when a
+  // different program opens). item_category carries the parent program_id. Only
+  // documents with both a link_url and link_text render as downloadable.
   const shownImpressionsProgramId = useRef<number | undefined>(undefined);
   useEffect(() => {
     if (shownImpressionsProgramId.current === program.program_id) {
       return;
     }
     shownImpressionsProgramId.current = program.program_id;
+    const parentProgramId = String(program.program_id);
 
     if (program.navigators.length > 0) {
-      track('screener_navigators_shown', {
-        program_name: program.name.default_message,
-        program_id: String(program.program_id),
-        navigator_ids: program.navigators.map((navigator) => navigator.id),
-        navigator_names: program.navigators.map((navigator) => navigator.name.default_message),
-        navigator_count: program.navigators.length,
-      });
+      trackItemList(
+        'results_navigators',
+        program.navigators.map((navigator) => ({
+          item_id: String(navigator.id),
+          item_name: navigator.name.default_message,
+          item_category: parentProgramId,
+        })),
+      );
     }
 
     const downloadableDocuments = program.documents.filter(
       (document) => document.link_url.default_message && document.link_text.default_message,
     );
     if (downloadableDocuments.length > 0) {
-      track('screener_program_documents_shown', {
-        program_name: program.name.default_message,
-        program_id: String(program.program_id),
-        document_names: downloadableDocuments.map((document) => document.text.default_message),
-        document_count: downloadableDocuments.length,
-      });
+      trackItemList(
+        'results_documents',
+        downloadableDocuments.map((document) => ({
+          item_name: document.text.default_message,
+          item_category: parentProgramId,
+        })),
+      );
     }
-  }, [program, track]);
+  }, [program, trackItemList]);
 
   const openPolicyEngineRequest = () => setOpenPEModal(true);
   const closePolicyEngineRequest = () => setOpenPEModal(false);
@@ -287,7 +288,6 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
             target="_blank"
             onClick={() =>
               track('screener_apply_click', {
-                program_name: program.name.default_message,
                 program_id: String(program.program_id),
                 url: programApplyButtonLink,
               })
@@ -415,7 +415,6 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                           className="link-color"
                           onClick={() =>
                             track('screener_navigator_engaged', {
-                              program_name: program.name.default_message,
                               program_id: String(program.program_id),
                               navigator_id: navigator.id,
                               navigator_name: navigator.name.default_message,
@@ -435,7 +434,6 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                           className="link-color email-link"
                           onClick={() =>
                             track('screener_navigator_engaged', {
-                              program_name: program.name.default_message,
                               program_id: String(program.program_id),
                               navigator_id: navigator.id,
                               navigator_name: navigator.name.default_message,
@@ -454,7 +452,6 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                           className="link-color phone-link"
                           onClick={() =>
                             track('screener_navigator_engaged', {
-                              program_name: program.name.default_message,
                               program_id: String(program.program_id),
                               navigator_id: navigator.id,
                               navigator_name: navigator.name.default_message,
@@ -492,7 +489,6 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                         className="link-color"
                         onClick={() =>
                           track('screener_program_document_download', {
-                            program_name: program.name.default_message,
                             program_id: String(program.program_id),
                             document_name: document.text.default_message || undefined,
                           })
@@ -565,7 +561,6 @@ function RequiredProgram({ programId }: RequiredProgramProps) {
           to={programLink}
           onClick={() =>
             track('screener_required_program_click', {
-              program_name: program.name.default_message,
               program_id: String(program.program_id),
             })
           }
