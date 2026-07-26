@@ -179,8 +179,6 @@ const HouseholdMemberForm = () => {
 
     // This page navigates manually (onSubmitSuccessfulOverride) instead of through
     // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
-    // Member add/delete counts come only from the household-basics roster, so no
-    // screener_household_member event fires here on the per-member detail save.
     track('screener_form_step', {
       screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberDetails,
       screener_step_number: currentStepId,
