@@ -12,13 +12,16 @@ export default defineConfig({
   fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* On CI, run 3 workers in parallel. Tests are well-isolated (fresh browser
+  /* On CI, run 2 workers in parallel. Tests are well-isolated (fresh browser
      context per test, no shared fixtures, no shared screen UUIDs), so the
      speedup is bounded by file count (9) and the two long-pole files
      (white-labels.spec.ts, current-benefits.spec.ts) that loop over white
      labels. fullyParallel stays false — files run in parallel, tests within
-     a file remain serial. */
-  workers: process.env.CI ? 3 : undefined,
+     a file remain serial. Capped at 2 (down from 3) because the shared staging
+     API is a 512MB dyno: 3 concurrent full-flow workers spiked its 2 gunicorn
+     workers' translation cache past the memory quota (R15/SIGKILL, crash loop).
+     Two workers keep peak memory under the kill threshold. */
+  workers: process.env.CI ? 2 : undefined,
   /* On CI, retry failed tests up to twice to absorb infra/network flakes
      (mid-spec dev-server hiccups, slow first-paint timeouts, etc.). Real
      failures cost extra wallclock but pass-on-retry saves a full re-run. */
