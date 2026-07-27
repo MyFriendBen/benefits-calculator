@@ -16,19 +16,19 @@ export const RULE_LABELS: Record<string, string> = {
   too_big: 'Too long',
   invalid_string: 'Invalid format',
   invalid_enum_value: 'Invalid selection',
-  custom: 'Failed validation',
+  custom: 'Invalid',
   // custom rule codes
   required: 'Required',
   select_one: 'Must select an option',
   none_exclusive: "Can't combine None with others",
-  invalid_amount: 'Invalid amount',
+  invalid_format: 'Invalid format',
+  must_be_positive: 'Must be greater than 0',
   hours_required: 'Enter hours worked',
   future_date: "Date can't be in the future",
   incomplete: 'Answer all questions',
   consent_required: 'Consent required',
   phone_format: 'Must be 10 digits',
   out_of_area: 'Not in service area',
-  invalid_selection: 'Invalid selection',
   must_agree: 'Must be checked to continue',
 };
 

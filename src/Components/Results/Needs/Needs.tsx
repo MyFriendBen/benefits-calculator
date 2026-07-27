@@ -5,11 +5,12 @@ import { useResultsContext, useResultsLink } from '../Results';
 import NeedCard from './NeedCard';
 import { ResultsMessageForNeeds } from '../../Referrer/Referrer';
 import InformationalText from '../../Common/InformationalText/InformationalText';
-import { useTrackEvent } from '../../../Assets/analytics';
+import { useTrackEvent, useTrackItemList } from '../../../Assets/analytics';
 
 const Needs = () => {
   const { needs } = useResultsContext();
   const track = useTrackEvent();
+  const trackItemList = useTrackItemList();
   const needsSortedByCategory = needs.sort((a, b) => {
     if (a.category_type.default_message > b.category_type.default_message) {
       return 1;
@@ -20,20 +21,19 @@ const Needs = () => {
     return 0;
   });
 
-  // One impression event listing every resource shown, fired once per mount
-  // (ref-guarded). A single event rather than one per resource, since GA4 drops
-  // same-name events fired together in a tick.
+  // Resources shown, as one view_item_list impression, once per mount. Resources
+  // have no stable id, so item_name is the key.
   const hasTrackedResourcesShown = useRef(false);
   useEffect(() => {
     if (hasTrackedResourcesShown.current || needs.length === 0) {
       return;
     }
     hasTrackedResourcesShown.current = true;
-    track('screener_resources_shown', {
-      resource_names: needs.map((need) => need.name.default_message),
-      resource_count: needs.length,
-    });
-  }, [needs, track]);
+    trackItemList(
+      'results_resources',
+      needs.map((need) => ({ item_name: need.name.default_message })),
+    );
+  }, [needs, trackItemList]);
 
   const immediateNeedsLink = useResultsLink('step-9');
 
