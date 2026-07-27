@@ -1,10 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import ConnectNowPage, { getContractorGuideAssets } from './ConnectNowPage';
 
-function renderConnectNow(locale = 'en') {
-  return render(
+function connectNowTree(locale: string) {
+  return (
     <IntlProvider locale={locale} messages={{}}>
       <MemoryRouter initialEntries={['/cesn/test-session-uuid/results/energy-rebates/waterHeater/connect-now']}>
         <Routes>
@@ -14,8 +14,12 @@ function renderConnectNow(locale = 'en') {
           />
         </Routes>
       </MemoryRouter>
-    </IntlProvider>,
+    </IntlProvider>
   );
+}
+
+function renderConnectNow(locale = 'en') {
+  return render(connectNowTree(locale));
 }
 
 describe('ConnectNowPage', () => {
@@ -77,6 +81,19 @@ describe('ConnectNowPage', () => {
       'noopener,noreferrer',
     );
     openSpy.mockRestore();
+  });
+
+  it('swaps the edition when the language changes mid-read, holding the reader on the same page', () => {
+    const { rerender } = renderConnectNow('en');
+    fireEvent.click(screen.getByRole('button', { name: /next page/i }));
+
+    const guidePage = () => screen.getByRole('img', { name: /how to find a good hvac contractor/i });
+    expect(guidePage()).toHaveAttribute('src', expect.stringContaining('/heat-pump-journey/en/page-2.png'));
+
+    rerender(connectNowTree('es'));
+
+    expect(guidePage()).toHaveAttribute('src', expect.stringContaining('/heat-pump-journey/es/page-2.png'));
+    expect(screen.getByText('2/3')).toBeInTheDocument();
   });
 
   it('falls back to the English guide for locales with no translated edition', () => {
