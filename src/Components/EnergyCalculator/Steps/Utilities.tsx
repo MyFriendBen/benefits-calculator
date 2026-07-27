@@ -34,7 +34,7 @@ const Utilities = () => {
       ),
     },
     hasPastDueEnergyBills: {
-      icon: <Icon name="file-warning" className="option-card-lucide-icon" />,
+      icon: <Icon name="file-exclamation-point" className="option-card-lucide-icon" />,
       text: (
         <FormattedMessage
           id="utilityStatusOptions.hasPastDueEnergyBills"
