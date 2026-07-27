@@ -1,5 +1,10 @@
 import { createHouseholdMemberSchema, createEnergyCalculatorHouseholdMemberSchema } from './schema';
 import { getCurrentMonthYear, MAX_AGE } from '../../../../Assets/age.tsx';
+import type { FormattedMessageType } from '../../../../Types/Questions';
+
+// The schema only reads the keys of relationshipOptions, so tests pass plain
+// strings instead of building FormattedMessage elements; cast to the real type.
+const asMessages = (m: Record<string, string>) => m as unknown as Record<string, FormattedMessageType>;
 
 // Mock intl with inline formatMessage for all validation messages
 const mockFormatMessage = jest.fn((params: { id: string; defaultMessage?: string }) => params.defaultMessage ?? params.id);
@@ -14,8 +19,8 @@ const validMainData = {
   healthInsurance: { none: true, employer: false, private: false, medicaid: false, medicare: false, chp: false, emergency_medicaid: false, family_planning: false, va: false, mass_health: false },
   conditions: { student: false, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false },
   studentEligibility: { studentFullTime: undefined, studentJobTrainingProgram: undefined, studentHasWorkStudy: undefined, studentWorks20PlusHrs: undefined },
-  // The three income questions are required; answered here so the
-  // fixture is valid. incomeGig can stay null because incomeEmployed is true.
+  // The three income questions are required; all answered "No" here (with no
+  // streams) so the fixture is valid with the minimum income data.
   incomeEmployed: false,
   incomeGig: false,
   incomeOther: false,
@@ -331,7 +336,7 @@ describe('createHouseholdMemberSchema (main)', () => {
 // ============================================================================
 
 describe('createEnergyCalculatorHouseholdMemberSchema', () => {
-  const relationshipOptions = { spouse: 'Spouse', child: 'Child', parent: 'Parent' };
+  const relationshipOptions = asMessages({ spouse: 'Spouse', child: 'Child', parent: 'Parent' });
   const schema = createEnergyCalculatorHouseholdMemberSchema(mockIntl, 2, relationshipOptions);
 
   describe('valid data', () => {
