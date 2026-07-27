@@ -14,11 +14,11 @@ Print/Download link, so the assets cannot be imported from `src/`.
 Assets for the CESN heat pump journey "Connect Now / Contractor Checklist" page
 (`src/Components/EnergyCalculator/Results/HeatPumpJourney/ConnectNowPage.tsx`).
 
-One subdirectory per translated edition of the guide, named for the language it
-serves (`en-us/`, `es/`). `getContractorGuideAssets()` in `ConnectNowPage.tsx`
-picks the directory from the selected locale's language subtag and falls back to
-`en-us/` for languages with no edition — cesn offers a dozen languages, but only
-these editions exist.
+One subdirectory per translated edition of the guide, named for the language
+subtag it serves (`en/`, `es/`). `getContractorGuideAssets()` in
+`ConnectNowPage.tsx` picks the directory from the selected locale's language
+subtag (`en-us` → `en/`, `es-mx` → `es/`) and falls back to `en/` for languages
+with no edition — cesn offers a dozen languages, but only these editions exist.
 
 ### `<edition>/contractor-checklist.pdf`
 
@@ -47,6 +47,6 @@ Figma design.
 ### Adding an edition
 
 Add `public/documents/heat-pump-journey/<lang>/contractor-checklist.pdf`, render its
-page images as above, then add a `<lang>: { dir, pageCount }` entry to
-`CONTRACTOR_GUIDE_EDITIONS` keyed by the language subtag of the app locale
-(e.g. `zh` for `zh-hans`).
+page images as above, then add a `<lang>: { pageCount }` entry to
+`CONTRACTOR_GUIDE_EDITIONS`. `<lang>` is the language subtag of the app locale
+(e.g. `zh` for `zh-hans`) and must match the directory name.

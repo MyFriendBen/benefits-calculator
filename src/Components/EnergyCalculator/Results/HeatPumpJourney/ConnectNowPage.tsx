@@ -23,32 +23,42 @@ const CONTRACTOR_GUIDE_BASE_URL = `${process.env.PUBLIC_URL}/documents/heat-pump
  * Now), keyed by language subtag. cesn offers a dozen languages but only these
  * editions exist, so every other locale falls back to English.
  *
- * Each edition is a directory under `public/documents/heat-pump-journey/` holding
+ * Each key is also a directory under `public/documents/heat-pump-journey/` holding
  * the PDF plus one pre-rendered page image per page — see
  * `public/documents/README.md`, and update `pageCount` if a PDF's page count
  * changes.
  */
 const CONTRACTOR_GUIDE_EDITIONS = {
-  en: { dir: 'en-us', pageCount: 3 },
-  es: { dir: 'es', pageCount: 3 },
+  en: { pageCount: 3 },
+  es: { pageCount: 3 },
 } as const;
 
-const CONTRACTOR_GUIDE_FALLBACK_EDITION = CONTRACTOR_GUIDE_EDITIONS.en;
+type ContractorGuideLanguage = keyof typeof CONTRACTOR_GUIDE_EDITIONS;
+
+const CONTRACTOR_GUIDE_LANGUAGES = Object.keys(CONTRACTOR_GUIDE_EDITIONS) as ContractorGuideLanguage[];
+
+const CONTRACTOR_GUIDE_FALLBACK_LANGUAGE: ContractorGuideLanguage = 'en';
 
 /**
- * Guide assets for `locale`, matched on its language subtag ('es-mx' → 'es').
+ * Guide assets for `locale`, matched on its language subtag ('es-mx' → 'es',
+ * 'en-us' → 'en').
  *
  * The PagedDocumentViewer displays the pre-rendered page images (so the
  * toolbar/pager can match the design); Print/Download opens the PDF so users get
  * a real PDF.
  */
 export function getContractorGuideAssets(locale: string) {
-  const language = locale.toLowerCase().split('-')[0] as keyof typeof CONTRACTOR_GUIDE_EDITIONS;
-  const { dir, pageCount } = CONTRACTOR_GUIDE_EDITIONS[language] ?? CONTRACTOR_GUIDE_FALLBACK_EDITION;
+  const subtag = locale.toLowerCase().split('-')[0];
+  const language =
+    CONTRACTOR_GUIDE_LANGUAGES.find((edition) => edition === subtag) ?? CONTRACTOR_GUIDE_FALLBACK_LANGUAGE;
+  const { pageCount } = CONTRACTOR_GUIDE_EDITIONS[language];
 
   return {
-    pdfUrl: `${CONTRACTOR_GUIDE_BASE_URL}/${dir}/contractor-checklist.pdf`,
-    pageImages: Array.from({ length: pageCount }, (_, i) => `${CONTRACTOR_GUIDE_BASE_URL}/${dir}/page-${i + 1}.png`),
+    pdfUrl: `${CONTRACTOR_GUIDE_BASE_URL}/${language}/contractor-checklist.pdf`,
+    pageImages: Array.from(
+      { length: pageCount },
+      (_, i) => `${CONTRACTOR_GUIDE_BASE_URL}/${language}/page-${i + 1}.png`,
+    ),
   };
 }
 

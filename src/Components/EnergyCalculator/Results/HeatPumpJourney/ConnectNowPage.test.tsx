@@ -82,7 +82,7 @@ describe('ConnectNowPage', () => {
   it('falls back to the English guide for locales with no translated edition', () => {
     renderConnectNow('zh-hans');
     const firstPage = screen.getByRole('img', { name: /how to find a good hvac contractor/i });
-    expect(firstPage).toHaveAttribute('src', expect.stringContaining('/heat-pump-journey/en-us/page-1.png'));
+    expect(firstPage).toHaveAttribute('src', expect.stringContaining('/heat-pump-journey/en/page-1.png'));
   });
 
   it('renders the PDF section heading with Electrify Now attribution', () => {
@@ -112,7 +112,7 @@ describe('getContractorGuideAssets', () => {
   it.each(CESN_LOCALES.filter((locale) => locale !== 'es'))('serves the English guide for %s', (locale) => {
     const { pdfUrl, pageImages } = getContractorGuideAssets(locale);
     expect(pdfUrl).toBe(getContractorGuideAssets('en-us').pdfUrl);
-    expect(pdfUrl).toContain('/heat-pump-journey/en-us/contractor-checklist.pdf');
+    expect(pdfUrl).toContain('/heat-pump-journey/en/contractor-checklist.pdf');
     expect(pageImages).toEqual(getContractorGuideAssets('en-us').pageImages);
   });
 
