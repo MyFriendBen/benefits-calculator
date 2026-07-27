@@ -84,9 +84,6 @@ interface IncomeSectionProps {
 interface IncomeStreamRowProps {
   index: number;
   variant: IncomeRowVariant;
-  // 1-based position within its question's rows; shown as a heading on amount-only
-  // rows (which have no source field to identify them).
-  rowNumber?: number;
   control: Control<IncomeFormValues>;
   setValue: UseFormSetValue<IncomeFormValues>;
   remove: UseFieldArrayRemove;
@@ -99,7 +96,6 @@ interface IncomeStreamRowProps {
 const IncomeStreamRow = ({
   index,
   variant,
-  rowNumber,
   control,
   setValue,
   remove,
@@ -123,7 +119,7 @@ const IncomeStreamRow = ({
   const sourceOptions = effectiveCategory && incomeOptions[effectiveCategory] ? incomeOptions[effectiveCategory] : {};
   const specificTypeMenuItems = createMenuItems(
     sourceOptions,
-    <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectType" defaultMessage="Select source" />,
+    <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectType" defaultMessage="Select..." />,
   );
 
   const incomeCategoryError = getError(index, 'incomeCategory') as { message?: string } | undefined;
@@ -135,23 +131,12 @@ const IncomeStreamRow = ({
   return (
     <Box id={`income-stream-${index}`} className="income-box">
       <Box className="income-fields-container">
-        {/* Amount-only rows (wages/self-employment) have no source field, so a
-            numbered heading identifies what the frequency + amount describe. */}
-        {variant === 'amountOnly' && rowNumber !== undefined && (
-          <div className="income-row-heading">
-            <FormattedMessage
-              id="personIncomeBlock.incomeSourceNumber"
-              defaultMessage="Income Source {number}"
-              values={{ number: rowNumber }}
-            />
-          </div>
-        )}
         {/* Income Category (only for the "other recurring payments" question) */}
         {showCategory && (
           <Box className="income-category-container">
             <FormControl fullWidth size="small" error={incomeCategoryError !== undefined}>
               <FormLabel id={`income-category-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
-                <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Income Category" />
+                <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Category" />
               </FormLabel>
               <Controller
                 name={`incomeStreams.${index}.incomeCategory`}
@@ -159,7 +144,7 @@ const IncomeStreamRow = ({
                 render={({ field }) => (
                   <Select
                     {...field}
-                    inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.incomeCategory', defaultMessage: 'Income Category' }) }}
+                    inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.incomeCategory', defaultMessage: 'Category' }) }}
                     id={`income-category-select-${index}`}
                     sx={{ backgroundColor: '#fff' }}
                     onChange={(e) => {
@@ -187,7 +172,7 @@ const IncomeStreamRow = ({
             <Box className="income-field-specific-type">
               <FormControl fullWidth size="small" error={!!effectiveCategory && incomeStreamNameError !== undefined}>
                 <FormLabel id={`income-source-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
-                  <FormattedMessage id="personIncomeBlock.incomeStreamName" defaultMessage="Income Source" />
+                  <FormattedMessage id="personIncomeBlock.incomeStreamName" defaultMessage="Source" />
                 </FormLabel>
                 <Controller
                   name={`incomeStreams.${index}.incomeStreamName`}
@@ -203,7 +188,7 @@ const IncomeStreamRow = ({
                       <span>
                         <Select
                           {...field}
-                          inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.incomeStreamName', defaultMessage: 'Income Source' }) }}
+                          inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.incomeStreamName', defaultMessage: 'Source' }) }}
                           id={`income-source-select-${index}`}
                           sx={{ backgroundColor: '#fff' }}
                           disabled={!effectiveCategory}
@@ -314,6 +299,7 @@ const IncomeStreamRow = ({
                     fullWidth
                     size="small"
                     variant="outlined"
+                    placeholder="0.00"
                     inputProps={{ id: `income-amount-input-${index}`, inputMode: isHourly ? 'decimal' : 'numeric', 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.preTaxAmount', defaultMessage: 'Pre-Tax Amount' }) }}
                     sx={{ backgroundColor: '#fff' }}
                     error={incomeAmountError !== undefined}
@@ -431,7 +417,7 @@ const AddIncomeSourceLink = ({ onClick }: { onClick: () => void }) => (
   <Box>
     <button onClick={onClick} type="button" className="income-add-button">
       <AddIcon fontSize="small" />
-      <FormattedMessage id="personIncomeBlock.addIncomeSourceButton" defaultMessage="Add an income source" />
+      <FormattedMessage id="personIncomeBlock.addAnotherSourceButton" defaultMessage="Add Another Source" />
     </button>
   </Box>
 );
@@ -465,7 +451,7 @@ const IncomeSection = ({
 
   const incomeCategoriesMenuItems = createMenuItems(
     otherIncomeCategories,
-    <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectCategory" defaultMessage="Select category" />,
+    <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectCategory" defaultMessage="Select category..." />,
   );
 
   const getError = (index: number, fieldName: keyof IncomeStreamFormData) => {
@@ -632,25 +618,29 @@ const IncomeSection = ({
 
   const handleAddEmploymentSource = () => {
     append(EMPTY_EMPLOYMENT_INCOME_STREAM);
+    // Adding a source satisfies the "add at least one income source" rule, so
+    // clear the stale error left over from a prior failed submit.
+    clearErrors('incomeEmployed');
     trackIncomeSource('add');
   };
 
   const handleAddGigSource = () => {
     append(EMPTY_GIG_INCOME_STREAM);
+    clearErrors('incomeGig');
     trackIncomeSource('add');
   };
 
   const handleAddOtherSource = () => {
     append(EMPTY_INCOME_STREAM);
+    clearErrors('incomeOther');
     trackIncomeSource('add');
   };
 
-  const renderRow = (r: { field: { id: string }; index: number }, variant: IncomeRowVariant, rowNumber?: number) => (
+  const renderRow = (r: { field: { id: string }; index: number }, variant: IncomeRowVariant) => (
     <IncomeStreamRow
       key={r.field.id}
       index={r.index}
       variant={variant}
-      rowNumber={rowNumber}
       control={control}
       setValue={setValue}
       remove={trackedRemove}
@@ -685,12 +675,12 @@ const IncomeSection = ({
         <Box className={`income-question-block${employed ? ' income-question-block--active' : ''}`}>
           <FormLabel className="income-question-label">
             <Icon name="briefcase" size={26} className="income-question-icon" aria-hidden />
-            <FormattedMessage id="householdDataBlock.incomeQuestion-employed" defaultMessage="Are {subject} employed (receiving consistent wages, salary, or tips)?" values={{ subject }} />
+            <FormattedMessage id="householdDataBlock.incomeQuestion-employed" defaultMessage="Are {subject} currently employed (receiving consistent wages, salary, or tips)?" values={{ subject }} />
           </FormLabel>
           <YesNoToggle
             value={employed}
             onChange={handleEmployedChange}
-            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-employed', defaultMessage: 'Are {subject} employed (receiving consistent wages, salary, or tips)?' }, { subject })}
+            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-employed', defaultMessage: 'Are {subject} currently employed (receiving consistent wages, salary, or tips)?' }, { subject })}
             errorId="income-employed-error"
             hasError={!!employedError}
           />
@@ -701,7 +691,18 @@ const IncomeSection = ({
           )}
           {employed && (
             <Stack spacing={2} className="income-streams-stack">
-              {employedRows.map((r, i) => renderRow(r, 'amountOnly', i + 1))}
+              <div className="income-entry-heading">
+                <div className="income-entry-heading__title">
+                  <FormattedMessage id="personIncomeBlock.incomeGroup-employment" defaultMessage="Employment income" />
+                </div>
+                <p className="income-entry-heading__subtext">
+                  <FormattedMessage
+                    id="personIncomeBlock.incomeGroupHint-employment"
+                    defaultMessage="Add income details for each employer or pay source."
+                  />
+                </p>
+              </div>
+              {employedRows.map((r) => renderRow(r, 'amountOnly'))}
               <AddIncomeSourceLink onClick={handleAddEmploymentSource} />
             </Stack>
           )}
@@ -713,7 +714,7 @@ const IncomeSection = ({
             <Icon name="car" size={26} className="income-question-icon" aria-hidden />
             <FormattedMessage
               id="householdDataBlock.incomeQuestion-gig"
-              defaultMessage="Do {subject} earn any money from self-employment, freelance, gig, or occasional work?"
+              defaultMessage="Do {subject} earn any money from freelance, gig, or occasional work?"
               values={{ subject }}
             />
           </FormLabel>
@@ -726,7 +727,7 @@ const IncomeSection = ({
           <YesNoToggle
             value={gig}
             onChange={handleGigChange}
-            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-gig', defaultMessage: 'Do {subject} earn any money from self-employment, freelance, gig, or occasional work?' }, { subject })}
+            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-gig', defaultMessage: 'Do {subject} earn any money from freelance, gig, or occasional work?' }, { subject })}
             errorId="income-gig-error"
             hasError={!!gigError}
             descriptionId="income-gig-subtext"
@@ -738,7 +739,18 @@ const IncomeSection = ({
           )}
           {gig && (
             <Stack spacing={2} className="income-streams-stack">
-              {gigRows.map((r, i) => renderRow(r, 'amountOnly', i + 1))}
+              <div className="income-entry-heading">
+                <div className="income-entry-heading__title">
+                  <FormattedMessage id="personIncomeBlock.incomeGroup-gig" defaultMessage="Freelance & gig income" />
+                </div>
+                <p className="income-entry-heading__subtext">
+                  <FormattedMessage
+                    id="personIncomeBlock.incomeGroupHint-gig"
+                    defaultMessage="Add income details for each type of gig or side work."
+                  />
+                </p>
+              </div>
+              {gigRows.map((r) => renderRow(r, 'amountOnly'))}
               <AddIncomeSourceLink onClick={handleAddGigSource} />
             </Stack>
           )}
@@ -768,6 +780,17 @@ const IncomeSection = ({
           )}
           {other && (
             <Stack spacing={2} className="income-streams-stack">
+              <div className="income-entry-heading">
+                <div className="income-entry-heading__title">
+                  <FormattedMessage id="personIncomeBlock.incomeGroup-other" defaultMessage="Benefits & recurring payments" />
+                </div>
+                <p className="income-entry-heading__subtext">
+                  <FormattedMessage
+                    id="personIncomeBlock.incomeGroupHint-other"
+                    defaultMessage="Add details for each benefit or payment you receive."
+                  />
+                </p>
+              </div>
               {otherRows.map((r) => renderRow(r, 'full'))}
               <AddIncomeSourceLink onClick={handleAddOtherSource} />
             </Stack>

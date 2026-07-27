@@ -110,25 +110,25 @@ describe('IncomeSection (three-question design)', () => {
   describe('question visibility', () => {
     it('renders all three questions up front (gig is not gated on employed)', () => {
       render(<Wrapper />);
-      expect(screen.getByText(/are you employed/i)).toBeInTheDocument();
+      expect(screen.getByText(/are you currently employed/i)).toBeInTheDocument();
       expect(screen.getByText(/freelance, gig, or occasional work/i)).toBeInTheDocument();
       expect(screen.getByText(/government benefits, child support, alimony/i)).toBeInTheDocument();
     });
 
     it('phrases the questions in the first person for member 1 ("you")', () => {
       render(<Wrapper pageNumber={1} />);
-      expect(screen.getByText(/are you employed/i)).toBeInTheDocument();
+      expect(screen.getByText(/are you currently employed/i)).toBeInTheDocument();
     });
 
     it('phrases the questions in the third person for later members ("they")', () => {
       render(<Wrapper pageNumber={2} />);
-      expect(screen.getByText(/are they employed/i)).toBeInTheDocument();
-      expect(screen.queryByText(/are you employed/i)).not.toBeInTheDocument();
+      expect(screen.getByText(/are they currently employed/i)).toBeInTheDocument();
+      expect(screen.queryByText(/are you currently employed/i)).not.toBeInTheDocument();
     });
 
     it('answering employed does not affect the gig question (both stay visible)', () => {
       render(<Wrapper />);
-      clickYes(/are you employed/i);
+      clickYes(/are you currently employed/i);
       expect(screen.getByText(/freelance, gig, or occasional work/i)).toBeInTheDocument();
     });
   });
@@ -136,7 +136,7 @@ describe('IncomeSection (three-question design)', () => {
   describe('employed question (Q1) fields', () => {
     it('reveals an amount-only row (no category or source dropdown) on "Yes"', async () => {
       render(<Wrapper />);
-      clickYes(/are you employed/i);
+      clickYes(/are you currently employed/i);
       await waitFor(() => {
         expect(document.getElementById('income-amount-label-0')).toBeInTheDocument();
       });
@@ -144,12 +144,11 @@ describe('IncomeSection (three-question design)', () => {
       expect(document.getElementById('income-source-label-0')).not.toBeInTheDocument();
     });
 
-    it('labels amount-only rows with a numbered "Income Source N" heading', async () => {
+    it('shows the employment entry header + hint on "Yes"', async () => {
       render(<Wrapper />);
-      clickYes(/are you employed/i);
-      expect(await screen.findByText(/income source 1/i)).toBeInTheDocument();
-      fireEvent.click(screen.getByRole('button', { name: /add an income source/i }));
-      expect(await screen.findByText(/income source 2/i)).toBeInTheDocument();
+      clickYes(/are you currently employed/i);
+      expect(await screen.findByText(/^employment income$/i)).toBeInTheDocument();
+      expect(screen.getByText(/add income details for each employer or pay source/i)).toBeInTheDocument();
     });
   });
 
@@ -178,7 +177,7 @@ describe('IncomeSection (three-question design)', () => {
     it('excludes the employment category from the Q3 category dropdown', async () => {
       render(<Wrapper defaultStreams={[otherStream()]} />);
       const categorySelect = Array.from(getSelectDivs()).find(
-        (el) => el.getAttribute('aria-label') === 'Income Category',
+        (el) => el.getAttribute('aria-label') === 'Category',
       )!;
       fireEvent.mouseDown(categorySelect);
       await waitFor(() => {
@@ -195,7 +194,7 @@ describe('IncomeSection (three-question design)', () => {
       expect(document.getElementById('income-amount-label-0')).toBeInTheDocument();
       expect(document.getElementById('income-source-label-0')).not.toBeInTheDocument();
       // Employed Yes doesn't hide the gig question.
-      expect(within(yesNoGroup(/are you employed/i)).getByRole('radio', { name: /^yes$/i })).toHaveAttribute('aria-checked', 'true');
+      expect(within(yesNoGroup(/are you currently employed/i)).getByRole('radio', { name: /^yes$/i })).toHaveAttribute('aria-checked', 'true');
     });
 
     it('auto-answers gig=Yes for a saved self-employment stream', () => {
@@ -210,16 +209,16 @@ describe('IncomeSection (three-question design)', () => {
   });
 
   describe('add / remove within a bucket', () => {
-    it('offers an add-income-source link on the gig question', () => {
+    it('offers an add-another-source link on the gig question', () => {
       render(<Wrapper defaultStreams={[employmentStream('selfEmployment')]} />);
       // Gig question is active (self-employment-only stream) and can add more rows.
-      expect(screen.getByRole('button', { name: /add an income source/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /add another source/i })).toBeInTheDocument();
     });
 
-    it('appends another employment row via Add An Income Source', async () => {
+    it('appends another employment row via Add Another Source', async () => {
       render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
       const before = screen.getAllByRole('button', { name: /delete income source/i }).length;
-      fireEvent.click(screen.getByRole('button', { name: /add an income source/i }));
+      fireEvent.click(screen.getByRole('button', { name: /add another source/i }));
       await waitFor(() => {
         expect(screen.getAllByRole('button', { name: /delete income source/i })).toHaveLength(before + 1);
       });
@@ -228,7 +227,7 @@ describe('IncomeSection (three-question design)', () => {
     it('removes all employment rows when employed is switched to "No" (after confirming in the popover)', async () => {
       render(<Wrapper defaultStreams={[filledEmploymentStream()]} />);
       expect(screen.getAllByRole('button', { name: /delete income source/i })).toHaveLength(1);
-      clickNo(/are you employed/i);
+      clickNo(/are you currently employed/i);
       // The row has an entered amount, so a confirmation popover appears; confirm.
       fireEvent.click(await screen.findByRole('button', { name: /^remove$/i }));
       await waitFor(() => {
@@ -240,25 +239,25 @@ describe('IncomeSection (three-question design)', () => {
   describe('confirm before discarding filled income (destructive toggle)', () => {
     it('opens a confirmation popover before removing a row with an entered amount', async () => {
       render(<Wrapper defaultStreams={[filledEmploymentStream()]} />);
-      clickNo(/are you employed/i);
+      clickNo(/are you currently employed/i);
       expect(await screen.findByText(/this will remove the income you entered/i)).toBeInTheDocument();
     });
 
     it('keeps the data and the "Yes" answer if the popover is cancelled', async () => {
       render(<Wrapper defaultStreams={[filledEmploymentStream()]} />);
-      clickNo(/are you employed/i);
+      clickNo(/are you currently employed/i);
       fireEvent.click(await screen.findByRole('button', { name: /^cancel$/i }));
       await waitFor(() => {
         expect(screen.queryByText(/this will remove the income you entered/i)).not.toBeInTheDocument();
       });
       expect(screen.getByRole('button', { name: /delete income source/i })).toBeInTheDocument();
-      expect(within(yesNoGroup(/are you employed/i)).getByRole('radio', { name: /^yes$/i })).toHaveAttribute('aria-checked', 'true');
+      expect(within(yesNoGroup(/are you currently employed/i)).getByRole('radio', { name: /^yes$/i })).toHaveAttribute('aria-checked', 'true');
     });
 
     it('does not prompt when the employment rows are empty', () => {
       render(<Wrapper />);
-      clickYes(/are you employed/i); // appends an empty employment row
-      clickNo(/are you employed/i); // empty row → removed with no popover
+      clickYes(/are you currently employed/i); // appends an empty employment row
+      clickNo(/are you currently employed/i); // empty row → removed with no popover
       expect(screen.queryByText(/this will remove the income you entered/i)).not.toBeInTheDocument();
       // Gig question appears (employed is now No), confirming the toggle applied.
       expect(screen.getByText(/freelance, gig, or occasional work/i)).toBeInTheDocument();
@@ -268,7 +267,7 @@ describe('IncomeSection (three-question design)', () => {
       // Regression: a wages/selfEmployment source is either user- or auto-seeded,
       // but with no amount/frequency the box is effectively empty — no prompt.
       render(<Wrapper defaultStreams={[employmentStream('wages')]} />);
-      clickNo(/are you employed/i);
+      clickNo(/are you currently employed/i);
       expect(screen.queryByText(/this will remove the income you entered/i)).not.toBeInTheDocument();
     });
 
@@ -285,14 +284,14 @@ describe('IncomeSection (three-question design)', () => {
   describe('accessibility', () => {
     it('renders each question as a radiogroup with two radios', () => {
       render(<Wrapper />);
-      const group = yesNoGroup(/are you employed/i);
+      const group = yesNoGroup(/are you currently employed/i);
       expect(within(group).getAllByRole('radio')).toHaveLength(2);
     });
 
     it('associates the required-answer error with the toggle via aria-describedby + aria-invalid', () => {
       // Force the employed error via the errors prop.
       render(<Wrapper errors={{ incomeEmployed: { message: 'Please select an answer.' } }} />);
-      const group = yesNoGroup(/are you employed/i);
+      const group = yesNoGroup(/are you currently employed/i);
       expect(group).toHaveAttribute('aria-invalid', 'true');
       const describedBy = group.getAttribute('aria-describedby');
       expect(describedBy).toBe('income-employed-error');
@@ -301,7 +300,7 @@ describe('IncomeSection (three-question design)', () => {
 
     it('describes the gig toggle with its example subtext for screen readers', () => {
       render(<Wrapper />);
-      clickNo(/are you employed/i); // reveal the gig question
+      clickNo(/are you currently employed/i); // reveal the gig question
       const group = yesNoGroup(/freelance, gig, or occasional work/i);
       const describedBy = group.getAttribute('aria-describedby') ?? '';
       expect(describedBy.split(' ')).toContain('income-gig-subtext');
@@ -313,14 +312,23 @@ describe('IncomeSection (three-question design)', () => {
       // shows an error; toggling No then Yes should clear it rather than persist.
       const clearErrorsSpy = jest.fn();
       render(<Wrapper clearErrorsSpy={clearErrorsSpy} />);
-      clickNo(/are you employed/i);
-      clickYes(/are you employed/i);
+      clickNo(/are you currently employed/i);
+      clickYes(/are you currently employed/i);
+      expect(clearErrorsSpy).toHaveBeenCalledWith('incomeEmployed');
+    });
+
+    it('clears the "add at least one income source" error when a row is added', () => {
+      // After a failed submit the required-source error sits on the question;
+      // adding a source should clear it immediately, not wait for the next submit.
+      const clearErrorsSpy = jest.fn();
+      render(<Wrapper defaultStreams={[employmentStream('wages')]} clearErrorsSpy={clearErrorsSpy} />);
+      fireEvent.click(screen.getByRole('button', { name: /add another source/i }));
       expect(clearErrorsSpy).toHaveBeenCalledWith('incomeEmployed');
     });
 
     it('moves the selection with arrow keys', () => {
       render(<Wrapper />);
-      const group = yesNoGroup(/are you employed/i);
+      const group = yesNoGroup(/are you currently employed/i);
       fireEvent.keyDown(group, { key: 'ArrowRight' });
       // From unanswered, ArrowRight selects "Yes".
       expect(within(group).getByRole('radio', { name: /^yes$/i })).toHaveAttribute('aria-checked', 'true');
