@@ -14,26 +14,39 @@ Print/Download link, so the assets cannot be imported from `src/`.
 Assets for the CESN heat pump journey "Connect Now / Contractor Checklist" page
 (`src/Components/EnergyCalculator/Results/HeatPumpJourney/ConnectNowPage.tsx`).
 
-### `how-to-find-hvac-contractor.pdf`
+One subdirectory per translated edition of the guide, named for the language it
+serves (`en-us/`, `es/`). `getContractorGuideAssets()` in `ConnectNowPage.tsx`
+picks the directory from the selected locale's language subtag and falls back to
+`en-us/` for languages with no edition — cesn offers a dozen languages, but only
+these editions exist.
 
-"How to find a good HVAC contractor" guide from Electrify Now. Referenced as
-`CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL`. The viewer's **Print / Download** action
-opens this PDF, so users always get a real PDF — the page images are display-only.
+### `<edition>/contractor-checklist.pdf`
 
-### `page-*.png`
+"How to find a good HVAC contractor" guide from Electrify Now, in that edition's
+language. The viewer's **Print / Download** action opens this PDF, so users always
+get a real PDF — the page images are display-only.
 
-Pre-rendered page images of the PDF above, one per page, displayed by
+### `<edition>/page-*.png`
+
+Pre-rendered page images of the PDF beside them, one per page, displayed by
 `PagedDocumentViewer` (with a custom toolbar/pager) so the chrome can match the
-Figma design. Referenced as `CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES`.
+Figma design.
 
-> **Regenerate these whenever `how-to-find-hvac-contractor.pdf` changes.** They are
-> NOT produced automatically. With poppler (`brew install poppler`):
+> **Regenerate these whenever that edition's PDF changes.** They are NOT produced
+> automatically. With poppler (`brew install poppler`), from the repo root:
 >
 > ```sh
 > pdftoppm -png -r 150 \
->   public/documents/heat-pump-journey/how-to-find-hvac-contractor.pdf \
->   public/documents/heat-pump-journey/page
+>   public/documents/heat-pump-journey/es/contractor-checklist.pdf \
+>   public/documents/heat-pump-journey/es/page
 > ```
 >
-> This writes `page-1.png`, `page-2.png`, … If the page count changes, update the
-> `CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES` array in `ConnectNowPage.tsx`.
+> This writes `page-1.png`, `page-2.png`, … If the page count changes, update that
+> edition's `pageCount` in `CONTRACTOR_GUIDE_EDITIONS` in `ConnectNowPage.tsx`.
+
+### Adding an edition
+
+Add `public/documents/heat-pump-journey/<lang>/contractor-checklist.pdf`, render its
+page images as above, then add a `<lang>: { dir, pageCount }` entry to
+`CONTRACTOR_GUIDE_EDITIONS` keyed by the language subtag of the app locale
+(e.g. `zh` for `zh-hans`).
