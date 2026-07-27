@@ -122,6 +122,38 @@ describe('PagedDocumentViewer', () => {
     expect(screen.getByText('1/2')).toBeInTheDocument();
   });
 
+  it('clamps to the last page when the document swaps for one with fewer pages', () => {
+    const { rerender } = renderViewer();
+    fireEvent.click(screen.getByRole('button', { name: /next page/i }));
+    expect(screen.getByText('2/2')).toBeInTheDocument();
+
+    // e.g. the user changes language and the new edition is one page shorter.
+    const shorter = ['/docs/es/page-1.png'];
+    rerender(
+      <IntlProvider locale="en" messages={{}}>
+        <PagedDocumentViewer pageImages={shorter} pdfUrl={PDF_URL} title="Test guide" />
+      </IntlProvider>,
+    );
+
+    expect(screen.getByText('1/1')).toBeInTheDocument();
+    expect(screen.getByRole('img')).toHaveAttribute('src', shorter[0]);
+  });
+
+  it('keeps the current page when the document swaps for one with the same page count', () => {
+    const { rerender } = renderViewer();
+    fireEvent.click(screen.getByRole('button', { name: /next page/i }));
+
+    const sameLength = ['/docs/es/page-1.png', '/docs/es/page-2.png'];
+    rerender(
+      <IntlProvider locale="en" messages={{}}>
+        <PagedDocumentViewer pageImages={sameLength} pdfUrl={PDF_URL} title="Test guide" />
+      </IntlProvider>,
+    );
+
+    expect(screen.getByText('2/2')).toBeInTheDocument();
+    expect(screen.getByRole('img')).toHaveAttribute('src', sameLength[1]);
+  });
+
   it('renders nothing when there are no page images', () => {
     const { container } = render(
       <IntlProvider locale="en" messages={{}}>
