@@ -1,14 +1,16 @@
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { useResultsContext, useResultsLink } from '../Results';
 import NeedCard from './NeedCard';
 import { ResultsMessageForNeeds } from '../../Referrer/Referrer';
 import InformationalText from '../../Common/InformationalText/InformationalText';
-import { useTrackEvent } from '../../../Assets/analytics';
+import { useTrackEvent, useTrackItemList } from '../../../Assets/analytics';
 
 const Needs = () => {
   const { needs } = useResultsContext();
   const track = useTrackEvent();
+  const trackItemList = useTrackItemList();
   const needsSortedByCategory = needs.sort((a, b) => {
     if (a.category_type.default_message > b.category_type.default_message) {
       return 1;
@@ -18,6 +20,20 @@ const Needs = () => {
 
     return 0;
   });
+
+  // Resources shown, as one view_item_list impression, once per mount. Resources
+  // have no stable id, so item_name is the key.
+  const hasTrackedResourcesShown = useRef(false);
+  useEffect(() => {
+    if (hasTrackedResourcesShown.current || needs.length === 0) {
+      return;
+    }
+    hasTrackedResourcesShown.current = true;
+    trackItemList(
+      'results_resources',
+      needs.map((need) => ({ item_name: need.name.default_message })),
+    );
+  }, [needs, trackItemList]);
 
   const immediateNeedsLink = useResultsLink('step-9');
 
@@ -37,6 +53,7 @@ const Needs = () => {
                   track('screener_link_click', {
                     link_name: 'Additional Resources — Edit Step',
                     url: immediateNeedsLink,
+                    link_location: 'results_needs',
                   })
                 }
               >

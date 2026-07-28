@@ -36,14 +36,6 @@ export const Zipcode = () => {
   const countiesByZipcode = useConfig<{ [key: string]: { [key: string]: string } }>('counties_by_zipcode');
   const state = useConfig<{ name: string }>('state');
   const { formatMessage } = useIntl();
-  const checkCountyIsValid = ({ zipcode, county }: { zipcode: string; county: string }) => {
-    const validCounties = countiesByZipcode[zipcode];
-
-    if (validCounties && county in validCounties) {
-      return true;
-    }
-    return false;
-  };
 
   const numberMustBeFiveDigitsLongRegex = /^\d{5}$/;
   const errorMessage =
@@ -69,10 +61,12 @@ export const Zipcode = () => {
       zipcode: zipcodeSchema,
       county: z.string(),
     })
-    .refine((data) => checkCountyIsValid(data), {
-      message: 'Invalid county',
+    // County is a dropdown populated only with valid counties for the zip, so the
+    // only failure is not having picked one (still the disabled placeholder).
+    .refine((data) => data.county !== '' && data.county !== 'disabled-select', {
+      message: 'Please select a county',
       path: ['county'],
-      params: { code: 'invalid_selection' },
+      params: { code: 'required' },
     });
 
   type FormSchema = z.infer<typeof formSchema>;
@@ -194,6 +188,7 @@ export const Zipcode = () => {
                 link_name: 'Other State Options',
                 url: '/select-state',
                 screener_step_name: getStepAnalyticsId('zipcode'),
+                link_location: 'zip_code_inline',
               })
             }
           >

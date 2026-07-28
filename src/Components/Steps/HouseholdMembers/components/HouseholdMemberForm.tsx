@@ -29,7 +29,7 @@ import StudentEligibilitySection from '../sections/StudentEligibilitySection';
 import IncomeSection from '../sections/IncomeSection';
 import BasicInfoSection from '../sections/BasicInfoSection';
 import { useTrackEvent } from '../../../../Assets/analytics';
-import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
+import { HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
 
 const HouseholdMemberForm = () => {
   const isEnergyCalculator = useIsEnergyCalculator();
@@ -76,6 +76,9 @@ const HouseholdMemberForm = () => {
       screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberDetails,
       screener_step_number: currentStepId,
       step_action: 'view',
+      // 0-based member ordinal, shared with the income actions fired on this
+      // same member-detail page (see screener_income_source).
+      member_index: currentMemberIndex,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageNumber]);
@@ -176,17 +179,6 @@ const HouseholdMemberForm = () => {
 
     // This page navigates manually (onSubmitSuccessfulOverride) instead of through
     // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
-    // (Edits entered via the summary cards' edit button already fire their own
-    // 'edit' screener_household_member event on entry — see HouseholdMemberSummaryCards
-    // — so this submit only reports a new-member 'add' the first time a member's
-    // details are saved, to avoid double-counting the same edit.)
-    if (!isEditing) {
-      track('screener_household_member', {
-        screener_step_name: getStepAnalyticsId(questionName),
-        screener_step_number: currentStepId,
-        action: 'add',
-      });
-    }
     track('screener_form_step', {
       screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberDetails,
       screener_step_number: currentStepId,
