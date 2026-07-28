@@ -11,6 +11,8 @@ import {
   renderIncomeFrequencyHelperText,
   renderHoursWorkedHelperText,
   renderIncomeAmountHelperText,
+  renderIncomeAmountRequiredHelperText,
+  renderIncomeAmountFormatHelperText,
   renderStudentEligibilityErrorMessage,
   renderMissingBirthMonthHelperText,
   renderFutureBirthMonthHelperText,
@@ -23,7 +25,7 @@ import {
   hasAtLeastOneTrue,
   validateNoneExclusive,
   validateHourlyIncome,
-  validateIncomeAmount,
+  INCOME_AMOUNT_REGEX,
 } from './validation';
 
 export type StudentQuestionName = 'studentFullTime' | 'studentJobTrainingProgram' | 'studentHasWorkStudy' | 'studentWorks20PlusHrs';
@@ -82,9 +84,17 @@ const createIncomeSourceSchema = (intl: IntlShape) => {
       incomeAmount: z
         .string()
         .trim()
-        .refine(validateIncomeAmount, {
+        // Refines run even when .min fails (zod doesn't short-circuit them), so
+        // both skip the empty case — otherwise a blank amount would report
+        // must_be_positive instead of the .min 'required'.
+        .min(1, { message: renderIncomeAmountRequiredHelperText(intl) })
+        .refine((value) => value === '' || INCOME_AMOUNT_REGEX.test(value), {
+          message: renderIncomeAmountFormatHelperText(intl),
+          params: { code: 'invalid_format' },
+        })
+        .refine((value) => value === '' || Number(value) > 0, {
           message: renderIncomeAmountHelperText(intl),
-          params: { code: 'invalid_amount' },
+          params: { code: 'must_be_positive' },
         }),
     })
     .refine(

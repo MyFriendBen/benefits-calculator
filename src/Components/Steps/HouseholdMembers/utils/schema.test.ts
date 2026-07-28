@@ -67,6 +67,43 @@ describe('createHouseholdMemberSchema (main)', () => {
     });
   });
 
+  // The income-amount field emits a distinct rule code per failure so the
+  // Validation Errors card can tell blank from malformed from zero. Assert the
+  // code the REAL schema produces (not a copy), keyed off the incomeAmount path.
+  describe('incomeAmount validation codes', () => {
+    // A stream valid except for the amount, so only incomeAmount fails.
+    const streamWithAmount = (incomeAmount: string) => ({
+      incomeCategory: 'wages',
+      incomeStreamName: 'wages',
+      incomeFrequency: 'monthly',
+      hoursPerWeek: '',
+      incomeAmount,
+    });
+    const amountIssue = (incomeAmount: string) => {
+      const result = schema.safeParse({ ...validMainData, incomeStreams: [streamWithAmount(incomeAmount)] });
+      return result.error?.issues.find((i) => i.path.includes('incomeAmount'));
+    };
+
+    it('blank → required (too_small)', () => {
+      expect(amountIssue('')?.code).toBe('too_small');
+    });
+
+    it('malformed → invalid_format', () => {
+      for (const bad of ['abc', '$100', '10.123', '12345678']) {
+        expect((amountIssue(bad) as any)?.params?.code).toBe('invalid_format');
+      }
+    });
+
+    it('zero → must_be_positive', () => {
+      expect((amountIssue('0') as any)?.params?.code).toBe('must_be_positive');
+    });
+
+    it('valid amount → no incomeAmount issue', () => {
+      expect(amountIssue('100')).toBeUndefined();
+      expect(amountIssue('100.50')).toBeUndefined();
+    });
+  });
+
   describe('birthMonth validation', () => {
     it('rejects birthMonth of 0', () => {
       const result = schema.safeParse({ ...validMainData, birthMonth: 0 });
