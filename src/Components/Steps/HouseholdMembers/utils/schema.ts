@@ -2,6 +2,7 @@ import * as z from 'zod';
 import { IntlShape } from 'react-intl';
 import { MAX_AGE, getCurrentMonthYear } from '../../../../Assets/age';
 import { FormattedMessageType } from '../../../../Types/Questions';
+import { EMPLOYMENT_CATEGORY, WAGES_SOURCE, SELF_EMPLOYMENT_SOURCE } from './constants';
 import {
   renderHealthInsSelectOneHelperText,
   renderHealthInsNonePlusHelperText,
@@ -19,6 +20,8 @@ import {
   renderInvalidBirthYearHelperText,
   renderRelationshipToHHHelperText,
   renderIncomeCategoryHelperText,
+  renderIncomeQuestionHelperText,
+  renderIncomeSourceRequiredHelperText,
   hasAtLeastOneTrue,
   validateNoneExclusive,
   validateHourlyIncome,
@@ -100,6 +103,54 @@ const createIncomeSourceSchema = (intl: IntlShape) => {
     );
 };
 
+type IncomeQuestionValues = {
+  incomeEmployed: boolean | null;
+  incomeGig: boolean | null;
+  incomeOther: boolean | null;
+  incomeStreams: { incomeCategory: string; incomeStreamName: string }[];
+};
+
+/**
+ * Validates the three (independently answered) income questions. Shared by both
+ * the main and Energy Calculator schemas so the rules can't drift.
+ *
+ * Two rules per question:
+ * 1. Required — each must be answered Yes/No.
+ * 2. Answering "Yes" must be backed by at least one income source of that kind,
+ *    so a user can't answer Yes, remove the seeded row, and continue with no
+ *    income. Sources: wages back Q1, self-employment backs Q2, non-employment
+ *    categories back Q3.
+ */
+const validateIncomeQuestions = (
+  { incomeEmployed, incomeGig, incomeOther, incomeStreams }: IncomeQuestionValues,
+  ctx: z.RefinementCtx,
+  intl: IntlShape,
+) => {
+  const wagesCount = incomeStreams.filter((s) => s.incomeCategory === EMPLOYMENT_CATEGORY && s.incomeStreamName === WAGES_SOURCE).length;
+  const selfEmploymentCount = incomeStreams.filter((s) => s.incomeCategory === EMPLOYMENT_CATEGORY && s.incomeStreamName === SELF_EMPLOYMENT_SOURCE).length;
+  const otherCount = incomeStreams.filter((s) => s.incomeCategory && s.incomeCategory !== EMPLOYMENT_CATEGORY).length;
+
+  const requireAnswer = (value: boolean | null, path: string) => {
+    if (value === null) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: [path], params: { code: 'required' } });
+    }
+  };
+  const requireStream = (value: boolean | null, count: number, path: string) => {
+    if (value === true && count === 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeSourceRequiredHelperText(intl), path: [path], params: { code: 'source_required' } });
+    }
+  };
+
+  requireAnswer(incomeEmployed, 'incomeEmployed');
+  requireStream(incomeEmployed, wagesCount, 'incomeEmployed');
+
+  requireAnswer(incomeGig, 'incomeGig');
+  requireStream(incomeGig, selfEmploymentCount, 'incomeGig');
+
+  requireAnswer(incomeOther, 'incomeOther');
+  requireStream(incomeOther, otherCount, 'incomeOther');
+};
+
 /**
  * Creates health insurance validation schema
  */
@@ -169,8 +220,13 @@ export const createHouseholdMemberSchema = (
     healthInsurance: createHealthInsuranceSchema(intl, pageNumber),
     conditions: createSpecialConditionsSchema(intl),
     studentEligibility: studentEligibilitySchema,
+    incomeEmployed: z.boolean().nullable(),
+    incomeGig: z.boolean().nullable(),
+    incomeOther: z.boolean().nullable(),
     incomeStreams: incomeStreamsSchema,
-  }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility }, ctx) => {
+  }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility, incomeEmployed, incomeGig, incomeOther, incomeStreams }, ctx) => {
+    validateIncomeQuestions({ incomeEmployed, incomeGig, incomeOther, incomeStreams }, ctx, intl);
+
     const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
     if (birthYear === CURRENT_YEAR && birthMonth > CURRENT_MONTH) {
       ctx.addIssue({
@@ -270,6 +326,9 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
           (value) => [...Object.keys(relationshipOptions)].includes(value) || pageNumber === 1,
           { message: renderRelationshipToHHHelperText(intl) },
         ),
+      incomeEmployed: z.boolean().nullable(),
+      incomeGig: z.boolean().nullable(),
+      incomeOther: z.boolean().nullable(),
       incomeStreams: incomeStreamsSchema,
     })
     .refine(
@@ -280,5 +339,8 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
         return true;
       },
       { message: renderFutureBirthMonthHelperText(intl), path: ['birthMonth'] },
-    );
+    )
+    .superRefine(({ incomeEmployed, incomeGig, incomeOther, incomeStreams }, ctx) => {
+      validateIncomeQuestions({ incomeEmployed, incomeGig, incomeOther, incomeStreams }, ctx, intl);
+    });
 };
