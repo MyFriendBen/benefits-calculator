@@ -42,7 +42,7 @@ import {
   EMPTY_GIG_INCOME_STREAM,
   EMPTY_INCOME_STREAM,
 } from '../utils/constants';
-import { isWagesStream, isSelfEmploymentStream } from '../utils/helpers';
+import { isWagesStream, isSelfEmploymentStream, isOtherBucketStream } from '../utils/helpers';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { useTrackEvent } from '../../../../Assets/analytics';
 import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
@@ -61,11 +61,9 @@ type IncomeFormValues = {
 
 // Row layout variants, keyed to the three income questions:
 // - 'full': category + source dropdowns (government benefits / other payments).
-// - 'sourceOnly': category is fixed to employment; only the source dropdown shows
-//   (the "Are you currently employed?" question).
-// - 'amountOnly': category and source are both implied (self-employment); only
-//   frequency + amount show (the "freelance, gig, or occasional work?" question).
-type IncomeRowVariant = 'full' | 'sourceOnly' | 'amountOnly';
+// - 'amountOnly': category and source are both implied by the question (wages or
+//   self-employment); only frequency + amount show (the employed / gig questions).
+type IncomeRowVariant = 'full' | 'amountOnly';
 
 interface IncomeSectionProps {
   control: Control<IncomeFormValues>;
@@ -112,10 +110,9 @@ const IncomeStreamRow = ({
   const isHourly = useWatch({ control, name: `incomeStreams.${index}.incomeFrequency` }) === 'hourly';
 
   const showCategory = variant === 'full';
-  const showSource = variant === 'full' || variant === 'sourceOnly';
+  const showSource = variant === 'full';
 
-  // sourceOnly rows have a fixed employment category, so scope the source options to it.
-  const effectiveCategory = variant === 'sourceOnly' ? EMPLOYMENT_CATEGORY : selectedType;
+  const effectiveCategory = selectedType;
   const sourceOptions = effectiveCategory && incomeOptions[effectiveCategory] ? incomeOptions[effectiveCategory] : {};
   const specificTypeMenuItems = createMenuItems(
     sourceOptions,
@@ -469,7 +466,7 @@ const IncomeSection = ({
   // a freshly-appended blank row whose category isn't chosen yet — belongs to Q3.
   const employedRows = rows.filter((r) => isWagesStream(r.value));
   const gigRows = rows.filter((r) => isSelfEmploymentStream(r.value));
-  const otherRows = rows.filter((r) => !isWagesStream(r.value) && !isSelfEmploymentStream(r.value));
+  const otherRows = rows.filter((r) => isOtherBucketStream(r.value));
 
   // The three Yes/No answers live in RHF form state (incomeEmployed/Gig/Other) so
   // they are required by the schema and participate in scroll-to-error. They are
@@ -608,10 +605,9 @@ const IncomeSection = ({
     } else {
       // Remove every Q3 row — non-employment rows plus any blank row the user
       // added but never assigned a category.
-      const isOtherBucket = (v: IncomeStreamFormData) => !isWagesStream(v) && !isSelfEmploymentStream(v);
-      confirmDiscardOrApply(isOtherBucket, anchorEl, () => {
+      confirmDiscardOrApply(isOtherBucketStream, anchorEl, () => {
         setOther(answer);
-        removeMatching(isOtherBucket);
+        removeMatching(isOtherBucketStream);
       });
     }
   };

@@ -45,6 +45,17 @@ export const isOtherStream = (s: Pick<IncomeStreamFormData, 'incomeCategory'>): 
   !!s.incomeCategory && s.incomeCategory !== EMPLOYMENT_CATEGORY;
 
 /**
+ * Whether a stream belongs to the Q3 ("other") bucket for row rendering and
+ * removal — anything that isn't a wages or self-employment row. This is broader
+ * than isOtherStream: a freshly-appended Q3 row has no category chosen yet, so
+ * isOtherStream is false for it, but it must still render (and be removable)
+ * under Q3. Q1/Q2 rows are always seeded with their source, so the negation is
+ * exact.
+ */
+export const isOtherBucketStream = (s: Pick<IncomeStreamFormData, 'incomeCategory' | 'incomeStreamName'>): boolean =>
+  !isWagesStream(s) && !isSelfEmploymentStream(s);
+
+/**
  * Derives the three Yes/No answers from income streams so the toggles rehydrate
  * on edit/reload. Each answer is independent and keyed to its source:
  * - employed: any wages stream exists.
@@ -58,47 +69,6 @@ export const deriveIncomeAnswers = (
   gig: streams.some(isSelfEmploymentStream),
   other: streams.some(isOtherStream),
 });
-
-// ============================================================================
-// GENERIC FORM HELPERS
-// ============================================================================
-
-/**
- * Determines default form items (e.g., income streams) based on context.
- * Returns existing items if available, or seeds a single empty item for
- * eligible members on their absolute first visit.
- *
- * Seeding logic:
- * - If existingItems has entries → always return them (truth of record).
- * - If hasCompletedDownstreamField is true → user already submitted once;
- *   an empty state ([] or undefined) means they deliberately cleared it. Respect that.
- * - Otherwise (no downstream progress) → first visit: seed one item if eligible.
- *
- * @param existingItems - Current items from saved form data (undefined = never visited)
- * @param hasCompletedDownstreamField - Whether the user has already submitted the form before
- * @param isEligible - Whether member qualifies for a default item (e.g. working age)
- * @param emptyTemplate - The empty item to seed on first visit
- */
-export function getDefaultFormItems<T>(
-  existingItems: T[] | undefined,
-  hasCompletedDownstreamField: boolean,
-  isEligible: boolean,
-  emptyTemplate: T,
-): T[] {
-  // Existing items always win.
-  if (existingItems && existingItems.length > 0) {
-    return existingItems;
-  }
-  // User has progressed past this section — an empty state is intentional.
-  if (hasCompletedDownstreamField) {
-    return [];
-  }
-  // First visit (no downstream progress): seed one item if eligible.
-  if (isEligible) {
-    return [emptyTemplate];
-  }
-  return [];
-}
 
 // ============================================================================
 // CALCULATION HELPERS

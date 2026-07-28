@@ -1,5 +1,4 @@
 import {
-  getDefaultFormItems,
   sortFrequencyOptions,
   calculateAge,
   formatToUSD,
@@ -9,6 +8,7 @@ import {
   isWagesStream,
   isSelfEmploymentStream,
   isOtherStream,
+  isOtherBucketStream,
 } from './helpers';
 import { FREQUENCY_ORDER } from './constants';
 import { calcAge } from '../../../../Assets/age';
@@ -28,47 +28,6 @@ if (!globalThis.crypto?.randomUUID) {
 }
 
 const mockCalcAge = jest.mocked(calcAge);
-
-// ============================================================================
-// getDefaultFormItems
-// ============================================================================
-
-describe('getDefaultFormItems', () => {
-  const template = { incomeCategory: '', incomeStreamName: '', incomeAmount: '', incomeFrequency: '', hoursPerWeek: '' };
-
-  it('returns existing items when they are present', () => {
-    const existing = [template, template];
-    expect(getDefaultFormItems(existing, false, true, template)).toBe(existing);
-  });
-
-  it('returns empty array when user has progressed and no existing items', () => {
-    expect(getDefaultFormItems(undefined, true, true, template)).toEqual([]);
-    expect(getDefaultFormItems([], true, true, template)).toEqual([]);
-  });
-
-  it('seeds one empty template for eligible first-time visitors (undefined = never visited)', () => {
-    expect(getDefaultFormItems(undefined, false, true, template)).toEqual([template]);
-  });
-
-  it('seeds when existing is an empty array and user has not yet progressed (API returns [] for new member)', () => {
-    // API returns [] for a brand-new member; without downstream progress this is a first visit, seed it
-    expect(getDefaultFormItems([], false, true, template)).toEqual([template]);
-  });
-
-  it('returns empty array for ineligible first-time visitors', () => {
-    expect(getDefaultFormItems(undefined, false, false, template)).toEqual([]);
-  });
-
-  it('existing items take priority over eligibility and progression', () => {
-    const existing = [template];
-    expect(getDefaultFormItems(existing, true, false, template)).toBe(existing);
-  });
-
-  it('does not seed when existing is an empty array and user has progressed', () => {
-    // Empty array = user intentionally cleared; respect their choice
-    expect(getDefaultFormItems([], true, true, template)).toEqual([]);
-  });
-});
 
 // ============================================================================
 // income question bucketing
@@ -101,6 +60,25 @@ describe('isWagesStream / isSelfEmploymentStream / isOtherStream', () => {
     expect(isWagesStream(stream)).toBe(false);
     expect(isSelfEmploymentStream(stream)).toBe(false);
     expect(isOtherStream(stream)).toBe(false);
+  });
+});
+
+describe('isOtherBucketStream', () => {
+  it('excludes wages and self-employment rows', () => {
+    expect(isOtherBucketStream({ incomeCategory: 'employment', incomeStreamName: 'wages' })).toBe(false);
+    expect(isOtherBucketStream({ incomeCategory: 'employment', incomeStreamName: 'selfEmployment' })).toBe(false);
+  });
+
+  it('includes non-employment rows', () => {
+    expect(isOtherBucketStream({ incomeCategory: 'government', incomeStreamName: 'sSI' })).toBe(true);
+  });
+
+  it('includes a blank row with no category yet (unlike isOtherStream)', () => {
+    // A freshly-appended Q3 row hasn't chosen a category; it must still bucket
+    // under Q3 so it renders and can be removed.
+    const blank = { incomeCategory: '', incomeStreamName: '' };
+    expect(isOtherStream(blank)).toBe(false);
+    expect(isOtherBucketStream(blank)).toBe(true);
   });
 });
 
