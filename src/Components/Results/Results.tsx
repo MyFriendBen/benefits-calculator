@@ -193,15 +193,19 @@ const Results = ({ type }: ResultsProps) => {
       step_action: 'view',
     });
 
-    // Programs shown, as one view_item_list impression. Ref-guarded above, so
-    // once per screening — not on filter re-renders.
+    // Programs shown, as one view_item_list impression. Only eligible programs
+    // render as results, so the impression is the eligible set — not the full
+    // catalog the API returns. Ref-guarded above, so once per screening — not on
+    // filter re-renders.
     trackItemList(
       'results_programs',
-      apiResults.programs.map((program, index) => ({
-        item_id: String(program.program_id),
-        item_name: program.name.default_message,
-        item_list_index: index,
-      })),
+      apiResults.programs
+        .filter((program) => program.eligible)
+        .map((program, index) => ({
+          item_id: String(program.program_id),
+          item_name: program.name.default_message,
+          item_list_index: index,
+        })),
     );
   }, [apiResults, track, trackItemList]);
 
