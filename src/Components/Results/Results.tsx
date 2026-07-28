@@ -207,18 +207,6 @@ const Results = ({ type }: ResultsProps) => {
           item_list_index: index,
         })),
     );
-
-    // Additional resources shown, as one view_item_list impression. Fired here
-    // on results load — not from the Needs tab — so it lands once per screening
-    // even for screenings that never open the Additional Resources tab. Resources
-    // have no stable id, so item_name is the key.
-    trackItemList(
-      'results_resources',
-      apiResults.urgent_needs.map((need, index) => ({
-        item_name: need.name.default_message,
-        item_list_index: index,
-      })),
-    );
   }, [apiResults, track, trackItemList]);
 
   // Results-page scroll depth, only on the two browsable tabs (program =
