@@ -10,7 +10,7 @@ import {
   UrgentNeed,
   Validation,
 } from '../../Types/Results';
-import { getEligibility } from '../../apiCalls';
+import { getEligibility, AssistantVisibleProgram } from '../../apiCalls';
 import { Context } from '../Wrapper/Wrapper';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { Grid } from '@mui/material';
@@ -42,12 +42,23 @@ import { useFeatureFlag } from '../Config/configHook';
 import { ChatbotProvider } from './Chatbot/Chatbot';
 import { useTrackEvent, useTrackItemList } from '../../Assets/analytics';
 import { POST_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
-import { calculateTotalValue } from './FormattedValue';
+import { calculateTotalValue, programValue } from './FormattedValue';
 
 // Mounts the Benbot chat widget only when the flag is on; otherwise renders children unchanged.
 // Defined at module scope so its identity is stable across renders (no subtree remount).
-const BenbotWrapper = ({ enabled, children }: PropsWithChildren<{ enabled: boolean }>) =>
-  enabled ? <ChatbotProvider>{children}</ChatbotProvider> : <>{children}</>;
+//
+// `visiblePrograms` is the filtered program list this page is rendering, with each
+// value as displayed. BenBot may only recommend from the list it's handed, and several
+// results-page filters run client-side (legal status, mutual exclusions, per-member
+// insurance) so the server can't reproduce them from the eligibility snapshot.
+// Passing what's on screen is what keeps BenBot's recommendations — and the dollar
+// figures it quotes — to what the user can actually see.
+const BenbotWrapper = ({
+  enabled,
+  visiblePrograms,
+  children,
+}: PropsWithChildren<{ enabled: boolean; visiblePrograms: AssistantVisibleProgram[] }>) =>
+  enabled ? <ChatbotProvider visiblePrograms={visiblePrograms}>{children}</ChatbotProvider> : <>{children}</>;
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -266,6 +277,14 @@ const Results = ({ type }: ResultsProps) => {
     [formData, filterState, isAdminView]
   );
 
+  // What BenBot is allowed to recommend from, with the values as displayed — see
+  // BenbotWrapper. programValue() is the same figure the card renders, which nets out
+  // members who already have the program's insurance.
+  const visiblePrograms = useMemo(
+    () => programs.map((program) => ({ name_abbreviated: program.name_abbreviated, value: programValue(program) })),
+    [programs],
+  );
+
   useEffect(() => {
     if (apiResults === undefined) {
       setNeeds([]);
@@ -353,7 +372,7 @@ const Results = ({ type }: ResultsProps) => {
   } else if (programId === undefined && (type === 'program' || type === 'need')) {
     return (
       <ResultsContextProvider>
-        <BenbotWrapper enabled={isBenbotEnabled}>
+        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms}>
           <main>
             <ResultsHeader type={type} />
             <div className="results-card-wrapper">

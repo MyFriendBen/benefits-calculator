@@ -5,7 +5,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { parseMarkdown } from '../../../utils/parseMarkdown';
-import { startAssistantConversation, sendAssistantMessage, AssistantApiMessage } from '../../../apiCalls';
+import {
+  startAssistantConversation,
+  sendAssistantMessage,
+  AssistantApiMessage,
+  AssistantVisibleProgram,
+} from '../../../apiCalls';
 import { useTrackEvent } from '../../../Assets/analytics';
 import './Chatbot.css';
 
@@ -94,7 +99,35 @@ function renderFormattedMessage(text: string): React.ReactNode {
   return elements;
 }
 
-export function ChatbotProvider({ children }: PropsWithChildren) {
+type ChatbotProviderProps = {
+  /**
+   * Every program currently rendered on the results page — i.e. what survived the
+   * results-page filters (legal status, mutual exclusions, already_has, zero value) —
+   * with each value as displayed. BenBot may only recommend from the list it's given
+   * and quotes the values in it, so this is what keeps both equal to what the user is
+   * looking at.
+   *
+   * Passed in rather than read from ResultsContext because Results.tsx imports this
+   * module; consuming the context here would close an import cycle.
+   *
+   * Left `undefined` rather than defaulted to `[]` on purpose — the two mean
+   * different things to benefits-api. `[]` asserts "the results page is showing
+   * nothing", which makes BenBot recommend nothing at all; `undefined` means "no
+   * list available", which selects the server-side fallback filters.
+   *
+   * KNOWN LIMITATION: the list is fixed when the conversation opens (the first
+   * message). `ensureConversation` short-circuits on `conversationIdRef`, so changing
+   * a results-page filter mid-session doesn't re-post the narrowed list — it takes
+   * effect on the next page load, where the ref is null again and ai-service refreshes
+   * the stored context. Acceptable because filters narrow far more often than they
+   * widen, so the stale list is a superset and the closed-world rule still holds
+   * against something the user saw. Re-posting mid-session would risk clobbering
+   * `messages` during an in-flight send.
+   */
+  visiblePrograms?: AssistantVisibleProgram[];
+};
+
+export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren<ChatbotProviderProps>) {
   const { uuid } = useParams();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -127,13 +160,19 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
     }
   }, [isOpen]);
 
+  // Identity-stable key so ensureConversation isn't rebuilt on every render just
+  // because the caller passed a fresh array. `undefined` and `[]` must produce
+  // different keys — they mean different things to the backend.
+  const visibleProgramsKey =
+    visiblePrograms === undefined ? 'unset' : visiblePrograms.map((p) => `${p.name_abbreviated}:${p.value}`).join(',');
+
   // Start (or reuse) the conversation; returns the conversation id, or null on failure.
   // Deduped via startPromiseRef so concurrent opens/sends don't create two conversations.
   const ensureConversation = useCallback(async (): Promise<string | null> => {
     if (conversationIdRef.current) return conversationIdRef.current;
     if (!uuid) return null;
     if (!startPromiseRef.current) {
-      startPromiseRef.current = startAssistantConversation(uuid)
+      startPromiseRef.current = startAssistantConversation(uuid, undefined, visiblePrograms)
         .then((res) => {
           conversationIdRef.current = res.conversation_id;
           setMessages(res.messages.map(toWidgetMessage));
@@ -145,7 +184,8 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
         });
     }
     return startPromiseRef.current;
-  }, [uuid, errorMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- visibleProgramsKey stands in for the visiblePrograms array
+  }, [uuid, errorMessage, visibleProgramsKey]);
 
   const sendMessage = useCallback(
     async (text: string) => {
