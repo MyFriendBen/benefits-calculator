@@ -12,10 +12,9 @@ import {
   fillTextField,
   checkCheckbox,
   selectDate,
-  selectIncomeCategory,
-  selectIncomeType,
   selectFrequency,
 } from '../form';
+import { answerIncomeQuestion } from '../steps';
 import { FORM_INPUTS, BUTTONS, DROPDOWN, BASIC_INFO_PAGE } from '../selectors';
 import { URL_PATTERNS } from '../utils/constants';
 import { FlowResult, PrimaryUserInfo, HouseholdMemberInfo, ExpenseInfo, BasicInfoMember } from './types';
@@ -192,15 +191,11 @@ export async function completePrimaryUserInfo(
     await expect(healthInsuranceButtonLocator).toBeVisible();
     await healthInsuranceButtonLocator.click();
 
-    // Handle income
+    // Handle income. All three questions are required. Wage income is entered by
+    // answering "employed" = Yes (amount-only row, no category/source); the gig
+    // and other-benefits questions are answered No.
     if (userInfo.income) {
-      const incomeCategoryDropdownLocator = page.locator(DROPDOWN.INCOME_CATEGORY);
-      await expect(incomeCategoryDropdownLocator).toBeVisible();
-      await selectIncomeCategory(page, userInfo.income.category);
-
-      const incomeTypeDropdownLocator = page.locator(DROPDOWN.INCOME_TYPE);
-      await expect(incomeTypeDropdownLocator).toBeVisible();
-      await selectIncomeType(page, userInfo.income.type);
+      await answerIncomeQuestion(page, /are you currently employed/i, 'Yes');
 
       const frequencyDropdownLocator = page.locator(DROPDOWN.FREQUENCY);
       await expect(frequencyDropdownLocator).toBeVisible();
@@ -209,7 +204,11 @@ export async function completePrimaryUserInfo(
       const amountInputLocator = page.locator(FORM_INPUTS.AMOUNT);
       await expect(amountInputLocator).toBeVisible();
       await amountInputLocator.fill(userInfo.income.amount);
+    } else {
+      await answerIncomeQuestion(page, /are you currently employed/i, 'No');
     }
+    await answerIncomeQuestion(page, /freelance, gig, or occasional work/i, 'No');
+    await answerIncomeQuestion(page, /government benefits, child support, alimony/i, 'No');
 
     const continueButtonLocator = page.getByRole(BUTTONS.CONTINUE.role, { name: BUTTONS.CONTINUE.name });
     await expect(continueButtonLocator).toBeVisible();
@@ -249,13 +248,18 @@ export async function completeHouseholdMemberInfo(
     // Handle health insurance
     await page.getByRole('button', { name: "They don't have or know if" }).click();
 
-    // Handle income if applicable
+    // Handle income. All three questions are required (third-person "they"
+    // phrasing for additional members). Wage income = "employed" Yes reveals an
+    // amount-only row; gig and other-benefits questions are answered No.
     if (memberInfo.income) {
-      await selectIncomeCategory(page, memberInfo.income.category);
-      await selectIncomeType(page, memberInfo.income.type);
+      await answerIncomeQuestion(page, /are they currently employed/i, 'Yes');
       await selectFrequency(page, memberInfo.income.frequency);
       await page.locator(FORM_INPUTS.AMOUNT).fill(memberInfo.income.amount);
+    } else {
+      await answerIncomeQuestion(page, /are they currently employed/i, 'No');
     }
+    await answerIncomeQuestion(page, /freelance, gig, or occasional work/i, 'No');
+    await answerIncomeQuestion(page, /government benefits, child support, alimony/i, 'No');
 
     await clickContinue(page);
     return { success: true, step: 'household-member-info' };
