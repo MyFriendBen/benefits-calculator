@@ -20,7 +20,7 @@ export interface WrapperContext {
   setStepLoading: (loading: boolean) => void;
   pageIsLoading: boolean;
   setScreenLoading: (loading: boolean) => void;
-  getReferrer: <T extends keyof ReferrerData>(key: T, defaultValue?: ReferrerDataValue<T>) => ReferrerDataValue<T>;
+  getReferrer: <T extends keyof ReferrerData>(key: T, defaultValue?: ReferrerDataValue) => ReferrerDataValue;
   staffToken: string | undefined;
   setStaffToken: (token: string | undefined) => void;
   whiteLabel: string;
