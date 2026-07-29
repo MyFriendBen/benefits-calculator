@@ -177,6 +177,8 @@ export type ApiFormData = {
   needs_veteran_services: boolean | null;
   needs_disability_resources: boolean | null;
   needs_aging_resources: boolean | null;
+  needs_homeless_services: boolean | null;
+  needs_free_low_cost_medical_care: boolean | null;
   utm_id: string | null;
   utm_source: string | null;
   utm_medium: string | null;

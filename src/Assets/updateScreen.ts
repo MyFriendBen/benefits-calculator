@@ -56,6 +56,8 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     needs_veteran_services: formData.acuteHHConditions.veteranServices ?? null,
     needs_disability_resources: formData.acuteHHConditions.disabilityResources ?? null,
     needs_aging_resources: formData.acuteHHConditions.agingResources ?? null,
+    needs_homeless_services: formData.acuteHHConditions.homelessServices ?? null,
+    needs_free_low_cost_medical_care: formData.acuteHHConditions.freeLowCostMedicalCare ?? null,
     utm_id: formData.utm?.id ?? null,
     utm_source: formData.utm?.source ?? null,
     utm_medium: formData.utm?.medium ?? null,

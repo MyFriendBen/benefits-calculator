@@ -69,6 +69,20 @@ export default function NcLink211Message() {
       subtopic: 'Military+Service%2CMilitary+Personnel%2FContractors',
       keyword: 'veterans services',
     },
+    // NC211 topic/subtopic mapping for the "Help finding shelter" and
+    // "Help finding health care" step-9 buttons. `subtopic` supports comma-separated
+    // values, so "Help finding health care" maps to both Health Screening/Diagnostic
+    // Services and Specialized Treatment and Prevention in a single search.
+    homelessServices: {
+      topic: 'Basic%20Needs',
+      subtopic: 'Housing%2FShelter',
+      keyword: 'homeless shelter',
+    },
+    freeLowCostMedicalCare: {
+      topic: 'Health%20Care',
+      subtopic: 'Health%20Screening%2FDiagnostic%20Services%2CSpecialized%20Treatment%20and%20Prevention',
+      keyword: 'free health care clinic',
+    },
   };
 
   const { formData } = useContext(Context);
