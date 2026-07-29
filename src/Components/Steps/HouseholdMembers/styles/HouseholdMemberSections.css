@@ -39,6 +39,20 @@
   color: #666;
 }
 
+/* When applied to a MUI FormLabel (e.g. the student-eligibility questions), the
+   plain class loses to MUI's default label size — this more specific selector
+   keeps the intended 0.875rem so those questions match the rest of the step. */
+.question-sub-label.MuiFormLabel-root {
+  font-size: 0.875rem;
+}
+
+/* Match the student-eligibility Yes/No radio labels to the 14px question scale
+   (MUI's FormControlLabel text defaults to 1rem). Scoped to the section so no
+   other radio labels are affected. */
+#student-eligibility-section .MuiFormControlLabel-label {
+  font-size: 0.875rem;
+}
+
 .summary-cards-container {
   margin-bottom: 0;
 }

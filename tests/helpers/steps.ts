@@ -1,5 +1,5 @@
 import { Page, expect } from '@playwright/test';
-import { selectIncomeCategory, selectIncomeType, selectFrequency } from './form';
+import { selectFrequency } from './form';
 
 export async function navigateHomePage(page: Page, specificPath?: string) {
   await page.goto('/');
@@ -60,11 +60,29 @@ export async function selectCondition(page: Page, condition: string) {
   await page.locator('.option-cards-container').last().getByRole('button', { name: condition }).click();
 }
 
-export async function selectIncome(page: Page, incomeCategory: string, incomeType: string, frequency: string, amount: number) {
-  await selectIncomeCategory(page, incomeCategory);
-  await selectIncomeType(page, incomeType);
+/**
+ * Answers one of the three income Yes/No questions (employed / gig / other).
+ * Each question is a radiogroup labeled by its full question text; pass a
+ * substring that uniquely matches the question you want.
+ */
+export async function answerIncomeQuestion(page: Page, questionText: string | RegExp, answer: 'Yes' | 'No') {
+  const group = page.getByRole('radiogroup', { name: questionText });
+  await group.getByRole('radio', { name: answer, exact: true }).click();
+}
+
+/**
+ * Enters standard wage income for a member: answers "Are you currently
+ * employed?" = Yes (which reveals an amount-only row — wages are implied, so
+ * there's no category/source dropdown), then fills frequency + pre-tax amount.
+ */
+export async function selectIncome(page: Page, _incomeCategory: string, _incomeType: string, frequency: string, amount: number) {
+  await answerIncomeQuestion(page, /are you currently employed/i, 'Yes');
   await selectFrequency(page, frequency);
   await page.locator('#income-amount-input-0').fill(amount.toString());
+  // The gig and "other benefits" questions are also required — answer No so
+  // Continue isn't blocked.
+  await answerIncomeQuestion(page, /freelance, gig, or occasional work/i, 'No');
+  await answerIncomeQuestion(page, /government benefits, child support, alimony/i, 'No');
 }
 
 export async function selectExpense(page: Page, expenseType: string, amount: number) {

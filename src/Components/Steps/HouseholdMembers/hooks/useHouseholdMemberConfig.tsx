@@ -20,7 +20,7 @@ export const useHouseholdMemberConfig = () => {
   const sortedFrequencyOptions = sortFrequencyOptions(frequencyOptions);
   const frequencyMenuItems = createMenuItems(
     sortedFrequencyOptions,
-    <FormattedMessage id="personIncomeBlock.createFrequencyMenuItems-disabledSelectMenuItem" defaultMessage="Select" />,
+    <FormattedMessage id="personIncomeBlock.createFrequencyMenuItems-disabledSelectMenuItem" defaultMessage="Select..." />,
   ).flat();
 
   return {

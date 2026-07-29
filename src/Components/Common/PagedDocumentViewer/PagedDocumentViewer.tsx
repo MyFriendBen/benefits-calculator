@@ -41,6 +41,15 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
   const goPrev = useCallback(() => setPageIndex((i) => Math.max(0, i - 1)), []);
   const goNext = useCallback(() => setPageIndex((i) => Math.min(pageCount - 1, i + 1)), [pageCount]);
 
+  // The page list can swap while the viewer is open — ConnectNowPage hands us a
+  // different edition of the guide when the user changes language. If the new
+  // document has fewer pages, the held index would point past its end: the pager
+  // would read "3/2" and the page <img> would get an undefined src. Clamp instead
+  // of resetting to 0 so the reader keeps their place when the counts match.
+  useEffect(() => {
+    setPageIndex((i) => Math.max(0, Math.min(i, pageImages.length - 1)));
+  }, [pageImages]);
+
   const handlePagingKey = useCallback(
     (key: string): boolean => {
       if (key === 'ArrowLeft' || key === 'PageUp') {
