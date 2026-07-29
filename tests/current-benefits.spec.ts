@@ -16,12 +16,7 @@ const TEST_CONFIG: Record<WhiteLabel, { name: string; skip?: boolean; skipReason
   ks: { name: 'Kansas' },
   tx: { name: 'Texas' },
   wa: { name: 'Washington' },
-  mo: {
-    name: 'Missouri',
-    skip: true,
-    skipReason:
-      'MO white label config is not yet loaded on the deployed backend (add_config mo runs post-merge, per MFB-1569). Un-skip once MO config is live.',
-  },
+  mo: { name: 'Missouri' },
 };
 
 // Validate that TEST_CONFIG is in sync with ALL_VALID_WHITE_LABELS
