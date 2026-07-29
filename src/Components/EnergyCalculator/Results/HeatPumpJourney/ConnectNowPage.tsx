@@ -16,22 +16,51 @@ const CONTRACTOR_FINDER_URL = 'https://contractors.poweraheadcolorado.org/contra
 
 const EXPAND_SEARCH_URL = 'https://app.hvacree.net/LoveElectric' as const;
 
-/**
- * "How to find a good HVAC contractor" guide (Electrify Now), served as a static
- * asset from `public/documents/`. See `public/documents/README.md`.
- *
- * The PagedDocumentViewer displays pre-rendered page images (so the toolbar/pager
- * can match the design); Print/Download opens this PDF so users get a real PDF.
- * Regenerate the page images if this PDF changes — see the README.
- */
-export const CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL =
-  `${process.env.PUBLIC_URL}/documents/heat-pump-journey/ElectrifyNow_heatpumpcontractor.pdf` as const;
+const CONTRACTOR_GUIDE_BASE_URL = `${process.env.PUBLIC_URL}/documents/heat-pump-journey` as const;
 
-export const CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES = [
-  `${process.env.PUBLIC_URL}/documents/heat-pump-journey/page-1.png`,
-  `${process.env.PUBLIC_URL}/documents/heat-pump-journey/page-2.png`,
-  `${process.env.PUBLIC_URL}/documents/heat-pump-journey/page-3.png`,
-] as const;
+/**
+ * Translated editions of the "How to find a good HVAC contractor" guide (Electrify
+ * Now), keyed by language subtag. cesn offers a dozen languages but only these
+ * editions exist, so every other locale falls back to English.
+ *
+ * Each key is also a directory under `public/documents/heat-pump-journey/` holding
+ * the PDF plus one pre-rendered page image per page — see
+ * `public/documents/README.md`, and update `pageCount` if a PDF's page count
+ * changes.
+ */
+const CONTRACTOR_GUIDE_EDITIONS = {
+  en: { pageCount: 3 },
+  es: { pageCount: 3 },
+} as const;
+
+type ContractorGuideLanguage = keyof typeof CONTRACTOR_GUIDE_EDITIONS;
+
+const CONTRACTOR_GUIDE_LANGUAGES = Object.keys(CONTRACTOR_GUIDE_EDITIONS) as ContractorGuideLanguage[];
+
+const CONTRACTOR_GUIDE_FALLBACK_LANGUAGE: ContractorGuideLanguage = 'en';
+
+/**
+ * Guide assets for `locale`, matched on its language subtag ('es-mx' → 'es',
+ * 'en-us' → 'en').
+ *
+ * The PagedDocumentViewer displays the pre-rendered page images (so the
+ * toolbar/pager can match the design); Print/Download opens the PDF so users get
+ * a real PDF.
+ */
+export function getContractorGuideAssets(locale: string) {
+  const subtag = locale.toLowerCase().split('-')[0];
+  const language =
+    CONTRACTOR_GUIDE_LANGUAGES.find((edition) => edition === subtag) ?? CONTRACTOR_GUIDE_FALLBACK_LANGUAGE;
+  const { pageCount } = CONTRACTOR_GUIDE_EDITIONS[language];
+
+  return {
+    pdfUrl: `${CONTRACTOR_GUIDE_BASE_URL}/${language}/contractor-checklist.pdf`,
+    pageImages: Array.from(
+      { length: pageCount },
+      (_, i) => `${CONTRACTOR_GUIDE_BASE_URL}/${language}/page-${i + 1}.png`,
+    ),
+  };
+}
 
 export default function ConnectNowPage() {
   const intl = useIntl();
@@ -50,6 +79,8 @@ export default function ConnectNowPage() {
   });
 
   const pdfSectionHeadingId = 'connect-now-pdf-heading';
+
+  const contractorGuide = useMemo(() => getContractorGuideAssets(intl.locale), [intl.locale]);
 
   return (
     <main className="benefits-form connect-now-page">
@@ -133,8 +164,8 @@ export default function ConnectNowPage() {
           />
         </Typography>
         <PagedDocumentViewer
-          pageImages={CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES}
-          pdfUrl={CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL}
+          pageImages={contractorGuide.pageImages}
+          pdfUrl={contractorGuide.pdfUrl}
           title={pdfDocumentTitle}
           className="connect-now-pdf-frame"
         />

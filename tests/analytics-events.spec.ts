@@ -12,7 +12,7 @@ import {
   FORM_INPUTS,
 } from './helpers';
 import { URL_PATTERNS, STATES } from './helpers/utils/constants';
-import { fillDateOfBirth, fillHouseholdSize, selectInsurance } from './helpers/steps';
+import { answerIncomeQuestion, fillDateOfBirth, fillHouseholdSize, selectInsurance } from './helpers/steps';
 import { getEvents, lastEvent } from './helpers/analytics';
 
 // Asserts the FE pushes the right analytics events/params to the dataLayer (the
@@ -90,8 +90,17 @@ test.describe('Analytics events (dataLayer)', () => {
     await verifyCurrentUrl(page, URL_PATTERNS.HOUSEHOLD_MEMBER);
     await fillDateOfBirth(page, nc.dobMonth, nc.dobYear);
     await selectInsurance(page, nc.insurance);
-    await selectIncomeCategory(page, nc.incomeCategory);
-    await selectIncomeType(page, nc.incomeType);
+    // Route through the "other recurring payments" question — it's the one that
+    // reveals a full row (category + source + frequency + amount), so the amount
+    // validations below fire. All three questions are required, so answer the
+    // employed/gig ones No; a blocked submit still emits a form_error per field.
+    await answerIncomeQuestion(page, /are you currently employed/i, 'No');
+    await answerIncomeQuestion(page, /freelance, gig, or occasional work/i, 'No');
+    await answerIncomeQuestion(page, /government benefits, child support, alimony/i, 'Yes');
+    // Q3 excludes the employment category, so use a real non-employment
+    // category/source (nc.incomeCategory is the employment one, for the wage path).
+    await selectIncomeCategory(page, 'Government Benefits');
+    await selectIncomeType(page, 'Supplemental Security Income (SSI)');
     await selectFrequency(page, nc.incomeFrequency);
 
     // blank → Required; malformed → Invalid format; zero → Must be greater than 0.

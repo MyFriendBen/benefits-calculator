@@ -1,39 +1,53 @@
-import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { useResultsContext, useResultsLink } from '../Results';
+import { UrgentNeed } from '../../../Types/Results';
 import NeedCard from './NeedCard';
 import { ResultsMessageForNeeds } from '../../Referrer/Referrer';
 import InformationalText from '../../Common/InformationalText/InformationalText';
 import { useTrackEvent, useTrackItemList } from '../../../Assets/analytics';
 
+// Category order for the resource list — shared by the render and the shown
+// impression so item_list_index matches on-screen position.
+const sortByCategory = (a: UrgentNeed, b: UrgentNeed) => {
+  if (a.category_type.default_message > b.category_type.default_message) {
+    return 1;
+  } else if (a.category_type.default_message < b.category_type.default_message) {
+    return -1;
+  }
+
+  return 0;
+};
+
 const Needs = () => {
   const { needs } = useResultsContext();
+  const { uuid } = useParams();
   const track = useTrackEvent();
   const trackItemList = useTrackItemList();
-  const needsSortedByCategory = needs.sort((a, b) => {
-    if (a.category_type.default_message > b.category_type.default_message) {
-      return 1;
-    } else if (a.category_type.default_message < b.category_type.default_message) {
-      return -1;
-    }
+  const needsSortedByCategory = [...needs].sort(sortByCategory);
 
-    return 0;
-  });
-
-  // Resources shown, as one view_item_list impression, once per mount. Resources
-  // have no stable id, so item_name is the key.
-  const hasTrackedResourcesShown = useRef(false);
+  // Resources shown, as one view_item_list impression once the resources are on
+  // screen. Keyed on the screening uuid in sessionStorage so it fires exactly
+  // once per screening — not skipped when this tab mounts before needs load, and
+  // not re-fired when the user switches tabs and comes back. Resources have no
+  // stable id, so item_name is the key; item_list_index follows the on-screen
+  // (category-sorted) order.
   useEffect(() => {
-    if (hasTrackedResourcesShown.current || needs.length === 0) {
+    if (needs.length === 0 || uuid === undefined) {
       return;
     }
-    hasTrackedResourcesShown.current = true;
+    const key = `resources_shown_tracked:${uuid}`;
+    if (sessionStorage.getItem(key)) {
+      return;
+    }
+    sessionStorage.setItem(key, '1');
+    const sorted = [...needs].sort(sortByCategory);
     trackItemList(
       'results_resources',
-      needs.map((need) => ({ item_name: need.name.default_message })),
+      sorted.map((need, index) => ({ item_name: need.name.default_message, item_list_index: index })),
     );
-  }, [needs, trackItemList]);
+  }, [needs, uuid, trackItemList]);
 
   const immediateNeedsLink = useResultsLink('step-9');
 
