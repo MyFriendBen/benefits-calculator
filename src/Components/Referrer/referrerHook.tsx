@@ -25,15 +25,15 @@ export type ReferrerData = {
   stateName: ReferrerOptions<string>;
 };
 
-export type ReferrerDataValue = keyof ReferrerOptions<keyof ReferrerData>
+export type ReferrerDataValue<T extends keyof ReferrerData> = ReferrerData[T]['default'];
 
 export default function useReferrer(referrerCode?: string, referrerData?: ReferrerData) {
   const [referrer, setReferrer] = useState<string | undefined>(referrerCode);
 
   function getReferrer<T extends keyof ReferrerData>(
     key: T,
-    defaultValue?: ReferrerDataValue,
-  ): ReferrerDataValue {
+    defaultValue?: ReferrerDataValue<T>,
+  ): ReferrerDataValue<T> {
     if (referrerData === undefined) {
       if (defaultValue !== undefined) return defaultValue;
 
@@ -46,7 +46,7 @@ export default function useReferrer(referrerCode?: string, referrerData?: Referr
       throw new Error(`${key} is not in referrerData`);
     }
 
-    return (referrerData[key][referrer ?? 'default'] ?? referrerData[key].default) as ReferrerDataValue;
+    return (referrerData[key][referrer ?? 'default'] ?? referrerData[key].default) as ReferrerDataValue<T>;
   }
 
   return { getReferrer, setReferrer };

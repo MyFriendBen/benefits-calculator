@@ -1,4 +1,4 @@
-import { CssBaseline, createTheme, ThemeProvider } from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material';
 import { useContext, useMemo } from 'react';
 import { LicenseInfo } from '@mui/x-license-pro';
 import { Context } from './Components/Wrapper/Wrapper';
@@ -20,11 +20,9 @@ const App = () => {
   // Initialize all app-level side effects
   useAppInitialization(themeName);
   useCampaign();
-
   if (pageIsLoading) {
     return (
       <ThemeProvider theme={theme}>
-        <CssBaseline />
         <InitializationRouter />
       </ThemeProvider>
     );
