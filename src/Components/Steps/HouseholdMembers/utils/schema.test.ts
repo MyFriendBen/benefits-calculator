@@ -1,5 +1,10 @@
 import { createHouseholdMemberSchema, createEnergyCalculatorHouseholdMemberSchema } from './schema';
 import { getCurrentMonthYear, MAX_AGE } from '../../../../Assets/age.tsx';
+import type { FormattedMessageType } from '../../../../Types/Questions';
+
+// The schema only reads the keys of relationshipOptions, so tests pass plain
+// strings instead of building FormattedMessage elements; cast to the real type.
+const asMessages = (m: Record<string, string>) => m as unknown as Record<string, FormattedMessageType>;
 
 // Mock intl with inline formatMessage for all validation messages
 const mockFormatMessage = jest.fn((params: { id: string; defaultMessage?: string }) => params.defaultMessage ?? params.id);
@@ -14,6 +19,11 @@ const validMainData = {
   healthInsurance: { none: true, employer: false, private: false, medicaid: false, medicare: false, chp: false, emergency_medicaid: false, family_planning: false, va: false, mass_health: false },
   conditions: { student: false, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false },
   studentEligibility: { studentFullTime: undefined, studentJobTrainingProgram: undefined, studentHasWorkStudy: undefined, studentWorks20PlusHrs: undefined },
+  // The three income questions are required; all answered "No" here (with no
+  // streams) so the fixture is valid with the minimum income data.
+  incomeEmployed: false,
+  incomeGig: false,
+  incomeOther: false,
   incomeStreams: [],
 };
 
@@ -23,8 +33,16 @@ const validEcData = {
   conditions: { survivingSpouse: false, disabled: false, medicalEquipment: false },
   receivesSsi: 'false' as const,
   relationshipToHH: 'spouse',
+  incomeEmployed: false,
+  incomeGig: false,
+  incomeOther: false,
   incomeStreams: [],
 };
+
+// Fully valid income stream fixtures for the "Yes requires >=1 source" rule.
+const validEmploymentStream = { incomeCategory: 'employment', incomeStreamName: 'wages', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '1000' };
+const validSelfEmploymentStream = { incomeCategory: 'employment', incomeStreamName: 'selfEmployment', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '800' };
+const validOtherStream = { incomeCategory: 'government', incomeStreamName: 'sSI', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '500' };
 
 // ============================================================================
 // createHouseholdMemberSchema — main workflow
@@ -216,6 +234,71 @@ describe('createHouseholdMemberSchema (main)', () => {
     });
   });
 
+  describe('income question validation', () => {
+    it('accepts the "currently unemployed" path: all three answered No, no income streams', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: false, incomeGig: false, incomeOther: false, incomeStreams: [] });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects when incomeEmployed is unanswered (null)', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: null });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeEmployed')).toBe(true);
+    });
+
+    it('rejects when incomeOther is unanswered (null)', () => {
+      const result = schema.safeParse({ ...validMainData, incomeOther: null });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeOther')).toBe(true);
+    });
+
+    it('requires incomeGig regardless of incomeEmployed (independent questions)', () => {
+      // gig unanswered → invalid even when employed is true
+      const missingGig = schema.safeParse({ ...validMainData, incomeEmployed: true, incomeGig: null, incomeStreams: [validEmploymentStream] });
+      expect(missingGig.success).toBe(false);
+      expect(missingGig.error?.issues.some(i => i.path.at(-1) === 'incomeGig')).toBe(true);
+    });
+
+    it('rejects "employed = Yes" with no wages income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: true, incomeStreams: [] });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeEmployed')).toBe(true);
+    });
+
+    it('accepts "employed = Yes" with a wages income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: true, incomeStreams: [validEmploymentStream] });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects "gig = Yes" with no self-employment income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeGig: true, incomeStreams: [] });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeGig')).toBe(true);
+    });
+
+    it('accepts "gig = Yes" with a self-employment income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeGig: true, incomeStreams: [validSelfEmploymentStream] });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects "employed = Yes" backed only by a self-employment stream (wrong source)', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: true, incomeStreams: [validSelfEmploymentStream] });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeEmployed')).toBe(true);
+    });
+
+    it('rejects "other = Yes" with no non-employment income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeOther: true, incomeStreams: [] });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeOther')).toBe(true);
+    });
+
+    it('accepts "other = Yes" with a non-employment income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeOther: true, incomeStreams: [validOtherStream] });
+      expect(result.success).toBe(true);
+    });
+  });
+
   describe('income validation', () => {
     const validStream = { incomeCategory: 'employment', incomeStreamName: 'wages', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '1000' };
 
@@ -290,7 +373,7 @@ describe('createHouseholdMemberSchema (main)', () => {
 // ============================================================================
 
 describe('createEnergyCalculatorHouseholdMemberSchema', () => {
-  const relationshipOptions = { spouse: 'Spouse', child: 'Child', parent: 'Parent' };
+  const relationshipOptions = asMessages({ spouse: 'Spouse', child: 'Child', parent: 'Parent' });
   const schema = createEnergyCalculatorHouseholdMemberSchema(mockIntl, 2, relationshipOptions);
 
   describe('valid data', () => {
