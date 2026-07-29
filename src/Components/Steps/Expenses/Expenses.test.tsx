@@ -111,14 +111,14 @@ function renderExpenses(formDataOverrides: Partial<FormData> = {}) {
 }
 
 /** Returns the .expense-row div containing a specific expense label. */
-function getExpenseRow(labelText: string | RegExp) {
-  return screen.getByText(labelText, { selector: 'label' }).closest('.expense-row')!;
+function getExpenseRow(labelText: string | RegExp): HTMLInputElement {
+  return screen.getByText(labelText, { selector: 'label' }).closest('.expense-row')! as HTMLInputElement;
 }
 
 /** Returns the amount input for a given expense row. */
 function getAmountInput(labelText: string | RegExp): HTMLInputElement {
   const row = getExpenseRow(labelText);
-  return within(row).getByRole('textbox') as HTMLInputElement;
+  return within(row).getByRole('textbox');
 }
 
 /** Returns the frequency radiogroup within a given expense row. */
