@@ -12,6 +12,7 @@ import { useTrackEvent } from '../../../Assets/analytics';
 import Login from '../../Login/Login';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorResultsHeader from '../../EnergyCalculator/Results/ResultsHeader';
+import ResultsSurvey from '../ResultsSurvey/ResultsSurvey';
 
 type ResultsHeaderProps = {
   type: 'program' | 'need';
@@ -108,6 +109,7 @@ const ResultsHeader = ({ type }: ResultsHeaderProps) => {
         />
       </div>
       {isAdminView && <Login setToken={setStaffToken} loggedIn={staffToken !== undefined} />}
+      <ResultsSurvey />
       <div className={isEnergyCalculator ? "energy-calculator-results-header-container" : "results-header-container"}>{header}</div>
     </>
   );
