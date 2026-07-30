@@ -23,6 +23,15 @@ export interface ScreenerContext {
   screener_state?: string;
   /** The screening UUID from the route; the join key for downstream analysis. */
   screener_uid?: string;
+  /**
+   * CESN energy path: "homeowner" or "renter" — which branch of the two-path
+   * energy flow this screening took. Only attached on CESN screenings; absent
+   * elsewhere. It rides on every CESN event (not just the landing-page choice)
+   * so the path is known even for screenings that drop before the paths diverge,
+   * which the dashboard's two-path energy funnel splits on. A benign category,
+   * not PII.
+   */
+  screener_path?: string;
 }
 
 // Params common to interactions that happen on a known screener step.
