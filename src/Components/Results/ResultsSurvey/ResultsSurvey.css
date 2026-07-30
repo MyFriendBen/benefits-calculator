@@ -1,0 +1,60 @@
+.results-survey {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+  max-width: var(--content-max-width);
+  margin: 1rem auto;
+  padding: 16px 24px;
+  background: #eef2f6; /* fallback if color-mix is unsupported */
+  background: color-mix(in srgb, var(--secondary-color) 12%, white);
+  border: 1px solid var(--secondary-color);
+  border-radius: 12px;
+}
+
+.results-survey-intro {
+  flex: 1 1 240px;
+  margin: 0;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.results-survey-btn {
+  flex-shrink: 0;
+  padding: 10px 24px;
+  background: var(--secondary-color);
+  color: white;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.results-survey-btn:hover {
+  background: white;
+  color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+@media (width <= 600px) {
+  .results-survey {
+    margin: 0.75rem;
+    padding: 14px 16px;
+  }
+
+  /* Let long translated labels wrap instead of overflowing/clipping on narrow screens. */
+  .results-survey-btn {
+    flex-shrink: 1;
+    white-space: normal;
+    text-align: center;
+  }
+}

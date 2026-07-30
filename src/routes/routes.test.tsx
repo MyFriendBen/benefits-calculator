@@ -30,16 +30,12 @@ describe('Route Configuration', () => {
     });
 
     it('should have jeffcohs landing pages', () => {
-      const jeffcoPages = CUSTOM_LANDING_PAGES.filter((page) =>
-        page.path.includes('jeffco')
-      );
+      const jeffcoPages = CUSTOM_LANDING_PAGES.filter((page) => page.path.includes('jeffco'));
       expect(jeffcoPages.length).toBeGreaterThan(0);
     });
 
     it('should have cesn landing page', () => {
-      const energyCalcPage = CUSTOM_LANDING_PAGES.find((page) =>
-        page.path.includes('cesn')
-      );
+      const energyCalcPage = CUSTOM_LANDING_PAGES.find((page) => page.path.includes('cesn'));
       expect(energyCalcPage).toBeDefined();
     });
   });
@@ -47,13 +43,14 @@ describe('Route Configuration', () => {
   describe('White Label Routes', () => {
     it('should support all valid white labels', () => {
       // Verify we have the expected white labels defined
-      expect(ALL_VALID_WHITE_LABELS).toHaveLength(8);
+      expect(ALL_VALID_WHITE_LABELS).toHaveLength(9);
       expect(ALL_VALID_WHITE_LABELS).toContain('co');
       expect(ALL_VALID_WHITE_LABELS).toContain('nc');
       expect(ALL_VALID_WHITE_LABELS).toContain('cesn');
       expect(ALL_VALID_WHITE_LABELS).toContain('ma');
       expect(ALL_VALID_WHITE_LABELS).toContain('il');
       expect(ALL_VALID_WHITE_LABELS).toContain('ks');
+      expect(ALL_VALID_WHITE_LABELS).toContain('mo');
       expect(ALL_VALID_WHITE_LABELS).toContain('tx');
       expect(ALL_VALID_WHITE_LABELS).toContain('wa');
     });
@@ -125,12 +122,7 @@ describe('Route Configuration', () => {
 
       const paths = (whiteLabelRoute!.children
         ?.map((route) => route.path)
-        .filter((path) =>
-          typeof path === 'string' &&
-          path !== '' &&
-          !path.startsWith(':') &&
-          !path.includes('*')
-        )
+        .filter((path) => typeof path === 'string' && path !== '' && !path.startsWith(':') && !path.includes('*'))
         .filter(Boolean) || []) as string[];
 
       // Verify each path uses kebab-case
