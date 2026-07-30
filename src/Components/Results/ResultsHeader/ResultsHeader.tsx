@@ -8,9 +8,11 @@ import { useResultsContext } from '../Results';
 import { calculateTotalValue } from '../FormattedValue';
 import '../../Results/Results.css';
 import { useTranslateNumber } from '../../../Assets/languageOptions';
+import { useTrackEvent } from '../../../Assets/analytics';
 import Login from '../../Login/Login';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorResultsHeader from '../../EnergyCalculator/Results/ResultsHeader';
+import ResultsSurvey from '../ResultsSurvey/ResultsSurvey';
 
 type ResultsHeaderProps = {
   type: 'program' | 'need';
@@ -89,6 +91,7 @@ const ResultsHeader = ({ type }: ResultsHeaderProps) => {
   const { staffToken, setStaffToken } = useContext(Context);
   const { isAdminView } = useResultsContext();
   const isEnergyCalculator = useIsEnergyCalculator();
+  const track = useTrackEvent();
 
   let header = type === 'need' ? <NeedsHeader /> : <ProgramsHeader />;
 
@@ -102,9 +105,11 @@ const ResultsHeader = ({ type }: ResultsHeaderProps) => {
         <BackAndSaveButtons
           navigateToLink={`/${whiteLabel}/${uuid}/confirm-information`}
           BackToThisPageText={<FormattedMessage id="results.back-to-screen-btn" defaultMessage="BACK TO SCREENER" />}
+          onBack={() => track('screener_results_back_to_screener', {})}
         />
       </div>
       {isAdminView && <Login setToken={setStaffToken} loggedIn={staffToken !== undefined} />}
+      <ResultsSurvey />
       <div className={isEnergyCalculator ? "energy-calculator-results-header-container" : "results-header-container"}>{header}</div>
     </>
   );

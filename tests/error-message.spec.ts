@@ -6,8 +6,6 @@ import {
   fillTextField,
   FORM_INPUTS,
   selectDropdownOption,
-  selectIncomeCategory,
-  selectIncomeType,
   selectFrequency,
   checkCheckbox,
   UncheckCheckbox,
@@ -17,6 +15,7 @@ import {
 
 import { URL_PATTERNS, STATES } from './helpers/utils/constants';
 import {
+  answerIncomeQuestion,
   fillDateOfBirth,
   fillHouseholdSize,
   selectFirstHasBenefitsTile,
@@ -102,28 +101,39 @@ test.describe('Error Messages Test', () => {
 
     const memberErrorMessages = await page.locator('span.error-message').allTextContents();
 
+    // Birth + insurance errors, plus one "Please select an answer." for each of
+    // the three required income Yes/No questions (employed / gig / other).
     expect(memberErrorMessages).toEqual([
       'Please enter a birth month.',
       'Please enter a valid birth year.',
       'Please select at least one health insurance option.',
+      'Please select an answer.',
+      'Please select an answer.',
+      'Please select an answer.',
     ]);
 
     await fillDateOfBirth(page, userInfo.dobMonth, userInfo.dobYear);
 
     await selectInsurance(page, userInfo.insurance);
 
+    // Answer employed = Yes (reveals an amount-only wage row) but leave the row
+    // empty, and answer the other two questions No, then submit to surface the
+    // remaining per-row income errors.
+    await answerIncomeQuestion(page, /are you currently employed/i, 'Yes');
+    await answerIncomeQuestion(page, /freelance, gig, or occasional work/i, 'No');
+    await answerIncomeQuestion(page, /government benefits, child support, alimony/i, 'No');
+
     await clickContinue(page);
 
     const incomeErrorMessages = await page.locator('span.error-message').allTextContents();
 
     expect(incomeErrorMessages).toEqual([
-      'Please select an income category.',
       'Please select a frequency.',
-      'Please enter a number greater than 0.',
+      // Blank amount now reports the required message (distinct from the
+      // "greater than 0" message, which fires only for an entered zero).
+      'Please enter an income amount.',
     ]);
 
-    await selectIncomeCategory(page, userInfo.incomeCategory);
-    await selectIncomeType(page, userInfo.incomeType);
     await selectFrequency(page, userInfo.incomeFrequency);
     await page.locator(FORM_INPUTS.AMOUNT).fill(userInfo.incomeAmount);
 

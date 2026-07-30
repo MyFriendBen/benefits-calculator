@@ -2,6 +2,7 @@ import * as z from 'zod';
 import { IntlShape } from 'react-intl';
 import { MAX_AGE, getCurrentMonthYear } from '../../../../Assets/age';
 import { FormattedMessageType } from '../../../../Types/Questions';
+import { EMPLOYMENT_CATEGORY, WAGES_SOURCE, SELF_EMPLOYMENT_SOURCE } from './constants';
 import {
   renderHealthInsSelectOneHelperText,
   renderHealthInsNonePlusHelperText,
@@ -10,6 +11,8 @@ import {
   renderIncomeFrequencyHelperText,
   renderHoursWorkedHelperText,
   renderIncomeAmountHelperText,
+  renderIncomeAmountRequiredHelperText,
+  renderIncomeAmountFormatHelperText,
   renderStudentEligibilityErrorMessage,
   renderMissingBirthMonthHelperText,
   renderFutureBirthMonthHelperText,
@@ -17,10 +20,12 @@ import {
   renderInvalidBirthYearHelperText,
   renderRelationshipToHHHelperText,
   renderIncomeCategoryHelperText,
+  renderIncomeQuestionHelperText,
+  renderIncomeSourceRequiredHelperText,
   hasAtLeastOneTrue,
   validateNoneExclusive,
   validateHourlyIncome,
-  validateIncomeAmount,
+  INCOME_AMOUNT_REGEX,
 } from './validation';
 
 export type StudentQuestionName = 'studentFullTime' | 'studentJobTrainingProgram' | 'studentHasWorkStudy' | 'studentWorks20PlusHrs';
@@ -79,15 +84,71 @@ const createIncomeSourceSchema = (intl: IntlShape) => {
       incomeAmount: z
         .string()
         .trim()
-        .refine(validateIncomeAmount, {
+        // Refines run even when .min fails (zod doesn't short-circuit them), so
+        // both skip the empty case — otherwise a blank amount would report
+        // must_be_positive instead of the .min 'required'.
+        .min(1, { message: renderIncomeAmountRequiredHelperText(intl) })
+        .refine((value) => value === '' || INCOME_AMOUNT_REGEX.test(value), {
+          message: renderIncomeAmountFormatHelperText(intl),
+          params: { code: 'invalid_format' },
+        })
+        .refine((value) => value === '' || Number(value) > 0, {
           message: renderIncomeAmountHelperText(intl),
-          params: { code: 'invalid_amount' },
+          params: { code: 'must_be_positive' },
         }),
     })
     .refine(
       (data) => validateHourlyIncome(data.incomeFrequency, data.hoursPerWeek),
       { message: renderHoursWorkedHelperText(intl), path: ['hoursPerWeek'], params: { code: 'hours_required' } }
     );
+};
+
+type IncomeQuestionValues = {
+  incomeEmployed: boolean | null;
+  incomeGig: boolean | null;
+  incomeOther: boolean | null;
+  incomeStreams: { incomeCategory: string; incomeStreamName: string }[];
+};
+
+/**
+ * Validates the three (independently answered) income questions. Shared by both
+ * the main and Energy Calculator schemas so the rules can't drift.
+ *
+ * Two rules per question:
+ * 1. Required — each must be answered Yes/No.
+ * 2. Answering "Yes" must be backed by at least one income source of that kind,
+ *    so a user can't answer Yes, remove the seeded row, and continue with no
+ *    income. Sources: wages back Q1, self-employment backs Q2, non-employment
+ *    categories back Q3.
+ */
+const validateIncomeQuestions = (
+  { incomeEmployed, incomeGig, incomeOther, incomeStreams }: IncomeQuestionValues,
+  ctx: z.RefinementCtx,
+  intl: IntlShape,
+) => {
+  const wagesCount = incomeStreams.filter((s) => s.incomeCategory === EMPLOYMENT_CATEGORY && s.incomeStreamName === WAGES_SOURCE).length;
+  const selfEmploymentCount = incomeStreams.filter((s) => s.incomeCategory === EMPLOYMENT_CATEGORY && s.incomeStreamName === SELF_EMPLOYMENT_SOURCE).length;
+  const otherCount = incomeStreams.filter((s) => s.incomeCategory && s.incomeCategory !== EMPLOYMENT_CATEGORY).length;
+
+  const requireAnswer = (value: boolean | null, path: string) => {
+    if (value === null) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeQuestionHelperText(intl), path: [path], params: { code: 'required' } });
+    }
+  };
+  const requireStream = (value: boolean | null, count: number, path: string) => {
+    if (value === true && count === 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: renderIncomeSourceRequiredHelperText(intl), path: [path], params: { code: 'source_required' } });
+    }
+  };
+
+  requireAnswer(incomeEmployed, 'incomeEmployed');
+  requireStream(incomeEmployed, wagesCount, 'incomeEmployed');
+
+  requireAnswer(incomeGig, 'incomeGig');
+  requireStream(incomeGig, selfEmploymentCount, 'incomeGig');
+
+  requireAnswer(incomeOther, 'incomeOther');
+  requireStream(incomeOther, otherCount, 'incomeOther');
 };
 
 /**
@@ -159,8 +220,13 @@ export const createHouseholdMemberSchema = (
     healthInsurance: createHealthInsuranceSchema(intl, pageNumber),
     conditions: createSpecialConditionsSchema(intl),
     studentEligibility: studentEligibilitySchema,
+    incomeEmployed: z.boolean().nullable(),
+    incomeGig: z.boolean().nullable(),
+    incomeOther: z.boolean().nullable(),
     incomeStreams: incomeStreamsSchema,
-  }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility }, ctx) => {
+  }).superRefine(({ birthMonth, birthYear, conditions, studentEligibility, incomeEmployed, incomeGig, incomeOther, incomeStreams }, ctx) => {
+    validateIncomeQuestions({ incomeEmployed, incomeGig, incomeOther, incomeStreams }, ctx, intl);
+
     const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
     if (birthYear === CURRENT_YEAR && birthMonth > CURRENT_MONTH) {
       ctx.addIssue({
@@ -260,6 +326,9 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
           (value) => [...Object.keys(relationshipOptions)].includes(value) || pageNumber === 1,
           { message: renderRelationshipToHHHelperText(intl) },
         ),
+      incomeEmployed: z.boolean().nullable(),
+      incomeGig: z.boolean().nullable(),
+      incomeOther: z.boolean().nullable(),
       incomeStreams: incomeStreamsSchema,
     })
     .refine(
@@ -270,5 +339,8 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
         return true;
       },
       { message: renderFutureBirthMonthHelperText(intl), path: ['birthMonth'] },
-    );
+    )
+    .superRefine(({ incomeEmployed, incomeGig, incomeOther, incomeStreams }, ctx) => {
+      validateIncomeQuestions({ incomeEmployed, incomeGig, incomeOther, incomeStreams }, ctx, intl);
+    });
 };

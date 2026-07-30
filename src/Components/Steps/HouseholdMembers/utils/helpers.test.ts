@@ -1,4 +1,15 @@
-import { getDefaultFormItems, sortFrequencyOptions, calculateAge, formatToUSD, createHouseholdMemberData, scrollToFirstError } from './helpers';
+import {
+  sortFrequencyOptions,
+  calculateAge,
+  formatToUSD,
+  createHouseholdMemberData,
+  scrollToFirstError,
+  deriveIncomeAnswers,
+  isWagesStream,
+  isSelfEmploymentStream,
+  isOtherStream,
+  isOtherBucketStream,
+} from './helpers';
 import { FREQUENCY_ORDER } from './constants';
 import { calcAge } from '../../../../Assets/age';
 
@@ -19,43 +30,94 @@ if (!globalThis.crypto?.randomUUID) {
 const mockCalcAge = jest.mocked(calcAge);
 
 // ============================================================================
-// getDefaultFormItems
+// income question bucketing
 // ============================================================================
 
-describe('getDefaultFormItems', () => {
-  const template = { incomeCategory: '', incomeStreamName: '', incomeAmount: '', incomeFrequency: '', hoursPerWeek: '' };
-
-  it('returns existing items when they are present', () => {
-    const existing = [template, template];
-    expect(getDefaultFormItems(existing, false, true, template)).toBe(existing);
+describe('isWagesStream / isSelfEmploymentStream / isOtherStream', () => {
+  it('classifies a wages stream as wages only', () => {
+    const stream = { incomeCategory: 'employment', incomeStreamName: 'wages' };
+    expect(isWagesStream(stream)).toBe(true);
+    expect(isSelfEmploymentStream(stream)).toBe(false);
+    expect(isOtherStream(stream)).toBe(false);
   });
 
-  it('returns empty array when user has progressed and no existing items', () => {
-    expect(getDefaultFormItems(undefined, true, true, template)).toEqual([]);
-    expect(getDefaultFormItems([], true, true, template)).toEqual([]);
+  it('classifies a self-employment stream as self-employment only', () => {
+    const stream = { incomeCategory: 'employment', incomeStreamName: 'selfEmployment' };
+    expect(isSelfEmploymentStream(stream)).toBe(true);
+    expect(isWagesStream(stream)).toBe(false);
+    expect(isOtherStream(stream)).toBe(false);
   });
 
-  it('seeds one empty template for eligible first-time visitors (undefined = never visited)', () => {
-    expect(getDefaultFormItems(undefined, false, true, template)).toEqual([template]);
+  it('classifies non-employment categories as other', () => {
+    const stream = { incomeCategory: 'government', incomeStreamName: 'sSI' };
+    expect(isOtherStream(stream)).toBe(true);
+    expect(isWagesStream(stream)).toBe(false);
+    expect(isSelfEmploymentStream(stream)).toBe(false);
   });
 
-  it('seeds when existing is an empty array and user has not yet progressed (API returns [] for new member)', () => {
-    // API returns [] for a brand-new member; without downstream progress this is a first visit, seed it
-    expect(getDefaultFormItems([], false, true, template)).toEqual([template]);
+  it('treats an empty category as no bucket', () => {
+    const stream = { incomeCategory: '', incomeStreamName: '' };
+    expect(isWagesStream(stream)).toBe(false);
+    expect(isSelfEmploymentStream(stream)).toBe(false);
+    expect(isOtherStream(stream)).toBe(false);
+  });
+});
+
+describe('isOtherBucketStream', () => {
+  it('excludes wages and self-employment rows', () => {
+    expect(isOtherBucketStream({ incomeCategory: 'employment', incomeStreamName: 'wages' })).toBe(false);
+    expect(isOtherBucketStream({ incomeCategory: 'employment', incomeStreamName: 'selfEmployment' })).toBe(false);
   });
 
-  it('returns empty array for ineligible first-time visitors', () => {
-    expect(getDefaultFormItems(undefined, false, false, template)).toEqual([]);
+  it('includes non-employment rows', () => {
+    expect(isOtherBucketStream({ incomeCategory: 'government', incomeStreamName: 'sSI' })).toBe(true);
   });
 
-  it('existing items take priority over eligibility and progression', () => {
-    const existing = [template];
-    expect(getDefaultFormItems(existing, true, false, template)).toBe(existing);
+  it('includes a blank row with no category yet (unlike isOtherStream)', () => {
+    // A freshly-appended Q3 row hasn't chosen a category; it must still bucket
+    // under Q3 so it renders and can be removed.
+    const blank = { incomeCategory: '', incomeStreamName: '' };
+    expect(isOtherStream(blank)).toBe(false);
+    expect(isOtherBucketStream(blank)).toBe(true);
+  });
+});
+
+describe('deriveIncomeAnswers', () => {
+  it('returns all-false for no streams', () => {
+    expect(deriveIncomeAnswers([])).toEqual({ employed: false, gig: false, other: false });
+    expect(deriveIncomeAnswers()).toEqual({ employed: false, gig: false, other: false });
   });
 
-  it('does not seed when existing is an empty array and user has progressed', () => {
-    // Empty array = user intentionally cleared; respect their choice
-    expect(getDefaultFormItems([], true, true, template)).toEqual([]);
+  it('marks employed when a wages stream exists', () => {
+    const answers = deriveIncomeAnswers([{ incomeCategory: 'employment', incomeStreamName: 'wages' }]);
+    expect(answers).toEqual({ employed: true, gig: false, other: false });
+  });
+
+  it('marks gig when a self-employment stream exists', () => {
+    const answers = deriveIncomeAnswers([{ incomeCategory: 'employment', incomeStreamName: 'selfEmployment' }]);
+    expect(answers).toEqual({ employed: false, gig: true, other: false });
+  });
+
+  it('marks both employed and gig independently when both sources exist', () => {
+    const answers = deriveIncomeAnswers([
+      { incomeCategory: 'employment', incomeStreamName: 'wages' },
+      { incomeCategory: 'employment', incomeStreamName: 'selfEmployment' },
+    ]);
+    expect(answers).toEqual({ employed: true, gig: true, other: false });
+  });
+
+  it('marks other when a non-employment stream exists', () => {
+    const answers = deriveIncomeAnswers([{ incomeCategory: 'government', incomeStreamName: 'sSI' }]);
+    expect(answers).toEqual({ employed: false, gig: false, other: true });
+  });
+
+  it('combines all three independently', () => {
+    const answers = deriveIncomeAnswers([
+      { incomeCategory: 'employment', incomeStreamName: 'wages' },
+      { incomeCategory: 'employment', incomeStreamName: 'selfEmployment' },
+      { incomeCategory: 'support', incomeStreamName: 'childSupport' },
+    ]);
+    expect(answers).toEqual({ employed: true, gig: true, other: true });
   });
 });
 

@@ -31,11 +31,34 @@ interface StepContext {
   screener_step_number?: number;
 }
 
-// Params that identify a specific benefit program.
+// A stable, PII-free ordinal for the household member a step/interaction belongs
+// to. Derived from the member page (0-based: page N -> member_index N-1), NOT
+// from any member attribute, so it carries no identifying data.
+interface MemberIndexContext {
+  member_index?: number;
+}
+
+// Identifies a specific benefit program. Only the stable id is sent; the display
+// name is resolved from the id downstream (dbt), so it isn't duplicated onto
+// every program event.
 interface ProgramContext {
-  program_name: string;
-  /** Stable program id — preferred over program_name for grouping. */
-  program_id?: string;
+  program_id: string;
+}
+
+// Which results-page list a view_item_list impression is for.
+export type ItemListName = 'results_programs' | 'results_resources' | 'results_navigators' | 'results_documents';
+
+// One entry in a view_item_list `items` array. These are GA4 ecommerce reserved
+// keys, so GA4/BigQuery populate the native `items` RECORD. Per list:
+//   programs   — item_id = program_id, item_name = program name
+//   resources  — item_name = resource org name (no stable id)
+//   navigators — item_id = navigator_id, item_name = name, item_category = parent program_id
+//   documents  — item_name = document name, item_category = parent program_id
+export interface ItemListItem {
+  item_id?: string;
+  item_name: string;
+  item_category?: string;
+  item_list_index?: number;
 }
 
 /**
@@ -50,9 +73,21 @@ export interface ScreenerEventMap {
   // One consolidated step event. `step_action` distinguishes landing on a step
   // ('view') from advancing past it ('complete') — that distinction is what
   // makes a real drop-off funnel possible.
-  screener_form_step: StepContext & { step_action: 'view' | 'complete' };
+  // `member_index` is set only on the per-member-details substep, so a
+  // member-detail page view shares the ordinal with the income actions on that
+  // same page; absent on all other steps.
+  screener_form_step: StepContext & MemberIndexContext & { step_action: 'view' | 'complete' };
   screener_form_complete: {};
-  screener_form_error: StepContext & { form_error_message?: string; form_error_count?: number };
+  // Emitted once per failed field (not one joined message) so no single param
+  // hits GA4's 100-char string cap. `form_field_name` is the canonical field
+  // path (array indices normalized, e.g. `members.birthYear`), `form_error_reason`
+  // the friendly rule label, and `form_error_count` the total failed fields in
+  // that submit, repeated on each event so the submit can be reconstructed.
+  screener_form_error: StepContext & {
+    form_field_name?: string;
+    form_error_reason?: string;
+    form_error_count?: number;
+  };
   // NOT YET EMITTED — needs a shared form-field wrapper first. Wiring only some
   // steps would produce a partial, misleading dataset, so it's deferred until a
   // single field component exists to instrument once. Tracked in MFB-1268.
@@ -64,8 +99,13 @@ export interface ScreenerEventMap {
   screener_form_submit_failed: StepContext & { reason?: string };
 
   // ---- Step interactions ----
-  screener_household_member: StepContext & { action: 'add' | 'edit' | 'delete' };
-  screener_income_source: StepContext & { action: 'add' | 'edit' | 'delete' };
+  // add / delete = roster changes on the household-basics page.
+  // edit_from_summary / delete_from_summary = reopening or removing an already-
+  // detailed member from the summary cards — distinct from the basics-page roster.
+  screener_household_member: StepContext & { action: 'add' | 'delete' | 'edit_from_summary' | 'delete_from_summary' };
+  // `member_index` ties an income add/edit/delete to the member-detail page it
+  // happened on (shares the ordinal with that page's screener_form_step view).
+  screener_income_source: StepContext & MemberIndexContext & { action: 'add' | 'edit' | 'delete' };
   screener_has_benefits_load_error: StepContext;
   screener_language_changed: StepContext & { language_name: string };
   screener_confirmation_edit: { section: string };
@@ -77,6 +117,13 @@ export interface ScreenerEventMap {
   // Results-page "More Help / 211" CTA — kept separate from screener_help_click so
   // it doesn't pollute the inline-tooltip confusion metric.
   screener_get_help_click: { location?: string };
+  // "Other Resources Near You" (more-help page) "Visit Website" link click.
+  // `resource_name` is the config `label` (a plain string, PII-free);
+  // `resource_index` is the item's ordinal on the page.
+  screener_more_help_resource_click: { resource_name?: string; resource_index?: number; url?: string };
+  // Results "Back to Screener" button — the user returning to edit their answers
+  // from results. Distinct from screener_form_back (the in-form step-back button).
+  screener_results_back_to_screener: {};
 
   // ---- Results: outcomes (fired once on results load) ----
   screener_results_loaded: { program_count: number; total_estimated_value?: number };
@@ -97,9 +144,9 @@ export interface ScreenerEventMap {
   // previously untracked.
   screener_additional_resource_click: { resource_name?: string; url?: string; contact_method?: 'website' | 'phone' };
   screener_required_program_click: ProgramContext;
-  // Per-program impression (once per program shown on results) — the "shown"
-  // denominator for a true more-info/apply ÷ shown conversion rate.
-  screener_program_shown: ProgramContext;
+  // NOTE: results-page list impressions use the GA4 `view_item_list` event, which
+  // is intentionally NOT in this map — it must be emitted via `trackItemList`
+  // (which nests items under `ecommerce`), never through `track`/`trackEvent`.
   // Navigator ("Get Help Applying") click, tied to program + specific navigator.
   // Fires INSTEAD of the generic program website/phone events for navigator links
   // (no double-count) and adds the previously-untracked email link.
@@ -133,7 +180,16 @@ export interface ScreenerEventMap {
   };
 
   // ---- Links (footer / header / nav) ----
-  screener_link_click: StepContext & { link_name: string; url?: string };
+  // `link_location` names the emitting component. The same link_name (e.g.
+  // "Privacy Policy") fires from both the footer AND inline on the Disclaimer
+  // step; screener_step_name alone can't tell a footer click made while on a
+  // step apart from an inline link on that step, so it's needed to distinguish
+  // footer chrome from in-step links.
+  screener_link_click: StepContext & {
+    link_name: string;
+    url?: string;
+    link_location?: 'footer' | 'disclaimer_inline' | 'zip_code_inline' | 'results_needs';
+  };
   screener_logo_click: { location: 'header' | 'footer'; logo_name?: string };
   screener_social_click: { network: string };
   screener_feedback_click: { channel: 'survey' | 'email' };
@@ -157,7 +213,6 @@ export interface ScreenerEventMap {
 
   // ---- Low-priority UI ----
   screener_document_summary_toggle: { expanded: boolean };
-  screener_eligibility_tags_shown: ProgramContext;
 }
 
 export type ScreenerEventName = keyof ScreenerEventMap;

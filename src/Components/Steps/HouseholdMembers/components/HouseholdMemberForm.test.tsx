@@ -54,12 +54,6 @@ jest.mock('../hooks/useHouseholdMemberFormEffects', () => ({
   useHouseholdMemberFormEffects: () => {},
 }));
 
-jest.mock('../../../AgeCalculation/useAgeCalculation', () => ({
-  useAgeCalculation: () => ({
-    calculateCurrentAgeStatus: () => ({ isUnder16: false }),
-  }),
-}));
-
 // Mock heavy section components — we only care about whether BasicInfoSection renders
 jest.mock('../sections/BasicInfoSection', () => ({
   __esModule: true,

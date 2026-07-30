@@ -82,6 +82,7 @@ const Footer = ({ hideServiceLinks }: FooterProps) => {
                   track('screener_link_click', {
                     link_name: 'About Us',
                     url: 'https://www.myfriendben.org/about-us/',
+                    link_location: 'footer',
                   })
                 }
               >
@@ -92,7 +93,13 @@ const Footer = ({ hideServiceLinks }: FooterProps) => {
                 target="_blank"
                 rel="noreferrer"
                 className="policy-link"
-                onClick={() => track('screener_link_click', { link_name: 'Privacy Policy', url: privacyPolicyLink })}
+                onClick={() =>
+                  track('screener_link_click', {
+                    link_name: 'Privacy Policy',
+                    url: privacyPolicyLink,
+                    link_location: 'footer',
+                  })
+                }
               >
                 <FormattedMessage id="footer.privacyPolicy" defaultMessage="Privacy Policy" />
               </a>
@@ -102,7 +109,11 @@ const Footer = ({ hideServiceLinks }: FooterProps) => {
                 rel="noreferrer"
                 className="policy-link"
                 onClick={() =>
-                  track('screener_link_click', { link_name: 'Terms and Conditions', url: termsAndConditionsLink })
+                  track('screener_link_click', {
+                    link_name: 'Terms and Conditions',
+                    url: termsAndConditionsLink,
+                    link_location: 'footer',
+                  })
                 }
               >
                 <FormattedMessage id="footer.termsAndConditions" defaultMessage="Terms and Conditions" />
