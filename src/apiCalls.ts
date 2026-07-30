@@ -345,11 +345,20 @@ export interface AssistantMessageResponse {
   assistant_message: AssistantApiMessage;
 }
 
-// A program the results page is currently showing the user, with the value as
-// displayed. BenBot recommends and quotes from these, so both fields have to match
-// what's on screen.
+// A program the results page is currently showing the user. BenBot recommends and
+// quotes from these, so both fields have to reflect what's on screen.
 export interface AssistantVisibleProgram {
   name_abbreviated: string;
+  /**
+   * `programValue()` — the ANNUAL value in whole USD, which nets out members who
+   * already hold the program's insurance.
+   *
+   * Not literally the string on the card: for the default `value_format` the card
+   * renders this divided by 12 with "/month", and when `estimated_value_override` is
+   * set it renders prose ("Varies") with no number at all. Annual is what the backend
+   * contract expects — ai-service is told these figures are annual totals and converts
+   * when it needs a monthly one.
+   */
   value: number;
 }
 
@@ -363,8 +372,11 @@ export interface AssistantVisibleProgram {
 // This has to come from the client because the relevant filtering only exists here:
 // citizenship/legal status, `excludes_programs` mutual exclusions, and per-member
 // insurance all run in the browser, and the server's eligibility snapshot stores no
-// member breakdown to reproduce them from. `value` is `programValue()` — the same
-// number rendered on the card, which nets out members who already have the coverage.
+// member breakdown to reproduce them from.
+//
+// benefits-api can only ever *narrow* using this list, and it bounds `value` by the
+// snapshot's own figure — so a bad list degrades the assistant rather than misleading
+// the user.
 const startAssistantConversation = async (
   uuid: string,
   locale?: string,

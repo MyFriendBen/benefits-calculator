@@ -5,7 +5,10 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ChatbotProvider } from './Chatbot';
 import { startAssistantConversation, sendAssistantMessage, AssistantVisibleProgram } from '../../../apiCalls';
 
+// requireActual so a future import of a third export from apiCalls doesn't silently
+// become undefined at runtime.
 jest.mock('../../../apiCalls', () => ({
+  ...jest.requireActual('../../../apiCalls'),
   startAssistantConversation: jest.fn(),
   sendAssistantMessage: jest.fn(),
 }));

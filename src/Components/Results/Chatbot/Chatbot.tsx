@@ -115,14 +115,21 @@ type ChatbotProviderProps = {
    * nothing", which makes BenBot recommend nothing at all; `undefined` means "no
    * list available", which selects the server-side fallback filters.
    *
-   * KNOWN LIMITATION: the list is fixed when the conversation opens (the first
-   * message). `ensureConversation` short-circuits on `conversationIdRef`, so changing
-   * a results-page filter mid-session doesn't re-post the narrowed list — it takes
-   * effect on the next page load, where the ref is null again and ai-service refreshes
-   * the stored context. Acceptable because filters narrow far more often than they
-   * widen, so the stale list is a superset and the closed-world rule still holds
-   * against something the user saw. Re-posting mid-session would risk clobbering
-   * `messages` during an in-flight send.
+   * KNOWN LIMITATION: `ensureConversation` short-circuits on `conversationIdRef`, so
+   * once a conversation is open, changing a results-page filter does not re-post the
+   * new list; it takes effect on the next page load, where the ref is null again and
+   * ai-service refreshes the stored context.
+   *
+   * Note this is NOT safely one-directional. The default filter state is `citizen` —
+   * the most permissive — so the first change always narrows, but a user who selects
+   * a different status and then switches back *widens*, leaving BenBot with a strict
+   * subset of what's on screen and refusing to discuss visible cards.
+   *
+   * (In practice this is currently masked by `ResultsContextProvider` being defined
+   * inside the `Results` component body, which remounts this whole subtree on any
+   * filter change — destroying `messages` and `isOpen` in the process. That's a
+   * separate pre-existing bug; when it's fixed, this limitation becomes live and
+   * re-posting on change is worth doing, guarded on `!sendingRef.current`.)
    */
   visiblePrograms?: AssistantVisibleProgram[];
 };
@@ -160,12 +167,6 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
     }
   }, [isOpen]);
 
-  // Identity-stable key so ensureConversation isn't rebuilt on every render just
-  // because the caller passed a fresh array. `undefined` and `[]` must produce
-  // different keys — they mean different things to the backend.
-  const visibleProgramsKey =
-    visiblePrograms === undefined ? 'unset' : visiblePrograms.map((p) => `${p.name_abbreviated}:${p.value}`).join(',');
-
   // Start (or reuse) the conversation; returns the conversation id, or null on failure.
   // Deduped via startPromiseRef so concurrent opens/sends don't create two conversations.
   const ensureConversation = useCallback(async (): Promise<string | null> => {
@@ -184,8 +185,7 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
         });
     }
     return startPromiseRef.current;
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- visibleProgramsKey stands in for the visiblePrograms array
-  }, [uuid, errorMessage, visibleProgramsKey]);
+  }, [uuid, errorMessage, visiblePrograms]);
 
   const sendMessage = useCallback(
     async (text: string) => {
