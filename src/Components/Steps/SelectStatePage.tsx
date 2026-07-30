@@ -24,6 +24,7 @@ export const STATES: { [key: string]: string } = {
   il: 'Illinois',
   ks: 'Kansas',
   ma: 'Massachusetts',
+  mo: 'Missouri',
   nc: 'North Carolina',
   tx: 'Texas',
   wa: 'Washington',
