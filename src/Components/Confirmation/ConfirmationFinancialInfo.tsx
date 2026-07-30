@@ -3,8 +3,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { useTranslateNumber } from '../../Assets/languageOptions';
 import { FormattedMessageType } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
-import { ConfirmationItem, formatToUSD } from './ConfirmationBlock';
-import { RowEditLink } from './ConfirmationBlock';
+import ConfirmationBlock, { ConfirmationItem, formatToUSD, RowEditLink } from './ConfirmationBlock';
 import { Icon } from '../Icon/Icon';
 import { Context } from '../Wrapper/Wrapper';
 
@@ -48,57 +47,50 @@ export default function ConfirmationFinancialInfo() {
   };
 
   return (
-    <div className="confirmation-section-container">
-      <div className="confirmation-section-header">
-        <h2>
-          <span className="confirmation-icon">
-            <Icon name="receipt" aria-hidden={true} />
-          </span>
-          <FormattedMessage id="confirmation.financialInfo" defaultMessage="Financial Information" />
-        </h2>
-      </div>
-      <div className="confirmation-section-content">
-        <ConfirmationItem
-          label={
-            <FormattedMessage
-              id="confirmation.headOfHouseholdDataBlock-expensesLabel"
-              defaultMessage="Household Expenses"
-            />
-          }
-          value={expensesValue()}
-          editLink={
-            <RowEditLink
-              stepName="hasExpenses"
-              ariaLabel={formatMessage({ id: 'confirmation.expense.edit-AL', defaultMessage: 'edit expenses' })}
-            />
-          }
-        />
-        <ConfirmationItem
-          label={
-            <FormattedMessage
-              id="confirmation.displayAllFormData-householdResourcesText"
-              defaultMessage="Household Resources"
-            />
-          }
-          value={
-            <>
-              {translateNumber(formatToUSD(formData.householdAssets, 0))}
-              <i>
-                <FormattedMessage
-                  id="confirmation.displayAllFormData-householdResourcesDescription"
-                  defaultMessage="(This is cash on hand, checking or saving accounts, stocks, bonds or mutual funds.)"
-                />
-              </i>
-            </>
-          }
-          editLink={
-            <RowEditLink
-              stepName="householdAssets"
-              ariaLabel={formatMessage({ id: 'confirmation.assets.edit-AL', defaultMessage: 'edit assets' })}
-            />
-          }
-        />
-      </div>
-    </div>
+    <ConfirmationBlock
+      icon={<Icon name="receipt" aria-hidden={true} />}
+      title={<FormattedMessage id="confirmation.financialInfo" defaultMessage="Financial Information" />}
+    >
+      <ConfirmationItem
+        label={
+          <FormattedMessage
+            id="confirmation.headOfHouseholdDataBlock-expensesLabel"
+            defaultMessage="Household Expenses"
+          />
+        }
+        value={expensesValue()}
+        editLink={
+          <RowEditLink
+            stepName="hasExpenses"
+            ariaLabel={formatMessage({ id: 'confirmation.expense.edit-AL', defaultMessage: 'edit expenses' })}
+          />
+        }
+      />
+      <ConfirmationItem
+        label={
+          <FormattedMessage
+            id="confirmation.displayAllFormData-householdResourcesText"
+            defaultMessage="Household Resources"
+          />
+        }
+        value={
+          <>
+            {translateNumber(formatToUSD(formData.householdAssets, 0))}
+            <i>
+              <FormattedMessage
+                id="confirmation.displayAllFormData-householdResourcesDescription"
+                defaultMessage="(This is cash on hand, checking or saving accounts, stocks, bonds or mutual funds.)"
+              />
+            </i>
+          </>
+        }
+        editLink={
+          <RowEditLink
+            stepName="householdAssets"
+            ariaLabel={formatMessage({ id: 'confirmation.assets.edit-AL', defaultMessage: 'edit assets' })}
+          />
+        }
+      />
+    </ConfirmationBlock>
   );
 }

@@ -5,7 +5,7 @@ import { useTranslateNumber } from '../../Assets/languageOptions';
 import { HouseholdData } from '../../Types/FormData';
 import { FormattedMessageType } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
-import { formatToUSD } from './ConfirmationBlock';
+import ConfirmationBlock, { formatToUSD } from './ConfirmationBlock';
 import { Context } from '../Wrapper/Wrapper';
 import { Icon } from '../Icon/Icon';
 import { Pencil } from 'lucide-react';
@@ -130,109 +130,98 @@ const DefaultConfirmationHHData = () => {
   };
 
   return (
-    <div className="confirmation-section-container">
-      <div className="confirmation-section-header">
-        <h2>
-          <span className="confirmation-icon">
-            <Icon name="users" className="confirmation-lucide-icon" aria-hidden={true} />
-          </span>
+    <ConfirmationBlock
+      icon={<Icon name="users" className="confirmation-lucide-icon" aria-hidden={true} />}
+      title={
+        <>
           <FormattedMessage id="confirmation.displayAllFormData-yourHouseholdLabel" defaultMessage="Household Members" />
           {' '}
           <span className="household-member-count">
             <span className="household-member-count-full">({householdSizeText})</span>
             <span className="household-member-count-short">({translateNumber(householdSize)})</span>
           </span>
-        </h2>
-        <Link
-          to={`/${whiteLabel}/${uuid}/step-${householdDataStepNumber - 1}`}
-          state={{ routedFromConfirmationPg: true, isEditing: true }}
-          className="edit-button"
-          aria-label={formatMessage({
-            id: 'confirmation.household.edit-AL',
-            defaultMessage: 'edit household members',
-          })}
-          onClick={() => track('screener_confirmation_edit', { section: 'householdData' })}
-        >
-          <Pencil aria-hidden={true} className="edit-pencil-icon" strokeWidth={1.5} />
-        </Link>
-      </div>
-      <div className="confirmation-section-content">
-        <div className="household-member-table-wrapper">
-          <table className="household-member-table household-member-table-desktop">
-            <caption className="confirmation-sr-only">
-              <FormattedMessage
-                id="confirmation.householdTable.caption"
-                defaultMessage="Household member details"
-              />
-            </caption>
-            <thead>
-              <tr>
+        </>
+      }
+      // household size is its own step, collected one page before household member details
+      stepName="householdSize"
+      editAriaLabel={{ id: 'confirmation.household.edit-AL', defaultMessage: 'edit household members' }}
+    >
+      <div className="household-member-table-wrapper">
+        <table className="household-member-table household-member-table-desktop">
+          <caption className="confirmation-sr-only">
+            <FormattedMessage
+              id="confirmation.householdTable.caption"
+              defaultMessage="Household member details"
+            />
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">
+                <FormattedMessage id="confirmation.table.member" defaultMessage="Member" />
+              </th>
+              <th scope="col">
+                <FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year:" />
+              </th>
+              <th scope="col">
+                <FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions:" />
+              </th>
+              <th scope="col">
+                <FormattedMessage id="confirmation.annualIncome" defaultMessage="Annual Income" />
+              </th>
+              {!isEnergyCalculator && (
                 <th scope="col">
-                  <FormattedMessage id="confirmation.table.member" defaultMessage="Member" />
+                  <FormattedMessage
+                    id="confirmation.headOfHouseholdDataBlock-healthInsuranceText"
+                    defaultMessage="Health Insurance"
+                  />
                 </th>
-                <th scope="col">
-                  <FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year:" />
-                </th>
-                <th scope="col">
-                  <FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions:" />
-                </th>
-                <th scope="col">
-                  <FormattedMessage id="confirmation.annualIncome" defaultMessage="Annual Income" />
-                </th>
-                {!isEnergyCalculator && (
-                  <th scope="col">
-                    <FormattedMessage
-                      id="confirmation.headOfHouseholdDataBlock-healthInsuranceText"
-                      defaultMessage="Health Insurance"
-                    />
-                  </th>
-                )}
-                <th style={{ width: '40px' }} aria-hidden={true}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {householdData.map((member, i) => {
-                const relationship = getRelationship(member, i);
-                const memberEditLabel = `${formatMessage(editHouseholdMemberAriaLabel)}: ${relationship}`;
+              )}
+              <th style={{ width: '40px' }} aria-hidden={true}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {householdData.map((member, i) => {
+              const relationship = getRelationship(member, i);
+              const memberEditLabel = `${formatMessage(editHouseholdMemberAriaLabel)}: ${relationship}`;
 
-                return (
-                  <tr key={i}>
-                    <td>{relationship}</td>
-                    <td>
-                      {hasBirthMonthYear(member) ? (
-                        formatBirthMonthYear(member)
-                      ) : (
-                        <span
-                          aria-label={formatMessage({
-                            id: 'confirmation.notProvided',
-                            defaultMessage: 'not provided',
-                          })}
-                        >
-                          -
-                        </span>
-                      )}
-                    </td>
-                    <td>{conditionsString(member)}</td>
-                    <td>{calculateTotalAnnualIncome(member)}</td>
-                    {!isEnergyCalculator && <td>{displayHealthInsurance(member, i)}</td>}
-                    <td>
-                      <Link
-                        to={`/${whiteLabel}/${uuid}/step-${householdDataStepNumber}/${i + 1}`}
-                        state={{ routedFromConfirmationPg: true, isEditing: true }}
-                        className="edit-button-simple"
-                        aria-label={memberEditLabel}
+              return (
+                <tr key={i}>
+                  <td>{relationship}</td>
+                  <td>
+                    {hasBirthMonthYear(member) ? (
+                      formatBirthMonthYear(member)
+                    ) : (
+                      <span
+                        aria-label={formatMessage({
+                          id: 'confirmation.notProvided',
+                          defaultMessage: 'not provided',
+                        })}
                       >
-                        <Pencil aria-hidden={true} className="edit-pencil-icon" strokeWidth={1.5} />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                        -
+                      </span>
+                    )}
+                  </td>
+                  <td>{conditionsString(member)}</td>
+                  <td>{calculateTotalAnnualIncome(member)}</td>
+                  {!isEnergyCalculator && <td>{displayHealthInsurance(member, i)}</td>}
+                  <td>
+                    <Link
+                      to={`/${whiteLabel}/${uuid}/step-${householdDataStepNumber}/${i + 1}`}
+                      state={{ routedFromConfirmationPg: true, isEditing: true }}
+                      className="edit-button-simple"
+                      aria-label={memberEditLabel}
+                      onClick={() => track('screener_confirmation_edit', { section: 'householdData' })}
+                    >
+                      <Pencil aria-hidden={true} className="edit-pencil-icon" strokeWidth={1.5} />
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
-    </div>
+    </ConfirmationBlock>
   );
 };
 

@@ -11,8 +11,8 @@ export { formatToUSD } from '../../utils/formatCurrency';
 type ConfirmationBlockParams = PropsWithChildren<{
   icon: ReactNode;
   title: ReactNode;
-  stepName: QuestionName;
-  editAriaLabel: MessageDescriptor;
+  stepName?: QuestionName;
+  editAriaLabel?: MessageDescriptor;
   noReturn?: boolean;
   editUrlEnding?: string;
 }>;
@@ -39,15 +39,17 @@ export default function ConfirmationBlock({
           <span className="confirmation-icon">{icon}</span>
           {title}
         </h2>
-        <Link
-          to={`/${whiteLabel}/${uuid}/step-${stepNumber}/${editUrlEnding}`}
-          state={locationState}
-          className="edit-button"
-          aria-label={formatMessage(editAriaLabel)}
-          onClick={() => track('screener_confirmation_edit', { section: stepName })}
-        >
-          <Pencil aria-hidden={true} className="edit-pencil-icon" strokeWidth={1.5} />
-        </Link>
+        {stepName !== undefined && editAriaLabel !== undefined && stepNumber !== -1 && (
+          <Link
+            to={`/${whiteLabel}/${uuid}/step-${stepNumber}/${editUrlEnding}`}
+            state={locationState}
+            className="edit-button"
+            aria-label={formatMessage(editAriaLabel)}
+            onClick={() => track('screener_confirmation_edit', { section: stepName })}
+          >
+            <Pencil aria-hidden={true} className="edit-pencil-icon" strokeWidth={1.5} />
+          </Link>
+        )}
       </div>
       <div className="confirmation-section-content">
         {children}
@@ -78,6 +80,7 @@ export function ConfirmationItem({ label, value, editLink }: ConfirmationItemPar
 export function RowEditLink({ stepName, ariaLabel }: { stepName: QuestionName; ariaLabel: string }) {
   const { whiteLabel, uuid } = useParams();
   const stepNumber = useStepNumber(stepName, false);
+  const track = useTrackEvent();
 
   if (stepNumber === -1) {
     return null;
@@ -89,6 +92,7 @@ export function RowEditLink({ stepName, ariaLabel }: { stepName: QuestionName; a
       state={{ routedFromConfirmationPg: true }}
       className="edit-button-simple"
       aria-label={ariaLabel}
+      onClick={() => track('screener_confirmation_edit', { section: stepName })}
     >
       <Pencil aria-hidden={true} className="edit-pencil-icon" strokeWidth={1.5} />
     </Link>

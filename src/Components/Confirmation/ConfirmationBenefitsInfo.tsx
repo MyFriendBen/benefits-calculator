@@ -3,7 +3,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { HasBenefitsProgram } from '../../Types/ApiCalls';
 import { FormattedMessageType } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
-import { ConfirmationItem, RowEditLink } from './ConfirmationBlock';
+import ConfirmationBlock, { ConfirmationItem, RowEditLink } from './ConfirmationBlock';
 import { Icon } from '../Icon/Icon';
 import { Context } from '../Wrapper/Wrapper';
 import { useStepNumber } from '../../Assets/stepDirectory';
@@ -93,80 +93,75 @@ export default function ConfirmationBenefitsInfo() {
   }
 
   return (
-    <div className="confirmation-section-container">
-      <div className="confirmation-section-header">
-        <h2>
-          <span className="confirmation-icon">
-            <Icon name="shield-check" aria-hidden={true} />
-          </span>
-          <FormattedMessage
-            id="confirmation.benefitsAndAdditionalInfo"
-            defaultMessage="Benefits & Additional Information"
-          />
-        </h2>
-      </div>
-      <div className="confirmation-section-content">
-        {showBenefitsRow && (
-          <ConfirmationItem
-            label={
-              <FormattedMessage
-                id="confirmation.displayAllFormData-currentHHBenefitsText"
-                defaultMessage="Current Household Benefits"
-              />
-            }
-            value={benefitsValue()}
-            editLink={
-              <RowEditLink
-                stepName="hasBenefits"
-                ariaLabel={formatMessage({
-                  id: 'confirmation.currentBenefits.edit-AL',
-                  defaultMessage: 'edit benefits you already have',
-                })}
-              />
-            }
-          />
-        )}
-        {showAcuteConditionsRow && (
-          <ConfirmationItem
-            label={
-              <FormattedMessage
-                id="confirmation.displayAllFormData-acuteHHConditions"
-                defaultMessage="Additional Resources"
-              />
-            }
-            value={acuteConditionsValue()}
-            editLink={
-              <RowEditLink
-                stepName="acuteHHConditions"
-                ariaLabel={formatMessage({
-                  id: 'confirmation.acuteConditions.edit-AL',
-                  defaultMessage: 'edit immediate needs',
-                })}
-              />
-            }
-          />
-        )}
-        {showReferralRow && (
-          <ConfirmationItem
-            label={
-              <FormattedMessage
-                id="confirmation.displayAllFormData-referralSourceText"
-                defaultMessage="Referral Source"
-              />
-            }
-            value={referralDisplayValue()}
-            editLink={
-              <RowEditLink
-                stepName="referralSource"
-                ariaLabel={formatMessage({
-                  id: 'confirmation.referralSource.edit-AL',
-                  defaultMessage: 'edit referral source',
-                })}
-              />
-            }
-          />
-        )}
-      </div>
-    </div>
+    <ConfirmationBlock
+      icon={<Icon name="shield-check" aria-hidden={true} />}
+      title={
+        <FormattedMessage
+          id="confirmation.benefitsAndAdditionalInfo"
+          defaultMessage="Benefits & Additional Information"
+        />
+      }
+    >
+      {showBenefitsRow && (
+        <ConfirmationItem
+          label={
+            <FormattedMessage
+              id="confirmation.displayAllFormData-currentHHBenefitsText"
+              defaultMessage="Current Household Benefits"
+            />
+          }
+          value={benefitsValue()}
+          editLink={
+            <RowEditLink
+              stepName="hasBenefits"
+              ariaLabel={formatMessage({
+                id: 'confirmation.currentBenefits.edit-AL',
+                defaultMessage: 'edit benefits you already have',
+              })}
+            />
+          }
+        />
+      )}
+      {showAcuteConditionsRow && (
+        <ConfirmationItem
+          label={
+            <FormattedMessage
+              id="confirmation.displayAllFormData-acuteHHConditions"
+              defaultMessage="Additional Resources"
+            />
+          }
+          value={acuteConditionsValue()}
+          editLink={
+            <RowEditLink
+              stepName="acuteHHConditions"
+              ariaLabel={formatMessage({
+                id: 'confirmation.acuteConditions.edit-AL',
+                defaultMessage: 'edit immediate needs',
+              })}
+            />
+          }
+        />
+      )}
+      {showReferralRow && (
+        <ConfirmationItem
+          label={
+            <FormattedMessage
+              id="confirmation.displayAllFormData-referralSourceText"
+              defaultMessage="Referral Source"
+            />
+          }
+          value={referralDisplayValue()}
+          editLink={
+            <RowEditLink
+              stepName="referralSource"
+              ariaLabel={formatMessage({
+                id: 'confirmation.referralSource.edit-AL',
+                defaultMessage: 'edit referral source',
+              })}
+            />
+          }
+        />
+      )}
+    </ConfirmationBlock>
   );
 }
