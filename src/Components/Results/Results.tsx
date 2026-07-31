@@ -42,7 +42,8 @@ import { useFeatureFlag } from '../Config/configHook';
 import { ChatbotProvider } from './Chatbot/Chatbot';
 import { useTrackEvent, useTrackItemList } from '../../Assets/analytics';
 import { POST_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
-import { calculateTotalValue, programValue } from './FormattedValue';
+import { calculateTotalValue } from './FormattedValue';
+import { deriveVisiblePrograms } from './visiblePrograms';
 
 // Mounts the Benbot chat widget only when the flag is on; otherwise renders children unchanged.
 // Defined at module scope so its identity is stable across renders (no subtree remount).
@@ -277,37 +278,9 @@ const Results = ({ type }: ResultsProps) => {
     [formData, filterState, isAdminView]
   );
 
-  // What BenBot is allowed to recommend from — see BenbotWrapper.
-  //
-  // Derived from `programCategories`, NOT `programs`, because that's what the page
-  // actually renders (`Programs.tsx` iterates categories). The two provably diverge:
-  // `applyProgramExclusions` is order-dependent ("keeping the first program
-  // encountered in the array"), and it runs once over the flat list and again per
-  // category, where the ordering differs. A mutually-exclusive pair can therefore
-  // survive as A globally and B per-category — the page would render B while BenBot
-  // was told A. Cross-category exclusions and programs belonging to no category
-  // diverge too.
-  //
-  // `value` is programValue(), the ANNUAL figure. Note the card shows this divided by
-  // 12 with "/month" for the default value_format; ai-service is told these are annual
-  // and converts when quoting a monthly amount.
-  //
-  // Deduped by program_id because the same program can legitimately appear in more
-  // than one category.
-  const visiblePrograms = useMemo(() => {
-    const seen = new Map<number, AssistantVisibleProgram>();
-    for (const category of programCategories) {
-      for (const program of category.programs) {
-        if (!seen.has(program.program_id)) {
-          seen.set(program.program_id, {
-            name_abbreviated: program.name_abbreviated,
-            value: programValue(program),
-          });
-        }
-      }
-    }
-    return [...seen.values()];
-  }, [programCategories]);
+  // What BenBot is allowed to recommend from — see BenbotWrapper and
+  // ./visiblePrograms, which documents why this comes from programCategories.
+  const visiblePrograms = useMemo(() => deriveVisiblePrograms(programCategories), [programCategories]);
 
   useEffect(() => {
     if (apiResults === undefined) {

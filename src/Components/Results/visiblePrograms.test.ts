@@ -1,36 +1,18 @@
 /**
  * The `visible_programs` derivation (MFB-1427).
  *
- * BenBot may only recommend from the list this produces, so it has to equal what the
- * page renders. The page renders `programCategories`; an earlier revision derived this
- * from the flat `programs` array instead, and the two provably diverge because
+ * BenBot may only recommend from the list this produces, so it has to equal what the page
+ * renders. The page renders `programCategories`; an earlier revision derived it from the
+ * flat `programs` array instead, and the two provably diverge because
  * `applyProgramExclusions` is order-dependent and runs separately over each.
  *
- * The logic under test lives in a `useMemo` in Results.tsx. It's reproduced here rather
- * than exported because extracting it would mean touching the component's render path
- * for test-only reasons; the duplication is three lines and this file exists to pin the
- * *properties* that matter.
+ * Imports the real implementation. An earlier revision of this file reproduced the three
+ * lines instead, which meant Results.tsx's own copy had no coverage (Codecov flagged 16
+ * uncovered lines) and the test would have kept passing while the component drifted.
  */
-import { Program, ProgramCategory } from '../../Types/Results';
-import { programValue } from './FormattedValue';
+import { Program } from '../../Types/Results';
 import { createProgram } from './testHelpers';
-import { AssistantVisibleProgram } from '../../apiCalls';
-
-/** Mirror of the derivation in Results.tsx. */
-function deriveVisiblePrograms(programCategories: Pick<ProgramCategory, 'programs'>[]): AssistantVisibleProgram[] {
-  const seen = new Map<number, AssistantVisibleProgram>();
-  for (const category of programCategories) {
-    for (const program of category.programs) {
-      if (!seen.has(program.program_id)) {
-        seen.set(program.program_id, {
-          name_abbreviated: program.name_abbreviated,
-          value: programValue(program),
-        });
-      }
-    }
-  }
-  return [...seen.values()];
-}
+import { deriveVisiblePrograms } from './visiblePrograms';
 
 const category = (...programs: Program[]) => ({ programs });
 
