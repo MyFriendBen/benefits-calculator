@@ -168,6 +168,20 @@ const Results = ({ type }: ResultsProps) => {
   const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
 
+  // The programs shown on load — run through the same filterPrograms pipeline the
+  // UI uses (legal status, calculated member eligibility, value/already-held,
+  // program exclusions), but with the INITIAL filter state, so it reflects the
+  // page as first rendered and doesn't shift when the user changes the
+  // interactive citizenship filter. Analytics for the count, impression, and
+  // none-eligible guard all read this one set.
+  const shownPrograms = useMemo(
+    () =>
+      apiResults === undefined
+        ? []
+        : filterProgramsGenerator(formData, createInitialFilterState(), isAdminView)(apiResults.programs),
+    [apiResults, formData, isAdminView],
+  );
+
   // Fire screener_results_loaded once, as soon as the API result resolves —
   // independent of rebate loading (not on later filter re-renders).
   useEffect(() => {
@@ -181,14 +195,8 @@ const Results = ({ type }: ResultsProps) => {
       0,
     );
 
-    // The programs the user actually qualifies for and sees — the same cuts the
-    // impression below and the none-eligible guard use.
-    const eligiblePrograms = apiResults.programs.filter(
-      (program) => program.eligible && programValue(program) > 0 && !program.already_has,
-    );
-
     track('screener_results_loaded', {
-      program_count: eligiblePrograms.length,
+      program_count: shownPrograms.length,
       total_estimated_value: totalEstimatedValue,
     });
 
@@ -199,22 +207,17 @@ const Results = ({ type }: ResultsProps) => {
       step_action: 'view',
     });
 
-    // Programs shown, as one view_item_list impression. Match the intrinsic cuts
-    // filterPrograms applies before rendering a program as a result — eligible,
-    // non-zero value, not already held — so the impression reflects what the user
-    // sees rather than the full catalog the API returns. (The interactive
-    // citizenship filter is deliberately not applied: the impression is the set
-    // shown on load, independent of later filter changes.) Ref-guarded above, so
-    // once per screening — not on filter re-renders.
+    // Programs shown, as one view_item_list impression — the on-load set from
+    // shownPrograms. Ref-guarded above, so once per screening.
     trackItemList(
       'results_programs',
-      eligiblePrograms.map((program, index) => ({
+      shownPrograms.map((program, index) => ({
         item_id: String(program.program_id),
         item_name: program.name.default_message,
         item_list_index: index,
       })),
     );
-  }, [apiResults, track, trackItemList]);
+  }, [apiResults, shownPrograms, track, trackItemList]);
 
   // Results-page scroll depth, only on the two browsable tabs (program =
   // long-term benefits, need = additional resources). Each threshold fires once
@@ -250,10 +253,9 @@ const Results = ({ type }: ResultsProps) => {
   // "None eligible" needs BOTH result sets resolved, or we'd fire a false
   // negative while rebates are still loading (and the once-guard would prevent
   // correction). On the energy calculator, rebates load async and are undefined
-  // until resolved. Uses the same eligible-and-shown cuts as the impression, NOT
-  // the interactive citizenship filter (so hiding all programs via that filter
-  // isn't miscounted as "none eligible"). Separate guard so it stays independent
-  // of screener_results_loaded above.
+  // until resolved. Reads shownPrograms (the on-load visible set), so a screening
+  // with nothing shown and no rebates is a true none-eligible. Separate guard so
+  // it stays independent of screener_results_loaded above.
   const hasTrackedNoneEligible = useRef(false);
   useEffect(() => {
     const rebatesLoading = whiteLabel === 'cesn' && energyCalculatorRebateCategories === undefined;
@@ -262,16 +264,11 @@ const Results = ({ type }: ResultsProps) => {
     }
 
     hasTrackedNoneEligible.current = true;
-    // Count programs actually eligible and shown — apiResults.programs holds the
-    // full catalog (every program with an `eligible` flag), not just the shown set.
-    const eligibleCount = apiResults.programs.filter(
-      (program) => program.eligible && programValue(program) > 0 && !program.already_has,
-    ).length;
     const noRebates = (energyCalculatorRebateCategories ?? []).length === 0;
-    if (eligibleCount === 0 && noRebates) {
+    if (shownPrograms.length === 0 && noRebates) {
       track('screener_results_none_eligible', {});
     }
-  }, [apiResults, energyCalculatorRebateCategories, whiteLabel, track]);
+  }, [apiResults, shownPrograms, energyCalculatorRebateCategories, whiteLabel, track]);
 
   // Benbot AI assistant — gated behind the 'benbot' feature flag (off by default).
   const isBenbotEnabled = useFeatureFlag('benbot');
