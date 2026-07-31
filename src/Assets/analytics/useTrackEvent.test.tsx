@@ -56,12 +56,20 @@ describe('useTrackEvent screener_path', () => {
     expect(lastPayload().screener_path).toBe('renter');
   });
 
-  it('defaults a CESN screening with no chosen path to "homeowner"', () => {
+  it('marks a CESN homeowner screening ("default" path) as "homeowner"', () => {
+    mockParams = { whiteLabel: 'cesn', uuid: 'abc' };
+    mockFormPath = 'default';
+    const { result } = renderHook(() => useTrackEvent());
+    result.current('screener_form_start', {});
+    expect(lastPayload().screener_path).toBe('homeowner');
+  });
+
+  it('omits screener_path when the CESN path is unknown', () => {
     mockParams = { whiteLabel: 'cesn', uuid: 'abc' };
     mockFormPath = undefined;
     const { result } = renderHook(() => useTrackEvent());
     result.current('screener_form_start', {});
-    expect(lastPayload().screener_path).toBe('homeowner');
+    expect(lastPayload()).not.toHaveProperty('screener_path');
   });
 
   it('omits screener_path for a non-CESN screening', () => {

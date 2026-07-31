@@ -9,9 +9,11 @@ import type { ItemListItem, ItemListName, ScreenerContext, ScreenerEventMap, Scr
 // components whose useParams() doesn't resolve the params, which would otherwise
 // fire events with no state and no uid (the downstream join key).
 //
-// screener_path is the CESN homeowner/renter branch, derived from formPath
-// (formData.path, 'renter' for renters). It's CESN-only and defaults to
-// 'homeowner' when unset, so the dashboard can split the CESN funnel by path.
+// screener_path is the CESN homeowner/renter branch, from formData.path. The
+// landing page sets it to 'renter' or 'default' (the homeowner path), so those
+// map to 'renter' / 'homeowner'. Any other value — including undefined when the
+// path was never resolved — stays unset rather than being fabricated as a
+// homeowner, so the dashboard can tell a real homeowner from an unknown. CESN-only.
 function resolveScreenerContext(
   whiteLabel?: string,
   uuid?: string,
@@ -23,10 +25,12 @@ function resolveScreenerContext(
     whiteLabel ??
     (contextWhiteLabel && contextWhiteLabel !== DEFAULT_WHITE_LABEL ? contextWhiteLabel : undefined) ??
     (urlWhiteLabel !== DEFAULT_WHITE_LABEL ? urlWhiteLabel : undefined);
+  const screenerPath =
+    formPath === 'renter' ? 'renter' : formPath === 'default' ? 'homeowner' : undefined;
   return {
     screener_state: screenerState,
     screener_uid: uuid ?? getUuidFromUrl(),
-    screener_path: screenerState === 'cesn' ? (formPath === 'renter' ? 'renter' : 'homeowner') : undefined,
+    screener_path: screenerState === 'cesn' ? screenerPath : undefined,
   };
 }
 

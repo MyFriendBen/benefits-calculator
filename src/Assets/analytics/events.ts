@@ -23,8 +23,8 @@ export interface ScreenerContext {
   screener_state?: string;
   /** The screening UUID from the route; the join key for downstream analysis. */
   screener_uid?: string;
-  /** CESN energy path: "homeowner" or "renter". CESN-only; absent elsewhere. */
-  screener_path?: string;
+  /** CESN energy path. CESN-only; absent elsewhere and when the path is unknown. */
+  screener_path?: 'homeowner' | 'renter';
 }
 
 // Params common to interactions that happen on a known screener step.
