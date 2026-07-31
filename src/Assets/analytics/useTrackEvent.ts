@@ -49,11 +49,10 @@ export function useTrackEvent() {
   const { whiteLabel, uuid } = useParams();
   const wrapperContext = useContext(Context);
   const contextWhiteLabel = wrapperContext?.whiteLabel;
-  // CESN homeowner/renter branch, persisted on the screening (survives across
-  // steps, unlike the ?path= URL param which only exists on the entry URL).
-  const formPath = wrapperContext?.formData?.path;
 
-  const context = resolveScreenerContext(whiteLabel, uuid, contextWhiteLabel, formPath);
+  // formData.path is the CESN homeowner/renter branch, persisted on the screening
+  // (unlike the ?path= URL param, which only exists on the entry URL).
+  const context = resolveScreenerContext(whiteLabel, uuid, contextWhiteLabel, wrapperContext?.formData?.path);
   const screenerState = context.screener_state;
   const screenerUid = context.screener_uid;
   const screenerPath = context.screener_path;
@@ -80,9 +79,8 @@ export function useTrackItemList() {
   const { whiteLabel, uuid } = useParams();
   const wrapperContext = useContext(Context);
   const contextWhiteLabel = wrapperContext?.whiteLabel;
-  const formPath = wrapperContext?.formData?.path;
 
-  const context = resolveScreenerContext(whiteLabel, uuid, contextWhiteLabel, formPath);
+  const context = resolveScreenerContext(whiteLabel, uuid, contextWhiteLabel, wrapperContext?.formData?.path);
   const screenerState = context.screener_state;
   const screenerUid = context.screener_uid;
   const screenerPath = context.screener_path;
