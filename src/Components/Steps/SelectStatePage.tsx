@@ -25,7 +25,9 @@ const SELECT_STATE_STEP_ANALYTICS_ID = PRE_DIRECTORY_STEP_IDS.selectState;
 export const STATES: { [key: string]: string } = {
   co: 'Colorado',
   il: 'Illinois',
+  // ks: 'Kansas',
   ma: 'Massachusetts',
+  // mo: 'Missouri',
   nc: 'North Carolina',
   tx: 'Texas',
   wa: 'Washington',
