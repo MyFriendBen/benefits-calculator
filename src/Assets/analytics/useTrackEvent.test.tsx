@@ -69,6 +69,6 @@ describe('useTrackEvent screener_path', () => {
     mockFormPath = 'renter';
     const { result } = renderHook(() => useTrackEvent());
     result.current('screener_form_start', {});
-    expect(lastPayload().screener_path).toBeUndefined();
+    expect(lastPayload()).not.toHaveProperty('screener_path');
   });
 });

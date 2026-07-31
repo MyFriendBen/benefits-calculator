@@ -4,18 +4,14 @@ import { trackEvent, trackItemList } from './index';
 import { Context, DEFAULT_WHITE_LABEL, getUuidFromUrl, getWhiteLabelFromUrl } from '../../Components/Wrapper/Wrapper';
 import type { ItemListItem, ItemListName, ScreenerContext, ScreenerEventMap, ScreenerEventName } from './events';
 
-// Resolve screener_state / screener_uid / screener_path for an event's context.
-// Prefer the route params, then Wrapper's context, then parse the URL directly.
-// The URL fallback covers components (e.g. results-page children) whose useParams()
-// doesn't resolve the params even though they're present in the path — without it
-// those events fire with no state AND no uid (the downstream join key).
+// Resolve the context attached to every screener event. State and uid prefer the
+// route params, then Wrapper's context, then the URL — the URL fallback covers
+// components whose useParams() doesn't resolve the params, which would otherwise
+// fire events with no state and no uid (the downstream join key).
 //
-// screener_path is CESN-only: the energy flow branches into a homeowner and a
-// renter path (formData.path === 'renter' for renters, unset for homeowners),
-// chosen on the landing page before the first step. Attaching it here means every
-// CESN event carries the path — including events before the paths visibly diverge —
-// so the dashboard can split the CESN funnel by path even for early drop-offs. It
-// is omitted entirely for non-CESN screeners.
+// screener_path is the CESN homeowner/renter branch, derived from formPath
+// (formData.path, 'renter' for renters). It's CESN-only and defaults to
+// 'homeowner' when unset, so the dashboard can split the CESN funnel by path.
 function resolveScreenerContext(
   whiteLabel?: string,
   uuid?: string,
@@ -82,21 +78,26 @@ export function useTrackEvent() {
  */
 export function useTrackItemList() {
   const { whiteLabel, uuid } = useParams();
-  const contextWhiteLabel = useContext(Context)?.whiteLabel;
+  const wrapperContext = useContext(Context);
+  const contextWhiteLabel = wrapperContext?.whiteLabel;
+  const formPath = wrapperContext?.formData?.path;
 
-  const context = resolveScreenerContext(whiteLabel, uuid, contextWhiteLabel);
+  const context = resolveScreenerContext(whiteLabel, uuid, contextWhiteLabel, formPath);
   const screenerState = context.screener_state;
   const screenerUid = context.screener_uid;
+  const screenerPath = context.screener_path;
 
   return useCallback(
     (itemListName: ItemListName, items: ItemListItem[]) => {
       trackItemList({
         screener_state: screenerState,
         screener_uid: screenerUid,
+        // Only present on CESN, matching useTrackEvent.
+        ...(screenerPath !== undefined ? { screener_path: screenerPath } : {}),
         item_list_name: itemListName,
         items,
       });
     },
-    [screenerState, screenerUid],
+    [screenerState, screenerUid, screenerPath],
   );
 }

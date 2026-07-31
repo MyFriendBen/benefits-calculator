@@ -182,9 +182,7 @@ const Results = ({ type }: ResultsProps) => {
     );
 
     // The programs the user actually qualifies for and sees — the same cuts the
-    // impression below and the none-eligible guard use. apiResults.programs is the
-    // full catalog (every program with an `eligible` flag), so its raw length is
-    // not the shown count.
+    // impression below and the none-eligible guard use.
     const eligiblePrograms = apiResults.programs.filter(
       (program) => program.eligible && programValue(program) > 0 && !program.already_has,
     );
@@ -264,10 +262,8 @@ const Results = ({ type }: ResultsProps) => {
     }
 
     hasTrackedNoneEligible.current = true;
-    // apiResults.programs is the full catalog; count the ones actually eligible
-    // and shown. The old `apiResults.programs.length === 0` check was never true
-    // (the array always holds every program, eligible or not), so this event
-    // never fired.
+    // Count programs actually eligible and shown — apiResults.programs holds the
+    // full catalog (every program with an `eligible` flag), not just the shown set.
     const eligibleCount = apiResults.programs.filter(
       (program) => program.eligible && programValue(program) > 0 && !program.already_has,
     ).length;
