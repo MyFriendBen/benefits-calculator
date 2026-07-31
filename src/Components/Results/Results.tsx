@@ -181,8 +181,16 @@ const Results = ({ type }: ResultsProps) => {
       0,
     );
 
+    // The programs the user actually qualifies for and sees — the same cuts the
+    // impression below and the none-eligible guard use. apiResults.programs is the
+    // full catalog (every program with an `eligible` flag), so its raw length is
+    // not the shown count.
+    const eligiblePrograms = apiResults.programs.filter(
+      (program) => program.eligible && programValue(program) > 0 && !program.already_has,
+    );
+
     track('screener_results_loaded', {
-      program_count: apiResults.programs.length,
+      program_count: eligiblePrograms.length,
       total_estimated_value: totalEstimatedValue,
     });
 
@@ -202,13 +210,11 @@ const Results = ({ type }: ResultsProps) => {
     // once per screening — not on filter re-renders.
     trackItemList(
       'results_programs',
-      apiResults.programs
-        .filter((program) => program.eligible && programValue(program) > 0 && !program.already_has)
-        .map((program, index) => ({
-          item_id: String(program.program_id),
-          item_name: program.name.default_message,
-          item_list_index: index,
-        })),
+      eligiblePrograms.map((program, index) => ({
+        item_id: String(program.program_id),
+        item_name: program.name.default_message,
+        item_list_index: index,
+      })),
     );
   }, [apiResults, track, trackItemList]);
 
@@ -246,9 +252,10 @@ const Results = ({ type }: ResultsProps) => {
   // "None eligible" needs BOTH result sets resolved, or we'd fire a false
   // negative while rebates are still loading (and the once-guard would prevent
   // correction). On the energy calculator, rebates load async and are undefined
-  // until resolved. Derived from the UNFILTERED sets so a citizenship filter
-  // hiding all programs isn't miscounted as "none eligible". Separate guard so
-  // it stays independent of screener_results_loaded above.
+  // until resolved. Uses the same eligible-and-shown cuts as the impression, NOT
+  // the interactive citizenship filter (so hiding all programs via that filter
+  // isn't miscounted as "none eligible"). Separate guard so it stays independent
+  // of screener_results_loaded above.
   const hasTrackedNoneEligible = useRef(false);
   useEffect(() => {
     const rebatesLoading = whiteLabel === 'cesn' && energyCalculatorRebateCategories === undefined;
@@ -257,8 +264,15 @@ const Results = ({ type }: ResultsProps) => {
     }
 
     hasTrackedNoneEligible.current = true;
+    // apiResults.programs is the full catalog; count the ones actually eligible
+    // and shown. The old `apiResults.programs.length === 0` check was never true
+    // (the array always holds every program, eligible or not), so this event
+    // never fired.
+    const eligibleCount = apiResults.programs.filter(
+      (program) => program.eligible && programValue(program) > 0 && !program.already_has,
+    ).length;
     const noRebates = (energyCalculatorRebateCategories ?? []).length === 0;
-    if (apiResults.programs.length === 0 && noRebates) {
+    if (eligibleCount === 0 && noRebates) {
       track('screener_results_none_eligible', {});
     }
   }, [apiResults, energyCalculatorRebateCategories, whiteLabel, track]);
