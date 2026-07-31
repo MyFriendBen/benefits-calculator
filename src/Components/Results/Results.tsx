@@ -40,9 +40,9 @@ import { NPSWidget } from '../NPS';
 import ShareModalAutoPopup from '../Share/ShareModalAutoPopup';
 import { useFeatureFlag } from '../Config/configHook';
 import { ChatbotProvider } from './Chatbot/Chatbot';
-import { useTrackEvent } from '../../Assets/analytics';
+import { useTrackEvent, useTrackItemList } from '../../Assets/analytics';
 import { POST_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
-import { calculateTotalValue } from './FormattedValue';
+import { calculateTotalValue, programValue } from './FormattedValue';
 
 // Mounts the Benbot chat widget only when the flag is on; otherwise renders children unchanged.
 // Defined at module scope so its identity is stable across renders (no subtree remount).
@@ -118,6 +118,7 @@ const Results = ({ type }: ResultsProps) => {
   const [apiError, setApiError] = useState(false);
   const [apiResults, setApiResults] = useState<EligibilityResults | undefined>();
   const track = useTrackEvent();
+  const trackItemList = useTrackItemList();
   const hasTrackedResultsLoaded = useRef(false);
 
   useEffect(() => {
@@ -197,16 +198,24 @@ const Results = ({ type }: ResultsProps) => {
       step_action: 'view',
     });
 
-    // One batched impression event with parallel id/name arrays, rather than a
-    // forEach firing one event per program: GA4 coalesces same-name events fired
-    // in a single synchronous tick, dropping most of a ~44-program burst. Guarded
-    // by the same ref, so once per screening — not on filter re-renders.
-    track('screener_programs_shown', {
-      program_ids: apiResults.programs.map((program) => String(program.program_id)),
-      program_names: apiResults.programs.map((program) => program.name.default_message),
-      program_count: apiResults.programs.length,
-    });
-  }, [apiResults, track]);
+    // Programs shown, as one view_item_list impression. Match the intrinsic cuts
+    // filterPrograms applies before rendering a program as a result — eligible,
+    // non-zero value, not already held — so the impression reflects what the user
+    // sees rather than the full catalog the API returns. (The interactive
+    // citizenship filter is deliberately not applied: the impression is the set
+    // shown on load, independent of later filter changes.) Ref-guarded above, so
+    // once per screening — not on filter re-renders.
+    trackItemList(
+      'results_programs',
+      apiResults.programs
+        .filter((program) => program.eligible && programValue(program) > 0 && !program.already_has)
+        .map((program, index) => ({
+          item_id: String(program.program_id),
+          item_name: program.name.default_message,
+          item_list_index: index,
+        })),
+    );
+  }, [apiResults, track, trackItemList]);
 
   // Results-page scroll depth, only on the two browsable tabs (program =
   // long-term benefits, need = additional resources). Each threshold fires once

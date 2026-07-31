@@ -47,6 +47,29 @@ export const EMPTY_INCOME_STREAM: IncomeStreamFormData = {
   hoursPerWeek: '',
 };
 
+// Income category/source keys used to bucket streams behind the three income
+// questions. These mirror the keys in the benefits-api config
+// (configuration/white_labels/base.py `income_options_by_category`).
+export const EMPLOYMENT_CATEGORY = 'employment';
+export const WAGES_SOURCE = 'wages';
+export const SELF_EMPLOYMENT_SOURCE = 'selfEmployment';
+
+// Fully-scoped stream for the "Are they currently employed?" question — category
+// and source (wages) are implied, so no dropdowns are shown.
+export const EMPTY_EMPLOYMENT_INCOME_STREAM: IncomeStreamFormData = {
+  ...EMPTY_INCOME_STREAM,
+  incomeCategory: EMPLOYMENT_CATEGORY,
+  incomeStreamName: WAGES_SOURCE,
+};
+
+// Fully-scoped stream for the "freelance, gig, or occasional work?" question —
+// category and source (self-employment) are implied, so no dropdowns are shown.
+export const EMPTY_GIG_INCOME_STREAM: IncomeStreamFormData = {
+  ...EMPTY_INCOME_STREAM,
+  incomeCategory: EMPLOYMENT_CATEGORY,
+  incomeStreamName: SELF_EMPLOYMENT_SOURCE,
+};
+
 // Error section mapping for scroll-to-error functionality (main workflow)
 export const ERROR_SECTION_MAP = [
   { key: 'birthMonth', id: 'basic-info-section' },
@@ -55,6 +78,9 @@ export const ERROR_SECTION_MAP = [
   { key: 'healthInsurance', id: 'health-insurance-section' },
   { key: 'conditions', id: 'conditions-section' },
   { key: 'studentEligibility', id: 'student-eligibility-section' },
+  { key: 'incomeEmployed', id: 'income-section' },
+  { key: 'incomeGig', id: 'income-section' },
+  { key: 'incomeOther', id: 'income-section' },
   { key: 'incomeStreams', id: 'income-stream' },
 ] as const;
 
@@ -65,5 +91,8 @@ export const ENERGY_CALCULATOR_ERROR_SECTION_MAP = [
   { key: 'relationshipToHH', id: 'basic-info-section' },
   { key: 'conditions', id: 'conditions-section' },
   { key: 'receivesSsi', id: 'conditions-section' },
+  { key: 'incomeEmployed', id: 'income-section' },
+  { key: 'incomeGig', id: 'income-section' },
+  { key: 'incomeOther', id: 'income-section' },
   { key: 'incomeStreams', id: 'income-stream' },
 ] as const;

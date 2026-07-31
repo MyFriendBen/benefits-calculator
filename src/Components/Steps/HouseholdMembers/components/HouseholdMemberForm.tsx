@@ -8,7 +8,6 @@ import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
 import HouseholdMemberSummaryCards from './HouseholdMemberSummaryCards';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { SubmitHandler, useFieldArray, useWatch } from 'react-hook-form';
-import { useAgeCalculation } from '../../../AgeCalculation/useAgeCalculation';
 import { mfbZodResolver } from '../../../../Assets/analytics/mfbZodResolver';
 import PrevAndContinueButtons from '../../../PrevAndContinueButtons/PrevAndContinueButtons';
 import useScreenApi from '../../../../Assets/updateScreen';
@@ -29,7 +28,7 @@ import StudentEligibilitySection from '../sections/StudentEligibilitySection';
 import IncomeSection from '../sections/IncomeSection';
 import BasicInfoSection from '../sections/BasicInfoSection';
 import { useTrackEvent } from '../../../../Assets/analytics';
-import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
+import { HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
 
 const HouseholdMemberForm = () => {
   const isEnergyCalculator = useIsEnergyCalculator();
@@ -127,11 +126,6 @@ const HouseholdMemberForm = () => {
     name: 'incomeStreams',
   });
 
-  // AGE CALCULATION
-  const { calculateCurrentAgeStatus } = useAgeCalculation(watch);
-
-  const watchBirthMonth = useWatch({ control, name: 'birthMonth' });
-  const watchBirthYear = useWatch({ control, name: 'birthYear' });
   const watchIsStudent = useWatch({ control, name: 'conditions.student' });
   const watchIsDisabled = useWatch({ control, name: 'conditions.disabled' });
 
@@ -144,10 +138,6 @@ const HouseholdMemberForm = () => {
     setValue,
     getValues,
     reset,
-    append,
-    calculateCurrentAgeStatus,
-    watchBirthMonth,
-    watchBirthYear,
     watchIsStudent,
     watchIsDisabled,
   });
@@ -179,17 +169,6 @@ const HouseholdMemberForm = () => {
 
     // This page navigates manually (onSubmitSuccessfulOverride) instead of through
     // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
-    // (Edits entered via the summary cards' edit button already fire their own
-    // 'edit' screener_household_member event on entry — see HouseholdMemberSummaryCards
-    // — so this submit only reports a new-member 'add' the first time a member's
-    // details are saved, to avoid double-counting the same edit.)
-    if (!isEditing) {
-      track('screener_household_member', {
-        screener_step_name: getStepAnalyticsId(questionName),
-        screener_step_number: currentStepId,
-        action: 'add',
-      });
-    }
     track('screener_form_step', {
       screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberDetails,
       screener_step_number: currentStepId,
@@ -307,6 +286,7 @@ const HouseholdMemberForm = () => {
         append={append}
         remove={remove}
         setValue={setValue}
+        clearErrors={clearErrors}
         incomeCategories={incomeCategories}
         incomeOptions={incomeOptions}
         frequencyMenuItems={frequencyMenuItems}
@@ -326,7 +306,12 @@ const HouseholdMemberForm = () => {
 
       <form onSubmit={handleSubmit(formSubmitHandler, handleFormError)}>
         {renderFormSections()}
-        <PrevAndContinueButtons backNavigationFunction={navigateBack} stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberDetails} />
+        {/* Promote Continue to the primary action on the income step. */}
+        <PrevAndContinueButtons
+          backNavigationFunction={navigateBack}
+          continueVariant="contained"
+          stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberDetails}
+        />
       </form>
     </main>
   );
