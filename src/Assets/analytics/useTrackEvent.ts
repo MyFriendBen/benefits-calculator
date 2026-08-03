@@ -25,8 +25,7 @@ function resolveScreenerContext(
     whiteLabel ??
     (contextWhiteLabel && contextWhiteLabel !== DEFAULT_WHITE_LABEL ? contextWhiteLabel : undefined) ??
     (urlWhiteLabel !== DEFAULT_WHITE_LABEL ? urlWhiteLabel : undefined);
-  const screenerPath =
-    formPath === 'renter' ? 'renter' : formPath === 'default' ? 'homeowner' : undefined;
+  const screenerPath = formPath === 'renter' ? 'renter' : formPath === 'default' ? 'homeowner' : undefined;
   return {
     screener_state: screenerState,
     screener_uid: uuid ?? getUuidFromUrl(),

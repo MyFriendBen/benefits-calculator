@@ -46,7 +46,8 @@ describe('useTrackEvent screener_path', () => {
     mockFormPath = undefined;
   });
 
-  const lastPayload = () => trackEventMock.mock.calls[trackEventMock.mock.calls.length - 1][1] as Record<string, unknown>;
+  const lastPayload = () =>
+    trackEventMock.mock.calls[trackEventMock.mock.calls.length - 1][1] as Record<string, unknown>;
 
   it('marks a CESN renter screening as "renter"', () => {
     mockParams = { whiteLabel: 'cesn', uuid: 'abc' };
