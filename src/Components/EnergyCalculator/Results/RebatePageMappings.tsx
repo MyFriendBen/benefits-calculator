@@ -155,6 +155,30 @@ const ITEM_NAME_MAP: Record<EnergyCalculatorItemType, MessageConfig> = {
     id: 'energyCalculator.rebatePage.title.itemName.wallInsulation',
     defaultMessage: 'wall insulation',
   },
+  new_electric_vehicle: {
+    id: 'energyCalculator.rebatePage.title.itemName.newElectricVehicle',
+    defaultMessage: 'a new electric vehicle',
+  },
+  used_electric_vehicle: {
+    id: 'energyCalculator.rebatePage.title.itemName.usedElectricVehicle',
+    defaultMessage: 'a used electric vehicle',
+  },
+  new_plugin_hybrid_vehicle: {
+    id: 'energyCalculator.rebatePage.title.itemName.newPluginHybridVehicle',
+    defaultMessage: 'a new plug-in hybrid vehicle',
+  },
+  used_plugin_hybrid_vehicle: {
+    id: 'energyCalculator.rebatePage.title.itemName.usedPluginHybridVehicle',
+    defaultMessage: 'a used plug-in hybrid vehicle',
+  },
+  electric_vehicle_charger: {
+    id: 'energyCalculator.rebatePage.title.itemName.electricVehicleCharger',
+    defaultMessage: 'an electric vehicle charger',
+  },
+  ebike: {
+    id: 'energyCalculator.rebatePage.title.itemName.ebike',
+    defaultMessage: 'an e-bike',
+  },
 };
 
 /**
@@ -249,6 +273,10 @@ const PAGE_TITLE_MAP: Record<EnergyCalculatorRebateCategoryType, MessageConfig> 
   stove: {
     id: 'energyCalculator.rebatePage.title.itemName.pageStove',
     defaultMessage: 'upgrades',
+  },
+  electricVehiclesAndBikes: {
+    id: 'energyCalculator.rebatePage.title.itemName.pageElectricVehiclesAndBikes',
+    defaultMessage: 'electric vehicles & bikes',
   },
 };
 

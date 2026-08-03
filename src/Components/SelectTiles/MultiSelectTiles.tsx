@@ -47,21 +47,25 @@ function Tile<T extends string | number>({ option, selected, onClick, variant }:
   );
 }
 
-type MultiSelectTilesProps<T extends string | number> = {
+// `V` mirrors the caller's value shape: a click spreads the existing object and sets one
+// key, never removing any, so the emitted object has the same keys it came in with. Typing
+// onChange as `Partial<...>` would flatten that guarantee and break callers whose form
+// schema requires every key to be present.
+type MultiSelectTilesProps<T extends string | number, V extends Partial<Record<T, boolean>>> = {
   options: MultiSelectTileOption<T>[];
-  values: Partial<Record<T, boolean>>;
-  onChange: (value: Partial<Record<T, boolean>>) => void;
+  values: V;
+  onChange: (value: V) => void;
   variant?: 'square' | 'flat';
   exclusiveValues?: T[];
 };
 
-function MultiSelectTiles<T extends string | number>({
+function MultiSelectTiles<T extends string | number, V extends Partial<Record<T, boolean>>>({
   options,
   values,
   onChange,
   variant = 'flat',
   exclusiveValues = [],
-}: MultiSelectTilesProps<T>) {
+}: MultiSelectTilesProps<T, V>) {
   const handleTileClick = useCallback(
     (clickedValue: T) => {
       const newValues = { ...values } as Record<T, boolean>;
@@ -77,7 +81,7 @@ function MultiSelectTiles<T extends string | number>({
       }
 
       newValues[clickedValue] = selecting;
-      onChange(newValues);
+      onChange(newValues as V);
     },
     [values, exclusiveValues, onChange],
   );
