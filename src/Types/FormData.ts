@@ -40,7 +40,8 @@ export type EnergyCalculatorMember = {
 };
 
 export type HouseholdData = {
-  id: number;
+  /** backend DB pk, set by the API only — absent for members created client-side */
+  id?: number;
   frontendId: string;
   /** deprecated: used for historical screens only */
   age?: number;

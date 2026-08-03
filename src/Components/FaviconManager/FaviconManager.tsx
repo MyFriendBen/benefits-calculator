@@ -51,13 +51,13 @@ const FaviconManager = () => {
       const link16 = document.createElement('link');
       link16.rel = 'icon';
       link16.type = 'image/png';
-      link16.sizes = '16x16';
+      link16.setAttribute('sizes', '16x16');
       link16.href = cacheBustedPath;
 
       const link32 = document.createElement('link');
       link32.rel = 'icon';
       link32.type = 'image/png';
-      link32.sizes = '32x32';
+      link32.setAttribute('sizes', '32x32');
       link32.href = cacheBustedPath;
 
       // Add shortcut icon for older browsers
