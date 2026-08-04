@@ -169,6 +169,12 @@ export default function CalculateImpactPage() {
   // refire it — we only want to record that the field was engaged, once.
   const hasTrackedAddressFieldRef = useRef(false);
 
+  // Reaching the calculator: the denominator for the field and submit events.
+  useEffect(() => {
+    track('heat_pump_section_view', { section: 'calculator' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const backLink = addAdminToLink(`/${whiteLabel}/${uuid}/results/energy-rebates/hvac`, isAdminView);
 
   const {

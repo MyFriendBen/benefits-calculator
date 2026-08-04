@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -16,6 +17,15 @@ export default function HeatPumpJourneyCards() {
   const track = useTrackEvent();
   const billsImpactLink = useResultsLink('results/energy-rebates/waterHeater/calculate-impact');
   const contractorsLink = useResultsLink('results/energy-rebates/waterHeater/connect-now');
+
+  // The three cards render together, so each is seen when this mounts. These are
+  // the denominators for the learn-more click and the two CTA clicks below.
+  useEffect(() => {
+    track('heat_pump_section_view', { section: 'why_heat_pump' });
+    track('heat_pump_section_view', { section: 'bills_impact' });
+    track('heat_pump_section_view', { section: 'find_contractor' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const sectionAriaLabel = intl.formatMessage({
     id: 'energyCalculator.heatPumpJourney.sectionAriaLabel',

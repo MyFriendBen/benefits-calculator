@@ -6,11 +6,12 @@ import { EnergyCalculatorRebateCardTitle, rebateTypes } from './RebatePageMappin
 import { Icon } from '../../Icon/Icon';
 import { renderCategoryDescription } from './rebateTypes';
 import './RebatePage.css';
-import { useMemo, useContext } from 'react';
+import { useMemo, useContext, useEffect } from 'react';
 import { TrackedOutboundLink } from '../../Common/TrackedOutboundLink';
 import { Context } from '../../Wrapper/Wrapper';
 import { HeatPumpJourneyCards } from './HeatPumpJourney';
 import { useFeatureFlag } from '../../Config/configHook';
+import { useTrackEvent } from '../../../Assets/analytics';
 
 // Format expiration date from ISO string to readable format
 const formatExpirationDate = (dateString: string): string => {
@@ -41,7 +42,17 @@ type RebatePageProps = {
 export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePageProps) {
   const backLink = useResultsLink(`results/benefits`);
   const { formData } = useContext(Context);
+  const track = useTrackEvent();
   const showHeatPumpJourney = useFeatureFlag('cesn_heat_pump_journey') && rebateCategory.type === 'hvac';
+
+  // Denominator for the "Learn how to apply" rebate_link_click, fired when the
+  // heat-pump rebates page is shown (the only context that carries the journey).
+  useEffect(() => {
+    if (showHeatPumpJourney) {
+      track('heat_pump_section_view', { section: 'rebates' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showHeatPumpJourney]);
 
   return (
     <main className="benefits-form">

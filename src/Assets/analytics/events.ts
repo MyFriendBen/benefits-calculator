@@ -216,17 +216,15 @@ export interface ScreenerEventMap {
   // ---- Low-priority UI ----
   screener_document_summary_toggle: { expanded: boolean };
 
-  // ---- CESN Heat Pump Journey (MFB-1182) ----
-  // Separate product surface (the energy-calculator heat-pump flow). These are
-  // typed like everything else so GTM only relays them. The pre-existing
-  // heat_pump_journey_* / *_connect_now_* / rebate_link_click events are
-  // outbound_click actions (not in this map) and stay as-is.
+  // ---- CESN Heat Pump Journey ----
+  // Privacy: the calculator collects a street address — never send its value.
+  // The field event records only that the address field was engaged.
   //
-  // PRIVACY: the calculator collects a street address — NEVER send its value.
-  // Record only THAT an address was entered. Household/fuel/project enums and
-  // computed savings/emissions aggregates are non-identifying and safe.
-  // Income/geographic segmentation (Story 4) is done downstream by joining on
-  // screener_uid in dbt/Metabase, not via GA4 params.
+  // section_view is the denominator for the click events: it fires when a section
+  // renders, so a click-through rate is clicks / views of the same section.
+  heat_pump_section_view: {
+    section: 'why_heat_pump' | 'bills_impact' | 'find_contractor' | 'rebates' | 'calculator' | 'contractor_pdf';
+  };
   heat_pump_cta_click: { cta: 'calculate_impact' | 'connect_now' };
   heat_pump_calculator_field: {
     field: 'household_type' | 'address' | 'heating_fuel' | 'water_heating' | 'project_type';
@@ -239,8 +237,7 @@ export interface ScreenerEventMap {
   };
   heat_pump_calculator_edit: {};
   heat_pump_calculator_error: { error_type: 'address_not_supported' | 'error' | 'invalid_response' };
-  // Fired once when results render (post-API-resolution). Deltas are annual;
-  // negative bill_delta = savings, negative emissions_delta = reduction.
+  // Annual deltas: negative bill_delta = savings, negative emissions_delta = reduction.
   heat_pump_calculator_result: {
     annual_bill_delta_median?: number;
     annual_bill_delta_p20?: number;

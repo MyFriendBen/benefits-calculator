@@ -1,5 +1,5 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
@@ -83,6 +83,14 @@ export default function ConnectNowPage() {
   const pdfSectionHeadingId = 'connect-now-pdf-heading';
 
   const contractorGuide = useMemo(() => getContractorGuideAssets(intl.locale), [intl.locale]);
+
+  // Reaching this page is the denominator for the two contractor-search clicks;
+  // the guide viewer renders here too, so it's also the denominator for the PDF.
+  useEffect(() => {
+    track('heat_pump_section_view', { section: 'find_contractor' });
+    track('heat_pump_section_view', { section: 'contractor_pdf' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <main className="benefits-form connect-now-page">
@@ -170,13 +178,10 @@ export default function ConnectNowPage() {
           pdfUrl={contractorGuide.pdfUrl}
           title={pdfDocumentTitle}
           className="connect-now-pdf-frame"
-          onPageView={(n) => {
-            // Ticket calls out pages 2 & 3 specifically (page 1 is the landing
-            // view, not a "turn"); still send the actual page number reached.
-            if (n >= 2) {
-              track('heat_pump_pdf_page', { page_number: n });
-            }
-          }}
+          // Fires on every page change (the viewer only calls this on navigation,
+          // so it captures each turn); the PDF-opened denominator is the
+          // contractor_pdf section_view above.
+          onPageView={(n) => track('heat_pump_pdf_page', { page_number: n })}
           onPrint={() => track('heat_pump_pdf_print', {})}
         />
       </section>
