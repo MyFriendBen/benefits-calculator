@@ -240,7 +240,7 @@ export default function CalculateImpactPage() {
           track('heat_pump_calculator_error', { error_type: 'address_not_supported' });
         } else {
           setSubmitState({ status: 'error', message: err.message });
-          track('heat_pump_calculator_error', { error_type: 'error' });
+          track('heat_pump_calculator_error', { error_type: 'error', error_message: err.message });
         }
       });
   };

@@ -236,7 +236,12 @@ export interface ScreenerEventMap {
     project_type?: string;
   };
   heat_pump_calculator_edit: {};
-  heat_pump_calculator_error: { error_type: 'address_not_supported' | 'error' | 'invalid_response' };
+  // error_type is the machine category; error_message carries the human-readable
+  // failure text for the generic case (mapped to friendly labels downstream).
+  heat_pump_calculator_error: {
+    error_type: 'address_not_supported' | 'error' | 'invalid_response';
+    error_message?: string;
+  };
   // Annual deltas: negative bill_delta = savings, negative emissions_delta = reduction.
   heat_pump_calculator_result: {
     annual_bill_delta_median?: number;
