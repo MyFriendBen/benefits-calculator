@@ -98,7 +98,10 @@ export default function ConnectNowPage() {
         <button
           data-testid="back-to-results-button"
           className="results-back-save-buttons"
-          onClick={() => navigate(backLink)}
+          onClick={() => {
+            track('heat_pump_back_click', { from: 'connect_now' });
+            navigate(backLink);
+          }}
           aria-label={intl.formatMessage({
             id: 'energyCalculator.connectNow.backToResults',
             defaultMessage: 'BACK TO RESULTS',

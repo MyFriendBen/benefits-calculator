@@ -256,6 +256,9 @@ export interface ScreenerEventMap {
   };
   heat_pump_pdf_page: { page_number: number };
   heat_pump_pdf_print: {};
+  // Explicit back-navigation out of a journey page, to tell a deliberate exit
+  // apart from silent drop-off.
+  heat_pump_back_click: { from: 'calculator' | 'connect_now' };
 }
 
 export type ScreenerEventName = keyof ScreenerEventMap;

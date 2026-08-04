@@ -177,6 +177,11 @@ export default function CalculateImpactPage() {
 
   const backLink = addAdminToLink(`/${whiteLabel}/${uuid}/results/energy-rebates/hvac`, isAdminView);
 
+  const handleBack = () => {
+    track('heat_pump_back_click', { from: 'calculator' });
+    navigate(backLink);
+  };
+
   const {
     control,
     handleSubmit,
@@ -252,7 +257,7 @@ export default function CalculateImpactPage() {
           <button
             data-testid="back-to-results-button"
             className="results-back-save-buttons"
-            onClick={() => navigate(backLink)}
+            onClick={handleBack}
             aria-label={intl.formatMessage({
               id: 'energyCalculator.calculateImpact.backToResults',
               defaultMessage: 'BACK TO RESULTS',
@@ -319,7 +324,7 @@ export default function CalculateImpactPage() {
         <button
           data-testid="back-to-results-button"
           className="results-back-save-buttons"
-          onClick={() => navigate(backLink)}
+          onClick={handleBack}
           aria-label={intl.formatMessage({
             id: 'energyCalculator.calculateImpact.backToResults',
             defaultMessage: 'BACK TO RESULTS',
