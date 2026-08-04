@@ -1,6 +1,6 @@
 import { Language } from '@mui/icons-material';
 import { englishToNepaliNumber } from 'nepali-number';
-import { ReactNode, useContext, useMemo } from 'react';
+import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useConfig } from '../Components/Config/configHook';
 import { Context } from '../Components/Wrapper/Wrapper';
@@ -29,25 +29,6 @@ export const LANGUAGE_OPTIONS: Record<Language, string> = {
 };
 
 export const rightToLeftLanguages = ['ar', 'ur'];
-
-// Reorder a list of elements based on the selected locale. A key might need to be added to the FormattedMessage.
-export function useReorderLanguage(text: ReactNode[], order: { [key in Language]?: number[] }) {
-  const { locale } = useContext(Context);
-
-  return useMemo(() => {
-    const localeOrder = order[locale];
-    if (localeOrder === undefined) {
-      return text;
-    }
-
-    const localeText = [];
-    for (const index of localeOrder) {
-      localeText.push(text[index]);
-    }
-
-    return localeText;
-  }, [locale, order]);
-}
 
 export function translateNumber(number: number | string, locale: Language) {
   if (locale === 'ne') {

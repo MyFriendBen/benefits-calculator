@@ -6,7 +6,7 @@ import { useContext, useEffect } from 'react';
 import { Context } from '../Wrapper/Wrapper';
 import dataLayerPush from '../../Assets/analytics';
 import './ProgressBar.css';
-import { useReorderLanguage, useTranslateNumber } from '../../Assets/languageOptions';
+import { useTranslateNumber } from '../../Assets/languageOptions';
 
 interface ProgressBarProps {
   step?: number;
@@ -38,14 +38,14 @@ const ProgressBar = ({ step }: ProgressBarProps) => {
 
   let stepValue = step ?? id ?? getStepFromPath() ?? 0;
 
-  const stepText = useReorderLanguage(
-    [
-      <FormattedMessage id="confirmation.return-stepLabel" defaultMessage="Step " key="0" />,
-      translateNumber(stepValue),
-      <FormattedMessage id="confirmation.return-ofLabel" defaultMessage=" of " key="1" />,
-      translateNumber(totalSteps),
-    ],
-    { my: [0, 3, 2, 1] },
+  // One message with named placeholders, so each locale controls word order in its own
+  // translation rather than needing the fragments reordered in code.
+  const stepText = (
+    <FormattedMessage
+      id="progressBar.stepOf"
+      defaultMessage="Step {step} of {total}"
+      values={{ step: translateNumber(stepValue), total: translateNumber(totalSteps) }}
+    />
   );
 
   // Don't render progress bar if we're not on a valid step page
