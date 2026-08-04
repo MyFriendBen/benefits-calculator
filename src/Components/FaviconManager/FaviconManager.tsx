@@ -21,20 +21,10 @@ const FaviconManager = () => {
       let faviconPath = 'favicon.ico'; // default
 
       try {
+        // getReferrer resolves the referrer-specific value (or its default) and returns a string
         const faviconSource = context.getReferrer('faviconSource');
         if (faviconSource) {
-          // faviconSource might be a string (for specific white label) or an object
-          if (typeof faviconSource === 'string') {
-            // Direct string value from getReferrer
-            faviconPath = faviconSource;
-          } else if (typeof faviconSource === 'object') {
-            // Object with white label keys
-            if (white_label && faviconSource[white_label]) {
-              faviconPath = faviconSource[white_label];
-            } else if (faviconSource.default) {
-              faviconPath = faviconSource.default;
-            }
-          }
+          faviconPath = faviconSource;
         }
       } catch (error) {
         // If getReferrer fails, use default favicon
