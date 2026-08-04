@@ -47,9 +47,13 @@ export function useStepDirectory() {
   return steps;
 }
 
-export function useStepNumber(name: QuestionName, raise: boolean = true) {
+export function useStepNumber(name: QuestionName | undefined, raise: boolean = true) {
   // The second argument is an optional boolean that you can use if you need to access the step number before the config is loaded.
   const stepDirectory = useStepDirectory();
+
+  if (name === undefined) {
+    return -1;
+  }
 
   const stepNumber = stepDirectory.findIndex((question) => question === name);
 
