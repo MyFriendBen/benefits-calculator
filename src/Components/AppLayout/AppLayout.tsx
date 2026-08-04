@@ -1,3 +1,4 @@
+import { CssBaseline } from '@mui/material';
 import Box from '@mui/material/Box';
 import { useContext } from 'react';
 import { Context } from '../Wrapper/Wrapper';
@@ -23,6 +24,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
 
   return (
     <div className="app">
+      <CssBaseline />
       <FaviconManager />
       <BrandedHeader />
       <Box className="main-max-width">
