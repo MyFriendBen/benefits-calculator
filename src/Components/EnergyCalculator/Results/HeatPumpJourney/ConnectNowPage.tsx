@@ -4,7 +4,6 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { Typography } from '@mui/material';
-import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import PagedDocumentViewer from '../../../Common/PagedDocumentViewer';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
@@ -141,32 +140,32 @@ export default function ConnectNowPage() {
           defaultMessage: 'Contractor search links',
         })}
       >
-        <TrackedOutboundLink
+        <a
           href={CONTRACTOR_FINDER_URL}
-          action="heat_pump_connect_now_find_installer"
-          label="Power Ahead Colorado Contractor Finder"
-          category="heat_pump_journey"
+          target="_blank"
+          rel="noopener noreferrer"
           className="connect-now-cta"
+          onClick={() => track('heat_pump_connect_now_find_installer', { url: CONTRACTOR_FINDER_URL })}
         >
           <FormattedMessage id="energyCalculator.connectNow.cta.findInstaller" defaultMessage="Find an installer" />
           <OpenInNewIcon className="connect-now-cta-icon" aria-hidden="true" />
-        </TrackedOutboundLink>
+        </a>
         <Typography variant="body1" className="connect-now-cta-interstitial">
           <FormattedMessage
             id="energyCalculator.connectNow.cta.interstitial"
             defaultMessage="If you are unable to find someone in your area, try an expanded search."
           />
         </Typography>
-        <TrackedOutboundLink
+        <a
           href={EXPAND_SEARCH_URL}
-          action="heat_pump_connect_now_expand_search"
-          label="Love Electric HVACREE expand search"
-          category="heat_pump_journey"
+          target="_blank"
+          rel="noopener noreferrer"
           className="connect-now-cta"
+          onClick={() => track('heat_pump_connect_now_expand_search', { url: EXPAND_SEARCH_URL })}
         >
           <FormattedMessage id="energyCalculator.connectNow.cta.expandSearch" defaultMessage="Expand search" />
           <OpenInNewIcon className="connect-now-cta-icon" aria-hidden="true" />
-        </TrackedOutboundLink>
+        </a>
       </section>
 
       <section className="connect-now-pdf-section" aria-labelledby={pdfSectionHeadingId}>
@@ -181,10 +180,9 @@ export default function ConnectNowPage() {
           pdfUrl={contractorGuide.pdfUrl}
           title={pdfDocumentTitle}
           className="connect-now-pdf-frame"
-          // Fires on every page change (the viewer only calls this on navigation,
-          // so it captures each turn); the PDF-opened denominator is the
-          // contractor_pdf section_view above.
+          // Fires page 1 on mount (PDF-opened denominator) and each page turn.
           onPageView={(n) => track('heat_pump_pdf_page', { page_number: n })}
+          onFullscreen={() => track('heat_pump_pdf_fullscreen', {})}
           onPrint={() => track('heat_pump_pdf_print', {})}
         />
       </section>

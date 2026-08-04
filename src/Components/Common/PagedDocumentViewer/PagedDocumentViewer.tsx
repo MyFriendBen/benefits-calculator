@@ -20,13 +20,16 @@ export type PagedDocumentViewerProps = {
   title: string;
   className?: string;
   /**
-   * Called with the 1-based page number whenever the visible page changes via
-   * the pager controls or arrow keys. This is a reusable common component, so
-   * it never fires analytics itself — callers wire this to their own tracking.
+   * Called with the 1-based page number when the viewer first mounts (page 1)
+   * and whenever the visible page changes via the pager controls or arrow keys.
+   * This is a reusable common component, so it never fires analytics itself —
+   * callers wire this to their own tracking.
    */
   onPageView?: (pageNumber: number) => void;
   /** Called when the user triggers the Print/Download action. */
   onPrint?: () => void;
+  /** Called when the user enters fullscreen. */
+  onFullscreen?: () => void;
 };
 
 /**
@@ -42,6 +45,7 @@ export default function PagedDocumentViewer({
   className,
   onPageView,
   onPrint,
+  onFullscreen,
 }: PagedDocumentViewerProps) {
   const intl = useIntl();
   const [pageIndex, setPageIndex] = useState(0);
@@ -105,6 +109,13 @@ export default function PagedDocumentViewer({
     [handlePagingKey],
   );
 
+  // Report page 1 once on mount — the "document opened" signal, so callers have a
+  // denominator for later page turns.
+  useEffect(() => {
+    onPageView?.(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     const onChange = () => {
       const nowFullscreen = document.fullscreenElement === rootRef.current;
@@ -114,11 +125,12 @@ export default function PagedDocumentViewer({
       // arrow-key paging works immediately.
       if (nowFullscreen) {
         pageAreaRef.current?.focus();
+        onFullscreen?.();
       }
     };
     document.addEventListener('fullscreenchange', onChange);
     return () => document.removeEventListener('fullscreenchange', onChange);
-  }, []);
+  }, [onFullscreen]);
 
   // While fullscreen, page on arrow keys no matter which control inside the
   // viewer holds focus (e.g. the toggle button right after entering).

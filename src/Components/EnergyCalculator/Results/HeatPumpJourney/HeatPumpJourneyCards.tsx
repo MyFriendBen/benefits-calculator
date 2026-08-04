@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import { useResultsLink } from '../../../Results/Results';
 import { useTrackEvent } from '../../../../Assets/analytics';
 import './HeatPumpJourneyCards.css';
@@ -52,16 +51,16 @@ export default function HeatPumpJourneyCards() {
             defaultMessage="Many customers see cost savings from switching to a heat pump. They reduce your carbon footprint and can improve air quality."
           />
         </p>
-        <TrackedOutboundLink
+        <a
           href={POWER_AHEAD_LEARN_MORE_URL}
-          action="heat_pump_journey_learn_more_click"
-          label="Power Ahead Colorado - Why Heat Pumps"
-          category="heat_pump_journey"
+          target="_blank"
+          rel="noopener noreferrer"
           className="heat-pump-journey-card-cta"
+          onClick={() => track('heat_pump_journey_learn_more_click', { url: POWER_AHEAD_LEARN_MORE_URL })}
         >
           <FormattedMessage id="energyCalculator.heatPumpJourney.card1.cta" defaultMessage="Learn more" />
           <OpenInNewIcon className="heat-pump-journey-card-cta-icon" aria-hidden="true" />
-        </TrackedOutboundLink>
+        </a>
       </article>
 
       <article className="heat-pump-journey-card">

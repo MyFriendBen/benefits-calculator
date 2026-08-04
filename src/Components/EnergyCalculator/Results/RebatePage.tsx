@@ -99,6 +99,7 @@ type RebateProps = {
 };
 
 function RebateCard({ rebate, rebateCategory }: RebateProps) {
+  const track = useTrackEvent();
   const rebateUrl = useMemo(() => {
     const url = new URL(rebate.program_url);
 
@@ -153,18 +154,38 @@ function RebateCard({ rebate, rebateCategory }: RebateProps) {
         Remains in code as CDS wanted the option to reintroduce it easily
       */}
       <div className="energy-calculator-rebate-page-more-info">
-        <TrackedOutboundLink
-          href={rebateUrl}
-          action="rebate_link_click"
-          label={rebate.program}
-          category="energy_rebate"
-          additionalData={{
-            rebate_type: rebate.payment_methods.join(', '),
-            rebate_category: rebateCategory.type,
-          }}
-        >
-          <FormattedMessage id="energyCalculator.rebatePage.applyButton" defaultMessage="Learn how to apply" />
-        </TrackedOutboundLink>
+        {rebateCategory.type === 'hvac' ? (
+          // Heat-pump journey: emit through useTrackEvent so the click carries
+          // screener_uid (the join key Stories 6/7 need), unlike the general
+          // outbound-link path used for other rebate categories below.
+          <a
+            href={rebateUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() =>
+              track('heat_pump_rebate_link_click', {
+                rebate_type: rebate.payment_methods.join(', '),
+                rebate_category: rebateCategory.type,
+                url: rebateUrl,
+              })
+            }
+          >
+            <FormattedMessage id="energyCalculator.rebatePage.applyButton" defaultMessage="Learn how to apply" />
+          </a>
+        ) : (
+          <TrackedOutboundLink
+            href={rebateUrl}
+            action="rebate_link_click"
+            label={rebate.program}
+            category="energy_rebate"
+            additionalData={{
+              rebate_type: rebate.payment_methods.join(', '),
+              rebate_category: rebateCategory.type,
+            }}
+          >
+            <FormattedMessage id="energyCalculator.rebatePage.applyButton" defaultMessage="Learn how to apply" />
+          </TrackedOutboundLink>
+        )}
       </div>
     </div>
   );

@@ -80,15 +80,11 @@ describe('HeatPumpJourneyCards', () => {
 
       fireEvent.click(screen.getByRole('link', { name: /learn more/i }));
 
-      expect(mockDataLayerPush).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: 'outbound_click',
-          action: 'heat_pump_journey_learn_more_click',
-          category: 'heat_pump_journey',
-          label: 'Power Ahead Colorado - Why Heat Pumps',
-          url: 'https://poweraheadcolorado.org/why-heat-pumps?utm_source=cesn',
-        }),
-      );
+      // Emitted via useTrackEvent (not the legacy outbound path) so it carries
+      // screener_uid downstream.
+      expect(mockTrack).toHaveBeenCalledWith('heat_pump_journey_learn_more_click', {
+        url: 'https://poweraheadcolorado.org/why-heat-pumps?utm_source=cesn',
+      });
     });
   });
 

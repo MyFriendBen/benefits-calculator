@@ -222,6 +222,14 @@ export interface ScreenerEventMap {
   //
   // section_view is the denominator for the click events: it fires when a section
   // renders, so a click-through rate is clicks / views of the same section.
+  //
+  // The outbound links (learn more, rebate, the two contractor searches) are
+  // emitted here rather than via TrackedOutboundLink so they carry screener_uid /
+  // screener_state — the join key Stories 5/6/7 need to tie a click to a screening.
+  heat_pump_journey_learn_more_click: { url: string };
+  heat_pump_rebate_link_click: { rebate_type?: string; rebate_category?: string; url: string };
+  heat_pump_connect_now_find_installer: { url: string };
+  heat_pump_connect_now_expand_search: { url: string };
   heat_pump_section_view: {
     section: 'why_heat_pump' | 'bills_impact' | 'find_contractor' | 'rebates' | 'calculator' | 'contractor_pdf';
   };
@@ -256,6 +264,7 @@ export interface ScreenerEventMap {
   };
   heat_pump_pdf_page: { page_number: number };
   heat_pump_pdf_print: {};
+  heat_pump_pdf_fullscreen: {};
   // Explicit back-navigation out of a journey page, to tell a deliberate exit
   // apart from silent drop-off.
   heat_pump_back_click: { from: 'calculator' | 'connect_now' };
