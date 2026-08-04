@@ -202,6 +202,8 @@ export default function CalculateImpactResults({
       annual_bill_delta_p20: billP20,
       annual_bill_delta_p80: billP80,
       annual_emissions_delta_median: emMedian,
+      annual_emissions_delta_p20: emP20,
+      annual_emissions_delta_p80: emP80,
       project_type: formValues.upgradeChoice,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

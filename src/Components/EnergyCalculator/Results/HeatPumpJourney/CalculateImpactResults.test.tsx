@@ -4,6 +4,13 @@ import { MemoryRouter } from 'react-router-dom';
 import CalculateImpactResults from './CalculateImpactResults';
 import type { RemImpactApiResponse, CalculateImpactFormValues } from './remCalculateImpactTypes';
 
+const mockTrack = jest.fn();
+jest.mock('../../../../Assets/analytics', () => ({
+  __esModule: true,
+  default: jest.fn(),
+  useTrackEvent: () => mockTrack,
+}));
+
 // ─── Shared test data ──────────────────────────────────────────────────────────
 
 const FORM_VALUES: CalculateImpactFormValues = {
@@ -88,6 +95,22 @@ const renderResults = (
 // ─── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('CalculateImpactResults', () => {
+  describe('analytics', () => {
+    it('fires heat_pump_calculator_result with the full bill and emissions range on mount', () => {
+      mockTrack.mockClear();
+      renderResults(ALL_NEGATIVE_RESULT);
+      expect(mockTrack).toHaveBeenCalledWith('heat_pump_calculator_result', {
+        annual_bill_delta_median: -200,
+        annual_bill_delta_p20: -300,
+        annual_bill_delta_p80: -100,
+        annual_emissions_delta_median: -200,
+        annual_emissions_delta_p20: -300,
+        annual_emissions_delta_p80: -100,
+        project_type: 'heat_pump_water_heater',
+      });
+    });
+  });
+
   describe('household info summary', () => {
     it('renders submitted address, household type, and fuels', () => {
       renderResults(ALL_NEGATIVE_RESULT);

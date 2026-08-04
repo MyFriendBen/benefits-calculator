@@ -243,11 +243,15 @@ export interface ScreenerEventMap {
     error_message?: string;
   };
   // Annual deltas: negative bill_delta = savings, negative emissions_delta = reduction.
+  // Both deltas carry the full median / p20 / p80 range the results UI shows, so
+  // trends and ranges can be built for either downstream.
   heat_pump_calculator_result: {
     annual_bill_delta_median?: number;
     annual_bill_delta_p20?: number;
     annual_bill_delta_p80?: number;
     annual_emissions_delta_median?: number;
+    annual_emissions_delta_p20?: number;
+    annual_emissions_delta_p80?: number;
     project_type?: string;
   };
   heat_pump_pdf_page: { page_number: number };
