@@ -111,7 +111,8 @@ const Results = ({ type }: ResultsProps) => {
   const noHelpButton = getReferrer('uiOptions').includes('no_results_more_help');
 
   const [searchParams] = useSearchParams();
-  const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams.get('admin')]);
+  const adminParam = searchParams.get('admin');
+  const isAdminView = useMemo(() => adminParam === 'true', [adminParam]);
 
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
@@ -157,6 +158,10 @@ const Results = ({ type }: ResultsProps) => {
 
   useEffect(() => {
     fetchResults();
+    // Fetch results once on mount. `fetchResults` is intentionally excluded so a
+    // mid-mount change to the admin query param or uuid can't trigger an
+    // unguarded refetch — this preserves the original mount-only behavior.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [filterState, setFilterState] = useState<FilterState>(createInitialFilterState());

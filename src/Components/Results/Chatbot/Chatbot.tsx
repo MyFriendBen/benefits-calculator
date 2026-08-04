@@ -145,7 +145,7 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
         });
     }
     return startPromiseRef.current;
-  }, [uuid, errorMessage]);
+  }, [uuid]);
 
   const sendMessage = useCallback(
     async (text: string) => {

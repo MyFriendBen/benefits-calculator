@@ -115,7 +115,7 @@ export function useDefaultBackNavigationFunction(questionName: QuestionName) {
     }
 
     return `/${whiteLabel}/${uuid}/step-${currentStepId - 1}`;
-  }, [prevStepName]);
+  }, [prevStepName, whiteLabel, uuid, currentStepId, formData.householdData.length]);
 
   return () => navigate(prevUrl);
 }

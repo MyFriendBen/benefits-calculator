@@ -43,7 +43,7 @@ export default function useStepForm<T extends FieldValues>({
 
   useEffect(() => {
     setStepLoading(isSubmitting);
-  }, [isSubmitting]);
+  }, [isSubmitting, setStepLoading]);
 
   useEffect(() => {
     if (isSubmitSuccessful) {

@@ -11,13 +11,13 @@ import { Context } from '../../Wrapper/Wrapper';
 type Props = { referrer: string };
 
 const JeffcoLandingPage = ({ referrer }: Props) => {
-  const { formData, setFormData } = useContext(Context);
+  const { setFormData } = useContext(Context);
   const navigate = useNavigate();
   const queryString = useQueryString();
 
   useEffect(() => {
-    setFormData({ ...formData, immutableReferrer: referrer, referralSource: 'jeffcoHS' });
-  }, []);
+    setFormData((prevFormData) => ({ ...prevFormData, immutableReferrer: referrer, referralSource: 'jeffcoHS' }));
+  }, [setFormData, referrer]);
 
   const handleGetStarted = () => {
     navigate(`/co/step-1${queryString}`);

@@ -99,6 +99,11 @@ const CurrentBenefits = () => {
       setUrgentNeedCategories(sorted);
       setUrgentNeedsLoaded(true);
     });
+    // Fetch once on mount. `whiteLabel` is fixed for this route's lifetime, and
+    // `sortAlphabetically` is re-created every render (it closes over `intl`), so
+    // depending on it would re-fetch on every render. Programs are sorted with
+    // the locale active at load time.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const displayProgramSection = (program: Program, index: number) => {

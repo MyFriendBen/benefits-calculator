@@ -32,7 +32,11 @@ const Header = () => {
     }
 
     return `/${whiteLabel}/step-1${queryString}`;
-  }, [whiteLabel]);
+    // `getReferrer` is intentionally excluded: it's re-created every render, and
+    // the `uiOptions` it reads are fixed for the header's lifetime once config
+    // loads. The reactive inputs that actually change the URL are listed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [whiteLabel, queryString, landingPageQueryString]);
 
   const selectLangAriaLabelProps = {
     id: 'header.selectLang-AL',
@@ -81,6 +85,10 @@ const Header = () => {
     }
 
     return className;
+    // `getReferrer` is intentionally excluded: it's re-created every render, and
+    // the `uiOptions` it reads are fixed for the header's lifetime once config
+    // loads. `formData.frozen` is the only reactive input.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.frozen]);
 
   return (
