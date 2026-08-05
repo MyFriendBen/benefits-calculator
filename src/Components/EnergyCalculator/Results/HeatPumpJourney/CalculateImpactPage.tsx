@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { mfbZodResolver } from '../../../../Assets/analytics/mfbZodResolver';
+import { collectFieldErrors } from '../../../../Assets/analytics/errorLabels';
 import * as z from 'zod';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -18,11 +19,11 @@ import {
 } from '@mui/material';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { Alert, CircularProgress } from '@mui/material';
-import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
 import { addAdminToLink } from '../../../../Assets/adminLink';
 import { useFeatureFlag } from '../../../Config/configHook';
+import { useTrackEvent } from '../../../../Assets/analytics';
 import {
   type CalculateImpactHouseholdType,
   type CalculateImpactUpgradeChoice,
@@ -163,8 +164,24 @@ export default function CalculateImpactPage() {
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams]);
   const showCalculateImpact = useFeatureFlag('cesn_heat_pump_journey');
   const [submitState, setSubmitState] = useState<SubmitState>({ status: 'idle' });
+  const track = useTrackEvent();
+
+  // Reaching the calculator: the denominator for the field and submit events.
+  // Gated on the feature flag — the component returns null when it's off, so an
+  // ungated effect would count views the user never actually saw.
+  useEffect(() => {
+    if (showCalculateImpact) {
+      track('heat_pump_section_view', { section: 'calculator' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showCalculateImpact]);
 
   const backLink = addAdminToLink(`/${whiteLabel}/${uuid}/results/energy-rebates/hvac`, isAdminView);
+
+  const handleBack = () => {
+    track('heat_pump_back_click', { from: 'calculator' });
+    navigate(backLink);
+  };
 
   const {
     control,
@@ -172,7 +189,7 @@ export default function CalculateImpactPage() {
     resetField,
     formState: { errors },
   } = useForm<CalculateImpactFormData>({
-    resolver: zodResolver(calculateImpactSchema),
+    resolver: mfbZodResolver(calculateImpactSchema),
     defaultValues: {
       householdType: undefined,
       address: '',
@@ -196,6 +213,25 @@ export default function CalculateImpactPage() {
 
   if (!showCalculateImpact) return null;
 
+  // Fires for every press of Calculate impact, whether or not validation passes —
+  // the literal "clicked the button" count. Wired via handleSubmit(onSubmit,
+  // onInvalid) so it precedes both the success and validation-failure branches.
+  const onCalculateClick = () => {
+    track('heat_pump_calculator_submit_attempt', {});
+  };
+
+  // Validation failed on submit: emit the first failed field + its rule label
+  // (PII-safe — rule code only, never the entered value), matching the screener's
+  // form-error vocabulary.
+  const onInvalid = (formErrors: typeof errors) => {
+    const [first] = collectFieldErrors(formErrors);
+    track('heat_pump_calculator_error', {
+      error_type: 'validation',
+      field: first?.field,
+      reason: first?.reason,
+    });
+  };
+
   const onSubmit = (data: CalculateImpactFormData) => {
     if (!whiteLabel) return;
     if (submitState.status === 'loading') return;
@@ -208,10 +244,17 @@ export default function CalculateImpactPage() {
     });
     setSubmitState({ status: 'loading' });
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
+    track('heat_pump_calculator_submit', {
+      household_type: data.householdType,
+      heating_fuel: data.heatingFuel,
+      water_heating: data.waterHeatingFuel,
+      project_type: data.upgradeChoice,
+    });
     fetchRemImpact(whiteLabel, payload.remAddressQuery)
       .then((result) => {
         if (!isValidRemImpactApiResponse(result)) {
           setSubmitState({ status: 'error', message: 'Unexpected response from Rewiring America.' });
+          track('heat_pump_calculator_error', { error_type: 'invalid_response' });
           return;
         }
         setSubmitState({ status: 'success', result, formValues: data });
@@ -219,8 +262,10 @@ export default function CalculateImpactPage() {
       .catch((err: Error) => {
         if (err instanceof RemAddressNotSupportedError) {
           setSubmitState({ status: 'address_not_supported' });
+          track('heat_pump_calculator_error', { error_type: 'address_not_supported' });
         } else {
           setSubmitState({ status: 'error', message: err.message });
+          track('heat_pump_calculator_error', { error_type: 'error', error_message: err.message });
         }
       });
   };
@@ -232,7 +277,7 @@ export default function CalculateImpactPage() {
           <button
             data-testid="back-to-results-button"
             className="results-back-save-buttons"
-            onClick={() => navigate(backLink)}
+            onClick={handleBack}
             aria-label={intl.formatMessage({
               id: 'energyCalculator.calculateImpact.backToResults',
               defaultMessage: 'BACK TO RESULTS',
@@ -267,15 +312,17 @@ export default function CalculateImpactPage() {
             defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
             values={{
               rewiringAmerica: (
-                <TrackedOutboundLink
+                <a
                   href="https://www.rewiringamerica.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="link-color"
-                  action="calculate_impact_rewiring_america"
-                  label="Rewiring America"
-                  category="energy_rebate"
+                  onClick={() =>
+                    track('heat_pump_rewiring_america_click', { url: 'https://www.rewiringamerica.org' })
+                  }
                 >
                   <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
-                </TrackedOutboundLink>
+                </a>
               ),
             }}
           />
@@ -284,7 +331,10 @@ export default function CalculateImpactPage() {
         <CalculateImpactResults
           result={submitState.result}
           formValues={submitState.formValues}
-          onEdit={() => setSubmitState({ status: 'idle' })}
+          onEdit={() => {
+            track('heat_pump_calculator_edit', {});
+            setSubmitState({ status: 'idle' });
+          }}
         />
       </main>
     );
@@ -296,7 +346,7 @@ export default function CalculateImpactPage() {
         <button
           data-testid="back-to-results-button"
           className="results-back-save-buttons"
-          onClick={() => navigate(backLink)}
+          onClick={handleBack}
           aria-label={intl.formatMessage({
             id: 'energyCalculator.calculateImpact.backToResults',
             defaultMessage: 'BACK TO RESULTS',
@@ -331,15 +381,17 @@ export default function CalculateImpactPage() {
           defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
           values={{
             rewiringAmerica: (
-              <TrackedOutboundLink
+              <a
                 href="https://www.rewiringamerica.org"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="link-color"
-                action="calculate_impact_rewiring_america"
-                label="Rewiring America"
-                category="energy_rebate"
+                onClick={() =>
+                  track('heat_pump_rewiring_america_click', { url: 'https://www.rewiringamerica.org' })
+                }
               >
                 <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
-              </TrackedOutboundLink>
+              </a>
             ),
           }}
         />
@@ -370,7 +422,16 @@ export default function CalculateImpactPage() {
         </Alert>
       )}
 
-      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <Box
+        component="form"
+        onSubmit={(e) => {
+          // Count the click before RHF runs validation, so the attempt is
+          // recorded whether submission succeeds or fails.
+          onCalculateClick();
+          handleSubmit(onSubmit, onInvalid)(e);
+        }}
+        noValidate
+      >
         <section className="calculate-impact-card" aria-labelledby="calculate-impact-household-heading">
           <h2 id="calculate-impact-household-heading" className="calculate-impact-section-title">
             <FormattedMessage
@@ -400,6 +461,10 @@ export default function CalculateImpactPage() {
                   render={({ field }) => (
                     <Select
                       {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        track('heat_pump_calculator_field', { field: 'household_type' });
+                      }}
                       id="calculate-impact-household-type"
                       value={field.value ?? ''}
                       displayEmpty
@@ -454,7 +519,14 @@ export default function CalculateImpactPage() {
                     fullWidth
                     id="calculate-impact-address"
                     value={field.value}
-                    onChange={field.onChange}
+                    onChange={(value) => {
+                      field.onChange(value);
+                      // Fire on every change like the other fields: distinct uid
+                      // still gives "engaged the field at all", and the repeat
+                      // count gives per-user re-engagement (a confusion signal).
+                      // PRIVACY: still only records THAT the address was engaged.
+                      track('heat_pump_calculator_field', { field: 'address' });
+                    }}
                     error={!!errors.address}
                     helperText={errors.address?.message}
                     placeholder={intl.formatMessage({
@@ -484,6 +556,10 @@ export default function CalculateImpactPage() {
                   render={({ field }) => (
                     <Select
                       {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        track('heat_pump_calculator_field', { field: 'heating_fuel' });
+                      }}
                       id="calculate-impact-heating-fuel"
                       value={field.value ?? ''}
                       displayEmpty
@@ -540,6 +616,10 @@ export default function CalculateImpactPage() {
                   render={({ field }) => (
                     <Select
                       {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        track('heat_pump_calculator_field', { field: 'water_heating' });
+                      }}
                       id="calculate-impact-water-heating-fuel"
                       value={field.value ?? ''}
                       displayEmpty
@@ -604,7 +684,14 @@ export default function CalculateImpactPage() {
               name="upgradeChoice"
               control={control}
               render={({ field }) => (
-                <RadioGroup {...field} value={field.value ?? ''}>
+                <RadioGroup
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    track('heat_pump_calculator_field', { field: 'project_type' });
+                  }}
+                  value={field.value ?? ''}
+                >
                   {UPGRADE_OPTIONS.map((opt) => {
                     const isSelected = field.value === opt.value;
                     const isDisabled = opt.value === 'heat_pump_water_heater' && !isHpwhEnabled;
