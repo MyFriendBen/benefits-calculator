@@ -45,6 +45,12 @@ export function trackItemList(
   params: { item_list_name: ItemListName; items: ItemListItem[] } & ScreenerContext,
 ) {
   const { item_list_name, items, ...context } = params;
+  // Nothing was shown — don't emit an impression. GA4 fabricates a single
+  // all-"(not set)" item for a view_item_list sent with an empty items array,
+  // which then reads downstream as a phantom program/resource.
+  if (items.length === 0) {
+    return;
+  }
   // Clear any ecommerce object left on the dataLayer so items don't merge.
   dataLayerPush({ ecommerce: null });
   dataLayerPush({
