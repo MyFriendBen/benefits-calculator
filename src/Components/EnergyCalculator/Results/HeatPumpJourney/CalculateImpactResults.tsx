@@ -205,6 +205,12 @@ export default function CalculateImpactResults({
       annual_emissions_delta_p20: emP20,
       annual_emissions_delta_p80: emP80,
       project_type: formValues.upgradeChoice,
+      // Echo the inputs so a result is unambiguous when a user re-runs the
+      // calculator with different values (the join to _submit on screener_uid
+      // alone can't tell two runs apart).
+      household_type: formValues.householdType,
+      heating_fuel: formValues.heatingFuel,
+      water_heating: formValues.waterHeatingFuel,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -164,6 +164,7 @@ function RebateCard({ rebate, rebateCategory }: RebateProps) {
             rel="noopener noreferrer"
             onClick={() =>
               track('heat_pump_rebate_link_click', {
+                program: rebate.program,
                 rebate_type: rebate.payment_methods.join(', '),
                 rebate_category: rebateCategory.type,
                 url: rebateUrl,

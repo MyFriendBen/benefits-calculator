@@ -86,7 +86,7 @@ export default function ConnectNowPage() {
   // Reaching this page is the denominator for the two contractor-search clicks;
   // the guide viewer renders here too, so it's also the denominator for the PDF.
   useEffect(() => {
-    track('heat_pump_section_view', { section: 'find_contractor' });
+    track('heat_pump_section_view', { section: 'connect_now_page' });
     track('heat_pump_section_view', { section: 'contractor_pdf' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { mfbZodResolver } from '../../../../Assets/analytics/mfbZodResolver';
+import { collectFieldErrors } from '../../../../Assets/analytics/errorLabels';
 import * as z from 'zod';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -18,7 +19,6 @@ import {
 } from '@mui/material';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { Alert, CircularProgress } from '@mui/material';
-import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
 import { addAdminToLink } from '../../../../Assets/adminLink';
@@ -188,7 +188,7 @@ export default function CalculateImpactPage() {
     resetField,
     formState: { errors },
   } = useForm<CalculateImpactFormData>({
-    resolver: zodResolver(calculateImpactSchema),
+    resolver: mfbZodResolver(calculateImpactSchema),
     defaultValues: {
       householdType: undefined,
       address: '',
@@ -211,6 +211,25 @@ export default function CalculateImpactPage() {
   }, [watchedWaterHeatingFuel, watchedUpgradeChoice, resetField]);
 
   if (!showCalculateImpact) return null;
+
+  // Fires for every press of Calculate impact, whether or not validation passes —
+  // the literal "clicked the button" count. Wired via handleSubmit(onSubmit,
+  // onInvalid) so it precedes both the success and validation-failure branches.
+  const onCalculateClick = () => {
+    track('heat_pump_calculator_submit_attempt', {});
+  };
+
+  // Validation failed on submit: emit the first failed field + its rule label
+  // (PII-safe — rule code only, never the entered value), matching the screener's
+  // form-error vocabulary.
+  const onInvalid = (formErrors: typeof errors) => {
+    const [first] = collectFieldErrors(formErrors);
+    track('heat_pump_calculator_error', {
+      error_type: 'validation',
+      field: first?.field,
+      reason: first?.reason,
+    });
+  };
 
   const onSubmit = (data: CalculateImpactFormData) => {
     if (!whiteLabel) return;
@@ -292,15 +311,17 @@ export default function CalculateImpactPage() {
             defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
             values={{
               rewiringAmerica: (
-                <TrackedOutboundLink
+                <a
                   href="https://www.rewiringamerica.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="link-color"
-                  action="calculate_impact_rewiring_america"
-                  label="Rewiring America"
-                  category="energy_rebate"
+                  onClick={() =>
+                    track('heat_pump_rewiring_america_click', { url: 'https://www.rewiringamerica.org' })
+                  }
                 >
                   <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
-                </TrackedOutboundLink>
+                </a>
               ),
             }}
           />
@@ -359,15 +380,17 @@ export default function CalculateImpactPage() {
           defaultMessage="This data modeling is by {rewiringAmerica}, an independent nonprofit that supports customers accessing electrification rebates and home energy upgrades. It provides a range of the impact of your selected upgrade on your energy bill, and emissions reductions estimates for your project."
           values={{
             rewiringAmerica: (
-              <TrackedOutboundLink
+              <a
                 href="https://www.rewiringamerica.org"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="link-color"
-                action="calculate_impact_rewiring_america"
-                label="Rewiring America"
-                category="energy_rebate"
+                onClick={() =>
+                  track('heat_pump_rewiring_america_click', { url: 'https://www.rewiringamerica.org' })
+                }
               >
                 <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
-              </TrackedOutboundLink>
+              </a>
             ),
           }}
         />
@@ -398,7 +421,16 @@ export default function CalculateImpactPage() {
         </Alert>
       )}
 
-      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <Box
+        component="form"
+        onSubmit={(e) => {
+          // Count the click before RHF runs validation, so the attempt is
+          // recorded whether submission succeeds or fails.
+          onCalculateClick();
+          handleSubmit(onSubmit, onInvalid)(e);
+        }}
+        noValidate
+      >
         <section className="calculate-impact-card" aria-labelledby="calculate-impact-household-heading">
           <h2 id="calculate-impact-household-heading" className="calculate-impact-section-title">
             <FormattedMessage

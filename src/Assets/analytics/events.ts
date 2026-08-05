@@ -227,11 +227,21 @@ export interface ScreenerEventMap {
   // emitted here rather than via TrackedOutboundLink so they carry screener_uid /
   // screener_state — the join key Stories 5/6/7 need to tie a click to a screening.
   heat_pump_journey_learn_more_click: { url: string };
-  heat_pump_rebate_link_click: { rebate_type?: string; rebate_category?: string; url: string };
+  heat_pump_rewiring_america_click: { url: string };
+  heat_pump_rebate_link_click: { program?: string; rebate_type?: string; rebate_category?: string; url: string };
   heat_pump_connect_now_find_installer: { url: string };
   heat_pump_connect_now_expand_search: { url: string };
   heat_pump_section_view: {
-    section: 'why_heat_pump' | 'bills_impact' | 'find_contractor' | 'rebates' | 'calculator' | 'contractor_pdf';
+    // find_contractor_card is the "Whom should I hire?" card on the rebates page;
+    // connect_now_page is the ConnectNow page itself — distinct denominators.
+    section:
+      | 'why_heat_pump'
+      | 'bills_impact'
+      | 'find_contractor_card'
+      | 'connect_now_page'
+      | 'rebates'
+      | 'calculator'
+      | 'contractor_pdf';
   };
   heat_pump_cta_click: { cta: 'calculate_impact' | 'connect_now' };
   heat_pump_calculator_field: {
@@ -244,12 +254,20 @@ export interface ScreenerEventMap {
     project_type?: string;
   };
   heat_pump_calculator_edit: {};
-  // error_type is the machine category; error_message carries the human-readable
-  // failure text for the generic case (mapped to friendly labels downstream).
+  // error_type is the machine category: the three API/response failures, plus
+  // 'validation' for a failed submit (required field missing / invalid). For
+  // validation, field + reason name the first failed field and its rule label —
+  // PII-safe (rule code only, never the entered value); error_message carries the
+  // human-readable text for the generic API 'error' case.
   heat_pump_calculator_error: {
-    error_type: 'address_not_supported' | 'error' | 'invalid_response';
+    error_type: 'address_not_supported' | 'error' | 'invalid_response' | 'validation';
     error_message?: string;
+    field?: string;
+    reason?: string;
   };
+  // Fires when Calculate impact is pressed, before validation — the true "clicked
+  // the button" count. calculator_submit fires only after validation passes.
+  heat_pump_calculator_submit_attempt: {};
   // Annual deltas: negative bill_delta = savings, negative emissions_delta = reduction.
   // Both deltas carry the full median / p20 / p80 range the results UI shows, so
   // trends and ranges can be built for either downstream.
@@ -261,6 +279,10 @@ export interface ScreenerEventMap {
     annual_emissions_delta_p20?: number;
     annual_emissions_delta_p80?: number;
     project_type?: string;
+    // Echoed inputs, so a repeat run with different inputs is unambiguous.
+    household_type?: string;
+    heating_fuel?: string;
+    water_heating?: string;
   };
   heat_pump_pdf_page: { page_number: number };
   heat_pump_pdf_print: {};

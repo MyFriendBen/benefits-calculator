@@ -22,7 +22,7 @@ export default function HeatPumpJourneyCards() {
   useEffect(() => {
     track('heat_pump_section_view', { section: 'why_heat_pump' });
     track('heat_pump_section_view', { section: 'bills_impact' });
-    track('heat_pump_section_view', { section: 'find_contractor' });
+    track('heat_pump_section_view', { section: 'find_contractor_card' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

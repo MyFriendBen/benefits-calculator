@@ -107,6 +107,9 @@ describe('CalculateImpactResults', () => {
         annual_emissions_delta_p20: -300,
         annual_emissions_delta_p80: -100,
         project_type: 'heat_pump_water_heater',
+        household_type: 'single_family_detached',
+        heating_fuel: 'electricity',
+        water_heating: 'natural_gas',
       });
     });
   });

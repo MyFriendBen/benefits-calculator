@@ -94,7 +94,7 @@ describe('HeatPumpJourneyCards', () => {
 
       expect(mockTrack).toHaveBeenCalledWith('heat_pump_section_view', { section: 'why_heat_pump' });
       expect(mockTrack).toHaveBeenCalledWith('heat_pump_section_view', { section: 'bills_impact' });
-      expect(mockTrack).toHaveBeenCalledWith('heat_pump_section_view', { section: 'find_contractor' });
+      expect(mockTrack).toHaveBeenCalledWith('heat_pump_section_view', { section: 'find_contractor_card' });
     });
 
     it('fires heat_pump_cta_click with the matching cta when a CTA is clicked', () => {
