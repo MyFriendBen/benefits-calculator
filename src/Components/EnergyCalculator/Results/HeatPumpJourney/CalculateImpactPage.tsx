@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { mfbZodResolver } from '../../../../Assets/analytics/mfbZodResolver';
 import { collectFieldErrors } from '../../../../Assets/analytics/errorLabels';
@@ -165,15 +165,16 @@ export default function CalculateImpactPage() {
   const showCalculateImpact = useFeatureFlag('cesn_heat_pump_journey');
   const [submitState, setSubmitState] = useState<SubmitState>({ status: 'idle' });
   const track = useTrackEvent();
-  // Guards the address field event so re-selecting/re-typing an address doesn't
-  // refire it — we only want to record that the field was engaged, once.
-  const hasTrackedAddressFieldRef = useRef(false);
 
   // Reaching the calculator: the denominator for the field and submit events.
+  // Gated on the feature flag — the component returns null when it's off, so an
+  // ungated effect would count views the user never actually saw.
   useEffect(() => {
-    track('heat_pump_section_view', { section: 'calculator' });
+    if (showCalculateImpact) {
+      track('heat_pump_section_view', { section: 'calculator' });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [showCalculateImpact]);
 
   const backLink = addAdminToLink(`/${whiteLabel}/${uuid}/results/energy-rebates/hvac`, isAdminView);
 
@@ -520,10 +521,11 @@ export default function CalculateImpactPage() {
                     value={field.value}
                     onChange={(value) => {
                       field.onChange(value);
-                      if (!hasTrackedAddressFieldRef.current) {
-                        hasTrackedAddressFieldRef.current = true;
-                        track('heat_pump_calculator_field', { field: 'address' });
-                      }
+                      // Fire on every change like the other fields: distinct uid
+                      // still gives "engaged the field at all", and the repeat
+                      // count gives per-user re-engagement (a confusion signal).
+                      // PRIVACY: still only records THAT the address was engaged.
+                      track('heat_pump_calculator_field', { field: 'address' });
                     }}
                     error={!!errors.address}
                     helperText={errors.address?.message}

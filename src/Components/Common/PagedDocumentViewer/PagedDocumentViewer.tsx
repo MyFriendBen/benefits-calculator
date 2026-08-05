@@ -57,24 +57,23 @@ export default function PagedDocumentViewer({
   const isFirst = pageIndex === 0;
   const isLast = pageIndex === pageCount - 1;
 
+  // Compute the target page and fire onPageView OUTSIDE the setPageIndex updater:
+  // React may replay a functional updater, so a side effect inside it can emit
+  // duplicate page-view events. The updater stays pure (returns the next index).
   const goPrev = useCallback(() => {
-    setPageIndex((i) => {
-      const next = Math.max(0, i - 1);
-      if (next !== i) {
-        onPageView?.(next + 1);
-      }
-      return next;
-    });
-  }, [onPageView]);
+    const next = Math.max(0, pageIndex - 1);
+    if (next !== pageIndex) {
+      onPageView?.(next + 1);
+      setPageIndex(next);
+    }
+  }, [pageIndex, onPageView]);
   const goNext = useCallback(() => {
-    setPageIndex((i) => {
-      const next = Math.min(pageCount - 1, i + 1);
-      if (next !== i) {
-        onPageView?.(next + 1);
-      }
-      return next;
-    });
-  }, [pageCount, onPageView]);
+    const next = Math.min(pageCount - 1, pageIndex + 1);
+    if (next !== pageIndex) {
+      onPageView?.(next + 1);
+      setPageIndex(next);
+    }
+  }, [pageCount, pageIndex, onPageView]);
 
   // The page list can swap while the viewer is open — ConnectNowPage hands us a
   // different edition of the guide when the user changes language. If the new
@@ -109,12 +108,18 @@ export default function PagedDocumentViewer({
     [handlePagingKey],
   );
 
-  // Report page 1 once on mount — the "document opened" signal, so callers have a
-  // denominator for later page turns.
+  // Report page 1 once, when the document is first shown — the "document opened"
+  // signal, so callers have a denominator for later page turns. Skip while the
+  // page list is empty (the component renders null then); fire when the first
+  // non-empty list arrives, and only once.
+  const reportedOpenRef = useRef(false);
   useEffect(() => {
-    onPageView?.(1);
+    if (pageCount > 0 && !reportedOpenRef.current) {
+      reportedOpenRef.current = true;
+      onPageView?.(1);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [pageCount]);
 
   useEffect(() => {
     const onChange = () => {

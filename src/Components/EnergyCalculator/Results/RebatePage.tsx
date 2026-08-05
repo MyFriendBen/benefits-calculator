@@ -100,6 +100,9 @@ type RebateProps = {
 
 function RebateCard({ rebate, rebateCategory }: RebateProps) {
   const track = useTrackEvent();
+  // Matches EnergyCalculatorRebatePage's showHeatPumpJourney: the heat-pump event
+  // is only in-journey when the flag is on AND this is the HVAC category.
+  const inHeatPumpJourney = useFeatureFlag('cesn_heat_pump_journey') && rebateCategory.type === 'hvac';
   const rebateUrl = useMemo(() => {
     const url = new URL(rebate.program_url);
 
@@ -154,7 +157,7 @@ function RebateCard({ rebate, rebateCategory }: RebateProps) {
         Remains in code as CDS wanted the option to reintroduce it easily
       */}
       <div className="energy-calculator-rebate-page-more-info">
-        {rebateCategory.type === 'hvac' ? (
+        {inHeatPumpJourney ? (
           // Heat-pump journey: emit through useTrackEvent so the click carries
           // screener_uid (the join key Stories 6/7 need), unlike the general
           // outbound-link path used for other rebate categories below.
