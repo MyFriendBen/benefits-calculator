@@ -6,11 +6,12 @@ import { EnergyCalculatorRebateCardTitle, rebateTypes } from './RebatePageMappin
 import { Icon } from '../../Icon/Icon';
 import { renderCategoryDescription } from './rebateTypes';
 import './RebatePage.css';
-import { useMemo, useContext } from 'react';
+import { useMemo, useContext, useEffect } from 'react';
 import { TrackedOutboundLink } from '../../Common/TrackedOutboundLink';
 import { Context } from '../../Wrapper/Wrapper';
 import { HeatPumpJourneyCards } from './HeatPumpJourney';
 import { useFeatureFlag } from '../../Config/configHook';
+import { useTrackEvent } from '../../../Assets/analytics';
 
 // Format expiration date from ISO string to readable format
 const formatExpirationDate = (dateString: string): string => {
@@ -41,7 +42,17 @@ type RebatePageProps = {
 export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePageProps) {
   const backLink = useResultsLink(`results/benefits`);
   const { formData } = useContext(Context);
+  const track = useTrackEvent();
   const showHeatPumpJourney = useFeatureFlag('cesn_heat_pump_journey') && rebateCategory.type === 'hvac';
+
+  // Denominator for the "Learn how to apply" rebate_link_click, fired when the
+  // heat-pump rebates page is shown (the only context that carries the journey).
+  useEffect(() => {
+    if (showHeatPumpJourney) {
+      track('heat_pump_section_view', { section: 'rebates' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showHeatPumpJourney]);
 
   return (
     <main className="benefits-form">
@@ -88,6 +99,10 @@ type RebateProps = {
 };
 
 function RebateCard({ rebate, rebateCategory }: RebateProps) {
+  const track = useTrackEvent();
+  // Matches EnergyCalculatorRebatePage's showHeatPumpJourney: the heat-pump event
+  // is only in-journey when the flag is on AND this is the HVAC category.
+  const inHeatPumpJourney = useFeatureFlag('cesn_heat_pump_journey') && rebateCategory.type === 'hvac';
   const rebateUrl = useMemo(() => {
     const url = new URL(rebate.program_url);
 
@@ -142,18 +157,39 @@ function RebateCard({ rebate, rebateCategory }: RebateProps) {
         Remains in code as CDS wanted the option to reintroduce it easily
       */}
       <div className="energy-calculator-rebate-page-more-info">
-        <TrackedOutboundLink
-          href={rebateUrl}
-          action="rebate_link_click"
-          label={rebate.program}
-          category="energy_rebate"
-          additionalData={{
-            rebate_type: rebate.payment_methods.join(', '),
-            rebate_category: rebateCategory.type,
-          }}
-        >
-          <FormattedMessage id="energyCalculator.rebatePage.applyButton" defaultMessage="Learn how to apply" />
-        </TrackedOutboundLink>
+        {inHeatPumpJourney ? (
+          // Heat-pump journey: emit through useTrackEvent so the click carries
+          // screener_uid (the join key Stories 6/7 need), unlike the general
+          // outbound-link path used for other rebate categories below.
+          <a
+            href={rebateUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() =>
+              track('heat_pump_rebate_link_click', {
+                program: rebate.program,
+                rebate_type: rebate.payment_methods.join(', '),
+                rebate_category: rebateCategory.type,
+                url: rebateUrl,
+              })
+            }
+          >
+            <FormattedMessage id="energyCalculator.rebatePage.applyButton" defaultMessage="Learn how to apply" />
+          </a>
+        ) : (
+          <TrackedOutboundLink
+            href={rebateUrl}
+            action="rebate_link_click"
+            label={rebate.program}
+            category="energy_rebate"
+            additionalData={{
+              rebate_type: rebate.payment_methods.join(', '),
+              rebate_category: rebateCategory.type,
+            }}
+          >
+            <FormattedMessage id="energyCalculator.rebatePage.applyButton" defaultMessage="Learn how to apply" />
+          </TrackedOutboundLink>
+        )}
       </div>
     </div>
   );

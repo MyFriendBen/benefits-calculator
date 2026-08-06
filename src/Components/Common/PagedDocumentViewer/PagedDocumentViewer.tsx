@@ -19,6 +19,17 @@ export type PagedDocumentViewerProps = {
   /** Accessible name for the document (e.g. its title). Used for page alt text. */
   title: string;
   className?: string;
+  /**
+   * Called with the 1-based page number when the viewer first mounts (page 1)
+   * and whenever the visible page changes via the pager controls or arrow keys.
+   * This is a reusable common component, so it never fires analytics itself —
+   * callers wire this to their own tracking.
+   */
+  onPageView?: (pageNumber: number) => void;
+  /** Called when the user triggers the Print/Download action. */
+  onPrint?: () => void;
+  /** Called when the user enters fullscreen. */
+  onFullscreen?: () => void;
 };
 
 /**
@@ -27,7 +38,15 @@ export type PagedDocumentViewerProps = {
  * the browser's native PDF viewer can't reproduce. Print/Download opens the
  * underlying PDF so the downloaded artifact is a real PDF.
  */
-export default function PagedDocumentViewer({ pageImages, pdfUrl, title, className }: PagedDocumentViewerProps) {
+export default function PagedDocumentViewer({
+  pageImages,
+  pdfUrl,
+  title,
+  className,
+  onPageView,
+  onPrint,
+  onFullscreen,
+}: PagedDocumentViewerProps) {
   const intl = useIntl();
   const [pageIndex, setPageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -38,8 +57,23 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
   const isFirst = pageIndex === 0;
   const isLast = pageIndex === pageCount - 1;
 
-  const goPrev = useCallback(() => setPageIndex((i) => Math.max(0, i - 1)), []);
-  const goNext = useCallback(() => setPageIndex((i) => Math.min(pageCount - 1, i + 1)), [pageCount]);
+  // Compute the target page and fire onPageView OUTSIDE the setPageIndex updater:
+  // React may replay a functional updater, so a side effect inside it can emit
+  // duplicate page-view events. The updater stays pure (returns the next index).
+  const goPrev = useCallback(() => {
+    const next = Math.max(0, pageIndex - 1);
+    if (next !== pageIndex) {
+      onPageView?.(next + 1);
+      setPageIndex(next);
+    }
+  }, [pageIndex, onPageView]);
+  const goNext = useCallback(() => {
+    const next = Math.min(pageCount - 1, pageIndex + 1);
+    if (next !== pageIndex) {
+      onPageView?.(next + 1);
+      setPageIndex(next);
+    }
+  }, [pageCount, pageIndex, onPageView]);
 
   // The page list can swap while the viewer is open — ConnectNowPage hands us a
   // different edition of the guide when the user changes language. If the new
@@ -74,6 +108,19 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
     [handlePagingKey],
   );
 
+  // Report page 1 once, when the document is first shown — the "document opened"
+  // signal, so callers have a denominator for later page turns. Skip while the
+  // page list is empty (the component renders null then); fire when the first
+  // non-empty list arrives, and only once.
+  const reportedOpenRef = useRef(false);
+  useEffect(() => {
+    if (pageCount > 0 && !reportedOpenRef.current) {
+      reportedOpenRef.current = true;
+      onPageView?.(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageCount]);
+
   useEffect(() => {
     const onChange = () => {
       const nowFullscreen = document.fullscreenElement === rootRef.current;
@@ -83,11 +130,12 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
       // arrow-key paging works immediately.
       if (nowFullscreen) {
         pageAreaRef.current?.focus();
+        onFullscreen?.();
       }
     };
     document.addEventListener('fullscreenchange', onChange);
     return () => document.removeEventListener('fullscreenchange', onChange);
-  }, []);
+  }, [onFullscreen]);
 
   // While fullscreen, page on arrow keys no matter which control inside the
   // viewer holds focus (e.g. the toggle button right after entering).
@@ -115,7 +163,8 @@ export default function PagedDocumentViewer({ pageImages, pdfUrl, title, classNa
   const printDocument = useCallback(() => {
     // Open the real PDF so the user prints/saves a PDF rather than the images.
     window.open(pdfUrl, '_blank', 'noopener,noreferrer');
-  }, [pdfUrl]);
+    onPrint?.();
+  }, [pdfUrl, onPrint]);
 
   const rootClass = ['paged-document-viewer', className].filter(Boolean).join(' ');
 
