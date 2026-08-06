@@ -70,8 +70,8 @@ export default function NcLink211Message() {
       keyword: 'veterans services',
     },
     // NC211 topic/subtopic mapping for the "Help finding shelter" and
-    // "Help finding health care" step-9 buttons. `subtopic` supports comma-separated
-    // values, so "Help finding health care" maps to both Health Screening/Diagnostic
+    // "Free or lower cost health care" step-9 buttons. `subtopic` supports comma-separated
+    // values, so "Free or lower cost health care" maps to both Health Screening/Diagnostic
     // Services and Specialized Treatment and Prevention in a single search.
     homelessServices: {
       topic: 'Basic%20Needs',

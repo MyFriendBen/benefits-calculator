@@ -53,7 +53,7 @@ describe('NcLink211Message', () => {
     expect(link).toHaveAttribute('href', expect.stringContaining('subtopic=Housing%2FShelter'));
   });
 
-  it('links "Help finding health care" to NC211 Health Care > Health Screening/Diagnostic Services and Specialized Treatment and Prevention', () => {
+  it('links "Free or lower cost health care" to NC211 Health Care > Health Screening/Diagnostic Services and Specialized Treatment and Prevention', () => {
     const formData = createFormData();
     formData.acuteHHConditions = { freeLowCostMedicalCare: true };
     renderWithProviders(formData);
