@@ -1,7 +1,6 @@
 import { Controller, SubmitHandler } from 'react-hook-form';
 import { InputAdornment, TextField } from '@mui/material';
 import { FormattedMessage, useIntl } from 'react-intl';
-import HelpButton from '../../HelpBubbleIcon/HelpButton';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
@@ -15,7 +14,6 @@ import { useParams } from 'react-router-dom';
 import { NumericFormat } from 'react-number-format';
 import useStepForm from '../stepForm';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
-import { getStepAnalyticsId } from '../../../Assets/analytics/stepIds';
 
 const HouseholdAssets = () => {
   const { formData } = useContext(Context);
