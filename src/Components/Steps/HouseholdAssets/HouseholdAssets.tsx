@@ -68,18 +68,10 @@ const HouseholdAssets = () => {
         <FormattedMessage id="qcc.about_household" defaultMessage="Tell us about your household" />
       </QuestionHeader>
       <QuestionQuestion>
-        <>
-          <FormattedMessage
-            id="questions.householdAssets"
-            defaultMessage="How much does your whole household have right now in cash, checking or savings accounts, stocks, bonds, or mutual funds?"
-          />
-          <HelpButton helpTopic="household-assets" stepName={getStepAnalyticsId('householdAssets')}>
-            <FormattedMessage
-              id="questions.householdAssets-description"
-              defaultMessage="In some cases, eligibility for benefits may be affected if your household owns other valuable assets such as a car or life insurance policy."
-            />
-          </HelpButton>
-        </>
+        <FormattedMessage
+          id="questions.householdAssets"
+          defaultMessage="How much does your whole household have right now in cash, checking or savings accounts, stocks, bonds, or mutual funds?"
+        />
       </QuestionQuestion>
       <form onSubmit={handleSubmit(formSubmitHandler)}>
         <Controller
