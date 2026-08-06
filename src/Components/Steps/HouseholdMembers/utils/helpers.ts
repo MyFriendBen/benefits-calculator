@@ -145,7 +145,7 @@ export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParam
 
   const base = {
     ...restMemberData,
-    id: existingHouseholdData[currentMemberIndex]?.id ?? crypto.randomUUID(),
+    id: existingHouseholdData[currentMemberIndex]?.id,
     frontendId: existingHouseholdData[currentMemberIndex]?.frontendId ?? crypto.randomUUID(),
     hasIncome,
     incomeStreams,

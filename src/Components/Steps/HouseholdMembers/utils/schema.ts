@@ -215,7 +215,7 @@ export const createHouseholdMemberSchema = (
 
   return z.object({
     birthMonth: z.number().min(1, { message: renderMissingBirthMonthHelperText(intl) }).max(12, { message: renderMissingBirthMonthHelperText(intl) }),
-    birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl) }).int().min(new Date().getFullYear() - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) }).max(new Date().getFullYear(), { message: renderInvalidBirthYearHelperText(intl) }),
+    birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl), required_error: renderBirthYearHelperText(intl) }).int().min(1, { message: renderBirthYearHelperText(intl) }).min(new Date().getFullYear() - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) }).max(new Date().getFullYear(), { message: renderInvalidBirthYearHelperText(intl) }),
     relationshipToHH: z.string().min(1, { message: renderRelationshipToHHHelperText(intl) }),
     healthInsurance: createHealthInsuranceSchema(intl, pageNumber),
     conditions: createSpecialConditionsSchema(intl),
@@ -265,8 +265,9 @@ export const createBasicInfoPageSchema = (intl: IntlShape) => {
         .number()
         .min(1, { message: renderMissingBirthMonthHelperText(intl) })
         .max(12, { message: renderMissingBirthMonthHelperText(intl) }),
-      birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl) })
+      birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl), required_error: renderBirthYearHelperText(intl) })
         .int()
+        .min(1, { message: renderBirthYearHelperText(intl) })
         .min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
         .max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
       relationshipToHH: z.string().min(1, { message: renderRelationshipToHHHelperText(intl) }),
@@ -313,7 +314,7 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
   return z
     .object({
       birthMonth: z.number().min(1, { message: renderMissingBirthMonthHelperText(intl) }).max(12, { message: renderMissingBirthMonthHelperText(intl) }),
-      birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl) }).int().min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) }).max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
+      birthYear: z.number({ invalid_type_error: renderBirthYearHelperText(intl), required_error: renderBirthYearHelperText(intl) }).int().min(1, { message: renderBirthYearHelperText(intl) }).min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) }).max(CURRENT_YEAR, { message: renderInvalidBirthYearHelperText(intl) }),
       conditions: z.object({
         survivingSpouse: z.boolean().optional().default(false),
         disabled: z.boolean().optional().default(false),
