@@ -1,7 +1,6 @@
 import { Controller, SubmitHandler } from 'react-hook-form';
 import { InputAdornment, TextField } from '@mui/material';
 import { FormattedMessage, useIntl } from 'react-intl';
-import HelpButton from '../../HelpBubbleIcon/HelpButton';
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
 import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinueButtons';
@@ -15,7 +14,6 @@ import { useParams } from 'react-router-dom';
 import { NumericFormat } from 'react-number-format';
 import useStepForm from '../stepForm';
 import ErrorMessageWrapper from '../../ErrorMessage/ErrorMessageWrapper';
-import { getStepAnalyticsId } from '../../../Assets/analytics/stepIds';
 
 const HouseholdAssets = () => {
   const { formData } = useContext(Context);
@@ -68,18 +66,10 @@ const HouseholdAssets = () => {
         <FormattedMessage id="qcc.about_household" defaultMessage="Tell us about your household" />
       </QuestionHeader>
       <QuestionQuestion>
-        <>
-          <FormattedMessage
-            id="questions.householdAssets"
-            defaultMessage="How much does your whole household have right now in cash, checking or savings accounts, stocks, bonds, or mutual funds?"
-          />
-          <HelpButton helpTopic="household-assets" stepName={getStepAnalyticsId('householdAssets')}>
-            <FormattedMessage
-              id="questions.householdAssets-description"
-              defaultMessage="In some cases, eligibility for benefits may be affected if your household owns other valuable assets such as a car or life insurance policy."
-            />
-          </HelpButton>
-        </>
+        <FormattedMessage
+          id="questions.householdAssets"
+          defaultMessage="How much does your whole household have right now in cash, checking or savings accounts, stocks, bonds, or mutual funds?"
+        />
       </QuestionQuestion>
       <form onSubmit={handleSubmit(formSubmitHandler)}>
         <Controller
