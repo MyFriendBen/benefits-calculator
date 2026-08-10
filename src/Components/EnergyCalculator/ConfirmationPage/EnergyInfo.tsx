@@ -77,7 +77,7 @@ export default function EnergyCalculatorEnergyInfo() {
     }
 
     return (
-      <ul className="confirmation-acute-need-list">
+      <ul className="confirmation-expense-list">
         {statuses.map((status, i) => (
           <li key={i}>{status}</li>
         ))}
@@ -95,7 +95,7 @@ export default function EnergyCalculatorEnergyInfo() {
     }
 
     return (
-      <ul className="confirmation-acute-need-list">
+      <ul className="confirmation-expense-list">
         {truthyApplianceStatuses.map(([applianceStatusName, applianceStatusProps]) => (
           <li key={applianceStatusName}>{applianceStatusProps.text}</li>
         ))}
@@ -124,7 +124,7 @@ export default function EnergyCalculatorEnergyInfo() {
       return <FormattedMessage id="confirmation.none" defaultMessage="None" />;
     }
 
-    return <ul className="confirmation-acute-need-list">{bills}</ul>;
+    return <ul className="confirmation-expense-list">{bills}</ul>;
   };
 
   const rows: {
