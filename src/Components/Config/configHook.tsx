@@ -257,5 +257,9 @@ export function useLocalizedLink(configKey: 'privacy_policy' | 'consent_to_conta
     consent_to_contact: 'https://www.myfriendben.org/terms-and-conditions/',
   };
 
-  return links[locale] ?? links['en-us'] ?? fallbackUrls[configKey] ?? '';
+  // Empty strings have to fall through, not just null/undefined: a white label that never
+  // overrode these keys sends {"en-us": ""}, and `??` would return that empty string and
+  // render a link with an empty href. These links carry legal copy, so falling back to the
+  // generic MyFriendBen page is always better than pointing nowhere.
+  return links[locale] || links['en-us'] || fallbackUrls[configKey];
 }
