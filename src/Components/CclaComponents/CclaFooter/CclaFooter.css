@@ -20,9 +20,13 @@
   flex-direction: row;
 }
 
-.footer-paragraph {
+.ccla-footer-paragraph {
   margin-bottom: 1rem;
   text-align: center;
+}
+
+.ccla-footer-paragraph .MuiTypography-root {
+  font-size: 0.625rem;
 }
 
 .first-paragraph {
