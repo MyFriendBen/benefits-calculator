@@ -19,6 +19,8 @@ jest.mock('../Config/configHook', () => ({
   useConfig: () => ({
     food: { text: 'Food Resources', icon: null },
     housing: { text: 'Housing Resources', icon: null },
+    homelessServices: { text: 'Shelter Resources', icon: null },
+    freeLowCostMedicalCare: { text: 'Health Care Resources', icon: null },
   }),
 }));
 
@@ -39,5 +41,30 @@ describe('NcLink211Message', () => {
     expect(screen.getByText(/More local resources from NC211/i)).toBeInTheDocument();
     expect(screen.getByText(/Food Resources/i)).toBeInTheDocument();
     expect(screen.getByText(/Housing Resources/i)).toBeInTheDocument();
+  });
+
+  it('links "Help finding shelter" to NC211 Basic Needs > Housing/Shelter', () => {
+    const formData = createFormData();
+    formData.acuteHHConditions = { homelessServices: true };
+    renderWithProviders(formData);
+
+    const link = screen.getByText(/Shelter Resources/i).closest('a');
+    expect(link).toHaveAttribute('href', expect.stringContaining('topic=Basic%20Needs'));
+    expect(link).toHaveAttribute('href', expect.stringContaining('subtopic=Housing%2FShelter'));
+  });
+
+  it('links "Free or lower cost health care" to NC211 Health Care > Health Screening/Diagnostic Services and Specialized Treatment and Prevention', () => {
+    const formData = createFormData();
+    formData.acuteHHConditions = { freeLowCostMedicalCare: true };
+    renderWithProviders(formData);
+
+    const link = screen.getByText(/Health Care Resources/i).closest('a');
+    expect(link).toHaveAttribute('href', expect.stringContaining('topic=Health%20Care'));
+    expect(link).toHaveAttribute(
+      'href',
+      expect.stringContaining(
+        'subtopic=Health%20Screening%2FDiagnostic%20Services%2CSpecialized%20Treatment%20and%20Prevention',
+      ),
+    );
   });
 });
