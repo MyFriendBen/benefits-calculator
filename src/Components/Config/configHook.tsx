@@ -41,6 +41,7 @@ export const OPTION_CARD_ICON_MAP: Record<string, string> = {
   Health_care: 'hospital',
   Legal_services: 'scale',
   Savings: 'piggy-bank',
+  Transportation: 'bus-front',
   Military: 'shield',
   Aging: 'tree-deciduous',
   Youth_development: 'shapes',
