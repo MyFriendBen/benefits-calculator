@@ -7,6 +7,11 @@ import { FormattedMessage } from 'react-intl';
 import { Language } from '../../Assets/languageOptions';
 import { Icon } from '../Icon/Icon';
 
+const FALLBACK_FOOTER_URLS = {
+  privacy_policy: 'https://www.myfriendben.org/privacy-policy/',
+  consent_to_contact: 'https://www.myfriendben.org/terms-and-conditions/',
+};
+
 export const OPTION_CARD_ICON_MAP: Record<string, string> = {
   // Health Insurance
   None: 'ban',
@@ -41,7 +46,6 @@ export const OPTION_CARD_ICON_MAP: Record<string, string> = {
   Aging: 'tree-deciduous',
   Youth_development: 'shapes',
 };
-
 
 type Item = {
   _label: string;
@@ -128,7 +132,7 @@ function transformConfigData(configData: ConfigApiResponse[]): Config {
           if (key in mergedFlags && mergedFlags[key] !== value) {
             console.warn(
               `Feature flag '${key}' is defined in multiple config items with different values. ` +
-              `Previous: ${mergedFlags[key]}, Current: ${value}. Using current value from config '${item.name}'.`
+                `Previous: ${mergedFlags[key]}, Current: ${value}. Using current value from config '${item.name}'.`,
             );
           }
         }
@@ -248,15 +252,13 @@ export function useFeatureFlag(flag: string): boolean {
   return config?._feature_flags?.[flag] ?? false;
 }
 
-export function useLocalizedLink(configKey: 'privacy_policy' | 'consent_to_contact') {
+export function useLocalizedLink(configKey: keyof typeof FALLBACK_FOOTER_URLS) {
   const { locale } = useContext(Context);
   const links = useConfig<Partial<Record<Language, string>>>(configKey, {});
 
-  // Fallback URLs if not found in config
-  const fallbackUrls = {
-    privacy_policy: 'https://www.myfriendben.org/privacy-policy/',
-    consent_to_contact: 'https://www.myfriendben.org/terms-and-conditions/',
-  };
-
-  return links[locale] ?? links['en-us'] ?? fallbackUrls[configKey] ?? '';
+  // Empty strings have to fall through, not just null/undefined: a white label that never
+  // overrode these keys sends {"en-us": ""}, and `??` would return that empty string and
+  // render a link with an empty href. These links carry legal copy, so falling back to the
+  // generic MyFriendBen page is always better than pointing nowhere.
+  return links[locale] || links['en-us'] || FALLBACK_FOOTER_URLS[configKey];
 }
