@@ -5,7 +5,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { parseMarkdown } from '../../../utils/parseMarkdown';
-import { startAssistantConversation, sendAssistantMessage, AssistantApiMessage } from '../../../apiCalls';
+import {
+  startAssistantConversation,
+  sendAssistantMessage,
+  AssistantApiMessage,
+  AssistantVisibleProgram,
+} from '../../../apiCalls';
 import { useTrackEvent } from '../../../Assets/analytics';
 import './Chatbot.css';
 
@@ -94,7 +99,42 @@ function renderFormattedMessage(text: string): React.ReactNode {
   return elements;
 }
 
-export function ChatbotProvider({ children }: PropsWithChildren) {
+type ChatbotProviderProps = {
+  /**
+   * Every program currently rendered on the results page — i.e. what survived the
+   * results-page filters (legal status, mutual exclusions, already_has, zero value) —
+   * with each value as displayed. BenBot may only recommend from the list it's given
+   * and quotes the values in it, so this is what keeps both equal to what the user is
+   * looking at.
+   *
+   * Passed in rather than read from ResultsContext because Results.tsx imports this
+   * module; consuming the context here would close an import cycle.
+   *
+   * Left `undefined` rather than defaulted to `[]` on purpose — the two mean
+   * different things to benefits-api. `[]` asserts "the results page is showing
+   * nothing", which makes BenBot recommend nothing at all; `undefined` means "no
+   * list available", which selects the server-side fallback filters.
+   *
+   * KNOWN LIMITATION: `ensureConversation` short-circuits on `conversationIdRef`, so
+   * once a conversation is open, changing a results-page filter does not re-post the
+   * new list; it takes effect on the next page load, where the ref is null again and
+   * ai-service refreshes the stored context.
+   *
+   * Note this is NOT safely one-directional. The default filter state is `citizen` —
+   * the most permissive — so the first change always narrows, but a user who selects
+   * a different status and then switches back *widens*, leaving BenBot with a strict
+   * subset of what's on screen and refusing to discuss visible cards.
+   *
+   * (In practice this is currently masked by `ResultsContextProvider` being defined
+   * inside the `Results` component body, which remounts this whole subtree on any
+   * filter change — destroying `messages` and `isOpen` in the process. That's a
+   * separate pre-existing bug; when it's fixed, this limitation becomes live and
+   * re-posting on change is worth doing, guarded on `!sendingRef.current`.)
+   */
+  visiblePrograms?: AssistantVisibleProgram[];
+};
+
+export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren<ChatbotProviderProps>) {
   const { uuid } = useParams();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -133,7 +173,7 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
     if (conversationIdRef.current) return conversationIdRef.current;
     if (!uuid) return null;
     if (!startPromiseRef.current) {
-      startPromiseRef.current = startAssistantConversation(uuid)
+      startPromiseRef.current = startAssistantConversation(uuid, undefined, visiblePrograms)
         .then((res) => {
           conversationIdRef.current = res.conversation_id;
           setMessages(res.messages.map(toWidgetMessage));
@@ -145,7 +185,7 @@ export function ChatbotProvider({ children }: PropsWithChildren) {
         });
     }
     return startPromiseRef.current;
-  }, [uuid, errorMessage]);
+  }, [uuid, errorMessage, visiblePrograms]);
 
   const sendMessage = useCallback(
     async (text: string) => {
