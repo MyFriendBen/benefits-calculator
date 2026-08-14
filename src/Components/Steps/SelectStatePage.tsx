@@ -19,12 +19,15 @@ import { PRE_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
 
 const SELECT_STATE_STEP_ANALYTICS_ID = PRE_DIRECTORY_STEP_IDS.selectState;
 
+// States shown in the public "What is your state?" dropdown. A white label can
+// be live and directly reachable at /{state} (see ALL_VALID_WHITE_LABELS) without
+// appearing here — KS and MO are omitted because they are not yet publicly launched.
 export const STATES: { [key: string]: string } = {
   co: 'Colorado',
   il: 'Illinois',
-  ks: 'Kansas',
+  // ks: 'Kansas',
   ma: 'Massachusetts',
-  mo: 'Missouri',
+  // mo: 'Missouri',
   nc: 'North Carolina',
   tx: 'Texas',
   wa: 'Washington',

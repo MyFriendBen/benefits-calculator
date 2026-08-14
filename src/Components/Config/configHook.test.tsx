@@ -7,7 +7,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { useGetConfig, useFeatureFlag } from './configHook';
+import { useGetConfig, useFeatureFlag, useLocalizedLink } from './configHook';
 import { Context } from '../Wrapper/Wrapper';
 import { WrapperContext } from '../../Types/WrapperContext';
 import { PropsWithChildren } from 'react';
@@ -376,5 +376,92 @@ describe('useFeatureFlag', () => {
     const wrapper = createWrapper(undefined);
     const { result } = renderHook(() => useFeatureFlag('eligibility_tags'), { wrapper });
     expect(result.current).toBe(false);
+  });
+});
+
+describe('useLocalizedLink', () => {
+  const GENERIC_PRIVACY_POLICY = 'https://www.myfriendben.org/privacy-policy/';
+  const GENERIC_TERMS = 'https://www.myfriendben.org/terms-and-conditions/';
+
+  const createWrapper = (config: Config | undefined, locale = 'en-us') => {
+    const contextValue = {
+      config,
+      configLoading: false,
+      formData: {} as any,
+      setFormData: jest.fn(),
+      locale: locale as any,
+      selectLanguage: jest.fn(),
+      getReferrer: jest.fn(() => '') as any,
+      theme: {} as any,
+      setTheme: jest.fn(),
+      styleOverride: undefined,
+      stepLoading: false,
+      setStepLoading: jest.fn(),
+      pageIsLoading: false,
+      setScreenLoading: jest.fn(),
+      staffToken: undefined,
+      setStaffToken: jest.fn(),
+      whiteLabel: '',
+      setWhiteLabel: jest.fn(),
+      referralOptions: { generic: {}, partners: {} },
+      referralOptionsLoading: false,
+      referralOptionsError: null,
+      hasBenefitsPrograms: [],
+      hasBenefitsProgramsLoading: false,
+      hasBenefitsProgramsError: false,
+    } as WrapperContext;
+
+    return ({ children }: PropsWithChildren) => (
+      <Context.Provider value={contextValue}>{children}</Context.Provider>
+    );
+  };
+
+  it('should return the link for the current locale', () => {
+    const wrapper = createWrapper(
+      { privacy_policy: { 'en-us': GENERIC_PRIVACY_POLICY, es: 'https://www.myfriendben.org/privacidad/' } },
+      'es',
+    );
+    const { result } = renderHook(() => useLocalizedLink('privacy_policy'), { wrapper });
+    expect(result.current).toBe('https://www.myfriendben.org/privacidad/');
+  });
+
+  it('should fall back to en-us for a locale without its own translated page', () => {
+    const wrapper = createWrapper({ privacy_policy: { 'en-us': GENERIC_PRIVACY_POLICY } }, 'vi');
+    const { result } = renderHook(() => useLocalizedLink('privacy_policy'), { wrapper });
+    expect(result.current).toBe(GENERIC_PRIVACY_POLICY);
+  });
+
+  // KS, MO, and WA shipped with {"en-us": ""} in the config, which rendered the footer and
+  // consent links with an empty href. An empty string must fall through to the generic page.
+  it('should fall back to the generic page when the configured link is an empty string', () => {
+    const wrapper = createWrapper({ privacy_policy: { 'en-us': '' }, consent_to_contact: { 'en-us': '' } });
+    const { result: privacy } = renderHook(() => useLocalizedLink('privacy_policy'), { wrapper });
+    const { result: terms } = renderHook(() => useLocalizedLink('consent_to_contact'), { wrapper });
+    expect(privacy.current).toBe(GENERIC_PRIVACY_POLICY);
+    expect(terms.current).toBe(GENERIC_TERMS);
+  });
+
+  it('should fall back to the generic page when the locale link is empty but en-us is set', () => {
+    const wrapper = createWrapper({ privacy_policy: { 'en-us': GENERIC_PRIVACY_POLICY, es: '' } }, 'es');
+    const { result } = renderHook(() => useLocalizedLink('privacy_policy'), { wrapper });
+    expect(result.current).toBe(GENERIC_PRIVACY_POLICY);
+  });
+
+  it('should fall back to the generic page when the config key is absent', () => {
+    const wrapper = createWrapper({});
+    const { result } = renderHook(() => useLocalizedLink('consent_to_contact'), { wrapper });
+    expect(result.current).toBe(GENERIC_TERMS);
+  });
+
+  it('should fall back to the generic page before the config has loaded', () => {
+    const wrapper = createWrapper(undefined);
+    const { result } = renderHook(() => useLocalizedLink('privacy_policy'), { wrapper });
+    expect(result.current).toBe(GENERIC_PRIVACY_POLICY);
+  });
+
+  it('should never return an empty href', () => {
+    const wrapper = createWrapper({ privacy_policy: {} });
+    const { result } = renderHook(() => useLocalizedLink('privacy_policy'), { wrapper });
+    expect(result.current).toBeTruthy();
   });
 });

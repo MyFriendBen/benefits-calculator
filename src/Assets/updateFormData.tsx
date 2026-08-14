@@ -42,6 +42,9 @@ export function useUpdateFormData() {
         veteranServices: response.needs_veteran_services ?? false,
         disabilityResources: response.needs_disability_resources ?? false,
         agingResources: response.needs_aging_resources ?? false,
+        homelessServices: response.needs_homeless_services ?? false,
+        freeLowCostMedicalCare: response.needs_free_low_cost_medical_care ?? false,
+        transportation: response.needs_transportation ?? false,
       },
       signUpInfo: {
         email: '',

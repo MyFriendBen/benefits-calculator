@@ -1,14 +1,14 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { Typography } from '@mui/material';
-import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import PagedDocumentViewer from '../../../Common/PagedDocumentViewer';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
 import { addAdminToLink } from '../../../../Assets/adminLink';
+import { useTrackEvent } from '../../../../Assets/analytics';
 import { Icon } from '../../../Icon/Icon';
 import './ConnectNowPage.css';
 
@@ -68,6 +68,7 @@ export default function ConnectNowPage() {
   const { whiteLabel, uuid } = useParams();
   const [searchParams] = useSearchParams();
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams]);
+  const track = useTrackEvent();
 
   const backLink = addAdminToLink(`/${whiteLabel}/${uuid}/results/energy-rebates/hvac`, isAdminView);
 
@@ -82,13 +83,24 @@ export default function ConnectNowPage() {
 
   const contractorGuide = useMemo(() => getContractorGuideAssets(intl.locale), [intl.locale]);
 
+  // Reaching this page is the denominator for the two contractor-search clicks;
+  // the guide viewer renders here too, so it's also the denominator for the PDF.
+  useEffect(() => {
+    track('heat_pump_section_view', { section: 'connect_now_page' });
+    track('heat_pump_section_view', { section: 'contractor_pdf' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <main className="benefits-form connect-now-page">
       <div className="connect-now-back-row results-back-save-btn-container">
         <button
           data-testid="back-to-results-button"
           className="results-back-save-buttons"
-          onClick={() => navigate(backLink)}
+          onClick={() => {
+            track('heat_pump_back_click', { from: 'connect_now' });
+            navigate(backLink);
+          }}
           aria-label={intl.formatMessage({
             id: 'energyCalculator.connectNow.backToResults',
             defaultMessage: 'BACK TO RESULTS',
@@ -128,32 +140,32 @@ export default function ConnectNowPage() {
           defaultMessage: 'Contractor search links',
         })}
       >
-        <TrackedOutboundLink
+        <a
           href={CONTRACTOR_FINDER_URL}
-          action="heat_pump_connect_now_find_installer"
-          label="Power Ahead Colorado Contractor Finder"
-          category="heat_pump_journey"
+          target="_blank"
+          rel="noopener noreferrer"
           className="connect-now-cta"
+          onClick={() => track('heat_pump_connect_now_find_installer', { url: CONTRACTOR_FINDER_URL })}
         >
           <FormattedMessage id="energyCalculator.connectNow.cta.findInstaller" defaultMessage="Find an installer" />
           <OpenInNewIcon className="connect-now-cta-icon" aria-hidden="true" />
-        </TrackedOutboundLink>
+        </a>
         <Typography variant="body1" className="connect-now-cta-interstitial">
           <FormattedMessage
             id="energyCalculator.connectNow.cta.interstitial"
             defaultMessage="If you are unable to find someone in your area, try an expanded search."
           />
         </Typography>
-        <TrackedOutboundLink
+        <a
           href={EXPAND_SEARCH_URL}
-          action="heat_pump_connect_now_expand_search"
-          label="Love Electric HVACREE expand search"
-          category="heat_pump_journey"
+          target="_blank"
+          rel="noopener noreferrer"
           className="connect-now-cta"
+          onClick={() => track('heat_pump_connect_now_expand_search', { url: EXPAND_SEARCH_URL })}
         >
           <FormattedMessage id="energyCalculator.connectNow.cta.expandSearch" defaultMessage="Expand search" />
           <OpenInNewIcon className="connect-now-cta-icon" aria-hidden="true" />
-        </TrackedOutboundLink>
+        </a>
       </section>
 
       <section className="connect-now-pdf-section" aria-labelledby={pdfSectionHeadingId}>
@@ -168,6 +180,10 @@ export default function ConnectNowPage() {
           pdfUrl={contractorGuide.pdfUrl}
           title={pdfDocumentTitle}
           className="connect-now-pdf-frame"
+          // Fires page 1 on mount (PDF-opened denominator) and each page turn.
+          onPageView={(n) => track('heat_pump_pdf_page', { page_number: n })}
+          onFullscreen={() => track('heat_pump_pdf_fullscreen', {})}
+          onPrint={() => track('heat_pump_pdf_print', {})}
         />
       </section>
     </main>

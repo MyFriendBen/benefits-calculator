@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import ForestIcon from '@mui/icons-material/Forest';
+import { useTrackEvent } from '../../../../Assets/analytics';
 import { formatToUSD } from '../../../../utils/formatCurrency';
 import {
   getEpaEquivalencies,
@@ -190,6 +192,28 @@ export default function CalculateImpactResults({
   const emMostLikely = Math.round(Math.abs(emMedian)).toLocaleString();
 
   const equivalencies = getEpaEquivalencies(emMedian);
+
+  const track = useTrackEvent();
+  // This component only mounts once the REM API has resolved successfully, so
+  // these values are always defined here — fire once on mount.
+  useEffect(() => {
+    track('heat_pump_calculator_result', {
+      annual_bill_delta_median: billMedian,
+      annual_bill_delta_p20: billP20,
+      annual_bill_delta_p80: billP80,
+      annual_emissions_delta_median: emMedian,
+      annual_emissions_delta_p20: emP20,
+      annual_emissions_delta_p80: emP80,
+      project_type: formValues.upgradeChoice,
+      // Echo the inputs so a result is unambiguous when a user re-runs the
+      // calculator with different values (the join to _submit on screener_uid
+      // alone can't tell two runs apart).
+      household_type: formValues.householdType,
+      heating_fuel: formValues.heatingFuel,
+      water_heating: formValues.waterHeatingFuel,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="calculate-impact-results-outer-card">
