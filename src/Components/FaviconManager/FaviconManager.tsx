@@ -21,20 +21,10 @@ const FaviconManager = () => {
       let faviconPath = 'favicon.ico'; // default
 
       try {
+        // getReferrer resolves the referrer-specific value (or its default) and returns a string
         const faviconSource = context.getReferrer('faviconSource');
         if (faviconSource) {
-          // faviconSource might be a string (for specific white label) or an object
-          if (typeof faviconSource === 'string') {
-            // Direct string value from getReferrer
-            faviconPath = faviconSource;
-          } else if (typeof faviconSource === 'object') {
-            // Object with white label keys
-            if (white_label && faviconSource[white_label]) {
-              faviconPath = faviconSource[white_label];
-            } else if (faviconSource.default) {
-              faviconPath = faviconSource.default;
-            }
-          }
+          faviconPath = faviconSource;
         }
       } catch (error) {
         // If getReferrer fails, use default favicon
@@ -51,13 +41,13 @@ const FaviconManager = () => {
       const link16 = document.createElement('link');
       link16.rel = 'icon';
       link16.type = 'image/png';
-      link16.sizes = '16x16';
+      link16.setAttribute('sizes', '16x16');
       link16.href = cacheBustedPath;
 
       const link32 = document.createElement('link');
       link32.rel = 'icon';
       link32.type = 'image/png';
-      link32.sizes = '32x32';
+      link32.setAttribute('sizes', '32x32');
       link32.href = cacheBustedPath;
 
       // Add shortcut icon for older browsers

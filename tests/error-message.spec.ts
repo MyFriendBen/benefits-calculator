@@ -105,7 +105,7 @@ test.describe('Error Messages Test', () => {
     // the three required income Yes/No questions (employed / gig / other).
     expect(memberErrorMessages).toEqual([
       'Please enter a birth month.',
-      'Please enter a valid birth year.',
+      'Please enter a birth year.',
       'Please select at least one health insurance option.',
       'Please select an answer.',
       'Please select an answer.',

@@ -1,7 +1,12 @@
 import { HouseholdData } from '../../../../Types/FormData';
 import { deriveIncomeAnswers } from './helpers';
 
-export const UNSET_BIRTH_YEAR: number | '' = '';
+/**
+ * Sentinel for "birth year not yet entered", matching the `0` convention already used
+ * for birthMonth and by createDefaultValues. The schema's `.min(1)` check reports it as
+ * a missing value, and inputs render it as empty via `field.value || ''`.
+ */
+export const UNSET_BIRTH_YEAR = 0;
 
 /**
  * Default health insurance object
@@ -164,7 +169,7 @@ export const DEFAULT_ENERGY_CALCULATOR_CONDITIONS = {
  */
 export const createDefaultMember = (index: number, existingMember?: HouseholdData): HouseholdData => ({
   ...existingMember,
-  id: existingMember?.id ?? crypto.randomUUID(),
+  id: existingMember?.id,
   frontendId: existingMember?.frontendId ?? crypto.randomUUID(),
   birthMonth: existingMember?.birthMonth ?? 0,
   birthYear: existingMember?.birthYear ?? 0,

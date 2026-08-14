@@ -25,26 +25,7 @@ export type ReferrerData = {
   stateName: ReferrerOptions<string>;
 };
 
-export type ReferrerDataValue<T extends keyof ReferrerData> = T extends
-  | 'theme'
-  | 'logoSource'
-  | 'faviconSource'
-  | 'logoFooterSource'
-  | 'footerLogoClass'
-  | 'logoClass'
-  | 'shareLink'
-  | 'defaultLanguage'
-  | 'stateName'
-  ? string
-  : T extends 'logoAlt' | 'logoFooterAlt'
-  ? { id: string; defaultMessage: string }
-  : T extends 'stepDirectory'
-  ? StepDirectory
-  : T extends 'uiOptions'
-  ? string[]
-  : T extends 'noResultMessage'
-  ? FormattedMessageType
-  : never;
+export type ReferrerDataValue<T extends keyof ReferrerData> = ReferrerData[T]['default'];
 
 export default function useReferrer(referrerCode?: string, referrerData?: ReferrerData) {
   const [referrer, setReferrer] = useState<string | undefined>(referrerCode);

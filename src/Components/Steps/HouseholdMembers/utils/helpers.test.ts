@@ -228,7 +228,7 @@ describe('formatToUSD', () => {
 // ============================================================================
 
 describe('createHouseholdMemberData', () => {
-  const existingMember = { id: 'existing-id', frontendId: 'existing-fid' } as any;
+  const existingMember = { id: 1284637, frontendId: 'existing-fid' } as any;
 
   const baseMemberData = {
     birthYear: 1990,
@@ -250,19 +250,19 @@ describe('createHouseholdMemberData', () => {
       currentMemberIndex: 0,
       existingHouseholdData: [existingMember],
     });
-    expect(result.id).toBe('existing-id');
+    expect(result.id).toBe(1284637);
     expect(result.frontendId).toBe('existing-fid');
   });
 
-  it('generates new id and frontendId for new members', () => {
+  it('leaves id unset and generates a frontendId for new members', () => {
     const result = createHouseholdMemberData({
       memberData: baseMemberData,
       currentMemberIndex: 0,
       existingHouseholdData: [],
     });
-    expect(result.id).toBeDefined();
-    expect(result.frontendId).toBeDefined();
-    expect(typeof result.id).toBe('string');
+    // `id` is the backend pk — only the API assigns it, so a client-side member has none.
+    expect(result.id).toBeUndefined();
+    expect(typeof result.frontendId).toBe('string');
   });
 
   it('sets hasIncome true when income streams are present', () => {
