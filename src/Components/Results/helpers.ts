@@ -28,6 +28,7 @@ export const ICON_NAME_MAP: Record<string, string> = {
   light_bulb: 'lightbulb',
   lightning: 'zap',
   managing_housing: 'house',
+  medical_expenses_and_debt: 'heart-plus',
   savings: 'piggy-bank',
   talk: 'message-circle',
   tax_credit: 'banknote',
