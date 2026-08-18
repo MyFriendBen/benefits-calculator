@@ -26,8 +26,20 @@ export const resourceNameFromConfig = (resource: Resource): string | undefined =
   return undefined;
 };
 
-const MoreHelp = () => {
-  const { moreHelpOptions } = useConfig<{ moreHelpOptions: Resource[] }>('more_help_options');
+type MoreHelpProps = {
+  // True only on CESN's standalone page (see Results.tsx), which has no other top-level
+  // heading. Everywhere else this renders inside the Immediate Help tab, nested under
+  // the results page's own heading structure, so "Other Resources Near You" is an h2.
+  isStandalonePage?: boolean;
+};
+
+const MoreHelp = ({ isStandalonePage = false }: MoreHelpProps) => {
+  // Defaulted rather than left to throw: this now renders inside the main results
+  // route instead of a standalone page, and there is no ErrorBoundary in the app, so
+  // a missing config key would blank the whole page rather than just this tab.
+  const { moreHelpOptions } = useConfig<{ moreHelpOptions: Resource[] }>('more_help_options', {
+    moreHelpOptions: [],
+  });
   const resources: Resource[] = moreHelpOptions;
   const track = useTrackEvent();
 
@@ -35,9 +47,9 @@ const MoreHelp = () => {
     return resources.map((resource, index) => {
       return (
         <article key={index} className="resource-card-article">
-          <h1 className="resource-header" key={index}>
+          <h3 className="resource-header" key={index}>
             {resource.name}
-          </h1>
+          </h3>
           {resource.description && <p className="resource-desc">{resource.description}</p>}
           {resource.phone && <p className="resource-phone">{resource.phone}</p>}
           <div className="resource-link-container">
@@ -69,9 +81,15 @@ const MoreHelp = () => {
   return (
     <div className="more-help-container">
       <div className="underline-header-container">
-        <h1 className="more-help-header">
-          <FormattedMessage id="moreHelp.header" defaultMessage="Other Resources Near You" />
-        </h1>
+        {isStandalonePage ? (
+          <h1 className="more-help-header">
+            <FormattedMessage id="moreHelp.header" defaultMessage="Other Resources Near You" />
+          </h1>
+        ) : (
+          <h2 className="more-help-header">
+            <FormattedMessage id="moreHelp.header" defaultMessage="Other Resources Near You" />
+          </h2>
+        )}
       </div>
       {displayResources(resources)}
     </div>

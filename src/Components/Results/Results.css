@@ -63,6 +63,22 @@
   margin: 0;
 }
 
+/* Three-tab-only adjustments. Scoped to [data-tab-count='3'] so the two-tab layout —
+   still rendered for referrers carrying `no_results_more_help` — is byte-identical to
+   before this change. At ~33% width the labels can wrap, so the anchor becomes a
+   centering flex container (Grid items stretch to equal height, and without this a
+   one-line tab would sit top-aligned next to a two-line neighbour). */
+.results-tab-container[data-tab-count='3'] .results-tab a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.results-tab-container[data-tab-count='3'] .results-tab a .results-tab-label {
+  /* Only breaks where a word would otherwise overflow its tab; no hyphens inserted. */
+  overflow-wrap: break-word;
+}
+
 .results-tab a.active {
   background-color: white;
 }
@@ -159,43 +175,6 @@
 
 .results-header {
   height: 7rem;
-}
-
-.results-needs-header-background {
-  background-color: var(--secondary-background-color);
-  padding: 1rem;
-}
-
-.results-needs-header {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 7rem;
-  background-color: var(--primary-color);
-  color: white;
-  text-align: center;
-  line-height: normal;
-  max-width: var(--content-max-width);
-  margin: 0 auto;
-}
-
-.results-needs-header-programs {
-  display: flex;
-  justify-content: center;
-  font-size: xxx-large;
-  font-family: var(--font-heading);
-  font-weight: 700;
-}
-
-.results-needs-header-programs-text {
-  display: flex;
-  width: 8rem;
-  font-size: large;
-  font-family: var(--font-body);
-  font-weight: 400;
-  margin: auto;
-  margin-top: -0.5rem;
-  margin-bottom: 0.5rem;
 }
 
 .result-program-container hr {
@@ -432,6 +411,16 @@
   .results-tab a .results-tab-label {
     font-size: .9rem;
     margin: 0;
+  }
+
+  /* Three tabs share a narrow viewport, so each gets ~33% instead of 50%. Tightened
+     only for that case; the two-tab mobile rendering above is unchanged. */
+  .results-tab-container[data-tab-count='3'] .results-tab a {
+    padding: 0.5rem 0.15rem;
+  }
+
+  .results-tab-container[data-tab-count='3'] .results-tab a .results-tab-label {
+    font-size: max(0.7rem, min(0.9rem, 2.8vw));
   }
 
   .results-tab-container {

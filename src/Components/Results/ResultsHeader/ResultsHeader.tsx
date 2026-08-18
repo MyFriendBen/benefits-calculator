@@ -14,8 +14,8 @@ import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorResultsHeader from '../../EnergyCalculator/Results/ResultsHeader';
 import ResultsSurvey from '../ResultsSurvey/ResultsSurvey';
 
-type ResultsHeaderProps = {
-  type: 'program' | 'need';
+type ResultsSummaryProps = {
+  type: 'program' | 'need' | 'help';
 };
 
 const ProgramsHeader = () => {
@@ -71,33 +71,47 @@ const ProgramsHeader = () => {
   );
 };
 
-const NeedsHeader = () => {
-  const { needs } = useResultsContext();
+// The per-tab summary block. Rendered BELOW the tab bar and inside the results card,
+// so it is separate from ResultsHeader (which stays above, full-bleed). The wrapper
+// div lives in here rather than in Results so the Immediate Help tab renders nothing
+// at all — `.results-header-container` has a fixed `height: 9rem`, which would leave
+// an empty gap if the wrapper rendered without a summary inside it.
+//
+// Shows only on Long-Term Benefits, per the PM. Additional Resources previously had its
+// own "N Resources Found" block (NeedsHeader), but that count already appears in the tab
+// label itself ("Additional Resources (N)"), so it was a pure duplicate carrying the
+// same visual weight as the real summary for no extra information — removed rather than
+// repositioned.
+export const ResultsSummary = ({ type }: ResultsSummaryProps) => {
+  const isEnergyCalculator = useIsEnergyCalculator();
+
+  if (isEnergyCalculator) {
+    return (
+      <div className="energy-calculator-results-header-container">
+        <EnergyCalculatorResultsHeader />
+      </div>
+    );
+  }
+
+  if (type !== 'program') {
+    return null;
+  }
 
   return (
-    <div className="results-needs-header-background">
-      <div className="results-needs-header">
-        <div className="results-needs-header-programs">{needs.length}</div>
-        <div className="results-needs-header-programs-text">
-          <FormattedMessage id="results.needHeader" defaultMessage="Resources Found" />
-        </div>
-      </div>
+    <div className="results-header-container">
+      <ProgramsHeader />
     </div>
   );
 };
 
-const ResultsHeader = ({ type }: ResultsHeaderProps) => {
+// Page-level chrome shared by every results tab: back/save buttons, the admin login,
+// and the NC feedback survey. Takes no `type` on purpose — it renders above the tab
+// bar and outside the results card, so it is identical whichever tab is active.
+const ResultsHeader = () => {
   const { whiteLabel, uuid } = useParams();
   const { staffToken, setStaffToken } = useContext(Context);
   const { isAdminView } = useResultsContext();
-  const isEnergyCalculator = useIsEnergyCalculator();
   const track = useTrackEvent();
-
-  let header = type === 'need' ? <NeedsHeader /> : <ProgramsHeader />;
-
-  if (isEnergyCalculator) {
-    header = <EnergyCalculatorResultsHeader />;
-  }
 
   return (
     <>
@@ -110,7 +124,6 @@ const ResultsHeader = ({ type }: ResultsHeaderProps) => {
       </div>
       {isAdminView && <Login setToken={setStaffToken} loggedIn={staffToken !== undefined} />}
       <ResultsSurvey />
-      <div className={isEnergyCalculator ? "energy-calculator-results-header-container" : "results-header-container"}>{header}</div>
     </>
   );
 };
