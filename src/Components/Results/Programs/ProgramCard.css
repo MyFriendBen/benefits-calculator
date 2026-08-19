@@ -11,14 +11,6 @@
   margin-bottom: 1rem;
 }
 
-.result-program-container.passed {
-  background-color: #d9ead3;
-}
-
-.result-program-container.failed {
-  background-color: #ea9999;
-}
-
 .result-program-container hr {
   background-color: var(--secondary-color);
   width: 98%;
