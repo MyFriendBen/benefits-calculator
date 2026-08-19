@@ -5,7 +5,6 @@ import LanguageIcon from '@mui/icons-material/Language';
 import LanguageSelect from '../LanguageSelect/LanguageSelect';
 import Paper from '@mui/material/Paper';
 import { useIntl } from 'react-intl';
-import { FormattedMessage } from 'react-intl';
 import './Header.css';
 import { useLogo } from '../Referrer/useLogo';
 import { DEFAULT_WHITE_LABEL } from '../Wrapper/Wrapper';
@@ -40,19 +39,21 @@ const Header = () => {
 
   const track = useTrackEvent();
 
+  const uiOptions = getReferrer('uiOptions');
+
   const containerClass = useMemo(() => {
     let className = 'header-full-width-container';
 
-    if (getReferrer('uiOptions').includes('white_header')) {
+    if (uiOptions.includes('white_header')) {
       className += ' white-header';
     }
 
-    if (getReferrer('uiOptions').includes('small_header_language_dropdown')) {
+    if (uiOptions.includes('small_header_language_dropdown')) {
       className += ' small-header-language-dropdown';
     }
 
     return className;
-  }, []);
+  }, [uiOptions]);
 
   return (
     <nav>
