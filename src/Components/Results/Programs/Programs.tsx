@@ -1,5 +1,5 @@
 import { ProgramCategory } from '../../../Types/Results';
-import { findValidationForProgram, useResultsContext } from '../Results';
+import { useResultsContext } from '../Results';
 import Filter from '../Filter/Filter';
 import ProgramCard from './ProgramCard';
 import CategoryHeading from '../CategoryHeading/CategoryHeading';
@@ -45,44 +45,6 @@ function sortProgramsIntoCategories(categories: ProgramCategory[]): ProgramCateg
   return sortedCategories;
 }
 
-const ValidationCategory = () => {
-  const { programs, isAdminView, validations } = useResultsContext();
-
-  const validationPrograms = useMemo(
-    () => programs.filter((program) => findValidationForProgram(validations, program) !== undefined),
-    [validations, programs],
-  );
-
-  const validationCategory = useMemo<ProgramCategory>(() => {
-    return {
-      external_name: 'validation_category',
-      icon: '',
-      name: { label: 'programs.categories.validation.header', default_message: 'Validations' },
-      description: { label: '', default_message: '' },
-      caps: [],
-      programs: validationPrograms,
-      priority: null,
-      tax_category: false,
-    };
-  }, [validationPrograms]);
-
-  if (!isAdminView || validationPrograms.length === 0) {
-    return null;
-  }
-
-  return (
-    <>
-      <CategoryHeading category={validationCategory} />
-      {validationPrograms.map((program) => {
-        // Key by identity, not index: filtering reorders programs, and an
-        // index key would reuse a card instance (and its already-tripped
-        // impression ref) for a different program, dropping its impression.
-        return <ProgramCard program={program} key={program.program_id} />;
-      })}
-    </>
-  );
-};
-
 // Opens the Benbot chat window with an initial "guide me" prompt.
 // Only rendered when the 'benbot' flag is on (so it's always inside ChatbotProvider).
 const GuideMeButton = () => {
@@ -121,7 +83,6 @@ const Programs = () => {
       <ResultsMessage />
       {!isEnergyCalculator && <Filter />}
       {isEnergyCalculator && <DocumentSummary programs={programs} />}
-      <ValidationCategory />
       {isBenbotEnabled && (
         <div className="results-action-buttons">
           <GuideMeButton />

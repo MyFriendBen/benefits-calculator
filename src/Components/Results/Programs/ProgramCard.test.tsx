@@ -10,10 +10,9 @@ import { createProgram, createMemberEligibility, createFormData } from '../testH
 
 // Mock Results module hooks
 jest.mock('../Results', () => ({
-  useResultsContext: () => ({ validations: [], isAdminView: false }),
+  useResultsContext: () => ({ isAdminView: false }),
   useResultsLink: (link: string) => `/test/uuid/${link}`,
   findMemberEligibilityMember: jest.requireActual('../Results').findMemberEligibilityMember,
-  findValidationForProgram: jest.requireActual('../Results').findValidationForProgram,
 }));
 
 // Mock FormattedValue
@@ -42,7 +41,13 @@ const createMember = (overrides: Partial<HouseholdData> = {}): HouseholdData => 
   birthYear: 1990,
   birthMonth: 1,
   relationshipToHH: 'headOfHousehold',
-  conditions: { student: false, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false },
+  conditions: {
+    student: false,
+    pregnant: false,
+    blindOrVisuallyImpaired: false,
+    disabled: false,
+    longTermDisability: false,
+  },
   hasIncome: false,
   incomeStreams: [],
   ...overrides,
@@ -80,7 +85,7 @@ const createContextValue = (config: Config | undefined, formData = createFormDat
     hasBenefitsPrograms: [],
     hasBenefitsProgramsLoading: false,
     hasBenefitsProgramsError: false,
-  }) as WrapperContext;
+  } as WrapperContext);
 
 const renderProgramCard = (
   program: ReturnType<typeof createProgram>,
@@ -118,10 +123,7 @@ describe('ProgramCard - Eligibility Tags', () => {
     });
 
     const programWithMembers = createProgram({
-      members: [
-        createMemberEligibility('hoh', true, 100),
-        createMemberEligibility('child-1', true, 50),
-      ],
+      members: [createMemberEligibility('hoh', true, 100), createMemberEligibility('child-1', true, 50)],
     });
 
     it('should not show eligibility tags when feature flag is off', () => {
@@ -144,9 +146,7 @@ describe('ProgramCard - Eligibility Tags', () => {
     it('should not show eligibility tags for single-member household even with flag on', () => {
       const singleMemberFormData = createFormData({
         householdSize: 1,
-        householdData: [
-          createMember({ id: 1, frontendId: 'hoh', relationshipToHH: 'headOfHousehold' }),
-        ],
+        householdData: [createMember({ id: 1, frontendId: 'hoh', relationshipToHH: 'headOfHousehold' })],
       });
 
       const program = createProgram({
@@ -204,10 +204,7 @@ describe('ProgramCard - Eligibility Tags', () => {
 
     it('should show tags for all eligible members when all are eligible', () => {
       const program = createProgram({
-        members: [
-          createMemberEligibility('hoh', true, 100),
-          createMemberEligibility('child-1', true, 50),
-        ],
+        members: [createMemberEligibility('hoh', true, 100), createMemberEligibility('child-1', true, 50)],
       });
 
       renderProgramCard(program, configWithFlag(true), twoMemberFormData);
@@ -219,10 +216,7 @@ describe('ProgramCard - Eligibility Tags', () => {
     it('should not show tags when no members are eligible and program is not eligible', () => {
       const program = createProgram({
         eligible: false,
-        members: [
-          createMemberEligibility('hoh', false, 0),
-          createMemberEligibility('child-1', false, 0),
-        ],
+        members: [createMemberEligibility('hoh', false, 0), createMemberEligibility('child-1', false, 0)],
       });
 
       renderProgramCard(program, configWithFlag(true), twoMemberFormData);
@@ -290,14 +284,18 @@ describe('ProgramCard - Eligibility Tags', () => {
         householdSize: 2,
         householdData: [
           createMember({ id: 1, frontendId: 'hoh', relationshipToHH: 'headOfHousehold' }),
-          createMember({ id: 2, frontendId: 'foster-1', relationshipToHH: 'fosterChild', birthYear: 2018, birthMonth: 3 }),
+          createMember({
+            id: 2,
+            frontendId: 'foster-1',
+            relationshipToHH: 'fosterChild',
+            birthYear: 2018,
+            birthMonth: 3,
+          }),
         ],
       });
 
       const program = createProgram({
-        members: [
-          createMemberEligibility('foster-1', true, 50),
-        ],
+        members: [createMemberEligibility('foster-1', true, 50)],
       });
 
       renderProgramCard(program, configWithStringRelation, twoMemberFormData);
@@ -324,9 +322,7 @@ describe('ProgramCard - Eligibility Tags', () => {
       });
 
       const program = createProgram({
-        members: [
-          createMemberEligibility('sib-1', true, 50),
-        ],
+        members: [createMemberEligibility('sib-1', true, 50)],
       });
 
       renderProgramCard(program, configWithMissingRelation, twoMemberFormData);
@@ -348,10 +344,7 @@ describe('ProgramCard - Eligibility Tags', () => {
       });
 
       const program = createProgram({
-        members: [
-          createMemberEligibility('hoh', true, 100),
-          createMemberEligibility('child-1', true, 50),
-        ],
+        members: [createMemberEligibility('hoh', true, 100), createMemberEligibility('child-1', true, 50)],
       });
 
       renderProgramCard(program, configWithFlag(true), twoMemberFormData);

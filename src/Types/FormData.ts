@@ -89,7 +89,6 @@ export type AcuteHHConditions = { [key: string]: boolean };
 export type FormData = {
   isTest: boolean;
   isTestData?: boolean;
-  frozen: boolean;
   externalID?: string;
   agreeToTermsOfService: boolean;
   is13OrOlder: boolean;

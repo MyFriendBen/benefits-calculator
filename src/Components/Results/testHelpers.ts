@@ -11,7 +11,7 @@ export const createMemberEligibility = (
   id: string,
   eligible: boolean = true,
   value: number = 100,
-  already_has: boolean = false
+  already_has: boolean = false,
 ): MemberEligibility => ({
   frontend_id: id,
   eligible,
@@ -51,40 +51,38 @@ export const createProgram = (overrides: Partial<Program> = {}): Program => ({
   ...overrides,
 });
 
-export const createFormData = (overrides: Partial<FormData> = {}): FormData => ({
-  isTest: false,
-  frozen: false,
-  agreeToTermsOfService: true,
-  is13OrOlder: true,
-  zipcode: '60601',
-  county: 'Cook',
-  startTime: new Date().toISOString(),
-  hasExpenses: 'false',
-  expenses: [],
-  householdSize: 1,
-  householdData: [],
-  householdAssets: 0,
-  hasBenefits: 'false',
-  benefits: [],
-  signUpInfo: {
-    email: '',
-    phone: '',
-    firstName: '',
-    lastName: '',
-    hasUser: false,
-    sendOffers: false,
-    sendUpdates: false,
-    commConsent: false,
-  },
-  acuteHHConditions: {},
-  referrerCode: '',
-  immutableReferrer: '',
-  ...overrides,
-} as FormData);
+export const createFormData = (overrides: Partial<FormData> = {}): FormData =>
+  ({
+    isTest: false,
+    agreeToTermsOfService: true,
+    is13OrOlder: true,
+    zipcode: '60601',
+    county: 'Cook',
+    startTime: new Date().toISOString(),
+    hasExpenses: 'false',
+    expenses: [],
+    householdSize: 1,
+    householdData: [],
+    householdAssets: 0,
+    hasBenefits: 'false',
+    benefits: [],
+    signUpInfo: {
+      email: '',
+      phone: '',
+      firstName: '',
+      lastName: '',
+      hasUser: false,
+      sendOffers: false,
+      sendUpdates: false,
+      commConsent: false,
+    },
+    acuteHHConditions: {},
+    referrerCode: '',
+    immutableReferrer: '',
+    ...overrides,
+  } as FormData);
 
-export const createFilterState = (
-  selectedCitizenship: CitizenLabelOptions = 'citizen'
-): FilterState => ({
+export const createFilterState = (selectedCitizenship: CitizenLabelOptions = 'citizen'): FilterState => ({
   selectedCitizenship,
   calculatedFilters: new Set(),
 });
@@ -94,27 +92,28 @@ export const createProgramWithExclusions = (
   name: string,
   excludes: number[] = [],
   eligible: boolean = true,
-  value: number = 100
-): Program => createProgram({
-  program_id: id,
-  name: createTranslation(name),
-  name_abbreviated: name.substring(0, 3).toUpperCase(),
-  eligible,
-  estimated_value: value,
-  household_value: value,
-  excludes_programs: excludes.length > 0 ? excludes : null,
-});
+  value: number = 100,
+): Program =>
+  createProgram({
+    program_id: id,
+    name: createTranslation(name),
+    name_abbreviated: name.substring(0, 3).toUpperCase(),
+    eligible,
+    estimated_value: value,
+    household_value: value,
+    excludes_programs: excludes.length > 0 ? excludes : null,
+  });
 
 export const createProgramWithMembers = (
   id: number,
   name: string,
   memberValues: { [key: string]: number },
-  legalStatus: string[] = ['citizen']
+  legalStatus: string[] = ['citizen'],
 ): Program => {
   const members = Object.entries(memberValues).map(([memberId, value]) =>
-    createMemberEligibility(memberId, true, value)
+    createMemberEligibility(memberId, true, value),
   );
-  
+
   return createProgram({
     program_id: id,
     name: createTranslation(name),

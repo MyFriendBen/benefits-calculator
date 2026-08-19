@@ -122,7 +122,6 @@ export type ApiUser = {
 
 export type ApiFormDataReadOnly = {
   id: number;
-  frozen: boolean;
   uuid: string;
   submision_date: string | null;
   last_email_request_date: string | null;

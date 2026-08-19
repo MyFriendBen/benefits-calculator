@@ -49,13 +49,6 @@ export type UrgentNeedTypeResponse = {
   }[];
 }[];
 
-export type ValidationRequestData = {
-  screen_uuid: string;
-  program_name: string;
-  eligible: boolean;
-  value: number;
-};
-
 export type AdminTokenResponse = {
   token: string;
 };

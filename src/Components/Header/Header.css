@@ -54,10 +54,6 @@
   z-index: 1;
 }
 
-.MuiPaper-root.header-full-width-container.frozen {
-  height: 6.5rem;
-}
-
 #nav-container {
   display: flex;
   flex-direction: row;
@@ -151,13 +147,6 @@
 .white-header #select-language:focus-visible,
 .white-header #select-language .MuiSelect-select:focus-visible {
   outline: 2px solid var(--primary-color);
-}
-
-.header-frozen-message-container {
-  background-color: var(--hover-color);
-  text-align: center;
-  height: max-content;
-  font-weight: bold;
 }
 
 .eaglecounty-logo-size {
