@@ -2,7 +2,6 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { useTranslateNumber } from '../../Assets/languageOptions';
 import { FormattedMessageType } from '../../Types/Questions';
 import { Program, ProgramCategory } from '../../Types/Results';
-import { findValidationForProgram, useResultsContext } from './Results';
 
 export function programValue(program: Program) {
   let total = program.household_value;
@@ -95,8 +94,7 @@ export const formatToUSD = (num: number) => {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
 };
 
-function useOverrideValue(program: Program, value: string, expectedValue?: string) {
-  const { isAdminView } = useResultsContext();
+function useOverrideValue(program: Program, value: string) {
   const intl = useIntl();
 
   if (program.estimated_value_override.default_message !== '') {
@@ -104,10 +102,6 @@ function useOverrideValue(program: Program, value: string, expectedValue?: strin
       id: program.estimated_value_override.label,
       defaultMessage: program.estimated_value_override.default_message,
     });
-  }
-
-  if (isAdminView && expectedValue !== undefined) {
-    return `${expectedValue} => ${value}`;
   }
 
   return value;
@@ -128,9 +122,7 @@ function useValueFormats(): DefaultMap<(program: Program) => string> {
       return translateNumber(formatToUSD(programValue(program) / 12)) + perMonth;
     },
     lump_sum: (program: Program) => {
-      return (
-        translateNumber(formatToUSD(programValue(program)))
-      );
+      return translateNumber(formatToUSD(programValue(program)));
     },
     estimated_annual: (program: Program) => {
       const perYear = intl.formatMessage({ id: 'results.programs.values.formats.per_year', defaultMessage: '/year' });
@@ -143,15 +135,7 @@ export function useFormatDisplayValue(program: Program) {
   const formats = useValueFormats();
   const calculator = formats[program.value_format ?? 'default'] ?? formats.default;
   const value = calculator(program);
-  const { validations } = useResultsContext();
-  const validation = findValidationForProgram(validations, program);
-  const translateNumber = useTranslateNumber();
-
-  // Call the hook unconditionally (rules-of-hooks): expectedValue is simply
-  // undefined when there's no validation, which useOverrideValue handles.
-  const expectedValue =
-    validation !== undefined ? translateNumber(formatToUSD(Number(validation.value) / 12)) : undefined;
-  return useOverrideValue(program, value, expectedValue);
+  return useOverrideValue(program, value);
 }
 
 export function YearlyValueLabel({ program }: { program: Program }) {
@@ -176,13 +160,7 @@ export function YearlyValueLabel({ program }: { program: Program }) {
 
 export function useFormatYearlyValue(program: Program) {
   const translateNumber = useTranslateNumber();
-  const { validations } = useResultsContext();
-  const validation = findValidationForProgram(validations, program);
 
   const value = translateNumber(formatToUSD(programValue(program)));
-
-  // Call the hook unconditionally (rules-of-hooks): expectedValue is simply
-  // undefined when there's no validation, which useOverrideValue handles.
-  const expectedValue = validation !== undefined ? translateNumber(formatToUSD(Number(validation.value))) : undefined;
-  return useOverrideValue(program, value, expectedValue);
+  return useOverrideValue(program, value);
 }

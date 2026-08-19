@@ -14,7 +14,7 @@ import { useTrackEvent } from '../../Assets/analytics';
 
 const Header = () => {
   const context = useContext(Context);
-  const { formData, getReferrer, whiteLabel } = context;
+  const { getReferrer, whiteLabel } = context;
   const languageOptions = useConfig<{ [key: string]: string }>('language_options');
   const queryString = useQueryString();
   const landingPageQueryString = useQueryString({ path: null });
@@ -68,10 +68,6 @@ const Header = () => {
   const containerClass = useMemo(() => {
     let className = 'header-full-width-container';
 
-    if (formData.frozen) {
-      className += ' frozen';
-    }
-
     if (getReferrer('uiOptions').includes('white_header')) {
       className += ' white-header';
     }
@@ -81,7 +77,7 @@ const Header = () => {
     }
 
     return className;
-  }, [formData.frozen]);
+  }, []);
 
   return (
     <nav>
@@ -120,14 +116,6 @@ const Header = () => {
             </Select>
           </div>
         </AppBar>
-        {formData.frozen && (
-          <div className="header-frozen-message-container">
-            <FormattedMessage
-              id="header.frozen.message"
-              defaultMessage="This screen is frozen. Changes you make will not be saved."
-            />
-          </div>
-        )}
       </Paper>
     </nav>
   );

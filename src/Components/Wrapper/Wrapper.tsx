@@ -16,7 +16,6 @@ const EMPTY_REFERRAL_OPTIONS: ReferralOptions = { generic: {}, partners: {} };
 
 const initialFormData: FormData = {
   isTest: false,
-  frozen: false,
   externalID: undefined,
   agreeToTermsOfService: false,
   is13OrOlder: false,

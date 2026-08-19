@@ -8,7 +8,6 @@ import {
   TranslationResponse,
   UrgentNeedTypeResponse,
   UserRequestData,
-  ValidationRequestData,
 } from './Types/ApiCalls';
 import { ApiFormData, ApiFormDataReadOnly } from './Types/ApiFormData';
 import { EligibilityResults } from './Types/Results';
@@ -25,7 +24,6 @@ const apiUrgentNeedTypesEndpoint = `${domain}/api/urgent_need_types/`;
 export const configEndpoint = `${domain}/api/configuration/`;
 const screenerOptionsEndpoint = `${domain}/api/screener-options/`;
 const eligibilityEndpoint = `${domain}/api/eligibility/`;
-const validationEndpoint = `${domain}/api/validations/`;
 const authTokenEndpoint = `${domain}/api/auth-token/`;
 const getNpsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/nps/`;
 const assistantConversationsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/assistant/conversations/`;
@@ -190,42 +188,6 @@ const getAllNearTermPrograms = async (whiteLabel: string) => {
     types.push({ ...rest, programs: urgentNeeds });
   }
   return types;
-};
-
-const postValidation = async (validationBody: ValidationRequestData, key: string) => {
-  const staffHeader = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: 'Token ' + key,
-  };
-
-  return await fetch(validationEndpoint, {
-    method: 'POST',
-    headers: staffHeader,
-    body: JSON.stringify(validationBody),
-  }).then((response) => {
-    if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}`);
-    }
-    return response.json();
-  });
-};
-
-const deleteValidation = async (validationid: number, key: string) => {
-  const staffHeader = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: 'Token ' + key,
-  };
-
-  return await fetch(validationEndpoint + validationid, {
-    method: 'DELETE',
-    headers: staffHeader,
-  }).then((response) => {
-    if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}`);
-    }
-  });
 };
 
 type NPSScoreData = {
@@ -425,8 +387,6 @@ export {
   getEligibility,
   getAllLongTermPrograms,
   getAllNearTermPrograms,
-  postValidation,
-  deleteValidation,
   getAuthToken,
   postNPSScore,
   patchNPSReason,
