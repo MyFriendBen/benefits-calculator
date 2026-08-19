@@ -65,19 +65,21 @@ const Header = () => {
     return dropdownMenuItems;
   };
 
+  const uiOptions = getReferrer('uiOptions');
+
   const containerClass = useMemo(() => {
     let className = 'header-full-width-container';
 
-    if (getReferrer('uiOptions').includes('white_header')) {
+    if (uiOptions.includes('white_header')) {
       className += ' white-header';
     }
 
-    if (getReferrer('uiOptions').includes('small_header_language_dropdown')) {
+    if (uiOptions.includes('small_header_language_dropdown')) {
       className += ' small-header-language-dropdown';
     }
 
     return className;
-  }, []);
+  }, [uiOptions]);
 
   return (
     <nav>
