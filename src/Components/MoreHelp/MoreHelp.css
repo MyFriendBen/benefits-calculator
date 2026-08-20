@@ -2,6 +2,13 @@
   padding: 1rem;
 }
 
+/* `.results-card-body` already adds 1rem side padding, so drop it here to avoid
+   doubling. Scoped to that ancestor so CESN's standalone page (no such wrapper)
+   keeps its original padding. */
+.results-card-body .more-help-container {
+  padding: 1rem 0;
+}
+
 .back-button {
   padding: 0.25rem 0.75rem;
   margin-bottom: 1rem;
@@ -16,6 +23,10 @@
 
 .more-help-header {
   color: var(--primary-color);
+  /* Tag varies: <h2> in the tab, <h1> standalone (see isStandalonePage). Pinned to the
+     old always-<h1> metrics so neither case shows a visual diff. */
+  font-size: 2em;
+  margin: 0.67em 0;
 }
 
 .resource-card-article {
@@ -27,6 +38,12 @@
   color: var(--primary-color);
   font-size: 1rem;
   white-space: pre-line;
+}
+
+/* Was an <h1>; demoted to <h3>. font-size is already pinned above, so only the default
+   margin needed restoring to keep the rendering identical. */
+.resource-header {
+  margin: 0.67em 0;
 }
 
 .resource-desc {

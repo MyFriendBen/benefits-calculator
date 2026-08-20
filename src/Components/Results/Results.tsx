@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { ComponentType, createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import ResultsError from './ResultsError/ResultsError';
 import Loading from './Loading/Loading';
 import {
@@ -14,19 +14,20 @@ import { getEligibility, AssistantVisibleProgram } from '../../apiCalls';
 import { Context } from '../Wrapper/Wrapper';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { Grid } from '@mui/material';
-import ResultsHeader from './ResultsHeader/ResultsHeader';
+import ResultsHeader, { ResultsSummary } from './ResultsHeader/ResultsHeader';
 import Needs from './Needs/Needs';
 import Programs from './Programs/Programs';
 import ProgramPage from './ProgramPage/ProgramPage';
 import ResultsTabs from './Tabs/Tabs';
+import { ResultsTabId } from './Tabs/buildTabs';
+import BackAndSaveButtons from './BackAndSaveButtons/BackAndSaveButtons';
+import { FormattedMessage } from 'react-intl';
 import { FilterState, createInitialFilterState } from './Filter/citizenshipFilterConfig';
 import dataLayerPush from '../../Assets/analytics';
 import MoreHelpButton from './211Button/211Button';
 import MoreHelp from '../MoreHelp/MoreHelp';
-import BackAndSaveButtons from './BackAndSaveButtons/BackAndSaveButtons';
 import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
 import ExternalApiFailureBanner from './ExternalApiFailureBanner/ExternalApiFailureBanner';
-import { FormattedMessage } from 'react-intl';
 import './Results.css';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { addAdminToLink } from '../../Assets/adminLink';
@@ -117,10 +118,27 @@ export function useResultsLink(link: string) {
   return addAdminToLink(`/${whiteLabel}/${uuid}/${link}`, isAdminView);
 }
 
+// Referrer opt-out for Immediate Help. Flag is still named `no_results_more_help`
+// (predates the tab; policy unchanged). Centralizes the `[] as string[]` default
+// getReferrer needs to avoid throwing when referrerData is undefined.
+export function useImmediateHelpSuppressed() {
+  const { getReferrer } = useContext(Context);
+
+  return getReferrer('uiOptions', [] as string[]).includes('no_results_more_help');
+}
+
+// GA4 tab_name per browsable tab. Types absent here (program detail, energy rebates)
+// are not tabs and are excluded from scroll-depth tracking.
+const SCROLL_DEPTH_TAB_NAMES: Partial<Record<ResultsProps['type'], string>> = {
+  program: 'long_term_benefits',
+  need: 'additional_resources',
+  help: 'immediate_help',
+};
+
 const Results = ({ type }: ResultsProps) => {
-  const { formData, getReferrer, locale } = useContext(Context);
+  const { formData, locale } = useContext(Context);
   const { whiteLabel, uuid, programId, energyCalculatorRebateType } = useParams();
-  const noHelpButton = getReferrer('uiOptions').includes('no_results_more_help');
+  const immediateHelpSuppressed = useImmediateHelpSuppressed();
 
   const [searchParams] = useSearchParams();
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams.get('admin')]);
@@ -231,14 +249,14 @@ const Results = ({ type }: ResultsProps) => {
     );
   }, [apiResults, shownPrograms, track, trackItemList]);
 
-  // Results-page scroll depth, only on the two browsable tabs (program =
-  // long-term benefits, need = additional resources). Each threshold fires once
-  // per tab per screening.
+  // Results-page scroll depth, browsable tabs only. Each threshold fires once per tab per screening.
   const firedScrollDepths = useRef<Set<number>>(new Set());
   useEffect(() => {
-    const tabName = type === 'program' ? 'long_term_benefits' : type === 'need' ? 'additional_resources' : null;
+    // CESN's `help` route is a standalone page with no tab bar (see `isEnergyCalculator`
+    // below) — exclude it here even though `help` is otherwise in the lookup.
+    const tabName = whiteLabel === 'cesn' && type === 'help' ? null : (SCROLL_DEPTH_TAB_NAMES[type] ?? null);
     if (tabName === null) {
-      return; // program detail / more-help / rebates aren't browsable tabs
+      return; // program detail / rebates / CESN's standalone help page aren't browsable tabs
     }
     firedScrollDepths.current = new Set(); // new tab → reset the once-per-tab guard
 
@@ -260,7 +278,7 @@ const Results = ({ type }: ResultsProps) => {
 
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [type, track]);
+  }, [type, track, whiteLabel]);
 
   // "None eligible" needs BOTH result sets resolved, or we'd fire a false
   // negative while rebates are still loading (and the once-guard would prevent
@@ -364,7 +382,14 @@ const Results = ({ type }: ResultsProps) => {
     );
   } else if (apiError) {
     return <ResultsError />;
-  } else if (programId === undefined && type === 'help') {
+  } else if (programId === undefined && type === 'help' && immediateHelpSuppressed) {
+    // Suppressed referrers must not reach More Help by URL either. Must run before the
+    // CESN branch below, so a suppressed referrer on CESN redirects here too.
+    return <Navigate to={addAdminToLink(`/${whiteLabel}/${uuid}/results/benefits`, isAdminView)} replace />;
+  } else if (programId === undefined && type === 'help' && isEnergyCalculator) {
+    // CESN has no tab bar (Tabs.tsx), so Immediate Help stays this standalone page,
+    // keeping its "BACK TO RESULTS" affordance. Folding it into the tabbed layout would
+    // leave "BACK TO SCREENER" with no tab bar to get back to results.
     return (
       <main className="benefits-form">
         <Grid container>
@@ -375,30 +400,50 @@ const Results = ({ type }: ResultsProps) => {
                 <FormattedMessage id="results.back-to-results-btn" defaultMessage="BACK TO RESULTS" />
               }
             />
-            <MoreHelp />
+            <MoreHelp isStandalonePage />
           </Grid>
         </Grid>
       </main>
     );
-  } else if (programId === undefined && (type === 'program' || type === 'need')) {
+  } else if (programId === undefined && (type === 'program' || type === 'need' || type === 'help')) {
+    // Built inside render, not at module scope: Results.tsx has an import cycle
+    // (Results -> Tabs -> Results), and a module-scope lookup could read
+    // Programs/Needs/MoreHelp before they finish initializing, baking in `undefined`
+    // with no ErrorBoundary to catch it. Render only starts after the whole module
+    // graph loads, so this is safe. A Record (not nested ternaries) makes a missing
+    // type a compile error instead of a silent fallback to Long-Term Benefits.
+    const panels: Record<ResultsTabId, { tabId: string; Content: ComponentType }> = {
+      program: { tabId: 'long-term-benefits-tab', Content: Programs },
+      need: { tabId: 'near-term-benefits-tab', Content: Needs },
+      help: { tabId: 'immediate-help-tab', Content: MoreHelp },
+    };
+    const panel = panels[type];
+
     return (
       <ResultsContextProvider>
         <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms}>
           <main>
-            <ResultsHeader type={type} />
+            <ResultsHeader />
             <div className="results-card-wrapper">
-              <ResultsTabs />
-              <div id="results-tabpanel" role="tabpanel" aria-labelledby={type === 'program' ? 'long-term-benefits-tab' : 'near-term-benefits-tab'} className="benefits-form results-card-body">
+              <ResultsTabs activeTab={type} />
+              <div id="results-tabpanel" role="tabpanel" aria-labelledby={panel.tabId} className="benefits-form results-card-body">
+                {/* Inside the panel, not above it — per-tab content should be reachable
+                    when a screen reader enters the active panel. */}
+                <ResultsSummary type={type} />
                 {type === 'program' && <ExternalApiFailureBanner />}
                 {type === 'program' && <UrgentNeedBanner />}
                 <Grid container sx={{ pt: '1rem' }}>
                   <Grid item xs={12}>
-                    {type === 'need' ? <Needs /> : <Programs />}
+                    <panel.Content />
                   </Grid>
                 </Grid>
-                {!noHelpButton && <MoreHelpButton />}
-                <NPSWidget uuid={uuid} />
-                <ShareModalAutoPopup />
+                {/* CESN renders no tab bar (see Tabs.tsx), so this button remains its only
+                    entry point to the Immediate Help resources. */}
+                {isEnergyCalculator && !immediateHelpSuppressed && <MoreHelpButton />}
+                {/* Both fire impression events on a timer, so they stay off the help tab to
+                    avoid inflating impressions and diluting the NPS response denominator. */}
+                {type !== 'help' && <NPSWidget uuid={uuid} />}
+                {type !== 'help' && <ShareModalAutoPopup />}
               </div>
             </div>
           </main>

@@ -14,8 +14,8 @@ import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorResultsHeader from '../../EnergyCalculator/Results/ResultsHeader';
 import ResultsSurvey from '../ResultsSurvey/ResultsSurvey';
 
-type ResultsHeaderProps = {
-  type: 'program' | 'need';
+type ResultsSummaryProps = {
+  type: 'program' | 'need' | 'help';
 };
 
 const ProgramsHeader = () => {
@@ -71,33 +71,39 @@ const ProgramsHeader = () => {
   );
 };
 
-const NeedsHeader = () => {
-  const { needs } = useResultsContext();
+// Rendered below the tab bar, inside the results card — separate from ResultsHeader,
+// which stays above. The wrapper div lives here (not in Results) so the Immediate Help
+// tab renders nothing: `.results-header-container` has a fixed height: 9rem, and an
+// empty wrapper would leave a gap.
+export const ResultsSummary = ({ type }: ResultsSummaryProps) => {
+  const isEnergyCalculator = useIsEnergyCalculator();
+
+  if (isEnergyCalculator) {
+    return (
+      <div className="energy-calculator-results-header-container">
+        <EnergyCalculatorResultsHeader />
+      </div>
+    );
+  }
+
+  if (type !== 'program') {
+    return null;
+  }
 
   return (
-    <div className="results-needs-header-background">
-      <div className="results-needs-header">
-        <div className="results-needs-header-programs">{needs.length}</div>
-        <div className="results-needs-header-programs-text">
-          <FormattedMessage id="results.needHeader" defaultMessage="Resources Found" />
-        </div>
-      </div>
+    <div className="results-header-container">
+      <ProgramsHeader />
     </div>
   );
 };
 
-const ResultsHeader = ({ type }: ResultsHeaderProps) => {
+// Elements shared by every tab: back/save buttons, admin login, NC survey. No `type`
+// prop — it renders above the tab bar, outside the results card, the same for every tab.
+const ResultsHeader = () => {
   const { whiteLabel, uuid } = useParams();
   const { staffToken, setStaffToken } = useContext(Context);
   const { isAdminView } = useResultsContext();
-  const isEnergyCalculator = useIsEnergyCalculator();
   const track = useTrackEvent();
-
-  let header = type === 'need' ? <NeedsHeader /> : <ProgramsHeader />;
-
-  if (isEnergyCalculator) {
-    header = <EnergyCalculatorResultsHeader />;
-  }
 
   return (
     <>
@@ -110,7 +116,6 @@ const ResultsHeader = ({ type }: ResultsHeaderProps) => {
       </div>
       {isAdminView && <Login setToken={setStaffToken} loggedIn={staffToken !== undefined} />}
       <ResultsSurvey />
-      <div className={isEnergyCalculator ? "energy-calculator-results-header-container" : "results-header-container"}>{header}</div>
     </>
   );
 };
