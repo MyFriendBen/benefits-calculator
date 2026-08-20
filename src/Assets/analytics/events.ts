@@ -116,17 +116,12 @@ export interface ScreenerEventMap {
   // 'income-frequency') and tagged with the hosting step via StepContext. Not the
   // results-page "More Help / 211" CTA below.
   screener_help_click: StepContext & { help_topic: string };
-  // "User asked for more help" — surface-agnostic; `location` names the surface, so the
-  // event survives UI moves. Kept separate from screener_help_click so it doesn't pollute
-  // the inline-tooltip confusion metric. Current emitters:
-  //   'immediate_help_tab' — the Immediate Help results tab (Tabs.tsx)
-  //   'results'            — the bottom "More Help / 211" CTA, now CESN-only, since CESN
-  //                          renders no tab bar (211Button.tsx)
-  // Redundant with screener_results_tab_click{tab_name:'immediate_help'} by design, to keep
-  // existing GA4 reporting continuous. Retire this emitter once tab_name is confirmed
-  // flowing (~2 reporting cycles) so the duplication doesn't become permanent.
+  // Fired from the Immediate Help tab (location: 'immediate_help_tab') and CESN's
+  // bottom button (location: 'results'). Deliberately kept alongside
+  // screener_results_tab_click for GA4 continuity — retire once tab_name is confirmed flowing.
   screener_get_help_click: { location?: string };
-  // "Other Resources Near You" (Immediate Help tab) "Visit Website" link click.
+  // "Visit Website" click on Other Resources Near You — fires from the Immediate Help
+  // tab or CESN's standalone more-help page.
   // `resource_name` is the config `label` (a plain string, PII-free);
   // `resource_index` is the item's ordinal on the page.
   screener_more_help_resource_click: { resource_name?: string; resource_index?: number; url?: string };

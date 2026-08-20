@@ -2,9 +2,9 @@
   padding: 1rem;
 }
 
-/* Inside the Immediate Help tab the card body already supplies `0 1rem 1.5rem`, so the
-   horizontal padding is dropped to avoid doubled side gutters. Scoped to that parent so
-   the standalone page CESN still uses (it has no tab bar) keeps its original spacing. */
+/* `.results-card-body` already adds 1rem side padding, so drop it here to avoid
+   doubling. Scoped to that ancestor so CESN's standalone page (no such wrapper)
+   keeps its original padding. */
 .results-card-body .more-help-container {
   padding: 1rem 0;
 }
@@ -23,10 +23,8 @@
 
 .more-help-header {
   color: var(--primary-color);
-  /* Renders as <h2> inside the Immediate Help tab (correct heading order under the tab
-     bar) or <h1> on CESN's standalone page (its only top-level heading — see MoreHelp's
-     `isStandalonePage` prop). Font metrics pinned to the old, always-<h1> defaults so
-     neither case has a visual diff from before this component's heading became variable. */
+  /* Tag varies: <h2> in the tab, <h1> standalone (see isStandalonePage). Pinned to the
+     old always-<h1> metrics so neither case shows a visual diff. */
   font-size: 2em;
   margin: 0.67em 0;
 }

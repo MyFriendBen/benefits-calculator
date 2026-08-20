@@ -29,8 +29,7 @@ describe('buildTabs', () => {
   });
 
   it('leaves Immediate Help without a count', () => {
-    // The resource list is fixed per-tenant config, so a count would be identical for
-    // every user of a white label and would imply a personalization that doesn't exist.
+    // Mirrors the no-count rationale in buildTabs.ts.
     expect(buildTabs(args).find((tab) => tab.id === 'help')?.count).toBeUndefined();
   });
 

@@ -106,11 +106,9 @@ export function useResultsLink(link: string) {
   return addAdminToLink(`/${whiteLabel}/${uuid}/${link}`, isAdminView);
 }
 
-// Referrer-level opt-out for the Immediate Help destination. The backend flag is still
-// called `no_results_more_help` because it originally hid the bottom "More Help" button;
-// the policy ("this referrer does not surface More Help") is unchanged now that the
-// destination is a tab. Read in one place so the `[] as string[]` default — which
-// getReferrer needs to avoid throwing when referrerData is undefined — isn't duplicated.
+// Referrer opt-out for Immediate Help. Flag is still named `no_results_more_help`
+// (predates the tab; policy unchanged). Centralizes the `[] as string[]` default
+// getReferrer needs to avoid throwing when referrerData is undefined.
 export function useImmediateHelpSuppressed() {
   const { getReferrer } = useContext(Context);
 
@@ -239,14 +237,11 @@ const Results = ({ type }: ResultsProps) => {
     );
   }, [apiResults, shownPrograms, track, trackItemList]);
 
-  // Results-page scroll depth, only on the browsable tabs (program = long-term
-  // benefits, need = additional resources, help = immediate help). Each threshold
-  // fires once per tab per screening.
+  // Results-page scroll depth, browsable tabs only. Each threshold fires once per tab per screening.
   const firedScrollDepths = useRef<Set<number>>(new Set());
   useEffect(() => {
-    // CESN's `help` route is its own standalone page with no tab bar (see the
-    // `isEnergyCalculator` branch below), so it's excluded here the same way program
-    // detail and energy-rebate routes are — those `type`s just aren't in the lookup.
+    // CESN's `help` route is a standalone page with no tab bar (see `isEnergyCalculator`
+    // below) — exclude it here even though `help` is otherwise in the lookup.
     const tabName = whiteLabel === 'cesn' && type === 'help' ? null : (SCROLL_DEPTH_TAB_NAMES[type] ?? null);
     if (tabName === null) {
       return; // program detail / rebates / CESN's standalone help page aren't browsable tabs
@@ -372,15 +367,13 @@ const Results = ({ type }: ResultsProps) => {
   } else if (apiError) {
     return <ResultsError />;
   } else if (programId === undefined && type === 'help' && immediateHelpSuppressed) {
-    // Referrers that opted out of More Help must not reach it by URL either, now that no
-    // tab links there for them. This runs before the CESN branch below, so a suppressed
-    // referrer on CESN redirects here rather than landing on CESN's standalone help page.
+    // Suppressed referrers must not reach More Help by URL either. Must run before the
+    // CESN branch below, so a suppressed referrer on CESN redirects here too.
     return <Navigate to={addAdminToLink(`/${whiteLabel}/${uuid}/results/benefits`, isAdminView)} replace />;
   } else if (programId === undefined && type === 'help' && isEnergyCalculator) {
-    // CESN renders no tab bar (see Tabs.tsx), so Immediate Help stays the standalone page
-    // it is today, reached from the More Help button and keeping its drill-down "BACK TO
-    // RESULTS" affordance. Folding CESN into the tabbed layout instead would leave it with
-    // "BACK TO SCREENER" and no tab bar to return to results with.
+    // CESN has no tab bar (Tabs.tsx), so Immediate Help stays this standalone page,
+    // keeping its "BACK TO RESULTS" affordance. Folding it into the tabbed layout would
+    // leave "BACK TO SCREENER" with no tab bar to get back to results.
     return (
       <main className="benefits-form">
         <Grid container>
@@ -397,16 +390,12 @@ const Results = ({ type }: ResultsProps) => {
       </main>
     );
   } else if (programId === undefined && (type === 'program' || type === 'need' || type === 'help')) {
-    // Panel content and the tab that labels it, keyed by results type. Built here inside
-    // the render function — NOT at module scope — because Results.tsx sits in an import
-    // cycle (Results -> Tabs -> Results). A lookup built at module scope would read
-    // Programs/Needs/MoreHelp at module-evaluation time, which can be before those
-    // modules have finished initializing if the cycle is entered from one of them
-    // instead of from here, permanently baking in `undefined` with no ErrorBoundary to
-    // catch the resulting crash. Rendering never happens until the whole module graph
-    // has finished loading, so building it here is race-free. A Record rather than
-    // nested ternaries, so a fourth type is a compile error instead of a silent
-    // fallthrough to the Long-Term Benefits panel.
+    // Built inside render, not at module scope: Results.tsx has an import cycle
+    // (Results -> Tabs -> Results), and a module-scope lookup could read
+    // Programs/Needs/MoreHelp before they finish initializing, baking in `undefined`
+    // with no ErrorBoundary to catch it. Render only starts after the whole module
+    // graph loads, so this is safe. A Record (not nested ternaries) makes a missing
+    // type a compile error instead of a silent fallback to Long-Term Benefits.
     const panels: Record<ResultsTabId, { tabId: string; Content: ComponentType }> = {
       program: { tabId: 'long-term-benefits-tab', Content: Programs },
       need: { tabId: 'near-term-benefits-tab', Content: Needs },
@@ -422,8 +411,8 @@ const Results = ({ type }: ResultsProps) => {
             <div className="results-card-wrapper">
               <ResultsTabs activeTab={type} />
               <div id="results-tabpanel" role="tabpanel" aria-labelledby={panel.tabId} className="benefits-form results-card-body">
-                {/* Inside the panel, not above it: the summary is per-tab content, so it
-                    should be reachable when a screen reader moves into the active panel. */}
+                {/* Inside the panel, not above it — per-tab content should be reachable
+                    when a screen reader enters the active panel. */}
                 <ResultsSummary type={type} />
                 {type === 'program' && <ExternalApiFailureBanner />}
                 {type === 'program' && <UrgentNeedBanner />}

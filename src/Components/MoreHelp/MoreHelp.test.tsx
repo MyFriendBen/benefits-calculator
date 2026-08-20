@@ -18,9 +18,8 @@ const renderWithProviders = (isStandalonePage?: boolean) => {
 };
 
 describe('MoreHelp', () => {
-  // Nested under the Immediate Help tab (isStandalonePage unset), the results page
-  // supplies its own top-level heading, so "Other Resources Near You" must not also be
-  // an <h1> — that would give the page two level-1 headings.
+  // Nested in the tab (isStandalonePage unset), the results page already has its own
+  // h1, so this must not be a second one.
   it('renders the header as an h2 when nested in the tab (default)', () => {
     renderWithProviders();
 
@@ -28,8 +27,8 @@ describe('MoreHelp', () => {
     expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument();
   });
 
-  // CESN's standalone /results/more-help page (see Results.tsx) has no tab bar and no
-  // other heading, so this is the page's only top-level heading and must be an <h1>.
+  // CESN's standalone page (see Results.tsx) has no other heading, so this one must
+  // be the h1.
   it('renders the header as an h1 on the standalone page', () => {
     renderWithProviders(true);
 

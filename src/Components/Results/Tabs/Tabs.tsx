@@ -96,10 +96,9 @@ const ResultsTabs = ({ activeTab }: ResultsTabsProps) => {
                   track('screener_results_tab_click', { tab_name: tab.trackName });
 
                   if (tab.id === 'help') {
-                    // Continuity for the GA4 "get help" metric: this event used to fire
-                    // only from the bottom More Help button, which this tab replaces. A
-                    // distinct `location` keeps the rollup comparable across the change
-                    // while still telling the two surfaces apart.
+                    // Continuity for GA4 "get help": this event used to fire only from
+                    // the bottom More Help button, which this tab replaces. Distinct
+                    // `location` keeps the rollup comparable while still separating the two surfaces.
                     track('screener_get_help_click', { location: 'immediate_help_tab' });
                   }
                 }}

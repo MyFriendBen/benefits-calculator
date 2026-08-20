@@ -71,17 +71,10 @@ const ProgramsHeader = () => {
   );
 };
 
-// The per-tab summary block. Rendered BELOW the tab bar and inside the results card,
-// so it is separate from ResultsHeader (which stays above, full-bleed). The wrapper
-// div lives in here rather than in Results so the Immediate Help tab renders nothing
-// at all — `.results-header-container` has a fixed `height: 9rem`, which would leave
-// an empty gap if the wrapper rendered without a summary inside it.
-//
-// Shows only on Long-Term Benefits, per the PM. Additional Resources previously had its
-// own "N Resources Found" block (NeedsHeader), but that count already appears in the tab
-// label itself ("Additional Resources (N)"), so it was a pure duplicate carrying the
-// same visual weight as the real summary for no extra information — removed rather than
-// repositioned.
+// Rendered below the tab bar, inside the results card — separate from ResultsHeader,
+// which stays above. The wrapper div lives here (not in Results) so the Immediate Help
+// tab renders nothing: `.results-header-container` has a fixed height: 9rem, and an
+// empty wrapper would leave a gap.
 export const ResultsSummary = ({ type }: ResultsSummaryProps) => {
   const isEnergyCalculator = useIsEnergyCalculator();
 
@@ -104,9 +97,8 @@ export const ResultsSummary = ({ type }: ResultsSummaryProps) => {
   );
 };
 
-// Page-level chrome shared by every results tab: back/save buttons, the admin login,
-// and the NC feedback survey. Takes no `type` on purpose — it renders above the tab
-// bar and outside the results card, so it is identical whichever tab is active.
+// Elements shared by every tab: back/save buttons, admin login, NC survey. No `type`
+// prop — it renders above the tab bar, outside the results card, the same for every tab.
 const ResultsHeader = () => {
   const { whiteLabel, uuid } = useParams();
   const { staffToken, setStaffToken } = useContext(Context);

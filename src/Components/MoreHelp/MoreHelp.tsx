@@ -27,16 +27,14 @@ export const resourceNameFromConfig = (resource: Resource): string | undefined =
 };
 
 type MoreHelpProps = {
-  // True only on CESN's standalone page (see Results.tsx), which has no other top-level
-  // heading. Everywhere else this renders inside the Immediate Help tab, nested under
-  // the results page's own heading structure, so "Other Resources Near You" is an h2.
+  // True only on CESN's standalone page (see Results.tsx) — its only top-level
+  // heading, so it's an h1. Elsewhere (the Immediate Help tab) it's an h2.
   isStandalonePage?: boolean;
 };
 
 const MoreHelp = ({ isStandalonePage = false }: MoreHelpProps) => {
-  // Defaulted rather than left to throw: this now renders inside the main results
-  // route instead of a standalone page, and there is no ErrorBoundary in the app, so
-  // a missing config key would blank the whole page rather than just this tab.
+  // Defaulted, not left to throw: this now lives inside the main results route, and
+  // with no ErrorBoundary in the app, a missing key would blank the whole page, not just this tab.
   const { moreHelpOptions } = useConfig<{ moreHelpOptions: Resource[] }>('more_help_options', {
     moreHelpOptions: [],
   });

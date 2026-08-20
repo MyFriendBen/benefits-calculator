@@ -51,9 +51,8 @@ export function buildTabs({
     },
   ];
 
-  // No count on Immediate Help: the resource list comes from fixed per-tenant config
-  // rather than the household's results, so a count would be the same for every user
-  // of a white label and would imply a personalization that doesn't exist.
+  // No count: the resource list is fixed per-tenant config, not household-specific,
+  // so a count would falsely imply personalization.
   if (!immediateHelpSuppressed) {
     tabs.push({
       id: 'help',
@@ -68,9 +67,9 @@ export function buildTabs({
   return tabs;
 }
 
-// Roving-tabindex arithmetic for the tab bar, extracted so it can be tested without
-// rendering. Returns null for keys that shouldn't move focus. `tabCount` varies (2 when
-// a referrer suppresses Immediate Help, 3 otherwise), so nothing here may assume 3.
+// Roving-tabindex arithmetic, extracted so it's testable without rendering.
+// Returns null for keys that shouldn't move focus. `tabCount` varies (2 or 3),
+// so nothing here may assume 3.
 export function getNextTabIndex(key: string, currentIndex: number, tabCount: number): number | null {
   if (key === 'ArrowRight' || key === 'ArrowDown') {
     return (currentIndex + 1) % tabCount;
