@@ -44,6 +44,8 @@ export function useUpdateFormData() {
         agingResources: response.needs_aging_resources ?? false,
         homelessServices: response.needs_homeless_services ?? false,
         freeLowCostMedicalCare: response.needs_free_low_cost_medical_care ?? false,
+        transportation: response.needs_transportation ?? false,
+        medicalExpensesAndDebt: response.needs_medical_expenses_and_debt ?? false,
       },
       signUpInfo: {
         email: '',

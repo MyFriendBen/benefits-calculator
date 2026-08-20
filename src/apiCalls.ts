@@ -345,14 +345,46 @@ export interface AssistantMessageResponse {
   assistant_message: AssistantApiMessage;
 }
 
+// A program the results page is currently showing the user. BenBot recommends and
+// quotes from these, so both fields have to reflect what's on screen.
+export interface AssistantVisibleProgram {
+  name_abbreviated: string;
+  /**
+   * `programValue()` — the ANNUAL value in whole USD, which nets out members who
+   * already hold the program's insurance.
+   *
+   * Not literally the string on the card: for the default `value_format` the card
+   * renders this divided by 12 with "/month", and when `estimated_value_override` is
+   * set it renders prose ("Varies") with no number at all. Annual is what the backend
+   * contract expects — ai-service is told these figures are annual totals and converts
+   * when it needs a monthly one.
+   */
+  value: number;
+}
+
 // Open (or resume) a Benbot conversation for a screen.
+//
+// `visiblePrograms` is what the results page is currently rendering. BenBot may only
+// recommend programs from the list it is given, so that list has to match what the
+// user is actually looking at — otherwise it recommends programs they can't see, or
+// quotes a figure they can't find.
+//
+// This has to come from the client because the relevant filtering only exists here:
+// citizenship/legal status, `excludes_programs` mutual exclusions, and per-member
+// insurance all run in the browser, and the server's eligibility snapshot stores no
+// member breakdown to reproduce them from.
+//
+// benefits-api can only ever *narrow* using this list, and it bounds `value` by the
+// snapshot's own figure — so a bad list degrades the assistant rather than misleading
+// the user.
 const startAssistantConversation = async (
   uuid: string,
   locale?: string,
+  visiblePrograms?: AssistantVisibleProgram[],
 ): Promise<AssistantConversationResponse> => {
   return fetch(assistantConversationsEndpoint(uuid), {
     method: 'POST',
-    body: JSON.stringify({ locale }),
+    body: JSON.stringify({ locale, visible_programs: visiblePrograms }),
     headers: header,
   }).then((response) => {
     if (!response.ok) {
