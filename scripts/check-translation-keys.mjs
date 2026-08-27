@@ -217,13 +217,27 @@ async function loadDbTranslations() {
 
   // The API returns one language at a time, so every language is fetched to be
   // able to compare placeholders and spot untranslated values.
+  // Mirrors src/apiCalls.ts, which stores the bare DRF token and prepends the
+  // scheme: `const apiKey = 'Token ' + process.env.REACT_APP_API_KEY`. Storing the
+  // bare token means the CI secret is a straight copy of the existing
+  // REACT_APP_API_KEY Heroku config value. A value that already carries the scheme
+  // is accepted too, so either form works.
   const headers = { Accept: 'application/json' };
-  if (key) headers.Authorization = key;
+  if (key) headers.Authorization = key.startsWith('Token ') ? key : `Token ${key}`;
 
+  // TranslationView returns Translation.objects.all_translations([lang]), which is
+  // keyed by language: {"en-us": {label: text, ...}}. Unwrap that one level rather
+  // than assuming a flat map - reading it flat yields exactly one "key" named after
+  // the language and reports every real id as missing.
   const fetchLang = async (lang) => {
     const response = await fetch(`${url}?lang=${lang}`, { headers });
     if (!response.ok) throw new Error(`${lang}: ${response.status} ${response.statusText}`);
-    return response.json();
+    const body = await response.json();
+    const inner = body?.[lang];
+    if (inner && typeof inner === 'object') return inner;
+    // Tolerate a flat response too, so a future API change does not silently
+    // report every id as missing.
+    return body ?? {};
   };
 
   let english;
