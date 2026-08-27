@@ -1,0 +1,34 @@
+name: Translation Keys
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-translation-keys:
+    name: Frontend ids vs Translation DB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and dependencies
+        uses: ./.github/actions/setup-node-dependencies
+
+      # Fails the PR on either of two things that are invisible to an
+      # English-speaking reviewer:
+      #
+      #   - a message id with no Translation record, which react-intl silently
+      #     renders as its English defaultMessage in all 17 languages
+      #   - a translation whose ICU placeholders no longer match the English, so
+      #     the placeholder can never resolve (see MFB-1733)
+      #
+      # Both classes reached production undetected before this check existed:
+      # 50 missing keys and 18 mangled ones, found only when a partner complained.
+      - name: Check translation key parity
+        run: npm run check:translations
+        env:
+          TRANSLATIONS_API_URL: ${{ secrets.TRANSLATIONS_API_URL }}
+          TRANSLATIONS_API_KEY: ${{ secrets.TRANSLATIONS_API_KEY }}

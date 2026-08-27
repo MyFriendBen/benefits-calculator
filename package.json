@@ -51,6 +51,7 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "heroku-postbuild": "npm run build",
+    "check:translations": "node scripts/check-translation-keys.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "format": "prettier --write . --config .prettierrc.json",
