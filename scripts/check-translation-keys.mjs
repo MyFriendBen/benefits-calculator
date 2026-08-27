@@ -107,6 +107,7 @@ function extractFrontendIds() {
     let id;
     let defaultMessage;
     let idNode;
+    let hasDefaultMessage = false;
     for (const prop of obj.properties) {
       if (!ts.isPropertyAssignment(prop) || !prop.name) continue;
       const key = ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name) ? prop.name.text : undefined;
@@ -114,8 +115,16 @@ function extractFrontendIds() {
         id = staticString(prop.initializer);
         idNode = prop.initializer;
       }
-      if (key === 'defaultMessage') defaultMessage = staticString(prop.initializer);
+      if (key === 'defaultMessage') {
+        hasDefaultMessage = true;
+        defaultMessage = staticString(prop.initializer);
+      }
     }
+    // BOTH keys are required. `id` alone is far too common to be a useful signal -
+    // plenty of unrelated objects carry one - whereas `id` + `defaultMessage`
+    // together is the react-intl MessageDescriptor shape and essentially nothing
+    // else. Without this guard, matching on shape floods the report with noise.
+    if (!hasDefaultMessage) return;
     if (id) record(id, defaultMessage, file);
     else if (idNode) dynamicIds.push({ file, text: idNode.getText() });
   };
@@ -153,13 +162,22 @@ function extractFrontendIds() {
         }
       }
 
-      // intl.formatMessage({ id, defaultMessage }) / formatMessage({...})
-      if (ts.isCallExpression(node)) {
-        const callee = node.expression;
-        const name = ts.isPropertyAccessExpression(callee) ? callee.name.getText() : callee.getText?.();
-        if (name === 'formatMessage' && node.arguments.length > 0) {
-          fromObjectLiteral(node.arguments[0], file);
-        }
+      // Any object literal carrying both `id` and `defaultMessage` is a react-intl
+      // MessageDescriptor. Matching on the shape rather than on `formatMessage(...)`
+      // call sites is deliberate: descriptors are routinely hoisted to a variable
+      // and passed by reference, e.g. in CclaFooter.tsx
+      //
+      //   const cclaPrivacyPolicyALProps = { id: 'cclaFooter...AL', defaultMessage: '...' };
+      //   aria-label={intl.formatMessage(cclaPrivacyPolicyALProps)}
+      //
+      // which a call-site-only walk sees as formatMessage(identifier) and records
+      // nothing. That produced two wrong answers: those keys were reported as dead
+      // while being actively used, and - worse - a hoisted descriptor with no
+      // Translation record would not have been flagged as missing at all. The
+      // codebase uses this shape widely for aria-labels. Matching on shape also
+      // covers defineMessages({...}) blocks for free.
+      if (ts.isObjectLiteralExpression(node)) {
+        fromObjectLiteral(node, file);
       }
 
       ts.forEachChild(node, visit);
