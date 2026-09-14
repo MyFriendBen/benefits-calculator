@@ -2,7 +2,7 @@ import { ReactNode, useContext } from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { useFormatBirthMonthYear, hasBirthMonthYear } from '../../Assets/age';
 import { useTranslateNumber } from '../../Assets/languageOptions';
-import { HouseholdData } from '../../Types/FormData';
+import { HouseholdData, StudentEligibility } from '../../Types/FormData';
 import { FormattedMessageType } from '../../Types/Questions';
 import { useConfig } from '../Config/configHook';
 import ConfirmationBlock, { formatToUSD } from './ConfirmationBlock';
@@ -39,6 +39,35 @@ const EC_CONDITIONS: ConditionEntry[] = [
   { isActive: (m) => m.energyCalculator?.survivingSpouse ?? false, id: 'eCConditionOptions.survivingSpouse', defaultMessage: 'Surviving Spouse' },
   { isActive: (m) => m.conditions.disabled, id: 'confirmationHHData.disability', defaultMessage: 'Disability' },
   { isActive: (m) => m.energyCalculator?.medicalEquipment ?? false, id: 'confirmationHHData.medicalEquipment', defaultMessage: 'In-home medical equipment' },
+];
+
+type StudentEligibilityItem = {
+  field: keyof StudentEligibility;
+  labelId: string;
+  labelDefault: string;
+};
+
+const STUDENT_ELIGIBILITY_ITEMS: StudentEligibilityItem[] = [
+  {
+    field: 'studentFullTime',
+    labelId: 'confirmation.studentEligibility.enrolledHalfTime',
+    labelDefault: 'Enrolled half-time or more',
+  },
+  {
+    field: 'studentJobTrainingProgram',
+    labelId: 'confirmation.studentEligibility.jobTrainingProgram',
+    labelDefault: 'Job training program',
+  },
+  {
+    field: 'studentHasWorkStudy',
+    labelId: 'confirmation.studentEligibility.workStudy',
+    labelDefault: 'Work study program',
+  },
+  {
+    field: 'studentWorks20PlusHrs',
+    labelId: 'confirmation.studentEligibility.works20PlusHrs',
+    labelDefault: 'Works 20+ hrs/week',
+  },
 ];
 
 const DefaultConfirmationHHData = () => {
@@ -79,17 +108,52 @@ const DefaultConfirmationHHData = () => {
       : member.relationshipToHH;
   };
 
-  const conditionsString = (member: HouseholdData): string => {
+  const renderConditions = (member: HouseholdData): ReactNode => {
     const conditions = isEnergyCalculator ? EC_CONDITIONS : MAIN_CONDITIONS;
-    const conditionText = conditions
-      .filter(({ isActive }) => isActive(member))
-      .map(({ id, defaultMessage }) => formatMessage({ id, defaultMessage }));
+    const activeConditions = conditions.filter(({ isActive }) => isActive(member));
 
-    if (conditionText.length === 0) {
+    if (activeConditions.length === 0) {
       return formatMessage({ id: 'confirmation.none', defaultMessage: 'None' });
     }
 
-    return conditionText.join(', ');
+    const studentConditionId = 'confirmation.headOfHouseholdDataBlock-studentText';
+
+    return (
+      <ul className="confirmation-conditions-list">
+        {activeConditions.map(({ id, defaultMessage }) => {
+          const isStudent = id === studentConditionId;
+          const studentElig = member.studentEligibility;
+          const hasStudentSubItems =
+            isStudent &&
+            studentElig !== undefined &&
+            STUDENT_ELIGIBILITY_ITEMS.some(({ field }) => studentElig[field] !== undefined);
+
+          return (
+            <li key={id}>
+              {formatMessage({ id, defaultMessage })}
+              {hasStudentSubItems && (
+                <ul className="confirmation-student-eligibility-list">
+                  {STUDENT_ELIGIBILITY_ITEMS.map(({ field, labelId, labelDefault }) => {
+                    const value = studentElig![field];
+                    if (value === undefined) return null;
+                    return (
+                      <li key={field}>
+                        <FormattedMessage id={labelId} defaultMessage={labelDefault} />
+                        {': '}
+                        <FormattedMessage
+                          id={value ? 'radiofield.label-yes' : 'radiofield.label-no'}
+                          defaultMessage={value ? 'Yes' : 'No'}
+                        />
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    );
   };
 
   const calculateTotalAnnualIncome = (member: HouseholdData): string => {
@@ -163,7 +227,7 @@ const DefaultConfirmationHHData = () => {
               <th scope="col">
                 <FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year:" />
               </th>
-              <th scope="col">
+              <th scope="col" style={{ width: '30%' }}>
                 <FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions:" />
               </th>
               <th scope="col">
@@ -202,7 +266,7 @@ const DefaultConfirmationHHData = () => {
                       </span>
                     )}
                   </td>
-                  <td>{conditionsString(member)}</td>
+                  <td>{renderConditions(member)}</td>
                   <td>{calculateTotalAnnualIncome(member)}</td>
                   {!isEnergyCalculator && <td>{displayHealthInsurance(member, i)}</td>}
                   <td>
