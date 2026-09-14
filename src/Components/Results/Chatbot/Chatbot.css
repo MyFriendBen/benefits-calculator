@@ -255,3 +255,39 @@
     opacity: 0.6;
   }
 }
+
+/* Peek state (MFB-1737): partial-height auto-open on small screens — greeting and
+   input visible, results still visible behind it. Any engagement expands to full. */
+.chatbot-panel--peek {
+  max-height: min(21rem, 45vh);
+}
+
+.chatbot-panel--peek .chatbot-messages {
+  min-height: 0;
+}
+
+.chatbot-panel--peek .chatbot-welcome {
+  padding: 0.75rem 0.5rem;
+}
+
+.chatbot-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.chatbot-header-expand {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  transition: background-color 0.15s;
+}
+
+.chatbot-header-expand:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}

@@ -3,13 +3,9 @@ import { findValidationForProgram, useResultsContext } from '../Results';
 import Filter from '../Filter/Filter';
 import ProgramCard from './ProgramCard';
 import CategoryHeading from '../CategoryHeading/CategoryHeading';
-import { useCallback, useMemo } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useMemo } from 'react';
 import { calculateTotalValue, programValue } from '../FormattedValue';
 import { ResultsMessage } from '../../Referrer/Referrer';
-import { useFeatureFlag } from '../../Config/configHook';
-import { useChatbotContext } from '../Chatbot/Chatbot';
-import { useTrackEvent } from '../../../Assets/analytics';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorRebateCategoryList, {
   useEnergyCalculatorNeedsRebates,
@@ -83,30 +79,6 @@ const ValidationCategory = () => {
   );
 };
 
-// Opens the Benbot chat window with an initial "guide me" prompt.
-// Only rendered when the 'benbot' flag is on (so it's always inside ChatbotProvider).
-const GuideMeButton = () => {
-  const { openWithMessage } = useChatbotContext();
-  const { formatMessage } = useIntl();
-  const track = useTrackEvent();
-
-  const handleClick = useCallback(() => {
-    track('screener_benbot_opened', { entry: 'guide_me' });
-    openWithMessage(
-      formatMessage({
-        id: 'chatbot.guideMeMessage',
-        defaultMessage: 'Guide me through my benefits',
-      }),
-    );
-  }, [openWithMessage, formatMessage, track]);
-
-  return (
-    <button type="button" className="guide-me-button" onClick={handleClick}>
-      <FormattedMessage id="programs.guideMeButton" defaultMessage="Guide Me Through My Benefits" />
-    </button>
-  );
-};
-
 const Programs = () => {
   const { programs, programCategories } = useResultsContext();
 
@@ -114,7 +86,6 @@ const Programs = () => {
 
   const isEnergyCalculator = useIsEnergyCalculator();
   const needsRebates = useEnergyCalculatorNeedsRebates();
-  const isBenbotEnabled = useFeatureFlag('benbot');
 
   return (
     <>
@@ -122,11 +93,6 @@ const Programs = () => {
       {!isEnergyCalculator && <Filter />}
       {isEnergyCalculator && <DocumentSummary programs={programs} />}
       <ValidationCategory />
-      {isBenbotEnabled && (
-        <div className="results-action-buttons">
-          <GuideMeButton />
-        </div>
-      )}
       {isEnergyCalculator && needsRebates && <EnergyCalculatorRebateCategoryList />}
       {categories.map((category) => {
         return (

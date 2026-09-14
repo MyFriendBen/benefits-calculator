@@ -148,6 +148,23 @@ describe('createDefaultValues', () => {
       expect(result.conditions.student).toBe(true);
     });
 
+    it('does not infer none=true when fosterCare is the only condition set', () => {
+      const member = memberWithHealthIns({
+        conditions: { student: false, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false, fosterCare: true } as any,
+      });
+      const result = createDefaultValues(member);
+      expect(result.conditions.none).toBe(false);
+      expect(result.conditions.fosterCare).toBe(true);
+    });
+
+    it('backfills fosterCare=false for a member saved before the tile existed', () => {
+      const member = memberWithHealthIns({
+        conditions: { student: true, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false } as any,
+      });
+      const result = createDefaultValues(member);
+      expect(result.conditions.fosterCare).toBe(false);
+    });
+
     it('does not infer none=true for first visit (not progressed)', () => {
       // No health insurance = not yet progressed, so none should not be inferred
       const member: HouseholdData = {

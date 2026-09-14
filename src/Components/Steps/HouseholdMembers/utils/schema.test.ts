@@ -188,6 +188,19 @@ describe('createHouseholdMemberSchema (main)', () => {
       const data = { ...validMainData, conditions: { student: false, pregnant: true, blindOrVisuallyImpaired: true, disabled: false, longTermDisability: false } };
       expect(schema.safeParse(data).success).toBe(true);
     });
+
+    it('defaults fosterCare to false when the tile is absent', () => {
+      const result = schema.safeParse(validMainData);
+      expect(result.success).toBe(true);
+      expect(result.success && result.data.conditions.fosterCare).toBe(false);
+    });
+
+    it('accepts fosterCare on its own', () => {
+      const data = { ...validMainData, conditions: { ...validMainData.conditions, fosterCare: true } };
+      const result = schema.safeParse(data);
+      expect(result.success).toBe(true);
+      expect(result.success && result.data.conditions.fosterCare).toBe(true);
+    });
   });
 
   describe('student eligibility validation', () => {

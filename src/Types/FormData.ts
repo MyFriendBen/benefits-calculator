@@ -120,6 +120,7 @@ export type Conditions = {
   blindOrVisuallyImpaired: boolean;
   disabled: boolean;
   longTermDisability: boolean;
+  fosterCare: boolean;
 };
 
 export type StudentEligibility = {

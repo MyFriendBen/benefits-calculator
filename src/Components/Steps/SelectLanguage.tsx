@@ -8,7 +8,7 @@ import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import { useQueryString } from '../QuestionComponents/questionHooks';
 import FormContinueButton from '../ContinueButton/FormContinueButton';
 import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
-import { STATES } from './SelectStatePage';
+import { useStateOptions } from '../../Assets/stateOptions';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { useUpdateWhiteLabelAndNavigate } from '../RouterUtil/RedirectToWhiteLabel';
 import { usePageTitle } from '../Common/usePageTitle';
@@ -18,9 +18,10 @@ import { PRE_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
 const STEP_1_ANALYTICS_ID = PRE_DIRECTORY_STEP_IDS.language;
 
 const SelectLanguagePage = () => {
-  const { locale, selectLanguage, configLoading } = useContext(Context);
+  const { locale, selectLanguage } = useContext(Context);
   const languageOptions = useConfig<{ [key: string]: string }>('language_options');
   const { whiteLabel, uuid } = useParams();
+  const states = useStateOptions();
 
   const queryString = useQueryString();
   const navigate = useNavigate();
@@ -106,21 +107,18 @@ const SelectLanguagePage = () => {
       return;
     }
 
-    const stateCodes = Object.keys(STATES);
-
-    if (stateCodes.length > 1) {
+    // Only skip the state page when there is exactly one state to skip it for.
+    if (states.length !== 1) {
       navigate(`/select-state${queryString}`);
       return;
     }
 
-    updateWhiteLabelAndNavigate(stateCodes[0], `/${stateCodes[0]}/step-2${queryString}`);
-    // wait for the new config to be loaded
-    const interval = setInterval(() => {
-      if (!configLoading) {
-        navigate(`/${stateCodes[0]}/step-2${queryString}`);
-        clearInterval(interval);
-      }
-    }, 1);
+    const stateCode = states[0].code;
+
+    // Let updateWhiteLabelAndNavigate own the navigation, as it already does on the state page.
+    // There is nothing to wait for: App gates rendering on pageIsLoading, so step 2 does not
+    // render until the new config resolves.
+    updateWhiteLabelAndNavigate(stateCode, `/${stateCode}/step-2${queryString}`);
   };
 
   return (

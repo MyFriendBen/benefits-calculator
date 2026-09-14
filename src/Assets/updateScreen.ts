@@ -133,6 +133,7 @@ const getHouseholdMemberBody = (householdMemberData: HouseholdData): ApiHousehol
     visually_impaired: householdMemberData.conditions.blindOrVisuallyImpaired ?? null,
     disabled: householdMemberData.conditions.disabled ?? null,
     long_term_disability: householdMemberData.conditions.longTermDisability ?? null,
+    was_in_foster_care: householdMemberData.conditions.fosterCare ?? null,
     has_income: householdMemberData.hasIncome,
     income_streams: incomes,
     energy_calculator: getEnergyCalculatorMemberBody(householdMemberData.energyCalculator),

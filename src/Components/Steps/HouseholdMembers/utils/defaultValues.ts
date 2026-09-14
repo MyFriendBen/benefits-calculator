@@ -33,6 +33,7 @@ export const DEFAULT_SPECIAL_CONDITIONS = {
   blindOrVisuallyImpaired: false,
   disabled: false,
   longTermDisability: false,
+  fosterCare: false,
   none: false,
 };
 

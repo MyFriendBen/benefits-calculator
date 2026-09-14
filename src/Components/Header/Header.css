@@ -192,3 +192,18 @@
   max-height: 60%;
   max-width: 95%;
 }
+
+/* KS/MO 2-1-1 co-brand: an unusually wide lockup (2000x375, ~5.3:1). It carries its own state
+   label, so there is no .state-name beneath it to leave room for and it can take the full header
+   height. Width is capped on small screens because height alone would overflow the bar. */
+.uwgkc-logo-size {
+  display: block;
+  max-height: 80%;
+  max-width: 100%;
+}
+
+@media (max-width: 767px) {
+  .uwgkc-logo-size {
+    max-width: 55vw;
+  }
+}

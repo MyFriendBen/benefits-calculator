@@ -82,6 +82,7 @@ export type ApiHouseholdMember = {
   medicaid?: boolean | null;
   disability_medicaid?: boolean | null;
   long_term_disability: boolean | null;
+  was_in_foster_care: boolean | null;
   has_income: boolean | null;
   energy_calculator: ApiEnergyCalculatorMember | null;
   income_streams: ApiIncome[];

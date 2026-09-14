@@ -22,6 +22,8 @@ export type ReferrerData = {
   stepDirectory: ReferrerOptions<StepDirectory>;
   noResultMessage: ReferrerOptions<FormattedMessageType>;
   defaultLanguage: ReferrerOptions<string>;
+  // White label codes offered in the state dropdown; empty means "use the public list"
+  stateOptions: ReferrerOptions<string[]>;
   stateName: ReferrerOptions<string>;
 };
 

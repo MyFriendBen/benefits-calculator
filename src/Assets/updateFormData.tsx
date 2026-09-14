@@ -136,6 +136,7 @@ export function useUpdateFormData() {
           blindOrVisuallyImpaired: member.visually_impaired ?? false,
           disabled: member.disabled ?? false,
           longTermDisability: member.long_term_disability ?? false,
+          fosterCare: member.was_in_foster_care ?? false,
         },
         studentEligibility: studentEligibility,
         hasIncome: member.has_income ?? false,

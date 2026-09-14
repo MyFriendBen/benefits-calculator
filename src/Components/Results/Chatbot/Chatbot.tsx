@@ -1,12 +1,14 @@
-import { createContext, useContext, useState, useRef, useEffect, useCallback, PropsWithChildren } from 'react';
+import { createContext, useContext, useState, useRef, useEffect, useCallback, useMemo, PropsWithChildren } from 'react';
 import { useParams } from 'react-router-dom';
 import ChatIcon from '@mui/icons-material/Chat';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { parseMarkdown } from '../../../utils/parseMarkdown';
 import {
   startAssistantConversation,
+  getAssistantHistory,
   sendAssistantMessage,
   AssistantApiMessage,
   AssistantVisibleProgram,
@@ -30,6 +32,39 @@ function newClientMessageId(): string {
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+// MFB-1737: the widget opens itself instead of waiting behind a button, but the
+// results page gets the first impression — this is how long it keeps it.
+const AUTO_OPEN_DELAY_MS = 2000;
+
+const dismissalKey = (uuid: string) => `benbot-dismissed-${uuid}`;
+
+// Dismissal is remembered per screen for the tab session so remounts and
+// back-navigation don't re-open a widget the user closed. sessionStorage can
+// throw (private windows, storage disabled); treat that as "not dismissed" and
+// accept the worst case of one extra auto-open.
+function wasDismissed(uuid: string): boolean {
+  try {
+    return sessionStorage.getItem(dismissalKey(uuid)) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function rememberDismissal(uuid: string): void {
+  try {
+    sessionStorage.setItem(dismissalKey(uuid), '1');
+  } catch {
+    // best-effort
+  }
+}
+
+// On small screens the full panel covers the results the user just earned, so
+// auto-open lands in the partial-height "peek" state instead. Guarded because
+// jsdom has no matchMedia.
+function isSmallScreen(): boolean {
+  return typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 767px)').matches;
+}
+
 type ChatbotContextType = {
   openWithMessage: (message: string) => void;
 };
@@ -45,7 +80,8 @@ export function useChatbotContext() {
 }
 
 function renderFormattedMessage(text: string): React.ReactNode {
-  const PRIMARY_COLOR = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#1976d2';
+  const PRIMARY_COLOR =
+    getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#1976d2';
   const lines = text.split('\n');
   const elements: React.ReactNode[] = [];
   let bulletBuffer: string[] = [];
@@ -115,28 +151,23 @@ type ChatbotProviderProps = {
    * nothing", which makes BenBot recommend nothing at all; `undefined` means "no
    * list available", which selects the server-side fallback filters.
    *
-   * KNOWN LIMITATION: `ensureConversation` short-circuits on `conversationIdRef`, so
-   * once a conversation is open, changing a results-page filter does not re-post the
-   * new list; it takes effect on the next page load, where the ref is null again and
-   * ai-service refreshes the stored context.
-   *
-   * Note this is NOT safely one-directional. The default filter state is `citizen` —
-   * the most permissive — so the first change always narrows, but a user who selects
-   * a different status and then switches back *widens*, leaving BenBot with a strict
-   * subset of what's on screen and refusing to discuss visible cards.
-   *
-   * (In practice this is currently masked by `ResultsContextProvider` being defined
-   * inside the `Results` component body, which remounts this whole subtree on any
-   * filter change — destroying `messages` and `isOpen` in the process. That's a
-   * separate pre-existing bug; when it's fixed, this limitation becomes live and
-   * re-posting on change is worth doing, guarded on `!sendingRef.current`.)
+   * MFB-1737: the results subtree no longer remounts on filter changes (see the
+   * resultsContextValue note in Results.tsx), so an open conversation now outlives
+   * them. To keep ai-service's stored snapshot equal to what's on screen, a change
+   * to this list re-POSTs the start endpoint once a conversation exists — it is
+   * idempotent per screen and refreshes the context on resume. See the
+   * context-refresh effect below.
    */
   visiblePrograms?: AssistantVisibleProgram[];
 };
 
 export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren<ChatbotProviderProps>) {
   const { uuid } = useParams();
-  const [isOpen, setIsOpen] = useState(false);
+  // 'peek' is a partial-height panel used by auto-open on small screens: the
+  // greeting and input are visible, the results stay visible behind it, and any
+  // engagement expands to 'full'.
+  const [panel, setPanel] = useState<'closed' | 'peek' | 'full'>('closed');
+  const isOpen = panel !== 'closed';
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -145,8 +176,14 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
   const conversationIdRef = useRef<string | null>(null);
   const startPromiseRef = useRef<Promise<string | null> | null>(null);
   const sendingRef = useRef(false);
-  const { formatMessage } = useIntl();
+  const { formatMessage, formatNumber } = useIntl();
   const track = useTrackEvent();
+
+  // Displayed program values are annual whole dollars (see visiblePrograms).
+  const totalAnnualValue = useMemo(
+    () => (visiblePrograms ?? []).reduce((sum, program) => sum + program.value, 0),
+    [visiblePrograms],
+  );
 
   const errorMessage = formatMessage({
     id: 'chatbot.error',
@@ -161,11 +198,69 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
     scrollToBottom();
   }, [messages, isSending, scrollToBottom]);
 
+  // Focus the input only after a deliberate open or expand — never on auto-open,
+  // where stealing focus would pop the mobile keyboard over the results and yank
+  // screen-reader users into the dialog before they've heard their results.
+  const pendingFocusRef = useRef(false);
   useEffect(() => {
-    if (isOpen) {
+    if (panel !== 'closed' && pendingFocusRef.current) {
+      pendingFocusRef.current = false;
       inputRef.current?.focus();
     }
-  }, [isOpen]);
+  }, [panel]);
+
+  // Auto-open (MFB-1737), replacing the old "Guide Me" button: open shortly after
+  // the results render — peek on small screens, full panel on large ones. Skipped
+  // when the page is showing zero programs (a bot with nothing to recommend
+  // shouldn't announce itself; `undefined` means "no list available" and still
+  // opens with the generic welcome) and when the user dismissed it for this
+  // screen. A manual open first changes `panel`, which cancels the timer.
+  useEffect(() => {
+    if (panel !== 'closed') return;
+    if (!uuid || wasDismissed(uuid)) return;
+    if (visiblePrograms !== undefined && visiblePrograms.length === 0) return;
+    const timer = setTimeout(() => {
+      setPanel(isSmallScreen() ? 'peek' : 'full');
+      track('screener_benbot_opened', { entry: 'auto' });
+    }, AUTO_OPEN_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [panel, uuid, visiblePrograms, track]);
+
+  // Restore a returning household's transcript when the widget opens.
+  //
+  // The emailed results link brings them back to the same screen_uuid, so their
+  // conversation is still there — but nothing used to fetch it until they sent a
+  // message, so they landed on the generic welcome and their history appeared all at
+  // once above their next question. This reads it on open instead.
+  //
+  // Two deliberate choices:
+  //
+  // 1. It does NOT set `conversationIdRef`. That looks like an obvious optimization
+  //    (we know the id now, so why let the next send POST the start endpoint again?)
+  //    and it would be a bug: `ensureConversation` returns early when the ref is set,
+  //    and the start call is what refreshes ai-service's stored context snapshot.
+  //    Skipping it would leave a returning household's assistant reasoning from the
+  //    program list as it was on their last visit — the MFB-1427 failure, reintroduced
+  //    through the back door. The start call on their first message returns this same
+  //    history, so nothing is duplicated and nothing is lost.
+  // 2. It only fills an EMPTY transcript. A fast first send can land before this
+  //    resolves, and overwriting state at that point would drop the message the user
+  //    just typed.
+  //
+  // Best-effort: a failure here leaves the welcome exactly as it was before, so it
+  // deliberately emits no error event.
+  const historyRequestedRef = useRef(false);
+  useEffect(() => {
+    if (panel === 'closed' || historyRequestedRef.current || !uuid) return;
+    historyRequestedRef.current = true;
+    getAssistantHistory(uuid)
+      .then((conversation) => {
+        if (!conversation || conversation.messages.length === 0) return;
+        const restored = conversation.messages.map(toWidgetMessage);
+        setMessages((prev) => (prev.length === 0 ? restored : prev));
+      })
+      .catch(() => {});
+  }, [panel, uuid]);
 
   // Start (or reuse) the conversation; returns the conversation id, or null on failure.
   // Deduped via startPromiseRef so concurrent opens/sends don't create two conversations.
@@ -186,6 +281,37 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
     }
     return startPromiseRef.current;
   }, [uuid, errorMessage, visiblePrograms]);
+
+  // Context refresh (MFB-1737): once a conversation exists, a change in the
+  // rendered program list (a results-page filter) re-POSTs the start endpoint so
+  // ai-service's stored snapshot tracks what the user is actually looking at.
+  // Idempotent per screen; benefits-api refuses to overwrite a good snapshot with
+  // an empty list. Best-effort — the next page load re-syncs anyway.
+  //
+  // A refresh must not interleave with a message round-trip, so a change that
+  // lands mid-send is queued and flushed when the send finishes (dropping it
+  // would leave the snapshot stale until the next page load). The ref carries
+  // the LATEST list so the flush never re-posts an already-superseded one.
+  const visibleProgramsRef = useRef(visiblePrograms);
+  useEffect(() => {
+    visibleProgramsRef.current = visiblePrograms;
+  });
+
+  const pendingRefreshRef = useRef(false);
+
+  const refreshContext = useCallback(() => {
+    if (!conversationIdRef.current || !uuid) return;
+    startAssistantConversation(uuid, undefined, visibleProgramsRef.current).catch(() => {});
+  }, [uuid]);
+
+  useEffect(() => {
+    if (!conversationIdRef.current || !uuid) return;
+    if (sendingRef.current) {
+      pendingRefreshRef.current = true;
+      return;
+    }
+    refreshContext();
+  }, [uuid, visiblePrograms, refreshContext]);
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -211,14 +337,18 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
       } finally {
         sendingRef.current = false;
         setIsSending(false);
+        if (pendingRefreshRef.current) {
+          pendingRefreshRef.current = false;
+          refreshContext();
+        }
       }
     },
-    [ensureConversation, uuid, errorMessage, track],
+    [ensureConversation, uuid, errorMessage, track, refreshContext],
   );
 
   const openWithMessage = useCallback(
     (message: string) => {
-      setIsOpen(true);
+      setPanel('full');
       void sendMessage(message);
     },
     [sendMessage],
@@ -242,42 +372,82 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
   );
 
   const handleClose = useCallback(() => {
-    setIsOpen(false);
+    setPanel('closed');
+    if (uuid) rememberDismissal(uuid);
     track('screener_benbot_closed', {});
-  }, [track]);
+  }, [track, uuid]);
 
   const handleOpen = useCallback(() => {
-    // Open to a blank window; the conversation is created lazily on the first
-    // user message (typed, or via the "Guide me" button), so no unsolicited reply.
-    setIsOpen(true);
+    // Opens to the templated welcome; the conversation is created lazily on the
+    // first user message, so no unsolicited model reply (and no API call yet).
+    pendingFocusRef.current = true;
+    setPanel('full');
     track('screener_benbot_opened', { entry: 'fab' });
   }, [track]);
+
+  const handleExpand = useCallback(() => {
+    pendingFocusRef.current = true;
+    setPanel('full');
+  }, []);
 
   return (
     <ChatbotContext.Provider value={{ openWithMessage }}>
       {children}
       {isOpen ? (
-        <div className="chatbot-panel" role="dialog" aria-label={formatMessage({ id: 'chatbot.ariaLabel', defaultMessage: 'BenBot Assistant chat' })}>
+        <div
+          className={`chatbot-panel${panel === 'peek' ? ' chatbot-panel--peek' : ''}`}
+          role="dialog"
+          aria-label={formatMessage({ id: 'chatbot.ariaLabel', defaultMessage: 'Benji Assistant chat' })}
+        >
           <div className="chatbot-header">
             <span className="chatbot-header-title">
-              <FormattedMessage id="chatbot.title" defaultMessage="BenBot Assistant" />
+              <FormattedMessage id="chatbot.title" defaultMessage="Benji Assistant" />
             </span>
-            <button
-              type="button"
-              className="chatbot-header-close"
-              onClick={handleClose}
-              aria-label={formatMessage({ id: 'chatbot.close', defaultMessage: 'Close chat' })}
-            >
-              <CloseIcon fontSize="small" />
-            </button>
+            <span className="chatbot-header-actions">
+              {panel === 'peek' && (
+                <button
+                  type="button"
+                  className="chatbot-header-expand"
+                  onClick={handleExpand}
+                  aria-label={formatMessage({ id: 'chatbot.expand', defaultMessage: 'Expand chat' })}
+                >
+                  <KeyboardArrowUpIcon fontSize="small" />
+                </button>
+              )}
+              <button
+                type="button"
+                className="chatbot-header-close"
+                onClick={handleClose}
+                aria-label={formatMessage({ id: 'chatbot.close', defaultMessage: 'Close chat' })}
+              >
+                <CloseIcon fontSize="small" />
+              </button>
+            </span>
           </div>
           <div className="chatbot-messages">
             {messages.length === 0 && (
               <div className="chatbot-welcome">
-                <FormattedMessage
-                  id="chatbot.welcome"
-                  defaultMessage="Hi there! I'm here to help you understand your benefits. Ask me anything about the programs you qualify for."
-                />
+                {visiblePrograms && visiblePrograms.length > 0 ? (
+                  // Templated client-side from what the page is showing — instant
+                  // and free; the model is only engaged once the user replies.
+                  <FormattedMessage
+                    id="chatbot.welcomePersonalized"
+                    defaultMessage="Hi, I'm Benji! Your results show {count, plural, one {# program} other {# programs}} you may qualify for, worth about {totalValue} per year. Ask me anything — like which one to apply for first."
+                    values={{
+                      count: visiblePrograms.length,
+                      totalValue: formatNumber(totalAnnualValue, {
+                        style: 'currency',
+                        currency: 'USD',
+                        maximumFractionDigits: 0,
+                      }),
+                    }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="chatbot.welcome"
+                    defaultMessage="Hi there! I'm here to help you understand your benefits. Ask me anything about the programs you qualify for."
+                  />
+                )}
               </div>
             )}
             {messages.map((msg, i) => (
@@ -289,7 +459,7 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
               <div
                 className="chatbot-message chatbot-message-bot chatbot-message-loading"
                 role="status"
-                aria-label={formatMessage({ id: 'chatbot.loading', defaultMessage: 'BenBot is typing' })}
+                aria-label={formatMessage({ id: 'chatbot.loading', defaultMessage: 'Benji is typing' })}
               >
                 <span className="chatbot-typing-dot" />
                 <span className="chatbot-typing-dot" />
@@ -306,6 +476,7 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
+              onFocus={panel === 'peek' ? handleExpand : undefined}
               placeholder={formatMessage({ id: 'chatbot.placeholder', defaultMessage: 'Type a message...' })}
               aria-label={formatMessage({ id: 'chatbot.inputAriaLabel', defaultMessage: 'Chat message input' })}
               disabled={isSending}
@@ -326,7 +497,7 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
           type="button"
           className="chatbot-fab"
           onClick={handleOpen}
-          aria-label={formatMessage({ id: 'chatbot.open', defaultMessage: 'Open BenBot Assistant chat' })}
+          aria-label={formatMessage({ id: 'chatbot.open', defaultMessage: 'Open Benji Assistant chat' })}
         >
           <ChatIcon />
         </button>

@@ -32,6 +32,7 @@ const MAIN_CONDITIONS: ConditionEntry[] = [
   { isActive: (m) => m.conditions.blindOrVisuallyImpaired, id: 'confirmation.headOfHouseholdDataBlock-blindOrVisuallyImpairedText', defaultMessage: 'Blind or visually impaired' },
   { isActive: (m) => m.conditions.disabled, id: 'confirmation.headOfHouseholdDataBlock-disabledText', defaultMessage: 'Disabled' },
   { isActive: (m) => m.conditions.longTermDisability, id: 'confirmation.longTermDisability', defaultMessage: 'Has a medical or developmental condition that has lasted, or is expected to last, more than 12 months' },
+  { isActive: (m) => m.conditions.fosterCare, id: 'confirmation.fosterCare', defaultMessage: 'Ever in foster care' },
 ];
 
 const EC_CONDITIONS: ConditionEntry[] = [

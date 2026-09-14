@@ -29,6 +29,7 @@ export const OPTION_CARD_ICON_MAP: Record<string, string> = {
   BlindOrVisuallyImpaired: 'glasses',
   Disabled: 'accessibility',
   LongTermDisability: 'calendar-clock',
+  FosterCare: 'house-heart',
   // Acute needs
   Food: 'apple',
   Baby_supplies: 'baby',

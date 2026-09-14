@@ -394,6 +394,33 @@ const startAssistantConversation = async (
   });
 };
 
+// Read back a household's existing Benbot conversation, or null if they have none.
+//
+// GET on the same path the start call POSTs to. Deliberately a different call from
+// `startAssistantConversation`, which also resumes by screen but is a WRITE: it
+// creates a conversation when there isn't one, and refreshes the stored context
+// snapshot when there is. The widget opens on nearly every results page, so using
+// the start call to restore a transcript would mint an empty conversation for every
+// visitor who never types.
+//
+// A 404 means "no history yet" — the common case for a first-time visitor — and is
+// resolved to `null` HERE, once, so callers can't confuse it with a real failure and
+// silently show a blank transcript when the read actually broke.
+const getAssistantHistory = async (uuid: string): Promise<AssistantConversationResponse | null> => {
+  return fetch(assistantConversationsEndpoint(uuid), {
+    method: 'GET',
+    headers: header,
+  }).then((response) => {
+    if (response.status === 404) {
+      return null;
+    }
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json() as Promise<AssistantConversationResponse>;
+  });
+};
+
 // Send a user message to an existing Benbot conversation.
 const sendAssistantMessage = async (
   uuid: string,
@@ -415,6 +442,7 @@ const sendAssistantMessage = async (
 
 export {
   startAssistantConversation,
+  getAssistantHistory,
   sendAssistantMessage,
   getTranslations,
   postScreen,

@@ -1,6 +1,14 @@
 import { useLayoutEffect, useMemo, useState } from 'react';
 
-export type ThemeName = 'default' | 'twoOneOne' | 'twoOneOneNC' | 'co_energy' | 'nc_lanc' | 'nc_ccla' | 'cu_denver';
+export type ThemeName =
+  | 'default'
+  | 'twoOneOne'
+  | 'twoOneOneNC'
+  | 'co_energy'
+  | 'nc_lanc'
+  | 'nc_ccla'
+  | 'cu_denver'
+  | 'uwgkc';
 
 export interface ITheme {
   primaryColor: string;
@@ -48,7 +56,7 @@ export interface ITheme {
 
 export type Themes = Record<ThemeName, ITheme>;
 
-const themes: Themes = {
+export const themes: Themes = {
   default: {
     primaryColor: '#293457',
     secondaryColor: '#B85A27',
@@ -319,6 +327,50 @@ const themes: Themes = {
       // Typography
       '--font-heading': "'Roboto Slab', serif",
       '--font-body': "'Open Sans', sans-serif",
+      'font-size': '18px',
+
+      // Layout
+      '--main-max-width': '1310px',
+      '--content-max-width': '900px',
+    },
+  },
+  // United Way of Greater Kansas City, whose 2-1-1 serves both sides of the KS/MO line, so this
+  // theme is shared by the ks and mo white labels. Colors and fonts come from United Way Brand
+  // Guidelines 2024 v1.3: primary blue leads (p.18 reserves the purple/green tertiaries for
+  // supporting roles), and every text pairing below is an approved combination from p.19.
+  uwgkc: {
+    primaryColor: '#21296B', // UW dark blue (Pantone 3581 C)
+    secondaryColor: '#0044B5', // UW blue (Pantone 2728 C)
+    midBlueColor: '#0044B5',
+    footerColor: '#21296B',
+    secondaryBackgroundColor: '#F7F7F7',
+    hoverColor: '#A7D2FF', // UW light blue tone (Pantone 2717 C)
+    outlineHoverBackgroundColor: '#A7D2FF',
+    outlineHoverColor: '#21296B',
+    progressBarColor: '#5082F0', // UW blue tone (Pantone 2718 C)
+    cssVariables: {
+      // Colors - Primary & Secondary
+      '--primary-color': '#21296B',
+      '--secondary-color': '#0044B5',
+      '--midBlue-color': '#0044B5',
+      '--footer-color': '#21296B',
+
+      // Colors - Background
+      '--secondary-background-color': '#F7F7F7',
+      '--hover-color': '#A7D2FF',
+
+      // Colors - Icons
+      // The guide's dark red rather than its primary #FD372C, which is only 3.7:1 on white.
+      '--icon-color': '#D12626',
+      '--secondary-icon-color': '#21296B',
+
+      // Colors - Interactive States
+      '--option-card-hover-font-color': '#1D1C1E',
+      '--active-border-color': '#0044B5',
+
+      // Typography
+      '--font-heading': "'Antonio', sans-serif",
+      '--font-body': "'Palanquin', sans-serif",
       'font-size': '18px',
 
       // Layout

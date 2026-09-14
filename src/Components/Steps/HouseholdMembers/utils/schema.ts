@@ -191,6 +191,7 @@ const createSpecialConditionsSchema = (_intl: IntlShape) => {
     blindOrVisuallyImpaired: z.boolean().optional().default(false),
     disabled: z.boolean().optional().default(false),
     longTermDisability: z.boolean().optional().default(false),
+    fosterCare: z.boolean().optional().default(false),
   });
 };
 

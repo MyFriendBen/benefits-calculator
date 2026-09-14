@@ -109,6 +109,12 @@ export interface ScreenerEventMap {
   // happened on (shares the ordinal with that page's screener_form_step view).
   screener_income_source: StepContext & MemberIndexContext & { action: 'add' | 'edit' | 'delete' };
   screener_has_benefits_load_error: StepContext;
+  // A referrer's `stateOptions` named states but none resolved to a routable one, so the state
+  // dropdown fell back to the public list instead of the referrer's. Always a config/build
+  // mismatch — the codes are missing from the API catalog or from ALL_VALID_WHITE_LABELS.
+  // `referrer_state_options` is the comma-joined list the config asked for (white label codes,
+  // PII-free).
+  screener_state_options_unresolved: { referrer_state_options: string };
   screener_language_changed: StepContext & { language_name: string };
   screener_confirmation_edit: { section: string };
   screener_confirmation_proceed: {};
@@ -197,7 +203,8 @@ export interface ScreenerEventMap {
   screener_feedback_click: { channel: 'survey' | 'email' };
 
   // ---- BenBot chatbot ----
-  screener_benbot_opened: { entry: 'fab' | 'guide_me' };
+  // 'auto' = the widget opened itself on results-page load (MFB-1737).
+  screener_benbot_opened: { entry: 'fab' | 'auto' };
   screener_benbot_closed: {};
   screener_benbot_message_sent: {};
   screener_benbot_error: {};
