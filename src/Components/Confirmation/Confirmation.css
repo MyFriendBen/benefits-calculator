@@ -349,3 +349,25 @@ svg.confirmation-lucide-icon * {
     height: 1.25rem;
   }
 }
+
+.confirmation-conditions-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.confirmation-conditions-list > li + li {
+  margin-top: 0.25rem;
+}
+
+.confirmation-student-eligibility-list {
+  list-style: none;
+  margin: 0.25rem 0 0 0;
+  padding-left: 0;
+  font-size: 0.875em;
+  color: #555;
+}
+
+.confirmation-student-eligibility-list li + li {
+  margin-top: 0.125rem;
+}
