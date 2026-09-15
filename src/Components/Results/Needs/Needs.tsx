@@ -77,9 +77,13 @@ const Needs = () => {
           }}
         />
       </InformationalText>
-      {needsSortedByCategory.map((need, index) => {
-        return <NeedCard need={need} key={index} />;
-      })}
+      {/* Carries the divider above the cards. A wrapper rather than a sibling selector
+          because the referrer message above renders for only some white labels. */}
+      <div className="results-needs-list">
+        {needsSortedByCategory.map((need, index) => {
+          return <NeedCard need={need} key={index} />;
+        })}
+      </div>
     </div>
   );
 };

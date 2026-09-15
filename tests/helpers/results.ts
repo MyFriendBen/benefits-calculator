@@ -171,13 +171,15 @@ export async function clickBackToResults(page: Page): Promise<void> {
 }
 
 /**
- * Clicks on a results page tab (Near-Term or Long-Term) using its data-testid.
+ * Clicks on a results page tab (Long-Term, Near-Term, or Immediate Help) using its
+ * data-testid. Note that `immediate-help-tab` is not rendered for referrers carrying the
+ * `no_results_more_help` uiOption, nor on the CESN white label, which has no tab bar.
  * @param page - Playwright page instance
  * @param tabTestId - The data-testid of the tab to click.
  */
 export async function clickResultsTab(
   page: Page,
-  tabTestId: 'near-term-benefits-tab' | 'long-term-benefits-tab',
+  tabTestId: 'near-term-benefits-tab' | 'long-term-benefits-tab' | 'immediate-help-tab',
 ): Promise<void> {
   try {
     const tabSelector = `[data-testid="${tabTestId}"]`;
