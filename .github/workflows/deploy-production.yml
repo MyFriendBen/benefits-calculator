@@ -2,14 +2,13 @@ name: Deploy to Production
 
 on:
   release:
-    types: [created, published]
+    types: [published]
 
 jobs:
-  test:
-    name: Run Tests on Draft Release
+  verify:
+    name: Verify Release Tag
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: github.event.release.draft == true
 
     steps:
       - name: Checkout release tag
@@ -23,20 +22,37 @@ jobs:
       - name: Run unit tests
         run: npm test -- --coverage --watchAll=false --passWithNoTests
 
-      - name: Run linters
-        uses: wearerequired/lint-action@v3.0.2
+      # Same `react-scripts build` Heroku runs at deploy time, but against the
+      # tag being shipped, so a build-breaking error blocks the deploy instead
+      # of failing the push to Heroku. Mirrors the production-build job in
+      # lint.yml, which only covers pull requests.
+      - name: Run production build
+        run: npm run build
+        env:
+          # Match Heroku's build environment (no CI var): hard errors fail the
+          # build, pre-existing warnings don't.
+          CI: false
+
+      - name: Send verification failure notification to Slack
+        if: failure()
+        uses: ./.github/actions/slack-notify
         with:
-          eslint: true
-          prettier: true
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          status: failure
+          environment: production
+          release-tag: ${{ github.event.release.tag_name }}
+          release-url: ${{ github.event.release.html_url }}
 
   deploy:
-    if: github.event.action == 'published'
+    needs: [verify]
     name: Deploy Frontend to Heroku Production
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
       name: production
-      url: ${{ secrets.HEROKU_PROD_URL }}
+      # Must stay a literal: environment.url rejects the secrets context, which
+      # made this workflow unloadable and unrunnable for months.
+      url: https://benefits-calculator-v1.herokuapp.com
 
     steps:
       - name: Checkout release tag
