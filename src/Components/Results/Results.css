@@ -513,6 +513,15 @@
     margin: 0;
     white-space: normal;
     min-width: 0;
+    /* Once text wraps, the label stretches to the tab's full width — wider
+       than the text itself. So each line needs its own centering; centering
+       the label box does nothing, since the box is already full-width. */
+    text-align: center;
+  }
+
+  /* Icons made the label feel squished once wrapped onto 2 lines at these widths. */
+  .results-tab-icon {
+    display: none;
   }
 
   /* Content-sized tabs would overflow a narrow viewport, so they share the width
@@ -528,8 +537,18 @@
     position: relative;
     width: 100%;
     height: 100%;
-    /* Right padding fits the badge below (0.25rem gap + 1.35rem width). */
-    padding: 0.5rem 1.6rem 0.5rem 0.25rem;
+    padding: 0.5rem 0.25rem;
+    /* Without the icon, the label sat to the left with empty space on the
+       right (where the icon used to be) — center it in the tab instead. */
+    justify-content: center;
+  }
+
+  /* Extra right padding only on tabs that actually have a badge (0.25rem gap +
+     1.35rem width), so the badge has room and doesn't overlap the text.
+     Immediate Help has no badge, so it doesn't need this — without this
+     split, its text would sit left of center for no reason. */
+  .results-tab a:has(.results-tab-count) {
+    padding-right: 1.6rem;
   }
 
   /* Badge sits at the tab's edge, not next to the label — icon, wrapped text,
@@ -542,10 +561,10 @@
     transform: translateY(-50%);
   }
 
-  /* Text shrinks step by step as the screen narrows, instead of jumping
-     straight to 2 lines and making every tab taller at once. */
+  /* Same fixed size as desktop tabs, now that removing the icon leaves enough
+     room for it at every mobile width. */
   .results-tab-container[data-tab-count='3'] .results-tab a .results-tab-label {
-    font-size: max(0.58rem, min(0.85rem, 1.8vw));
+    font-size: var(--results-font-meta);
   }
 
   /* All tabs get the same height, since labels can now wrap to a different
@@ -583,11 +602,17 @@
     margin-bottom: 0.5rem;
   }
 
-  /* Fits the count number's size (0.2rem + 1.1rem). Right and left set
-     separately, so the active tab's taller top/bottom padding stays untouched. */
+  /* Sets only the left side — setting all four sides here would reset the
+     active tab's separately-set top/bottom padding back to default, breaking
+     its lifted look. */
   .results-tab-container[data-tab-count='3'] .results-tab a {
-    padding-right: 1.3rem;
     padding-left: 0.15rem;
+  }
+
+  /* Fits the count number's size at this width (0.2rem + 1.1rem) — only on
+     tabs that actually have a badge (Immediate Help doesn't). */
+  .results-tab-container[data-tab-count='3'] .results-tab a:has(.results-tab-count) {
+    padding-right: 1.3rem;
   }
 
   /* No new text-size rule needed — the rule above already applies here.
