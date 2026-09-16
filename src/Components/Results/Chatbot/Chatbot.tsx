@@ -21,6 +21,12 @@ type Message = {
   text: string;
 };
 
+// The greeting as the user last saw it — which variant, and the numbers it quotes.
+// A discriminated union rather than a nullable count, so the branch and its values are
+// latched by the same write: freezing one without the other is what let the greeting
+// swap variants under a live conversation.
+type GreetingSnapshot = { variant: 'personalized'; count: number; totalValue: number } | { variant: 'generic' };
+
 // The API uses role 'assistant'; the widget renders it as 'bot'.
 function toWidgetMessage(m: AssistantApiMessage): Message {
   return { role: m.role === 'assistant' ? 'bot' : 'user', text: m.text };
@@ -78,6 +84,17 @@ export function useChatbotContext() {
   }
   return context;
 }
+
+// `<b>` chunks for the greeting's two options.
+//
+// The greeting is a raw <FormattedMessage>, not model output, so it never passes
+// through renderFormattedMessage below and `**asterisks**` would render literally.
+// The bolding isn't decoration: the system prompt requires each option in a choice to
+// be bold (PROMPT_VERSION v5), and the greeting is now the message that makes that
+// offer — so it has to look like the assistant's own offers, not like prose.
+//
+// Module-level, so it's a stable reference rather than a new closure per render.
+const boldChunks = (chunks: React.ReactNode) => <strong>{chunks}</strong>;
 
 function renderFormattedMessage(text: string): React.ReactNode {
   const PRIMARY_COLOR =
@@ -186,6 +203,42 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
     () => (visiblePrograms ?? []).reduce((sum, program) => sum + program.value, 0),
     [visiblePrograms],
   );
+
+  // WHICH greeting is on screen, and the numbers it quotes — latched the moment the
+  // user answers it.
+  //
+  // The invariant is "the greeting stops changing once the user has answered it", not
+  // the weaker "its numbers stop changing". Both inputs are live, and freezing only the
+  // numbers leaves the second one editing a message that has already been read:
+  //
+  //   - `visiblePrograms` tracks the results-page filters, so an unfrozen count
+  //     re-counts itself mid-conversation;
+  //   - `programId` tracks the route, and ChatbotProvider deliberately survives the
+  //     navigation into a program's own page (MFB-1872, Results.tsx) — so a user who
+  //     clicks "more info" mid-conversation would watch the personalized greeting above
+  //     their own words turn into the generic one.
+  //
+  // Before they answer, recomputing is correct and not merely harmless: the greeting
+  // quotes what the results page is showing, so it has to track a filter change, and
+  // this is also what lets a widget that auto-opened before the list resolved upgrade
+  // from the generic welcome to the personalized one. After they answer, it is a sent
+  // message, and sent messages don't change.
+  //
+  // `isSending` is part of "answered" because `messages` is still empty while the first
+  // send is in flight — without it, a filter landing in that window still edits the
+  // greeting the user has just replied to.
+  //
+  // Written during render rather than from an effect so the first paint already has the
+  // final text; this is a latched snapshot, not derived state.
+  const greetingRef = useRef<GreetingSnapshot | null>(null);
+  const greetingAnswered = messages.length > 0 || isSending;
+  if (isOpen && (greetingRef.current === null || !greetingAnswered)) {
+    greetingRef.current =
+      !programId && visiblePrograms && visiblePrograms.length > 0
+        ? { variant: 'personalized', count: visiblePrograms.length, totalValue: totalAnnualValue }
+        : { variant: 'generic' };
+  }
+  const greeting = greetingRef.current;
 
   const errorMessage = formatMessage({
     id: 'chatbot.error',
@@ -444,14 +497,32 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
             </div>
           )}
           <div className="chatbot-messages">
-            {messages.length === 0 && (
+            {
               // The greeting is a real bot bubble, not a banner, so the conversation
-              // opens the way it continues. Derived from an empty transcript rather
-              // than seeded into `messages`: seeding would defeat the history-restore
-              // guard below (which only fills an EMPTY transcript) and be overwritten
-              // by the start call's own messages on the first send.
+              // opens the way it continues — and it STAYS, which is the whole point of
+              // rendering it unconditionally rather than from `messages.length === 0`.
+              // Under that old guard it vanished the instant the user hit send: the
+              // start call replaces `messages` wholesale with the server's transcript,
+              // which has never contained the greeting. What the user saw was Benji
+              // deleting its own opening line the moment they answered it — and once
+              // that line is an invitation to describe a hard situation, retracting it
+              // mid-thought is the worst possible moment to do it.
+              //
+              // It is still derived rather than seeded into `messages`, because seeding
+              // is what actually can't survive here: the history-restore effect below
+              // only fills an EMPTY transcript (so a seeded greeting would suppress a
+              // returning household's history), and `ensureConversation` would overwrite
+              // it on the first send anyway. Deriving sidesteps both. Both the variant
+              // and its numbers come from the latched `greeting` above — nothing here
+              // may read `visiblePrograms` or `programId` directly, or the bubble starts
+              // rewriting itself again under a conversation that has moved past it.
+              //
+              // Not stored server-side: it is client-templated and already translated,
+              // and ai-service's store appends user/assistant messages in pairs. The
+              // model is told about it in the system prompt instead, so it doesn't
+              // re-offer the choice this bubble just made.
               <div className="chatbot-message chatbot-message-bot">
-                {visiblePrograms && visiblePrograms.length > 0 && !programId ? (
+                {greeting?.variant === 'personalized' ? (
                   // Templated client-side from what the page is showing — instant
                   // and free; the model is only engaged once the user replies.
                   //
@@ -462,25 +533,27 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
                   // welcome below is route-neutral and already translated, so this
                   // costs no new strings.
                   <FormattedMessage
-                    id="chatbot.welcomePersonalized"
-                    defaultMessage="Hi, I'm Benji! Your results show {count, plural, one {# program} other {# programs}} you may qualify for, worth about {totalValue} per year. Ask me anything — like which one to apply for first."
+                    id="chatbot.welcomePersonalizedSituation"
+                    defaultMessage="Hi, I'm Benji! Your results show {count, plural, one {# program} other {# programs}} you may qualify for, worth about {totalValue} per year. <b>Tell me what's going on right now</b> and I'll point you to the best place to start — or I can <b>walk you through your top result</b>."
                     values={{
-                      count: visiblePrograms.length,
-                      totalValue: formatNumber(totalAnnualValue, {
+                      count: greeting.count,
+                      totalValue: formatNumber(greeting.totalValue, {
                         style: 'currency',
                         currency: 'USD',
                         maximumFractionDigits: 0,
                       }),
+                      b: boldChunks,
                     }}
                   />
                 ) : (
                   <FormattedMessage
-                    id="chatbot.welcome"
-                    defaultMessage="Hi there! I'm here to help you understand your benefits. Ask me anything about the programs you qualify for."
+                    id="chatbot.welcomeSituation"
+                    defaultMessage="Hi, I'm Benji. <b>Tell me what's going on for you right now</b> and I'll help you find the best place to start — or <b>ask me anything</b> about the programs you qualify for."
+                    values={{ b: boldChunks }}
                   />
                 )}
               </div>
-            )}
+            }
             {messages.map((msg, i) => (
               <div key={i} className={`chatbot-message chatbot-message-${msg.role}`}>
                 {renderFormattedMessage(msg.text)}
