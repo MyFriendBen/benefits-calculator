@@ -95,12 +95,18 @@
   max-height: 22rem;
 }
 
-.chatbot-welcome {
+/* Standing privacy notice: a fixed band under the header, outside the scrolling
+   transcript, so it stays visible while the user types. Kept compact — it is
+   permanent now rather than something the first reply pushes away. */
+.chatbot-disclaimer {
   color: #666;
-  font-size: 0.875rem;
+  background-color: #f7f7f7;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 0.75rem;
   text-align: center;
-  padding: 2rem 0.5rem;
-  line-height: 1.5;
+  padding: 0.5rem 0.875rem;
+  line-height: 1.4;
+  flex-shrink: 0;
 }
 
 .chatbot-message {
@@ -210,6 +216,17 @@
     bottom: 1rem;
     right: 1rem;
   }
+
+  /* The 16rem floor above is there to keep a sparse panel from collapsing, but it
+     also stops the message list giving up height when the panel is capped. The
+     disclaimer can't shrink (flex-shrink: 0) and the list won't, so the overflow
+     lands on the input row, which `overflow: hidden` on the panel then clips — at
+     320x568 that cost 30px of the row, half the send button. Dropping the floor
+     here only: on desktop it is what keeps the default panel roomy, and the cap is
+     far enough away (a notice would have to run to ~8 lines) not to need it. */
+  .chatbot-messages {
+    min-height: 0;
+  }
 }
 
 /* "BenBot is typing" loading indicator — pulsing dots in a bot bubble */
@@ -238,7 +255,9 @@
 }
 
 @keyframes chatbot-typing {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0.6);
     opacity: 0.4;
   }
@@ -264,10 +283,6 @@
 
 .chatbot-panel--peek .chatbot-messages {
   min-height: 0;
-}
-
-.chatbot-panel--peek .chatbot-welcome {
-  padding: 0.75rem 0.5rem;
 }
 
 .chatbot-header-actions {

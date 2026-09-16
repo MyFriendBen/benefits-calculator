@@ -409,3 +409,69 @@ describe('ChatbotProvider history restore', () => {
     expect(mockHistory).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('greeting bubble and privacy notice', () => {
+  const open = () => userEvent.click(screen.getByRole('button', { name: /chat/i }));
+
+  it('renders the greeting as a bot message bubble, not a banner', async () => {
+    renderChatbot(undefined);
+
+    await open();
+
+    const greeting = screen.getByText(/help you understand your benefits/i);
+    expect(greeting).toHaveClass('chatbot-message', 'chatbot-message-bot');
+  });
+
+  it('withholds the notice in peek, where typing is impossible, and shows it on expand', async () => {
+    // Peek is a teaser: focusing the input expands to full, so no character can be
+    // entered while it is on screen and the notice has no job to do there. It costs
+    // the greeting ~39px of a panel capped at min(21rem, 45vh), which pushed the
+    // last lines below the fold.
+    jest.useFakeTimers();
+    (window as unknown as { matchMedia: unknown }).matchMedia = jest.fn().mockReturnValue({
+      matches: true,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    });
+    try {
+      renderChatbot([SNAP]);
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+
+      expect(screen.getByRole('dialog').className).toContain('chatbot-panel--peek');
+      expect(screen.queryByRole('note')).not.toBeInTheDocument();
+
+      fireEvent.focus(screen.getByRole('textbox'));
+
+      expect(screen.getByRole('dialog').className).not.toContain('chatbot-panel--peek');
+      expect(screen.getByRole('note')).toHaveTextContent(/do not include your SSN/i);
+    } finally {
+      jest.useRealTimers();
+      delete (window as unknown as { matchMedia?: unknown }).matchMedia;
+    }
+  });
+
+  it('shows the privacy notice as soon as the widget opens', async () => {
+    renderChatbot([SNAP]);
+
+    await open();
+
+    expect(screen.getByRole('note')).toHaveTextContent(/do not include your SSN/i);
+  });
+
+  it('keeps the privacy notice once the conversation has started', async () => {
+    // The greeting is a message and behaves like one — the transcript replaces it.
+    // The notice is not: it warns about what the user is about to type, so it has to
+    // outlive the first exchange.
+    renderChatbot(undefined);
+
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    expect(screen.queryByText(/help you understand your benefits/i)).not.toBeInTheDocument();
+    expect(screen.getByRole('note')).toHaveTextContent(/do not include your SSN/i);
+  });
+});

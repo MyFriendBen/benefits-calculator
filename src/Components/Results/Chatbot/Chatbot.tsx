@@ -426,9 +426,31 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
               </button>
             </span>
           </div>
+          {/* Standing privacy notice. Pinned between the header and the transcript
+              rather than placed in it: it's a warning about what the user is about
+              to type, so it has to stay on screen once the conversation starts.
+
+              Omitted in 'peek', which is a teaser, not a place you can type: focusing
+              the input there expands to 'full' (see the input's onFocus), so the
+              notice is always on screen before a character can be entered. Rendering
+              it in peek only costs the greeting ~39px of a panel already capped at
+              min(21rem, 45vh), which pushed the last lines below the fold. */}
+          {panel === 'full' && (
+            <div className="chatbot-disclaimer" role="note">
+              <FormattedMessage
+                id="chatbot.privacyNotice"
+                defaultMessage="Please do not include your SSN, account numbers, or medical details in this chat."
+              />
+            </div>
+          )}
           <div className="chatbot-messages">
             {messages.length === 0 && (
-              <div className="chatbot-welcome">
+              // The greeting is a real bot bubble, not a banner, so the conversation
+              // opens the way it continues. Derived from an empty transcript rather
+              // than seeded into `messages`: seeding would defeat the history-restore
+              // guard below (which only fills an EMPTY transcript) and be overwritten
+              // by the start call's own messages on the first send.
+              <div className="chatbot-message chatbot-message-bot">
                 {visiblePrograms && visiblePrograms.length > 0 && !programId ? (
                   // Templated client-side from what the page is showing — instant
                   // and free; the model is only engaged once the user replies.
