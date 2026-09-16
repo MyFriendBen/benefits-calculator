@@ -75,7 +75,18 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
             parts.push(inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{textBefore}</strong> : textBefore);
           }
           const linkIdx = parseInt(linkIdxString, 10);
-          const [, linkText, url] = linkMatches[linkIdx];
+          const linkMatch = linkMatches[linkIdx];
+          if (!linkMatch) {
+            // A literal "__MDLINK_n__" in the source text rather than one we emitted
+            // above. Render it verbatim: destructuring the missing entry would throw
+            // during render, and with no ErrorBoundary in the tree that blanks the page.
+            parts.push(
+              inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{placeholder}</strong> : placeholder,
+            );
+            remaining = remaining.slice(placeholderIndex + placeholder.length);
+            continue;
+          }
+          const [, linkText, url] = linkMatch;
           if (isSafeUrl(url)) {
             parts.push(
               <a

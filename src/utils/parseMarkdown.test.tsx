@@ -248,6 +248,38 @@ describe('parseMarkdown', () => {
     expect(screen.getByRole('link', { name: 'SNAP' })).toHaveAttribute('href', 'https://snap.gov');
   });
 
+  it('renders a literal __MDLINK_n__ placeholder instead of throwing', () => {
+    // Chatbot renders every message through parseMarkdown, including the user's own,
+    // so this string is reachable from user input. There is no ErrorBoundary in src/,
+    // so a throw here unmounts the tree and blanks the results page.
+    const inputs = [
+      'see https://example.com__MDLINK_0__ ok', // flush against a URL
+      'hello __MDLINK_0__ world', // standalone, no markdown links present
+      '[a](https://a.gov) __MDLINK_7__', // index past the end of linkMatches
+    ];
+
+    inputs.forEach((input) => {
+      expect(() => render(<>{parseMarkdown(input, primaryColor)}</>)).not.toThrow();
+    });
+  });
+
+  it('keeps the surrounding text when a literal placeholder is rendered verbatim', () => {
+    const result = parseMarkdown('see https://example.com__MDLINK_0__ ok', primaryColor);
+    const { container } = render(<>{result}</>);
+
+    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://example.com');
+    expect(container.textContent).toContain('__MDLINK_0__');
+    expect(container.textContent).toContain('ok');
+  });
+
+  it('still resolves real markdown links alongside a literal placeholder', () => {
+    const result = parseMarkdown('[SNAP](https://snap.gov) and __MDLINK_7__', primaryColor);
+    const { container } = render(<>{result}</>);
+
+    expect(screen.getByRole('link', { name: 'SNAP' })).toHaveAttribute('href', 'https://snap.gov');
+    expect(container.textContent).toContain('__MDLINK_7__');
+  });
+
   it('keeps underscores inside URLs intact', () => {
     const result = parseMarkdown('See https://example.com/a_b_c/page for info', primaryColor);
     render(<>{result}</>);
