@@ -67,20 +67,9 @@ import { calculateTotalValue, programValue } from './FormattedValue';
 const BenbotWrapper = ({
   enabled,
   visiblePrograms,
-  autoOpen,
   children,
-}: PropsWithChildren<{
-  enabled: boolean;
-  visiblePrograms: AssistantVisibleProgram[];
-  autoOpen?: boolean;
-}>) =>
-  enabled ? (
-    <ChatbotProvider visiblePrograms={visiblePrograms} autoOpen={autoOpen}>
-      {children}
-    </ChatbotProvider>
-  ) : (
-    <>{children}</>
-  );
+}: PropsWithChildren<{ enabled: boolean; visiblePrograms: AssistantVisibleProgram[] }>) =>
+  enabled ? <ChatbotProvider visiblePrograms={visiblePrograms}>{children}</ChatbotProvider> : <>{children}</>;
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -460,12 +449,15 @@ const Results = ({ type }: ResultsProps) => {
           unmounted on "more info" and they lost the assistant at the moment they had a
           concrete question.
 
-          `autoOpen={false}`: dismissal already carries across routes (the sessionStorage
-          key is per screen uuid, not per path), but a user who never dismissed it would
-          otherwise get the panel popping open two seconds into every detail page. They
-          clicked into this program to read it. The FAB is still there.
+          Auto-open is deliberately left ON here, identical to the list page. Closing
+          the panel writes the dismissal key, which is per screen uuid rather than per
+          path — so a user who closed Benji anywhere stays free of it everywhere, and a
+          user who did not gets the same offer on the page where their question is most
+          specific. Those two cases are the whole intended behaviour, and the existing
+          effect already produces both; a route-aware exception would only break the
+          second one.
         */}
-        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms} autoOpen={false}>
+        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms}>
           <ProgramPage program={program} />
         </BenbotWrapper>
       </ResultsContext.Provider>

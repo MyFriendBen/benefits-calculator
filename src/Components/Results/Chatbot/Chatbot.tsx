@@ -159,20 +159,9 @@ type ChatbotProviderProps = {
    * context-refresh effect below.
    */
   visiblePrograms?: AssistantVisibleProgram[];
-  /**
-   * Whether the panel may open itself (MFB-1872). True on the results list, where
-   * MFB-1737's auto-open earns its impression; false on a program's own page, which
-   * the user reached by deliberately clicking into one program and is now reading.
-   * Re-popping a panel there on every "more info" click is the annoying version of
-   * discoverability, and the FAB is still one tap away.
-   *
-   * A prop rather than a route check inside the provider: the provider has no
-   * business knowing the route shape, and the caller already branches on it.
-   */
-  autoOpen?: boolean;
 };
 
-export function ChatbotProvider({ visiblePrograms, autoOpen = true, children }: PropsWithChildren<ChatbotProviderProps>) {
+export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren<ChatbotProviderProps>) {
   const { uuid } = useParams();
   // 'peek' is a partial-height panel used by auto-open on small screens: the
   // greeting and input are visible, the results stay visible behind it, and any
@@ -227,7 +216,6 @@ export function ChatbotProvider({ visiblePrograms, autoOpen = true, children }: 
   // opens with the generic welcome) and when the user dismissed it for this
   // screen. A manual open first changes `panel`, which cancels the timer.
   useEffect(() => {
-    if (!autoOpen) return;
     if (panel !== 'closed') return;
     if (!uuid || wasDismissed(uuid)) return;
     if (visiblePrograms !== undefined && visiblePrograms.length === 0) return;
@@ -236,7 +224,7 @@ export function ChatbotProvider({ visiblePrograms, autoOpen = true, children }: 
       track('screener_benbot_opened', { entry: 'auto' });
     }, AUTO_OPEN_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [autoOpen, panel, uuid, visiblePrograms, track]);
+  }, [panel, uuid, visiblePrograms, track]);
 
   // Restore a returning household's transcript when the widget opens.
   //
