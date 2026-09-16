@@ -409,3 +409,37 @@ describe('ChatbotProvider history restore', () => {
     expect(mockHistory).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('greeting bubble and privacy notice', () => {
+  const open = () => userEvent.click(screen.getByRole('button', { name: /chat/i }));
+
+  it('renders the greeting as a bot message bubble, not a banner', async () => {
+    renderChatbot(undefined);
+
+    await open();
+
+    const greeting = screen.getByText(/help you understand your benefits/i);
+    expect(greeting).toHaveClass('chatbot-message', 'chatbot-message-bot');
+  });
+
+  it('shows the privacy notice as soon as the widget opens', async () => {
+    renderChatbot([SNAP]);
+
+    await open();
+
+    expect(screen.getByRole('note')).toHaveTextContent(/do not include your SSN/i);
+  });
+
+  it('keeps the privacy notice once the conversation has started', async () => {
+    // The greeting is a message and behaves like one — the transcript replaces it.
+    // The notice is not: it warns about what the user is about to type, so it has to
+    // outlive the first exchange.
+    renderChatbot(undefined);
+
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    expect(screen.queryByText(/help you understand your benefits/i)).not.toBeInTheDocument();
+    expect(screen.getByRole('note')).toHaveTextContent(/do not include your SSN/i);
+  });
+});
