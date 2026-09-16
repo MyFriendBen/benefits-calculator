@@ -280,6 +280,25 @@ describe('parseMarkdown', () => {
     expect(container.textContent).toContain('__MDLINK_7__');
   });
 
+  it('does not leak an unpaired ** into the href', () => {
+    // The bold pass only rewrites *paired* "**". An odd number on the line leaves a
+    // raw "**" that the URL match would otherwise absorb — the same dead-link
+    // symptom as the __BOLD_END__ bug, via a different route.
+    const result = parseMarkdown('**Apply** at https://www.washingtonconnection.org/**', primaryColor);
+    render(<>{result}</>);
+
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', 'https://www.washingtonconnection.org/');
+    expect(link.getAttribute('href')).not.toContain('*');
+  });
+
+  it('does not leak a stray ** mid-line into the href', () => {
+    const result = parseMarkdown('Visit https://a.com** now', primaryColor);
+    render(<>{result}</>);
+
+    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://a.com');
+  });
+
   it('keeps underscores inside URLs intact', () => {
     const result = parseMarkdown('See https://example.com/a_b_c/page for info', primaryColor);
     render(<>{result}</>);

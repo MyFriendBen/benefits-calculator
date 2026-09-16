@@ -49,7 +49,11 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
     // against a marker (e.g. "**https://example.com**", which the bold pass above
     // turns into "...example.com__BOLD_END__") has no whitespace to stop at, so
     // the lazy match would swallow the marker into the href.
-    const urlRegex = /(https?:\/\/[^\s]+?)(?=[.,;:!?)\]'\"]*(?:\s|$|__BOLD_(?:START|END)__|__MDLINK_\d+__))/g;
+    //
+    // "*" is in the trailing-punctuation class because the bold pass only rewrites
+    // *paired* "**". An odd number on a line leaves a raw "**" behind, which would
+    // otherwise be absorbed into the href the same way.
+    const urlRegex = /(https?:\/\/[^\s]+?)(?=[.,;:!?)\]'\"*]*(?:\s|$|__BOLD_(?:START|END)__|__MDLINK_\d+__))/g;
     const plainUrlMatches = [...currentText.matchAll(urlRegex)];
 
     // Maintain bold state across the entire line
