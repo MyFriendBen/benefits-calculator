@@ -250,7 +250,7 @@ describe('auto-open (MFB-1737)', () => {
       jest.advanceTimersByTime(2000);
     });
 
-    expect(screen.getByRole('dialog')).toHaveTextContent(/help you understand your benefits/i);
+    expect(screen.getByRole('dialog')).toHaveTextContent(/best place to start/i);
   });
 
   it('stays closed once dismissed, including across remounts of the same screen', () => {
@@ -418,7 +418,7 @@ describe('greeting bubble and privacy notice', () => {
 
     await open();
 
-    const greeting = screen.getByText(/help you understand your benefits/i);
+    const greeting = screen.getByText(/best place to start/i);
     expect(greeting).toHaveClass('chatbot-message', 'chatbot-message-bot');
   });
 
@@ -462,16 +462,62 @@ describe('greeting bubble and privacy notice', () => {
     expect(screen.getByRole('note')).toHaveTextContent(/do not include your SSN/i);
   });
 
-  it('keeps the privacy notice once the conversation has started', async () => {
-    // The greeting is a message and behaves like one — the transcript replaces it.
-    // The notice is not: it warns about what the user is about to type, so it has to
-    // outlive the first exchange.
+  it('keeps the greeting and the privacy notice once the conversation has started', async () => {
+    // The greeting is a message and behaves like one — which means it STAYS. It used
+    // to be rendered only while `messages` was empty, so the start call's transcript
+    // swap deleted it the moment the user replied: Benji retracting its own opening
+    // line at exactly the point someone had just answered it.
+    //
+    // The notice stays for a different reason: it warns about what the user is about
+    // to type, so it has to outlive every exchange, not just the first.
     renderChatbot(undefined);
 
     await openAndSend();
     await screen.findByText('hi there');
 
-    expect(screen.queryByText(/help you understand your benefits/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/best place to start/i)).toBeInTheDocument();
     expect(screen.getByRole('note')).toHaveTextContent(/do not include your SSN/i);
+  });
+
+  it('bolds both options, so the greeting makes the offer the way the assistant would', async () => {
+    // The system prompt has required each option in a choice to be bold since v5, and
+    // the greeting is now the message that makes that offer — the model is told so, and
+    // told not to repeat it. `**asterisks**` would render literally here: unlike model
+    // output, the greeting never passes through renderFormattedMessage. Hence <b> chunks.
+    renderChatbot([SNAP]);
+
+    await open();
+
+    const dialog = screen.getByRole('dialog');
+    expect(Array.from(dialog.querySelectorAll('strong')).map((el) => el.textContent)).toEqual([
+      "Tell me what's going on right now",
+      'walk you through your top result',
+    ]);
+    expect(dialog.textContent).not.toContain('**');
+  });
+
+  it('offers the situation door in the generic welcome too', async () => {
+    renderChatbot(undefined);
+
+    await open();
+
+    const dialog = screen.getByRole('dialog');
+    expect(Array.from(dialog.querySelectorAll('strong')).map((el) => el.textContent)).toEqual([
+      "Tell me what's going on for you right now",
+      'ask me anything',
+    ]);
+  });
+
+  it('holds the greeting still when a results filter changes the program list', async () => {
+    // `visiblePrograms` tracks the results-page filters. An unfrozen greeting would
+    // re-count itself mid-conversation, rewriting a message the user has already read.
+    const { rerender } = renderChatbot([SNAP, MEDICAID, WIC]);
+
+    await open();
+    expect(screen.getByRole('dialog')).toHaveTextContent('3 programs');
+
+    rerender(chatbotUi([SNAP]));
+
+    expect(screen.getByRole('dialog')).toHaveTextContent('3 programs');
   });
 });
