@@ -216,6 +216,17 @@
     bottom: 1rem;
     right: 1rem;
   }
+
+  /* The 16rem floor above is there to keep a sparse panel from collapsing, but it
+     also stops the message list giving up height when the panel is capped. The
+     disclaimer can't shrink (flex-shrink: 0) and the list won't, so the overflow
+     lands on the input row, which `overflow: hidden` on the panel then clips — at
+     320x568 that cost 30px of the row, half the send button. Dropping the floor
+     here only: on desktop it is what keeps the default panel roomy, and the cap is
+     far enough away (a notice would have to run to ~8 lines) not to need it. */
+  .chatbot-messages {
+    min-height: 0;
+  }
 }
 
 /* "BenBot is typing" loading indicator — pulsing dots in a bot bubble */
@@ -272,10 +283,6 @@
 
 .chatbot-panel--peek .chatbot-messages {
   min-height: 0;
-}
-
-.chatbot-panel--peek .chatbot-disclaimer {
-  padding: 0.375rem 0.875rem;
 }
 
 .chatbot-header-actions {

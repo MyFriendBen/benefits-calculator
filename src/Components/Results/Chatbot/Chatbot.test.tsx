@@ -422,6 +422,38 @@ describe('greeting bubble and privacy notice', () => {
     expect(greeting).toHaveClass('chatbot-message', 'chatbot-message-bot');
   });
 
+  it('withholds the notice in peek, where typing is impossible, and shows it on expand', async () => {
+    // Peek is a teaser: focusing the input expands to full, so no character can be
+    // entered while it is on screen and the notice has no job to do there. It costs
+    // the greeting ~39px of a panel capped at min(21rem, 45vh), which pushed the
+    // last lines below the fold.
+    jest.useFakeTimers();
+    (window as unknown as { matchMedia: unknown }).matchMedia = jest.fn().mockReturnValue({
+      matches: true,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    });
+    try {
+      renderChatbot([SNAP]);
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+
+      expect(screen.getByRole('dialog').className).toContain('chatbot-panel--peek');
+      expect(screen.queryByRole('note')).not.toBeInTheDocument();
+
+      fireEvent.focus(screen.getByRole('textbox'));
+
+      expect(screen.getByRole('dialog').className).not.toContain('chatbot-panel--peek');
+      expect(screen.getByRole('note')).toHaveTextContent(/do not include your SSN/i);
+    } finally {
+      jest.useRealTimers();
+      delete (window as unknown as { matchMedia?: unknown }).matchMedia;
+    }
+  });
+
   it('shows the privacy notice as soon as the widget opens', async () => {
     renderChatbot([SNAP]);
 
