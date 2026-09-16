@@ -27,9 +27,17 @@ import { join } from 'path';
 
 const read = (relativePath: string) => readFileSync(join(__dirname, relativePath), 'utf8');
 
-/** The `defaultMessage` literals in a component — i.e. the words the user reads. */
+/**
+ * The `defaultMessage` literals in a component — i.e. the words the user reads.
+ *
+ * Quote-aware on purpose. An earlier version closed the capture on ANY quote
+ * character (`[^'"`]*`), so it stopped at the first apostrophe in the copy:
+ * `defaultMessage="Don't wait — download a PDF"` extracted `Don`, and the negative
+ * assertions below then passed on text that contained the very word they ban.
+ * Apostrophes are common in this repo's copy, so that was not hypothetical.
+ */
 const userFacingCopy = (source: string): string[] =>
-  [...source.matchAll(/defaultMessage[=:]\s*['"`]([^'"`]*)['"`]/g)].map((m) => m[1]);
+  [...source.matchAll(/defaultMessage[=:]\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g)].map((m) => m[2]);
 
 // Each entry: the file that must contain it, and the literal the guide relies on.
 const REQUIRED: ReadonlyArray<[label: string, file: string]> = [
@@ -74,7 +82,7 @@ const REQUIRED: ReadonlyArray<[label: string, file: string]> = [
   ['Visit Website', 'Needs/NeedCard.tsx'],
 ];
 
-describe('controls named in Benji\'s results-page guide', () => {
+describe("controls named in Benji's results-page guide", () => {
   it.each(REQUIRED)('still renders %s (%s)', (label, file) => {
     expect(read(file)).toContain(label);
   });
@@ -101,21 +109,44 @@ describe('controls the guide tells Benji do NOT exist', () => {
    * fabrication.
    */
   it('offers no download, print or export of results', () => {
-    const surfaces = [
-      'SaveMyResultsModal/SaveMyResultsModal.tsx',
-      'BackAndSaveButtons/BackAndSaveButtons.tsx',
-    ];
+    const surfaces = ['SaveMyResultsModal/SaveMyResultsModal.tsx', 'BackAndSaveButtons/BackAndSaveButtons.tsx'];
     for (const file of surfaces) {
       // Only the copy the user actually sees. Scanning whole source matches the
       // `export default` on the last line of every component, which says nothing
       // about what the page offers.
-      for (const copy of userFacingCopy(read(file))) {
+      const copies = userFacingCopy(read(file));
+      // Without this the assertion below is vacuous: move this copy into a
+      // `defineMessages({...})` block in a sibling messages.ts and `copies` is
+      // empty, so the loop never runs, the test stays green, and a "Download PDF"
+      // control ships against a guide that promises there is none.
+      expect(copies.length).toBeGreaterThan(0);
+      for (const copy of copies) {
         expect(copy).not.toMatch(/\b(download|print|printable|export|pdf)\b/i);
       }
     }
   });
 
-  it('offers no control for sorting or reordering the program list', () => {
-    expect(read('Programs/Programs.tsx')).not.toMatch(/onClick|<Select|<Button/);
+  /**
+   * Asserted as a POSITIVE fact about the ordering, not as an absence of widgets.
+   *
+   * This started as `not.toMatch(/onClick|<Select|<Button/)` against Programs.tsx,
+   * which was wrong both ways. Under-specified: Programs.tsx already delegates its
+   * one filter control to a child (`<Filter />`), so a `<SortControl />` added the
+   * same way contains none of those tokens and the guard stays green while the
+   * guide's "THERE IS NO SORT CONTROL" goes false. Over-specified: any unrelated
+   * interactive element — a "show more" toggle, a retry button — failed a test
+   * about sorting, and this file's docstring would then send that author off to
+   * edit an ai-service prompt.
+   *
+   * What the guide actually claims is that the order is automatic, so that is what
+   * is asserted: the sort runs, unconditionally, over the rendered categories.
+   */
+  it('still orders the program list automatically', () => {
+    const source = read('Programs/Programs.tsx');
+    expect(source).toContain('function sortProgramsIntoCategories');
+    expect(source).toMatch(/sortProgramsIntoCategories\(/);
+    // Tax credits last (MFB-1185), then priority, then value — the specific order
+    // the guide describes to the user.
+    expect(source).toMatch(/tax_category/);
   });
 });
