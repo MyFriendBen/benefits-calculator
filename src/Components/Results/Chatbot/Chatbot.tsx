@@ -21,6 +21,12 @@ type Message = {
   text: string;
 };
 
+// The greeting as the user last saw it — which variant, and the numbers it quotes.
+// A discriminated union rather than a nullable count, so the branch and its values are
+// latched by the same write: freezing one without the other is what let the greeting
+// swap variants under a live conversation.
+type GreetingSnapshot = { variant: 'personalized'; count: number; totalValue: number } | { variant: 'generic' };
+
 // The API uses role 'assistant'; the widget renders it as 'bot'.
 function toWidgetMessage(m: AssistantApiMessage): Message {
   return { role: m.role === 'assistant' ? 'bot' : 'user', text: m.text };
@@ -198,23 +204,41 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
     [visiblePrograms],
   );
 
-  // The numbers the greeting quotes, frozen the first time it is actually on screen.
+  // WHICH greeting is on screen, and the numbers it quotes — latched the moment the
+  // user answers it.
   //
-  // They are read from `visiblePrograms`, which tracks the results-page filters — so
-  // an unfrozen greeting would silently re-count itself mid-conversation, editing a
-  // message the user has already read (and, after the first exchange, one sitting
-  // above their own words). A sent message doesn't change, and this one is sent.
+  // The invariant is "the greeting stops changing once the user has answered it", not
+  // the weaker "its numbers stop changing". Both inputs are live, and freezing only the
+  // numbers leaves the second one editing a message that has already been read:
   //
-  // Written during render rather than from an effect so the first paint already has
-  // the final text: this is lazy initialization of a ref, not derived state. It stays
-  // null until a non-empty list exists while the panel is open, which is what lets a
-  // widget that auto-opened before the list resolved upgrade from the generic welcome
-  // to the personalized one — and then hold still.
-  const greetingFactsRef = useRef<{ count: number; totalValue: number } | null>(null);
-  if (isOpen && greetingFactsRef.current === null && visiblePrograms && visiblePrograms.length > 0) {
-    greetingFactsRef.current = { count: visiblePrograms.length, totalValue: totalAnnualValue };
+  //   - `visiblePrograms` tracks the results-page filters, so an unfrozen count
+  //     re-counts itself mid-conversation;
+  //   - `programId` tracks the route, and ChatbotProvider deliberately survives the
+  //     navigation into a program's own page (MFB-1872, Results.tsx) — so a user who
+  //     clicks "more info" mid-conversation would watch the personalized greeting above
+  //     their own words turn into the generic one.
+  //
+  // Before they answer, recomputing is correct and not merely harmless: the greeting
+  // quotes what the results page is showing, so it has to track a filter change, and
+  // this is also what lets a widget that auto-opened before the list resolved upgrade
+  // from the generic welcome to the personalized one. After they answer, it is a sent
+  // message, and sent messages don't change.
+  //
+  // `isSending` is part of "answered" because `messages` is still empty while the first
+  // send is in flight — without it, a filter landing in that window still edits the
+  // greeting the user has just replied to.
+  //
+  // Written during render rather than from an effect so the first paint already has the
+  // final text; this is a latched snapshot, not derived state.
+  const greetingRef = useRef<GreetingSnapshot | null>(null);
+  const greetingAnswered = messages.length > 0 || isSending;
+  if (isOpen && (greetingRef.current === null || !greetingAnswered)) {
+    greetingRef.current =
+      !programId && visiblePrograms && visiblePrograms.length > 0
+        ? { variant: 'personalized', count: visiblePrograms.length, totalValue: totalAnnualValue }
+        : { variant: 'generic' };
   }
-  const greetingFacts = greetingFactsRef.current;
+  const greeting = greetingRef.current;
 
   const errorMessage = formatMessage({
     id: 'chatbot.error',
@@ -488,15 +512,17 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
               // is what actually can't survive here: the history-restore effect below
               // only fills an EMPTY transcript (so a seeded greeting would suppress a
               // returning household's history), and `ensureConversation` would overwrite
-              // it on the first send anyway. Deriving sidesteps both. The text is pinned
-              // by `greetingFacts` above, so this bubble is as fixed as a stored one.
+              // it on the first send anyway. Deriving sidesteps both. Both the variant
+              // and its numbers come from the latched `greeting` above — nothing here
+              // may read `visiblePrograms` or `programId` directly, or the bubble starts
+              // rewriting itself again under a conversation that has moved past it.
               //
               // Not stored server-side: it is client-templated and already translated,
               // and ai-service's store appends user/assistant messages in pairs. The
               // model is told about it in the system prompt instead, so it doesn't
               // re-offer the choice this bubble just made.
               <div className="chatbot-message chatbot-message-bot">
-                {greetingFacts && !programId ? (
+                {greeting?.variant === 'personalized' ? (
                   // Templated client-side from what the page is showing — instant
                   // and free; the model is only engaged once the user replies.
                   //
@@ -510,8 +536,8 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
                     id="chatbot.welcomePersonalizedSituation"
                     defaultMessage="Hi, I'm Benji! Your results show {count, plural, one {# program} other {# programs}} you may qualify for, worth about {totalValue} per year. <b>Tell me what's going on right now</b> and I'll point you to the best place to start — or I can <b>walk you through your top result</b>."
                     values={{
-                      count: greetingFacts.count,
-                      totalValue: formatNumber(greetingFacts.totalValue, {
+                      count: greeting.count,
+                      totalValue: formatNumber(greeting.totalValue, {
                         style: 'currency',
                         currency: 'USD',
                         maximumFractionDigits: 0,

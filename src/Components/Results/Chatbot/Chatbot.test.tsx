@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { ChatbotProvider } from './Chatbot';
 import {
   startAssistantConversation,
@@ -508,9 +508,12 @@ describe('greeting bubble and privacy notice', () => {
     ]);
   });
 
-  it('holds the greeting still when a results filter changes the program list', async () => {
-    // `visiblePrograms` tracks the results-page filters. An unfrozen greeting would
-    // re-count itself mid-conversation, rewriting a message the user has already read.
+  it('re-counts while the greeting is still unanswered, so it matches the page', async () => {
+    // Before the user replies, tracking the filters is correct rather than merely
+    // harmless: the greeting quotes what the results page is showing, so a greeting
+    // that held a stale count would contradict the list behind it. This is the same
+    // mechanism that lets a widget auto-opened before the list resolved upgrade from
+    // the generic welcome to the personalized one.
     const { rerender } = renderChatbot([SNAP, MEDICAID, WIC]);
 
     await open();
@@ -518,6 +521,115 @@ describe('greeting bubble and privacy notice', () => {
 
     rerender(chatbotUi([SNAP]));
 
+    expect(screen.getByRole('dialog')).toHaveTextContent('1 program');
+  });
+
+  it('stops re-counting once the user has answered it', async () => {
+    // After the first send it is a sent message, and sent messages don't change.
+    const { rerender } = renderChatbot([SNAP, MEDICAID, WIC]);
+
+    await openAndSend('my rent is late');
+    await screen.findByText('hi there');
     expect(screen.getByRole('dialog')).toHaveTextContent('3 programs');
+
+    rerender(chatbotUi([SNAP]));
+
+    expect(screen.getByRole('dialog')).toHaveTextContent('3 programs');
+  });
+
+  it('latches the generic welcome too, so a late program list cannot rewrite it', async () => {
+    // The zero-program path: auto-open is skipped when the page is showing nothing, but
+    // a manual open is not, so someone who filtered down to zero can still open Benji
+    // and start talking. Latching only on the first NON-EMPTY list would leave the ref
+    // null through that whole exchange and then personalize the greeting retroactively
+    // when they cleared the filter.
+    const { rerender } = renderChatbot([]);
+
+    await openAndSend('my rent is late');
+    await screen.findByText('hi there');
+    const greeting = screen.getByText(/best place to start/i).textContent;
+
+    rerender(chatbotUi([SNAP, MEDICAID, WIC]));
+
+    expect(screen.getByText(/best place to start/i).textContent).toBe(greeting);
+    expect(screen.getByRole('dialog')).not.toHaveTextContent('3 programs');
+  });
+});
+
+describe('greeting stability across navigation', () => {
+  const NavigateToProgram = () => {
+    const navigate = useNavigate();
+    return <button onClick={() => navigate(`/co/${SCREEN_UUID}/results/benefits/42`)}>go to program</button>;
+  };
+
+  // Mirrors src/routes/results.tsx: the results list and a program's own page are two
+  // routes rendering the same element type, so React keeps ChatbotProvider mounted and
+  // `programId` flips underneath a live conversation. That is deliberate (MFB-1872 —
+  // Benji follows the user into the page where their questions get specific), which is
+  // exactly why the greeting has to stop reading the route once it has been answered.
+  const routedUi = (visiblePrograms?: AssistantVisibleProgram[]) => {
+    const panel = (
+      <ChatbotProvider visiblePrograms={visiblePrograms}>
+        <NavigateToProgram />
+      </ChatbotProvider>
+    );
+    return (
+      <IntlProvider locale="en" defaultLocale="en">
+        <MemoryRouter initialEntries={[`/co/${SCREEN_UUID}/results/benefits`]}>
+          <Routes>
+            <Route path="/:whiteLabel/:uuid/results/benefits" element={panel} />
+            <Route path="/:whiteLabel/:uuid/results/benefits/:programId" element={panel} />
+          </Routes>
+        </MemoryRouter>
+      </IntlProvider>
+    );
+  };
+
+  const openSendAndNavigate = async () => {
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    const greeting = screen.getByText(/best place to start/i).textContent;
+    await userEvent.type(screen.getByRole('textbox'), 'my rent is late');
+    await userEvent.keyboard('{Enter}');
+    await screen.findByText('hi there');
+    await userEvent.click(screen.getByRole('button', { name: 'go to program' }));
+    return greeting;
+  };
+
+  it('carries the conversation into the program page', async () => {
+    // Guards the premise of the next test. If the provider ever starts remounting on
+    // this navigation, the greeting assertion below would pass for the wrong reason.
+    render(routedUi([SNAP, WIC]));
+
+    await openSendAndNavigate();
+
+    expect(screen.getByText('my rent is late')).toBeInTheDocument();
+    expect(screen.getByText('hi there')).toBeInTheDocument();
+  });
+
+  it('does not swap the greeting variant under a conversation that moved past it', async () => {
+    // `programId` is live, so the branch choosing which greeting to render used to flip
+    // on this navigation: the personalized bubble sitting above the user's own words
+    // silently became the generic one.
+    render(routedUi([SNAP, WIC]));
+
+    const greeting = await openSendAndNavigate();
+
+    expect(screen.getByText(/best place to start/i).textContent).toBe(greeting);
+    expect(screen.getByRole('dialog')).toHaveTextContent('2 programs');
+  });
+
+  it('still suppresses the personalized greeting when the program page is reached first', async () => {
+    // The pre-existing intent survives: before the user answers, the greeting tracks the
+    // route, because the personalized copy counts the whole list and offers to walk them
+    // through a top result — a screen they are not on.
+    render(routedUi([SNAP, WIC]));
+
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    expect(screen.getByRole('dialog')).toHaveTextContent('2 programs');
+
+    await userEvent.click(screen.getByRole('button', { name: 'go to program' }));
+
+    expect(screen.getByRole('dialog')).not.toHaveTextContent('2 programs');
+    expect(screen.getByRole('dialog')).toHaveTextContent(/ask me anything/i);
   });
 });
