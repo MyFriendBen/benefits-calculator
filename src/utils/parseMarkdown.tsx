@@ -44,8 +44,12 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
     // Now handle **bold** markdown
     currentText = currentText.replace(/\*\*(.+?)\*\*/g, '__BOLD_START__$1__BOLD_END__');
 
-    // Find all plain URLs (excluding trailing punctuation)
-    const urlRegex = /(https?:\/\/[^\s]+?)(?=[.,;:!?)\]'\"]*(?:\s|$))/g;
+    // Find all plain URLs (excluding trailing punctuation). The lookahead also
+    // terminates on our own placeholders: without them a URL that sits flush
+    // against a marker (e.g. "**https://example.com**", which the bold pass above
+    // turns into "...example.com__BOLD_END__") has no whitespace to stop at, so
+    // the lazy match would swallow the marker into the href.
+    const urlRegex = /(https?:\/\/[^\s]+?)(?=[.,;:!?)\]'\"]*(?:\s|$|__BOLD_(?:START|END)__|__MDLINK_\d+__))/g;
     const plainUrlMatches = [...currentText.matchAll(urlRegex)];
 
     // Maintain bold state across the entire line

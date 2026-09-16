@@ -197,10 +197,65 @@ describe('parseMarkdown', () => {
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
     expect(link).toHaveStyle({ color: primaryColor, textDecoration: 'underline' });
   });
- 
-});
 
-it('handles multiple markdown links in the same segment', () => {
+  it('does not swallow the bold marker into the href when a URL ends a bold run', () => {
+    // Regression: Benji emits "**<url>**" with no space before the closing "**".
+    // The bold pass rewrites that to "<url>__BOLD_END__", and the URL regex had no
+    // whitespace to stop at, so the marker ended up inside the href.
+    const result = parseMarkdown('**Apply at https://www.washingtonconnection.org/**', primaryColor);
+    render(<>{result}</>);
+
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', 'https://www.washingtonconnection.org/');
+    expect(link).toHaveTextContent('https://www.washingtonconnection.org/');
+    expect(link.getAttribute('href')).not.toContain('__BOLD_END__');
+  });
+
+  it('handles a bold run consisting solely of a URL', () => {
+    const result = parseMarkdown('**https://www.washingtonconnection.org/**', primaryColor);
+    const { container } = render(<>{result}</>);
+
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', 'https://www.washingtonconnection.org/');
+    expect(container.textContent).not.toContain('__BOLD_END__');
+    expect(container.textContent).not.toContain('__BOLD_START__');
+  });
+
+  it('ends the bold run after a URL that closes it', () => {
+    // The swallowed marker never reached the bold-state handler, so everything
+    // after the link stayed bold for the rest of the line.
+    const result = parseMarkdown('**Apply at https://example.com** then call 211', primaryColor);
+    const { container } = render(<>{result}</>);
+
+    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://example.com');
+
+    const boldText = Array.from(container.querySelectorAll('strong'))
+      .map((el) => el.textContent)
+      .join('');
+    expect(boldText).toContain('Apply at');
+    expect(boldText).not.toContain('then call 211');
+    expect(container.textContent).toContain('then call 211');
+  });
+
+  it('does not swallow a markdown-link placeholder into an adjacent plain URL', () => {
+    const result = parseMarkdown('See https://example.com[SNAP](https://snap.gov)', primaryColor);
+    render(<>{result}</>);
+
+    expect(screen.getByRole('link', { name: 'https://example.com' })).toHaveAttribute(
+      'href',
+      'https://example.com',
+    );
+    expect(screen.getByRole('link', { name: 'SNAP' })).toHaveAttribute('href', 'https://snap.gov');
+  });
+
+  it('keeps underscores inside URLs intact', () => {
+    const result = parseMarkdown('See https://example.com/a_b_c/page for info', primaryColor);
+    render(<>{result}</>);
+
+    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://example.com/a_b_c/page');
+  });
+
+  it('handles multiple markdown links in the same segment', () => {
     const result = parseMarkdown('Check [SNAP](https://snap.gov) and [PEBT](https://pebt.gov) for help', primaryColor);
     render(<>{result}</>);
 
@@ -213,3 +268,4 @@ it('handles multiple markdown links in the same segment', () => {
     expect(screen.getByText(/and/)).toBeInTheDocument();
     expect(screen.getByText(/for help/)).toBeInTheDocument();
   });
+});
