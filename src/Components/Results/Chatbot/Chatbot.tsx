@@ -162,7 +162,9 @@ type ChatbotProviderProps = {
 };
 
 export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren<ChatbotProviderProps>) {
-  const { uuid } = useParams();
+  // `programId` is set only on a program's own page (`results/benefits/:programId`).
+  // Used for the greeting, which is written about the whole results list (MFB-1872).
+  const { uuid, programId } = useParams();
   // 'peek' is a partial-height panel used by auto-open on small screens: the
   // greeting and input are visible, the results stay visible behind it, and any
   // engagement expands to 'full'.
@@ -427,9 +429,16 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
           <div className="chatbot-messages">
             {messages.length === 0 && (
               <div className="chatbot-welcome">
-                {visiblePrograms && visiblePrograms.length > 0 ? (
+                {visiblePrograms && visiblePrograms.length > 0 && !programId ? (
                   // Templated client-side from what the page is showing — instant
                   // and free; the model is only engaged once the user replies.
+                  //
+                  // Suppressed on a program's own page: this greeting counts the whole
+                  // list and offers to pick "which one to apply for first", which
+                  // describes a screen the user is not on. Someone who deep-links or
+                  // reloads there would otherwise be auto-opened into it. The generic
+                  // welcome below is route-neutral and already translated, so this
+                  // costs no new strings.
                   <FormattedMessage
                     id="chatbot.welcomePersonalized"
                     defaultMessage="Hi, I'm Benji! Your results show {count, plural, one {# program} other {# programs}} you may qualify for, worth about {totalValue} per year. Ask me anything — like which one to apply for first."

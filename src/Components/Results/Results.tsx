@@ -54,6 +54,16 @@ import { calculateTotalValue, programValue } from './FormattedValue';
 // insurance) so the server can't reproduce them from the eligibility snapshot.
 // Passing what's on screen is what keeps BenBot's recommendations — and the dollar
 // figures it quotes — to what the user can actually see.
+//
+// IF YOU CHANGE THE RESULTS PAGE, CHANGE BENJI'S DESCRIPTION OF IT (MFB-1872).
+// Benji is told, in the same closed-world terms as the program list, that it knows
+// every control this page has — so a tab, filter, button or modal that is added,
+// renamed or removed here makes Benji wrong in the one way its guardrails can't
+// catch: it will send people to hunt for something that isn't there. The description
+// is `_RESULTS_PAGE_GUIDE` in ai-service (`app/prompts.py`), and it is a hand-written
+// string in a different repo, so nothing enforces this automatically. The nearest
+// thing to enforcement is `resultsPageGuideLabels.test.ts` next door, which fails if
+// a control the guide names stops existing here.
 const BenbotWrapper = ({
   enabled,
   visiblePrograms,
@@ -432,7 +442,24 @@ const Results = ({ type }: ResultsProps) => {
 
     return (
       <ResultsContext.Provider value={resultsContextValue}>
-        <ProgramPage program={program} />
+        {/*
+          MFB-1872: Benji follows the user into a program's own page, which is exactly
+          where the questions get specific — "what does this Apply Online button do",
+          "do I really need all these documents", "what's a navigator". Before this it
+          unmounted on "more info" and they lost the assistant at the moment they had a
+          concrete question.
+
+          Auto-open is deliberately left ON here, identical to the list page. Closing
+          the panel writes the dismissal key, which is per screen uuid rather than per
+          path — so a user who closed Benji anywhere stays free of it everywhere, and a
+          user who did not gets the same offer on the page where their question is most
+          specific. Those two cases are the whole intended behaviour, and the existing
+          effect already produces both; a route-aware exception would only break the
+          second one.
+        */}
+        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms}>
+          <ProgramPage program={program} />
+        </BenbotWrapper>
       </ResultsContext.Provider>
     );
   } else if (energyCalculatorRebateType !== undefined) {
