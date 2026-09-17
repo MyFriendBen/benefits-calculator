@@ -363,7 +363,8 @@ svg.confirmation-lucide-icon * {
 .confirmation-student-eligibility-list {
   list-style: none;
   margin: 0.25rem 0 0 0;
-  padding-left: 0;
+  /* Use logical property so indentation respects LTR/RTL */
+  padding-inline-start: 1rem;
   font-size: 0.875em;
   color: #555;
 }

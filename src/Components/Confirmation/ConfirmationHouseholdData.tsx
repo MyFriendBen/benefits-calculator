@@ -24,10 +24,16 @@ type IconAndFormattedMessageMap = {
 
 type OptionMap = { [key: string]: FormattedMessageType };
 
-type ConditionEntry = { isActive: (m: HouseholdData) => boolean; id: string; defaultMessage: string };
+type ConditionEntry = {
+  isActive: (m: HouseholdData) => boolean;
+  id: string;
+  defaultMessage: string;
+  /** Optional discriminator for entries that render sub-answers */
+  kind?: 'student';
+};
 
 const MAIN_CONDITIONS: ConditionEntry[] = [
-  { isActive: (m) => m.conditions.student, id: 'confirmation.headOfHouseholdDataBlock-studentText', defaultMessage: 'Student' },
+  { isActive: (m) => m.conditions.student, id: 'confirmation.headOfHouseholdDataBlock-studentText', defaultMessage: 'Student', kind: 'student' },
   { isActive: (m) => m.conditions.pregnant, id: 'confirmation.headOfHouseholdDataBlock-pregnantText', defaultMessage: 'Pregnant' },
   { isActive: (m) => m.conditions.blindOrVisuallyImpaired, id: 'confirmation.headOfHouseholdDataBlock-blindOrVisuallyImpairedText', defaultMessage: 'Blind or visually impaired' },
   { isActive: (m) => m.conditions.disabled, id: 'confirmation.headOfHouseholdDataBlock-disabledText', defaultMessage: 'Disabled' },
@@ -116,42 +122,42 @@ const DefaultConfirmationHHData = () => {
       return formatMessage({ id: 'confirmation.none', defaultMessage: 'None' });
     }
 
-    const studentConditionId = 'confirmation.headOfHouseholdDataBlock-studentText';
+    const studentElig = member.studentEligibility;
+    // Only questions that were actually answered get a row — an unanswered one
+    // must not render as "No".
+    const answeredStudentItems = STUDENT_ELIGIBILITY_ITEMS.flatMap((item) => {
+      const value = studentElig?.[item.field];
+      return value === undefined ? [] : [{ ...item, value }];
+    }) as Array<StudentEligibilityItem & { value: boolean }>;
 
     return (
       <ul className="confirmation-conditions-list">
-        {activeConditions.map(({ id, defaultMessage }) => {
-          const isStudent = id === studentConditionId;
-          const studentElig = member.studentEligibility;
-          const hasStudentSubItems =
-            isStudent &&
-            studentElig !== undefined &&
-            STUDENT_ELIGIBILITY_ITEMS.some(({ field }) => studentElig[field] !== undefined);
-
-          return (
-            <li key={id}>
-              {formatMessage({ id, defaultMessage })}
-              {hasStudentSubItems && (
-                <ul className="confirmation-student-eligibility-list">
-                  {STUDENT_ELIGIBILITY_ITEMS.map(({ field, labelId, labelDefault }) => {
-                    const value = studentElig![field];
-                    if (value === undefined) return null;
-                    return (
-                      <li key={field}>
-                        <FormattedMessage id={labelId} defaultMessage={labelDefault} />
-                        {': '}
-                        <FormattedMessage
-                          id={value ? 'radiofield.label-yes' : 'radiofield.label-no'}
-                          defaultMessage={value ? 'Yes' : 'No'}
-                        />
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </li>
-          );
-        })}
+        {activeConditions.map(({ id, defaultMessage, kind }) => (
+          <li key={id}>
+            {formatMessage({ id, defaultMessage })}
+            {kind === 'student' && answeredStudentItems.length > 0 && (
+              <ul className="confirmation-student-eligibility-list">
+                {answeredStudentItems.map(({ field, labelId, labelDefault, value }) => (
+                  <li key={field}>
+                    <FormattedMessage
+                      id="confirmation.studentEligibility.item"
+                      defaultMessage="{label}: {answer}"
+                      values={{
+                        label: <FormattedMessage id={labelId} defaultMessage={labelDefault} />,
+                        answer: (
+                          <FormattedMessage
+                            id={value ? 'radiofield.label-yes' : 'radiofield.label-no'}
+                            defaultMessage={value ? 'Yes' : 'No'}
+                          />
+                        ),
+                      }}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
       </ul>
     );
   };
