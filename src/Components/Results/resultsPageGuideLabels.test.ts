@@ -80,11 +80,45 @@ const REQUIRED: ReadonlyArray<[label: string, file: string]> = [
   // Additional-resources cards: collapsed, then a website link.
   ['More Info', 'Needs/NeedCard.tsx'],
   ['Visit Website', 'Needs/NeedCard.tsx'],
+
+  // The link back to the immediate-needs step. Benji is now told it may point someone
+  // here when they raise a need no resource in their list covers, and may name the
+  // category to add — so this is the one control in the guide Benji actively SENDS
+  // people to rather than merely describes. If this copy goes, Benji starts directing
+  // people to a link that isn't on the page.
+  ['edit your selections in', 'Needs/Needs.tsx'],
 ];
 
 describe("controls named in Benji's results-page guide", () => {
   it.each(REQUIRED)('still renders %s (%s)', (label, file) => {
     expect(read(file)).toContain(label);
+  });
+});
+
+describe('the additional-resources tab, which Benji can now read from', () => {
+  /**
+   * Benji is given each resource's description, phone number and website, and told that
+   * list is the complete set the person has. That claim is only true while this tab
+   * renders every resource the API returns — the moment a filter lands here, Benji's
+   * list and the user's screen diverge silently, in the direction the closed-world rule
+   * cannot catch: it confidently offers an organization that is no longer on screen.
+   *
+   * The benefits tab has exactly this problem already, which is why `visible_programs`
+   * exists (MFB-1427) — the client reports what survived its own filters and the server
+   * intersects. Nothing equivalent exists for resources, deliberately, BECAUSE this tab
+   * does no filtering. This test is what makes that "deliberately" true rather than
+   * true-for-now.
+   *
+   * Asserted on the render, not on the component's whole source: sorting is fine (Benji
+   * is told the order) and so is the existing category sort. What must not appear is a
+   * predicate that drops resources.
+   */
+  it('renders every resource it is given, with no filtering', () => {
+    const source = read('Needs/Needs.tsx');
+    const rendered = source.slice(source.indexOf('return ('));
+
+    expect(rendered).toContain('needsSortedByCategory.map');
+    expect(rendered).not.toMatch(/\.filter\(/);
   });
 });
 
