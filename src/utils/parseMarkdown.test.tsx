@@ -197,10 +197,116 @@ describe('parseMarkdown', () => {
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
     expect(link).toHaveStyle({ color: primaryColor, textDecoration: 'underline' });
   });
- 
-});
 
-it('handles multiple markdown links in the same segment', () => {
+  it('does not swallow the bold marker into the href when a URL ends a bold run', () => {
+    // Regression: Benji emits "**<url>**" with no space before the closing "**".
+    // The bold pass rewrites that to "<url>__BOLD_END__", and the URL regex had no
+    // whitespace to stop at, so the marker ended up inside the href.
+    const result = parseMarkdown('**Apply at https://www.washingtonconnection.org/**', primaryColor);
+    render(<>{result}</>);
+
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', 'https://www.washingtonconnection.org/');
+    expect(link).toHaveTextContent('https://www.washingtonconnection.org/');
+    expect(link.getAttribute('href')).not.toContain('__BOLD_END__');
+  });
+
+  it('handles a bold run consisting solely of a URL', () => {
+    const result = parseMarkdown('**https://www.washingtonconnection.org/**', primaryColor);
+    const { container } = render(<>{result}</>);
+
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', 'https://www.washingtonconnection.org/');
+    expect(container.textContent).not.toContain('__BOLD_END__');
+    expect(container.textContent).not.toContain('__BOLD_START__');
+  });
+
+  it('ends the bold run after a URL that closes it', () => {
+    // The swallowed marker never reached the bold-state handler, so everything
+    // after the link stayed bold for the rest of the line.
+    const result = parseMarkdown('**Apply at https://example.com** then call 211', primaryColor);
+    const { container } = render(<>{result}</>);
+
+    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://example.com');
+
+    const boldText = Array.from(container.querySelectorAll('strong'))
+      .map((el) => el.textContent)
+      .join('');
+    expect(boldText).toContain('Apply at');
+    expect(boldText).not.toContain('then call 211');
+    expect(container.textContent).toContain('then call 211');
+  });
+
+  it('does not swallow a markdown-link placeholder into an adjacent plain URL', () => {
+    const result = parseMarkdown('See https://example.com[SNAP](https://snap.gov)', primaryColor);
+    render(<>{result}</>);
+
+    expect(screen.getByRole('link', { name: 'https://example.com' })).toHaveAttribute(
+      'href',
+      'https://example.com',
+    );
+    expect(screen.getByRole('link', { name: 'SNAP' })).toHaveAttribute('href', 'https://snap.gov');
+  });
+
+  it('renders a literal __MDLINK_n__ placeholder instead of throwing', () => {
+    // Chatbot renders every message through parseMarkdown, including the user's own,
+    // so this string is reachable from user input. There is no ErrorBoundary in src/,
+    // so a throw here unmounts the tree and blanks the results page.
+    const inputs = [
+      'see https://example.com__MDLINK_0__ ok', // flush against a URL
+      'hello __MDLINK_0__ world', // standalone, no markdown links present
+      '[a](https://a.gov) __MDLINK_7__', // index past the end of linkMatches
+    ];
+
+    inputs.forEach((input) => {
+      expect(() => render(<>{parseMarkdown(input, primaryColor)}</>)).not.toThrow();
+    });
+  });
+
+  it('keeps the surrounding text when a literal placeholder is rendered verbatim', () => {
+    const result = parseMarkdown('see https://example.com__MDLINK_0__ ok', primaryColor);
+    const { container } = render(<>{result}</>);
+
+    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://example.com');
+    expect(container.textContent).toContain('__MDLINK_0__');
+    expect(container.textContent).toContain('ok');
+  });
+
+  it('still resolves real markdown links alongside a literal placeholder', () => {
+    const result = parseMarkdown('[SNAP](https://snap.gov) and __MDLINK_7__', primaryColor);
+    const { container } = render(<>{result}</>);
+
+    expect(screen.getByRole('link', { name: 'SNAP' })).toHaveAttribute('href', 'https://snap.gov');
+    expect(container.textContent).toContain('__MDLINK_7__');
+  });
+
+  it('does not leak an unpaired ** into the href', () => {
+    // The bold pass only rewrites *paired* "**". An odd number on the line leaves a
+    // raw "**" that the URL match would otherwise absorb — the same dead-link
+    // symptom as the __BOLD_END__ bug, via a different route.
+    const result = parseMarkdown('**Apply** at https://www.washingtonconnection.org/**', primaryColor);
+    render(<>{result}</>);
+
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', 'https://www.washingtonconnection.org/');
+    expect(link.getAttribute('href')).not.toContain('*');
+  });
+
+  it('does not leak a stray ** mid-line into the href', () => {
+    const result = parseMarkdown('Visit https://a.com** now', primaryColor);
+    render(<>{result}</>);
+
+    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://a.com');
+  });
+
+  it('keeps underscores inside URLs intact', () => {
+    const result = parseMarkdown('See https://example.com/a_b_c/page for info', primaryColor);
+    render(<>{result}</>);
+
+    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://example.com/a_b_c/page');
+  });
+
+  it('handles multiple markdown links in the same segment', () => {
     const result = parseMarkdown('Check [SNAP](https://snap.gov) and [PEBT](https://pebt.gov) for help', primaryColor);
     render(<>{result}</>);
 
@@ -213,3 +319,4 @@ it('handles multiple markdown links in the same segment', () => {
     expect(screen.getByText(/and/)).toBeInTheDocument();
     expect(screen.getByText(/for help/)).toBeInTheDocument();
   });
+});
