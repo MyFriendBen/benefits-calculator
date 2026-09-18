@@ -508,15 +508,30 @@
      sizing to their labels, so the text has to be able to break. */
   /* min-width: 0 added so the label can shrink small enough to wrap — a flex
      item does not shrink smaller than its content by default. */
+  /* flex: 1 makes the label fill the tab, so the text and the badge divide the
+     tab's width between them. align-items: center seats the badge against the
+     text block when the text wraps to multiple lines. */
   .results-tab a .results-tab-label {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     margin: 0;
     white-space: normal;
     min-width: 0;
+    flex: 1;
+    align-items: center;
+    gap: 0.35rem;
     /* Once text wraps, the label stretches to the tab's full width — wider
-       than the text itself. So each line needs its own centering; centering
+       than the text itself. So each line needs its own alignment; aligning
        the label box does nothing, since the box is already full-width. */
-    text-align: center;
+    text-align: left;
+  }
+
+  /* The text takes the space the badge leaves rather than its own content width:
+     as a bare text node it would be an anonymous flex item, which refuses to
+     shrink below its longest word ("ADDITIONAL") and shoves the badge past the
+     tab's right edge. min-width: 0 lets it shrink and wrap instead. */
+  .results-tab a .results-tab-text {
+    flex: 1;
+    min-width: 0;
   }
 
   /* Icons made the label feel squished once wrapped onto 2 lines at these widths. */
@@ -531,40 +546,21 @@
     min-width: 0;
   }
 
-  /* position: relative so the count number below can place itself using this
-     tab as the reference point. */
   .results-tab a {
-    position: relative;
     width: 100%;
     height: 100%;
-    padding: 0.5rem 0.25rem;
-    /* Without the icon, the label sat to the left with empty space on the
-       right (where the icon used to be) — center it in the tab instead. */
-    justify-content: center;
+    padding: 0.5rem;
+    /* Matches the left-aligned label text, so the label box starts at the
+       tab's left padding edge rather than floating in the middle. */
+    justify-content: flex-start;
   }
 
-  /* Extra right padding only on tabs that actually have a badge (0.25rem gap +
-     1.35rem width), so the badge has room and doesn't overlap the text.
-     Immediate Help has no badge, so it doesn't need this — without this
-     split, its text would sit left of center for no reason. */
-  .results-tab a:has(.results-tab-count) {
-    padding-right: 1.6rem;
-  }
-
-  /* Badge sits at the tab's edge, not next to the label — icon, wrapped text,
-     and badge don't all fit in one row. Centered up and down so its position
-     stays the same no matter how many lines the label takes. */
+  /* The badge stays in normal flow, so the wrapping text and the badge share the
+     row instead of competing for it. Out of flow, clearing the badge takes right
+     padding wide enough that a label like "Long-Term Benefits" is forced onto a
+     third line. The text's flex: 1 seats the badge at the tab's right edge. */
   .results-tab a .results-tab-count {
-    position: absolute;
-    top: 50%;
-    right: 0.25rem;
-    transform: translateY(-50%);
-  }
-
-  /* Same fixed size as desktop tabs, now that removing the icon leaves enough
-     room for it at every mobile width. */
-  .results-tab-container[data-tab-count='3'] .results-tab a .results-tab-label {
-    font-size: var(--results-font-meta);
+    flex-shrink: 0;
   }
 
   /* All tabs get the same height, since labels can now wrap to a different
@@ -602,30 +598,32 @@
     margin-bottom: 0.5rem;
   }
 
-  /* Sets only the left side — setting all four sides here would reset the
+  /* Sets only the horizontal sides — setting all four here would reset the
      active tab's separately-set top/bottom padding back to default, breaking
      its lifted look. */
   .results-tab-container[data-tab-count='3'] .results-tab a {
-    padding-left: 0.15rem;
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
   }
 
-  /* Fits the count number's size at this width (0.2rem + 1.1rem) — only on
-     tabs that actually have a badge (Immediate Help doesn't). */
-  .results-tab-container[data-tab-count='3'] .results-tab a:has(.results-tab-count) {
-    padding-right: 1.3rem;
+  /* One step down from the general mobile size: three tabs in a ~500px viewport
+     leaves each one narrow, and the badge takes its share of the width. */
+  .results-tab-container[data-tab-count='3'] .results-tab a .results-tab-label {
+    font-size: 0.75rem;
+    gap: 0.25rem;
   }
 
-  /* No new text-size rule needed — the rule above already applies here.
-     Icons stay 16px too, hand-heart included, even though it is normally a
-     little bigger to match the others (see buildTabs.ts, iconSize) — bigger
-     here would push "Long-Term Benefits" onto a 3rd line. */
+  /* Icons stay 16px, hand-heart included, even though it is normally a little
+     bigger to match the others (see buildTabs.ts, iconSize) — bigger here would
+     push "Long-Term Benefits" onto a 3rd line. */
   .results-tab-container[data-tab-count='3'] .results-tab-icon {
     width: 16px;
     height: 16px;
   }
 
+  /* A slightly tighter badge at this width, so it takes less room away from the
+     label text. */
   .results-tab-container[data-tab-count='3'] .results-tab a .results-tab-count {
-    right: 0.2rem;
     min-width: 1.1rem;
     padding: 0 0.2rem;
     font-size: 0.65rem;

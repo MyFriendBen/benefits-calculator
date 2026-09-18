@@ -114,7 +114,11 @@ const ResultsTabs = ({ activeTab }: ResultsTabsProps) => {
                     size={tab.iconSize ?? DEFAULT_TAB_ICON_SIZE}
                     strokeWidth={1.5}
                   />
-                  <FormattedMessage id={tab.labelId} defaultMessage={tab.defaultMessage} />
+                  {/* Wrapped in a span so the mobile layout can size the text
+                      independently of the count badge beside it. */}
+                  <span className="results-tab-text">
+                    <FormattedMessage id={tab.labelId} defaultMessage={tab.defaultMessage} />
+                  </span>
                   {tab.count !== undefined && <span className="results-tab-count">{translateNumber(tab.count)}</span>}
                 </span>
               </NavLink>
