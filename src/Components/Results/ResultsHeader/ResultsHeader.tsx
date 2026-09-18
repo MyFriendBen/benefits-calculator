@@ -1,4 +1,3 @@
-import { CardContent } from '@mui/material';
 import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Context } from '../../Wrapper/Wrapper';
@@ -14,13 +13,13 @@ import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import EnergyCalculatorResultsHeader from '../../EnergyCalculator/Results/ResultsHeader';
 import ResultsSurvey from '../ResultsSurvey/ResultsSurvey';
 
-type ResultsHeaderProps = {
-  type: 'program' | 'need';
+type ResultsSummaryProps = {
+  type: 'program' | 'need' | 'help';
 };
 
 const ProgramsHeader = () => {
   const { programs, programCategories } = useResultsContext();
-  const { theme, formData } = useContext(Context);
+  const { formData } = useContext(Context);
   const taxCreditsCategory = programCategories.find((category) => category.tax_category);
   let taxCredit = 0;
   if (taxCreditsCategory !== undefined) {
@@ -40,7 +39,7 @@ const ProgramsHeader = () => {
   }
 
   return (
-    <CardContent sx={{ backgroundColor: theme.secondaryBackgroundColor, padding: '1rem' }}>
+    <div className="results-header-summary-box">
       <header className="results-header">
         <div className="results-header-programs-count-text">
           <div className="results-header-programs-count">{translateNumber(programs.length)}</div>
@@ -67,37 +66,38 @@ const ProgramsHeader = () => {
           )}
         </div>
       </header>
-    </CardContent>
-  );
-};
-
-const NeedsHeader = () => {
-  const { needs } = useResultsContext();
-
-  return (
-    <div className="results-needs-header-background">
-      <div className="results-needs-header">
-        <div className="results-needs-header-programs">{needs.length}</div>
-        <div className="results-needs-header-programs-text">
-          <FormattedMessage id="results.needHeader" defaultMessage="Resources Found" />
-        </div>
-      </div>
     </div>
   );
 };
 
-const ResultsHeader = ({ type }: ResultsHeaderProps) => {
+// Rendered below the tab bar, inside the results card — separate from ResultsHeader,
+// which stays above. The wrapper div lives here (not in Results) so the Immediate Help
+// and Additional Resources tabs render nothing at all, instead of an empty wrapper.
+//
+// CESN is absent here on purpose: its counts sit above the card, on the page
+// background, so they render from ResultsHeader instead.
+export const ResultsSummary = ({ type }: ResultsSummaryProps) => {
+  const isEnergyCalculator = useIsEnergyCalculator();
+
+  if (isEnergyCalculator || type !== 'program') {
+    return null;
+  }
+
+  return (
+    <div className="results-header-container">
+      <ProgramsHeader />
+    </div>
+  );
+};
+
+// Elements shared by every tab: back/save buttons, admin login, NC survey. No `type`
+// prop — it renders above the tab bar, outside the results card, the same for every tab.
+const ResultsHeader = () => {
   const { whiteLabel, uuid } = useParams();
   const { staffToken, setStaffToken } = useContext(Context);
   const { isAdminView } = useResultsContext();
-  const isEnergyCalculator = useIsEnergyCalculator();
   const track = useTrackEvent();
-
-  let header = type === 'need' ? <NeedsHeader /> : <ProgramsHeader />;
-
-  if (isEnergyCalculator) {
-    header = <EnergyCalculatorResultsHeader />;
-  }
+  const isEnergyCalculator = useIsEnergyCalculator();
 
   return (
     <>
@@ -109,8 +109,14 @@ const ResultsHeader = ({ type }: ResultsHeaderProps) => {
         />
       </div>
       {isAdminView && <Login setToken={setStaffToken} loggedIn={staffToken !== undefined} />}
+      {/* Above the card, so CESN's counts float on the page background rather than
+          sitting inside the panel the way the tabbed layout's summary does. */}
+      {isEnergyCalculator && (
+        <div className="energy-calculator-results-header-container">
+          <EnergyCalculatorResultsHeader />
+        </div>
+      )}
       <ResultsSurvey />
-      <div className={isEnergyCalculator ? "energy-calculator-results-header-container" : "results-header-container"}>{header}</div>
     </>
   );
 };
