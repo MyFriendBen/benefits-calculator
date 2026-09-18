@@ -44,8 +44,16 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
     // Now handle **bold** markdown
     currentText = currentText.replace(/\*\*(.+?)\*\*/g, '__BOLD_START__$1__BOLD_END__');
 
-    // Find all plain URLs (excluding trailing punctuation)
-    const urlRegex = /(https?:\/\/[^\s]+?)(?=[.,;:!?)\]'\"]*(?:\s|$))/g;
+    // Find all plain URLs (excluding trailing punctuation). The lookahead also
+    // terminates on our own placeholders: without them a URL that sits flush
+    // against a marker (e.g. "**https://example.com**", which the bold pass above
+    // turns into "...example.com__BOLD_END__") has no whitespace to stop at, so
+    // the lazy match would swallow the marker into the href.
+    //
+    // "*" is in the trailing-punctuation class because the bold pass only rewrites
+    // *paired* "**". An odd number on a line leaves a raw "**" behind, which would
+    // otherwise be absorbed into the href the same way.
+    const urlRegex = /(https?:\/\/[^\s]+?)(?=[.,;:!?)\]'\"*]*(?:\s|$|__BOLD_(?:START|END)__|__MDLINK_\d+__))/g;
     const plainUrlMatches = [...currentText.matchAll(urlRegex)];
 
     // Maintain bold state across the entire line
@@ -71,7 +79,18 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
             parts.push(inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{textBefore}</strong> : textBefore);
           }
           const linkIdx = parseInt(linkIdxString, 10);
-          const [, linkText, url] = linkMatches[linkIdx];
+          const linkMatch = linkMatches[linkIdx];
+          if (!linkMatch) {
+            // A literal "__MDLINK_n__" in the source text rather than one we emitted
+            // above. Render it verbatim: destructuring the missing entry would throw
+            // during render, and with no ErrorBoundary in the tree that blanks the page.
+            parts.push(
+              inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{placeholder}</strong> : placeholder,
+            );
+            remaining = remaining.slice(placeholderIndex + placeholder.length);
+            continue;
+          }
+          const [, linkText, url] = linkMatch;
           if (isSafeUrl(url)) {
             parts.push(
               <a

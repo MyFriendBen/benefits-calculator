@@ -20,6 +20,16 @@ const sortByCategory = (a: UrgentNeed, b: UrgentNeed) => {
   return 0;
 };
 
+// BENJI READS THIS LIST TOO. `screener/assistant.py` builds its additional-resources
+// context from the same server-side selection that produced `needs` here, and the prompt
+// tells Benji that list is the COMPLETE set of resources this person has.
+//
+// So this component must keep rendering everything it is given. A filter added here —
+// the way the benefits tab filters by citizenship — would diverge the two silently, and
+// Benji would go on offering an organization that is no longer on screen. That is why
+// there is no `visible_resources` counterpart to `visiblePrograms`: it isn't needed
+// while this tab does no filtering, and `resultsPageGuideLabels.test.ts` is what keeps
+// that true. If this tab ever needs to filter, Benji needs to be told what survived.
 const Needs = () => {
   const { needs } = useResultsContext();
   const { uuid } = useParams();
