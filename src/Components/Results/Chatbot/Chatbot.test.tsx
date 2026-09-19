@@ -462,6 +462,20 @@ describe('greeting bubble and privacy notice', () => {
     expect(screen.getByRole('note')).toHaveTextContent(/do not include your SSN/i);
   });
 
+  it('discloses that Benji is an AI before the warning about what not to type', async () => {
+    // Two separate jobs in one note, and the order is the point. The AI disclosure is
+    // about who the user is talking to, so it has to land before they read anything
+    // else in the panel — someone who skims only the first clause should still know.
+    // The PII warning then says what that means for what they type.
+    renderChatbot([SNAP]);
+
+    await open();
+
+    expect(screen.getByRole('note')).toHaveTextContent(
+      /^Benji is an AI assistant\.\s+Please do not include your SSN, account numbers, or medical details in this chat\.$/i,
+    );
+  });
+
   it('keeps the greeting and the privacy notice once the conversation has started', async () => {
     // The greeting is a message and behaves like one — which means it STAYS. It used
     // to be rendered only while `messages` was empty, so the start call's transcript
