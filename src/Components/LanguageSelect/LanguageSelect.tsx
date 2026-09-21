@@ -63,14 +63,14 @@ const LanguageSelect = ({
     const languageCode = event.target.value;
 
     if (onChange) {
-      onChange(languageCode, languageOptions[languageCode] ?? languageCode);
+      onChange(languageCode, languageOptions?.[languageCode] ?? languageCode);
       return;
     }
 
     selectLanguage(languageCode);
   };
 
-  const menuItems = Object.entries(languageOptions).map(([languageCode, languageLabel]) => (
+  const menuItems = Object.entries(languageOptions ?? {}).map(([languageCode, languageLabel]) => (
     <MenuItem value={languageCode} key={languageCode} sx={menuItemColor ? { color: menuItemColor } : undefined}>
       {languageLabel}
     </MenuItem>
