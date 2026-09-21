@@ -262,9 +262,14 @@ const Results = ({ type }: ResultsProps) => {
   // Results-page scroll depth, browsable tabs only. Each threshold fires once per tab per screening.
   const firedScrollDepths = useRef<Set<number>>(new Set());
   useEffect(() => {
-    // CESN's `help` route is a standalone page with no tab bar (see `isEnergyCalculator`
-    // below) — exclude it here even though `help` is otherwise in the lookup.
-    const tabName = whiteLabel === 'cesn' && type === 'help' ? null : (SCROLL_DEPTH_TAB_NAMES[type] ?? null);
+    // CESN has no tab bar for `help` (standalone page, see `isEnergyCalculator` below),
+    // and a suppressed referrer redirects away from `help` before ever seeing it (see
+    // the Navigate below) — both exclude it here even though `help` is otherwise in the
+    // lookup.
+    const tabName =
+      type === 'help' && (whiteLabel === 'cesn' || immediateHelpSuppressed)
+        ? null
+        : SCROLL_DEPTH_TAB_NAMES[type] ?? null;
     if (tabName === null) {
       return; // program detail / rebates / CESN's standalone help page aren't browsable tabs
     }
@@ -288,7 +293,7 @@ const Results = ({ type }: ResultsProps) => {
 
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [type, track, whiteLabel]);
+  }, [type, track, whiteLabel, immediateHelpSuppressed]);
 
   // "None eligible" needs BOTH result sets resolved, or we'd fire a false
   // negative while rebates are still loading (and the once-guard would prevent

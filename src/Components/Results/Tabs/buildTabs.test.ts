@@ -8,6 +8,7 @@ const args = {
   programCount: 4,
   needCount: 2,
   immediateHelpSuppressed: false,
+  immediateHelpEmpty: false,
 };
 
 describe('buildTabs', () => {
@@ -17,6 +18,15 @@ describe('buildTabs', () => {
 
   it('omits the Immediate Help tab when the referrer suppresses it', () => {
     const tabs = buildTabs({ ...args, immediateHelpSuppressed: true });
+
+    expect(tabs.map((tab) => tab.id)).toEqual(['program', 'need']);
+    expect(tabs.find((tab) => tab.id === 'help')).toBeUndefined();
+  });
+
+  it('omits the Immediate Help tab when there are no resources to show, even if not suppressed', () => {
+    // Guards against a config-fetch failure (empty resource list) making an
+    // otherwise-visible tab clickable with nothing but a heading inside it.
+    const tabs = buildTabs({ ...args, immediateHelpEmpty: true });
 
     expect(tabs.map((tab) => tab.id)).toEqual(['program', 'need']);
     expect(tabs.find((tab) => tab.id === 'help')).toBeUndefined();

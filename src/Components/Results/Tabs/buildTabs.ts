@@ -25,6 +25,9 @@ type BuildTabsArgs = {
   programCount: number;
   needCount: number;
   immediateHelpSuppressed: boolean;
+  // A config-fetch failure falls back to an empty resource list, which would
+  // otherwise still render a clickable tab whose panel is just a heading.
+  immediateHelpEmpty: boolean;
 };
 
 // Pure so the tab set can be tested without Router/Intl/Context providers.
@@ -35,6 +38,7 @@ export function buildTabs({
   programCount,
   needCount,
   immediateHelpSuppressed,
+  immediateHelpEmpty,
 }: BuildTabsArgs): TabDescriptor[] {
   const tabs: TabDescriptor[] = [
     {
@@ -64,7 +68,7 @@ export function buildTabs({
 
   // No count: the resource list is fixed per-tenant config, not household-specific,
   // so a count would falsely imply personalization.
-  if (!immediateHelpSuppressed) {
+  if (!immediateHelpSuppressed && !immediateHelpEmpty) {
     tabs.push({
       id: 'help',
       to: helpLink,

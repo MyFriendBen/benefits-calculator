@@ -84,7 +84,7 @@ export const ResultsSummary = ({ type }: ResultsSummaryProps) => {
   }
 
   return (
-    <div className="results-header-container">
+    <div>
       <ProgramsHeader />
     </div>
   );

@@ -5,6 +5,8 @@ import { FormattedMessage } from 'react-intl';
 import { useTranslateNumber } from '../../../Assets/languageOptions';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import { useTrackEvent } from '../../../Assets/analytics';
+import { useConfig } from '../../Config/configHook';
+import { Resource } from '../../MoreHelp/MoreHelp';
 import { buildTabs, getNextTabIndex, ResultsTabId, TabDescriptor } from './buildTabs';
 
 const DEFAULT_TAB_ICON_SIZE = 17;
@@ -24,6 +26,12 @@ const ResultsTabs = ({ activeTab }: ResultsTabsProps) => {
   const needsLink = useResultsLink(`results/near-term-needs`);
   const helpLink = useResultsLink(`results/more-help`);
   const immediateHelpSuppressed = useImmediateHelpSuppressed();
+  // Same config MoreHelp reads its resource list from — a config-fetch failure
+  // falls back to an empty list there too, so the two can't disagree.
+  const { moreHelpOptions } = useConfig<{ moreHelpOptions: Resource[] }>('more_help_options', {
+    moreHelpOptions: [],
+  });
+  const immediateHelpEmpty = (moreHelpOptions ?? []).length === 0;
 
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const track = useTrackEvent();
@@ -37,8 +45,9 @@ const ResultsTabs = ({ activeTab }: ResultsTabsProps) => {
         programCount: programs.length,
         needCount: needs.length,
         immediateHelpSuppressed,
+        immediateHelpEmpty,
       }),
-    [benefitsLink, needsLink, helpLink, programs.length, needs.length, immediateHelpSuppressed],
+    [benefitsLink, needsLink, helpLink, programs.length, needs.length, immediateHelpSuppressed, immediateHelpEmpty],
   );
 
   // Shared so click and keyboard both track the same events.
@@ -96,7 +105,10 @@ const ResultsTabs = ({ activeTab }: ResultsTabsProps) => {
                   tabRefs.current[index] = el;
                 }}
                 to={tab.to}
-                className={isActive ? 'active' : ''}
+                // Function form — a plain string also lets NavLink apply its own
+                // active class from its own URL match, which could disagree with
+                // activeTab later (e.g. a nested route).
+                className={() => (isActive ? 'active' : '')}
                 id={tab.testId}
                 data-testid={tab.testId}
                 role="tab"

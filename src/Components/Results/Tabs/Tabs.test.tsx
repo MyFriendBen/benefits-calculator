@@ -6,6 +6,7 @@ import ResultsTabs from './Tabs';
 import { ResultsTabId } from './buildTabs';
 
 const mockTrack = jest.fn();
+const mockUseConfig = jest.fn();
 
 jest.mock('../Results', () => ({
   useResultsContext: () => ({ programs: [{}, {}, {}], needs: [{}, {}] }),
@@ -21,6 +22,10 @@ jest.mock('../../../Assets/analytics', () => ({
   useTrackEvent: () => mockTrack,
 }));
 
+jest.mock('../../Config/configHook', () => ({
+  useConfig: () => mockUseConfig(),
+}));
+
 const renderTabs = (activeTab: ResultsTabId = 'program') =>
   render(
     <MemoryRouter>
@@ -32,6 +37,7 @@ const renderTabs = (activeTab: ResultsTabId = 'program') =>
 
 beforeEach(() => {
   mockTrack.mockClear();
+  mockUseConfig.mockReturnValue({ moreHelpOptions: [{ name: <></> }] });
 });
 
 describe('ResultsTabs', () => {
@@ -95,5 +101,16 @@ describe('ResultsTabs', () => {
 
     expect(mockTrack).toHaveBeenCalledWith('screener_results_tab_click', { tab_name: 'immediate_help' });
     expect(mockTrack).toHaveBeenCalledWith('screener_get_help_click', { location: 'immediate_help_tab' });
+  });
+
+  // Guards against a config-fetch failure (empty resource list) making an
+  // otherwise-visible tab clickable with nothing but a heading inside it.
+  it('omits the Immediate Help tab when there are no resources to show', () => {
+    mockUseConfig.mockReturnValue({ moreHelpOptions: [] });
+
+    renderTabs();
+
+    expect(screen.getAllByRole('tab')).toHaveLength(2);
+    expect(screen.queryByTestId('immediate-help-tab')).not.toBeInTheDocument();
   });
 });
