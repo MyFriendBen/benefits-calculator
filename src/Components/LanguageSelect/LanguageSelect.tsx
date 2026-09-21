@@ -36,6 +36,29 @@ type LanguageSelectProps = {
 };
 
 /**
+ * The app locale, but guaranteed to be a key of the white label's
+ * `language_options`.
+ *
+ * `Wrapper`'s locale is not guaranteed to be one: `initializeLocale` applies
+ * `verifyLanguage` only to the `navigator.language` fallback and returns a
+ * stored `localStorage` value as-is, so a code from an older config (`zh`,
+ * which is now `zh-hans`) survives indefinitely — and gets re-persisted on
+ * every locale change.
+ *
+ * An out-of-range value makes MUI render the dropdown blank, and a user who
+ * never opens it would submit that code. The API rejects anything outside
+ * `settings.LANGUAGES` and falls back, so the message would silently arrive in
+ * the wrong language with no error surfaced. `en-us` is the fallback because
+ * every white label offers it and it matches the backend's `LANGUAGE_CODE`.
+ */
+export function useSupportedLocale(): string {
+  const { locale } = useContext(Context);
+  const languageOptions = useConfig<LanguageOptions>('language_options', {});
+
+  return locale && locale in languageOptions ? locale : 'en-us';
+}
+
+/**
  * The single language dropdown. Options always come from the white label's
  * `language_options` config rather than a hardcoded list, because the option set
  * differs per white label and the codes there (e.g. `zh-hans`) are the ones the

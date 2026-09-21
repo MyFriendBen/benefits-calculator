@@ -9,12 +9,18 @@ jest.mock('../Config/configHook', () => ({
   useConfig: jest.fn(),
 }));
 
+// Guards against a real fetch() if the share language ever diverges from the
+// intl locale again; the modal would otherwise hang on "Loading...".
+jest.mock('../../apiCalls', () => ({
+  getTranslations: jest.fn().mockResolvedValue({}),
+}));
+
 jest.mock('../Results/shared/ModalShell.css', () => ({}));
 jest.mock('./ShareModal.css', () => ({}));
 
 const renderAutoPopup = () =>
   render(
-    <IntlProvider locale="en">
+    <IntlProvider locale="en-us">
       <MemoryRouter>
         <ShareModalAutoPopup />
       </MemoryRouter>

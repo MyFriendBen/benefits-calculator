@@ -17,9 +17,14 @@ const { getTranslations } = require('../../apiCalls');
 
 const LANGUAGE_OPTIONS = { 'en-us': 'English', es: 'Español' };
 
-const renderModal = (open: boolean, onClose = jest.fn()) =>
+const renderModal = (open: boolean, onClose = jest.fn(), contextOverrides = {}) =>
   render(
-    <Context.Provider value={createMockContextValue({ config: { language_options: LANGUAGE_OPTIONS } as any })}>
+    <Context.Provider
+      value={createMockContextValue({
+        config: { language_options: LANGUAGE_OPTIONS } as any,
+        ...contextOverrides,
+      })}
+    >
       <IntlProvider locale="en-us">
         <MemoryRouter>
           <ShareModal open={open} onClose={onClose} shareLocation="results_popup" />
@@ -152,6 +157,14 @@ describe('ShareModal', () => {
   it('does not fetch translations when sharing in the sender’s own language', () => {
     renderModal(true);
     continueFromLanguageStep();
+    expect(getTranslations).not.toHaveBeenCalled();
+  });
+
+  it('shows a supported language when the app locale is a stale code', async () => {
+    // `zh` left in localStorage from before the rename to `zh-hans` is read back
+    // by Wrapper unvalidated; it would otherwise render the dropdown blank.
+    renderModal(true, jest.fn(), { locale: 'zh' });
+    expect(screen.getByRole('button', { name: /English/ })).toBeInTheDocument();
     expect(getTranslations).not.toHaveBeenCalled();
   });
 

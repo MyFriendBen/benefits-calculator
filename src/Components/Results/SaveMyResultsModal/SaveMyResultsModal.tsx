@@ -2,8 +2,8 @@ import SaveIcon from '@mui/icons-material/SaveOutlined';
 import EmailIcon from '@mui/icons-material/Email';
 import SmsIcon from '@mui/icons-material/Sms';
 import { useState } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
-import LanguageSelect from '../../LanguageSelect/LanguageSelect';
+import { FormattedMessage } from 'react-intl';
+import LanguageSelect, { useSupportedLocale } from '../../LanguageSelect/LanguageSelect';
 import ModalShell from '../shared/ModalShell';
 import ModalOption from '../shared/ModalOption';
 import CopyLinkOption from '../shared/CopyLinkOption';
@@ -30,12 +30,13 @@ const subtitles: Record<SaveView, React.ReactNode> = {
 };
 
 const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
-  const intl = useIntl();
+  // Sanitized rather than the raw app locale: a stale code would be rejected by
+  // the API's allowlist and silently downgrade the message to English.
+  const readingLanguage = useSupportedLocale();
   const [view, setView] = useState<SaveView>('language');
-  // The language the API composes the message in. Defaults to the language the
-  // user is reading, which is the common case, but they can send the results to
-  // someone who reads another one.
-  const [messageLanguage, setMessageLanguage] = useState(intl.locale);
+  // The language the API composes the message in, defaulting to the one the
+  // user is reading.
+  const [messageLanguage, setMessageLanguage] = useState(readingLanguage);
   const track = useTrackEvent();
 
   const handleClose = () => {

@@ -38,6 +38,7 @@ const LANGUAGE_OPTIONS = { 'en-us': 'English', es: 'Español' };
 
 const mockContext = {
   formData: mockFormData,
+  locale: 'en-us',
   config: { language_options: LANGUAGE_OPTIONS },
 };
 
@@ -45,7 +46,7 @@ const continueFromLanguageStep = () => fireEvent.click(screen.getByRole('button'
 
 // The modal opens on the language step. Most tests here are about what comes
 // after it, so they advance past it by default rather than re-asserting it.
-const renderModal = (onClose = jest.fn(), { startOnLanguageStep = false } = {}) => {
+const renderModal = (onClose = jest.fn(), { startOnLanguageStep = false, contextOverrides = {} } = {}) => {
   const result = render(
     <MemoryRouter initialEntries={['/results/test-uuid']}>
       <Routes>
@@ -53,7 +54,7 @@ const renderModal = (onClose = jest.fn(), { startOnLanguageStep = false } = {}) 
           path="/results/:uuid"
           element={
             <IntlProvider locale="en-us">
-              <Context.Provider value={mockContext as any}>
+              <Context.Provider value={{ ...mockContext, ...contextOverrides } as any}>
                 <SaveMyResultsModal onClose={onClose} />
               </Context.Provider>
             </IntlProvider>
@@ -123,6 +124,29 @@ describe('SaveMyResultsModal', () => {
           email: 'test@example.com',
           type: 'emailScreen',
           language: 'es',
+        });
+      });
+    });
+
+    it('never sends a stale locale the white label no longer offers', async () => {
+      // A `zh` left in localStorage from before the rename to `zh-hans` is read
+      // back by Wrapper unvalidated. Submitting it would fail the API allowlist
+      // and silently downgrade the email to English.
+      (postMessage as jest.Mock).mockResolvedValue({});
+      renderModal(jest.fn(), { contextOverrides: { locale: 'zh' } });
+
+      fireEvent.click(screen.getByText('Email'));
+      fireEvent.change(screen.getByPlaceholderText('your.email@example.com'), {
+        target: { value: 'test@example.com' },
+      });
+      fireEvent.click(screen.getByText('Send Results'));
+
+      await waitFor(() => {
+        expect(postMessage).toHaveBeenCalledWith({
+          screen: 'test-uuid',
+          email: 'test@example.com',
+          type: 'emailScreen',
+          language: 'en-us',
         });
       });
     });

@@ -5,7 +5,7 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import SmsIcon from '@mui/icons-material/Sms';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { FormattedMessage, useIntl } from 'react-intl';
-import LanguageSelect from '../LanguageSelect/LanguageSelect';
+import LanguageSelect, { useSupportedLocale } from '../LanguageSelect/LanguageSelect';
 import ModalShell from '../Results/shared/ModalShell';
 import ModalOption from '../Results/shared/ModalOption';
 import CopyLinkOption from '../Results/shared/CopyLinkOption';
@@ -50,10 +50,13 @@ type ShareModalProps = {
 
 const ShareModal = ({ open, onClose, shareLocation }: ShareModalProps) => {
   const intl = useIntl();
+  // Sanitized rather than raw `intl.locale`, which can be a stale code that is
+  // not offered by this white label — see useSupportedLocale.
+  const senderLanguage = useSupportedLocale();
   const [view, setView] = useState<ShareView>('language');
   // The recipient's language, which defaults to the sender's but is deliberately
   // kept separate from it: choosing one here must not re-language the sender's UI.
-  const [shareLanguage, setShareLanguage] = useState(intl.locale);
+  const [shareLanguage, setShareLanguage] = useState(senderLanguage);
   const { subject: shareSubject, buildBody, loading: messagesLoading } = useShareMessages(shareLanguage);
   const track = useTrackEvent();
 
@@ -63,8 +66,8 @@ const ShareModal = ({ open, onClose, shareLocation }: ShareModalProps) => {
     setView('language');
     // Reset to the sender's current language: a stale pick from the last share
     // must not silently carry into the next one.
-    setShareLanguage(intl.locale);
-  }, [onClose, track, shareLocation, intl.locale]);
+    setShareLanguage(senderLanguage);
+  }, [onClose, track, shareLocation, senderLanguage]);
 
   const handleBack = useCallback(() => {
     track('screener_share', { share_location: shareLocation, share_action: 'back' });

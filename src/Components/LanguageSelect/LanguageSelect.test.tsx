@@ -3,7 +3,7 @@ import { IntlProvider } from 'react-intl';
 import { Context } from '../Wrapper/Wrapper';
 import { WrapperContext } from '../../Types/WrapperContext';
 import { createMockContextValue } from '../../test-utils/renderHelpers';
-import LanguageSelect from './LanguageSelect';
+import LanguageSelect, { useSupportedLocale } from './LanguageSelect';
 
 const LANGUAGE_OPTIONS = { 'en-us': 'English', es: 'Español', 'zh-hans': '中文 (简体)' };
 
@@ -79,5 +79,37 @@ describe('LanguageSelect', () => {
   it('renders without options instead of throwing before the config loads', () => {
     renderSelect(<LanguageSelect id="test-select" />, { config: undefined });
     expect(getTrigger()).toBeInTheDocument();
+  });
+});
+
+describe('useSupportedLocale', () => {
+  const Probe = () => <span data-testid="locale">{useSupportedLocale()}</span>;
+  const read = () => screen.getByTestId('locale').textContent;
+
+  it('passes through a locale the white label offers', () => {
+    renderSelect(<Probe />, { locale: 'es' });
+    expect(read()).toBe('es');
+  });
+
+  it('replaces a stale code that is no longer a config key', () => {
+    // `zh` predates the rename to `zh-hans` and survives in localStorage, which
+    // Wrapper reads back without validating.
+    renderSelect(<Probe />, { locale: 'zh' as any });
+    expect(read()).toBe('en-us');
+  });
+
+  it('replaces a bare code the config spells regionally', () => {
+    renderSelect(<Probe />, { locale: 'en' as any });
+    expect(read()).toBe('en-us');
+  });
+
+  it('falls back when the locale is unset', () => {
+    renderSelect(<Probe />, { locale: undefined as any });
+    expect(read()).toBe('en-us');
+  });
+
+  it('falls back before the config has loaded', () => {
+    renderSelect(<Probe />, { locale: 'es', config: undefined });
+    expect(read()).toBe('en-us');
   });
 });
