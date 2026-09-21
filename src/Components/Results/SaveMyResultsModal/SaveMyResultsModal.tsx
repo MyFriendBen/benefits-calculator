@@ -21,7 +21,7 @@ type SaveMyResultsModalProps = {
 
 const subtitles: Record<SaveView, React.ReactNode> = {
   language: (
-    <FormattedMessage id="saveMyResults.languageSubtitle" defaultMessage="What language should we send it in?" />
+    <FormattedMessage id="saveMyResults.languageSubtitle" defaultMessage="What language should we save it in?" />
   ),
   options: <FormattedMessage id="saveMyResults.subtitle" defaultMessage="Choose how to save your results" />,
   email: <FormattedMessage id="saveMyResults.emailSubtitle" defaultMessage="Enter your email address" />,

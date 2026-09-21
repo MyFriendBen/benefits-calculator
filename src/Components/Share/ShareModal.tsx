@@ -158,27 +158,29 @@ const ShareModal = ({ open, onClose, shareLocation }: ShareModalProps) => {
             label={<FormattedMessage id="sharePopup.languageLabel" defaultMessage="Language" />}
             formControlSx={{ width: '100%' }}
           />
-          <button
-            type="button"
-            className="modal-primary-btn"
-            // The channel options build `sms:`/`mailto:` links as real anchors, so
-            // the translated copy has to be in hand before they can be clicked.
-            disabled={messagesLoading}
-            onClick={() => {
-              track('screener_share', {
-                share_location: shareLocation,
-                share_language: shareLanguage,
-                share_action: 'language_selected',
-              });
-              setView('options');
-            }}
-          >
-            {messagesLoading ? (
-              <FormattedMessage id="sharePopup.languageLoading" defaultMessage="Loading..." />
-            ) : (
-              <FormattedMessage id="sharePopup.languageContinue" defaultMessage="Continue" />
-            )}
-          </button>
+          <div className="share-modal-language-actions">
+            <button
+              type="button"
+              className="modal-primary-btn"
+              // The channel options build `sms:`/`mailto:` links as real anchors, so
+              // the translated copy has to be in hand before they can be clicked.
+              disabled={messagesLoading}
+              onClick={() => {
+                track('screener_share', {
+                  share_location: shareLocation,
+                  share_language: shareLanguage,
+                  share_action: 'language_selected',
+                });
+                setView('options');
+              }}
+            >
+              {messagesLoading ? (
+                <FormattedMessage id="sharePopup.languageLoading" defaultMessage="Loading..." />
+              ) : (
+                <FormattedMessage id="sharePopup.languageContinue" defaultMessage="Continue" />
+              )}
+            </button>
+          </div>
         </div>
       </ModalShell>
     );

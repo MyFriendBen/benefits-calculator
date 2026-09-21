@@ -83,7 +83,7 @@ describe('SaveMyResultsModal', () => {
     it('opens on the language step rather than the options list', () => {
       renderModal(jest.fn(), { startOnLanguageStep: true });
       expect(screen.getByText('Save My Results')).toBeInTheDocument();
-      expect(screen.getByText('What language should we send it in?')).toBeInTheDocument();
+      expect(screen.getByText('What language should we save it in?')).toBeInTheDocument();
       expect(screen.queryByText('Copy to Clipboard')).not.toBeInTheDocument();
     });
 
@@ -100,7 +100,7 @@ describe('SaveMyResultsModal', () => {
     it('returns to the language step from the options list', () => {
       renderModal();
       fireEvent.click(screen.getByLabelText('Back'));
-      expect(screen.getByText('What language should we send it in?')).toBeInTheDocument();
+      expect(screen.getByText('What language should we save it in?')).toBeInTheDocument();
     });
 
     it('sends the chosen language to the API instead of the reading language', async () => {
