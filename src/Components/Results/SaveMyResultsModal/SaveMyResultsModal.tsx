@@ -3,6 +3,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import SmsIcon from '@mui/icons-material/Sms';
 import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
+import LanguageSelect, { useSupportedLocale } from '../../LanguageSelect/LanguageSelect';
 import ModalShell from '../shared/ModalShell';
 import ModalOption from '../shared/ModalOption';
 import CopyLinkOption from '../shared/CopyLinkOption';
@@ -12,13 +13,16 @@ import '../shared/ModalShell.css';
 import SaveViaEmailForm from './SaveViaEmailForm';
 import SaveViaSMSForm from './SaveViaSMSForm';
 
-type SaveView = 'options' | 'email' | 'sms' | 'success';
+type SaveView = 'language' | 'options' | 'email' | 'sms' | 'success';
 
 type SaveMyResultsModalProps = {
   onClose: () => void;
 };
 
 const subtitles: Record<SaveView, React.ReactNode> = {
+  language: (
+    <FormattedMessage id="saveMyResults.languageSubtitle" defaultMessage="What language should we save it in?" />
+  ),
   options: <FormattedMessage id="saveMyResults.subtitle" defaultMessage="Choose how to save your results" />,
   email: <FormattedMessage id="saveMyResults.emailSubtitle" defaultMessage="Enter your email address" />,
   sms: <FormattedMessage id="saveMyResults.smsSubtitle" defaultMessage="Enter your phone number" />,
@@ -26,7 +30,13 @@ const subtitles: Record<SaveView, React.ReactNode> = {
 };
 
 const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
-  const [view, setView] = useState<SaveView>('options');
+  // Sanitized rather than the raw app locale: a stale code would be rejected by
+  // the API's allowlist and silently downgrade the message to English.
+  const readingLanguage = useSupportedLocale();
+  const [view, setView] = useState<SaveView>('language');
+  // The language the API composes the message in, defaulting to the one the
+  // user is reading.
+  const [messageLanguage, setMessageLanguage] = useState(readingLanguage);
   const track = useTrackEvent();
 
   const handleClose = () => {
@@ -36,7 +46,7 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
 
   const handleBack = () => {
     track('screener_results_save', { save_action: 'back' });
-    setView('options');
+    setView((current) => (current === 'options' ? 'language' : 'options'));
   };
 
   if (view === 'success') {
@@ -56,8 +66,36 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
       title={<FormattedMessage id="saveMyResults.title" defaultMessage="Save My Results" />}
       subtitle={subtitles[view]}
       onClose={handleClose}
-      onBack={view !== 'options' ? handleBack : undefined}
+      onBack={view !== 'language' ? handleBack : undefined}
     >
+      {view === 'language' && (
+        <div className="save-my-results-language-step">
+          <LanguageSelect
+            id="save-results-language-select"
+            variant="outlined"
+            value={messageLanguage}
+            onChange={(languageCode) => setMessageLanguage(languageCode)}
+            label={<FormattedMessage id="saveMyResults.languageLabel" defaultMessage="Language" />}
+            formControlSx={{ width: '100%' }}
+          />
+          <div className="save-my-results-form-actions">
+            <button
+              type="button"
+              className="modal-primary-btn"
+              onClick={() => {
+                track('screener_results_save', {
+                  save_language: messageLanguage,
+                  save_action: 'language_selected',
+                });
+                setView('options');
+              }}
+            >
+              <FormattedMessage id="saveMyResults.languageContinue" defaultMessage="Continue" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {view === 'options' && (
         <>
           <div className="modal-options-list">
@@ -100,16 +138,26 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
 
       {view === 'email' && (
         <SaveViaEmailForm
+          language={messageLanguage}
           onSuccess={() => {
-            track('screener_results_save', { save_channel: 'email', save_action: 'send' });
+            track('screener_results_save', {
+              save_channel: 'email',
+              save_language: messageLanguage,
+              save_action: 'send',
+            });
             setView('success');
           }}
         />
       )}
       {view === 'sms' && (
         <SaveViaSMSForm
+          language={messageLanguage}
           onSuccess={() => {
-            track('screener_results_save', { save_channel: 'sms', save_action: 'send' });
+            track('screener_results_save', {
+              save_channel: 'sms',
+              save_language: messageLanguage,
+              save_action: 'send',
+            });
             setView('success');
           }}
         />

@@ -1,11 +1,11 @@
 import { useContext, useState, useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { AppBar, MenuItem, Select, Link, IconButton, Dialog, SelectChangeEvent } from '@mui/material';
+import { AppBar, Link, IconButton, Dialog } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import { useConfig } from '../../Config/configHook';
 import { Context } from '../../Wrapper/Wrapper';
+import LanguageSelect from '../../LanguageSelect/LanguageSelect';
 import twoOneOneMFBLogo from '../../../Assets/States/CO/WhiteLabels/TwoOneOneAssets/twoOneOneMFBLogo.png';
 import twoOneOneLinks from '../../../Assets/States/CO/WhiteLabels/TwoOneOneAssets/twoOneOneLinks';
 import LanguageIcon from '@mui/icons-material/Language';
@@ -15,14 +15,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import TwoOneOneShareCO from '../TwoOneOneShareCO/TwoOneOneShareCO';
 import './TwoOneOneHeaderCO.css';
 
-type LanguageOptions = {
-  [key: string]: string;
-};
-
 const TwoOneOneHeaderCO = () => {
   //this is so that when the users click on the cobranded logo, they're navigated back to step-1
-  const { formData, locale, selectLanguage, whiteLabel } = useContext(Context);
-  const languageOptions = useConfig<LanguageOptions>('language_options');
+  const { formData, whiteLabel } = useContext(Context);
   const queryString = formData.immutableReferrer ? `?referrer=${formData.immutableReferrer}` : '';
   const intl = useIntl();
 
@@ -52,7 +47,6 @@ const TwoOneOneHeaderCO = () => {
   };
 
   const [openShare, setOpenShare] = useState(false);
-  const [isLanguageSelectOpen, setIsLanguageSelectOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
 
   //this will disable the scroll when the hamburgerMenu is open
@@ -70,18 +64,6 @@ const TwoOneOneHeaderCO = () => {
 
   const handleCloseShare = () => {
     setOpenShare(false);
-  };
-
-  const handleCloseLanguage = () => {
-    setIsLanguageSelectOpen(false);
-  };
-
-  const handleOpenLanguage = () => {
-    setIsLanguageSelectOpen(true);
-  };
-
-  const handleLanguageChange = (event: SelectChangeEvent) => {
-    selectLanguage(event.target.value);
   };
 
   const handleOpenMenu = () => {
@@ -127,20 +109,6 @@ const TwoOneOneHeaderCO = () => {
     return <Stack id="hamburger-drawer">{create211Links()}</Stack>;
   };
 
-  const createMenuItems = (optionList: LanguageOptions) => {
-    const menuItemKeyLabelPairArr = Object.entries(optionList);
-
-    const dropdownMenuItems = menuItemKeyLabelPairArr.map((key) => {
-      return (
-        <MenuItem value={key[0]} key={key[0]} sx={{ color: '#005191' }}>
-          {key[1]}
-        </MenuItem>
-      );
-    });
-
-    return dropdownMenuItems;
-  };
-
   return (
     <nav>
       <Paper elevation={4} square={true} className="twoOneOne-header-container">
@@ -156,22 +124,12 @@ const TwoOneOneHeaderCO = () => {
             </Stack>
             <Stack direction="row" gap=".25rem" alignItems="center">
               <LanguageIcon className="twoOneOne-globe-icon" />
-              <Select
-                labelId="select-language-label"
+              <LanguageSelect
                 id="twoOneOne-select-language"
-                value={locale}
-                label="Language"
-                onChange={handleLanguageChange}
-                aria-label={intl.formatMessage(selectLangAriaLabelProps)}
-                variant="standard"
-                disableUnderline={true}
-                open={isLanguageSelectOpen}
-                onOpen={handleOpenLanguage}
-                onClose={handleCloseLanguage}
-                sx={{ '& .MuiSvgIcon-root': { color: '#005191' } }}
-              >
-                {createMenuItems(languageOptions)}
-              </Select>
+                ariaLabel={intl.formatMessage(selectLangAriaLabelProps)}
+                iconColor="#005191"
+                menuItemColor="#005191"
+              />
               <IconButton
                 color="primary"
                 onClick={handleOpenShare}
