@@ -34,15 +34,26 @@ const mockFormData = {
   signUpInfo: { email: '', phone: '' },
 };
 
-const renderModal = (onClose = jest.fn()) =>
-  render(
+const LANGUAGE_OPTIONS = { 'en-us': 'English', es: 'Español' };
+
+const mockContext = {
+  formData: mockFormData,
+  config: { language_options: LANGUAGE_OPTIONS },
+};
+
+const continueFromLanguageStep = () => fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+// The modal opens on the language step. Most tests here are about what comes
+// after it, so they advance past it by default rather than re-asserting it.
+const renderModal = (onClose = jest.fn(), { startOnLanguageStep = false } = {}) => {
+  const result = render(
     <MemoryRouter initialEntries={['/results/test-uuid']}>
       <Routes>
         <Route
           path="/results/:uuid"
           element={
-            <IntlProvider locale="en">
-              <Context.Provider value={{ formData: mockFormData } as any}>
+            <IntlProvider locale="en-us">
+              <Context.Provider value={mockContext as any}>
                 <SaveMyResultsModal onClose={onClose} />
               </Context.Provider>
             </IntlProvider>
@@ -52,12 +63,93 @@ const renderModal = (onClose = jest.fn()) =>
     </MemoryRouter>,
   );
 
+  if (!startOnLanguageStep) {
+    continueFromLanguageStep();
+  }
+
+  return result;
+};
+
 describe('SaveMyResultsModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     Object.defineProperty(navigator, 'userAgent', {
       value: 'Mozilla/5.0 (Macintosh)',
       configurable: true,
+    });
+  });
+
+  describe('language step', () => {
+    it('opens on the language step rather than the options list', () => {
+      renderModal(jest.fn(), { startOnLanguageStep: true });
+      expect(screen.getByText('Save My Results')).toBeInTheDocument();
+      expect(screen.getByText('What language should we send it in?')).toBeInTheDocument();
+      expect(screen.queryByText('Copy to Clipboard')).not.toBeInTheDocument();
+    });
+
+    it('defaults to the language the user is reading', () => {
+      renderModal(jest.fn(), { startOnLanguageStep: true });
+      expect(screen.getByRole('button', { name: /English/ })).toBeInTheDocument();
+    });
+
+    it('has no back button, being the first screen', () => {
+      renderModal(jest.fn(), { startOnLanguageStep: true });
+      expect(screen.queryByLabelText('Back')).not.toBeInTheDocument();
+    });
+
+    it('returns to the language step from the options list', () => {
+      renderModal();
+      fireEvent.click(screen.getByLabelText('Back'));
+      expect(screen.getByText('What language should we send it in?')).toBeInTheDocument();
+    });
+
+    it('sends the chosen language to the API instead of the reading language', async () => {
+      (postMessage as jest.Mock).mockResolvedValue({});
+      renderModal(jest.fn(), { startOnLanguageStep: true });
+
+      fireEvent.mouseDown(screen.getByRole('button', { name: /English/ }));
+      fireEvent.click(screen.getByRole('option', { name: 'Español' }));
+      continueFromLanguageStep();
+
+      fireEvent.click(screen.getByText('Email'));
+      fireEvent.change(screen.getByPlaceholderText('your.email@example.com'), {
+        target: { value: 'test@example.com' },
+      });
+      fireEvent.click(screen.getByText('Send Results'));
+
+      await waitFor(() => {
+        expect(postMessage).toHaveBeenCalledWith({
+          screen: 'test-uuid',
+          email: 'test@example.com',
+          type: 'emailScreen',
+          language: 'es',
+        });
+      });
+    });
+
+    it('keeps a language chosen before backing out of a channel', async () => {
+      (postMessage as jest.Mock).mockResolvedValue({});
+      renderModal(jest.fn(), { startOnLanguageStep: true });
+
+      fireEvent.mouseDown(screen.getByRole('button', { name: /English/ }));
+      fireEvent.click(screen.getByRole('option', { name: 'Español' }));
+      continueFromLanguageStep();
+
+      fireEvent.click(screen.getByText('SMS'));
+      fireEvent.click(screen.getByLabelText('Back'));
+      fireEvent.click(screen.getByText('SMS'));
+
+      fireEvent.change(screen.getByTestId('phone-input'), { target: { value: '3031234567' } });
+      fireEvent.click(screen.getByText('Send Results'));
+
+      await waitFor(() => {
+        expect(postMessage).toHaveBeenCalledWith({
+          screen: 'test-uuid',
+          phone: '+13031234567',
+          type: 'textScreen',
+          language: 'es',
+        });
+      });
     });
   });
 
@@ -139,6 +231,7 @@ describe('SaveMyResultsModal', () => {
           screen: 'test-uuid',
           email: 'test@example.com',
           type: 'emailScreen',
+          language: 'en-us',
         });
         expect(screen.getByText('Results Sent')).toBeInTheDocument();
       });
@@ -216,6 +309,7 @@ describe('SaveMyResultsModal', () => {
           screen: 'test-uuid',
           phone: '+13031234567',
           type: 'textScreen',
+          language: 'en-us',
         });
         expect(screen.getByText('Results Sent')).toBeInTheDocument();
       });
