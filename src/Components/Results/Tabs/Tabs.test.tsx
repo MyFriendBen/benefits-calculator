@@ -6,12 +6,13 @@ import ResultsTabs from './Tabs';
 import { ResultsTabId } from './buildTabs';
 
 const mockTrack = jest.fn();
-const mockUseConfig = jest.fn();
+const mockImmediateHelpEmpty = jest.fn();
 
 jest.mock('../Results', () => ({
   useResultsContext: () => ({ programs: [{}, {}, {}], needs: [{}, {}] }),
   useResultsLink: (link: string) => `/co/uuid/${link}`,
   useImmediateHelpSuppressed: () => false,
+  useImmediateHelpEmpty: () => mockImmediateHelpEmpty(),
 }));
 
 jest.mock('../../EnergyCalculator/hooks', () => ({
@@ -20,10 +21,6 @@ jest.mock('../../EnergyCalculator/hooks', () => ({
 
 jest.mock('../../../Assets/analytics', () => ({
   useTrackEvent: () => mockTrack,
-}));
-
-jest.mock('../../Config/configHook', () => ({
-  useConfig: () => mockUseConfig(),
 }));
 
 const renderTabs = (activeTab: ResultsTabId = 'program') =>
@@ -37,7 +34,7 @@ const renderTabs = (activeTab: ResultsTabId = 'program') =>
 
 beforeEach(() => {
   mockTrack.mockClear();
-  mockUseConfig.mockReturnValue({ moreHelpOptions: [{ name: <></> }] });
+  mockImmediateHelpEmpty.mockReturnValue(false);
 });
 
 describe('ResultsTabs', () => {
@@ -106,7 +103,7 @@ describe('ResultsTabs', () => {
   // Guards against a config-fetch failure (empty resource list) making an
   // otherwise-visible tab clickable with nothing but a heading inside it.
   it('omits the Immediate Help tab when there are no resources to show', () => {
-    mockUseConfig.mockReturnValue({ moreHelpOptions: [] });
+    mockImmediateHelpEmpty.mockReturnValue(true);
 
     renderTabs();
 

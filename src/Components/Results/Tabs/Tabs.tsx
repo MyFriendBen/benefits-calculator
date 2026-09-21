@@ -1,12 +1,10 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useImmediateHelpSuppressed, useResultsContext, useResultsLink } from '../Results';
+import { useImmediateHelpEmpty, useImmediateHelpSuppressed, useResultsContext, useResultsLink } from '../Results';
 import { FormattedMessage } from 'react-intl';
 import { useTranslateNumber } from '../../../Assets/languageOptions';
 import { useIsEnergyCalculator } from '../../EnergyCalculator/hooks';
 import { useTrackEvent } from '../../../Assets/analytics';
-import { useConfig } from '../../Config/configHook';
-import { Resource } from '../../MoreHelp/MoreHelp';
 import { buildTabs, getNextTabIndex, ResultsTabId, TabDescriptor } from './buildTabs';
 
 const DEFAULT_TAB_ICON_SIZE = 17;
@@ -26,12 +24,7 @@ const ResultsTabs = ({ activeTab }: ResultsTabsProps) => {
   const needsLink = useResultsLink(`results/near-term-needs`);
   const helpLink = useResultsLink(`results/more-help`);
   const immediateHelpSuppressed = useImmediateHelpSuppressed();
-  // Same config MoreHelp reads its resource list from — a config-fetch failure
-  // falls back to an empty list there too, so the two can't disagree.
-  const { moreHelpOptions } = useConfig<{ moreHelpOptions: Resource[] }>('more_help_options', {
-    moreHelpOptions: [],
-  });
-  const immediateHelpEmpty = (moreHelpOptions ?? []).length === 0;
+  const immediateHelpEmpty = useImmediateHelpEmpty();
 
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const track = useTrackEvent();

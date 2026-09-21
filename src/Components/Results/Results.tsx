@@ -25,7 +25,7 @@ import { FormattedMessage } from 'react-intl';
 import { FilterState, createInitialFilterState } from './Filter/citizenshipFilterConfig';
 import dataLayerPush from '../../Assets/analytics';
 import MoreHelpButton from './211Button/211Button';
-import MoreHelp from '../MoreHelp/MoreHelp';
+import MoreHelp, { Resource } from '../MoreHelp/MoreHelp';
 import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
 import ExternalApiFailureBanner from './ExternalApiFailureBanner/ExternalApiFailureBanner';
 import './Results.css';
@@ -39,7 +39,7 @@ import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
 import { usePageTitle } from '../Common/usePageTitle';
 import { NPSWidget } from '../NPS';
 import ShareModalAutoPopup from '../Share/ShareModalAutoPopup';
-import { useFeatureFlag } from '../Config/configHook';
+import { useConfig, useFeatureFlag } from '../Config/configHook';
 import { ChatbotProvider } from './Chatbot/Chatbot';
 import { useTrackEvent, useTrackItemList } from '../../Assets/analytics';
 import { POST_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
@@ -137,6 +137,17 @@ export function useImmediateHelpSuppressed() {
   return getReferrer('uiOptions', [] as string[]).includes('no_results_more_help');
 }
 
+// Shared by every place that needs to know whether there's anything to show on
+// the Immediate Help page (the tab list, the direct-URL redirect, and scroll
+// tracking) — one source of truth so those checks can't drift apart again.
+export function useImmediateHelpEmpty() {
+  const { moreHelpOptions } = useConfig<{ moreHelpOptions: Resource[] }>('more_help_options', {
+    moreHelpOptions: [],
+  });
+
+  return (moreHelpOptions ?? []).length === 0;
+}
+
 // GA4 tab_name per browsable tab. Types absent here (program detail, energy rebates)
 // are not tabs and are excluded from scroll-depth tracking.
 const SCROLL_DEPTH_TAB_NAMES: Partial<Record<ResultsProps['type'], string>> = {
@@ -149,6 +160,7 @@ const Results = ({ type }: ResultsProps) => {
   const { formData, locale } = useContext(Context);
   const { whiteLabel, uuid, programId, energyCalculatorRebateType } = useParams();
   const immediateHelpSuppressed = useImmediateHelpSuppressed();
+  const immediateHelpEmpty = useImmediateHelpEmpty();
 
   const [searchParams] = useSearchParams();
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams.get('admin')]);
@@ -263,11 +275,11 @@ const Results = ({ type }: ResultsProps) => {
   const firedScrollDepths = useRef<Set<number>>(new Set());
   useEffect(() => {
     // CESN has no tab bar for `help` (standalone page, see `isEnergyCalculator` below),
-    // and a suppressed referrer redirects away from `help` before ever seeing it (see
-    // the Navigate below) — both exclude it here even though `help` is otherwise in the
-    // lookup.
+    // and a suppressed or empty-resources referrer redirects away from `help` before
+    // ever seeing it (see the Navigate below) — all three excluded here even though
+    // `help` is otherwise in the lookup.
     const tabName =
-      type === 'help' && (whiteLabel === 'cesn' || immediateHelpSuppressed)
+      type === 'help' && (whiteLabel === 'cesn' || immediateHelpSuppressed || immediateHelpEmpty)
         ? null
         : SCROLL_DEPTH_TAB_NAMES[type] ?? null;
     if (tabName === null) {
@@ -293,7 +305,7 @@ const Results = ({ type }: ResultsProps) => {
 
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [type, track, whiteLabel, immediateHelpSuppressed]);
+  }, [type, track, whiteLabel, immediateHelpSuppressed, immediateHelpEmpty]);
 
   // "None eligible" needs BOTH result sets resolved, or we'd fire a false
   // negative while rebates are still loading (and the once-guard would prevent
@@ -409,9 +421,11 @@ const Results = ({ type }: ResultsProps) => {
     );
   } else if (apiError) {
     return <ResultsError />;
-  } else if (programId === undefined && type === 'help' && immediateHelpSuppressed) {
-    // Suppressed referrers must not reach More Help by URL either. Must run before the
-    // CESN branch below, so a suppressed referrer on CESN redirects here too.
+  } else if (programId === undefined && type === 'help' && (immediateHelpSuppressed || immediateHelpEmpty)) {
+    // Suppressed or empty-resources referrers must not reach More Help by URL
+    // either — otherwise the tab-bar fix (hiding the tab) doesn't help someone
+    // who gets here via a bookmark or the back button instead. Must run before
+    // the CESN branch below, so this redirects CESN too.
     return <Navigate to={addAdminToLink(`/${whiteLabel}/${uuid}/results/benefits`, isAdminView)} replace />;
   } else if (programId === undefined && type === 'help' && isEnergyCalculator) {
     // CESN has no tab bar (Tabs.tsx), so Immediate Help stays this standalone page,
