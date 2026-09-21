@@ -41,9 +41,10 @@ const userFacingCopy = (source: string): string[] =>
 
 // Each entry: the file that must contain it, and the literal the guide relies on.
 const REQUIRED: ReadonlyArray<[label: string, file: string]> = [
-  // Two tabs, each with a count.
-  ['Long-Term Benefits', 'Tabs/Tabs.tsx'],
-  ['Additional Resources', 'Tabs/Tabs.tsx'],
+  // Two tabs, each with a count. Labels moved into buildTabs.ts when the tab
+  // metadata was extracted there; the words themselves are unchanged.
+  ['Long-Term Benefits', 'Tabs/buildTabs.ts'],
+  ['Additional Resources', 'Tabs/buildTabs.ts'],
 
   // Citizenship filter: the header and all six options the guide enumerates.
   ['Filter Results by Citizenship', 'Filter/Filter.tsx'],
