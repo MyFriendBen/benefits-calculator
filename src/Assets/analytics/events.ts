@@ -215,6 +215,10 @@ export interface ScreenerEventMap {
   screener_benbot_closed: {};
   screener_benbot_message_sent: {};
   screener_benbot_error: {};
+  // Thumbs up / down on one reply (MFB-1915). 'cleared' is the user taking a rating
+  // BACK, which is its own signal and must not be folded into "never rated" — that is
+  // also why the column behind it records the clearing rather than just blanking.
+  screener_benbot_rated: { rating: 'up' | 'down' | 'cleared' };
 
   // ---- NPS survey ----
   screener_nps_score_submitted: { score: number };

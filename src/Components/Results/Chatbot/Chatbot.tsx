@@ -4,13 +4,19 @@ import ChatIcon from '@mui/icons-material/Chat';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
+import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
+import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { parseMarkdown } from '../../../utils/parseMarkdown';
 import {
   startAssistantConversation,
   getAssistantHistory,
   sendAssistantMessage,
+  rateAssistantMessage,
   AssistantApiMessage,
+  AssistantRating,
   AssistantVisibleProgram,
 } from '../../../apiCalls';
 import { useTrackEvent } from '../../../Assets/analytics';
@@ -19,6 +25,20 @@ import './Chatbot.css';
 type Message = {
   role: 'user' | 'bot';
   text: string;
+  /**
+   * The server's message id, and the rating it currently holds (MFB-1915).
+   *
+   * Both optional because not every bubble in this list is a stored row. A user's
+   * message is appended locally the instant they hit send, before the round trip that
+   * would give it an id — and it is never rateable anyway. The greeting isn't in this
+   * list at all (it's derived; see the transcript below), so it can't be rated either,
+   * which is right: it is client-templated copy, not something Benji said.
+   *
+   * `id` is therefore what makes a bubble rateable, and its absence is the reason the
+   * buttons don't render rather than a separate flag.
+   */
+  id?: string;
+  rating?: AssistantRating;
 };
 
 // The greeting as the user last saw it — which variant, and the numbers it quotes.
@@ -29,7 +49,14 @@ type GreetingSnapshot = { variant: 'personalized'; count: number; totalValue: nu
 
 // The API uses role 'assistant'; the widget renders it as 'bot'.
 function toWidgetMessage(m: AssistantApiMessage): Message {
-  return { role: m.role === 'assistant' ? 'bot' : 'user', text: m.text };
+  return {
+    role: m.role === 'assistant' ? 'bot' : 'user',
+    text: m.text,
+    id: m.message_id,
+    // `?? null` rather than passing it through: a backend that predates MFB-1915 omits
+    // the key, and "absent" and "unrated" have to be the same thing to the buttons.
+    rating: m.rating ?? null,
+  };
 }
 
 function newClientMessageId(): string {
@@ -193,6 +220,19 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const conversationIdRef = useRef<string | null>(null);
+  // The conversation id for RATING, which is deliberately not `conversationIdRef`.
+  //
+  // Those two look like the same fact and are not. `conversationIdRef` doubles as
+  // "we have already started this conversation in this session", and the
+  // history-restore effect below leaves it null ON PURPOSE so the next send still
+  // POSTs the start endpoint and refreshes ai-service's context snapshot (see the
+  // long note there — setting it is the MFB-1427 failure through the back door).
+  //
+  // Rating needs the plain fact instead: which conversation the messages on screen
+  // belong to, whether we opened it this session or read it back. Restoring a
+  // transcript and then being unable to rate any of it would defeat the "survives a
+  // reload" requirement, which is most of the point.
+  const ratingConversationIdRef = useRef<string | null>(null);
   const startPromiseRef = useRef<Promise<string | null> | null>(null);
   const sendingRef = useRef(false);
   const { formatMessage, formatNumber } = useIntl();
@@ -243,6 +283,19 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
   const errorMessage = formatMessage({
     id: 'chatbot.error',
     defaultMessage: 'Sorry, something went wrong. Please try again.',
+  });
+
+  // Formatted here rather than inline in the transcript: these are re-evaluated for
+  // every assistant bubble on every render, and the transcript grows all conversation.
+  //
+  // The labels say "helpful" rather than naming the gesture, because a thumb is not
+  // what a screen-reader user is choosing between — and because the two buttons are a
+  // pair, which `rateReplyLabel` on the group is what actually establishes.
+  const rateReplyLabel = formatMessage({ id: 'chatbot.rateReply', defaultMessage: 'Rate this reply' });
+  const thumbUpLabel = formatMessage({ id: 'chatbot.thumbUp', defaultMessage: 'This reply was helpful' });
+  const thumbDownLabel = formatMessage({
+    id: 'chatbot.thumbDown',
+    defaultMessage: 'This reply was not helpful',
   });
 
   const scrollToBottom = useCallback(() => {
@@ -311,6 +364,9 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
     getAssistantHistory(uuid)
       .then((conversation) => {
         if (!conversation || conversation.messages.length === 0) return;
+        // Rating only — NOT conversationIdRef, for the reason in (1) above and at the
+        // ref's own declaration.
+        ratingConversationIdRef.current = conversation.conversation_id;
         const restored = conversation.messages.map(toWidgetMessage);
         setMessages((prev) => (prev.length === 0 ? restored : prev));
       })
@@ -326,6 +382,7 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
       startPromiseRef.current = startAssistantConversation(uuid, undefined, visiblePrograms)
         .then((res) => {
           conversationIdRef.current = res.conversation_id;
+          ratingConversationIdRef.current = res.conversation_id;
           setMessages(res.messages.map(toWidgetMessage));
           return res.conversation_id;
         })
@@ -399,6 +456,52 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
       }
     },
     [ensureConversation, uuid, errorMessage, track, refreshContext],
+  );
+
+  // Thumbs up / down on one reply (MFB-1915).
+  //
+  // Clicking the thumb a message already holds clears it; clicking the other switches.
+  // Both are the same PUT with a different value, because the request states what the
+  // rating should BE rather than asking for a toggle — the user can click faster than
+  // the round trip, and two toggles racing can land in either order and leave the row
+  // disagreeing with the buttons they are looking at.
+  //
+  // Optimistic, with a rollback. A rating is feedback, not a transaction: making
+  // someone wait on a spinner to find out whether their thumbs-down registered costs
+  // more than the rare failure does, and it would also discourage the second and third
+  // ratings that make this data worth collecting. The rollback matters anyway, because
+  // a button that silently lies about what was stored is worse than one that flickers.
+  //
+  // Matching on `id` rather than index: the transcript can grow underneath this (a
+  // reply landing while the user rates an earlier one), and an index captured at click
+  // time would move a rating onto the wrong message.
+  const rateMessage = useCallback(
+    async (messageId: string, next: AssistantRating) => {
+      const conversationId = ratingConversationIdRef.current;
+      if (!conversationId || !uuid) return;
+
+      let previous: AssistantRating = null;
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== messageId) return m;
+          previous = m.rating ?? null;
+          return { ...m, rating: next };
+        }),
+      );
+
+      track('screener_benbot_rated', { rating: next === 1 ? 'up' : next === -1 ? 'down' : 'cleared' });
+
+      try {
+        await rateAssistantMessage(uuid, conversationId, messageId, next);
+      } catch {
+        setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, rating: previous } : m)));
+        // No error bubble in the transcript. The send path adds one because a failed
+        // send means the user's question went unanswered; a failed rating means only
+        // that their opinion wasn't recorded, and interrupting the conversation with a
+        // message about it would be louder than the thing that failed.
+      }
+    },
+    [uuid, track],
   );
 
   const openWithMessage = useCallback(
@@ -555,8 +658,49 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
               </div>
             }
             {messages.map((msg, i) => (
-              <div key={i} className={`chatbot-message chatbot-message-${msg.role}`}>
+              <div key={msg.id ?? i} className={`chatbot-message chatbot-message-${msg.role}`}>
                 {renderFormattedMessage(msg.text)}
+                {/* Rating buttons, on stored assistant replies only (MFB-1915).
+
+                    `msg.id` is the gate rather than a separate flag: a bubble without
+                    one is either the user's own message being echoed optimistically
+                    before its round trip, or a client-side error notice — nothing the
+                    server has a row for, and nothing it would make sense to rate. The
+                    greeting never reaches this list at all.
+
+                    Rendered as a pair of real <button>s with an aria-pressed state, so
+                    the current rating is what a screen reader announces rather than
+                    something conveyed only by which icon is filled in. */}
+                {msg.role === 'bot' && msg.id !== undefined && (
+                  <div className="chatbot-rating" role="group" aria-label={rateReplyLabel}>
+                    <button
+                      type="button"
+                      className={`chatbot-rating-btn${msg.rating === 1 ? ' chatbot-rating-btn--active' : ''}`}
+                      onClick={() => void rateMessage(msg.id!, msg.rating === 1 ? null : 1)}
+                      aria-pressed={msg.rating === 1}
+                      aria-label={thumbUpLabel}
+                    >
+                      {msg.rating === 1 ? (
+                        <ThumbUpAltIcon fontSize="inherit" />
+                      ) : (
+                        <ThumbUpOffAltIcon fontSize="inherit" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className={`chatbot-rating-btn${msg.rating === -1 ? ' chatbot-rating-btn--active' : ''}`}
+                      onClick={() => void rateMessage(msg.id!, msg.rating === -1 ? null : -1)}
+                      aria-pressed={msg.rating === -1}
+                      aria-label={thumbDownLabel}
+                    >
+                      {msg.rating === -1 ? (
+                        <ThumbDownAltIcon fontSize="inherit" />
+                      ) : (
+                        <ThumbDownOffAltIcon fontSize="inherit" />
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
             {isSending && (

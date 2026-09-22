@@ -31,6 +31,8 @@ const getNpsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/nps/`;
 const assistantConversationsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/assistant/conversations/`;
 const assistantMessagesEndpoint = (uuid: string, conversationId: string) =>
   `${domain}/api/screens/${uuid}/assistant/conversations/${conversationId}/messages/`;
+const assistantMessageRatingEndpoint = (uuid: string, conversationId: string, messageId: string) =>
+  `${domain}/api/screens/${uuid}/assistant/conversations/${conversationId}/messages/${messageId}/rating/`;
 
 export type ScreenApiResponse = ApiFormDataReadOnly & ApiFormData;
 
@@ -323,12 +325,21 @@ export interface AssistantSuggestedAction {
   url?: string;
 }
 
+// +1 thumbs up, -1 thumbs down, null unrated. A union rather than `number` so the
+// two thumbs can't be confused with each other or with an arbitrary score anywhere
+// between the button and the request body.
+export type AssistantRating = 1 | -1 | null;
+
 export interface AssistantApiMessage {
   message_id: string;
   role: 'user' | 'assistant';
   text: string;
   created_at: string;
   suggested_actions?: AssistantSuggestedAction[];
+  // Optional because it is absent from any response produced before MFB-1915
+  // deployed, and a cached bundle can outlive a backend release in either direction.
+  // Absent and null both mean unrated.
+  rating?: AssistantRating;
 }
 
 export interface AssistantConversationResponse {
@@ -440,10 +451,42 @@ const sendAssistantMessage = async (
   });
 };
 
+// Set, change, or clear the thumbs up/down on one assistant reply (MFB-1915).
+//
+// Unlike every other assistant call here, this one does NOT reach ai-service:
+// benefits-api owns the column and writes it directly. That is invisible from the
+// browser except in one way worth knowing — a rating still works while ai-service is
+// down, so a failure here is a real failure and not the assistant being unavailable.
+//
+// PUT with the value rather than a toggle, so the request says what the rating should
+// BE. A toggle would depend on the server's current value, and the widget lets a user
+// click faster than the round trip: two toggles racing can land in either order and
+// leave the row disagreeing with the buttons on screen.
+//
+// `null` clears. It is sent explicitly rather than omitted — benefits-api rejects a
+// body with no `rating` key, deliberately, so that a serialization bug that drops the
+// field can't read as "un-rate this".
+const rateAssistantMessage = async (
+  uuid: string,
+  conversationId: string,
+  messageId: string,
+  rating: AssistantRating,
+): Promise<void> => {
+  const response = await fetch(assistantMessageRatingEndpoint(uuid, conversationId, messageId), {
+    method: 'PUT',
+    body: JSON.stringify({ rating }),
+    headers: header,
+  });
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`);
+  }
+};
+
 export {
   startAssistantConversation,
   getAssistantHistory,
   sendAssistantMessage,
+  rateAssistantMessage,
   getTranslations,
   postScreen,
   getScreen,

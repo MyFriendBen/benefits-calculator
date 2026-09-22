@@ -132,6 +132,62 @@
   border-bottom-left-radius: 0.2rem;
 }
 
+/* Thumbs up / down on an assistant reply (MFB-1915).
+
+   Inside the bubble rather than floating beside it, so the buttons move with the
+   message they belong to and a long transcript never leaves a rating stranded next to
+   the wrong reply. Right-aligned and quiet: this is an invitation, not an instruction,
+   and it sits under every single reply — at full contrast it would compete with the
+   answer the user is actually reading. */
+.chatbot-rating {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.125rem;
+  margin-top: 0.25rem;
+}
+
+.chatbot-rating-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 1.75rem = 28px. Below the 44px touch target a standalone control would want, and
+     deliberately so — these are secondary to the message and a 44px pair under every
+     bubble would crowd a panel that is already capped at 45vh in peek. The padding
+     keeps the two thumbs far enough apart to be hit separately. */
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: none;
+  /* Not the bubble's own #333: the buttons must read as secondary to the text they
+     sit under, and darken only on interaction. */
+  color: #6b6b6b;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.chatbot-rating-btn:hover {
+  color: #333;
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Never removed, only restyled. These are small, low-contrast controls in a corner of
+   a floating panel — the place a keyboard user is most likely to lose track of where
+   they are. */
+.chatbot-rating-btn:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+/* The chosen thumb. Colour is NOT the only difference — the icon itself swaps from
+   outline to filled (see Chatbot.tsx), so the state survives a user who cannot
+   distinguish these two greys, and aria-pressed carries it for screen readers. */
+.chatbot-rating-btn--active {
+  color: var(--primary-color);
+}
+
 .chatbot-link {
   color: var(--primary-color);
   word-break: break-all;
