@@ -1,5 +1,4 @@
-import { useConfig } from '../Config/configHook';
-import { FormControl, Select, InputLabel, MenuItem, SelectChangeEvent } from '@mui/material';
+import LanguageSelect from '../LanguageSelect/LanguageSelect';
 import { FormattedMessage } from 'react-intl';
 import { Context } from '../Wrapper/Wrapper';
 import { useContext, useEffect, useRef } from 'react';
@@ -18,8 +17,7 @@ import { PRE_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
 const STEP_1_ANALYTICS_ID = PRE_DIRECTORY_STEP_IDS.language;
 
 const SelectLanguagePage = () => {
-  const { locale, selectLanguage } = useContext(Context);
-  const languageOptions = useConfig<{ [key: string]: string }>('language_options');
+  const { selectLanguage } = useContext(Context);
   const { whiteLabel, uuid } = useParams();
   const states = useStateOptions();
 
@@ -51,25 +49,6 @@ const SelectLanguagePage = () => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const createMenuItems = (optionList: Record<string, string>, disabledFMId: string, disabledFMDefault: string) => {
-    const disabledSelectMenuItem = (
-      <MenuItem value="disabled-select" key="disabled-select" disabled>
-        <FormattedMessage id={disabledFMId} defaultMessage={disabledFMDefault} />
-      </MenuItem>
-    );
-    const menuItemKeyLabelPairArr = Object.entries(optionList);
-
-    const dropdownMenuItems = menuItemKeyLabelPairArr.map((key) => {
-      return (
-        <MenuItem value={key[0]} key={key[0]}>
-          {key[1]}
-        </MenuItem>
-      );
-    });
-
-    return [disabledSelectMenuItem, dropdownMenuItems];
-  };
 
   useEffect(() => {
     const continueOnEnter = (event: KeyboardEvent) => {
@@ -130,23 +109,19 @@ const SelectLanguagePage = () => {
         <FormattedMessage id="selectLanguage.subHeader" defaultMessage="What is your preferred language?" />
       </QuestionQuestion>
       <form onSubmit={handleSubmit}>
-        <FormControl sx={{ mt: 1, mb: 2, minWidth: 210, maxWidth: '100%' }}>
-          <InputLabel id="language-select-label">
-            <FormattedMessage id="selectLang.text" defaultMessage="Language" />
-          </InputLabel>
-          <Select
-            labelId="language-select-label"
-            id="language-select"
-            value={locale}
-            label={<FormattedMessage id="selectLang.text" defaultMessage="Language" />}
-            onChange={(event) => {
-              markFormStarted();
-              selectLanguage(event.target.value);
-            }}
-          >
-            {createMenuItems(languageOptions, 'selectLang.disabledSelectMenuItemText', 'Select a language')}
-          </Select>
-        </FormControl>
+        <LanguageSelect
+          id="language-select"
+          variant="outlined"
+          label={<FormattedMessage id="selectLang.text" defaultMessage="Language" />}
+          placeholder={
+            <FormattedMessage id="selectLang.disabledSelectMenuItemText" defaultMessage="Select a language" />
+          }
+          formControlSx={{ mt: 1, mb: 2, minWidth: 210, maxWidth: '100%' }}
+          onChange={(languageCode) => {
+            markFormStarted();
+            selectLanguage(languageCode);
+          }}
+        />
         <div style={{ marginTop: '1rem' }}>
           <FormContinueButton>
             <FormattedMessage id="continueButton-getStarted" defaultMessage="Get Started" />

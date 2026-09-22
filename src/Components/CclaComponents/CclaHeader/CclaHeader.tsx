@@ -1,11 +1,11 @@
 import { useContext, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { AppBar, MenuItem, Select, IconButton, Dialog, SelectChangeEvent } from '@mui/material';
+import { AppBar, IconButton, Dialog } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import { useConfig } from '../../Config/configHook';
 import { Context } from '../../Wrapper/Wrapper';
+import LanguageSelect from '../../LanguageSelect/LanguageSelect';
 import CclaLogo from '../../../Assets/States/NC/WhiteLabels/CclaAssets/ccla_mfb_logo_v2.png';
 import LanguageIcon from '@mui/icons-material/Language';
 import ShareIcon from '@mui/icons-material/Share';
@@ -13,13 +13,8 @@ import './CclaHeader.css';
 import CclaShare from '../CclaShare/CclaShare';
 import { useQueryString } from '../../QuestionComponents/questionHooks';
 
-type LanguageOptions = {
-  [key: string]: string;
-};
-
 const CclaHeader = () => {
-  const { locale, selectLanguage, whiteLabel } = useContext(Context);
-  const languageOptions = useConfig<LanguageOptions>('language_options');
+  const { whiteLabel } = useContext(Context);
   const queryString = useQueryString();
   const intl = useIntl();
 
@@ -41,7 +36,6 @@ const CclaHeader = () => {
   };
 
   const [openShare, setOpenShare] = useState(false);
-  const [isLanguageSelectOpen, setIsLanguageSelectOpen] = useState(false);
 
   const handleOpenShare = () => {
     setOpenShare(true);
@@ -49,32 +43,6 @@ const CclaHeader = () => {
 
   const handleCloseShare = () => {
     setOpenShare(false);
-  };
-
-  const handleCloseLanguage = () => {
-    setIsLanguageSelectOpen(false);
-  };
-
-  const handleOpenLanguage = () => {
-    setIsLanguageSelectOpen(true);
-  };
-
-  const handleLanguageChange = (event: SelectChangeEvent) => {
-    selectLanguage(event.target.value);
-  };
-
-  const createMenuItems = (optionList: LanguageOptions) => {
-    const menuItemKeyLabelPairArr = Object.entries(optionList);
-
-    const dropdownMenuItems = menuItemKeyLabelPairArr.map((key) => {
-      return (
-        <MenuItem value={key[0]} key={key[0]} sx={{ color: '#000000' }}>
-          {key[1]}
-        </MenuItem>
-      );
-    });
-
-    return dropdownMenuItems;
   };
 
   return (
@@ -89,22 +57,12 @@ const CclaHeader = () => {
           <Stack direction="row" gap=".55rem">
             <Stack direction="row" gap=".25rem" alignItems="center">
               <LanguageIcon className="ccla-globe-icon" />
-              <Select
-                labelId="select-language-label"
+              <LanguageSelect
                 id="ccla-select-language"
-                value={locale}
-                label="Language"
-                onChange={handleLanguageChange}
-                aria-label={intl.formatMessage(selectLangAriaLabelProps)}
-                variant="standard"
-                disableUnderline={true}
-                open={isLanguageSelectOpen}
-                onOpen={handleOpenLanguage}
-                onClose={handleCloseLanguage}
-                sx={{ '& .MuiSvgIcon-root': { color: '#000000' } }}
-              >
-                {createMenuItems(languageOptions)}
-              </Select>
+                ariaLabel={intl.formatMessage(selectLangAriaLabelProps)}
+                iconColor="#000000"
+                menuItemColor="#000000"
+              />
               <IconButton
                 onClick={handleOpenShare}
                 aria-label={intl.formatMessage(shareButtonAriaLabelProps)}

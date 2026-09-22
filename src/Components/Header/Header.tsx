@@ -1,8 +1,8 @@
-import { AppBar, MenuItem, Select } from '@mui/material';
-import { useContext, useMemo, useState } from 'react';
+import { AppBar } from '@mui/material';
+import { useContext, useMemo } from 'react';
 import { Context } from '../Wrapper/Wrapper';
 import LanguageIcon from '@mui/icons-material/Language';
-import { useConfig } from '../Config/configHook';
+import LanguageSelect from '../LanguageSelect/LanguageSelect';
 import Paper from '@mui/material/Paper';
 import { useIntl } from 'react-intl';
 import { FormattedMessage } from 'react-intl';
@@ -15,7 +15,6 @@ import { useTrackEvent } from '../../Assets/analytics';
 const Header = () => {
   const context = useContext(Context);
   const { formData, getReferrer, whiteLabel } = context;
-  const languageOptions = useConfig<{ [key: string]: string }>('language_options');
   const queryString = useQueryString();
   const landingPageQueryString = useQueryString({ path: null });
   const intl = useIntl();
@@ -40,30 +39,6 @@ const Header = () => {
   };
 
   const track = useTrackEvent();
-
-  const [isLanguageSelectOpen, setIsLanguageSelectOpen] = useState(false);
-
-  const handleCloseLanguage = () => {
-    setIsLanguageSelectOpen(false);
-  };
-
-  const handleOpenLanguage = () => {
-    setIsLanguageSelectOpen(true);
-  };
-
-  const createMenuItems = (optionList: { [key: string]: string }) => {
-    const menuItemKeyLabelPairArr = Object.entries(optionList);
-
-    const dropdownMenuItems = menuItemKeyLabelPairArr.map((key) => {
-      return (
-        <MenuItem value={key[0]} key={key[0]}>
-          {key[1]}
-        </MenuItem>
-      );
-    });
-
-    return dropdownMenuItems;
-  };
 
   const containerClass = useMemo(() => {
     let className = 'header-full-width-container';
@@ -95,29 +70,15 @@ const Header = () => {
           </a>
           <div className="icon-wrapper">
             <LanguageIcon />
-            <Select
-              labelId="select-language-label"
+            <LanguageSelect
               id="select-language"
-              placeholder="Change Language"
-              value={context.locale}
-              label="Language"
-              onChange={(event) => {
-                const newLanguageCode = event.target.value;
-                track('screener_language_changed', {
-                  language_name: languageOptions[newLanguageCode] ?? newLanguageCode,
-                });
-                context.selectLanguage(newLanguageCode);
+              onChange={(languageCode, languageLabel) => {
+                track('screener_language_changed', { language_name: languageLabel });
+                context.selectLanguage(languageCode);
               }}
-              aria-label={intl.formatMessage(selectLangAriaLabelProps)}
-              variant="standard"
-              disableUnderline={true}
-              open={isLanguageSelectOpen}
-              onOpen={handleOpenLanguage}
-              onClose={handleCloseLanguage}
-              sx={{ '& .MuiSvgIcon-root': { color: '#FFFFFF' } }}
-            >
-              {createMenuItems(languageOptions)}
-            </Select>
+              ariaLabel={intl.formatMessage(selectLangAriaLabelProps)}
+              iconColor="#FFFFFF"
+            />
           </div>
         </AppBar>
         {formData.frozen && (
