@@ -179,6 +179,54 @@ function renderFormattedMessage(text: string): React.ReactNode {
   return elements;
 }
 
+type MessageRatingProps = {
+  rating: AssistantRating;
+  /** Called with what the rating should BECOME — never a toggle; see `rateMessage`. */
+  onRate: (next: AssistantRating) => void;
+  groupLabel: string;
+  upLabel: string;
+  downLabel: string;
+};
+
+/**
+ * The thumbs up / thumbs down pair under one assistant reply (MFB-1915).
+ *
+ * Presentational: it holds no state and performs no request, so the optimistic update
+ * and its rollback stay in one place in the provider rather than being split across a
+ * component that renders once per message.
+ *
+ * Two real <button>s carrying `aria-pressed`, inside a labelled group. The pressed
+ * state is what a screen reader announces, and the icon swaps between outline and
+ * filled — so which thumb is chosen never rests on colour alone.
+ */
+function MessageRating({ rating, onRate, groupLabel, upLabel, downLabel }: MessageRatingProps) {
+  // Clicking the thumb already held clears it; clicking the other switches.
+  const toggle = (thumb: 1 | -1) => () => onRate(rating === thumb ? null : thumb);
+
+  return (
+    <div className="chatbot-rating" role="group" aria-label={groupLabel}>
+      <button
+        type="button"
+        className={`chatbot-rating-btn${rating === 1 ? ' chatbot-rating-btn--active' : ''}`}
+        onClick={toggle(1)}
+        aria-pressed={rating === 1}
+        aria-label={upLabel}
+      >
+        {rating === 1 ? <ThumbUpAltIcon fontSize="inherit" /> : <ThumbUpOffAltIcon fontSize="inherit" />}
+      </button>
+      <button
+        type="button"
+        className={`chatbot-rating-btn${rating === -1 ? ' chatbot-rating-btn--active' : ''}`}
+        onClick={toggle(-1)}
+        aria-pressed={rating === -1}
+        aria-label={downLabel}
+      >
+        {rating === -1 ? <ThumbDownAltIcon fontSize="inherit" /> : <ThumbDownOffAltIcon fontSize="inherit" />}
+      </button>
+    </div>
+  );
+}
+
 type ChatbotProviderProps = {
   /**
    * Every program currently rendered on the results page — i.e. what survived the
@@ -660,46 +708,19 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
             {messages.map((msg, i) => (
               <div key={msg.id ?? i} className={`chatbot-message chatbot-message-${msg.role}`}>
                 {renderFormattedMessage(msg.text)}
-                {/* Rating buttons, on stored assistant replies only (MFB-1915).
-
-                    `msg.id` is the gate rather than a separate flag: a bubble without
-                    one is either the user's own message being echoed optimistically
-                    before its round trip, or a client-side error notice — nothing the
-                    server has a row for, and nothing it would make sense to rate. The
-                    greeting never reaches this list at all.
-
-                    Rendered as a pair of real <button>s with an aria-pressed state, so
-                    the current rating is what a screen reader announces rather than
-                    something conveyed only by which icon is filled in. */}
+                {/* Stored assistant replies only. `msg.id` is the gate rather than a
+                    separate flag: a bubble without one is either the user's own message
+                    echoed optimistically before its round trip, or a client-side error
+                    notice — nothing the server has a row for, and nothing it would make
+                    sense to rate. The greeting never reaches this list at all. */}
                 {msg.role === 'bot' && msg.id !== undefined && (
-                  <div className="chatbot-rating" role="group" aria-label={rateReplyLabel}>
-                    <button
-                      type="button"
-                      className={`chatbot-rating-btn${msg.rating === 1 ? ' chatbot-rating-btn--active' : ''}`}
-                      onClick={() => void rateMessage(msg.id!, msg.rating === 1 ? null : 1)}
-                      aria-pressed={msg.rating === 1}
-                      aria-label={thumbUpLabel}
-                    >
-                      {msg.rating === 1 ? (
-                        <ThumbUpAltIcon fontSize="inherit" />
-                      ) : (
-                        <ThumbUpOffAltIcon fontSize="inherit" />
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      className={`chatbot-rating-btn${msg.rating === -1 ? ' chatbot-rating-btn--active' : ''}`}
-                      onClick={() => void rateMessage(msg.id!, msg.rating === -1 ? null : -1)}
-                      aria-pressed={msg.rating === -1}
-                      aria-label={thumbDownLabel}
-                    >
-                      {msg.rating === -1 ? (
-                        <ThumbDownAltIcon fontSize="inherit" />
-                      ) : (
-                        <ThumbDownOffAltIcon fontSize="inherit" />
-                      )}
-                    </button>
-                  </div>
+                  <MessageRating
+                    rating={msg.rating ?? null}
+                    onRate={(next) => rateMessage(msg.id as string, next)}
+                    groupLabel={rateReplyLabel}
+                    upLabel={thumbUpLabel}
+                    downLabel={thumbDownLabel}
+                  />
                 )}
               </div>
             ))}
