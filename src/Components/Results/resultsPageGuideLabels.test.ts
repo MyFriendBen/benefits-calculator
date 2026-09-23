@@ -24,6 +24,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { buildTabs, type ResultsTabId } from './Tabs/buildTabs';
 
 const read = (relativePath: string) => readFileSync(join(__dirname, relativePath), 'utf8');
 
@@ -123,6 +124,64 @@ describe('the additional-resources tab, which Benji can now read from', () => {
 
     expect(rendered).toContain('needsSortedByCategory.map');
     expect(rendered).not.toMatch(/\.filter\(/);
+  });
+});
+
+/**
+ * The tab set, asserted by SHAPE rather than by label.
+ *
+ * The checks above assert that strings the guide names still exist, so they catch a
+ * rename or a removal but not an ADDITION — `REQUIRED` has no entry for a control that
+ * did not exist when it was written. This enumerates every tab `buildTabs` can produce,
+ * across every combination of its inputs, and pins that set. A new tab changes it and
+ * fails here, with the guide named in the failure.
+ */
+describe("the tab set Benji's guide is written against", () => {
+  const args = {
+    benefitsLink: '/co/uuid/results/benefits',
+    needsLink: '/co/uuid/results/near-term-needs',
+    helpLink: '/co/uuid/results/more-help',
+    programCount: 4,
+    needCount: 2,
+    immediateHelpSuppressed: false,
+    immediateHelpEmpty: false,
+  };
+
+  /** Every tab id reachable under any combination of the visibility inputs. */
+  const everyReachableTabId = (): ResultsTabId[] => {
+    const ids = new Set<ResultsTabId>();
+    for (const immediateHelpSuppressed of [false, true]) {
+      for (const immediateHelpEmpty of [false, true]) {
+        for (const tab of buildTabs({ ...args, immediateHelpSuppressed, immediateHelpEmpty })) {
+          ids.add(tab.id);
+        }
+      }
+    }
+    return [...ids].sort();
+  };
+
+  it('contains exactly the tabs the guide describes', () => {
+    // If this fails because you ADDED a tab, the fix is in ai-service: describe it in
+    // `_RESULTS_PAGE_GUIDE` (app/prompts.py) and then add its id here. Benji is told
+    // the page description is complete, so an undescribed tab is one it will actively
+    // tell users does not exist.
+    expect(everyReachableTabId()).toEqual(['help', 'need', 'program']);
+  });
+
+  it('keeps the two list tabs unconditional', () => {
+    // The guide states these two are always present and names them by what they hold.
+    const alwaysOn = buildTabs({ ...args, immediateHelpSuppressed: true, immediateHelpEmpty: true });
+    expect(alwaysOn.map((tab) => tab.id)).toEqual(['program', 'need']);
+  });
+
+  it('puts a count on those two tabs and on no others', () => {
+    // The guide says "Only the two program/resource tabs carry a count." Immediate
+    // Help opts out deliberately — its list is per-tenant config, not personalized —
+    // so a count appearing there would make the guide wrong without renaming anything.
+    const counted = buildTabs(args)
+      .filter((tab) => tab.count !== undefined)
+      .map((tab) => tab.id);
+    expect(counted).toEqual(['program', 'need']);
   });
 });
 
