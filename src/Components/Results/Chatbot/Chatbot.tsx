@@ -102,6 +102,11 @@ function isSmallScreen(): boolean {
   return typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 767px)').matches;
 }
 
+type RatingWriteValue = { rating: AssistantRating; reason: AssistantRatingReason | null };
+
+/** One message's in-flight rating request, plus the newest value waiting behind it. */
+type RatingWrite = { inFlight: boolean; pending: RatingWriteValue | null };
+
 type ChatbotContextType = {
   openWithMessage: (message: string) => void;
 };
@@ -337,6 +342,13 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
   // transcript and then being unable to rate any of it would defeat the "survives a
   // reload" requirement, which is most of the point.
   const ratingConversationIdRef = useRef<string | null>(null);
+  // A synchronous mirror of `messages`. A rating write needs to know what is currently
+  // displayed at the moment it is queued, and the `setMessages` updater runs when React
+  // processes the update, which is not necessarily before the next line here.
+  const messagesRef = useRef<Message[]>([]);
+  // Per message: is a rating request on the wire, what newer value is waiting behind it,
+  // and what to fall back to if the last one fails. See `queueRatingWrite`.
+  const ratingWritesRef = useRef<Map<string, RatingWrite>>(new Map());
   const startPromiseRef = useRef<Promise<string | null> | null>(null);
   const sendingRef = useRef(false);
   const { formatMessage, formatNumber } = useIntl();
@@ -442,6 +454,10 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
   }, []);
 
   useEffect(() => {
+    messagesRef.current = messages;
+  });
+
+  useEffect(() => {
     scrollToBottom();
   }, [messages, isSending, scrollToBottom]);
 
@@ -512,6 +528,34 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
       .catch(() => {});
   }, [panel, uuid]);
 
+  // Apply a server transcript WITHOUT discarding ratings this session has written.
+  //
+  // `setMessages(res.messages.map(toWidgetMessage))` replaced the list wholesale, which
+  // loses a rating the household has just given. The window is real and ordinary: after
+  // a history restore `conversationIdRef` is deliberately left null (see the restore
+  // effect), so the first send calls the start endpoint — and someone who rates a
+  // restored reply and immediately asks a follow-up has a rating PUT racing a start
+  // POST. If ai-service reads the rows before that PUT commits, the response carries
+  // `rating: null` and the reply goes back to unrated on screen while the database holds
+  // the rating.
+  //
+  // Any message this session has written a rating for keeps its local value: we know
+  // what we sent, and that is at least as fresh as anything a server read can tell us.
+  const applyServerMessages = useCallback((serverMessages: AssistantApiMessage[]) => {
+    setMessages((prev) => {
+      const ours = new Map(
+        prev
+          .filter((m) => m.id !== undefined && ratingWritesRef.current.has(m.id))
+          .map((m) => [m.id as string, { rating: m.rating ?? null, reason: m.reason ?? null }]),
+      );
+      return serverMessages.map((sm) => {
+        const mapped = toWidgetMessage(sm);
+        const mine = ours.get(sm.message_id);
+        return mine ? { ...mapped, rating: mine.rating, reason: mine.reason } : mapped;
+      });
+    });
+  }, []);
+
   // Start (or reuse) the conversation; returns the conversation id, or null on failure.
   // Deduped via startPromiseRef so concurrent opens/sends don't create two conversations.
   const ensureConversation = useCallback(async (): Promise<string | null> => {
@@ -522,7 +566,7 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
         .then((res) => {
           conversationIdRef.current = res.conversation_id;
           ratingConversationIdRef.current = res.conversation_id;
-          setMessages(res.messages.map(toWidgetMessage));
+          applyServerMessages(res.messages);
           return res.conversation_id;
         })
         .catch(() => null) // error surfaced by the caller (sendMessage), not here
@@ -531,7 +575,7 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
         });
     }
     return startPromiseRef.current;
-  }, [uuid, errorMessage, visiblePrograms]);
+  }, [uuid, errorMessage, visiblePrograms, applyServerMessages]);
 
   // Context refresh (MFB-1737): once a conversation exists, a change in the
   // rendered program list (a results-page filter) re-POSTs the start endpoint so
@@ -597,61 +641,109 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
     [ensureConversation, uuid, errorMessage, track, refreshContext],
   );
 
-  // Thumbs up / down on one reply (MFB-1915).
+  // Thumbs up / down on one reply, and the reason behind a thumbs-down (MFB-1915).
   //
-  // Clicking the thumb a message already holds clears it; clicking the other switches.
-  // Both are the same PUT with a different value, because the request states what the
-  // rating should BE rather than asking for a toggle — the user can click faster than
-  // the round trip, and two toggles racing can land in either order and leave the row
-  // disagreeing with the buttons they are looking at.
+  // ONE REQUEST PER MESSAGE AT A TIME, with the newest value coalesced behind it.
+  // Firing these off independently looked fine and was wrong in two ways, both of
+  // which a normal thumbs-down-then-pick-a-chip sequence can hit inside one round trip:
   //
-  // Optimistic, with a rollback. A rating is feedback, not a transaction: making
-  // someone wait on a spinner to find out whether their thumbs-down registered costs
-  // more than the rare failure does, and it would also discourage the second and third
-  // ratings that make this data worth collecting. The rollback matters anyway, because
-  // a button that silently lies about what was stored is worse than one that flickers.
+  //   1. Out-of-order writes. Two PUTs for the same message can reach different workers
+  //      and be applied in either order, so the row can end up holding the value the
+  //      user chose FIRST while the buttons show the one they chose second. Nothing
+  //      fails, so nothing rolls back, and the mismatch only surfaces on a reload.
+  //      Sending the desired value rather than a toggle fixes a double-click of the
+  //      SAME value; it does nothing for two different values in flight together.
   //
-  // Matching on `id` rather than index: the transcript can grow underneath this (a
-  // reply landing while the user rates an earlier one), and an index captured at click
-  // time would move a rating onto the wrong message.
-  const rateMessage = useCallback(
-    async (messageId: string, next: AssistantRating, nextReason: AssistantRatingReason | null = null) => {
+  //   2. A stale failure clobbering a newer success. Each attempt used to restore the
+  //      value it captured at its own click, with no check for anything newer. Thumbs-up
+  //      then quickly thumbs-down, where the first request then 429s, restored "unrated"
+  //      over a thumbs-down the server had already accepted.
+  //
+  // Serializing per message removes both: at most one write is on the wire, the latest
+  // intent always goes out last, and a failure can only ever roll back to the value the
+  // server most recently confirmed — and only when nothing newer is already waiting.
+  const queueRatingWrite = useCallback(
+    async (messageId: string, desired: RatingWriteValue) => {
       const conversationId = ratingConversationIdRef.current;
       if (!conversationId || !uuid) return;
 
-      // A reason only rides along with a thumbs-down. Switching thumbs or clearing
-      // drops it, matching what the endpoint (and the DB constraint) will do anyway.
-      const reason = next === -1 ? nextReason : null;
+      const current = messagesRef.current.find((m) => m.id === messageId);
+      const before: RatingWriteValue = { rating: current?.rating ?? null, reason: current?.reason ?? null };
 
-      let previous: AssistantRating = null;
-      let previousReason: AssistantRatingReason | null = null;
+      // Optimistic, always. A rating is feedback, not a transaction: making someone wait
+      // on a spinner to learn whether their thumbs-down registered costs more than the
+      // rare failure does.
       setMessages((prev) =>
-        prev.map((m) => {
-          if (m.id !== messageId) return m;
-          previous = m.rating ?? null;
-          previousReason = m.reason ?? null;
-          return { ...m, rating: next, reason };
-        }),
+        prev.map((m) => (m.id === messageId ? { ...m, rating: desired.rating, reason: desired.reason } : m)),
       );
 
-      track('screener_benbot_rated', {
-        rating: next === 1 ? 'up' : next === -1 ? 'down' : 'cleared',
-        ...(reason ? { reason } : {}),
-      });
+      const writes = ratingWritesRef.current;
+      const open = writes.get(messageId);
+      if (open?.inFlight) {
+        // Something is already on the wire for this message. Keep only the latest
+        // intent — the in-flight call will send it when it returns.
+        open.pending = desired;
+        return;
+      }
 
+      const entry: RatingWrite = { inFlight: true, pending: null };
+      writes.set(messageId, entry);
+
+      let send = desired;
+      // What the server has most recently accepted. Starts at what was on screen before
+      // this write, which is the last thing it accepted for this message.
+      let confirmed = before;
       try {
-        await rateAssistantMessage(uuid, conversationId, messageId, next, reason);
-      } catch {
-        setMessages((prev) =>
-          prev.map((m) => (m.id === messageId ? { ...m, rating: previous, reason: previousReason } : m)),
-        );
-        // No error bubble in the transcript. The send path adds one because a failed
-        // send means the user's question went unanswered; a failed rating means only
-        // that their opinion wasn't recorded, and interrupting the conversation with a
-        // message about it would be louder than the thing that failed.
+        for (;;) {
+          try {
+            await rateAssistantMessage(uuid, conversationId, messageId, send.rating, send.reason);
+            confirmed = send;
+          } catch {
+            // Don't roll back under a newer value that is about to be sent — it would
+            // flicker, and the pending write is about to state the truth anyway.
+            if (!entry.pending) {
+              const back = confirmed;
+              setMessages((prev) =>
+                prev.map((m) => (m.id === messageId ? { ...m, rating: back.rating, reason: back.reason } : m)),
+              );
+            }
+            // No error bubble in the transcript. The send path adds one because a failed
+            // send means the user's question went unanswered; a failed rating means only
+            // that their opinion wasn't recorded, and interrupting the conversation with
+            // a message about it would be louder than the thing that failed.
+          }
+          if (!entry.pending) break;
+          send = entry.pending;
+          entry.pending = null;
+        }
+      } finally {
+        entry.inFlight = false;
       }
     },
-    [uuid, track],
+    [uuid],
+  );
+
+  // Clicking a thumb. Always clears any reason: a reason stranded on a thumbs-up or an
+  // unrated reply would be counted as a complaint nobody made, and the endpoint and the
+  // DB constraint both refuse it anyway.
+  const rateMessage = useCallback(
+    (messageId: string, next: AssistantRating) => {
+      track('screener_benbot_rated', { rating: next === 1 ? 'up' : next === -1 ? 'down' : 'cleared' });
+      void queueRatingWrite(messageId, { rating: next, reason: null });
+    },
+    [queueRatingWrite, track],
+  );
+
+  // Picking or clearing a reason chip. A SEPARATE event from the thumb: these used to
+  // share `screener_benbot_rated`, so every chip press recorded another thumbs-down and
+  // one unhappy reply could report three. The overcount fell hardest on the most engaged
+  // households, whose reasons are the ones worth having.
+  const setRatingReason = useCallback(
+    (messageId: string, reason: AssistantRatingReason | null) => {
+      track('screener_benbot_rating_reason', { reason: reason ?? 'cleared' });
+      void queueRatingWrite(messageId, { rating: -1, reason });
+    },
+    [queueRatingWrite, track],
   );
 
   const openWithMessage = useCallback(
@@ -836,7 +928,7 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
                     {msg.rating === -1 && (
                       <ReasonChips
                         selected={msg.reason ?? null}
-                        onPick={(reason) => rateMessage(msg.id as string, -1, reason)}
+                        onPick={(reason) => setRatingReason(msg.id as string, reason)}
                         labels={reasonLabels}
                         labelledBy={`chatbot-rating-note-${msg.id}`}
                       />

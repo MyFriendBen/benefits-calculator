@@ -221,7 +221,12 @@ export interface ScreenerEventMap {
   // `reason` is present only when a chip was picked, which is a minority of
   // thumbs-downs by design — the chips are offered after the rating is already saved
   // and are skippable, so its absence means "skipped", not "missing data".
-  screener_benbot_rated: { rating: 'up' | 'down' | 'cleared'; reason?: string };
+  screener_benbot_rated: { rating: 'up' | 'down' | 'cleared' };
+  // Separate from `screener_benbot_rated` on purpose. Both used to fire from the same
+  // call, so every chip press recorded another thumbs-down and one unhappy reply could
+  // report three — an overcount that fell hardest on the most engaged households.
+  // 'cleared' is a reason taken back, which is not the same as never giving one.
+  screener_benbot_rating_reason: { reason: string };
 
   // ---- NPS survey ----
   screener_nps_score_submitted: { score: number };
