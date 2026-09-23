@@ -142,35 +142,55 @@
 .chatbot-rating {
   display: flex;
   justify-content: flex-end;
-  gap: 0.125rem;
-  margin-top: 0.25rem;
+  /* Visual gap comes from the hit areas overlapping slightly less than they extend;
+     see the ::after below. Keeping this at 0 lets the icons sit close without their
+     tap targets fighting. */
+  gap: 0.5rem;
+  margin-top: 0.125rem;
 }
 
+/* The box hugs the icon; the TAP TARGET is bigger and costs no layout height.
+   Previously `min-height: 1.75rem` (31.5px at this root size) wrapped a 15.75px glyph
+   in ~16px of chrome, which added 36px to every assistant bubble — and bought an
+   awkward middle ground, since 31.5px is not a real touch target either. The pseudo-
+   element below is absolutely positioned, so it enlarges what you can hit without
+   enlarging what the layout has to make room for: ~15px tall on the page, ~29px to
+   the finger, which is LARGER than the old button. */
 .chatbot-rating-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* 1.75rem = 28px. Below the 44px touch target a standalone control would want, and
-     deliberately so — these are secondary to the message and a 44px pair under every
-     bubble would crowd a panel that is already capped at 45vh in peek. The padding
-     keeps the two thumbs far enough apart to be hit separately. */
-  min-width: 1.75rem;
-  min-height: 1.75rem;
-  padding: 0.125rem 0.25rem;
-  font-size: 0.875rem;
+  padding: 0;
+  font-size: 0.8125rem;
+  /* 0, not 1 — a line box taller than the glyph is most of what was padding the row. */
+  line-height: 0;
   border: none;
-  border-radius: 0.25rem;
+  border-radius: 0.1875rem;
   background: none;
   /* Not the bubble's own #333: the buttons must read as secondary to the text they
      sit under, and darken only on interaction. */
   color: #6b6b6b;
   cursor: pointer;
-  line-height: 1;
 }
 
+.chatbot-rating-btn::after {
+  content: '';
+  position: absolute;
+  /* Extends the hit area past the icon without affecting layout.
+     HORIZONTAL MUST BE AT MOST HALF THE ROW'S `gap` (0.5rem), or the two hit areas
+     overlap — and because the down-thumb comes later in the DOM it wins the overlap,
+     so the WHOLE gap resolves to it. A click a few pixels right of the up-thumb would
+     then record a thumbs-DOWN: the one mis-click this feature must not make. At
+     0.25rem each, the two areas meet exactly and never overlap.
+     Vertical is free to be generous — nothing adjacent competes for it. */
+  inset: -0.4375rem -0.25rem;
+}
+
+/* No background on hover any more: a filled swatch around a 15px icon reads as a
+   chunky button again, which is the thing this is getting away from. */
 .chatbot-rating-btn:hover {
   color: #333;
-  background-color: rgba(0, 0, 0, 0.06);
 }
 
 /* Never removed, only restyled. These are small, low-contrast controls in a corner of
