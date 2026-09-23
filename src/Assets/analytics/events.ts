@@ -175,18 +175,25 @@ export interface ScreenerEventMap {
   screener_filter_engaged: { filter_type?: string };
 
   // ---- Share MFB (share the tool with others) ----
+  // `share_language` is the language the RECIPIENT will get the message in, not
+  // the sender's UI language. Absent on copy_link, which carries no message body.
   screener_share: {
     share_location: 'results_popup' | 'footer';
     share_channel?: 'email' | 'sms' | 'whatsapp' | 'copy_link';
     share_provider?: string;
-    share_action: 'open' | 'send' | 'close' | 'back';
+    share_language?: string;
+    share_action: 'open' | 'send' | 'close' | 'back' | 'language_selected';
   };
   screener_share_popup_shown: {};
 
   // ---- Save My Results (send the user their own results) ----
+  // `save_language` is the language the message is composed in, which can differ
+  // from the language the screener was taken in. Absent on copy_link, which
+  // sends no message.
   screener_results_save: {
     save_channel?: 'email' | 'sms' | 'copy_link';
-    save_action: 'open' | 'send' | 'close' | 'back';
+    save_language?: string;
+    save_action: 'open' | 'send' | 'close' | 'back' | 'language_selected';
   };
 
   // ---- Links (footer / header / nav) ----
