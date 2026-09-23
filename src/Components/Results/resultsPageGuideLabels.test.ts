@@ -130,19 +130,11 @@ describe('the additional-resources tab, which Benji can now read from', () => {
 /**
  * The tab set, asserted by SHAPE rather than by label.
  *
- * Everything above this point checks that strings the guide NAMES still exist, so it
- * fails on a rename and on a removal. It cannot fail on an ADDITION — `REQUIRED` has
- * no entry for a control that did not exist when it was written.
- *
- * That gap is not hypothetical. MFB-824 added a third tab, and the guide said "TWO
- * TABS at the top, each showing a count". The label half of this file caught the
- * renamed CESN button; nothing here caught the new tab, and Benji would have gone on
- * denying a tab that was on the user's screen. It surfaced only because a person
- * thought to ask.
- *
- * So: enumerate every tab `buildTabs` can produce, across every combination of its
- * inputs, and pin that set. A new tab changes it and fails here, with the guide named
- * in the failure.
+ * The checks above assert that strings the guide names still exist, so they catch a
+ * rename or a removal but not an ADDITION — `REQUIRED` has no entry for a control that
+ * did not exist when it was written. This enumerates every tab `buildTabs` can produce,
+ * across every combination of its inputs, and pins that set. A new tab changes it and
+ * fails here, with the guide named in the failure.
  */
 describe("the tab set Benji's guide is written against", () => {
   const args = {
