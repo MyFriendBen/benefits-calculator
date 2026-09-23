@@ -338,10 +338,8 @@ export type AssistantRating = 1 | -1 | null;
 export const ASSISTANT_RATING_REASONS = [
   'inaccurate',
   'not_my_results',
-  'bad_link',
   'unanswered',
   'hard_to_follow',
-  'wrong_tone',
   'other',
 ] as const;
 

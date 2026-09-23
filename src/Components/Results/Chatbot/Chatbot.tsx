@@ -206,6 +206,13 @@ type ReasonChipsProps = {
  * Single select: picking a second chip replaces the first, and picking the selected one
  * clears it, matching how the thumbs themselves behave.
  *
+ * FIVE, not the seven this started with. Seven stacked to seven lines in a panel capped
+ * at 45vh — a lot of furniture under every thumbs-down — and the labels were sentences
+ * rather than chips. `bad_link` was cut because it is the one failure mode detectable
+ * WITHOUT asking anyone (sweep the stored replies for URLs), and `wrong_tone` because it
+ * is the least often articulated as its own complaint. Both now land in `other`, whose
+ * rate is what will say if that was the wrong call.
+ *
  * Rendered whenever the rating is -1, including on a restored transcript, so a returning
  * household sees what they said — and gets a second chance if they skipped it.
  */
@@ -399,26 +406,15 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
   // object and the transcript re-renders on every message.
   const reasonLabels = useMemo(
     () => ({
-      inaccurate: formatMessage({ id: 'chatbot.reason.inaccurate', defaultMessage: "This isn't right" }),
+      inaccurate: formatMessage({ id: 'chatbot.reason.inaccurate', defaultMessage: 'Not accurate' }),
       not_my_results: formatMessage({
         id: 'chatbot.reason.notMyResults',
-        defaultMessage: "This isn't about my results",
+        defaultMessage: 'Not about my results',
       }),
-      bad_link: formatMessage({
-        id: 'chatbot.reason.badLink',
-        defaultMessage: "A link or phone number didn't work",
-      }),
-      unanswered: formatMessage({
-        id: 'chatbot.reason.unanswered',
-        defaultMessage: "It didn't answer what I asked",
-      }),
+      unanswered: formatMessage({ id: 'chatbot.reason.unanswered', defaultMessage: "Didn't answer me" }),
       hard_to_follow: formatMessage({
         id: 'chatbot.reason.hardToFollow',
-        defaultMessage: 'Hard to follow, or too long',
-      }),
-      wrong_tone: formatMessage({
-        id: 'chatbot.reason.wrongTone',
-        defaultMessage: 'It felt wrong for my situation',
+        defaultMessage: 'Confusing or too long',
       }),
       other: formatMessage({ id: 'chatbot.reason.other', defaultMessage: 'Something else' }),
     }),

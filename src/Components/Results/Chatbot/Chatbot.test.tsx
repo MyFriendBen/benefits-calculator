@@ -889,21 +889,21 @@ describe('thumbs-down reason chips (MFB-1915)', () => {
   it('sends the picked reason', async () => {
     await rateDown();
 
-    await userEvent.click(chip(/this isn.t about my results/i)[0]);
+    await userEvent.click(chip(/not about my results/i)[0]);
 
     expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, 'not_my_results');
-    await waitFor(() => expect(chip(/this isn.t about my results/i)[0]).toHaveAttribute('aria-pressed', 'true'));
+    await waitFor(() => expect(chip(/not about my results/i)[0]).toHaveAttribute('aria-pressed', 'true'));
   });
 
   it('picking a second chip replaces the first', async () => {
     await rateDown();
 
-    await userEvent.click(chip(/this isn.t right/i)[0]);
-    await userEvent.click(chip(/hard to follow/i)[0]);
+    await userEvent.click(chip(/not accurate/i)[0]);
+    await userEvent.click(chip(/confusing or too long/i)[0]);
 
     expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, 'hard_to_follow');
-    await waitFor(() => expect(chip(/hard to follow/i)[0]).toHaveAttribute('aria-pressed', 'true'));
-    expect(chip(/this isn.t right/i)[0]).toHaveAttribute('aria-pressed', 'false');
+    await waitFor(() => expect(chip(/confusing or too long/i)[0]).toHaveAttribute('aria-pressed', 'true'));
+    expect(chip(/not accurate/i)[0]).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('clicking the selected chip clears it', async () => {
@@ -918,7 +918,7 @@ describe('thumbs-down reason chips (MFB-1915)', () => {
 
   it('switching to a thumbs-up drops the reason and hides the chips', async () => {
     await rateDown();
-    await userEvent.click(chip(/this isn.t right/i)[0]);
+    await userEvent.click(chip(/not accurate/i)[0]);
 
     await userEvent.click(thumbUp()[0]);
 
@@ -948,7 +948,7 @@ describe('thumbs-down reason chips (MFB-1915)', () => {
           text: 'start with SNAP',
           created_at: '',
           rating: -1,
-          rating_reason: 'bad_link',
+          rating_reason: 'unanswered',
         },
       ],
     });
@@ -956,16 +956,16 @@ describe('thumbs-down reason chips (MFB-1915)', () => {
     await userEvent.click(screen.getByRole('button', { name: /chat/i }));
     await screen.findByText('start with SNAP');
 
-    await waitFor(() => expect(chip(/a link or phone number/i)[0]).toHaveAttribute('aria-pressed', 'true'));
+    await waitFor(() => expect(chip(/didn.t answer me/i)[0]).toHaveAttribute('aria-pressed', 'true'));
   });
 
   it('rolls the chip back when the request fails', async () => {
     await rateDown();
     mockRate.mockRejectedValueOnce(new Error('500'));
 
-    await userEvent.click(chip(/bad tone|wrong for my situation/i)[0]);
+    await userEvent.click(chip(/didn.t answer me/i)[0]);
 
-    await waitFor(() => expect(chip(/bad tone|wrong for my situation/i)[0]).toHaveAttribute('aria-pressed', 'false'));
+    await waitFor(() => expect(chip(/didn.t answer me/i)[0]).toHaveAttribute('aria-pressed', 'false'));
     expect(screen.queryByText(/something went wrong/i)).not.toBeInTheDocument();
   });
 
@@ -974,6 +974,6 @@ describe('thumbs-down reason chips (MFB-1915)', () => {
     await rateDown();
 
     const group = screen.getByRole('group', { name: /what went wrong/i });
-    expect(group.querySelectorAll('button')).toHaveLength(7);
+    expect(group.querySelectorAll('button')).toHaveLength(5);
   });
 });
