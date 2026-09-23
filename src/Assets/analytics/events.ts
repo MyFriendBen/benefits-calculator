@@ -218,7 +218,10 @@ export interface ScreenerEventMap {
   // Thumbs up / down on one reply (MFB-1915). 'cleared' is the user taking a rating
   // BACK, which is its own signal and must not be folded into "never rated" — that is
   // also why the column behind it records the clearing rather than just blanking.
-  screener_benbot_rated: { rating: 'up' | 'down' | 'cleared' };
+  // `reason` is present only when a chip was picked, which is a minority of
+  // thumbs-downs by design — the chips are offered after the rating is already saved
+  // and are skippable, so its absence means "skipped", not "missing data".
+  screener_benbot_rated: { rating: 'up' | 'down' | 'cleared'; reason?: string };
 
   // ---- NPS survey ----
   screener_nps_score_submitted: { score: number };

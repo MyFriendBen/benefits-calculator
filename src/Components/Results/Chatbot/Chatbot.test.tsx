@@ -663,7 +663,7 @@ describe('message rating (MFB-1915)', () => {
 
     await userEvent.click(thumbUp()[0]);
 
-    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a1', 1);
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a1', 1, null);
     await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true'));
   });
 
@@ -675,7 +675,7 @@ describe('message rating (MFB-1915)', () => {
     await userEvent.click(thumbUp()[0]);
     await userEvent.click(thumbUp()[0]);
 
-    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', null);
+    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', null, null);
     await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false'));
   });
 
@@ -687,7 +687,7 @@ describe('message rating (MFB-1915)', () => {
     await userEvent.click(thumbUp()[0]);
     await userEvent.click(thumbDown()[0]);
 
-    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1);
+    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, null);
     await waitFor(() => expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'true'));
     expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false');
   });
@@ -783,7 +783,7 @@ describe('message rating (MFB-1915)', () => {
 
     await userEvent.click(thumbUp()[0]);
 
-    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-restored', 'a9', 1);
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-restored', 'a9', 1, null);
   });
 
   it('treats a reply with no rating key as unrated', async () => {
@@ -817,7 +817,7 @@ describe('message rating (MFB-1915)', () => {
 
     await userEvent.click(thumbDown()[1]);
 
-    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a-second', -1);
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a-second', -1, null);
   });
 
   it('groups the two buttons so their pairing is announced', async () => {
@@ -837,6 +837,143 @@ describe('message rating (MFB-1915)', () => {
     expect(thumbUp()[0]).toHaveFocus();
     await userEvent.keyboard('{Enter}');
 
-    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a1', 1);
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a1', 1, null);
+  });
+});
+
+describe('thumbs-down reason chips (MFB-1915)', () => {
+  const thumbUp = () => screen.getAllByRole('button', { name: /this reply was helpful/i });
+  const thumbDown = () => screen.getAllByRole('button', { name: /this reply was not helpful/i });
+  const chip = (name: RegExp) => screen.getAllByRole('button', { name });
+
+  const rateDown = async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+    await userEvent.click(thumbDown()[0]);
+    await waitFor(() => expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'true'));
+  };
+
+  it('offers no chips until a reply is rated down', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument();
+  });
+
+  it('shows the chips once a reply is rated down', async () => {
+    await rateDown();
+
+    expect(screen.getByRole('group', { name: /what went wrong/i })).toBeInTheDocument();
+  });
+
+  it('never shows chips on a thumbs-up', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+
+    await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true'));
+    expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument();
+  });
+
+  it('records the thumbs-down before any chip is touched', async () => {
+    // The whole reason the chips can be skippable: the rating is already saved.
+    await rateDown();
+
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, null);
+  });
+
+  it('sends the picked reason', async () => {
+    await rateDown();
+
+    await userEvent.click(chip(/this isn.t about my results/i)[0]);
+
+    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, 'not_my_results');
+    await waitFor(() => expect(chip(/this isn.t about my results/i)[0]).toHaveAttribute('aria-pressed', 'true'));
+  });
+
+  it('picking a second chip replaces the first', async () => {
+    await rateDown();
+
+    await userEvent.click(chip(/this isn.t right/i)[0]);
+    await userEvent.click(chip(/hard to follow/i)[0]);
+
+    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, 'hard_to_follow');
+    await waitFor(() => expect(chip(/hard to follow/i)[0]).toHaveAttribute('aria-pressed', 'true'));
+    expect(chip(/this isn.t right/i)[0]).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('clicking the selected chip clears it', async () => {
+    await rateDown();
+
+    await userEvent.click(chip(/something else/i)[0]);
+    await userEvent.click(chip(/something else/i)[0]);
+
+    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, null);
+    await waitFor(() => expect(chip(/something else/i)[0]).toHaveAttribute('aria-pressed', 'false'));
+  });
+
+  it('switching to a thumbs-up drops the reason and hides the chips', async () => {
+    await rateDown();
+    await userEvent.click(chip(/this isn.t right/i)[0]);
+
+    await userEvent.click(thumbUp()[0]);
+
+    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', 1, null);
+    await waitFor(() => expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument());
+  });
+
+  it('clearing the thumbs-down hides the chips', async () => {
+    await rateDown();
+
+    await userEvent.click(thumbDown()[0]);
+
+    await waitFor(() => expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument());
+  });
+
+  it('restores a reason the household already picked', async () => {
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [
+        {
+          message_id: 'a9',
+          role: 'assistant',
+          text: 'start with SNAP',
+          created_at: '',
+          rating: -1,
+          rating_reason: 'bad_link',
+        },
+      ],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('start with SNAP');
+
+    await waitFor(() => expect(chip(/a link or phone number/i)[0]).toHaveAttribute('aria-pressed', 'true'));
+  });
+
+  it('rolls the chip back when the request fails', async () => {
+    await rateDown();
+    mockRate.mockRejectedValueOnce(new Error('500'));
+
+    await userEvent.click(chip(/bad tone|wrong for my situation/i)[0]);
+
+    await waitFor(() => expect(chip(/bad tone|wrong for my situation/i)[0]).toHaveAttribute('aria-pressed', 'false'));
+    expect(screen.queryByText(/something went wrong/i)).not.toBeInTheDocument();
+  });
+
+  it('offers every code the API accepts', async () => {
+    // A chip the API would refuse is a dead control; a code with no chip is unreachable.
+    await rateDown();
+
+    const group = screen.getByRole('group', { name: /what went wrong/i });
+    expect(group.querySelectorAll('button')).toHaveLength(7);
   });
 });

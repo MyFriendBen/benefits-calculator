@@ -15,8 +15,10 @@ import {
   getAssistantHistory,
   sendAssistantMessage,
   rateAssistantMessage,
+  ASSISTANT_RATING_REASONS,
   AssistantApiMessage,
   AssistantRating,
+  AssistantRatingReason,
   AssistantVisibleProgram,
 } from '../../../apiCalls';
 import { useTrackEvent } from '../../../Assets/analytics';
@@ -39,6 +41,7 @@ type Message = {
    */
   id?: string;
   rating?: AssistantRating;
+  reason?: AssistantRatingReason | null;
 };
 
 // The greeting as the user last saw it — which variant, and the numbers it quotes.
@@ -56,6 +59,7 @@ function toWidgetMessage(m: AssistantApiMessage): Message {
     // `?? null` rather than passing it through: a backend that predates MFB-1915 omits
     // the key, and "absent" and "unrated" have to be the same thing to the buttons.
     rating: m.rating ?? null,
+    reason: m.rating_reason ?? null,
   };
 }
 
@@ -177,6 +181,50 @@ function renderFormattedMessage(text: string): React.ReactNode {
   flushParagraph();
 
   return elements;
+}
+
+type ReasonChipsProps = {
+  selected: AssistantRatingReason | null;
+  onPick: (reason: AssistantRatingReason | null) => void;
+  labels: Record<AssistantRatingReason, string>;
+  groupLabel: string;
+};
+
+/**
+ * "What went wrong?" chips, shown under a reply that is currently rated down (MFB-1915).
+ *
+ * A bare thumbs-down says someone was unhappy and nothing about what to change. These
+ * are what make it actionable, and the codes come from the failure modes ai-service's
+ * `_SHARED_GUARDRAILS` already names — fabricated rules, programs outside the closed
+ * list, invented links — rather than from a generic list.
+ *
+ * SKIPPABLE, AND THAT IS THE POINT. The thumbs-down is saved before these ever render,
+ * so ignoring them costs the household nothing and costs us only a reason we were
+ * never owed. Requiring one would convert a rating we already have into an abandoned
+ * interaction — the opposite of the trade worth making.
+ *
+ * Single select: picking a second chip replaces the first, and picking the selected one
+ * clears it, matching how the thumbs themselves behave.
+ *
+ * Rendered whenever the rating is -1, including on a restored transcript, so a returning
+ * household sees what they said — and gets a second chance if they skipped it.
+ */
+function ReasonChips({ selected, onPick, labels, groupLabel }: ReasonChipsProps) {
+  return (
+    <div className="chatbot-reasons" role="group" aria-label={groupLabel}>
+      {ASSISTANT_RATING_REASONS.map((code) => (
+        <button
+          key={code}
+          type="button"
+          className={`chatbot-reason-chip${selected === code ? ' chatbot-reason-chip--active' : ''}`}
+          onClick={() => onPick(selected === code ? null : code)}
+          aria-pressed={selected === code}
+        >
+          {labels[code]}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 type MessageRatingProps = {
@@ -345,6 +393,37 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
     id: 'chatbot.thumbDown',
     defaultMessage: 'This reply was not helpful',
   });
+  const reasonGroupLabel = formatMessage({ id: 'chatbot.reason.groupLabel', defaultMessage: 'What went wrong?' });
+  // Keyed by the stored code, so re-wording a chip is a translation change and never
+  // touches what the warehouse has already recorded. `useMemo` because this builds an
+  // object and the transcript re-renders on every message.
+  const reasonLabels = useMemo(
+    () => ({
+      inaccurate: formatMessage({ id: 'chatbot.reason.inaccurate', defaultMessage: "This isn't right" }),
+      not_my_results: formatMessage({
+        id: 'chatbot.reason.notMyResults',
+        defaultMessage: "This isn't about my results",
+      }),
+      bad_link: formatMessage({
+        id: 'chatbot.reason.badLink',
+        defaultMessage: "A link or phone number didn't work",
+      }),
+      unanswered: formatMessage({
+        id: 'chatbot.reason.unanswered',
+        defaultMessage: "It didn't answer what I asked",
+      }),
+      hard_to_follow: formatMessage({
+        id: 'chatbot.reason.hardToFollow',
+        defaultMessage: 'Hard to follow, or too long',
+      }),
+      wrong_tone: formatMessage({
+        id: 'chatbot.reason.wrongTone',
+        defaultMessage: 'It felt wrong for my situation',
+      }),
+      other: formatMessage({ id: 'chatbot.reason.other', defaultMessage: 'Something else' }),
+    }),
+    [formatMessage],
+  );
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -524,25 +603,36 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
   // reply landing while the user rates an earlier one), and an index captured at click
   // time would move a rating onto the wrong message.
   const rateMessage = useCallback(
-    async (messageId: string, next: AssistantRating) => {
+    async (messageId: string, next: AssistantRating, nextReason: AssistantRatingReason | null = null) => {
       const conversationId = ratingConversationIdRef.current;
       if (!conversationId || !uuid) return;
 
+      // A reason only rides along with a thumbs-down. Switching thumbs or clearing
+      // drops it, matching what the endpoint (and the DB constraint) will do anyway.
+      const reason = next === -1 ? nextReason : null;
+
       let previous: AssistantRating = null;
+      let previousReason: AssistantRatingReason | null = null;
       setMessages((prev) =>
         prev.map((m) => {
           if (m.id !== messageId) return m;
           previous = m.rating ?? null;
-          return { ...m, rating: next };
+          previousReason = m.reason ?? null;
+          return { ...m, rating: next, reason };
         }),
       );
 
-      track('screener_benbot_rated', { rating: next === 1 ? 'up' : next === -1 ? 'down' : 'cleared' });
+      track('screener_benbot_rated', {
+        rating: next === 1 ? 'up' : next === -1 ? 'down' : 'cleared',
+        ...(reason ? { reason } : {}),
+      });
 
       try {
-        await rateAssistantMessage(uuid, conversationId, messageId, next);
+        await rateAssistantMessage(uuid, conversationId, messageId, next, reason);
       } catch {
-        setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, rating: previous } : m)));
+        setMessages((prev) =>
+          prev.map((m) => (m.id === messageId ? { ...m, rating: previous, reason: previousReason } : m)),
+        );
         // No error bubble in the transcript. The send path adds one because a failed
         // send means the user's question went unanswered; a failed rating means only
         // that their opinion wasn't recorded, and interrupting the conversation with a
@@ -714,13 +804,27 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
                     notice — nothing the server has a row for, and nothing it would make
                     sense to rate. The greeting never reaches this list at all. */}
                 {msg.role === 'bot' && msg.id !== undefined && (
-                  <MessageRating
-                    rating={msg.rating ?? null}
-                    onRate={(next) => rateMessage(msg.id as string, next)}
-                    groupLabel={rateReplyLabel}
-                    upLabel={thumbUpLabel}
-                    downLabel={thumbDownLabel}
-                  />
+                  <>
+                    <MessageRating
+                      rating={msg.rating ?? null}
+                      onRate={(next) => rateMessage(msg.id as string, next)}
+                      groupLabel={rateReplyLabel}
+                      upLabel={thumbUpLabel}
+                      downLabel={thumbDownLabel}
+                    />
+                    {/* Only under a reply that is currently rated down. Never on a
+                        thumbs-up: positive reasons are far less diagnostic, and a
+                        second step on the cheap positive action suppresses the volume
+                        that makes the positive signal worth having. */}
+                    {msg.rating === -1 && (
+                      <ReasonChips
+                        selected={msg.reason ?? null}
+                        onPick={(reason) => rateMessage(msg.id as string, -1, reason)}
+                        labels={reasonLabels}
+                        groupLabel={reasonGroupLabel}
+                      />
+                    )}
+                  </>
                 )}
               </div>
             ))}

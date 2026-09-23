@@ -330,6 +330,23 @@ export interface AssistantSuggestedAction {
 // between the button and the request body.
 export type AssistantRating = 1 | -1 | null;
 
+// Why a reply was rated down. These are STORED CODES, not display text — the label
+// for each is a translated string (`chatbot.reason.*`), so the wording can change
+// without splitting a code's history in the warehouse. The list is owned by
+// benefits-api (`AssistantMessage.RATING_REASON_CHOICES`) and must match it: a code
+// the API refuses would render as a dead chip.
+export const ASSISTANT_RATING_REASONS = [
+  'inaccurate',
+  'not_my_results',
+  'bad_link',
+  'unanswered',
+  'hard_to_follow',
+  'wrong_tone',
+  'other',
+] as const;
+
+export type AssistantRatingReason = (typeof ASSISTANT_RATING_REASONS)[number];
+
 export interface AssistantApiMessage {
   message_id: string;
   role: 'user' | 'assistant';
@@ -340,6 +357,9 @@ export interface AssistantApiMessage {
   // deployed, and a cached bundle can outlive a backend release in either direction.
   // Absent and null both mean unrated.
   rating?: AssistantRating;
+  // Null whenever the reply was not rated down, and also when it was rated down and
+  // the household skipped the chips — which is the common case, not an error.
+  rating_reason?: AssistantRatingReason | null;
 }
 
 export interface AssistantConversationResponse {
@@ -471,10 +491,16 @@ const rateAssistantMessage = async (
   conversationId: string,
   messageId: string,
   rating: AssistantRating,
+  reason: AssistantRatingReason | null = null,
 ): Promise<void> => {
+  // `reason` is sent on every call, including as null, because the PUT replaces BOTH
+  // fields: the body states the whole feedback. That is what makes picking a chip,
+  // switching chips, switching thumbs and un-rating one operation instead of four —
+  // and it means the widget never depends on the server remembering a reason it did
+  // not just send. benefits-api rejects a reason on anything but a thumbs-down.
   const response = await fetch(assistantMessageRatingEndpoint(uuid, conversationId, messageId), {
     method: 'PUT',
-    body: JSON.stringify({ rating }),
+    body: JSON.stringify({ rating, reason: rating === -1 ? reason : null }),
     headers: header,
   });
   if (!response.ok) {
