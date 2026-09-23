@@ -8,6 +8,17 @@ type WarningMessageProps = {
   warning: WarningMsg;
 };
 
+// Values every warning message may reference, e.g. "the {priorYear} tax year". Passed as
+// strings so react-intl doesn't format them as numbers ("2,025").
+const warningValues = (): Record<string, string> => {
+  const currentYear = new Date().getFullYear();
+
+  return {
+    currentYear: String(currentYear),
+    priorYear: String(currentYear - 1),
+  };
+};
+
 const WarningMessage = ({ warning }: WarningMessageProps) => {
   const intl = useIntl();
 
@@ -23,7 +34,7 @@ const WarningMessage = ({ warning }: WarningMessageProps) => {
     <div className="warning-message">
       <Icon name="triangle-alert" className="warning-icon" />
       <p>
-        <ResultsTranslate translation={warning.message} />
+        <ResultsTranslate translation={warning.message} values={warningValues()} />
         {translatedLink !== '' && (
           <span className="warning-message-link">
             <a href={translatedLink} target="_blank" className="link-color">
