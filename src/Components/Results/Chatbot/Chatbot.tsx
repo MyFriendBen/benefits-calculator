@@ -187,7 +187,8 @@ type ReasonChipsProps = {
   selected: AssistantRatingReason | null;
   onPick: (reason: AssistantRatingReason | null) => void;
   labels: Record<AssistantRatingReason, string>;
-  groupLabel: string;
+  /** Id of the visible heading above the chips; it names the group for screen readers. */
+  labelledBy: string;
 };
 
 /**
@@ -216,9 +217,9 @@ type ReasonChipsProps = {
  * Rendered whenever the rating is -1, including on a restored transcript, so a returning
  * household sees what they said — and gets a second chance if they skipped it.
  */
-function ReasonChips({ selected, onPick, labels, groupLabel }: ReasonChipsProps) {
+function ReasonChips({ selected, onPick, labels, labelledBy }: ReasonChipsProps) {
   return (
-    <div className="chatbot-reasons" role="group" aria-label={groupLabel}>
+    <div className="chatbot-reasons" role="group" aria-labelledby={labelledBy}>
       {ASSISTANT_RATING_REASONS.map((code) => (
         <button
           key={code}
@@ -400,7 +401,22 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
     id: 'chatbot.thumbDown',
     defaultMessage: 'This reply was not helpful',
   });
-  const reasonGroupLabel = formatMessage({ id: 'chatbot.reason.groupLabel', defaultMessage: 'What went wrong?' });
+  // Shown under the thumbs once a reply is rated, and for a thumbs-down it doubles as
+  // the visible heading for the chips below it — which is why `aria-labelledby` points
+  // at it rather than the group carrying its own invisible `aria-label`. One accessible
+  // name, and sighted users get the heading that was previously screen-reader-only.
+  //
+  // Deliberately NOT an aria-live region: `aria-pressed` on the thumb already announces
+  // the state change, so a live region here would say it twice.
+  //
+  // "Recorded" was considered and dropped. It reads as a promise — someone who has just
+  // said a reply was inaccurate may take it to mean a person will look and follow up,
+  // and nothing routes a thumbs-down anywhere today.
+  const thanksUpLabel = formatMessage({ id: 'chatbot.thanksUp', defaultMessage: "Thanks — that's helpful." });
+  const thanksDownLabel = formatMessage({
+    id: 'chatbot.reason.groupLabel',
+    defaultMessage: 'Thanks. What went wrong?',
+  });
   // Keyed by the stored code, so re-wording a chip is a translation change and never
   // touches what the warehouse has already recorded. `useMemo` because this builds an
   // object and the transcript re-renders on every message.
@@ -812,12 +828,17 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
                         thumbs-up: positive reasons are far less diagnostic, and a
                         second step on the cheap positive action suppresses the volume
                         that makes the positive signal worth having. */}
+                    {(msg.rating === 1 || msg.rating === -1) && (
+                      <p className="chatbot-rating-note" id={`chatbot-rating-note-${msg.id}`}>
+                        {msg.rating === 1 ? thanksUpLabel : thanksDownLabel}
+                      </p>
+                    )}
                     {msg.rating === -1 && (
                       <ReasonChips
                         selected={msg.reason ?? null}
                         onPick={(reason) => rateMessage(msg.id as string, -1, reason)}
                         labels={reasonLabels}
-                        groupLabel={reasonGroupLabel}
+                        labelledBy={`chatbot-rating-note-${msg.id}`}
                       />
                     )}
                   </>

@@ -208,6 +208,20 @@
   color: var(--primary-color);
 }
 
+/* Confirmation under the thumbs once a reply is rated, and the visible heading for the
+   chips on a thumbs-down.
+
+   Right-aligned to sit under the thumbs it answers, rather than under the message text.
+   Quiet and small on purpose: it is reassurance, not content, and it appears under every
+   rated reply — at the body size it would compete with the answer itself. */
+.chatbot-rating-note {
+  margin: 0.125rem 0 0;
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  color: #6b6b6b;
+  text-align: right;
+}
+
 /* "What went wrong?" chips under a reply rated down (MFB-1915).
 
    Left-aligned against the message text, not right-aligned with the thumbs: these are
@@ -217,7 +231,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
-  margin-top: 0.375rem;
+  /* Tighter than it was: the note above is now the heading for these, so they read as
+     one block rather than two things that happen to be stacked. */
+  margin-top: 0.25rem;
 }
 
 .chatbot-reason-chip {

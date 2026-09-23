@@ -977,3 +977,96 @@ describe('thumbs-down reason chips (MFB-1915)', () => {
     expect(group.querySelectorAll('button')).toHaveLength(5);
   });
 });
+
+describe('rating confirmation line (MFB-1915)', () => {
+  const thumbUp = () => screen.getAllByRole('button', { name: /this reply was helpful/i });
+  const thumbDown = () => screen.getAllByRole('button', { name: /this reply was not helpful/i });
+
+  const open = async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+  };
+
+  it('says nothing until a reply is rated', async () => {
+    await open();
+
+    expect(screen.queryByText(/that's helpful/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/what went wrong/i)).not.toBeInTheDocument();
+  });
+
+  it('thanks the household for a thumbs-up', async () => {
+    await open();
+
+    await userEvent.click(thumbUp()[0]);
+
+    expect(await screen.findByText(/thanks — that's helpful/i)).toBeInTheDocument();
+  });
+
+  it('asks what went wrong on a thumbs-down instead of thanking and stopping', async () => {
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+
+    expect(await screen.findByText(/thanks\. what went wrong\?/i)).toBeInTheDocument();
+    expect(screen.queryByText(/that's helpful/i)).not.toBeInTheDocument();
+  });
+
+  it('never promises that anyone will follow up', async () => {
+    // "recorded" reads as a promise to someone who just reported a bad answer, and
+    // nothing routes a thumbs-down anywhere today.
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+
+    await screen.findByText(/what went wrong/i);
+    expect(screen.queryByText(/recorded/i)).not.toBeInTheDocument();
+  });
+
+  it('uses the visible line as the chips’ accessible name, not a hidden duplicate', async () => {
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+
+    const group = await screen.findByRole('group', { name: /thanks\. what went wrong\?/i });
+    const heading = screen.getByText(/thanks\. what went wrong\?/i);
+    expect(group).toHaveAttribute('aria-labelledby', heading.id);
+  });
+
+  it('swaps the line when the household switches thumbs', async () => {
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+    await screen.findByText(/what went wrong/i);
+    await userEvent.click(thumbUp()[0]);
+
+    expect(await screen.findByText(/that's helpful/i)).toBeInTheDocument();
+    expect(screen.queryByText(/what went wrong/i)).not.toBeInTheDocument();
+  });
+
+  it('disappears when the rating is cleared', async () => {
+    await open();
+
+    await userEvent.click(thumbUp()[0]);
+    await screen.findByText(/that's helpful/i);
+    await userEvent.click(thumbUp()[0]);
+
+    await waitFor(() => expect(screen.queryByText(/that's helpful/i)).not.toBeInTheDocument());
+  });
+
+  it('comes back with a restored rating', async () => {
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [{ message_id: 'a9', role: 'assistant', text: 'start with SNAP', created_at: '', rating: 1 }],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('start with SNAP');
+
+    expect(await screen.findByText(/that's helpful/i)).toBeInTheDocument();
+  });
+});
