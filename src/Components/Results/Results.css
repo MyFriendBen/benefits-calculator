@@ -44,15 +44,15 @@
   max-width: var(--content-max-width);
   width: 100%;
   margin: 0 auto 1.5rem auto;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 }
 
-/* The shadow comes from .results-card-wrapper, which encloses the tab row as well as
-   this panel, so the card itself casts none. */
+/* The card keeps its own shadow (from .benefits-form) rather than inheriting one from
+   .results-card-wrapper: the wrapper's box spans the tab row too, so a shadow there
+   outlines the empty space beside and between the tabs. Shadowing the card alone lets
+   the tabs sit directly on the page background. */
 .benefits-form.results-card-body {
   margin: 0;
   padding: 0 1rem 1.5rem 1rem;
-  box-shadow: none;
 }
 
 /* Squared off and flush against the tab row above, so the active tab's white
