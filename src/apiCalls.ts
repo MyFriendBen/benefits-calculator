@@ -31,6 +31,8 @@ const getNpsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/nps/`;
 const assistantConversationsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/assistant/conversations/`;
 const assistantMessagesEndpoint = (uuid: string, conversationId: string) =>
   `${domain}/api/screens/${uuid}/assistant/conversations/${conversationId}/messages/`;
+const assistantMessageRatingEndpoint = (uuid: string, conversationId: string, messageId: string) =>
+  `${domain}/api/screens/${uuid}/assistant/conversations/${conversationId}/messages/${messageId}/rating/`;
 
 export type ScreenApiResponse = ApiFormDataReadOnly & ApiFormData;
 
@@ -323,12 +325,39 @@ export interface AssistantSuggestedAction {
   url?: string;
 }
 
+// +1 thumbs up, -1 thumbs down, null unrated. A union rather than `number` so the
+// two thumbs can't be confused with each other or with an arbitrary score anywhere
+// between the button and the request body.
+export type AssistantRating = 1 | -1 | null;
+
+// Why a reply was rated down. These are STORED CODES, not display text — the label
+// for each is a translated string (`chatbot.reason.*`), so the wording can change
+// without splitting a code's history in the warehouse. The list is owned by
+// benefits-api (`AssistantMessage.RATING_REASON_CHOICES`) and must match it: a code
+// the API refuses would render as a dead chip.
+export const ASSISTANT_RATING_REASONS = [
+  'inaccurate',
+  'not_my_results',
+  'unanswered',
+  'hard_to_follow',
+  'other',
+] as const;
+
+export type AssistantRatingReason = (typeof ASSISTANT_RATING_REASONS)[number];
+
 export interface AssistantApiMessage {
   message_id: string;
   role: 'user' | 'assistant';
   text: string;
   created_at: string;
   suggested_actions?: AssistantSuggestedAction[];
+  // Optional because it is absent from any response produced before MFB-1915
+  // deployed, and a cached bundle can outlive a backend release in either direction.
+  // Absent and null both mean unrated.
+  rating?: AssistantRating;
+  // Null whenever the reply was not rated down, and also when it was rated down and
+  // the household skipped the chips — which is the common case, not an error.
+  rating_reason?: AssistantRatingReason | null;
 }
 
 export interface AssistantConversationResponse {
@@ -440,10 +469,48 @@ const sendAssistantMessage = async (
   });
 };
 
+// Set, change, or clear the thumbs up/down on one assistant reply (MFB-1915).
+//
+// Unlike every other assistant call here, this one does NOT reach ai-service:
+// benefits-api owns the column and writes it directly. That is invisible from the
+// browser except in one way worth knowing — a rating still works while ai-service is
+// down, so a failure here is a real failure and not the assistant being unavailable.
+//
+// PUT with the value rather than a toggle, so the request says what the rating should
+// BE. A toggle would depend on the server's current value, and the widget lets a user
+// click faster than the round trip: two toggles racing can land in either order and
+// leave the row disagreeing with the buttons on screen.
+//
+// `null` clears. It is sent explicitly rather than omitted — benefits-api rejects a
+// body with no `rating` key, deliberately, so that a serialization bug that drops the
+// field can't read as "un-rate this".
+const rateAssistantMessage = async (
+  uuid: string,
+  conversationId: string,
+  messageId: string,
+  rating: AssistantRating,
+  reason: AssistantRatingReason | null = null,
+): Promise<void> => {
+  // `reason` is sent on every call, including as null, because the PUT replaces BOTH
+  // fields: the body states the whole feedback. That is what makes picking a chip,
+  // switching chips, switching thumbs and un-rating one operation instead of four —
+  // and it means the widget never depends on the server remembering a reason it did
+  // not just send. benefits-api rejects a reason on anything but a thumbs-down.
+  const response = await fetch(assistantMessageRatingEndpoint(uuid, conversationId, messageId), {
+    method: 'PUT',
+    body: JSON.stringify({ rating, reason: rating === -1 ? reason : null }),
+    headers: header,
+  });
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`);
+  }
+};
+
 export {
   startAssistantConversation,
   getAssistantHistory,
   sendAssistantMessage,
+  rateAssistantMessage,
   getTranslations,
   postScreen,
   getScreen,

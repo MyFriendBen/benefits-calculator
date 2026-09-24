@@ -1,19 +1,14 @@
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { useResultsLink } from '../Results';
 import { useTrackEvent } from '../../../Assets/analytics';
 import './211Button.css';
 
-// Results-page "More Help / 211" CTA — NOT the inline "?" tooltip (that is
-// HelpButton in HelpBubbleIcon/).
+// Results-page CTA to the Immediate Help resources — NOT the inline "?" tooltip
+// (that is HelpButton in HelpBubbleIcon/). CESN renders no tab bar, so this is its
+// only entry point to that page.
 const MoreHelpButton = () => {
-  const intl = useIntl();
   const track = useTrackEvent();
-  const moreHelpALProps = {
-    id: 'helpButton.AL',
-    defaultMessage: 'more help button',
-  };
-
   const moreHelpLink = useResultsLink(`results/more-help`);
 
   return (
@@ -24,10 +19,11 @@ const MoreHelpButton = () => {
       <Link
         to={moreHelpLink}
         className="button211"
-        aria-label={intl.formatMessage(moreHelpALProps)}
         onClick={() => track('screener_get_help_click', { location: 'results' })}
       >
-        <FormattedMessage id="moreHelp.211-link" defaultMessage="More Help" />
+        {/* Shares the Immediate Help tab's translation ID so both routes to this page
+            carry one label. */}
+        <FormattedMessage id="resultsOptions.immediateHelp" defaultMessage="Immediate Help" />
       </Link>
     </div>
   );

@@ -7,6 +7,7 @@ import {
   startAssistantConversation,
   getAssistantHistory,
   sendAssistantMessage,
+  rateAssistantMessage,
   AssistantVisibleProgram,
 } from '../../../apiCalls';
 
@@ -17,15 +18,18 @@ jest.mock('../../../apiCalls', () => ({
   startAssistantConversation: jest.fn(),
   getAssistantHistory: jest.fn(),
   sendAssistantMessage: jest.fn(),
+  rateAssistantMessage: jest.fn(),
 }));
 
+const mockTrack = jest.fn();
 jest.mock('../../../Assets/analytics', () => ({
-  useTrackEvent: () => jest.fn(),
+  useTrackEvent: () => mockTrack,
 }));
 
 const mockStart = startAssistantConversation as jest.MockedFunction<typeof startAssistantConversation>;
 const mockHistory = getAssistantHistory as jest.MockedFunction<typeof getAssistantHistory>;
 const mockSend = sendAssistantMessage as jest.MockedFunction<typeof sendAssistantMessage>;
+const mockRate = rateAssistantMessage as jest.MockedFunction<typeof rateAssistantMessage>;
 
 const SCREEN_UUID = 'c0ffee00-0000-4000-8000-000000000001';
 
@@ -77,6 +81,7 @@ beforeEach(() => {
     user_message: { message_id: 'u1', role: 'user', text: 'hello', created_at: '' },
     assistant_message: { message_id: 'a1', role: 'assistant', text: 'hi there', created_at: '' },
   });
+  mockRate.mockResolvedValue(undefined);
 });
 
 describe('ChatbotProvider visiblePrograms (MFB-1427)', () => {
@@ -645,5 +650,590 @@ describe('greeting stability across navigation', () => {
 
     expect(screen.getByRole('dialog')).not.toHaveTextContent('2 programs');
     expect(screen.getByRole('dialog')).toHaveTextContent(/ask me anything/i);
+  });
+});
+
+describe('message rating (MFB-1915)', () => {
+  const thumbUp = () => screen.getAllByRole('button', { name: /this reply was helpful/i });
+  const thumbDown = () => screen.getAllByRole('button', { name: /this reply was not helpful/i });
+
+  it('rates a reply with a thumbs up', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a1', 1, null);
+    await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true'));
+  });
+
+  it('clicking the same thumb again clears the rating', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+    await userEvent.click(thumbUp()[0]);
+
+    // Writes are serialized per message, so the second goes out once the first returns.
+    await waitFor(() => expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', null, null));
+    await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false'));
+  });
+
+  it('clicking the other thumb switches rather than adding a second rating', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+    await userEvent.click(thumbDown()[0]);
+
+    await waitFor(() => expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, null));
+    await waitFor(() => expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'true'));
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('shows the rating immediately, without waiting for the round trip', async () => {
+    let resolveRate: () => void = () => {};
+    mockRate.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveRate = resolve;
+      }),
+    );
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+
+    // Still in flight: the button reflects the click regardless.
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true');
+    await act(async () => {
+      resolveRate();
+    });
+  });
+
+  it('rolls the button back when the request fails', async () => {
+    mockRate.mockRejectedValue(new Error('500'));
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+
+    await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false'));
+  });
+
+  it('does not put an error bubble in the transcript when a rating fails', async () => {
+    mockRate.mockRejectedValue(new Error('500'));
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+
+    await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false'));
+    expect(screen.queryByText(/something went wrong/i)).not.toBeInTheDocument();
+  });
+
+  it('does not offer a rating on the user’s own message', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    // One assistant reply on screen, so one pair of buttons — the user's message and
+    // the greeting must not have their own.
+    expect(thumbUp()).toHaveLength(1);
+  });
+
+  it('restores a rating the household already gave, on a page reload', async () => {
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [
+        { message_id: 'u9', role: 'user', text: 'what should I apply for?', created_at: '' },
+        { message_id: 'a9', role: 'assistant', text: 'start with SNAP', created_at: '', rating: -1 },
+      ],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('start with SNAP');
+
+    await waitFor(() => expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'true'));
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('can rate a restored reply, using the conversation id from the history read', async () => {
+    // The history-restore effect deliberately leaves `conversationIdRef` null so the
+    // next send still refreshes ai-service's context snapshot. Rating needs the id
+    // anyway, and a restored transcript nobody can rate would defeat the point.
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [{ message_id: 'a9', role: 'assistant', text: 'start with SNAP', created_at: '' }],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('start with SNAP');
+
+    await userEvent.click(thumbUp()[0]);
+
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-restored', 'a9', 1, null);
+  });
+
+  it('treats a reply with no rating key as unrated', async () => {
+    // A cached bundle can outlive a backend release in either direction, so a response
+    // that predates MFB-1915 has to render as unrated rather than as undefined state.
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false');
+    expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('rates the reply that was clicked, not the one at that position', async () => {
+    // The transcript grows underneath the buttons; an index captured at click time
+    // would move a rating onto whichever message later occupied that slot.
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-1',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [
+        { message_id: 'a-first', role: 'assistant', text: 'first answer', created_at: '' },
+        { message_id: 'a-second', role: 'assistant', text: 'second answer', created_at: '' },
+      ],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('second answer');
+
+    await userEvent.click(thumbDown()[1]);
+
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a-second', -1, null);
+  });
+
+  it('groups the two buttons so their pairing is announced', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    expect(screen.getByRole('group', { name: /rate this reply/i })).toBeInTheDocument();
+  });
+
+  it('is reachable and operable from the keyboard', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    thumbUp()[0].focus();
+    expect(thumbUp()[0]).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a1', 1, null);
+  });
+});
+
+describe('thumbs-down reason chips (MFB-1915)', () => {
+  const thumbUp = () => screen.getAllByRole('button', { name: /this reply was helpful/i });
+  const thumbDown = () => screen.getAllByRole('button', { name: /this reply was not helpful/i });
+  const chip = (name: RegExp) => screen.getAllByRole('button', { name });
+
+  const rateDown = async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+    await userEvent.click(thumbDown()[0]);
+    await waitFor(() => expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'true'));
+  };
+
+  it('offers no chips until a reply is rated down', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument();
+  });
+
+  it('shows the chips once a reply is rated down', async () => {
+    await rateDown();
+
+    expect(screen.getByRole('group', { name: /what went wrong/i })).toBeInTheDocument();
+  });
+
+  it('never shows chips on a thumbs-up', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+
+    await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true'));
+    expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument();
+  });
+
+  it('records the thumbs-down before any chip is touched', async () => {
+    // The whole reason the chips can be skippable: the rating is already saved.
+    await rateDown();
+
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, null);
+  });
+
+  it('sends the picked reason', async () => {
+    await rateDown();
+
+    await userEvent.click(chip(/not about my results/i)[0]);
+
+    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, 'not_my_results');
+    await waitFor(() => expect(chip(/not about my results/i)[0]).toHaveAttribute('aria-pressed', 'true'));
+  });
+
+  it('picking a second chip replaces the first', async () => {
+    await rateDown();
+
+    await userEvent.click(chip(/not accurate/i)[0]);
+    await userEvent.click(chip(/confusing or too long/i)[0]);
+
+    await waitFor(() => expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, 'hard_to_follow'));
+    await waitFor(() => expect(chip(/confusing or too long/i)[0]).toHaveAttribute('aria-pressed', 'true'));
+    expect(chip(/not accurate/i)[0]).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('clicking the selected chip clears it', async () => {
+    await rateDown();
+
+    await userEvent.click(chip(/something else/i)[0]);
+    await userEvent.click(chip(/something else/i)[0]);
+
+    await waitFor(() => expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, null));
+    await waitFor(() => expect(chip(/something else/i)[0]).toHaveAttribute('aria-pressed', 'false'));
+  });
+
+  it('switching to a thumbs-up drops the reason and hides the chips', async () => {
+    await rateDown();
+    await userEvent.click(chip(/not accurate/i)[0]);
+
+    await userEvent.click(thumbUp()[0]);
+
+    await waitFor(() => expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', 1, null));
+    await waitFor(() => expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument());
+  });
+
+  it('clearing the thumbs-down hides the chips', async () => {
+    await rateDown();
+
+    await userEvent.click(thumbDown()[0]);
+
+    await waitFor(() => expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument());
+  });
+
+  it('restores a reason the household already picked', async () => {
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [
+        {
+          message_id: 'a9',
+          role: 'assistant',
+          text: 'start with SNAP',
+          created_at: '',
+          rating: -1,
+          rating_reason: 'unanswered',
+        },
+      ],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('start with SNAP');
+
+    await waitFor(() => expect(chip(/didn.t answer me/i)[0]).toHaveAttribute('aria-pressed', 'true'));
+  });
+
+  it('rolls the chip back when the request fails', async () => {
+    await rateDown();
+    mockRate.mockRejectedValueOnce(new Error('500'));
+
+    await userEvent.click(chip(/didn.t answer me/i)[0]);
+
+    await waitFor(() => expect(chip(/didn.t answer me/i)[0]).toHaveAttribute('aria-pressed', 'false'));
+    expect(screen.queryByText(/something went wrong/i)).not.toBeInTheDocument();
+  });
+
+  it('offers every code the API accepts', async () => {
+    // A chip the API would refuse is a dead control; a code with no chip is unreachable.
+    await rateDown();
+
+    const group = screen.getByRole('group', { name: /what went wrong/i });
+    expect(group.querySelectorAll('button')).toHaveLength(5);
+  });
+});
+
+describe('rating confirmation line (MFB-1915)', () => {
+  const thumbUp = () => screen.getAllByRole('button', { name: /this reply was helpful/i });
+  const thumbDown = () => screen.getAllByRole('button', { name: /this reply was not helpful/i });
+
+  const open = async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+  };
+
+  it('says nothing until a reply is rated', async () => {
+    await open();
+
+    expect(screen.queryByText(/that's helpful/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/what went wrong/i)).not.toBeInTheDocument();
+  });
+
+  it('thanks the household for a thumbs-up', async () => {
+    await open();
+
+    await userEvent.click(thumbUp()[0]);
+
+    expect(await screen.findByText(/thanks — that's helpful/i)).toBeInTheDocument();
+  });
+
+  it('asks what went wrong on a thumbs-down instead of thanking and stopping', async () => {
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+
+    expect(await screen.findByText(/thanks\. what went wrong\?/i)).toBeInTheDocument();
+    expect(screen.queryByText(/that's helpful/i)).not.toBeInTheDocument();
+  });
+
+  it('never promises that anyone will follow up', async () => {
+    // "recorded" reads as a promise to someone who just reported a bad answer, and
+    // nothing routes a thumbs-down anywhere today.
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+
+    await screen.findByText(/what went wrong/i);
+    expect(screen.queryByText(/recorded/i)).not.toBeInTheDocument();
+  });
+
+  it('uses the visible line as the chips’ accessible name, not a hidden duplicate', async () => {
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+
+    const group = await screen.findByRole('group', { name: /thanks\. what went wrong\?/i });
+    const heading = screen.getByText(/thanks\. what went wrong\?/i);
+    expect(group).toHaveAttribute('aria-labelledby', heading.id);
+  });
+
+  it('swaps the line when the household switches thumbs', async () => {
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+    await screen.findByText(/what went wrong/i);
+    await userEvent.click(thumbUp()[0]);
+
+    expect(await screen.findByText(/that's helpful/i)).toBeInTheDocument();
+    expect(screen.queryByText(/what went wrong/i)).not.toBeInTheDocument();
+  });
+
+  it('disappears when the rating is cleared', async () => {
+    await open();
+
+    await userEvent.click(thumbUp()[0]);
+    await screen.findByText(/that's helpful/i);
+    await userEvent.click(thumbUp()[0]);
+
+    await waitFor(() => expect(screen.queryByText(/that's helpful/i)).not.toBeInTheDocument());
+  });
+
+  it('comes back with a restored rating', async () => {
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [{ message_id: 'a9', role: 'assistant', text: 'start with SNAP', created_at: '', rating: 1 }],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('start with SNAP');
+
+    expect(await screen.findByText(/that's helpful/i)).toBeInTheDocument();
+  });
+});
+
+describe('concurrent rating writes (MFB-1915 review)', () => {
+  const thumbUp = () => screen.getAllByRole('button', { name: /this reply was helpful/i });
+  const thumbDown = () => screen.getAllByRole('button', { name: /this reply was not helpful/i });
+  const chip = (name: RegExp) => screen.getAllByRole('button', { name });
+
+  /** A rate call whose promise you resolve by hand, so two can be in flight at once. */
+  const deferred = () => {
+    let settle: (ok: boolean) => void = () => {};
+    const promise = new Promise<void>((resolve, reject) => {
+      settle = (ok: boolean) => (ok ? resolve() : reject(new Error('500')));
+    });
+    return { promise, settle };
+  };
+
+  const open = async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+  };
+
+  it('never sends two writes for one message at the same time', async () => {
+    // Two PUTs for one row can reach different workers and be applied in either order,
+    // leaving the database holding the value chosen FIRST while the buttons show the
+    // second. Nothing fails, so nothing rolls back, and it only shows after a reload.
+    const first = deferred();
+    mockRate.mockReturnValueOnce(first.promise);
+    await open();
+
+    await userEvent.click(thumbUp()[0]);
+    await userEvent.click(thumbDown()[0]);
+
+    // The second click must NOT have gone out while the first is unresolved.
+    expect(mockRate).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      first.settle(true);
+    });
+
+    await waitFor(() => expect(mockRate).toHaveBeenCalledTimes(2));
+    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, null);
+  });
+
+  it('sends only the newest value when several pile up behind one request', async () => {
+    const first = deferred();
+    mockRate.mockReturnValueOnce(first.promise);
+    await open();
+
+    await userEvent.click(thumbUp()[0]); // in flight
+    await userEvent.click(thumbDown()[0]); // queued
+    await userEvent.click(thumbDown()[0]); // supersedes it (clears)
+
+    await act(async () => {
+      first.settle(true);
+    });
+
+    // Two calls total: the one in flight, then the latest intent — not one per click.
+    await waitFor(() => expect(mockRate).toHaveBeenCalledTimes(2));
+    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', null, null);
+  });
+
+  it('a stale failure does not undo a newer rating that succeeded', async () => {
+    // Thumbs-up, then quickly thumbs-down; the first request then 429s. The old code
+    // restored the value captured at its own click, showing "unrated" over a
+    // thumbs-down the server had already accepted.
+    const first = deferred();
+    mockRate.mockReturnValueOnce(first.promise);
+    await open();
+
+    await userEvent.click(thumbUp()[0]);
+    await userEvent.click(thumbDown()[0]);
+
+    await act(async () => {
+      first.settle(false); // the earlier request fails, with a newer one waiting
+    });
+
+    await waitFor(() => expect(mockRate).toHaveBeenCalledTimes(2));
+    expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'true');
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('rolls back to unrated when every write in the chain failed', async () => {
+    // This is where tracking "what the server last accepted" beats "what was on screen
+    // when this click happened". A (thumbs-down) is in flight and B (a chip) queues
+    // behind it; BOTH fail. Nothing was ever saved, so the reply must end up unrated.
+    //
+    // Rolling back to each write's own click state gets this wrong in the worst
+    // direction: B's click state is A's optimistic thumbs-down, so the UI settles on a
+    // thumbs-down the server never accepted — a rating the household would believe they
+    // had given.
+    const first = deferred();
+    mockRate.mockReturnValueOnce(first.promise); // A
+    mockRate.mockRejectedValueOnce(new Error('500')); // B
+    await open();
+
+    await userEvent.click(thumbDown()[0]); // A, in flight
+    await waitFor(() => expect(screen.getByRole('group', { name: /what went wrong/i })).toBeInTheDocument());
+    await userEvent.click(chip(/not accurate/i)[0]); // B, queued behind A
+
+    await act(async () => {
+      first.settle(false); // A fails; B then goes out and fails too
+    });
+
+    await waitFor(() => expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'false'));
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument();
+  });
+
+  it('does not report a second thumbs-down when a reason chip is picked', async () => {
+    // Both used to fire `screener_benbot_rated`, so one unhappy reply could report
+    // three thumbs-downs — worst for the households whose reasons matter most.
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+    await waitFor(() => expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'true'));
+    await userEvent.click(chip(/not accurate/i)[0]);
+    await userEvent.click(chip(/didn.t answer me/i)[0]);
+
+    const rated = mockTrack.mock.calls.filter(([name]) => name === 'screener_benbot_rated');
+    const reasons = mockTrack.mock.calls.filter(([name]) => name === 'screener_benbot_rating_reason');
+    expect(rated).toHaveLength(1);
+    expect(rated[0][1]).toEqual({ rating: 'down' });
+    expect(reasons).toHaveLength(2);
+  });
+
+  it('keeps a rating the start response does not know about yet', async () => {
+    // After a history restore `conversationIdRef` is deliberately null, so the first
+    // send calls the start endpoint. A rating PUT racing that POST means ai-service can
+    // read the rows before the rating commits, and the response carries rating: null.
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [{ message_id: 'a9', role: 'assistant', text: 'start with SNAP', created_at: '' }],
+    });
+    mockStart.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      // Stale: the rating below has not been committed when ai-service read this.
+      messages: [{ message_id: 'a9', role: 'assistant', text: 'start with SNAP', created_at: '', rating: null }],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('start with SNAP');
+
+    await userEvent.click(thumbUp()[0]);
+    await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true'));
+
+    // Now send, which hits the start endpoint and replaces the transcript.
+    const input = screen.getByRole('textbox');
+    await userEvent.type(input, 'and rent?');
+    await userEvent.keyboard('{Enter}');
+
+    // Wait for the reply, which only arrives after the start response has been applied
+    // — asserting on `mockStart` being CALLED races the `.then` that replaces the list.
+    await screen.findByText('hi there');
+    expect(screen.getByText('start with SNAP')).toBeInTheDocument();
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true');
   });
 });
