@@ -8,7 +8,8 @@ export type ThemeName =
   | 'nc_lanc'
   | 'nc_ccla'
   | 'cu_denver'
-  | 'uwgkc';
+  | 'uwgkc'
+  | 'twoOneOneChicago';
 
 export interface ITheme {
   primaryColor: string;
@@ -371,6 +372,50 @@ export const themes: Themes = {
       // Typography
       '--font-heading': "'Antonio', sans-serif",
       '--font-body': "'Palanquin', sans-serif",
+      'font-size': '18px',
+
+      // Layout
+      '--main-max-width': '1310px',
+      '--content-max-width': '900px',
+    },
+  },
+  // 211 Metro Chicago. Registered up front as an exact copy of `default` so the
+  // il.py referrer_data can point at it before their brand guide arrives — a
+  // theme named in config but missing here silently falls back to `default`,
+  // which looks identical to this and hides the mistake. Swap the values in
+  // when the palette lands; nothing else has to change.
+  twoOneOneChicago: {
+    primaryColor: '#293457',
+    secondaryColor: '#B85A27',
+    secondaryBackgroundColor: '#FBF9FC',
+    midBlueColor: '#41528C',
+    footerColor: '#41528C',
+    hoverColor: '#ECDEED',
+    outlineHoverColor: '#293457',
+    outlineHoverBackgroundColor: '#ECDEED',
+    progressBarColor: '#D6743F',
+    cssVariables: {
+      // Colors - Primary & Secondary
+      '--primary-color': '#293457',
+      '--secondary-color': '#B85A27',
+      '--midBlue-color': '#41528C',
+      '--footer-color': '#41528C',
+
+      // Colors - Background
+      '--secondary-background-color': '#FBF9FC',
+      '--hover-color': '#ECDEED',
+
+      // Colors - Icons
+      '--icon-color': '#B85A27',
+      '--secondary-icon-color': '#B85A27',
+
+      // Colors - Interactive States
+      '--option-card-hover-font-color': '#1D1C1E',
+      '--active-border-color': '#B85A27',
+
+      // Typography
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
       'font-size': '18px',
 
       // Layout
