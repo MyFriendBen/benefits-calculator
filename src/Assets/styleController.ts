@@ -8,7 +8,8 @@ export type ThemeName =
   | 'nc_lanc'
   | 'nc_ccla'
   | 'cu_denver'
-  | 'uwgkc';
+  | 'uwgkc'
+  | 'twoOneOneChicago';
 
 export interface ITheme {
   primaryColor: string;
@@ -371,6 +372,60 @@ export const themes: Themes = {
       // Typography
       '--font-heading': "'Antonio', sans-serif",
       '--font-body': "'Palanquin', sans-serif",
+      'font-size': '18px',
+
+      // Layout
+      '--main-max-width': '1310px',
+      '--content-max-width': '900px',
+    },
+  },
+  // 211 Metro Chicago. Palette straight from their logo guidelines (Aug 2022):
+  // Blue Pantone 7685 #3E61A1, Red Pantone 179 #F04941.
+  //
+  // Blue carries text (6.1:1 on white, passes WCAG AA). Red is 3.7:1 — below
+  // the 4.5:1 text threshold but above the 3:1 non-text one, so it is confined
+  // to icons and accents and must never be used for body copy. That split
+  // mirrors the CO 211 theme, which also uses a red for --icon-color only, and
+  // it matches how the brand itself uses red: the Chicago stars, not the words.
+  //
+  // Typography is deliberately MFB's. The guidelines specify DIN and Zilla Slab
+  // for the logo lockup; both are licensed print faces with no webfont provided,
+  // and the guide gives no web typography direction.
+  twoOneOneChicago: {
+    primaryColor: '#3E61A1',
+    secondaryColor: '#3E61A1',
+    midBlueColor: '#3E61A1',
+    footerColor: '#3E61A1',
+    secondaryBackgroundColor: '#F7F7F7',
+    hoverColor: '#EFEFEF',
+    outlineHoverColor: '#FFFFFF',
+    outlineHoverBackgroundColor: '#3E61A1',
+    // 30% tint of the brand blue — the lightest step that still clears the
+    // 3:1 non-text contrast floor on white (3.2:1).
+    progressBarColor: '#7890BD',
+    cssVariables: {
+      // Colors - Primary & Secondary
+      '--primary-color': '#3E61A1',
+      '--secondary-color': '#3E61A1',
+      '--midBlue-color': '#3E61A1',
+      '--footer-color': '#3E61A1',
+
+      // Colors - Background
+      '--secondary-background-color': '#F7F7F7',
+      '--hover-color': '#EFEFEF',
+
+      // Colors - Icons
+      // Brand red, non-text use only (3.7:1 on white).
+      '--icon-color': '#F04941',
+      '--secondary-icon-color': '#3E61A1',
+
+      // Colors - Interactive States
+      '--option-card-hover-font-color': '#1D1C1E',
+      '--active-border-color': '#3E61A1',
+
+      // Typography
+      '--font-heading': "'Roboto Slab', serif",
+      '--font-body': "'Open Sans', sans-serif",
       'font-size': '18px',
 
       // Layout

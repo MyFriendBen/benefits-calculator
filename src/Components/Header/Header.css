@@ -207,3 +207,21 @@
     max-width: 55vw;
   }
 }
+
+/* 211 Metro Chicago co-brand lockup (2002x480, ~4.2:1): their vertical mark,
+   then "IN PARTNERSHIP WITH" over the MyFriendBen mark. Blue and navy on
+   transparent, so it pairs with the white_header uiOption rather than the
+   default primary-colour header bar. Like the uwgkc lockup it carries no
+   .state-name beneath it, so it can take most of the header height; width is
+   capped on small screens because height alone would overflow the bar. */
+.chicago211-logo-size {
+  display: block;
+  max-height: 80%;
+  max-width: 100%;
+}
+
+@media (max-width: 767px) {
+  .chicago211-logo-size {
+    max-width: 62vw;
+  }
+}
