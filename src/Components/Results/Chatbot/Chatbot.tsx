@@ -22,6 +22,7 @@ import {
   AssistantVisibleProgram,
 } from '../../../apiCalls';
 import { useTrackEvent } from '../../../Assets/analytics';
+import { Context } from '../../Wrapper/Wrapper';
 import './Chatbot.css';
 
 type Message = {
@@ -352,6 +353,11 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
   const startPromiseRef = useRef<Promise<string | null> | null>(null);
   const sendingRef = useRef(false);
   const { formatMessage, formatNumber } = useIntl();
+  // The app's language code as-is ('en-us', 'es', 'pt-br'), the same value the screen
+  // stores as `request_language_code`, so the two can be compared without a mapping.
+  // Only analytics reads it: ai-service stores it on the conversation and never puts
+  // it in the prompt.
+  const { locale } = useContext(Context);
   const track = useTrackEvent();
 
   // Displayed program values are annual whole dollars (see visiblePrograms).
@@ -562,7 +568,7 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
     if (conversationIdRef.current) return conversationIdRef.current;
     if (!uuid) return null;
     if (!startPromiseRef.current) {
-      startPromiseRef.current = startAssistantConversation(uuid, undefined, visiblePrograms)
+      startPromiseRef.current = startAssistantConversation(uuid, locale, visiblePrograms)
         .then((res) => {
           conversationIdRef.current = res.conversation_id;
           ratingConversationIdRef.current = res.conversation_id;
@@ -575,7 +581,7 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
         });
     }
     return startPromiseRef.current;
-  }, [uuid, errorMessage, visiblePrograms, applyServerMessages]);
+  }, [uuid, locale, errorMessage, visiblePrograms, applyServerMessages]);
 
   // Context refresh (MFB-1737): once a conversation exists, a change in the
   // rendered program list (a results-page filter) re-POSTs the start endpoint so
@@ -596,8 +602,8 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
 
   const refreshContext = useCallback(() => {
     if (!conversationIdRef.current || !uuid) return;
-    startAssistantConversation(uuid, undefined, visibleProgramsRef.current).catch(() => {});
-  }, [uuid]);
+    startAssistantConversation(uuid, locale, visibleProgramsRef.current).catch(() => {});
+  }, [uuid, locale]);
 
   useEffect(() => {
     if (!conversationIdRef.current || !uuid) return;
