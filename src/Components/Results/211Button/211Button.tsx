@@ -21,10 +21,7 @@ const MoreHelpButton = () => {
         className="button211"
         onClick={() => track('screener_get_help_click', { location: 'results' })}
       >
-        {/* Own translation ID, separate from the tab's `resultsOptions.immediateHelp`.
-            Translation labels are globally unique with no white label dimension, so a
-            shared ID cannot carry different copy for CESN than for the tab the other
-            white labels render. */}
+        {/* Own translation ID, separate from the tab's `resultsOptions.immediateHelp`. */}
         <FormattedMessage id="energyCalculator.results.moreHelp" defaultMessage="More Help" />
       </Link>
     </div>
