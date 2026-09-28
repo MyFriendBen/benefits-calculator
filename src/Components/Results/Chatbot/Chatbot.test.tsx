@@ -5,7 +5,6 @@ import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { ChatbotProvider } from './Chatbot';
 import { Context } from '../../Wrapper/Wrapper';
 import type { WrapperContext } from '../../../Types/WrapperContext';
-import type { Language } from '../../../Assets/languageOptions';
 import {
   startAssistantConversation,
   getAssistantHistory,
@@ -40,9 +39,13 @@ const SNAP = { name_abbreviated: 'co_snap', value: 6636 };
 const MEDICAID = { name_abbreviated: 'co_medicaid', value: 5280 };
 const WIC = { name_abbreviated: 'co_wic', value: 1224 };
 
-// The widget reads only `locale` from the app context.
-const chatbotUi = (visiblePrograms?: AssistantVisibleProgram[], locale: Language = 'en-us') => (
-  <Context.Provider value={{ locale } as WrapperContext}>
+// The widget reads only `locale` and the white label's `language_options` from the app
+// context (via useSupportedLocale). The codes are the config's, e.g. 'zh-hans', which is
+// why `locale` is a plain string here rather than the stale `Language` union.
+const LANGUAGE_OPTIONS = { 'en-us': 'English', es: 'Español', 'pt-br': 'Português Brasileiro', 'zh-hans': '中文' };
+
+const chatbotUi = (visiblePrograms?: AssistantVisibleProgram[], locale = 'en-us') => (
+  <Context.Provider value={{ locale, config: { language_options: LANGUAGE_OPTIONS } } as unknown as WrapperContext}>
     <IntlProvider locale="en" defaultLocale="en">
       <MemoryRouter initialEntries={[`/co/${SCREEN_UUID}/results/benefits`]}>
         <Routes>
@@ -56,7 +59,7 @@ const chatbotUi = (visiblePrograms?: AssistantVisibleProgram[], locale: Language
   </Context.Provider>
 );
 
-const renderChatbot = (visiblePrograms?: AssistantVisibleProgram[], locale?: Language) =>
+const renderChatbot = (visiblePrograms?: AssistantVisibleProgram[], locale?: string) =>
   render(chatbotUi(visiblePrograms, locale));
 
 /** Open the widget and send a message — the only thing that starts a conversation. */
@@ -151,17 +154,19 @@ describe('ChatbotProvider visiblePrograms (MFB-1427)', () => {
     // The results subtree no longer remounts on filter changes (Results.tsx), so an
     // open conversation outlives them. The widget re-POSTs the idempotent start
     // endpoint on a list change so ai-service's stored snapshot tracks the screen.
-    const { rerender } = render(chatbotUi([SNAP, MEDICAID]));
+    // A non-default locale, so a refresh that dropped back to 'en-us' would show.
+    const { rerender } = render(chatbotUi([SNAP, MEDICAID], 'pt-br'));
 
     await openAndSend();
     // mockSend being dispatched proves ensureConversation resolved, i.e. the
     // conversation id is set — the precondition for a refresh.
     await waitFor(() => expect(mockSend).toHaveBeenCalledTimes(1));
+    expect(mockStart).toHaveBeenCalledWith(SCREEN_UUID, 'pt-br', [SNAP, MEDICAID]);
 
-    rerender(chatbotUi([SNAP]));
+    rerender(chatbotUi([SNAP], 'pt-br'));
 
     await waitFor(() => expect(mockStart).toHaveBeenCalledTimes(2));
-    expect(mockStart).toHaveBeenLastCalledWith(SCREEN_UUID, 'en-us', [SNAP]);
+    expect(mockStart).toHaveBeenLastCalledWith(SCREEN_UUID, 'pt-br', [SNAP]);
     // A refresh is not a new conversation: no messages were sent.
     expect(mockSend).toHaveBeenCalledTimes(1);
   });
@@ -234,19 +239,40 @@ describe('ChatbotProvider locale', () => {
     }
   });
 
-  it('keeps sending the locale on a context refresh', async () => {
-    // ai-service only stores the locale when it creates a conversation, so this is for
-    // consistency rather than effect — but a refresh shouldn't drop back to the default.
-    const { rerender } = render(chatbotUi([SNAP, MEDICAID], 'pt-br'));
+  it('falls back to en-us for a stored code this white label does not offer', async () => {
+    // Wrapper returns a localStorage language as-is, so a code from an older config
+    // ('zh', now 'zh-hans') can still be the app locale. The screen's own language code
+    // has already fallen back by the time this runs, so sending the raw value would
+    // break the "compare without a mapping" goal.
+    renderChatbot([SNAP], 'zh');
+
+    await openAndSend();
+
+    await waitFor(() => expect(mockStart).toHaveBeenCalled());
+    expect(mockStart).toHaveBeenCalledWith(SCREEN_UUID, 'en-us', [SNAP]);
+  });
+
+  it('does not refresh when only the language changes, but sends the new one next time', async () => {
+    // ai-service stores the locale only when it creates a conversation, so a refresh
+    // triggered by a language switch would rebuild and re-post the whole context for
+    // nothing. The next real refresh should still carry the current language.
+    // One array instance, so the rerender changes the language and nothing else.
+    const programs = [SNAP, MEDICAID];
+    const { rerender } = render(chatbotUi(programs, 'en-us'));
 
     await openAndSend();
     await waitFor(() => expect(mockSend).toHaveBeenCalledTimes(1));
-    expect(mockStart).toHaveBeenCalledWith(SCREEN_UUID, 'pt-br', [SNAP, MEDICAID]);
+    expect(mockStart).toHaveBeenCalledTimes(1);
 
-    rerender(chatbotUi([SNAP], 'pt-br'));
+    rerender(chatbotUi(programs, 'es'));
+    // Flush effects; a refresh would have been dispatched synchronously from one.
+    await act(async () => {});
+    expect(mockStart).toHaveBeenCalledTimes(1);
+
+    rerender(chatbotUi([SNAP], 'es'));
 
     await waitFor(() => expect(mockStart).toHaveBeenCalledTimes(2));
-    expect(mockStart).toHaveBeenLastCalledWith(SCREEN_UUID, 'pt-br', [SNAP]);
+    expect(mockStart).toHaveBeenLastCalledWith(SCREEN_UUID, 'es', [SNAP]);
   });
 });
 
