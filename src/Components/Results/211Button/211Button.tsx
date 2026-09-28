@@ -21,9 +21,8 @@ const MoreHelpButton = () => {
         className="button211"
         onClick={() => track('screener_get_help_click', { location: 'results' })}
       >
-        {/* Shares the Immediate Help tab's translation ID so both routes to this page
-            carry one label. */}
-        <FormattedMessage id="resultsOptions.immediateHelp" defaultMessage="Immediate Help" />
+        {/* Own translation ID, separate from the tab's `resultsOptions.immediateHelp`. */}
+        <FormattedMessage id="energyCalculator.results.moreHelp" defaultMessage="More Help" />
       </Link>
     </div>
   );
