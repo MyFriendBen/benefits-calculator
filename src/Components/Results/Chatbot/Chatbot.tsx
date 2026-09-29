@@ -22,6 +22,7 @@ import {
   AssistantVisibleProgram,
 } from '../../../apiCalls';
 import { useTrackEvent } from '../../../Assets/analytics';
+import { useSupportedLocale } from '../../LanguageSelect/LanguageSelect';
 import './Chatbot.css';
 
 type Message = {
@@ -352,6 +353,12 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
   const startPromiseRef = useRef<Promise<string | null> | null>(null);
   const sendingRef = useRef(false);
   const { formatMessage, formatNumber } = useIntl();
+  // The app's language code as-is ('en-us', 'es', 'zh-hans'), the same value the screen
+  // stores as `request_language_code`, so the two can be compared without a mapping.
+  // Validated rather than Wrapper's raw `locale`, which can be a stale localStorage
+  // code this white label no longer offers (see useSupportedLocale). Only analytics
+  // reads it: ai-service stores it on the conversation and never puts it in the prompt.
+  const locale = useSupportedLocale();
   const track = useTrackEvent();
 
   // Displayed program values are annual whole dollars (see visiblePrograms).
@@ -562,7 +569,7 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
     if (conversationIdRef.current) return conversationIdRef.current;
     if (!uuid) return null;
     if (!startPromiseRef.current) {
-      startPromiseRef.current = startAssistantConversation(uuid, undefined, visiblePrograms)
+      startPromiseRef.current = startAssistantConversation(uuid, locale, visiblePrograms)
         .then((res) => {
           conversationIdRef.current = res.conversation_id;
           ratingConversationIdRef.current = res.conversation_id;
@@ -575,7 +582,7 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
         });
     }
     return startPromiseRef.current;
-  }, [uuid, errorMessage, visiblePrograms, applyServerMessages]);
+  }, [uuid, locale, visiblePrograms, applyServerMessages]);
 
   // Context refresh (MFB-1737): once a conversation exists, a change in the
   // rendered program list (a results-page filter) re-POSTs the start endpoint so
@@ -591,12 +598,19 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
   useEffect(() => {
     visibleProgramsRef.current = visiblePrograms;
   });
+  // Read through a ref for the same reason, and so a language switch doesn't give
+  // refreshContext a new identity and fire a refresh: ai-service only stores the
+  // locale when it creates a conversation, so that POST would change nothing.
+  const localeRef = useRef(locale);
+  useEffect(() => {
+    localeRef.current = locale;
+  });
 
   const pendingRefreshRef = useRef(false);
 
   const refreshContext = useCallback(() => {
     if (!conversationIdRef.current || !uuid) return;
-    startAssistantConversation(uuid, undefined, visibleProgramsRef.current).catch(() => {});
+    startAssistantConversation(uuid, localeRef.current, visibleProgramsRef.current).catch(() => {});
   }, [uuid]);
 
   useEffect(() => {

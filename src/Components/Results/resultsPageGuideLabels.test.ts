@@ -77,10 +77,9 @@ const REQUIRED: ReadonlyArray<[label: string, file: string]> = [
   // Navigation out of the results, and the 211 escape hatch.
   ['BACK TO SCREENER', 'ResultsHeader/ResultsHeader.tsx'],
   ['BACK TO RESULTS', 'ProgramPage/ProgramPage.tsx'],
-  // This button's own text changed from "More Help" to "Immediate Help" (it
-  // now shares the tab's translation key). Benji's guide in ai-service needs
-  // the matching update — flagged in the PR description, not yet confirmed.
-  ['Immediate Help', '211Button/211Button.tsx'],
+  // CESN-only button, on its own translation key so its copy can differ from the
+  // Immediate Help tab the other white labels render.
+  ['More Help', '211Button/211Button.tsx'],
 
   // Additional-resources cards: collapsed, then a website link.
   ['More Info', 'Needs/NeedCard.tsx'],
