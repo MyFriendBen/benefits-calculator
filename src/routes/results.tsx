@@ -24,6 +24,8 @@ const resultsRoutes: RouteObject[] = [
   },
   { path: 'results/benefits/:programId', element: <Results type="program" /> },
   { path: 'results/more-help', element: <Results type="help" /> },
+  // Benefits Manager demo (design discussion only — never merged to main).
+  { path: 'results/manage', element: <Results type="manage" /> },
 ];
 
 export default resultsRoutes;

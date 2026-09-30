@@ -45,6 +45,7 @@ import { useTrackEvent, useTrackItemList } from '../../Assets/analytics';
 import { POST_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
 import { deriveVisiblePrograms } from './visiblePrograms';
 import { calculateTotalValue, programValue } from './FormattedValue';
+import BenefitsManager from './BenefitsManager/BenefitsManager';
 
 // Mounts the Benbot chat widget only when the flag is on; otherwise renders children unchanged.
 // Defined at module scope so its identity is stable across renders (no subtree remount).
@@ -88,7 +89,7 @@ type WrapperResultsContext = {
 };
 
 type ResultsProps = {
-  type: 'program' | 'need' | 'help' | 'energy-calculator-rebates';
+  type: 'program' | 'need' | 'help' | 'energy-calculator-rebates' | 'manage';
 };
 
 export const ResultsContext = createContext<WrapperResultsContext | undefined>(undefined);
@@ -445,6 +446,14 @@ const Results = ({ type }: ResultsProps) => {
           </Grid>
         </Grid>
       </main>
+    );
+  } else if (programId === undefined && type === 'manage') {
+    // Benefits Manager demo. Deliberately NOT wrapped in BenbotWrapper: Benji is hidden
+    // on this page, since its page guide knows nothing about the manager.
+    return (
+      <ResultsContext.Provider value={resultsContextValue}>
+        <BenefitsManager />
+      </ResultsContext.Provider>
     );
   } else if (programId === undefined && (type === 'program' || type === 'need' || type === 'help')) {
     // Built inside render, not at module scope: Results.tsx has an import cycle

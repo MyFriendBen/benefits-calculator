@@ -1,5 +1,6 @@
 import { ProgramCategory } from '../../../Types/Results';
-import { findValidationForProgram, useResultsContext } from '../Results';
+import { useNavigate } from 'react-router-dom';
+import { findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
 import Filter from '../Filter/Filter';
 import ProgramCard from './ProgramCard';
 import CategoryHeading from '../CategoryHeading/CategoryHeading';
@@ -79,6 +80,19 @@ const ValidationCategory = () => {
   );
 };
 
+// Benefits Manager demo entry point. Intentionally unstyled — it only has to get a
+// presenter from the results page to the manager during a design discussion.
+const ManageBenefitsButton = () => {
+  const navigate = useNavigate();
+  const manageLink = useResultsLink('results/manage');
+
+  return (
+    <button type="button" onClick={() => navigate(manageLink)}>
+      Manage My Benefits (demo)
+    </button>
+  );
+};
+
 const Programs = () => {
   const { programs, programCategories } = useResultsContext();
 
@@ -89,6 +103,7 @@ const Programs = () => {
 
   return (
     <>
+      <ManageBenefitsButton />
       <ResultsMessage />
       {!isEnergyCalculator && <Filter />}
       {isEnergyCalculator && <DocumentSummary programs={programs} />}
