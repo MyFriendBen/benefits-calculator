@@ -16,13 +16,20 @@ describe('theme registry', () => {
   // The API sends a theme name as a plain string (referrer_data.theme). An unregistered name
   // fails isValidTheme and useThemeValidation silently swaps in 'default', so a referrer would
   // ship with generic branding and no error anywhere.
-  it.each(['default', 'twoOneOne', 'twoOneOneNC', 'co_energy', 'nc_lanc', 'nc_ccla', 'cu_denver', 'uwgkc'])(
-    'registers the "%s" theme the API can name',
-    (name) => {
-      expect(isValidTheme(name)).toBe(true);
-      expect(VALID_THEMES).toContain(name);
-    },
-  );
+  it.each([
+    'default',
+    'twoOneOne',
+    'twoOneOneNC',
+    'co_energy',
+    'nc_lanc',
+    'nc_ccla',
+    'cu_denver',
+    'uwgkc',
+    'twoOneOneChicago',
+  ])('registers the "%s" theme the API can name', (name) => {
+    expect(isValidTheme(name)).toBe(true);
+    expect(VALID_THEMES).toContain(name);
+  });
 
   it('rejects a theme name that is not registered', () => {
     expect(isValidTheme('uwgkc_211')).toBe(false);
