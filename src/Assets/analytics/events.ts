@@ -122,10 +122,12 @@ export interface ScreenerEventMap {
   // 'income-frequency') and tagged with the hosting step via StepContext. Not the
   // results-page "More Help / 211" CTA below.
   screener_help_click: StepContext & { help_topic: string };
-  // Results-page "More Help / 211" CTA — kept separate from screener_help_click so
-  // it doesn't pollute the inline-tooltip confusion metric.
+  // Fired from the Immediate Help tab (location: 'immediate_help_tab') and CESN's
+  // bottom button (location: 'results'). Deliberately kept alongside
+  // screener_results_tab_click for GA4 continuity — retire once tab_name is confirmed flowing.
   screener_get_help_click: { location?: string };
-  // "Other Resources Near You" (more-help page) "Visit Website" link click.
+  // "Visit Website" click on Other Resources Near You — fires from the Immediate Help
+  // tab or CESN's standalone more-help page.
   // `resource_name` is the config `label` (a plain string, PII-free);
   // `resource_index` is the item's ordinal on the page.
   screener_more_help_resource_click: { resource_name?: string; resource_index?: number; url?: string };
@@ -215,6 +217,18 @@ export interface ScreenerEventMap {
   screener_benbot_closed: {};
   screener_benbot_message_sent: {};
   screener_benbot_error: {};
+  // Thumbs up / down on one reply (MFB-1915). 'cleared' is the user taking a rating
+  // BACK, which is its own signal and must not be folded into "never rated" — that is
+  // also why the column behind it records the clearing rather than just blanking.
+  // `reason` is present only when a chip was picked, which is a minority of
+  // thumbs-downs by design — the chips are offered after the rating is already saved
+  // and are skippable, so its absence means "skipped", not "missing data".
+  screener_benbot_rated: { rating: 'up' | 'down' | 'cleared' };
+  // Separate from `screener_benbot_rated` on purpose. Both used to fire from the same
+  // call, so every chip press recorded another thumbs-down and one unhappy reply could
+  // report three — an overcount that fell hardest on the most engaged households.
+  // 'cleared' is a reason taken back, which is not the same as never giving one.
+  screener_benbot_rating_reason: { reason: string };
 
   // ---- NPS survey ----
   screener_nps_score_submitted: { score: number };

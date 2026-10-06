@@ -132,6 +132,149 @@
   border-bottom-left-radius: 0.2rem;
 }
 
+/* Thumbs up / down on an assistant reply (MFB-1915).
+
+   Inside the bubble rather than floating beside it, so the buttons move with the
+   message they belong to and a long transcript never leaves a rating stranded next to
+   the wrong reply. Right-aligned and quiet: this is an invitation, not an instruction,
+   and it sits under every single reply — at full contrast it would compete with the
+   answer the user is actually reading. */
+.chatbot-rating {
+  display: flex;
+  justify-content: flex-end;
+  /* Visual gap comes from the hit areas overlapping slightly less than they extend;
+     see the ::after below. Keeping this at 0 lets the icons sit close without their
+     tap targets fighting. */
+  gap: 0.5rem;
+  margin-top: 0.125rem;
+}
+
+/* The box hugs the icon; the TAP TARGET is bigger and costs no layout height.
+   Previously `min-height: 1.75rem` (31.5px at this root size) wrapped a 15.75px glyph
+   in ~16px of chrome, which added 36px to every assistant bubble — and bought an
+   awkward middle ground, since 31.5px is not a real touch target either. The pseudo-
+   element below is absolutely positioned, so it enlarges what you can hit without
+   enlarging what the layout has to make room for: ~15px tall on the page, ~29px to
+   the finger, which is LARGER than the old button. */
+.chatbot-rating-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 0.8125rem;
+  /* 0, not 1 — a line box taller than the glyph is most of what was padding the row. */
+  line-height: 0;
+  border: none;
+  border-radius: 0.1875rem;
+  background: none;
+  /* Not the bubble's own #333: the buttons must read as secondary to the text they
+     sit under, and darken only on interaction. */
+  color: #6b6b6b;
+  cursor: pointer;
+}
+
+.chatbot-rating-btn::after {
+  content: '';
+  position: absolute;
+  /* Extends the hit area past the icon without affecting layout.
+     HORIZONTAL MUST BE AT MOST HALF THE ROW'S `gap` (0.5rem), or the two hit areas
+     overlap — and because the down-thumb comes later in the DOM it wins the overlap,
+     so the WHOLE gap resolves to it. A click a few pixels right of the up-thumb would
+     then record a thumbs-DOWN: the one mis-click this feature must not make. At
+     0.25rem each, the two areas meet exactly and never overlap.
+     Vertical is free to be generous — nothing adjacent competes for it. */
+  inset: -0.4375rem -0.25rem;
+}
+
+/* No background on hover any more: a filled swatch around a 15px icon reads as a
+   chunky button again, which is the thing this is getting away from. */
+.chatbot-rating-btn:hover {
+  color: #333;
+}
+
+/* Never removed, only restyled. These are small, low-contrast controls in a corner of
+   a floating panel — the place a keyboard user is most likely to lose track of where
+   they are. */
+.chatbot-rating-btn:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+/* The chosen thumb. Colour is NOT the only difference — the icon itself swaps from
+   outline to filled (see Chatbot.tsx), so the state survives a user who cannot
+   distinguish these two greys, and aria-pressed carries it for screen readers. */
+.chatbot-rating-btn--active {
+  color: var(--primary-color);
+}
+
+/* Confirmation under the thumbs once a reply is rated, and the visible heading for the
+   chips on a thumbs-down.
+
+   Right-aligned to sit under the thumbs it answers, rather than under the message text.
+   Quiet and small on purpose: it is reassurance, not content, and it appears under every
+   rated reply — at the body size it would compete with the answer itself. */
+.chatbot-rating-note {
+  margin: 0.125rem 0 0;
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  color: #6b6b6b;
+  text-align: right;
+}
+
+/* "What went wrong?" chips under a reply rated down (MFB-1915).
+
+   Left-aligned against the message text, not right-aligned with the thumbs: these are
+   words to read, and a wrapped right-aligned block of them is hard to scan. Wrapping is
+   expected — seven chips never fit one line in a panel this narrow. */
+.chatbot-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  /* Tighter than it was: the note above is now the heading for these, so they read as
+     one block rather than two things that happen to be stacked. */
+  margin-top: 0.25rem;
+}
+
+.chatbot-reason-chip {
+  padding: 0.1875rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: inherit;
+  line-height: 1.3;
+  color: #4a4a4a;
+  background: none;
+  border: 1px solid #c9c9c9;
+  border-radius: 1rem;
+  cursor: pointer;
+  /* The label wraps inside the chip rather than being clipped: these are translated
+     strings, and several languages run substantially longer than the English. */
+  text-align: left;
+  white-space: normal;
+}
+
+.chatbot-reason-chip:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.chatbot-reason-chip:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+/* The chosen one. Filled rather than merely recoloured, so it is distinguishable from
+   the hover state and from the unselected chips without relying on hue alone —
+   aria-pressed carries it for screen readers. */
+.chatbot-reason-chip--active {
+  color: #fff;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.chatbot-reason-chip--active:hover {
+  color: #fff;
+}
+
 .chatbot-link {
   color: var(--primary-color);
   word-break: break-all;
