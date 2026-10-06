@@ -44,7 +44,7 @@ import { ChatbotProvider } from './Chatbot/Chatbot';
 import { useTrackEvent, useTrackItemList } from '../../Assets/analytics';
 import { POST_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
 import { deriveVisiblePrograms } from './visiblePrograms';
-import { calculateTotalValue, programValue } from './FormattedValue';
+import { calculateGreetingTotal, calculateTotalValue, programValue } from './FormattedValue';
 
 // Mounts the Benbot chat widget only when the flag is on; otherwise renders children unchanged.
 // Defined at module scope so its identity is stable across renders (no subtree remount).
@@ -68,9 +68,16 @@ import { calculateTotalValue, programValue } from './FormattedValue';
 const BenbotWrapper = ({
   enabled,
   visiblePrograms,
+  greetingTotal,
   children,
-}: PropsWithChildren<{ enabled: boolean; visiblePrograms: AssistantVisibleProgram[] }>) =>
-  enabled ? <ChatbotProvider visiblePrograms={visiblePrograms}>{children}</ChatbotProvider> : <>{children}</>;
+}: PropsWithChildren<{ enabled: boolean; visiblePrograms: AssistantVisibleProgram[]; greetingTotal: number }>) =>
+  enabled ? (
+    <ChatbotProvider visiblePrograms={visiblePrograms} greetingTotal={greetingTotal}>
+      {children}
+    </ChatbotProvider>
+  ) : (
+    <>{children}</>
+  );
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -340,6 +347,7 @@ const Results = ({ type }: ResultsProps) => {
   // What BenBot is allowed to recommend from — see BenbotWrapper and
   // ./visiblePrograms, which documents why this comes from programCategories.
   const visiblePrograms = useMemo(() => deriveVisiblePrograms(programCategories), [programCategories]);
+  const greetingTotal = useMemo(() => calculateGreetingTotal(programCategories), [programCategories]);
 
   useEffect(() => {
     if (apiResults === undefined) {
@@ -462,7 +470,7 @@ const Results = ({ type }: ResultsProps) => {
 
     return (
       <ResultsContext.Provider value={resultsContextValue}>
-        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms}>
+        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms} greetingTotal={greetingTotal}>
           <main>
             <ResultsHeader />
             <div className="results-card-wrapper">
@@ -531,7 +539,7 @@ const Results = ({ type }: ResultsProps) => {
           effect already produces both; a route-aware exception would only break the
           second one.
         */}
-        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms}>
+        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms} greetingTotal={greetingTotal}>
           <ProgramPage program={program} />
         </BenbotWrapper>
       </ResultsContext.Provider>
