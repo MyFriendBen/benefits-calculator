@@ -17,9 +17,7 @@ const TEST_CONFIG: Record<WhiteLabel, { name: string; skip?: boolean; skipReason
   tx: { name: 'Texas' },
   wa: { name: 'Washington' },
   mo: { name: 'Missouri' },
-  // Skipped until the NJ backend config (MFB-2161) is deployed and `add_config --all` has run —
-  // see the MO rollout (MFB-1569) for the same gating pattern.
-  nj: { name: 'New Jersey', skip: true, skipReason: 'NJ white label config not yet deployed (MFB-2161)' },
+  nj: { name: 'New Jersey' },
 };
 
 // Validate that TEST_CONFIG is in sync with ALL_VALID_WHITE_LABELS
