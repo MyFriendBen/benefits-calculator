@@ -65,6 +65,37 @@ type IncomeFormValues = {
 //   self-employment); only frequency + amount show (the employed / gig questions).
 type IncomeRowVariant = 'full' | 'amountOnly';
 
+const INCOME_QUESTIONS = {
+  you: {
+    employed: {
+      id: 'householdDataBlock.incomeQuestion-employed',
+      defaultMessage: 'Are you currently employed (receiving consistent wages, salary, or tips)?',
+    },
+    gig: {
+      id: 'householdDataBlock.incomeQuestion-gig',
+      defaultMessage: 'Do you earn any money from freelance, gig, or occasional work?',
+    },
+    other: {
+      id: 'householdDataBlock.incomeQuestion-other',
+      defaultMessage: 'Do you receive any government benefits, child support, alimony, or other recurring payments?',
+    },
+  },
+  they: {
+    employed: {
+      id: 'householdDataBlock.incomeQuestion-employed-they',
+      defaultMessage: 'Are they currently employed (receiving consistent wages, salary, or tips)?',
+    },
+    gig: {
+      id: 'householdDataBlock.incomeQuestion-gig-they',
+      defaultMessage: 'Do they earn any money from freelance, gig, or occasional work?',
+    },
+    other: {
+      id: 'householdDataBlock.incomeQuestion-other-they',
+      defaultMessage: 'Do they receive any government benefits, child support, alimony, or other recurring payments?',
+    },
+  },
+};
+
 interface IncomeSectionProps {
   control: Control<IncomeFormValues>;
   errors: FieldErrors<IncomeFormValues>;
@@ -132,7 +163,10 @@ const IncomeStreamRow = ({
         {showCategory && (
           <Box className="income-category-container">
             <FormControl fullWidth size="small" error={incomeCategoryError !== undefined}>
-              <FormLabel id={`income-category-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
+              <FormLabel
+                id={`income-category-label-${index}`}
+                sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}
+              >
                 <FormattedMessage id="personIncomeBlock.incomeCategory" defaultMessage="Category" />
               </FormLabel>
               <Controller
@@ -141,7 +175,12 @@ const IncomeStreamRow = ({
                 render={({ field }) => (
                   <Select
                     {...field}
-                    inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.incomeCategory', defaultMessage: 'Category' }) }}
+                    inputProps={{
+                      'aria-label': intl.formatMessage({
+                        id: 'personIncomeBlock.incomeCategory',
+                        defaultMessage: 'Category',
+                      }),
+                    }}
                     id={`income-category-select-${index}`}
                     sx={{ backgroundColor: '#fff' }}
                     onChange={(e) => {
@@ -168,7 +207,10 @@ const IncomeStreamRow = ({
           {showSource && (
             <Box className="income-field-specific-type">
               <FormControl fullWidth size="small" error={!!effectiveCategory && incomeStreamNameError !== undefined}>
-                <FormLabel id={`income-source-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}>
+                <FormLabel
+                  id={`income-source-label-${index}`}
+                  sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary' }}
+                >
                   <FormattedMessage id="personIncomeBlock.incomeStreamName" defaultMessage="Source" />
                 </FormLabel>
                 <Controller
@@ -177,7 +219,16 @@ const IncomeStreamRow = ({
                   render={({ field }) => (
                     // Tooltip needs a non-disabled span wrapper — disabled elements swallow pointer events
                     <Tooltip
-                      title={effectiveCategory ? '' : <FormattedMessage id="personIncomeBlock.specificType-tooltip" defaultMessage="Select an income category first" />}
+                      title={
+                        effectiveCategory ? (
+                          ''
+                        ) : (
+                          <FormattedMessage
+                            id="personIncomeBlock.specificType-tooltip"
+                            defaultMessage="Select an income category first"
+                          />
+                        )
+                      }
                       disableHoverListener={!!effectiveCategory}
                       disableFocusListener={!!effectiveCategory}
                       disableTouchListener={!!effectiveCategory}
@@ -185,7 +236,12 @@ const IncomeStreamRow = ({
                       <span>
                         <Select
                           {...field}
-                          inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.incomeStreamName', defaultMessage: 'Source' }) }}
+                          inputProps={{
+                            'aria-label': intl.formatMessage({
+                              id: 'personIncomeBlock.incomeStreamName',
+                              defaultMessage: 'Source',
+                            }),
+                          }}
                           id={`income-source-select-${index}`}
                           sx={{ backgroundColor: '#fff' }}
                           disabled={!effectiveCategory}
@@ -209,7 +265,10 @@ const IncomeStreamRow = ({
 
           <Box className="income-field-frequency">
             <div className="income-frequency-label-row">
-              <FormLabel id={`income-frequency-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, color: 'text.primary' }}>
+              <FormLabel
+                id={`income-frequency-label-${index}`}
+                sx={{ fontSize: '0.875rem', fontWeight: 400, color: 'text.primary' }}
+              >
                 <FormattedMessage id="personIncomeBlock.frequency" defaultMessage="Frequency" />
               </FormLabel>
               <HelpButton helpTopic="income-frequency" stepName={HOUSEHOLD_SUBSTEP_IDS.memberDetails}>
@@ -226,7 +285,12 @@ const IncomeStreamRow = ({
                 render={({ field }) => (
                   <Select
                     {...field}
-                    inputProps={{ 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.frequency', defaultMessage: 'Frequency' }) }}
+                    inputProps={{
+                      'aria-label': intl.formatMessage({
+                        id: 'personIncomeBlock.frequency',
+                        defaultMessage: 'Frequency',
+                      }),
+                    }}
                     id={`income-frequency-select-${index}`}
                     sx={{ backgroundColor: '#fff' }}
                   >
@@ -244,7 +308,9 @@ const IncomeStreamRow = ({
 
           {isHourly && (
             <Box className="income-field-hours">
-              <FormLabel sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary', display: 'block' }}>
+              <FormLabel
+                sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary', display: 'block' }}
+              >
                 <FormattedMessage id="personIncomeBlock.hoursPerWeek" defaultMessage="Hours per Week" />
               </FormLabel>
               <Controller
@@ -261,7 +327,13 @@ const IncomeStreamRow = ({
                       fullWidth
                       size="small"
                       variant="outlined"
-                      inputProps={{ inputMode: 'numeric', 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.hoursPerWeek', defaultMessage: 'Hours per Week' }) }}
+                      inputProps={{
+                        inputMode: 'numeric',
+                        'aria-label': intl.formatMessage({
+                          id: 'personIncomeBlock.hoursPerWeek',
+                          defaultMessage: 'Hours per Week',
+                        }),
+                      }}
                       sx={{ backgroundColor: '#fff' }}
                       error={hoursPerWeekError !== undefined}
                     />
@@ -277,7 +349,10 @@ const IncomeStreamRow = ({
           )}
 
           <Box className="income-field-amount">
-            <FormLabel id={`income-amount-label-${index}`} sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary', display: 'block' }}>
+            <FormLabel
+              id={`income-amount-label-${index}`}
+              sx={{ fontSize: '0.875rem', fontWeight: 400, mb: 0.5, color: 'text.primary', display: 'block' }}
+            >
               <FormattedMessage id="personIncomeBlock.preTaxAmount" defaultMessage="Pre-Tax Amount" />
             </FormLabel>
             <Controller
@@ -297,7 +372,14 @@ const IncomeStreamRow = ({
                     size="small"
                     variant="outlined"
                     placeholder="0.00"
-                    inputProps={{ id: `income-amount-input-${index}`, inputMode: isHourly ? 'decimal' : 'numeric', 'aria-label': intl.formatMessage({ id: 'personIncomeBlock.preTaxAmount', defaultMessage: 'Pre-Tax Amount' }) }}
+                    inputProps={{
+                      id: `income-amount-input-${index}`,
+                      inputMode: isHourly ? 'decimal' : 'numeric',
+                      'aria-label': intl.formatMessage({
+                        id: 'personIncomeBlock.preTaxAmount',
+                        defaultMessage: 'Pre-Tax Amount',
+                      }),
+                    }}
                     sx={{ backgroundColor: '#fff' }}
                     error={incomeAmountError !== undefined}
                     InputProps={{
@@ -320,7 +402,10 @@ const IncomeStreamRow = ({
         type="button"
         onClick={() => remove(index)}
         className="income-delete-button"
-        aria-label={intl.formatMessage({ id: 'personIncomeBlock.deleteIncomeAria', defaultMessage: 'Delete income source' })}
+        aria-label={intl.formatMessage({
+          id: 'personIncomeBlock.deleteIncomeAria',
+          defaultMessage: 'Delete income source',
+        })}
       >
         <DeleteIcon />
         <span className="income-delete-label">
@@ -435,9 +520,10 @@ const IncomeSection = ({
   const intl = useIntl();
 
   // First member is the applicant ("you"); later members are asked about in the
-  // third person ("they"). Matches the you/them convention used elsewhere in the
-  // household form (e.g. StudentEligibilitySection).
-  const subject = pageNumber === 1 ? 'you' : 'they';
+  // third person ("they"). Each person gets its own string so translations can
+  // conjugate for the right subject, matching the you/them convention used elsewhere
+  // in the household form (e.g. StudentEligibilitySection).
+  const questions = INCOME_QUESTIONS[pageNumber === 1 ? 'you' : 'they'];
 
   // Only non-employment categories belong to the "government benefits / other
   // recurring payments" question; employment is collected via Q1/Q2.
@@ -448,7 +534,10 @@ const IncomeSection = ({
 
   const incomeCategoriesMenuItems = createMenuItems(
     otherIncomeCategories,
-    <FormattedMessage id="personIncomeBlock.createMenuItems-disabledSelectCategory" defaultMessage="Select category..." />,
+    <FormattedMessage
+      id="personIncomeBlock.createMenuItems-disabledSelectCategory"
+      defaultMessage="Select category..."
+    />,
   );
 
   const getError = (index: number, fieldName: keyof IncomeStreamFormData) => {
@@ -650,7 +739,10 @@ const IncomeSection = ({
   return (
     <Box id="income-section" className="section">
       <QuestionQuestion>
-        <FormattedMessage id="householdDataBlock.createIncomeRadioQuestion-questionLabel" defaultMessage="Income Sources" />
+        <FormattedMessage
+          id="householdDataBlock.createIncomeRadioQuestion-questionLabel"
+          defaultMessage="Income Sources"
+        />
       </QuestionQuestion>
       <QuestionDescription>
         {pageNumber === 1 ? (
@@ -671,12 +763,12 @@ const IncomeSection = ({
         <Box className={`income-question-block${employed ? ' income-question-block--active' : ''}`}>
           <FormLabel className="income-question-label">
             <Icon name="briefcase" size={26} className="income-question-icon" aria-hidden />
-            <FormattedMessage id="householdDataBlock.incomeQuestion-employed" defaultMessage="Are {subject} currently employed (receiving consistent wages, salary, or tips)?" values={{ subject }} />
+            <FormattedMessage {...questions.employed} />
           </FormLabel>
           <YesNoToggle
             value={employed}
             onChange={handleEmployedChange}
-            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-employed', defaultMessage: 'Are {subject} currently employed (receiving consistent wages, salary, or tips)?' }, { subject })}
+            ariaLabel={intl.formatMessage(questions.employed)}
             errorId="income-employed-error"
             hasError={!!employedError}
           />
@@ -708,11 +800,7 @@ const IncomeSection = ({
         <Box className={`income-question-block${gig ? ' income-question-block--active' : ''}`}>
           <FormLabel className="income-question-label">
             <Icon name="car" size={26} className="income-question-icon" aria-hidden />
-            <FormattedMessage
-              id="householdDataBlock.incomeQuestion-gig"
-              defaultMessage="Do {subject} earn any money from freelance, gig, or occasional work?"
-              values={{ subject }}
-            />
+            <FormattedMessage {...questions.gig} />
           </FormLabel>
           <p id="income-gig-subtext" className="income-question-subtext">
             <FormattedMessage
@@ -723,7 +811,7 @@ const IncomeSection = ({
           <YesNoToggle
             value={gig}
             onChange={handleGigChange}
-            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-gig', defaultMessage: 'Do {subject} earn any money from freelance, gig, or occasional work?' }, { subject })}
+            ariaLabel={intl.formatMessage(questions.gig)}
             errorId="income-gig-error"
             hasError={!!gigError}
             descriptionId="income-gig-subtext"
@@ -756,16 +844,12 @@ const IncomeSection = ({
         <Box className={`income-question-block${other ? ' income-question-block--active' : ''}`}>
           <FormLabel className="income-question-label">
             <Icon name="banknote" size={26} className="income-question-icon" aria-hidden />
-            <FormattedMessage
-              id="householdDataBlock.incomeQuestion-other"
-              defaultMessage="Do {subject} receive any government benefits, child support, alimony, or other recurring payments?"
-              values={{ subject }}
-            />
+            <FormattedMessage {...questions.other} />
           </FormLabel>
           <YesNoToggle
             value={other}
             onChange={handleOtherChange}
-            ariaLabel={intl.formatMessage({ id: 'householdDataBlock.incomeQuestion-other', defaultMessage: 'Do {subject} receive any government benefits, child support, alimony, or other recurring payments?' }, { subject })}
+            ariaLabel={intl.formatMessage(questions.other)}
             errorId="income-other-error"
             hasError={!!otherError}
           />
@@ -778,7 +862,10 @@ const IncomeSection = ({
             <Stack spacing={2} className="income-streams-stack">
               <div className="income-entry-heading">
                 <div className="income-entry-heading__title">
-                  <FormattedMessage id="personIncomeBlock.incomeGroup-other" defaultMessage="Benefits & recurring payments" />
+                  <FormattedMessage
+                    id="personIncomeBlock.incomeGroup-other"
+                    defaultMessage="Benefits & recurring payments"
+                  />
                 </div>
                 <p className="income-entry-heading__subtext">
                   <FormattedMessage

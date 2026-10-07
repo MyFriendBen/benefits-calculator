@@ -1,4 +1,4 @@
-import { createHouseholdMemberSchema, createEnergyCalculatorHouseholdMemberSchema } from './schema';
+import { createHouseholdMemberSchema, createEnergyCalculatorHouseholdMemberSchema, STUDENT_QUESTIONS } from './schema';
 import { getCurrentMonthYear, MAX_AGE } from '../../../../Assets/age.tsx';
 import type { FormattedMessageType } from '../../../../Types/Questions';
 
@@ -467,6 +467,19 @@ describe('createEnergyCalculatorHouseholdMemberSchema', () => {
       const result = schema.safeParse({ ...validEcData, healthInsurance: { none: true } });
       // Should pass — EC schema doesn't have healthInsurance field so it's stripped
       expect(result.success).toBe(true);
+    });
+  });
+});
+
+describe('STUDENT_QUESTIONS', () => {
+  it('has a distinct "they" string for every question, with no {subject} placeholder', () => {
+    const ids = STUDENT_QUESTIONS.flatMap((q) => [q.messageId, q.theyMessageId]);
+    expect(new Set(ids).size).toBe(STUDENT_QUESTIONS.length * 2);
+    STUDENT_QUESTIONS.forEach((q) => {
+      expect(q.theyMessageId).toBe(`${q.messageId}-they`);
+      expect(q.defaultMessage).not.toContain('{subject}');
+      expect(q.theyDefaultMessage).not.toContain('{subject}');
+      expect(q.theyDefaultMessage).not.toBe(q.defaultMessage);
     });
   });
 });
