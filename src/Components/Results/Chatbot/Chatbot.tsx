@@ -313,9 +313,17 @@ type ChatbotProviderProps = {
    * context-refresh effect below.
    */
   visiblePrograms?: AssistantVisibleProgram[];
+  /**
+   * The annual figure the personalized greeting quotes — `calculateGreetingTotal`, NOT
+   * the sum of `visiblePrograms` values. Those stay per-program and unfiltered because
+   * BenBot quotes them individually; the greeting's total leaves out one-time lump sums
+   * and override programs (MFB-2202). Zero falls back to the generic welcome rather
+   * than announcing "worth about $0 per year".
+   */
+  greetingTotal: number;
 };
 
-export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren<ChatbotProviderProps>) {
+export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: PropsWithChildren<ChatbotProviderProps>) {
   // `programId` is set only on a program's own page (`results/benefits/:programId`).
   // Used for the greeting, which is written about the whole results list (MFB-1872).
   const { uuid, programId } = useParams();
@@ -361,12 +369,6 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
   const locale = useSupportedLocale();
   const track = useTrackEvent();
 
-  // Displayed program values are annual whole dollars (see visiblePrograms).
-  const totalAnnualValue = useMemo(
-    () => (visiblePrograms ?? []).reduce((sum, program) => sum + program.value, 0),
-    [visiblePrograms],
-  );
-
   // WHICH greeting is on screen, and the numbers it quotes — latched the moment the
   // user answers it.
   //
@@ -397,8 +399,8 @@ export function ChatbotProvider({ visiblePrograms, children }: PropsWithChildren
   const greetingAnswered = messages.length > 0 || isSending;
   if (isOpen && (greetingRef.current === null || !greetingAnswered)) {
     greetingRef.current =
-      !programId && visiblePrograms && visiblePrograms.length > 0
-        ? { variant: 'personalized', count: visiblePrograms.length, totalValue: totalAnnualValue }
+      !programId && visiblePrograms && visiblePrograms.length > 0 && greetingTotal > 0
+        ? { variant: 'personalized', count: visiblePrograms.length, totalValue: greetingTotal }
         : { variant: 'generic' };
   }
   const greeting = greetingRef.current;
