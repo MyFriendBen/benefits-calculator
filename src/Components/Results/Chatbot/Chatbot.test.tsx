@@ -44,14 +44,23 @@ const WIC = { name_abbreviated: 'co_wic', value: 1224 };
 // why `locale` is a plain string here rather than the stale `Language` union.
 const LANGUAGE_OPTIONS = { 'en-us': 'English', es: 'Español', 'pt-br': 'Português Brasileiro', 'zh-hans': '中文' };
 
-const chatbotUi = (visiblePrograms?: AssistantVisibleProgram[], locale = 'en-us') => (
+// Results.tsx computes the greeting total separately (calculateGreetingTotal); with no
+// lump sums or overrides in play, that equals the sum of the visible values.
+const sumValues = (visiblePrograms?: AssistantVisibleProgram[]) =>
+  (visiblePrograms ?? []).reduce((sum, program) => sum + program.value, 0);
+
+const chatbotUi = (
+  visiblePrograms?: AssistantVisibleProgram[],
+  locale = 'en-us',
+  greetingTotal = sumValues(visiblePrograms),
+) => (
   <Context.Provider value={{ locale, config: { language_options: LANGUAGE_OPTIONS } } as unknown as WrapperContext}>
     <IntlProvider locale="en" defaultLocale="en">
       <MemoryRouter initialEntries={[`/co/${SCREEN_UUID}/results/benefits`]}>
         <Routes>
           <Route
             path="/:whiteLabel/:uuid/results/benefits"
-            element={<ChatbotProvider visiblePrograms={visiblePrograms} />}
+            element={<ChatbotProvider visiblePrograms={visiblePrograms} greetingTotal={greetingTotal} />}
           />
         </Routes>
       </MemoryRouter>
@@ -59,8 +68,8 @@ const chatbotUi = (visiblePrograms?: AssistantVisibleProgram[], locale = 'en-us'
   </Context.Provider>
 );
 
-const renderChatbot = (visiblePrograms?: AssistantVisibleProgram[], locale?: string) =>
-  render(chatbotUi(visiblePrograms, locale));
+const renderChatbot = (visiblePrograms?: AssistantVisibleProgram[], locale?: string, greetingTotal?: number) =>
+  render(chatbotUi(visiblePrograms, locale, greetingTotal));
 
 /** Open the widget and send a message — the only thing that starts a conversation. */
 const openAndSend = async (text = 'hello') => {
@@ -323,6 +332,35 @@ describe('auto-open (MFB-1737)', () => {
     const dialog = screen.getByRole('dialog');
     expect(dialog).toHaveTextContent('3 programs');
     expect(dialog).toHaveTextContent('$13,140'); // 6636 + 5280 + 1224, annual
+  });
+
+  it('quotes the greeting total it is given, not the sum of the visible values (MFB-2202)', () => {
+    // e.g. a $7,475 one-time lump sum on the page: counted as a program, left out of
+    // the "per year" figure.
+    renderChatbot([SNAP, { name_abbreviated: 'ks_wap', value: 7475 }], undefined, 6636);
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveTextContent('2 programs');
+    expect(dialog).toHaveTextContent('$6,636');
+    expect(dialog).not.toHaveTextContent('$14,111');
+  });
+
+  it('falls back to the generic welcome when nothing counts toward the greeting total', () => {
+    // Every visible program is a lump sum or an override: "worth about $0 per year"
+    // would be wrong, not just unhelpful.
+    renderChatbot([{ name_abbreviated: 'wa_wap', value: 7669 }], undefined, 0);
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveTextContent(/ask me anything/i);
+    expect(dialog).not.toHaveTextContent('$0');
   });
 
   it('does not auto-open when the results page is showing zero programs', () => {
@@ -677,7 +715,7 @@ describe('greeting stability across navigation', () => {
   // exactly why the greeting has to stop reading the route once it has been answered.
   const routedUi = (visiblePrograms?: AssistantVisibleProgram[]) => {
     const panel = (
-      <ChatbotProvider visiblePrograms={visiblePrograms}>
+      <ChatbotProvider visiblePrograms={visiblePrograms} greetingTotal={sumValues(visiblePrograms)}>
         <NavigateToProgram />
       </ChatbotProvider>
     );

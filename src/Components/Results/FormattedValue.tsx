@@ -21,7 +21,16 @@ function capValuesInitializer(): { household_value: number; member_values: { [ke
   return { household_value: 0, member_values: {} };
 }
 
-export function calculateTotalValue(category: ProgramCategory) {
+// The card shows prose ("Varies", "Up to $7,669 per home") instead of the calculated
+// figure, so there is no number on screen for that figure to add to.
+function hasValueOverride(program: Program) {
+  return program.estimated_value_override.default_message !== '';
+}
+
+export function calculateTotalValue(
+  category: ProgramCategory,
+  isExcluded: (program: Program) => boolean = hasValueOverride,
+) {
   // assume that none of the caps are overlapping
   if (hasOverlappingCaps(category)) {
     throw new Error(`"${category.name.default_message}" has overlapping program caps`);
@@ -30,7 +39,7 @@ export function calculateTotalValue(category: ProgramCategory) {
   let nonCapTotal = 0;
   const capValues = Array.from({ length: category.caps.length }, capValuesInitializer);
   for (const program of category.programs) {
-    if (program.estimated_value_override.default_message !== '') {
+    if (isExcluded(program)) {
       continue;
     }
 
@@ -74,6 +83,18 @@ export function calculateTotalValue(category: ProgramCategory) {
   }
 
   return total;
+}
+
+/**
+ * The yearly total Benji's opening message quotes ("worth about $X per year").
+ *
+ * The results-page summary's rules — override programs skipped, category caps applied —
+ * plus one more: one-time lump sums are left out, because the greeting calls the total
+ * "per year". Tax credits stay in.
+ */
+export function calculateGreetingTotal(categories: ProgramCategory[]) {
+  const isExcluded = (program: Program) => hasValueOverride(program) || program.value_format === 'lump_sum';
+  return categories.reduce((sum, category) => sum + calculateTotalValue(category, isExcluded), 0);
 }
 
 function hasOverlappingCaps(category: ProgramCategory) {
