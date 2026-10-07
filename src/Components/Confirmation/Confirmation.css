@@ -258,6 +258,12 @@ svg.confirmation-lucide-icon * {
   color: #333;
 }
 
+/* Column-specific width for the Conditions column. Kept in stylesheet so
+   media queries can override on small screens. */
+.confirmation-conditions-col {
+  width: 30%;
+}
+
 .household-member-table td {
   padding: 0.5rem 0.75rem;
   border-bottom: 1px solid #e8e8e8;

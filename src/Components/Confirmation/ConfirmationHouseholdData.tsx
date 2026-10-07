@@ -127,15 +127,15 @@ const DefaultConfirmationHHData = () => {
     // must not render as "No".
     const answeredStudentItems = STUDENT_ELIGIBILITY_ITEMS.flatMap((item) => {
       const value = studentElig?.[item.field];
-      return value === undefined ? [] : [{ ...item, value }];
-    }) as Array<StudentEligibilityItem & { value: boolean }>;
+      return typeof value === 'boolean' ? [{ ...item, value }] : [];
+    });
 
     return (
       <ul className="confirmation-conditions-list">
         {activeConditions.map(({ id, defaultMessage, kind }) => (
           <li key={id}>
             {formatMessage({ id, defaultMessage })}
-            {kind === 'student' && answeredStudentItems.length > 0 && (
+            {member.conditions.student && answeredStudentItems.length > 0 && (
               <ul className="confirmation-student-eligibility-list">
                 {answeredStudentItems.map(({ field, labelId, labelDefault, value }) => (
                   <li key={field}>
@@ -233,7 +233,7 @@ const DefaultConfirmationHHData = () => {
               <th scope="col">
                 <FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year:" />
               </th>
-              <th scope="col" style={{ width: '30%' }}>
+              <th scope="col" className="confirmation-conditions-col">
                 <FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions:" />
               </th>
               <th scope="col">
