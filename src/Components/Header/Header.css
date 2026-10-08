@@ -29,7 +29,7 @@
 
 .state-name {
   color: white;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.76rem;
   font-weight: 500;
   text-transform: uppercase;
@@ -52,10 +52,6 @@
     0px 1px 10px 0px rgba(0, 0, 0, 0.12);
   position: relative;
   z-index: 1;
-}
-
-.MuiPaper-root.header-full-width-container.frozen {
-  height: 6.5rem;
 }
 
 #nav-container {
@@ -151,13 +147,6 @@
 .white-header #select-language:focus-visible,
 .white-header #select-language .MuiSelect-select:focus-visible {
   outline: 2px solid var(--primary-color);
-}
-
-.header-frozen-message-container {
-  background-color: var(--hover-color);
-  text-align: center;
-  height: max-content;
-  font-weight: bold;
 }
 
 .eaglecounty-logo-size {
