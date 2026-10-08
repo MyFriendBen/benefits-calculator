@@ -20,7 +20,9 @@ export default function ConfirmationBenefitsInfo() {
   const { formData, hasBenefitsPrograms } = useContext(Context);
   const { formatMessage } = useIntl();
   const acuteConditionOptions = useConfig<IconAndFormattedMessageMap>('acute_condition_options');
-  const { allOptions: referralOptions, loading: referralOptionsLoading } = useReferralOptions();
+  const { referralOptions: referralGroups, allOptions, loading: referralOptionsLoading } = useReferralOptions();
+  // A hidden referrer arrives only through a ?referrer= link; show its name, not its code.
+  const referralOptions = { ...allOptions, ...referralGroups.hidden };
 
   const hasBenefitsStepNumber = useStepNumber('hasBenefits', false);
   const acuteConditionsStepNumber = useStepNumber('acuteHHConditions', false);

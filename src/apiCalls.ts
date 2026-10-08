@@ -305,6 +305,7 @@ const getHasBenefitsPrograms = (whiteLabel: string): Promise<HasBenefitsProgram[
 export interface ReferralOptionsResponse {
   generic: Record<string, string>;
   partners: Record<string, string>;
+  hidden?: Record<string, string>;
 }
 
 const getReferralOptions = async (whiteLabel: string, signal?: AbortSignal): Promise<ReferralOptionsResponse> => {
