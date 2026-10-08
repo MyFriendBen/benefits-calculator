@@ -15,7 +15,7 @@
 .error-header {
   font-size: 2rem;
   font-weight: 700;
-  font-family: 'Roboto Slab', sans-serif;
+  font-family: var(--font-heading);
   color: var(--secondary-color);
   margin-bottom: 1rem;
 }
@@ -28,5 +28,5 @@ button.error-button {
   font-size: 0.8rem;
   color: #666;
   margin-top: 1rem;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
 }

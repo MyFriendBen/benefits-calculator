@@ -127,10 +127,6 @@
   margin-top: 0.5rem;
 }
 
-.result-program-subheader {
-  font: Open Sans, sans-serif;
-}
-
 .new-program-flag {
   font-weight: bold;
   font-family: var(--font-heading);

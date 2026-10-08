@@ -7,7 +7,7 @@
   height: 3rem;
   background-color: #ffffff;
   color: var(--primary-color);
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 400;
   padding-left: 1rem;
   padding-right: 1rem;
@@ -22,7 +22,7 @@
   font-size: x-large;
   font-weight: 700;
   margin: auto;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   display: flex;
   margin-right: 0.5rem;
 }

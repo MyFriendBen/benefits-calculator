@@ -63,7 +63,7 @@ export default function Link211Message<T>({ mapping, buildUrl, intro, fallback }
             style={{
               display: 'inline-block',
               fontWeight: '700',
-              fontFamily: 'Open Sans, sans-serif',
+              fontFamily: 'var(--font-body)',
               marginBottom: '0.5rem',
               marginRight: '0.5rem',
             }}
