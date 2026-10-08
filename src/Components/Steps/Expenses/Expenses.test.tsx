@@ -52,7 +52,6 @@ jest.mock('../../../Assets/stepDirectory', () => ({
 
 const baseFormData: FormData = {
   isTest: false,
-  frozen: false,
   externalID: undefined,
   agreeToTermsOfService: false,
   is13OrOlder: false,
