@@ -44,10 +44,5 @@ describe('theme registry', () => {
       // Icons are graphical objects, which WCAG 1.4.11 holds to 3:1.
       expect(contrastOnWhite(theme.cssVariables['--icon-color'])).toBeGreaterThanOrEqual(3);
     });
-
-    it('declares both font families', () => {
-      expect(theme.cssVariables['--font-heading']).toBeTruthy();
-      expect(theme.cssVariables['--font-body']).toBeTruthy();
-    });
   });
 });

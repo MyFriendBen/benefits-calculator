@@ -36,7 +36,7 @@ const ExternalApiFailureBanner = () => {
         <Typography
           variant="body1"
           sx={{
-            fontFamily: '"Open Sans", sans-serif',
+            fontFamily: 'var(--font-body)',
             lineHeight: 1.5,
             fontSize: { xs: '0.875rem', sm: '1rem' },
           }}

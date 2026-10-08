@@ -44,11 +44,6 @@ export interface ITheme {
     '--warning-background-color'?: string;
     '--warning-text-color'?: string;
 
-    // Typography
-    '--font-heading': string;
-    '--font-body': string;
-    'font-size': string;
-
     // Layout
     '--main-max-width': string;
     '--content-max-width': string;
@@ -87,11 +82,6 @@ export const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#B85A27',
 
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
-
       // Layout
       '--main-max-width': '1310px',
       '--content-max-width': '900px',
@@ -125,11 +115,6 @@ export const themes: Themes = {
       // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#005191',
-
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
 
       // Layout
       '--main-max-width': '1310px',
@@ -165,11 +150,6 @@ export const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#21296B',
 
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
-
       // Layout
       '--main-max-width': '1310px',
       '--content-max-width': '900px',
@@ -203,11 +183,6 @@ export const themes: Themes = {
       // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#8CCCF2',
-
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
 
       // Layout
       '--main-max-width': '1310px',
@@ -247,11 +222,6 @@ export const themes: Themes = {
       '--warning-background-color': '#F5E6C8',
       '--warning-text-color': '#6b5d00',
 
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
-
       // Layout
       '--main-max-width': '1310px',
       '--content-max-width': '900px',
@@ -285,11 +255,6 @@ export const themes: Themes = {
       // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#E87511',
-
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
 
       // Layout
       '--main-max-width': '1310px',
@@ -325,18 +290,13 @@ export const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#CFB87C', // CU gold selection accent
 
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
-
       // Layout
       '--main-max-width': '1310px',
       '--content-max-width': '900px',
     },
   },
   // United Way of Greater Kansas City, whose 2-1-1 serves both sides of the KS/MO line, so this
-  // theme is shared by the ks and mo white labels. Colors and fonts come from United Way Brand
+  // theme is shared by the ks and mo white labels. Colors come from United Way Brand
   // Guidelines 2024 v1.3: primary blue leads (p.18 reserves the purple/green tertiaries for
   // supporting roles), and every text pairing below is an approved combination from p.19.
   uwgkc: {
@@ -369,11 +329,6 @@ export const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#0044B5',
 
-      // Typography
-      '--font-heading': "'Antonio', sans-serif",
-      '--font-body': "'Palanquin', sans-serif",
-      'font-size': '18px',
-
       // Layout
       '--main-max-width': '1310px',
       '--content-max-width': '900px',
@@ -387,10 +342,6 @@ export const themes: Themes = {
   // to icons and accents and must never be used for body copy. That split
   // mirrors the CO 211 theme, which also uses a red for --icon-color only, and
   // it matches how the brand itself uses red: the Chicago stars, not the words.
-  //
-  // Typography is deliberately MFB's. The guidelines specify DIN and Zilla Slab
-  // for the logo lockup; both are licensed print faces with no webfont provided,
-  // and the guide gives no web typography direction.
   twoOneOneChicago: {
     primaryColor: '#3E61A1',
     secondaryColor: '#3E61A1',
@@ -422,11 +373,6 @@ export const themes: Themes = {
       // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#3E61A1',
-
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
 
       // Layout
       '--main-max-width': '1310px',
