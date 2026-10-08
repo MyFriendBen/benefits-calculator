@@ -8,6 +8,7 @@ import BackToScreen from '../BackToScreen/BackToScreen';
 import { useResultsContext } from '../Results/Results';
 import NoProgramEligibleMessage from '../Results/NoProgramEligibleMessage';
 import NcLink211Message from '../Results/NcLink211Message';
+import Chicago211LinkMessage from '../Results/Chicago211LinkMessage';
 import CcigResultsMessage from '../CcigComponents/CcigResultsMessage';
 import TwoOneOneHeaderNC from '../TwoOneOneNCComponents/TwoOneOneHeaderNC/TwoOneOneHeaderNC';
 import TwoOneOneFooterNC from '../TwoOneOneNCComponents/TwoOneOneFooterNC/TwoOneOneFooterNC';
@@ -87,6 +88,9 @@ export const ResultsMessageForNeeds = () => {
 
   if (uiOptions.includes('nc_show_211_link')) {
     return <NcLink211Message />;
+  }
+  if (uiOptions.includes('il_show_211_link')) {
+    return <Chicago211LinkMessage />;
   }
   return null;
 };
