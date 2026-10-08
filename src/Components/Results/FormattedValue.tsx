@@ -2,7 +2,6 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { useTranslateNumber } from '../../Assets/languageOptions';
 import { FormattedMessageType } from '../../Types/Questions';
 import { Program, ProgramCategory } from '../../Types/Results';
-import { findValidationForProgram, useResultsContext } from './Results';
 
 export function programValue(program: Program) {
   let total = program.household_value;
@@ -21,7 +20,16 @@ function capValuesInitializer(): { household_value: number; member_values: { [ke
   return { household_value: 0, member_values: {} };
 }
 
-export function calculateTotalValue(category: ProgramCategory) {
+// The card shows prose ("Varies", "Up to $7,669 per home") instead of the calculated
+// figure, so there is no number on screen for that figure to add to.
+function hasValueOverride(program: Program) {
+  return program.estimated_value_override.default_message !== '';
+}
+
+export function calculateTotalValue(
+  category: ProgramCategory,
+  isExcluded: (program: Program) => boolean = hasValueOverride,
+) {
   // assume that none of the caps are overlapping
   if (hasOverlappingCaps(category)) {
     throw new Error(`"${category.name.default_message}" has overlapping program caps`);
@@ -30,7 +38,7 @@ export function calculateTotalValue(category: ProgramCategory) {
   let nonCapTotal = 0;
   const capValues = Array.from({ length: category.caps.length }, capValuesInitializer);
   for (const program of category.programs) {
-    if (program.estimated_value_override.default_message !== '') {
+    if (isExcluded(program)) {
       continue;
     }
 
@@ -76,6 +84,18 @@ export function calculateTotalValue(category: ProgramCategory) {
   return total;
 }
 
+/**
+ * The yearly total Benji's opening message quotes ("worth about $X per year").
+ *
+ * The results-page summary's rules — override programs skipped, category caps applied —
+ * plus one more: one-time lump sums are left out, because the greeting calls the total
+ * "per year". Tax credits stay in.
+ */
+export function calculateGreetingTotal(categories: ProgramCategory[]) {
+  const isExcluded = (program: Program) => hasValueOverride(program) || program.value_format === 'lump_sum';
+  return categories.reduce((sum, category) => sum + calculateTotalValue(category, isExcluded), 0);
+}
+
 function hasOverlappingCaps(category: ProgramCategory) {
   const existingProgramCaps: string[] = [];
 
@@ -95,8 +115,7 @@ export const formatToUSD = (num: number) => {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
 };
 
-function useOverrideValue(program: Program, value: string, expectedValue?: string) {
-  const { isAdminView } = useResultsContext();
+function useOverrideValue(program: Program, value: string) {
   const intl = useIntl();
 
   if (program.estimated_value_override.default_message !== '') {
@@ -104,10 +123,6 @@ function useOverrideValue(program: Program, value: string, expectedValue?: strin
       id: program.estimated_value_override.label,
       defaultMessage: program.estimated_value_override.default_message,
     });
-  }
-
-  if (isAdminView && expectedValue !== undefined) {
-    return `${expectedValue} => ${value}`;
   }
 
   return value;
@@ -128,9 +143,7 @@ function useValueFormats(): DefaultMap<(program: Program) => string> {
       return translateNumber(formatToUSD(programValue(program) / 12)) + perMonth;
     },
     lump_sum: (program: Program) => {
-      return (
-        translateNumber(formatToUSD(programValue(program)))
-      );
+      return translateNumber(formatToUSD(programValue(program)));
     },
     estimated_annual: (program: Program) => {
       const perYear = intl.formatMessage({ id: 'results.programs.values.formats.per_year', defaultMessage: '/year' });
@@ -143,15 +156,7 @@ export function useFormatDisplayValue(program: Program) {
   const formats = useValueFormats();
   const calculator = formats[program.value_format ?? 'default'] ?? formats.default;
   const value = calculator(program);
-  const { validations } = useResultsContext();
-  const validation = findValidationForProgram(validations, program);
-  const translateNumber = useTranslateNumber();
-
-  // Call the hook unconditionally (rules-of-hooks): expectedValue is simply
-  // undefined when there's no validation, which useOverrideValue handles.
-  const expectedValue =
-    validation !== undefined ? translateNumber(formatToUSD(Number(validation.value) / 12)) : undefined;
-  return useOverrideValue(program, value, expectedValue);
+  return useOverrideValue(program, value);
 }
 
 export function YearlyValueLabel({ program }: { program: Program }) {
@@ -176,13 +181,7 @@ export function YearlyValueLabel({ program }: { program: Program }) {
 
 export function useFormatYearlyValue(program: Program) {
   const translateNumber = useTranslateNumber();
-  const { validations } = useResultsContext();
-  const validation = findValidationForProgram(validations, program);
 
   const value = translateNumber(formatToUSD(programValue(program)));
-
-  // Call the hook unconditionally (rules-of-hooks): expectedValue is simply
-  // undefined when there's no validation, which useOverrideValue handles.
-  const expectedValue = validation !== undefined ? translateNumber(formatToUSD(Number(validation.value))) : undefined;
-  return useOverrideValue(program, value, expectedValue);
+  return useOverrideValue(program, value);
 }

@@ -1,6 +1,6 @@
 .hfed-font {
   color: #505050;
-  font-family: 'league-gothic', Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   font-size: 1rem;
   font-weight: 550;
   line-height: 1.1em;
@@ -9,7 +9,7 @@
 
 .MuiTypography-root.icon-header {
   color: #505050;
-  font-family: 'league-gothic', Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   font-size: 1rem;
   font-weight: 550;
   line-height: 1.1em;
@@ -71,7 +71,7 @@
   color: #6b6b6b;
   font-weight: 500;
   font-size: 0.68rem;
-  font-family: 'league-gothic', Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
 }
 
 .displayInline {

@@ -5,7 +5,6 @@ import LanguageIcon from '@mui/icons-material/Language';
 import LanguageSelect from '../LanguageSelect/LanguageSelect';
 import Paper from '@mui/material/Paper';
 import { useIntl } from 'react-intl';
-import { FormattedMessage } from 'react-intl';
 import './Header.css';
 import { useLogo } from '../Referrer/useLogo';
 import { DEFAULT_WHITE_LABEL } from '../Wrapper/Wrapper';
@@ -14,7 +13,7 @@ import { useTrackEvent } from '../../Assets/analytics';
 
 const Header = () => {
   const context = useContext(Context);
-  const { formData, getReferrer, whiteLabel } = context;
+  const { getReferrer, whiteLabel } = context;
   const queryString = useQueryString();
   const landingPageQueryString = useQueryString({ path: null });
   const intl = useIntl();
@@ -40,23 +39,21 @@ const Header = () => {
 
   const track = useTrackEvent();
 
+  const uiOptions = getReferrer('uiOptions');
+
   const containerClass = useMemo(() => {
     let className = 'header-full-width-container';
 
-    if (formData.frozen) {
-      className += ' frozen';
-    }
-
-    if (getReferrer('uiOptions').includes('white_header')) {
+    if (uiOptions.includes('white_header')) {
       className += ' white-header';
     }
 
-    if (getReferrer('uiOptions').includes('small_header_language_dropdown')) {
+    if (uiOptions.includes('small_header_language_dropdown')) {
       className += ' small-header-language-dropdown';
     }
 
     return className;
-  }, [formData.frozen]);
+  }, [uiOptions]);
 
   return (
     <nav>
@@ -81,14 +78,6 @@ const Header = () => {
             />
           </div>
         </AppBar>
-        {formData.frozen && (
-          <div className="header-frozen-message-container">
-            <FormattedMessage
-              id="header.frozen.message"
-              defaultMessage="This screen is frozen. Changes you make will not be saved."
-            />
-          </div>
-        )}
       </Paper>
     </nav>
   );

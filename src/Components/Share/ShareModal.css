@@ -72,7 +72,7 @@
 }
 
 .share-modal-chip-title {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--primary-color);
@@ -80,7 +80,7 @@
 }
 
 .share-modal-chip-subtitle {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.78rem;
   color: #666;
   line-height: 1.3;

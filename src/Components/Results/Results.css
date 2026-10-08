@@ -323,10 +323,6 @@
   font-size: 1.3rem;
 }
 
-.result-program-subheader {
-  font-family: var(--font-body);
-}
-
 .results-category-description {
   background-color: var(--secondary-background-color);
   font-size: 0.9rem;

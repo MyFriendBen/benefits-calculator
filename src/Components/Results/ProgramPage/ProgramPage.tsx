@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Program } from '../../../Types/Results';
 import ResultsTranslate from '../Translate/Translate';
 import BackAndSaveButtons from '../BackAndSaveButtons/BackAndSaveButtons';
@@ -8,13 +8,11 @@ import './ProgramPage.css';
 import WarningMessage from '../../WarningComponent/WarningMessage';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Context } from '../../Wrapper/Wrapper';
-import { findProgramById, findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
-import { deleteValidation, postValidation } from '../../../apiCalls';
+import { findProgramById, useResultsContext, useResultsLink } from '../Results';
 import { Language } from '../../../Assets/languageOptions';
 import { allNavigatorLanguages } from './NavigatorLanguages';
 import { formatPhoneNumber, ICON_NAME_MAP } from '../helpers';
 import { Icon } from '../../Icon/Icon';
-import useScreenApi from '../../../Assets/updateScreen';
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import JsonView from '@uiw/react-json-view';
 import { redactPolicyEngineData } from '../../../Assets/policyEngineRedaction';
@@ -29,11 +27,9 @@ type IconRendererProps = {
 };
 
 const ProgramPage = ({ program }: ProgramPageProps) => {
-  const { uuid } = useParams();
-  const { formData, staffToken } = useContext(Context);
-  const { isAdminView, validations, setValidations, programCategories, filterState } = useResultsContext();
+  const { staffToken } = useContext(Context);
+  const { isAdminView, programCategories, filterState } = useResultsContext();
   const intl = useIntl();
-  const { fetchScreen } = useScreenApi();
   const track = useTrackEvent();
   const trackItemList = useTrackItemList();
   const [openPEmodal, setOpenPEModal] = useState(false);
@@ -98,62 +94,6 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
     const lucideIconName = ICON_NAME_MAP[headingType] ?? ICON_NAME_MAP['default'];
     return <Icon name={lucideIconName} />;
   };
-  const currentValidation = findValidationForProgram(validations, program);
-
-  const saveValidation = async () => {
-    if (uuid === undefined) {
-      throw new Error('somehow the uuid does not exist');
-    }
-
-    if (staffToken === undefined) {
-      throw new Error('you must be logged in to create a validation');
-    }
-
-    const body = {
-      screen_uuid: uuid,
-      program_name: program.external_name,
-      eligible: program.eligible,
-      value: program.estimated_value,
-    };
-
-    try {
-      const response = await postValidation(body, staffToken);
-      setValidations([...validations, response]);
-      fetchScreen();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const removeValidation = async () => {
-    if (currentValidation === undefined) {
-      throw new Error('there are no validations for this program');
-    }
-    if (staffToken === undefined) {
-      throw new Error('you must be logged in to create a validation');
-    }
-
-    try {
-      await deleteValidation(currentValidation.id, staffToken);
-      const newValidations = validations.filter((validation) => validation.id !== currentValidation?.id);
-      setValidations(newValidations);
-      if (newValidations.length === 0) {
-        fetchScreen();
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const toggleValidation = async () => {
-    if (currentValidation !== undefined) {
-      removeValidation();
-      return;
-    }
-
-    saveValidation();
-  };
-
   const category = programCategories.find((category) => {
     for (const categoryProgram of category.programs) {
       if (categoryProgram.external_name === program.external_name) {
@@ -269,258 +209,253 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
         />
       </div>
       <main className="benefits-form program-page-container">
-      <div className="icon-header-est-values">
-        {displayIconAndHeader(program)}
-        {displayEstimatedValueAndTime(program)}
-      </div>
-      {warningMessages.length > 0 && (
-        <div className="results-program-page-warning-container">
-          {warningMessages.map((warning, key) => {
-            return <WarningMessage warning={warning} key={key} />;
-          })}
+        <div className="icon-header-est-values">
+          {displayIconAndHeader(program)}
+          {displayEstimatedValueAndTime(program)}
         </div>
-      )}
-      <div className="apply-button-container">
-        {program.apply_button_link.default_message !== '' && (
-          <a
-            className="apply-online-button"
-            href={programApplyButtonLink}
-            target="_blank"
-            onClick={() =>
-              track('screener_apply_click', {
-                program_id: String(program.program_id),
-                url: programApplyButtonLink,
-              })
-            }
-          >
-            {program.apply_button_description.default_message == '' ? (
-              <FormattedMessage id="results.apply-online" defaultMessage="Apply Online" />
-            ) : (
-              <ResultsTranslate translation={program.apply_button_description} />
-            )}
-          </a>
+        {warningMessages.length > 0 && (
+          <div className="results-program-page-warning-container">
+            {warningMessages.map((warning, key) => {
+              return <WarningMessage warning={warning} key={key} />;
+            })}
+          </div>
         )}
-        <>
-          {isAdminView && !!staffToken && (
+        <div className="apply-button-container">
+          {program.apply_button_link.default_message !== '' && (
             <a
-              role="button"
-              className="pe-request-button"
-              onClick={openPolicyEngineRequest}
-              data-testid="pe-data-button"
+              className="apply-online-button"
+              href={programApplyButtonLink}
+              target="_blank"
+              onClick={() =>
+                track('screener_apply_click', {
+                  program_id: String(program.program_id),
+                  url: programApplyButtonLink,
+                })
+              }
             >
-              <FormattedMessage id="policy_engine_request_button" defaultMessage="Policy Engine API" />
+              {program.apply_button_description.default_message == '' ? (
+                <FormattedMessage id="results.apply-online" defaultMessage="Apply Online" />
+              ) : (
+                <ResultsTranslate translation={program.apply_button_description} />
+              )}
             </a>
           )}
+          <>
+            {isAdminView && !!staffToken && (
+              <a
+                role="button"
+                className="pe-request-button"
+                onClick={openPolicyEngineRequest}
+                data-testid="pe-data-button"
+              >
+                <FormattedMessage id="policy_engine_request_button" defaultMessage="Policy Engine API" />
+              </a>
+            )}
 
-          <Dialog
-            open={openPEmodal}
-            onClose={closePolicyEngineRequest}
-            maxWidth="md"
-            fullWidth
-            disableScrollLock
-            data-testid="pe-data-dialog"
-            PaperProps={{
-              sx: {
-                height: '75vh',
-                display: 'flex',
-                flexDirection: 'column',
-              },
-            }}
-          >
-            <DialogTitle>
-              <FormattedMessage id="policy_engine_modal_title" defaultMessage="Policy Engine API Data" />
-            </DialogTitle>
-            <DialogContent
-              dividers
-              sx={{
-                flex: 1,
-                overflowY: 'auto',
-                p: 2,
+            <Dialog
+              open={openPEmodal}
+              onClose={closePolicyEngineRequest}
+              maxWidth="md"
+              fullWidth
+              disableScrollLock
+              data-testid="pe-data-dialog"
+              PaperProps={{
+                sx: {
+                  height: '75vh',
+                  display: 'flex',
+                  flexDirection: 'column',
+                },
               }}
             >
-              <Box
+              <DialogTitle>
+                <FormattedMessage id="policy_engine_modal_title" defaultMessage="Policy Engine API Data" />
+              </DialogTitle>
+              <DialogContent
+                dividers
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  marginBottom: 2,
+                  flex: 1,
+                  overflowY: 'auto',
+                  p: 2,
                 }}
               >
-                <ButtonGroup variant="text" color="primary" size="small">
-                  <Button id='policy_engine_expand_all_button' onClick={() => setCollapsed(false)}>Expand All</Button>
-                  <Button id='policy_engine_collapse_button' onClick={() => setCollapsed(3)}>By Default</Button>
-                </ButtonGroup>
-              </Box>
-              <Typography component="pre" style={{ whiteSpace: 'pre-wrap' }}>
-                <JsonView value={redacted} collapsed={collapsed} />
-              </Typography>
-            </DialogContent>
-            <DialogActions>
-              <div className="pe-modal-button-container">
-                <a
-                  role="button"
-                  className="pe-request-button"
-                  onClick={downloadPolicyEngineRequest}
-                  data-testid="pe-data-download-button"
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    marginBottom: 2,
+                  }}
                 >
-                  <FormattedMessage id="policy_engine_download_button" defaultMessage="Download" />
-                </a>
-                <a
-                  role="button"
-                  className="pe-request-button"
-                  onClick={closePolicyEngineRequest}
-                  data-testid="pe-data-close-button"
-                >
-                  <FormattedMessage id="policy_engine_close_button" defaultMessage="Close" />
-                </a>
-              </div>
-            </DialogActions>
-          </Dialog>
-        </>
-        {isAdminView && staffToken !== undefined && formData.isTestData && (
-          <a role="button" className="apply-online-button" onClick={toggleValidation}>
-            {currentValidation === undefined ? (
-              <FormattedMessage id="results.validations.button.add" defaultMessage="Create Validation" />
-            ) : (
-              <FormattedMessage id="results.validations.button.remove" defaultMessage="Remove Validation" />
-            )}
-          </a>
-        )}
-      </div>
-      <div className="content-width">
-        {program.navigators.length > 0 && (
-          <section className="apply-box">
-            <h2 className="content-header">
-              <FormattedMessage id="results.get-help-applying" defaultMessage="Get Help Applying" />
-            </h2>
-            <ul className="apply-box-list">
-              {program.navigators.map((navigator, index) => (
-                <li key={index} className="apply-info">
-                  {navigator.name && (
-                    <p className="navigator-name">
-                      <ResultsTranslate translation={navigator.name} />
-                    </p>
-                  )}
-                  {navigator.languages && displayLanguageFlags(navigator.languages)}
-                  <div className="address-info">
-                    {navigator.description && (
-                      <p className="navigator-desc">
-                        <ResultsTranslate translation={navigator.description} />
+                  <ButtonGroup variant="text" color="primary" size="small">
+                    <Button id="policy_engine_expand_all_button" onClick={() => setCollapsed(false)}>
+                      Expand All
+                    </Button>
+                    <Button id="policy_engine_collapse_button" onClick={() => setCollapsed(3)}>
+                      By Default
+                    </Button>
+                  </ButtonGroup>
+                </Box>
+                <Typography component="pre" style={{ whiteSpace: 'pre-wrap' }}>
+                  <JsonView value={redacted} collapsed={collapsed} />
+                </Typography>
+              </DialogContent>
+              <DialogActions>
+                <div className="pe-modal-button-container">
+                  <a
+                    role="button"
+                    className="pe-request-button"
+                    onClick={downloadPolicyEngineRequest}
+                    data-testid="pe-data-download-button"
+                  >
+                    <FormattedMessage id="policy_engine_download_button" defaultMessage="Download" />
+                  </a>
+                  <a
+                    role="button"
+                    className="pe-request-button"
+                    onClick={closePolicyEngineRequest}
+                    data-testid="pe-data-close-button"
+                  >
+                    <FormattedMessage id="policy_engine_close_button" defaultMessage="Close" />
+                  </a>
+                </div>
+              </DialogActions>
+            </Dialog>
+          </>
+        </div>
+        <div className="content-width">
+          {program.navigators.length > 0 && (
+            <section className="apply-box">
+              <h2 className="content-header">
+                <FormattedMessage id="results.get-help-applying" defaultMessage="Get Help Applying" />
+              </h2>
+              <ul className="apply-box-list">
+                {program.navigators.map((navigator, index) => (
+                  <li key={index} className="apply-info">
+                    {navigator.name && (
+                      <p className="navigator-name">
+                        <ResultsTranslate translation={navigator.name} />
                       </p>
                     )}
-                    {navigator.assistance_link.default_message && (
-                      <div>
+                    {navigator.languages && displayLanguageFlags(navigator.languages)}
+                    <div className="address-info">
+                      {navigator.description && (
+                        <p className="navigator-desc">
+                          <ResultsTranslate translation={navigator.description} />
+                        </p>
+                      )}
+                      {navigator.assistance_link.default_message && (
+                        <div>
+                          <a
+                            href={navigator.assistance_link.default_message}
+                            target="_blank"
+                            className="link-color"
+                            onClick={() =>
+                              track('screener_navigator_engaged', {
+                                program_id: String(program.program_id),
+                                navigator_id: navigator.id,
+                                navigator_name: navigator.name.default_message,
+                                contact_method: 'website',
+                                url: navigator.assistance_link.default_message,
+                              })
+                            }
+                          >
+                            <FormattedMessage id="results.visit-webiste" defaultMessage="Visit Website" />
+                          </a>
+                        </div>
+                      )}
+                      {navigator.email.default_message && (
+                        <div>
+                          <a
+                            href={`mailto:${navigator.email.default_message}`}
+                            className="link-color email-link"
+                            onClick={() =>
+                              track('screener_navigator_engaged', {
+                                program_id: String(program.program_id),
+                                navigator_id: navigator.id,
+                                navigator_name: navigator.name.default_message,
+                                contact_method: 'email',
+                              })
+                            }
+                          >
+                            <ResultsTranslate translation={navigator.email} />
+                          </a>
+                        </div>
+                      )}
+                      {navigator.phone_number && (
+                        <div>
+                          <a
+                            href={`tel:${navigator.phone_number}`}
+                            className="link-color phone-link"
+                            onClick={() =>
+                              track('screener_navigator_engaged', {
+                                program_id: String(program.program_id),
+                                navigator_id: navigator.id,
+                                navigator_name: navigator.name.default_message,
+                                contact_method: 'phone',
+                              })
+                            }
+                          >
+                            {formatPhoneNumber(navigator.phone_number)}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {program.documents.length > 0 && (
+            <section className="required-docs">
+              <h3 className="content-header">
+                <FormattedMessage
+                  id="results.required-documents-checklist"
+                  defaultMessage="Required Key Documents Checklist"
+                />
+              </h3>
+              <ul className="required-docs-list">
+                {program.documents.map((document, index) => (
+                  <li key={index}>
+                    {<ResultsTranslate translation={document.text} />}
+                    {document.link_url.default_message && document.link_text.default_message && (
+                      <span className="required-docs-link">
                         <a
-                          href={navigator.assistance_link.default_message}
+                          href={document.link_url.default_message}
                           target="_blank"
                           className="link-color"
                           onClick={() =>
-                            track('screener_navigator_engaged', {
+                            track('screener_program_document_download', {
                               program_id: String(program.program_id),
-                              navigator_id: navigator.id,
-                              navigator_name: navigator.name.default_message,
-                              contact_method: 'website',
-                              url: navigator.assistance_link.default_message,
+                              document_name: document.text.default_message || undefined,
                             })
                           }
                         >
-                          <FormattedMessage id="results.visit-webiste" defaultMessage="Visit Website" />
+                          <ResultsTranslate translation={document.link_text} />
                         </a>
-                      </div>
+                      </span>
                     )}
-                    {navigator.email.default_message && (
-                      <div>
-                        <a
-                          href={`mailto:${navigator.email.default_message}`}
-                          className="link-color email-link"
-                          onClick={() =>
-                            track('screener_navigator_engaged', {
-                              program_id: String(program.program_id),
-                              navigator_id: navigator.id,
-                              navigator_name: navigator.name.default_message,
-                              contact_method: 'email',
-                            })
-                          }
-                        >
-                          <ResultsTranslate translation={navigator.email} />
-                        </a>
-                      </div>
-                    )}
-                    {navigator.phone_number && (
-                      <div>
-                        <a
-                          href={`tel:${navigator.phone_number}`}
-                          className="link-color phone-link"
-                          onClick={() =>
-                            track('screener_navigator_engaged', {
-                              program_id: String(program.program_id),
-                              navigator_id: navigator.id,
-                              navigator_name: navigator.name.default_message,
-                              contact_method: 'phone',
-                            })
-                          }
-                        >
-                          {formatPhoneNumber(navigator.phone_number)}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          <section className="program-description">
+            <ResultsTranslate translation={program.description} />
           </section>
-        )}
-        {program.documents.length > 0 && (
-          <section className="required-docs">
-            <h3 className="content-header">
-              <FormattedMessage
-                id="results.required-documents-checklist"
-                defaultMessage="Required Key Documents Checklist"
-              />
-            </h3>
-            <ul className="required-docs-list">
-              {program.documents.map((document, index) => (
-                <li key={index}>
-                  {<ResultsTranslate translation={document.text} />}
-                  {document.link_url.default_message && document.link_text.default_message && (
-                    <span className="required-docs-link">
-                      <a
-                        href={document.link_url.default_message}
-                        target="_blank"
-                        className="link-color"
-                        onClick={() =>
-                          track('screener_program_document_download', {
-                            program_id: String(program.program_id),
-                            document_name: document.text.default_message || undefined,
-                          })
-                        }
-                      >
-                        <ResultsTranslate translation={document.link_text} />
-                      </a>
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-        <section className="program-description">
-          <ResultsTranslate translation={program.description} />
-        </section>
-        {program.required_programs.length > 0 && (
-          <section className="program-page-required-programs-section">
-            <h3 className="program-page-required-programs-header">
-              <FormattedMessage
-                id="programPage.requiredPrograms.header"
-                defaultMessage="Enrollment in one of the following programs is required to be eligible for this program:"
-              />
-            </h3>
-            {program.required_programs.map((programId) => {
-              return <RequiredProgram programId={programId} key={programId} />;
-            })}
-          </section>
-        )}
-      </div>
-    </main>
+          {program.required_programs.length > 0 && (
+            <section className="program-page-required-programs-section">
+              <h3 className="program-page-required-programs-header">
+                <FormattedMessage
+                  id="programPage.requiredPrograms.header"
+                  defaultMessage="Enrollment in one of the following programs is required to be eligible for this program:"
+                />
+              </h3>
+              {program.required_programs.map((programId) => {
+                return <RequiredProgram programId={programId} key={programId} />;
+              })}
+            </section>
+          )}
+        </div>
+      </main>
     </>
   );
 };
