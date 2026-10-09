@@ -37,6 +37,7 @@ import MO211_MFBLogo from '../../Assets/States/MO/WhiteLabels/TwoOneOneAssets/mo
 // CU Denver reversed/white logo — derived from CU Denver's color PNG by recoloring the dark
 // ink to white and keeping the gold shield, so it reads on the black cu_denver header.
 import CUDenverLogo from '../../Assets/States/CO/WhiteLabels/CUDenver/CUDenver_Logo_White.png';
+import DPS_MFBLogo from '../../Assets/States/CO/WhiteLabels/DenverPublicSchools/DPS_MFBLogo.png';
 
 const logoMap: { [key: string]: string | undefined } = {
   MFB_COLogo: MFBCOLogo,
@@ -74,6 +75,7 @@ const logoMap: { [key: string]: string | undefined } = {
   CESN_Colorado_White: CESN_Colorado_White,
   HispanicFederation_MFBLogo: HispanicFederation_MFBLogo,
   CUDenver_Logo: CUDenverLogo,
+  DPS_MFBLogo: DPS_MFBLogo,
   // The uwgkc referrer spans both states, so it picks the lockup for whichever screener it entered.
   KS211_MFBLogo: KS211_MFBLogo,
   MO211_MFBLogo: MO211_MFBLogo,
