@@ -17,6 +17,7 @@ const TEST_CONFIG: Record<WhiteLabel, { name: string; skip?: boolean; skipReason
   tx: { name: 'Texas' },
   wa: { name: 'Washington' },
   mo: { name: 'Missouri' },
+  nj: { name: 'New Jersey' },
 };
 
 // Validate that TEST_CONFIG is in sync with ALL_VALID_WHITE_LABELS
