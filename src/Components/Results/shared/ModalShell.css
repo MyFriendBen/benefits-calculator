@@ -98,7 +98,7 @@
    Title & subtitle
    ===================== */
 .modal-shell-title {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 1.2rem !important;
   font-weight: 700 !important;
   color: var(--primary-color);
@@ -109,7 +109,7 @@
 }
 
 .modal-shell-subtitle {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9rem !important;
   color: #666;
   text-align: center;
@@ -139,7 +139,7 @@
   padding: 0.875rem 1rem;
   cursor: pointer;
   text-align: left;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.95rem;
   color: var(--primary-color);
   text-decoration: none;
@@ -236,7 +236,7 @@
   border: none;
   border-radius: 0.75rem;
   padding: 0.625rem 1.25rem;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;

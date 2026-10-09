@@ -8,7 +8,8 @@ export type ThemeName =
   | 'nc_lanc'
   | 'nc_ccla'
   | 'cu_denver'
-  | 'uwgkc';
+  | 'uwgkc'
+  | 'twoOneOneChicago';
 
 export interface ITheme {
   primaryColor: string;
@@ -42,11 +43,6 @@ export interface ITheme {
     // Colors - Warnings (optional)
     '--warning-background-color'?: string;
     '--warning-text-color'?: string;
-
-    // Typography
-    '--font-heading': string;
-    '--font-body': string;
-    'font-size': string;
 
     // Layout
     '--main-max-width': string;
@@ -86,11 +82,6 @@ export const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#B85A27',
 
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
-
       // Layout
       '--main-max-width': '1310px',
       '--content-max-width': '900px',
@@ -124,11 +115,6 @@ export const themes: Themes = {
       // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#005191',
-
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
 
       // Layout
       '--main-max-width': '1310px',
@@ -164,11 +150,6 @@ export const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#21296B',
 
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
-
       // Layout
       '--main-max-width': '1310px',
       '--content-max-width': '900px',
@@ -202,11 +183,6 @@ export const themes: Themes = {
       // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#8CCCF2',
-
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
 
       // Layout
       '--main-max-width': '1310px',
@@ -246,11 +222,6 @@ export const themes: Themes = {
       '--warning-background-color': '#F5E6C8',
       '--warning-text-color': '#6b5d00',
 
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
-
       // Layout
       '--main-max-width': '1310px',
       '--content-max-width': '900px',
@@ -284,11 +255,6 @@ export const themes: Themes = {
       // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#E87511',
-
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
 
       // Layout
       '--main-max-width': '1310px',
@@ -324,18 +290,13 @@ export const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#CFB87C', // CU gold selection accent
 
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
-
       // Layout
       '--main-max-width': '1310px',
       '--content-max-width': '900px',
     },
   },
   // United Way of Greater Kansas City, whose 2-1-1 serves both sides of the KS/MO line, so this
-  // theme is shared by the ks and mo white labels. Colors and fonts come from United Way Brand
+  // theme is shared by the ks and mo white labels. Colors come from United Way Brand
   // Guidelines 2024 v1.3: primary blue leads (p.18 reserves the purple/green tertiaries for
   // supporting roles), and every text pairing below is an approved combination from p.19.
   uwgkc: {
@@ -368,10 +329,50 @@ export const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#0044B5',
 
-      // Typography
-      '--font-heading': "'Antonio', sans-serif",
-      '--font-body': "'Palanquin', sans-serif",
-      'font-size': '18px',
+      // Layout
+      '--main-max-width': '1310px',
+      '--content-max-width': '900px',
+    },
+  },
+  // 211 Metro Chicago. Palette straight from their logo guidelines (Aug 2022):
+  // Blue Pantone 7685 #3E61A1, Red Pantone 179 #F04941.
+  //
+  // Blue carries text (6.1:1 on white, passes WCAG AA). Red is 3.7:1 — below
+  // the 4.5:1 text threshold but above the 3:1 non-text one, so it is confined
+  // to icons and accents and must never be used for body copy. That split
+  // mirrors the CO 211 theme, which also uses a red for --icon-color only, and
+  // it matches how the brand itself uses red: the Chicago stars, not the words.
+  twoOneOneChicago: {
+    primaryColor: '#3E61A1',
+    secondaryColor: '#3E61A1',
+    midBlueColor: '#3E61A1',
+    footerColor: '#3E61A1',
+    secondaryBackgroundColor: '#F7F7F7',
+    hoverColor: '#EFEFEF',
+    outlineHoverColor: '#FFFFFF',
+    outlineHoverBackgroundColor: '#3E61A1',
+    // 30% tint of the brand blue — the lightest step that still clears the
+    // 3:1 non-text contrast floor on white (3.2:1).
+    progressBarColor: '#7890BD',
+    cssVariables: {
+      // Colors - Primary & Secondary
+      '--primary-color': '#3E61A1',
+      '--secondary-color': '#3E61A1',
+      '--midBlue-color': '#3E61A1',
+      '--footer-color': '#3E61A1',
+
+      // Colors - Background
+      '--secondary-background-color': '#F7F7F7',
+      '--hover-color': '#EFEFEF',
+
+      // Colors - Icons
+      // Brand red, non-text use only (3.7:1 on white).
+      '--icon-color': '#F04941',
+      '--secondary-icon-color': '#3E61A1',
+
+      // Colors - Interactive States
+      '--option-card-hover-font-color': '#1D1C1E',
+      '--active-border-color': '#3E61A1',
 
       // Layout
       '--main-max-width': '1310px',

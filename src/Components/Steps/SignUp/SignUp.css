@@ -16,7 +16,7 @@
 .sign-up-disclaimer-text {
   margin: 1rem 0;
   font-weight: 600;
-  font-family: 'Open Sans';
+  font-family: var(--font-body);
 }
 
 .sign-up-server-error-container {

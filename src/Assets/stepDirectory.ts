@@ -26,8 +26,8 @@ export function useStepDirectory() {
   }
 
   if (formData.immutableReferrer && !referralOptionsLoading) {
-    const allOptions = { ...referralOptions.generic, ...referralOptions.partners };
-    if (formData.immutableReferrer in allOptions) {
+    const knownReferrers = { ...referralOptions.generic, ...referralOptions.partners, ...referralOptions.hidden };
+    if (formData.immutableReferrer in knownReferrers) {
       steps = steps.filter((step) => step !== 'referralSource');
     }
   }

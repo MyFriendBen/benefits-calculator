@@ -7,7 +7,7 @@
 .result-resource-more-info {
   display: flex;
   align-items: center;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-weight: 400;
 }
 
@@ -30,7 +30,7 @@ svg.need-card-lucide-icon * {
 }
 
 .result-resource-more-info span {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.7rem;
   text-transform: uppercase;
   font-weight: 600;
@@ -38,7 +38,7 @@ svg.need-card-lucide-icon * {
 }
 
 .result-resource-more-info span strong {
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-size: 1.25rem;
   display: block;
   text-transform: capitalize;
@@ -54,7 +54,7 @@ svg.need-card-lucide-icon * {
   background-color: var(--primary-color);
   height: 80%;
   font-weight: 700;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   border: 1px solid var(--primary-color);
 }
 
@@ -115,7 +115,7 @@ svg.need-card-lucide-icon * {
   background-color: var(--primary-color);
   height: 80%;
   font-weight: 700;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   border: 1px solid var(--primary-color);
   text-decoration: none;
 }
