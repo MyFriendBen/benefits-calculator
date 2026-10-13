@@ -1435,4 +1435,57 @@ describe('render crash containment (MFB-2222)', () => {
     expect(screen.queryByRole('button', { name: /chat/i })).not.toBeInTheDocument();
     expect(mockTrack).toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'widget' });
   });
+
+  it('stops auto-opening and fetching once the widget has crashed', () => {
+    // The boundary only hides the markup; the provider must not keep acting for a
+    // widget nobody can see (reporting an open, reading history).
+    jest.useFakeTimers();
+    try {
+      mockCrash.chatIcon = true;
+      renderChatbot([SNAP, MEDICAID, WIC]);
+
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+
+      expect(mockTrack).not.toHaveBeenCalledWith('screener_benbot_opened', expect.anything());
+      expect(mockHistory).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('reports a message that fails to format once, not on every reopen', async () => {
+    mockCrash.parseMarkdown = true;
+    mockSend.mockResolvedValue({
+      user_message: { message_id: 'u1', role: 'user', text: 'hello', created_at: '' },
+      assistant_message: { message_id: 'a1', role: 'assistant', text: 'BOOM reply', created_at: '' },
+    });
+    renderChatbot();
+    await openAndSend();
+    await screen.findByText('BOOM reply');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Close chat' }));
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+
+    expect(screen.getByText('BOOM reply')).toBeInTheDocument();
+    const crashes = mockTrack.mock.calls.filter(([name]) => name === 'screener_benbot_crashed');
+    expect(crashes).toHaveLength(1);
+  });
+
+  it('does not carry a caught error over to a different message at the same position', async () => {
+    // The first send fails to start a conversation, so the user's "BOOM" bubble is
+    // id-less and keyed by its index (0). The second send's start returns an empty
+    // transcript, which replaces the list, so the next id-less bubble lands on index 0.
+    mockCrash.parseMarkdown = true;
+    mockStart.mockRejectedValueOnce(new Error('down'));
+    renderChatbot();
+    await openAndSend('BOOM');
+    await screen.findByText('BOOM');
+
+    await userEvent.type(screen.getByRole('textbox'), '**fine**');
+    await userEvent.keyboard('{Enter}');
+
+    expect(await screen.findByText('fine', { selector: 'strong' })).toBeInTheDocument();
+  });
 });

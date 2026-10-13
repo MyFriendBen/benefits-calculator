@@ -1,4 +1,14 @@
-import { createContext, useContext, useState, useRef, useEffect, useCallback, useMemo, PropsWithChildren } from 'react';
+import {
+  createContext,
+  memo,
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+  PropsWithChildren,
+} from 'react';
 import { useParams } from 'react-router-dom';
 import ChatIcon from '@mui/icons-material/Chat';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -193,8 +203,16 @@ function renderFormattedMessage(text: string): React.ReactNode {
 // A component rather than a call, so a throw while formatting (e.g. in parseMarkdown)
 // is caught by the per-message ChatbotErrorBoundary around it. Called inline, it would
 // throw from ChatbotProvider's own render, which no boundary inside the provider sees.
-function FormattedChatText({ text }: { text: string }) {
+//
+// Memoized because the provider re-renders on every keystroke in the input, and the
+// output depends only on `text` (plus --primary-color, which is set once per white label).
+const FormattedChatText = memo(function FormattedChatText({ text }: { text: string }) {
   return <>{renderFormattedMessage(text)}</>;
+});
+
+// What a message shows when it can't be formatted (MFB-2222): its own text, unparsed.
+function PlainChatText({ text }: { text: string }) {
+  return <p className="chatbot-paragraph chatbot-paragraph--plain">{text}</p>;
 }
 
 type ReasonChipsProps = {
@@ -376,10 +394,29 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
   // reads it: ai-service stores it on the conversation and never puts it in the prompt.
   const locale = useSupportedLocale();
   const track = useTrackEvent();
-  // There is no error reporting service on the frontend, so this event is the only way
-  // a render crash caught by ChatbotErrorBoundary reaches us (MFB-2222).
-  const reportWidgetCrash = useCallback(() => track('screener_benbot_crashed', { scope: 'widget' }), [track]);
-  const reportMessageCrash = useCallback(() => track('screener_benbot_crashed', { scope: 'message' }), [track]);
+
+  // Render crashes caught by ChatbotErrorBoundary (MFB-2222). There is no error
+  // reporting service on the frontend, so `screener_benbot_crashed` is the only way one
+  // reaches us.
+  //
+  // `widgetCrashed`: the boundary only hides the markup. This also stops the logic
+  // behind it, so a widget nobody can see doesn't auto-open, report an open, or fetch.
+  const [widgetCrashed, setWidgetCrashed] = useState(false);
+  // Texts that already failed to format. Formatting depends on nothing but the text, so
+  // a known-bad one goes straight to PlainChatText rather than being re-thrown (and
+  // re-reported) every time the panel remounts.
+  const [unformattableTexts, setUnformattableTexts] = useState<ReadonlySet<string>>(() => new Set());
+  const handleWidgetCrash = useCallback(() => {
+    setWidgetCrashed(true);
+    track('screener_benbot_crashed', { scope: 'widget' });
+  }, [track]);
+  const handleMessageCrash = useCallback(
+    (text: string) => {
+      setUnformattableTexts((prev) => new Set(prev).add(text));
+      track('screener_benbot_crashed', { scope: 'message' });
+    },
+    [track],
+  );
 
   // WHICH greeting is on screen, and the numbers it quotes — latched the moment the
   // user answers it.
@@ -500,7 +537,7 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
   // opens with the generic welcome) and when the user dismissed it for this
   // screen. A manual open first changes `panel`, which cancels the timer.
   useEffect(() => {
-    if (panel !== 'closed') return;
+    if (widgetCrashed || panel !== 'closed') return;
     if (!uuid || wasDismissed(uuid)) return;
     if (visiblePrograms !== undefined && visiblePrograms.length === 0) return;
     const timer = setTimeout(() => {
@@ -508,7 +545,7 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
       track('screener_benbot_opened', { entry: 'auto' });
     }, AUTO_OPEN_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [panel, uuid, visiblePrograms, track]);
+  }, [widgetCrashed, panel, uuid, visiblePrograms, track]);
 
   // Restore a returning household's transcript when the widget opens.
   //
@@ -535,7 +572,7 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
   // deliberately emits no error event.
   const historyRequestedRef = useRef(false);
   useEffect(() => {
-    if (panel === 'closed' || historyRequestedRef.current || !uuid) return;
+    if (widgetCrashed || panel === 'closed' || historyRequestedRef.current || !uuid) return;
     historyRequestedRef.current = true;
     getAssistantHistory(uuid)
       .then((conversation) => {
@@ -547,7 +584,7 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
         setMessages((prev) => (prev.length === 0 ? restored : prev));
       })
       .catch(() => {});
-  }, [panel, uuid]);
+  }, [widgetCrashed, panel, uuid]);
 
   // Apply a server transcript WITHOUT discarding ratings this session has written.
   //
@@ -628,13 +665,13 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
   }, [uuid]);
 
   useEffect(() => {
-    if (!conversationIdRef.current || !uuid) return;
+    if (widgetCrashed || !conversationIdRef.current || !uuid) return;
     if (sendingRef.current) {
       pendingRefreshRef.current = true;
       return;
     }
     refreshContext();
-  }, [uuid, visiblePrograms, refreshContext]);
+  }, [widgetCrashed, uuid, visiblePrograms, refreshContext]);
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -823,7 +860,7 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
       {children}
       {/* Around the widget only, never {children}: those are the results page itself, and
           a page error caught here would be blamed on Benji and still blank the page. */}
-      <ChatbotErrorBoundary fallback={null} onError={reportWidgetCrash}>
+      <ChatbotErrorBoundary fallback={null} onError={handleWidgetCrash}>
         {isOpen ? (
           <div
             className={`chatbot-panel${panel === 'peek' ? ' chatbot-panel--peek' : ''}`}
@@ -933,13 +970,20 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
               {messages.map((msg, i) => (
                 <div key={msg.id ?? i} className={`chatbot-message chatbot-message-${msg.role}`}>
                   {/* One bad message falls back to its raw text instead of taking the
-                      whole widget down with it. */}
-                  <ChatbotErrorBoundary
-                    fallback={<p className="chatbot-paragraph chatbot-paragraph--plain">{msg.text}</p>}
-                    onError={reportMessageCrash}
-                  >
-                    <FormattedChatText text={msg.text} />
-                  </ChatbotErrorBoundary>
+                      whole widget down with it. Keyed by text, not just by position: an
+                      id-less bubble is keyed by its index, and a different message landing
+                      on that index must not inherit a caught error. */}
+                  {unformattableTexts.has(msg.text) ? (
+                    <PlainChatText text={msg.text} />
+                  ) : (
+                    <ChatbotErrorBoundary
+                      key={msg.text}
+                      fallback={<PlainChatText text={msg.text} />}
+                      onError={() => handleMessageCrash(msg.text)}
+                    >
+                      <FormattedChatText text={msg.text} />
+                    </ChatbotErrorBoundary>
+                  )}
                   {/* Stored assistant replies only. `msg.id` is the gate rather than a
                       separate flag: a bubble without one is either the user's own message
                       echoed optimistically before its round trip, or a client-side error
