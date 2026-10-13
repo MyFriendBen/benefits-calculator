@@ -1,4 +1,14 @@
-import { createContext, useContext, useState, useRef, useEffect, useCallback, useMemo, PropsWithChildren } from 'react';
+import {
+  createContext,
+  memo,
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+  PropsWithChildren,
+} from 'react';
 import { useParams } from 'react-router-dom';
 import ChatIcon from '@mui/icons-material/Chat';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -23,6 +33,7 @@ import {
 } from '../../../apiCalls';
 import { useTrackEvent } from '../../../Assets/analytics';
 import { useSupportedLocale } from '../../LanguageSelect/LanguageSelect';
+import { ChatbotErrorBoundary } from './ChatbotErrorBoundary';
 import './Chatbot.css';
 
 type Message = {
@@ -187,6 +198,21 @@ function renderFormattedMessage(text: string): React.ReactNode {
   flushParagraph();
 
   return elements;
+}
+
+// A component rather than a call, so a throw while formatting (e.g. in parseMarkdown)
+// is caught by the per-message ChatbotErrorBoundary around it. Called inline, it would
+// throw from ChatbotProvider's own render, which no boundary inside the provider sees.
+//
+// Memoized because the provider re-renders on every keystroke in the input, and the
+// output depends only on `text` (plus --primary-color, which is set once per white label).
+const FormattedChatText = memo(function FormattedChatText({ text }: { text: string }) {
+  return <>{renderFormattedMessage(text)}</>;
+});
+
+// What a message shows when it can't be formatted (MFB-2222): its own text, unparsed.
+function PlainChatText({ text }: { text: string }) {
+  return <p className="chatbot-paragraph chatbot-paragraph--plain">{text}</p>;
 }
 
 type ReasonChipsProps = {
@@ -369,6 +395,51 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
   const locale = useSupportedLocale();
   const track = useTrackEvent();
 
+  // Render crashes caught by ChatbotErrorBoundary (MFB-2222). There is no error
+  // reporting service on the frontend, so `screener_benbot_crashed` is the only way one
+  // reaches us.
+  //
+  // `widgetCrashed`: the boundary only hides the markup. This also stops the logic
+  // behind it, so a widget nobody can see doesn't auto-open, report an open, or fetch.
+  const [widgetCrashed, setWidgetCrashed] = useState(false);
+  // Parts of the transcript that already crashed, so they render without the failing
+  // piece from then on instead of re-throwing every time the panel remounts. Two kinds,
+  // each with its own boundary so one failing doesn't take the other with it:
+  //   `text:<text>` — the text failed to format. Formatting depends on nothing but the
+  //                   text, so every bubble showing it falls back to PlainChatText.
+  //   `rating:<id>` — that reply's rating UI threw. Its text still renders formatted.
+  // The state drives rendering; the ref is what makes each one reported exactly once,
+  // since two boundaries can catch in the same commit, before any state update lands.
+  const [crashedParts, setCrashedParts] = useState<ReadonlySet<string>>(() => new Set());
+  const reportedPartsRef = useRef(new Set<string>());
+  // Last element focused inside the transcript. If a crash removes it (a rating button
+  // the user was on), focus would otherwise drop to <body> and out of the chat.
+  const lastTranscriptFocusRef = useRef<HTMLElement | null>(null);
+  const handleWidgetCrash = useCallback(() => {
+    setWidgetCrashed(true);
+    track('screener_benbot_crashed', { scope: 'widget' });
+  }, [track]);
+  const handlePartCrash = useCallback(
+    (part: string, scope: 'message' | 'rating') => {
+      // Runs in the commit phase, after the failing subtree was swapped for its fallback.
+      // Only restore focus that the crash itself took: the element is gone and nothing
+      // else has focus. Never steal it otherwise (e.g. a crash during auto-open).
+      const lastFocus = lastTranscriptFocusRef.current;
+      if (
+        lastFocus &&
+        !lastFocus.isConnected &&
+        (!document.activeElement || document.activeElement === document.body)
+      ) {
+        inputRef.current?.focus();
+      }
+      if (reportedPartsRef.current.has(part)) return;
+      reportedPartsRef.current.add(part);
+      setCrashedParts(new Set(reportedPartsRef.current));
+      track('screener_benbot_crashed', { scope });
+    },
+    [track],
+  );
+
   // WHICH greeting is on screen, and the numbers it quotes — latched the moment the
   // user answers it.
   //
@@ -488,7 +559,7 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
   // opens with the generic welcome) and when the user dismissed it for this
   // screen. A manual open first changes `panel`, which cancels the timer.
   useEffect(() => {
-    if (panel !== 'closed') return;
+    if (widgetCrashed || panel !== 'closed') return;
     if (!uuid || wasDismissed(uuid)) return;
     if (visiblePrograms !== undefined && visiblePrograms.length === 0) return;
     const timer = setTimeout(() => {
@@ -496,7 +567,7 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
       track('screener_benbot_opened', { entry: 'auto' });
     }, AUTO_OPEN_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [panel, uuid, visiblePrograms, track]);
+  }, [widgetCrashed, panel, uuid, visiblePrograms, track]);
 
   // Restore a returning household's transcript when the widget opens.
   //
@@ -523,7 +594,7 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
   // deliberately emits no error event.
   const historyRequestedRef = useRef(false);
   useEffect(() => {
-    if (panel === 'closed' || historyRequestedRef.current || !uuid) return;
+    if (widgetCrashed || panel === 'closed' || historyRequestedRef.current || !uuid) return;
     historyRequestedRef.current = true;
     getAssistantHistory(uuid)
       .then((conversation) => {
@@ -535,7 +606,7 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
         setMessages((prev) => (prev.length === 0 ? restored : prev));
       })
       .catch(() => {});
-  }, [panel, uuid]);
+  }, [widgetCrashed, panel, uuid]);
 
   // Apply a server transcript WITHOUT discarding ratings this session has written.
   //
@@ -616,13 +687,13 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
   }, [uuid]);
 
   useEffect(() => {
-    if (!conversationIdRef.current || !uuid) return;
+    if (widgetCrashed || !conversationIdRef.current || !uuid) return;
     if (sendingRef.current) {
       pendingRefreshRef.current = true;
       return;
     }
     refreshContext();
-  }, [uuid, visiblePrograms, refreshContext]);
+  }, [widgetCrashed, uuid, visiblePrograms, refreshContext]);
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -809,197 +880,219 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
   return (
     <ChatbotContext.Provider value={{ openWithMessage }}>
       {children}
-      {isOpen ? (
-        <div
-          className={`chatbot-panel${panel === 'peek' ? ' chatbot-panel--peek' : ''}`}
-          role="dialog"
-          aria-label={formatMessage({ id: 'chatbot.ariaLabel', defaultMessage: 'Benji Assistant chat' })}
-        >
-          <div className="chatbot-header">
-            <span className="chatbot-header-title">
-              <FormattedMessage id="chatbot.title" defaultMessage="Benji Assistant" />
-            </span>
-            <span className="chatbot-header-actions">
-              {panel === 'peek' && (
+      {/* Around the widget only, never {children}: those are the results page itself, and
+          a page error caught here would be blamed on Benji and still blank the page. */}
+      <ChatbotErrorBoundary fallback={null} onError={handleWidgetCrash}>
+        {isOpen ? (
+          <div
+            className={`chatbot-panel${panel === 'peek' ? ' chatbot-panel--peek' : ''}`}
+            role="dialog"
+            aria-label={formatMessage({ id: 'chatbot.ariaLabel', defaultMessage: 'Benji Assistant chat' })}
+          >
+            <div className="chatbot-header">
+              <span className="chatbot-header-title">
+                <FormattedMessage id="chatbot.title" defaultMessage="Benji Assistant" />
+              </span>
+              <span className="chatbot-header-actions">
+                {panel === 'peek' && (
+                  <button
+                    type="button"
+                    className="chatbot-header-expand"
+                    onClick={handleExpand}
+                    aria-label={formatMessage({ id: 'chatbot.expand', defaultMessage: 'Expand chat' })}
+                  >
+                    <KeyboardArrowUpIcon fontSize="small" />
+                  </button>
+                )}
                 <button
                   type="button"
-                  className="chatbot-header-expand"
-                  onClick={handleExpand}
-                  aria-label={formatMessage({ id: 'chatbot.expand', defaultMessage: 'Expand chat' })}
+                  className="chatbot-header-close"
+                  onClick={handleClose}
+                  aria-label={formatMessage({ id: 'chatbot.close', defaultMessage: 'Close chat' })}
                 >
-                  <KeyboardArrowUpIcon fontSize="small" />
+                  <CloseIcon fontSize="small" />
                 </button>
-              )}
-              <button
-                type="button"
-                className="chatbot-header-close"
-                onClick={handleClose}
-                aria-label={formatMessage({ id: 'chatbot.close', defaultMessage: 'Close chat' })}
-              >
-                <CloseIcon fontSize="small" />
-              </button>
-            </span>
-          </div>
-          {/* Standing privacy notice. Pinned between the header and the transcript
-              rather than placed in it: it's a warning about what the user is about
-              to type, so it has to stay on screen once the conversation starts.
-
-              Omitted in 'peek', which is a teaser, not a place you can type: focusing
-              the input there expands to 'full' (see the input's onFocus), so the
-              notice is always on screen before a character can be entered. Rendering
-              it in peek only costs the greeting ~39px of a panel already capped at
-              min(21rem, 45vh), which pushed the last lines below the fold. */}
-          {panel === 'full' && (
-            <div className="chatbot-disclaimer" role="note">
-              <FormattedMessage
-                id="chatbot.privacyNotice"
-                defaultMessage="Benji is an AI assistant. Please do not include your SSN, account numbers, or medical details in this chat."
-              />
+              </span>
             </div>
-          )}
-          <div className="chatbot-messages">
-            {
-              // The greeting is a real bot bubble, not a banner, so the conversation
-              // opens the way it continues — and it STAYS, which is the whole point of
-              // rendering it unconditionally rather than from `messages.length === 0`.
-              // Under that old guard it vanished the instant the user hit send: the
-              // start call replaces `messages` wholesale with the server's transcript,
-              // which has never contained the greeting. What the user saw was Benji
-              // deleting its own opening line the moment they answered it — and once
-              // that line is an invitation to describe a hard situation, retracting it
-              // mid-thought is the worst possible moment to do it.
-              //
-              // It is still derived rather than seeded into `messages`, because seeding
-              // is what actually can't survive here: the history-restore effect below
-              // only fills an EMPTY transcript (so a seeded greeting would suppress a
-              // returning household's history), and `ensureConversation` would overwrite
-              // it on the first send anyway. Deriving sidesteps both. Both the variant
-              // and its numbers come from the latched `greeting` above — nothing here
-              // may read `visiblePrograms` or `programId` directly, or the bubble starts
-              // rewriting itself again under a conversation that has moved past it.
-              //
-              // Not stored server-side: it is client-templated and already translated,
-              // and ai-service's store appends user/assistant messages in pairs. The
-              // model is told about it in the system prompt instead, so it doesn't
-              // re-offer the choice this bubble just made.
-              <div className="chatbot-message chatbot-message-bot">
-                {greeting?.variant === 'personalized' ? (
-                  // Templated client-side from what the page is showing — instant
-                  // and free; the model is only engaged once the user replies.
-                  //
-                  // Suppressed on a program's own page: this greeting counts the whole
-                  // list and offers to pick "which one to apply for first", which
-                  // describes a screen the user is not on. Someone who deep-links or
-                  // reloads there would otherwise be auto-opened into it. The generic
-                  // welcome below is route-neutral and already translated, so this
-                  // costs no new strings.
-                  <FormattedMessage
-                    id="chatbot.welcomePersonalizedSituation"
-                    defaultMessage="Hi, I'm Benji! Your results show {count, plural, one {# program} other {# programs}} you may qualify for, worth about {totalValue} per year. <b>Tell me what's going on right now</b> and I'll point you to the best place to start — or I can <b>walk you through your top result</b>."
-                    values={{
-                      count: greeting.count,
-                      totalValue: formatNumber(greeting.totalValue, {
-                        style: 'currency',
-                        currency: 'USD',
-                        maximumFractionDigits: 0,
-                      }),
-                      b: boldChunks,
-                    }}
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="chatbot.welcomeSituation"
-                    defaultMessage="Hi, I'm Benji. <b>Tell me what's going on for you right now</b> and I'll help you find the best place to start — or <b>ask me anything</b> about the programs you qualify for."
-                    values={{ b: boldChunks }}
-                  />
-                )}
-              </div>
-            }
-            {messages.map((msg, i) => (
-              <div key={msg.id ?? i} className={`chatbot-message chatbot-message-${msg.role}`}>
-                {renderFormattedMessage(msg.text)}
-                {/* Stored assistant replies only. `msg.id` is the gate rather than a
-                    separate flag: a bubble without one is either the user's own message
-                    echoed optimistically before its round trip, or a client-side error
-                    notice — nothing the server has a row for, and nothing it would make
-                    sense to rate. The greeting never reaches this list at all. */}
-                {msg.role === 'bot' && msg.id !== undefined && (
-                  <>
-                    <MessageRating
-                      rating={msg.rating ?? null}
-                      onRate={(next) => rateMessage(msg.id as string, next)}
-                      groupLabel={rateReplyLabel}
-                      upLabel={thumbUpLabel}
-                      downLabel={thumbDownLabel}
-                    />
-                    {/* Only under a reply that is currently rated down. Never on a
-                        thumbs-up: positive reasons are far less diagnostic, and a
-                        second step on the cheap positive action suppresses the volume
-                        that makes the positive signal worth having. */}
-                    {(msg.rating === 1 || msg.rating === -1) && (
-                      <p className="chatbot-rating-note" id={`chatbot-rating-note-${msg.id}`}>
-                        {msg.rating === 1 ? thanksUpLabel : thanksDownLabel}
-                      </p>
-                    )}
-                    {msg.rating === -1 && (
-                      <ReasonChips
-                        selected={msg.reason ?? null}
-                        onPick={(reason) => setRatingReason(msg.id as string, reason)}
-                        labels={reasonLabels}
-                        labelledBy={`chatbot-rating-note-${msg.id}`}
-                      />
-                    )}
-                  </>
-                )}
-              </div>
-            ))}
-            {isSending && (
-              <div
-                className="chatbot-message chatbot-message-bot chatbot-message-loading"
-                role="status"
-                aria-label={formatMessage({ id: 'chatbot.loading', defaultMessage: 'Benji is typing' })}
-              >
-                <span className="chatbot-typing-dot" />
-                <span className="chatbot-typing-dot" />
-                <span className="chatbot-typing-dot" />
+            {/* Standing privacy notice. Pinned between the header and the transcript
+                rather than placed in it: it's a warning about what the user is about
+                to type, so it has to stay on screen once the conversation starts.
+
+                Omitted in 'peek', which is a teaser, not a place you can type: focusing
+                the input there expands to 'full' (see the input's onFocus), so the
+                notice is always on screen before a character can be entered. Rendering
+                it in peek only costs the greeting ~39px of a panel already capped at
+                min(21rem, 45vh), which pushed the last lines below the fold. */}
+            {panel === 'full' && (
+              <div className="chatbot-disclaimer" role="note">
+                <FormattedMessage
+                  id="chatbot.privacyNotice"
+                  defaultMessage="Benji is an AI assistant. Please do not include your SSN, account numbers, or medical details in this chat."
+                />
               </div>
             )}
-            <div ref={messagesEndRef} />
-          </div>
-          <div className="chatbot-input-area">
-            <input
-              ref={inputRef}
-              type="text"
-              className="chatbot-input"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onFocus={panel === 'peek' ? handleExpand : undefined}
-              placeholder={formatMessage({ id: 'chatbot.placeholder', defaultMessage: 'Type a message...' })}
-              aria-label={formatMessage({ id: 'chatbot.inputAriaLabel', defaultMessage: 'Chat message input' })}
-              disabled={isSending}
-            />
-            <button
-              type="button"
-              className="chatbot-send-btn"
-              onClick={handleSend}
-              disabled={inputValue.trim() === '' || isSending}
-              aria-label={formatMessage({ id: 'chatbot.send', defaultMessage: 'Send message' })}
+            <div
+              className="chatbot-messages"
+              onFocus={(e) => {
+                lastTranscriptFocusRef.current = e.target;
+              }}
             >
-              <SendIcon fontSize="small" />
-            </button>
+              {
+                // The greeting is a real bot bubble, not a banner, so the conversation
+                // opens the way it continues — and it STAYS, which is the whole point of
+                // rendering it unconditionally rather than from `messages.length === 0`.
+                // Under that old guard it vanished the instant the user hit send: the
+                // start call replaces `messages` wholesale with the server's transcript,
+                // which has never contained the greeting. What the user saw was Benji
+                // deleting its own opening line the moment they answered it — and once
+                // that line is an invitation to describe a hard situation, retracting it
+                // mid-thought is the worst possible moment to do it.
+                //
+                // It is still derived rather than seeded into `messages`, because seeding
+                // is what actually can't survive here: the history-restore effect below
+                // only fills an EMPTY transcript (so a seeded greeting would suppress a
+                // returning household's history), and `ensureConversation` would overwrite
+                // it on the first send anyway. Deriving sidesteps both. Both the variant
+                // and its numbers come from the latched `greeting` above — nothing here
+                // may read `visiblePrograms` or `programId` directly, or the bubble starts
+                // rewriting itself again under a conversation that has moved past it.
+                //
+                // Not stored server-side: it is client-templated and already translated,
+                // and ai-service's store appends user/assistant messages in pairs. The
+                // model is told about it in the system prompt instead, so it doesn't
+                // re-offer the choice this bubble just made.
+                <div className="chatbot-message chatbot-message-bot">
+                  {greeting?.variant === 'personalized' ? (
+                    // Templated client-side from what the page is showing — instant
+                    // and free; the model is only engaged once the user replies.
+                    //
+                    // Suppressed on a program's own page: this greeting counts the whole
+                    // list and offers to pick "which one to apply for first", which
+                    // describes a screen the user is not on. Someone who deep-links or
+                    // reloads there would otherwise be auto-opened into it. The generic
+                    // welcome below is route-neutral and already translated, so this
+                    // costs no new strings.
+                    <FormattedMessage
+                      id="chatbot.welcomePersonalizedSituation"
+                      defaultMessage="Hi, I'm Benji! Your results show {count, plural, one {# program} other {# programs}} you may qualify for, worth about {totalValue} per year. <b>Tell me what's going on right now</b> and I'll point you to the best place to start — or I can <b>walk you through your top result</b>."
+                      values={{
+                        count: greeting.count,
+                        totalValue: formatNumber(greeting.totalValue, {
+                          style: 'currency',
+                          currency: 'USD',
+                          maximumFractionDigits: 0,
+                        }),
+                        b: boldChunks,
+                      }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="chatbot.welcomeSituation"
+                      defaultMessage="Hi, I'm Benji. <b>Tell me what's going on for you right now</b> and I'll help you find the best place to start — or <b>ask me anything</b> about the programs you qualify for."
+                      values={{ b: boldChunks }}
+                    />
+                  )}
+                </div>
+              }
+              {messages.map((msg, i) => (
+                <div key={msg.id ?? i} className={`chatbot-message chatbot-message-${msg.role}`}>
+                  {/* Text and rating UI each have their own boundary (MFB-2222). Text
+                      that fails to format falls back to its raw text and keeps its rating
+                      buttons, so the reply that broke can still be rated down; a rating UI
+                      that throws is dropped, and the text stays formatted. */}
+                  {crashedParts.has(`text:${msg.text}`) ? (
+                    <PlainChatText text={msg.text} />
+                  ) : (
+                    <ChatbotErrorBoundary
+                      fallback={<PlainChatText text={msg.text} />}
+                      onError={() => handlePartCrash(`text:${msg.text}`, 'message')}
+                    >
+                      <FormattedChatText text={msg.text} />
+                    </ChatbotErrorBoundary>
+                  )}
+                  {/* Stored assistant replies only. `msg.id` is the gate rather than a
+                      separate flag: a bubble without one is either the user's own message
+                      echoed optimistically before its round trip, or a client-side error
+                      notice — nothing the server has a row for, and nothing it would make
+                      sense to rate. The greeting never reaches this list at all. */}
+                  {msg.role === 'bot' && msg.id !== undefined && !crashedParts.has(`rating:${msg.id}`) && (
+                    <ChatbotErrorBoundary fallback={null} onError={() => handlePartCrash(`rating:${msg.id}`, 'rating')}>
+                      <MessageRating
+                        rating={msg.rating ?? null}
+                        onRate={(next) => rateMessage(msg.id as string, next)}
+                        groupLabel={rateReplyLabel}
+                        upLabel={thumbUpLabel}
+                        downLabel={thumbDownLabel}
+                      />
+                      {/* Only under a reply that is currently rated down. Never on a
+                          thumbs-up: positive reasons are far less diagnostic, and a
+                          second step on the cheap positive action suppresses the volume
+                          that makes the positive signal worth having. */}
+                      {(msg.rating === 1 || msg.rating === -1) && (
+                        <p className="chatbot-rating-note" id={`chatbot-rating-note-${msg.id}`}>
+                          {msg.rating === 1 ? thanksUpLabel : thanksDownLabel}
+                        </p>
+                      )}
+                      {msg.rating === -1 && (
+                        <ReasonChips
+                          selected={msg.reason ?? null}
+                          onPick={(reason) => setRatingReason(msg.id as string, reason)}
+                          labels={reasonLabels}
+                          labelledBy={`chatbot-rating-note-${msg.id}`}
+                        />
+                      )}
+                    </ChatbotErrorBoundary>
+                  )}
+                </div>
+              ))}
+              {isSending && (
+                <div
+                  className="chatbot-message chatbot-message-bot chatbot-message-loading"
+                  role="status"
+                  aria-label={formatMessage({ id: 'chatbot.loading', defaultMessage: 'Benji is typing' })}
+                >
+                  <span className="chatbot-typing-dot" />
+                  <span className="chatbot-typing-dot" />
+                  <span className="chatbot-typing-dot" />
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+            <div className="chatbot-input-area">
+              <input
+                ref={inputRef}
+                type="text"
+                className="chatbot-input"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onFocus={panel === 'peek' ? handleExpand : undefined}
+                placeholder={formatMessage({ id: 'chatbot.placeholder', defaultMessage: 'Type a message...' })}
+                aria-label={formatMessage({ id: 'chatbot.inputAriaLabel', defaultMessage: 'Chat message input' })}
+                disabled={isSending}
+              />
+              <button
+                type="button"
+                className="chatbot-send-btn"
+                onClick={handleSend}
+                disabled={inputValue.trim() === '' || isSending}
+                aria-label={formatMessage({ id: 'chatbot.send', defaultMessage: 'Send message' })}
+              >
+                <SendIcon fontSize="small" />
+              </button>
+            </div>
           </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          className="chatbot-fab"
-          onClick={handleOpen}
-          aria-label={formatMessage({ id: 'chatbot.open', defaultMessage: 'Open Benji Assistant chat' })}
-        >
-          <ChatIcon />
-        </button>
-      )}
+        ) : (
+          <button
+            type="button"
+            className="chatbot-fab"
+            onClick={handleOpen}
+            aria-label={formatMessage({ id: 'chatbot.open', defaultMessage: 'Open Benji Assistant chat' })}
+          >
+            <ChatIcon />
+          </button>
+        )}
+      </ChatbotErrorBoundary>
     </ChatbotContext.Provider>
   );
 }
