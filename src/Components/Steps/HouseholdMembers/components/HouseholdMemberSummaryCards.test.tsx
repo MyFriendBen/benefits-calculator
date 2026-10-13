@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
@@ -282,17 +283,15 @@ describe('HouseholdMemberSummaryCards', () => {
       });
     });
 
-    it('navigates when a completed card is activated with the Enter key', () => {
+    it.each([
+      ['Enter', '{Enter}'],
+      ['Space', '[Space]'],
+    ])('navigates when a completed card is activated with the %s key', (_name, keys) => {
       renderCards([completedMember(), completedMember()], 2);
-      fireEvent.keyDown(editButtons()[0], { key: 'Enter' });
-      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/1', {
-        state: { isEditing: true, returnToPage: 2 },
-      });
-    });
-
-    it('navigates when a completed card is activated with the Space key', () => {
-      renderCards([completedMember(), completedMember()], 2);
-      fireEvent.keyDown(editButtons()[0], { key: ' ' });
+      // Real key presses rather than fireEvent.keyDown: the card relies on native <button>
+      // activation, which fireEvent.keyDown does not trigger.
+      editButtons()[0].focus();
+      userEvent.keyboard(keys);
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/1', {
         state: { isEditing: true, returnToPage: 2 },
       });

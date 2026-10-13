@@ -3,7 +3,7 @@ import { IconButton } from '@mui/material';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { KeyboardEvent, MouseEvent } from 'react';
+import { MouseEvent } from 'react';
 import { FormattedMessageType } from '../../../../Types/Questions';
 
 type MemberCardProps = {
@@ -43,16 +43,17 @@ const MemberCard = ({
   onEdit,
   onDelete,
 }: MemberCardProps) => {
-  const containerClassName = `member-added-container ${isCompleted ? 'completed-household-member' : ''} ${
-    isCurrentMember ? 'current-household-member' : ''
-  }`;
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      onEdit(memberIndex);
-    }
-  };
+  // `editable-household-member` carries the clickable affordance (hover lift, pointer cursor) and
+  // is kept separate from the `completed` colour styling: revisiting an already-completed member
+  // makes a card both completed and current, and that card has no edit button to click.
+  const containerClassName = [
+    'member-added-container',
+    isCompleted && 'completed-household-member',
+    isCurrentMember && 'current-household-member',
+    isEditable && 'editable-household-member',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   const handleDeleteClick = (event: MouseEvent<HTMLElement>) => {
     // The trash button is a sibling of the edit button (not nested in it), so the edit click
@@ -61,9 +62,9 @@ const MemberCard = ({
     onDelete(memberIndex, event.currentTarget);
   };
 
-  // The current and completed states are mutually exclusive (a card can't be both being-edited
-  // and editable-elsewhere), so a single badge slot picks the right icon rather than rendering two
-  // absolutely-positioned badges that would otherwise stack at the same coordinates.
+  // A single badge slot, rather than two absolutely-positioned badges that would stack at the same
+  // coordinates. Current wins over completed: revisiting a finished member makes the card both, and
+  // "you are here" is the more useful signal while they're on that page.
   let statusIcon: JSX.Element | null = null;
   if (isCurrentMember) {
     statusIcon = <ConstructionIcon className="current-icon" aria-hidden="true" />;
@@ -98,7 +99,6 @@ const MemberCard = ({
             type="button"
             className="member-added-edit-button"
             onClick={() => onEdit(memberIndex)}
-            onKeyDown={handleKeyDown}
             aria-label={editAriaLabel}
           >
             {relationshipLabel}

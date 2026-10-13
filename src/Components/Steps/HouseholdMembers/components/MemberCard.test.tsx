@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import MemberCard from './MemberCard';
 
@@ -57,12 +58,17 @@ describe('MemberCard', () => {
     expect(baseProps.onEdit).toHaveBeenCalledWith(1);
   });
 
-  it('activates onEdit via the Enter and Space keys', () => {
+  it('activates onEdit once per Enter and Space press', () => {
     renderCard();
-    const button = screen.getByRole('button', { name: 'edit household member' });
-    fireEvent.keyDown(button, { key: 'Enter' });
-    fireEvent.keyDown(button, { key: ' ' });
+    screen.getByRole('button', { name: 'edit household member' }).focus();
+    // Native <button> activation — no custom onKeyDown. Asserted via real key events (not
+    // fireEvent.keyDown, which skips the browser's click synthesis) so a regression that
+    // re-adds a hand-rolled handler shows up here as a double fire.
+    userEvent.keyboard('{Enter}');
+    expect(baseProps.onEdit).toHaveBeenCalledTimes(1);
+    userEvent.keyboard('[Space]');
     expect(baseProps.onEdit).toHaveBeenCalledTimes(2);
+    expect(baseProps.onEdit).toHaveBeenCalledWith(1);
   });
 
   it('renders a non-editable card as plain text with no edit button', () => {
@@ -89,6 +95,21 @@ describe('MemberCard', () => {
   it('renders no status badge for an incomplete placeholder member', () => {
     const { container } = renderCard({ isCurrentMember: false, isEditable: false, isCompleted: false });
     expect(container.querySelectorAll('.household-member-status-icon')).toHaveLength(0);
+  });
+
+  it('marks an editable card with the clickable-affordance class', () => {
+    const { container } = renderCard({ isEditable: true });
+    expect(container.querySelector('.member-added-container')).toHaveClass('editable-household-member');
+  });
+
+  it('withholds the clickable affordance from a completed member being revisited', () => {
+    // Revisiting a finished member makes their card both completed and current, but it has no
+    // edit button — so it must not advertise a hover/click that does nothing.
+    const { container } = renderCard({ isCompleted: true, isCurrentMember: true, isEditable: false });
+    const card = container.querySelector('.member-added-container');
+    expect(card).toHaveClass('completed-household-member');
+    expect(card).toHaveClass('current-household-member');
+    expect(card).not.toHaveClass('editable-household-member');
   });
 
   it('calls onDelete with the index when the trash button is clicked', () => {

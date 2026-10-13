@@ -13,7 +13,11 @@
   position: relative;
   font-size: 0.75rem;
   box-sizing: border-box;
-  background-color: var(--input-section-background);
+  /*
+    The themed page tint. The current-member card overrides this to white so it reads as the
+    active card against the others (see the current-household-member rule below).
+  */
+  background-color: var(--secondary-background-color);
   /* Just wide enough to fit the label plus the trash button without crowding. */
   min-width: 7.5rem;
 }
@@ -168,17 +172,32 @@
   a heavy overlay — the previous full-card "Edit" overlay competed with the trash button and
   obscured the card text, so we keep the affordance lightweight instead. The lift is driven by the
   inner edit button's hover/focus (`:focus-within` covers keyboard focus on that button).
+
+  Keyed on `editable-household-member`, not `completed`: the current member's card is completed
+  but not editable while you're on their page, and must not advertise a click that does nothing.
 */
-.member-added-container.completed-household-member {
+.member-added-container.editable-household-member {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.member-added-container.completed-household-member:hover,
-.member-added-container.completed-household-member:focus-within {
+.member-added-container.editable-household-member:hover,
+.member-added-container.editable-household-member:focus-within {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
+}
+
+/* Honor reduced-motion preferences: keep the focus/hover cue, drop the movement. */
+@media (prefers-reduced-motion: reduce) {
+  .member-added-container.editable-household-member {
+    transition: none;
+  }
+
+  .member-added-container.editable-household-member:hover,
+  .member-added-container.editable-household-member:focus-within {
+    transform: none;
+  }
 }
 
 @media (max-width: 600px) {
