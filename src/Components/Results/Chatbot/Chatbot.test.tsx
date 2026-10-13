@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactNode } from 'react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { ChatbotProvider } from './Chatbot';
@@ -28,6 +29,30 @@ jest.mock('../../../Assets/analytics', () => ({
   useTrackEvent: () => mockTrack,
 }));
 
+// Lets the crash-containment tests (MFB-2222) make one render path throw on demand.
+// Both are off by default, so every other test renders the real thing.
+const mockCrash = { parseMarkdown: false, chatIcon: false };
+jest.mock('../../../utils/parseMarkdown', () => {
+  const actual = jest.requireActual('../../../utils/parseMarkdown');
+  return {
+    parseMarkdown: (content: string, primaryColor: string) => {
+      if (mockCrash.parseMarkdown && content.includes('BOOM')) throw new Error('parse failed');
+      return actual.parseMarkdown(content, primaryColor);
+    },
+  };
+});
+jest.mock('@mui/icons-material/Chat', () => {
+  const actual = jest.requireActual('@mui/icons-material/Chat');
+  const { createElement } = jest.requireActual('react');
+  return {
+    __esModule: true,
+    default: (props: object) => {
+      if (mockCrash.chatIcon) throw new Error('icon failed');
+      return createElement(actual.default, props);
+    },
+  };
+});
+
 const mockStart = startAssistantConversation as jest.MockedFunction<typeof startAssistantConversation>;
 const mockHistory = getAssistantHistory as jest.MockedFunction<typeof getAssistantHistory>;
 const mockSend = sendAssistantMessage as jest.MockedFunction<typeof sendAssistantMessage>;
@@ -53,6 +78,7 @@ const chatbotUi = (
   visiblePrograms?: AssistantVisibleProgram[],
   locale = 'en-us',
   greetingTotal = sumValues(visiblePrograms),
+  children?: ReactNode,
 ) => (
   <Context.Provider value={{ locale, config: { language_options: LANGUAGE_OPTIONS } } as unknown as WrapperContext}>
     <IntlProvider locale="en" defaultLocale="en">
@@ -60,7 +86,11 @@ const chatbotUi = (
         <Routes>
           <Route
             path="/:whiteLabel/:uuid/results/benefits"
-            element={<ChatbotProvider visiblePrograms={visiblePrograms} greetingTotal={greetingTotal} />}
+            element={
+              <ChatbotProvider visiblePrograms={visiblePrograms} greetingTotal={greetingTotal}>
+                {children}
+              </ChatbotProvider>
+            }
           />
         </Routes>
       </MemoryRouter>
@@ -1362,5 +1392,47 @@ describe('concurrent rating writes (MFB-1915 review)', () => {
     await screen.findByText('hi there');
     expect(screen.getByText('start with SNAP')).toBeInTheDocument();
     expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true');
+  });
+});
+
+describe('render crash containment (MFB-2222)', () => {
+  let consoleError: jest.SpyInstance;
+
+  beforeEach(() => {
+    // React logs every caught render error; keep the expected ones out of the output.
+    consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    mockCrash.parseMarkdown = false;
+    mockCrash.chatIcon = false;
+    consoleError.mockRestore();
+  });
+
+  it('shows a reply that fails to format as its raw text, and keeps the rest of the chat', async () => {
+    mockCrash.parseMarkdown = true;
+    mockSend.mockResolvedValue({
+      user_message: { message_id: 'u1', role: 'user', text: 'hello', created_at: '' },
+      assistant_message: { message_id: 'a1', role: 'assistant', text: 'BOOM **not bolded**', created_at: '' },
+    });
+    renderChatbot();
+
+    await openAndSend();
+
+    expect(await screen.findByText('BOOM **not bolded**')).toBeInTheDocument();
+    // The other bubble and the input are untouched: one bad reply doesn't take the widget.
+    expect(screen.getByText('hello')).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    expect(mockTrack).toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'message' });
+    expect(mockTrack).not.toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'widget' });
+  });
+
+  it('hides the widget, not the results page, when the widget itself throws', () => {
+    mockCrash.chatIcon = true;
+    render(chatbotUi(undefined, undefined, undefined, <p>results page</p>));
+
+    expect(screen.getByText('results page')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /chat/i })).not.toBeInTheDocument();
+    expect(mockTrack).toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'widget' });
   });
 });

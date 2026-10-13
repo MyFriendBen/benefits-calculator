@@ -217,6 +217,10 @@ export interface ScreenerEventMap {
   screener_benbot_closed: {};
   screener_benbot_message_sent: {};
   screener_benbot_error: {};
+  // A render crash caught by ChatbotErrorBoundary (MFB-2222), not a failed send — that
+  // is `screener_benbot_error`. 'message' = one reply fell back to its raw text;
+  // 'widget' = the whole widget was hidden for the rest of the page view.
+  screener_benbot_crashed: { scope: 'widget' | 'message' };
   // Thumbs up / down on one reply (MFB-1915). 'cleared' is the user taking a rating
   // BACK, which is its own signal and must not be folded into "never rated" — that is
   // also why the column behind it records the clearing rather than just blanking.
