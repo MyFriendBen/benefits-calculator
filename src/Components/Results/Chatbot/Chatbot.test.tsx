@@ -31,7 +31,7 @@ jest.mock('../../../Assets/analytics', () => ({
 
 // Lets the crash-containment tests (MFB-2222) make one render path throw on demand.
 // Both are off by default, so every other test renders the real thing.
-const mockCrash = { parseMarkdown: false, chatIcon: false };
+const mockCrash = { parseMarkdown: false, chatIcon: false, thumbUpIcon: false };
 jest.mock('../../../utils/parseMarkdown', () => {
   const actual = jest.requireActual('../../../utils/parseMarkdown');
   return {
@@ -39,6 +39,17 @@ jest.mock('../../../utils/parseMarkdown', () => {
     parseMarkdown: (content: string, primaryColor: string) => {
       if (mockCrash.parseMarkdown && content.includes('BOOM')) throw new Error('parse failed');
       return actual.parseMarkdown(content, primaryColor);
+    },
+  };
+});
+jest.mock('@mui/icons-material/ThumbUpOffAlt', () => {
+  const actual = jest.requireActual('@mui/icons-material/ThumbUpOffAlt');
+  const { createElement } = jest.requireActual('react');
+  return {
+    __esModule: true,
+    default: (props: object) => {
+      if (mockCrash.thumbUpIcon) throw new Error('rating icon failed');
+      return createElement(actual.default, props);
     },
   };
 });
@@ -1407,6 +1418,7 @@ describe('render crash containment (MFB-2222)', () => {
   afterEach(() => {
     mockCrash.parseMarkdown = false;
     mockCrash.chatIcon = false;
+    mockCrash.thumbUpIcon = false;
     consoleError.mockRestore();
   });
 
@@ -1488,5 +1500,49 @@ describe('render crash containment (MFB-2222)', () => {
     await userEvent.keyboard('{Enter}');
 
     expect(await screen.findByText('fine', { selector: 'strong' })).toBeInTheDocument();
+  });
+
+  it('keeps a crash in the rating buttons to that one reply', async () => {
+    // The rating UI sits in the bubble's boundary too, so a throw there costs that
+    // reply its buttons, not the whole widget.
+    mockCrash.thumbUpIcon = true;
+    renderChatbot();
+
+    await openAndSend();
+
+    expect(await screen.findByText('hi there')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /this reply was helpful/i })).not.toBeInTheDocument();
+    expect(screen.getByText('hello')).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    expect(mockTrack).toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'message' });
+    expect(mockTrack).not.toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'widget' });
+  });
+
+  it('reports each crashed reply exactly once, even when two share the same text', async () => {
+    mockCrash.parseMarkdown = true;
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-prior',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [
+        { message_id: 'm1', role: 'assistant', text: 'BOOM same', created_at: '' },
+        { message_id: 'm2', role: 'assistant', text: 'BOOM same', created_at: '' },
+      ],
+    });
+    renderChatbot();
+
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    expect(await screen.findAllByText('BOOM same')).toHaveLength(2);
+    await userEvent.click(screen.getByRole('button', { name: 'Close chat' }));
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+
+    expect(screen.getAllByText('BOOM same')).toHaveLength(2);
+    const crashes = mockTrack.mock.calls.filter(([name]) => name === 'screener_benbot_crashed');
+    expect(crashes).toEqual([
+      ['screener_benbot_crashed', { scope: 'message' }],
+      ['screener_benbot_crashed', { scope: 'message' }],
+    ]);
   });
 });
