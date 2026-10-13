@@ -31,7 +31,7 @@ jest.mock('../../../Assets/analytics', () => ({
 
 // Lets the crash-containment tests (MFB-2222) make one render path throw on demand.
 // Both are off by default, so every other test renders the real thing.
-const mockCrash = { parseMarkdown: false, chatIcon: false, thumbUpIcon: false };
+const mockCrash = { parseMarkdown: false, chatIcon: false, thumbUpIcon: false, thumbDownFilledIcon: false };
 jest.mock('../../../utils/parseMarkdown', () => {
   const actual = jest.requireActual('../../../utils/parseMarkdown');
   return {
@@ -49,6 +49,19 @@ jest.mock('@mui/icons-material/ThumbUpOffAlt', () => {
     __esModule: true,
     default: (props: object) => {
       if (mockCrash.thumbUpIcon) throw new Error('rating icon failed');
+      return createElement(actual.default, props);
+    },
+  };
+});
+// The filled thumbs-down only renders once a reply is rated down, so this one throws
+// in response to a click rather than on first render.
+jest.mock('@mui/icons-material/ThumbDownAlt', () => {
+  const actual = jest.requireActual('@mui/icons-material/ThumbDownAlt');
+  const { createElement } = jest.requireActual('react');
+  return {
+    __esModule: true,
+    default: (props: object) => {
+      if (mockCrash.thumbDownFilledIcon) throw new Error('rating icon failed');
       return createElement(actual.default, props);
     },
   };
@@ -1419,6 +1432,7 @@ describe('render crash containment (MFB-2222)', () => {
     mockCrash.parseMarkdown = false;
     mockCrash.chatIcon = false;
     mockCrash.thumbUpIcon = false;
+    mockCrash.thumbDownFilledIcon = false;
     consoleError.mockRestore();
   });
 
@@ -1433,6 +1447,8 @@ describe('render crash containment (MFB-2222)', () => {
     await openAndSend();
 
     expect(await screen.findByText('BOOM **not bolded**')).toBeInTheDocument();
+    // Its rating buttons survive, so the reply that broke can still be rated down.
+    expect(screen.getByRole('button', { name: /this reply was not helpful/i })).toBeInTheDocument();
     // The other bubble and the input are untouched: one bad reply doesn't take the widget.
     expect(screen.getByText('hello')).toBeInTheDocument();
     expect(screen.getByRole('textbox')).toBeInTheDocument();
@@ -1502,23 +1518,39 @@ describe('render crash containment (MFB-2222)', () => {
     expect(await screen.findByText('fine', { selector: 'strong' })).toBeInTheDocument();
   });
 
-  it('keeps a crash in the rating buttons to that one reply', async () => {
-    // The rating UI sits in the bubble's boundary too, so a throw there costs that
-    // reply its buttons, not the whole widget.
+  it('drops only the rating buttons when they throw, and keeps the reply formatted', async () => {
     mockCrash.thumbUpIcon = true;
+    mockSend.mockResolvedValue({
+      user_message: { message_id: 'u1', role: 'user', text: 'hello', created_at: '' },
+      assistant_message: { message_id: 'a1', role: 'assistant', text: '**hi** there', created_at: '' },
+    });
     renderChatbot();
 
     await openAndSend();
 
-    expect(await screen.findByText('hi there')).toBeInTheDocument();
+    expect(await screen.findByText('hi', { selector: 'strong' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /this reply was helpful/i })).not.toBeInTheDocument();
-    expect(screen.getByText('hello')).toBeInTheDocument();
     expect(screen.getByRole('textbox')).toBeInTheDocument();
-    expect(mockTrack).toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'message' });
+    expect(mockTrack).toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'rating' });
+    expect(mockTrack).not.toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'message' });
     expect(mockTrack).not.toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'widget' });
   });
 
-  it('reports each crashed reply exactly once, even when two share the same text', async () => {
+  it('keeps keyboard focus in the chat when a crash removes the focused rating button', async () => {
+    mockCrash.thumbDownFilledIcon = true;
+    renderChatbot();
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(screen.getByRole('button', { name: /this reply was not helpful/i }));
+
+    expect(screen.queryByRole('button', { name: /this reply was not helpful/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toHaveFocus();
+  });
+
+  it('reports a text that fails to format once, even when two replies show it', async () => {
+    // Both bubbles catch in the same render, before any state update lands, so this is
+    // what the reported-parts ref is for.
     mockCrash.parseMarkdown = true;
     mockHistory.mockResolvedValue({
       conversation_id: 'conv-prior',
@@ -1539,10 +1571,8 @@ describe('render crash containment (MFB-2222)', () => {
     await userEvent.click(screen.getByRole('button', { name: /chat/i }));
 
     expect(screen.getAllByText('BOOM same')).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /this reply was not helpful/i })).toHaveLength(2);
     const crashes = mockTrack.mock.calls.filter(([name]) => name === 'screener_benbot_crashed');
-    expect(crashes).toEqual([
-      ['screener_benbot_crashed', { scope: 'message' }],
-      ['screener_benbot_crashed', { scope: 'message' }],
-    ]);
+    expect(crashes).toEqual([['screener_benbot_crashed', { scope: 'message' }]]);
   });
 });

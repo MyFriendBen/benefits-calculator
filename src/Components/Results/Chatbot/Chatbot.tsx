@@ -215,13 +215,6 @@ function PlainChatText({ text }: { text: string }) {
   return <p className="chatbot-paragraph chatbot-paragraph--plain">{text}</p>;
 }
 
-// Which bubble a caught render error belongs to (MFB-2222). Stored messages by their id.
-// An id-less bubble (the user's own echo, or a client-side error notice) has no rating
-// UI, so only its text can throw, and the text identifies it.
-function bubbleCrashKey(msg: Message): string {
-  return msg.id !== undefined ? `id:${msg.id}` : `text:${msg.text}`;
-}
-
 type ReasonChipsProps = {
   selected: AssistantRatingReason | null;
   onPick: (reason: AssistantRatingReason | null) => void;
@@ -409,19 +402,40 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
   // `widgetCrashed`: the boundary only hides the markup. This also stops the logic
   // behind it, so a widget nobody can see doesn't auto-open, report an open, or fetch.
   const [widgetCrashed, setWidgetCrashed] = useState(false);
-  // Bubbles that already crashed, by `bubbleCrashKey`. A known-bad one goes straight to
-  // PlainChatText rather than being re-thrown (and re-reported) every time the panel
-  // remounts, and since the next render no longer mounts a boundary for it, each bubble
-  // is reported once.
-  const [crashedBubbles, setCrashedBubbles] = useState<ReadonlySet<string>>(() => new Set());
+  // Parts of the transcript that already crashed, so they render without the failing
+  // piece from then on instead of re-throwing every time the panel remounts. Two kinds,
+  // each with its own boundary so one failing doesn't take the other with it:
+  //   `text:<text>` — the text failed to format. Formatting depends on nothing but the
+  //                   text, so every bubble showing it falls back to PlainChatText.
+  //   `rating:<id>` — that reply's rating UI threw. Its text still renders formatted.
+  // The state drives rendering; the ref is what makes each one reported exactly once,
+  // since two boundaries can catch in the same commit, before any state update lands.
+  const [crashedParts, setCrashedParts] = useState<ReadonlySet<string>>(() => new Set());
+  const reportedPartsRef = useRef(new Set<string>());
+  // Last element focused inside the transcript. If a crash removes it (a rating button
+  // the user was on), focus would otherwise drop to <body> and out of the chat.
+  const lastTranscriptFocusRef = useRef<HTMLElement | null>(null);
   const handleWidgetCrash = useCallback(() => {
     setWidgetCrashed(true);
     track('screener_benbot_crashed', { scope: 'widget' });
   }, [track]);
-  const handleBubbleCrash = useCallback(
-    (crashKey: string) => {
-      setCrashedBubbles((prev) => new Set(prev).add(crashKey));
-      track('screener_benbot_crashed', { scope: 'message' });
+  const handlePartCrash = useCallback(
+    (part: string, scope: 'message' | 'rating') => {
+      // Runs in the commit phase, after the failing subtree was swapped for its fallback.
+      // Only restore focus that the crash itself took: the element is gone and nothing
+      // else has focus. Never steal it otherwise (e.g. a crash during auto-open).
+      const lastFocus = lastTranscriptFocusRef.current;
+      if (
+        lastFocus &&
+        !lastFocus.isConnected &&
+        (!document.activeElement || document.activeElement === document.body)
+      ) {
+        inputRef.current?.focus();
+      }
+      if (reportedPartsRef.current.has(part)) return;
+      reportedPartsRef.current.add(part);
+      setCrashedParts(new Set(reportedPartsRef.current));
+      track('screener_benbot_crashed', { scope });
     },
     [track],
   );
@@ -917,7 +931,12 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
                 />
               </div>
             )}
-            <div className="chatbot-messages">
+            <div
+              className="chatbot-messages"
+              onFocus={(e) => {
+                lastTranscriptFocusRef.current = e.target;
+              }}
+            >
               {
                 // The greeting is a real bot bubble, not a banner, so the conversation
                 // opens the way it continues — and it STAYS, which is the whole point of
@@ -977,49 +996,50 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
               }
               {messages.map((msg, i) => (
                 <div key={msg.id ?? i} className={`chatbot-message chatbot-message-${msg.role}`}>
-                  {/* One bad bubble falls back to its raw text, without rating buttons,
-                      instead of taking the whole widget down with it. The boundary covers
-                      the rating UI too, since a throw there is just as local. */}
-                  {crashedBubbles.has(bubbleCrashKey(msg)) ? (
+                  {/* Text and rating UI each have their own boundary (MFB-2222). Text
+                      that fails to format falls back to its raw text and keeps its rating
+                      buttons, so the reply that broke can still be rated down; a rating UI
+                      that throws is dropped, and the text stays formatted. */}
+                  {crashedParts.has(`text:${msg.text}`) ? (
                     <PlainChatText text={msg.text} />
                   ) : (
                     <ChatbotErrorBoundary
                       fallback={<PlainChatText text={msg.text} />}
-                      onError={() => handleBubbleCrash(bubbleCrashKey(msg))}
+                      onError={() => handlePartCrash(`text:${msg.text}`, 'message')}
                     >
                       <FormattedChatText text={msg.text} />
-                      {/* Stored assistant replies only. `msg.id` is the gate rather than a
-                          separate flag: a bubble without one is either the user's own message
-                          echoed optimistically before its round trip, or a client-side error
-                          notice — nothing the server has a row for, and nothing it would make
-                          sense to rate. The greeting never reaches this list at all. */}
-                      {msg.role === 'bot' && msg.id !== undefined && (
-                        <>
-                          <MessageRating
-                            rating={msg.rating ?? null}
-                            onRate={(next) => rateMessage(msg.id as string, next)}
-                            groupLabel={rateReplyLabel}
-                            upLabel={thumbUpLabel}
-                            downLabel={thumbDownLabel}
-                          />
-                          {/* Only under a reply that is currently rated down. Never on a
-                              thumbs-up: positive reasons are far less diagnostic, and a
-                              second step on the cheap positive action suppresses the volume
-                              that makes the positive signal worth having. */}
-                          {(msg.rating === 1 || msg.rating === -1) && (
-                            <p className="chatbot-rating-note" id={`chatbot-rating-note-${msg.id}`}>
-                              {msg.rating === 1 ? thanksUpLabel : thanksDownLabel}
-                            </p>
-                          )}
-                          {msg.rating === -1 && (
-                            <ReasonChips
-                              selected={msg.reason ?? null}
-                              onPick={(reason) => setRatingReason(msg.id as string, reason)}
-                              labels={reasonLabels}
-                              labelledBy={`chatbot-rating-note-${msg.id}`}
-                            />
-                          )}
-                        </>
+                    </ChatbotErrorBoundary>
+                  )}
+                  {/* Stored assistant replies only. `msg.id` is the gate rather than a
+                      separate flag: a bubble without one is either the user's own message
+                      echoed optimistically before its round trip, or a client-side error
+                      notice — nothing the server has a row for, and nothing it would make
+                      sense to rate. The greeting never reaches this list at all. */}
+                  {msg.role === 'bot' && msg.id !== undefined && !crashedParts.has(`rating:${msg.id}`) && (
+                    <ChatbotErrorBoundary fallback={null} onError={() => handlePartCrash(`rating:${msg.id}`, 'rating')}>
+                      <MessageRating
+                        rating={msg.rating ?? null}
+                        onRate={(next) => rateMessage(msg.id as string, next)}
+                        groupLabel={rateReplyLabel}
+                        upLabel={thumbUpLabel}
+                        downLabel={thumbDownLabel}
+                      />
+                      {/* Only under a reply that is currently rated down. Never on a
+                          thumbs-up: positive reasons are far less diagnostic, and a
+                          second step on the cheap positive action suppresses the volume
+                          that makes the positive signal worth having. */}
+                      {(msg.rating === 1 || msg.rating === -1) && (
+                        <p className="chatbot-rating-note" id={`chatbot-rating-note-${msg.id}`}>
+                          {msg.rating === 1 ? thanksUpLabel : thanksDownLabel}
+                        </p>
+                      )}
+                      {msg.rating === -1 && (
+                        <ReasonChips
+                          selected={msg.reason ?? null}
+                          onPick={(reason) => setRatingReason(msg.id as string, reason)}
+                          labels={reasonLabels}
+                          labelledBy={`chatbot-rating-note-${msg.id}`}
+                        />
                       )}
                     </ChatbotErrorBoundary>
                   )}
