@@ -35,6 +35,7 @@ const mockCrash = { parseMarkdown: false, chatIcon: false };
 jest.mock('../../../utils/parseMarkdown', () => {
   const actual = jest.requireActual('../../../utils/parseMarkdown');
   return {
+    ...actual,
     parseMarkdown: (content: string, primaryColor: string) => {
       if (mockCrash.parseMarkdown && content.includes('BOOM')) throw new Error('parse failed');
       return actual.parseMarkdown(content, primaryColor);
