@@ -5,10 +5,10 @@ import PagedDocumentViewer from './PagedDocumentViewer';
 const PAGE_IMAGES = ['/docs/page-1.png', '/docs/page-2.png'];
 const PDF_URL = '/docs/guide.pdf';
 
-function renderViewer() {
+function renderViewer(props: Partial<React.ComponentProps<typeof PagedDocumentViewer>> = {}) {
   return render(
     <IntlProvider locale="en" messages={{}}>
-      <PagedDocumentViewer pageImages={PAGE_IMAGES} pdfUrl={PDF_URL} title="Test guide" />
+      <PagedDocumentViewer pageImages={PAGE_IMAGES} pdfUrl={PDF_URL} title="Test guide" {...props} />
     </IntlProvider>,
   );
 }
@@ -122,6 +122,38 @@ describe('PagedDocumentViewer', () => {
     expect(screen.getByText('1/2')).toBeInTheDocument();
   });
 
+  it('clamps to the last page when the document swaps for one with fewer pages', () => {
+    const { rerender } = renderViewer();
+    fireEvent.click(screen.getByRole('button', { name: /next page/i }));
+    expect(screen.getByText('2/2')).toBeInTheDocument();
+
+    // e.g. the user changes language and the new edition is one page shorter.
+    const shorter = ['/docs/es/page-1.png'];
+    rerender(
+      <IntlProvider locale="en" messages={{}}>
+        <PagedDocumentViewer pageImages={shorter} pdfUrl={PDF_URL} title="Test guide" />
+      </IntlProvider>,
+    );
+
+    expect(screen.getByText('1/1')).toBeInTheDocument();
+    expect(screen.getByRole('img')).toHaveAttribute('src', shorter[0]);
+  });
+
+  it('keeps the current page when the document swaps for one with the same page count', () => {
+    const { rerender } = renderViewer();
+    fireEvent.click(screen.getByRole('button', { name: /next page/i }));
+
+    const sameLength = ['/docs/es/page-1.png', '/docs/es/page-2.png'];
+    rerender(
+      <IntlProvider locale="en" messages={{}}>
+        <PagedDocumentViewer pageImages={sameLength} pdfUrl={PDF_URL} title="Test guide" />
+      </IntlProvider>,
+    );
+
+    expect(screen.getByText('2/2')).toBeInTheDocument();
+    expect(screen.getByRole('img')).toHaveAttribute('src', sameLength[1]);
+  });
+
   it('renders nothing when there are no page images', () => {
     const { container } = render(
       <IntlProvider locale="en" messages={{}}>
@@ -131,5 +163,34 @@ describe('PagedDocumentViewer', () => {
     // Guard prevents a "1/0" pager and an <img> with an undefined src.
     expect(container).toBeEmptyDOMElement();
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+
+  describe('onPageView', () => {
+    it('reports page 1 once on mount', () => {
+      const onPageView = jest.fn();
+      renderViewer({ onPageView });
+      expect(onPageView).toHaveBeenCalledTimes(1);
+      expect(onPageView).toHaveBeenCalledWith(1);
+    });
+
+    it('fires exactly one page-view per Next/Previous turn', () => {
+      const onPageView = jest.fn();
+      renderViewer({ onPageView });
+      onPageView.mockClear();
+
+      fireEvent.click(screen.getByRole('button', { name: /next page/i }));
+      expect(onPageView).toHaveBeenCalledTimes(1);
+      expect(onPageView).toHaveBeenCalledWith(2);
+
+      fireEvent.click(screen.getByRole('button', { name: /previous page/i }));
+      expect(onPageView).toHaveBeenCalledTimes(2);
+      expect(onPageView).toHaveBeenLastCalledWith(1);
+    });
+
+    it('does not report a page view for an empty document', () => {
+      const onPageView = jest.fn();
+      renderViewer({ pageImages: [], onPageView });
+      expect(onPageView).not.toHaveBeenCalled();
+    });
   });
 });

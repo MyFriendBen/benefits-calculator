@@ -16,7 +16,6 @@ const EMPTY_REFERRAL_OPTIONS: ReferralOptions = { generic: {}, partners: {} };
 
 const initialFormData: FormData = {
   isTest: false,
-  frozen: false,
   externalID: undefined,
   agreeToTermsOfService: false,
   is13OrOlder: false,
@@ -65,7 +64,7 @@ export const Context = React.createContext<WrapperContext>({} as WrapperContext)
 
 // Extract white label from URL pathname (e.g., /co/uuid/step-1 -> 'co')
 // Validates against the list of known white labels for security
-function getWhiteLabelFromUrl(): string {
+export function getWhiteLabelFromUrl(): string {
   const pathname = window.location.pathname;
   const parts = pathname.split('/').filter(Boolean);
 
@@ -78,6 +77,17 @@ function getWhiteLabelFromUrl(): string {
   }
 
   return DEFAULT_WHITE_LABEL;
+}
+
+// The screening uuid is the second path segment on /:whiteLabel/:uuid/... routes.
+// Used as a fallback for analytics context when a component's useParams() doesn't
+// resolve it (some results-tree components render where the match lacks it).
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+export function getUuidFromUrl(): string | undefined {
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  const candidate = parts[1];
+  return candidate && UUID_REGEX.test(candidate) ? candidate : undefined;
 }
 
 const Wrapper = (props: PropsWithChildren<{}>) => {

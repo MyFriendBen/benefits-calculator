@@ -3,15 +3,17 @@ import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 import HeatPumpJourneyCards from './HeatPumpJourneyCards';
 import { useResultsLink } from '../../../Results/Results';
-import dataLayerPush from '../../../../Assets/analytics';
+import dataLayerPush, { useTrackEvent } from '../../../../Assets/analytics';
 
 jest.mock('../../../Results/Results', () => ({
   useResultsLink: jest.fn(),
 }));
 
+const mockTrack = jest.fn();
 jest.mock('../../../../Assets/analytics', () => ({
   __esModule: true,
   default: jest.fn(),
+  useTrackEvent: () => mockTrack,
 }));
 
 const mockUseResultsLink = useResultsLink as jest.MockedFunction<typeof useResultsLink>;
@@ -78,15 +80,31 @@ describe('HeatPumpJourneyCards', () => {
 
       fireEvent.click(screen.getByRole('link', { name: /learn more/i }));
 
-      expect(mockDataLayerPush).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: 'outbound_click',
-          action: 'heat_pump_journey_learn_more_click',
-          category: 'heat_pump_journey',
-          label: 'Power Ahead Colorado - Why Heat Pumps',
-          url: 'https://poweraheadcolorado.org/why-heat-pumps?utm_source=cesn',
-        }),
-      );
+      // Emitted via useTrackEvent (not the legacy outbound path) so it carries
+      // screener_uid downstream.
+      expect(mockTrack).toHaveBeenCalledWith('heat_pump_journey_learn_more_click', {
+        url: 'https://poweraheadcolorado.org/why-heat-pumps?utm_source=cesn',
+      });
+    });
+  });
+
+  describe('analytics', () => {
+    it('fires a section_view for each card on mount (the CTA-click denominators)', () => {
+      renderCards();
+
+      expect(mockTrack).toHaveBeenCalledWith('heat_pump_section_view', { section: 'why_heat_pump' });
+      expect(mockTrack).toHaveBeenCalledWith('heat_pump_section_view', { section: 'bills_impact' });
+      expect(mockTrack).toHaveBeenCalledWith('heat_pump_section_view', { section: 'find_contractor_card' });
+    });
+
+    it('fires heat_pump_cta_click with the matching cta when a CTA is clicked', () => {
+      renderCards();
+
+      fireEvent.click(screen.getByRole('link', { name: /calculate impact/i }));
+      expect(mockTrack).toHaveBeenCalledWith('heat_pump_cta_click', { cta: 'calculate_impact' });
+
+      fireEvent.click(screen.getByRole('link', { name: /connect now/i }));
+      expect(mockTrack).toHaveBeenCalledWith('heat_pump_cta_click', { cta: 'connect_now' });
     });
   });
 });

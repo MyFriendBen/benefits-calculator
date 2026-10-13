@@ -62,22 +62,13 @@ describe('CALCULATE_IMPACT_UPGRADE_MAP', () => {
     expect(CALCULATE_IMPACT_UPGRADE_MAP.heat_pump).toBe('hvac__heat_pump_seer24_hspf13');
   });
 
-  it('maps weatherization to the correct REM upgrade', () => {
-    expect(CALCULATE_IMPACT_UPGRADE_MAP.weatherization).toBe('weatherization__insulation_air_duct_sealing');
-  });
-
-  it('maps heat_pump_weatherization to the correct REM upgrade', () => {
-    expect(CALCULATE_IMPACT_UPGRADE_MAP.heat_pump_weatherization).toBe(
-      'combination__hvac_seer18_hspf10__weatherization',
-    );
-  });
-
   it('maps heat_pump_water_heater to the correct REM upgrade', () => {
     expect(CALCULATE_IMPACT_UPGRADE_MAP.heat_pump_water_heater).toBe('water_heater__heat_pump_uef3.35');
   });
 
-  it('contains exactly 4 upgrade choices', () => {
-    expect(Object.keys(CALCULATE_IMPACT_UPGRADE_MAP)).toHaveLength(4);
+  it('contains exactly the two non-weatherization upgrade choices', () => {
+    // Weatherization-based choices are intentionally excluded per CESN SME guidance.
+    expect(Object.keys(CALCULATE_IMPACT_UPGRADE_MAP)).toEqual(['heat_pump', 'heat_pump_water_heater']);
   });
 });
 
@@ -132,12 +123,7 @@ describe('buildCalculateImpactPayload', () => {
   });
 
   it('maps each upgrade choice correctly', () => {
-    const choices: CalculateImpactUpgradeChoice[] = [
-      'heat_pump',
-      'weatherization',
-      'heat_pump_weatherization',
-      'heat_pump_water_heater',
-    ];
+    const choices: CalculateImpactUpgradeChoice[] = ['heat_pump', 'heat_pump_water_heater'];
 
     choices.forEach((choice) => {
       const payload = buildCalculateImpactPayload({ ...baseInput, upgradeChoice: choice });

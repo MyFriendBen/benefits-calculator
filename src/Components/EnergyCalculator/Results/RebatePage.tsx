@@ -3,15 +3,15 @@ import { FormattedMessage } from 'react-intl';
 import BackAndSaveButtons from '../../Results/BackAndSaveButtons/BackAndSaveButtons';
 import { useResultsLink } from '../../Results/Results';
 import { EnergyCalculatorRebateCardTitle, rebateTypes } from './RebatePageMappings';
-import { ReactComponent as WarningIcon } from '../../../Assets/icons/General/warning.svg';
-import { ReactComponent as Coin } from '../Icons/Coin.svg';
+import { Icon } from '../../Icon/Icon';
 import { renderCategoryDescription } from './rebateTypes';
 import './RebatePage.css';
-import { useMemo, useContext } from 'react';
+import { useMemo, useContext, useEffect } from 'react';
 import { TrackedOutboundLink } from '../../Common/TrackedOutboundLink';
 import { Context } from '../../Wrapper/Wrapper';
 import { HeatPumpJourneyCards } from './HeatPumpJourney';
 import { useFeatureFlag } from '../../Config/configHook';
+import { useTrackEvent } from '../../../Assets/analytics';
 
 // Format expiration date from ISO string to readable format
 const formatExpirationDate = (dateString: string): string => {
@@ -42,7 +42,17 @@ type RebatePageProps = {
 export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePageProps) {
   const backLink = useResultsLink(`results/benefits`);
   const { formData } = useContext(Context);
+  const track = useTrackEvent();
   const showHeatPumpJourney = useFeatureFlag('cesn_heat_pump_journey') && rebateCategory.type === 'hvac';
+
+  // Denominator for the "Learn how to apply" rebate_link_click, fired when the
+  // heat-pump rebates page is shown (the only context that carries the journey).
+  useEffect(() => {
+    if (showHeatPumpJourney) {
+      track('heat_pump_section_view', { section: 'rebates' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showHeatPumpJourney]);
 
   return (
     <main className="benefits-form">
@@ -54,7 +64,7 @@ export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePag
       </section>
       <div className="energy-calculator-rebate-page-container">
         <h1>
-          <Coin />
+          <Icon name="circle-dollar-sign" />
           <span>{rebateCategory.name}</span>
         </h1>
         {renderCategoryDescription(rebateCategory.type, formData)}
@@ -62,7 +72,7 @@ export default function EnergyCalculatorRebatePage({ rebateCategory }: RebatePag
           <>
             <HeatPumpJourneyCards />
             <h2 className="energy-calculator-rebate-page-rebates-heading">
-              <Coin />
+              <Icon name="circle-dollar-sign" />
               <span>
                 <FormattedMessage id="energyCalculator.rebatePage.rebatesHeading" defaultMessage="Rebates" />
               </span>
@@ -89,6 +99,10 @@ type RebateProps = {
 };
 
 function RebateCard({ rebate, rebateCategory }: RebateProps) {
+  const track = useTrackEvent();
+  // Matches EnergyCalculatorRebatePage's showHeatPumpJourney: the heat-pump event
+  // is only in-journey when the flag is on AND this is the HVAC category.
+  const inHeatPumpJourney = useFeatureFlag('cesn_heat_pump_journey') && rebateCategory.type === 'hvac';
   const rebateUrl = useMemo(() => {
     const url = new URL(rebate.program_url);
 
@@ -115,7 +129,12 @@ function RebateCard({ rebate, rebateCategory }: RebateProps) {
           })}
           {rebate.end_date && (
             <div className="energy-calculator-expiration-badge">
-              <WarningIcon className="energy-calculator-expiration-icon" role="img" aria-label="Warning expiration end date"/>
+              <Icon
+                name="triangle-alert"
+                className="energy-calculator-expiration-icon"
+                role="img"
+                aria-label="Warning expiration end date"
+              />
               <FormattedMessage
                 id="energyCalculator.rebatePage.expiration.ending"
                 defaultMessage="Ending on {date}"
@@ -138,18 +157,39 @@ function RebateCard({ rebate, rebateCategory }: RebateProps) {
         Remains in code as CDS wanted the option to reintroduce it easily
       */}
       <div className="energy-calculator-rebate-page-more-info">
-        <TrackedOutboundLink
-          href={rebateUrl}
-          action="rebate_link_click"
-          label={rebate.program}
-          category="energy_rebate"
-          additionalData={{
-            rebate_type: rebate.payment_methods.join(', '),
-            rebate_category: rebateCategory.type,
-          }}
-        >
-          <FormattedMessage id="energyCalculator.rebatePage.applyButton" defaultMessage="Learn how to apply" />
-        </TrackedOutboundLink>
+        {inHeatPumpJourney ? (
+          // Heat-pump journey: emit through useTrackEvent so the click carries
+          // screener_uid (the join key Stories 6/7 need), unlike the general
+          // outbound-link path used for other rebate categories below.
+          <a
+            href={rebateUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() =>
+              track('heat_pump_rebate_link_click', {
+                program: rebate.program,
+                rebate_type: rebate.payment_methods.join(', '),
+                rebate_category: rebateCategory.type,
+                url: rebateUrl,
+              })
+            }
+          >
+            <FormattedMessage id="energyCalculator.rebatePage.applyButton" defaultMessage="Learn how to apply" />
+          </a>
+        ) : (
+          <TrackedOutboundLink
+            href={rebateUrl}
+            action="rebate_link_click"
+            label={rebate.program}
+            category="energy_rebate"
+            additionalData={{
+              rebate_type: rebate.payment_methods.join(', '),
+              rebate_category: rebateCategory.type,
+            }}
+          >
+            <FormattedMessage id="energyCalculator.rebatePage.applyButton" defaultMessage="Learn how to apply" />
+          </TrackedOutboundLink>
+        )}
       </div>
     </div>
   );

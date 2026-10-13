@@ -97,4 +97,16 @@ describe('useStepDirectory', () => {
     const { result: partnerResult } = renderHook(() => useStepDirectory(), { wrapper: partnerWrapper });
     expect(partnerResult.current).not.toContain('referralSource');
   });
+
+  it('skips referralSource when immutableReferrer is a hidden (not in dropdown) referrer', () => {
+    const { result } = renderHook(() => useStepDirectory(), {
+      wrapper: makeWrapper({
+        formData: { immutableReferrer: '211chicago' } as any,
+        referralOptions: { generic: {}, partners: {}, hidden: { '211chicago': '211 Metro Chicago' } },
+        referralOptionsLoading: false,
+      }),
+    });
+
+    expect(result.current).not.toContain('referralSource');
+  });
 });

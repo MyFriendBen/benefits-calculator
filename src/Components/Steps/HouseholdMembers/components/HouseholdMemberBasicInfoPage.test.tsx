@@ -29,6 +29,7 @@ jest.mock('../hooks/useHouseholdMembersNavigation', () => ({
 
 jest.mock('../../../../Assets/stepDirectory', () => ({
   useStepNumber: () => 5,
+  useStepName: (_stepNumber: number) => undefined,
 }));
 
 jest.mock('../../../Config/configHook', () => ({
@@ -50,11 +51,6 @@ jest.mock('../sections/BasicInfoFields', () => ({
   default: ({ namePrefix, isFirstMember }: { namePrefix: string; isFirstMember: boolean }) => (
     <div data-testid={`basic-info-fields-${namePrefix}`} data-is-first={String(isFirstMember)} />
   ),
-}));
-
-// Mock SVG icon
-jest.mock('../../../../Assets/icons/General/head.svg', () => ({
-  ReactComponent: () => <svg data-testid="person-icon" />,
 }));
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

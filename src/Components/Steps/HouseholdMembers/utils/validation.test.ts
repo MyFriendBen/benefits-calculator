@@ -2,7 +2,6 @@ import {
   hasAtLeastOneTrue,
   validateNoneExclusive,
   validateHourlyIncome,
-  validateIncomeAmount,
   ONE_OR_MORE_DIGITS_BUT_NOT_ALL_ZERO,
   INCOME_AMOUNT_REGEX,
 } from './validation';
@@ -102,48 +101,9 @@ describe('validateHourlyIncome', () => {
   });
 });
 
-describe('validateIncomeAmount', () => {
-  it('returns true for valid positive integers', () => {
-    expect(validateIncomeAmount('100')).toBe(true);
-    expect(validateIncomeAmount('1')).toBe(true);
-    expect(validateIncomeAmount('9999999')).toBe(true);
-  });
-
-  it('returns true for valid decimal amounts', () => {
-    expect(validateIncomeAmount('100.5')).toBe(true);
-    expect(validateIncomeAmount('100.50')).toBe(true);
-  });
-
-  it('returns false for zero', () => {
-    expect(validateIncomeAmount('0')).toBe(false);
-  });
-
-  it('returns false for empty string', () => {
-    expect(validateIncomeAmount('')).toBe(false);
-  });
-
-  it('returns false for negative values', () => {
-    expect(validateIncomeAmount('-100')).toBe(false);
-  });
-
-  it('returns false for non-numeric strings', () => {
-    expect(validateIncomeAmount('abc')).toBe(false);
-    expect(validateIncomeAmount('$100')).toBe(false);
-  });
-
-  it('returns false for numbers exceeding max length', () => {
-    // 8+ digits before decimal not allowed
-    expect(validateIncomeAmount('12345678')).toBe(false);
-  });
-
-  it('returns false for more than 2 decimal places', () => {
-    expect(validateIncomeAmount('10.123')).toBe(false);
-  });
-
-  it('returns false for string with spaces', () => {
-    expect(validateIncomeAmount('10 0')).toBe(false);
-  });
-});
+// The income-amount distinct-code behavior (required / invalid_format /
+// must_be_positive) is tested against the real production schema in schema.test.ts,
+// not duplicated here.
 
 describe('ONE_OR_MORE_DIGITS_BUT_NOT_ALL_ZERO regex', () => {
   it('matches positive integers', () => {

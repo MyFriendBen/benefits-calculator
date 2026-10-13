@@ -41,11 +41,17 @@ jest.mock('../../QuestionComponents/questionHooks', () => ({
   useGoToNextStep: () => jest.fn(),
 }));
 
+// useStepForm calls useStepNumber (for the screener_form_error analytics event);
+// stub stepDirectory so it doesn't need real Wrapper Context (getReferrer).
+jest.mock('../../../Assets/stepDirectory', () => ({
+  useStepNumber: (_name: string, _required?: boolean) => 5,
+  useStepName: (_stepNumber: number) => undefined,
+}));
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const baseFormData: FormData = {
   isTest: false,
-  frozen: false,
   externalID: undefined,
   agreeToTermsOfService: false,
   is13OrOlder: false,
@@ -104,14 +110,14 @@ function renderExpenses(formDataOverrides: Partial<FormData> = {}) {
 }
 
 /** Returns the .expense-row div containing a specific expense label. */
-function getExpenseRow(labelText: string | RegExp) {
-  return screen.getByText(labelText, { selector: 'label' }).closest('.expense-row')!;
+function getExpenseRow(labelText: string | RegExp): HTMLInputElement {
+  return screen.getByText(labelText, { selector: 'label' }).closest('.expense-row')! as HTMLInputElement;
 }
 
 /** Returns the amount input for a given expense row. */
 function getAmountInput(labelText: string | RegExp): HTMLInputElement {
   const row = getExpenseRow(labelText);
-  return within(row).getByRole('textbox') as HTMLInputElement;
+  return within(row).getByRole('textbox');
 }
 
 /** Returns the frequency radiogroup within a given expense row. */

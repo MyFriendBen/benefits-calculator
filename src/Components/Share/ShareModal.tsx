@@ -1,14 +1,17 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import IosShareIcon from '@mui/icons-material/IosShare';
 import EmailIcon from '@mui/icons-material/Email';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import SmsIcon from '@mui/icons-material/Sms';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { FormattedMessage, useIntl } from 'react-intl';
+import LanguageSelect, { useSupportedLocale } from '../LanguageSelect/LanguageSelect';
 import ModalShell from '../Results/shared/ModalShell';
 import ModalOption from '../Results/shared/ModalOption';
 import CopyLinkOption from '../Results/shared/CopyLinkOption';
 import SuccessView from '../Results/shared/SuccessView';
+import { useTrackEvent } from '../../Assets/analytics';
+import { useShareMessages } from './useShareMessages';
 import '../Results/shared/ModalShell.css';
 import './ShareModal.css';
 
@@ -37,39 +40,52 @@ function buildMailtoUrl(subject: string, body: string) {
   return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-type ShareView = 'options' | 'email' | 'success';
+type ShareView = 'language' | 'options' | 'email' | 'success';
 
 type ShareModalProps = {
   open: boolean;
   onClose: () => void;
+  shareLocation: 'results_popup' | 'footer';
 };
 
-const ShareModal = ({ open, onClose }: ShareModalProps) => {
-  const { formatMessage } = useIntl();
-  const [view, setView] = useState<ShareView>('options');
+const ShareModal = ({ open, onClose, shareLocation }: ShareModalProps) => {
+  const intl = useIntl();
+  // Sanitized rather than raw `intl.locale`, which can be a stale code that is
+  // not offered by this white label — see useSupportedLocale.
+  const senderLanguage = useSupportedLocale();
+  const [view, setView] = useState<ShareView>('language');
+  // The recipient's language, which defaults to the sender's but is deliberately
+  // kept separate from it: choosing one here must not re-language the sender's UI.
+  const [shareLanguage, setShareLanguage] = useState(senderLanguage);
+  const { subject: shareSubject, buildBody, loading: messagesLoading } = useShareMessages(shareLanguage);
+  const track = useTrackEvent();
 
   const handleClose = useCallback(() => {
+    track('screener_share', { share_location: shareLocation, share_action: 'close' });
     onClose();
-    setView('options');
-  }, [onClose]);
+    setView('language');
+    // Reset to the sender's current language: a stale pick from the last share
+    // must not silently carry into the next one.
+    setShareLanguage(senderLanguage);
+  }, [onClose, track, shareLocation, senderLanguage]);
 
-  const shareSubject = formatMessage({
-    id: 'sharePopup.emailSubject',
-    defaultMessage: 'Check out MyFriendBen',
-  });
-  const buildShareBody = (url: string) =>
-    formatMessage(
-      {
-        id: 'sharePopup.shareBody',
-        defaultMessage:
-          "Hey, wanted to share MyFriendBen. It's a free screener that takes about 6 minutes and shows you what benefits you're eligible for - things like tax credits, help with utility bills, and food assistance. And it doesn't ask for your name or any contact information. {url}",
-      },
-      { url },
-    );
+  const handleBack = useCallback(() => {
+    track('screener_share', { share_location: shareLocation, share_action: 'back' });
+    setView((current) => (current === 'email' ? 'options' : 'language'));
+  }, [track, shareLocation]);
 
-  const emailBody = buildShareBody(SHARE_URL_EMAIL);
-  const smsBody = buildShareBody(SHARE_URL_SMS);
-  const whatsappBody = buildShareBody(SHARE_URL_WHATSAPP);
+  useEffect(() => {
+    if (open) {
+      track('screener_share', { share_location: shareLocation, share_action: 'open' });
+    }
+    // Fire once per modal open — intentionally excludes `track`/`shareLocation` so
+    // re-renders while open don't re-fire the impression.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const emailBody = buildBody(SHARE_URL_EMAIL);
+  const smsBody = buildBody(SHARE_URL_SMS);
+  const whatsappBody = buildBody(SHARE_URL_WHATSAPP);
 
   const emailProviders = useMemo(
     () => [
@@ -101,7 +117,7 @@ const ShareModal = ({ open, onClose }: ShareModalProps) => {
         ),
       },
       {
-        name: formatMessage({ id: 'sharePopup.appleMail', defaultMessage: 'Apple Mail' }),
+        name: intl.formatMessage({ id: 'sharePopup.appleMail', defaultMessage: 'Apple Mail' }),
         url: buildMailtoUrl(shareSubject, emailBody),
         icon: (
           <span className="modal-option-provider-icon" aria-hidden="true">
@@ -112,7 +128,7 @@ const ShareModal = ({ open, onClose }: ShareModalProps) => {
         ),
       },
       {
-        name: formatMessage({ id: 'sharePopup.otherEmail', defaultMessage: 'Other' }),
+        name: intl.formatMessage({ id: 'sharePopup.otherEmail', defaultMessage: 'Other' }),
         url: buildMailtoUrl(shareSubject, emailBody),
         icon: (
           <span className="modal-option-provider-icon" aria-hidden="true">
@@ -121,10 +137,57 @@ const ShareModal = ({ open, onClose }: ShareModalProps) => {
         ),
       },
     ],
-    [shareSubject, emailBody],
+    [shareSubject, emailBody, intl],
   );
 
   if (!open) return null;
+
+  if (view === 'language') {
+    return (
+      <ModalShell
+        headerIcon={<IosShareIcon />}
+        title={<FormattedMessage id="sharePopup.title" defaultMessage="Share MyFriendBen" />}
+        subtitle={
+          <FormattedMessage id="sharePopup.languageSubtitle" defaultMessage="What language should we send it in?" />
+        }
+        onClose={handleClose}
+      >
+        <div className="share-modal-language-step">
+          <LanguageSelect
+            id="share-language-select"
+            variant="outlined"
+            value={shareLanguage}
+            onChange={(languageCode) => setShareLanguage(languageCode)}
+            label={<FormattedMessage id="sharePopup.languageLabel" defaultMessage="Language" />}
+            formControlSx={{ width: '100%' }}
+          />
+          <div className="share-modal-language-actions">
+            <button
+              type="button"
+              className="modal-primary-btn"
+              // The channel options build `sms:`/`mailto:` links as real anchors, so
+              // the translated copy has to be in hand before they can be clicked.
+              disabled={messagesLoading}
+              onClick={() => {
+                track('screener_share', {
+                  share_location: shareLocation,
+                  share_language: shareLanguage,
+                  share_action: 'language_selected',
+                });
+                setView('options');
+              }}
+            >
+              {messagesLoading ? (
+                <FormattedMessage id="sharePopup.languageLoading" defaultMessage="Loading..." />
+              ) : (
+                <FormattedMessage id="sharePopup.languageContinue" defaultMessage="Continue" />
+              )}
+            </button>
+          </div>
+        </div>
+      </ModalShell>
+    );
+  }
 
   if (view === 'success') {
     return (
@@ -142,9 +205,14 @@ const ShareModal = ({ open, onClose }: ShareModalProps) => {
       <ModalShell
         headerIcon={<IosShareIcon />}
         title={<FormattedMessage id="sharePopup.emailProviderTitle" defaultMessage="Choose email provider" />}
-        subtitle={<FormattedMessage id="sharePopup.emailProviderSubtitle" defaultMessage="Select your preferred email service" />}
+        subtitle={
+          <FormattedMessage
+            id="sharePopup.emailProviderSubtitle"
+            defaultMessage="Select your preferred email service"
+          />
+        }
         onClose={handleClose}
-        onBack={() => setView('options')}
+        onBack={handleBack}
       >
         <div className="modal-options-list">
           {emailProviders.map((provider) => (
@@ -153,7 +221,18 @@ const ShareModal = ({ open, onClose }: ShareModalProps) => {
               icon={provider.icon}
               label={provider.name}
               href={provider.url}
-              onClick={() => setView('success')}
+              onClick={() => {
+                // Include share_channel: 'email' so all email sends group
+                // together without inferring from provider name.
+                track('screener_share', {
+                  share_location: shareLocation,
+                  share_channel: 'email',
+                  share_provider: provider.name,
+                  share_language: shareLanguage,
+                  share_action: 'send',
+                });
+                setView('success');
+              }}
             />
           ))}
         </div>
@@ -167,31 +246,68 @@ const ShareModal = ({ open, onClose }: ShareModalProps) => {
       title={<FormattedMessage id="sharePopup.title" defaultMessage="Share MyFriendBen" />}
       subtitle={<FormattedMessage id="sharePopup.subtitle" defaultMessage="Help a friend discover benefits" />}
       onClose={handleClose}
+      onBack={handleBack}
     >
       <div className="modal-options-list">
         {isMobile() && (
           <>
             <ModalOption
-              icon={<span className="modal-option-icon-circle"><SmsIcon /></span>}
+              icon={
+                <span className="modal-option-icon-circle">
+                  <SmsIcon />
+                </span>
+              }
               label={<FormattedMessage id="sharePopup.sms" defaultMessage="SMS" />}
               sublabel={<FormattedMessage id="sharePopup.smsSublabel" defaultMessage="Share via text message" />}
               href={`sms:?body=${encodeURIComponent(smsBody)}`}
-              onClick={() => setView('success')}
+              onClick={() => {
+                track('screener_share', {
+                  share_location: shareLocation,
+                  share_channel: 'sms',
+                  share_language: shareLanguage,
+                  share_action: 'send',
+                });
+                setView('success');
+              }}
             />
             <ModalOption
-              icon={<span className="modal-option-icon-circle"><WhatsAppIcon /></span>}
+              icon={
+                <span className="modal-option-icon-circle">
+                  <WhatsAppIcon />
+                </span>
+              }
               label={<FormattedMessage id="sharePopup.whatsapp" defaultMessage="WhatsApp" />}
               sublabel={<FormattedMessage id="sharePopup.whatsappSublabel" defaultMessage="Share via WhatsApp" />}
               href={`https://wa.me/?text=${encodeURIComponent(whatsappBody)}`}
-              onClick={() => setView('success')}
+              onClick={() => {
+                track('screener_share', {
+                  share_location: shareLocation,
+                  share_channel: 'whatsapp',
+                  share_language: shareLanguage,
+                  share_action: 'send',
+                });
+                setView('success');
+              }}
             />
           </>
         )}
         <ModalOption
-          icon={<span className="modal-option-icon-circle"><EmailIcon /></span>}
+          icon={
+            <span className="modal-option-icon-circle">
+              <EmailIcon />
+            </span>
+          }
           label={<FormattedMessage id="sharePopup.email" defaultMessage="Email" />}
           sublabel={<FormattedMessage id="sharePopup.emailSublabel" defaultMessage="Share via email" />}
-          onClick={() => setView('email')}
+          onClick={() => {
+            track('screener_share', {
+              share_location: shareLocation,
+              share_channel: 'email',
+              share_language: shareLanguage,
+              share_action: 'open',
+            });
+            setView('email');
+          }}
         />
         <CopyLinkOption
           url={SHARE_URL_COPY}
@@ -199,7 +315,13 @@ const ShareModal = ({ open, onClose }: ShareModalProps) => {
           sublabel={<FormattedMessage id="sharePopup.copyLinkSublabel" defaultMessage="Copy link to clipboard" />}
           copiedLabel={<FormattedMessage id="sharePopup.copied" defaultMessage="Copied!" />}
           errorLabel={<FormattedMessage id="sharePopup.copyFailed" defaultMessage="Copy failed" />}
-          errorSublabel={<FormattedMessage id="sharePopup.copyFailedSublabel" defaultMessage="Could not access clipboard" />}
+          errorSublabel={
+            <FormattedMessage id="sharePopup.copyFailedSublabel" defaultMessage="Could not access clipboard" />
+          }
+          // Copy Link has no message body to translate, so it carries no language.
+          onCopy={() =>
+            track('screener_share', { share_location: shareLocation, share_channel: 'copy_link', share_action: 'send' })
+          }
         />
       </div>
     </ModalShell>

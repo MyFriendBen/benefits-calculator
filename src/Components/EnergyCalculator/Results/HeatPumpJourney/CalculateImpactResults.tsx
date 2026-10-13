@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import ForestIcon from '@mui/icons-material/Forest';
+import { useTrackEvent } from '../../../../Assets/analytics';
 import { formatToUSD } from '../../../../utils/formatCurrency';
 import {
   getEpaEquivalencies,
@@ -169,6 +171,10 @@ export default function CalculateImpactResults({
     : null;
   const upgradeLabel = UPGRADE_LABEL_MAP[formValues.upgradeChoice];
 
+  // The AC disclaimer only applies to the whole-home heat pump upgrade, which adds
+  // space conditioning; it's misleading for the heat-pump water-heater upgrade.
+  const showAcDisclaimer = formValues.upgradeChoice === 'heat_pump';
+
   // Bill range values (absolute)
   const billP20 = result.bill_delta.percentile_20.value;
   const billMedian = result.bill_delta.median.value;
@@ -186,6 +192,28 @@ export default function CalculateImpactResults({
   const emMostLikely = Math.round(Math.abs(emMedian)).toLocaleString();
 
   const equivalencies = getEpaEquivalencies(emMedian);
+
+  const track = useTrackEvent();
+  // This component only mounts once the REM API has resolved successfully, so
+  // these values are always defined here — fire once on mount.
+  useEffect(() => {
+    track('heat_pump_calculator_result', {
+      annual_bill_delta_median: billMedian,
+      annual_bill_delta_p20: billP20,
+      annual_bill_delta_p80: billP80,
+      annual_emissions_delta_median: emMedian,
+      annual_emissions_delta_p20: emP20,
+      annual_emissions_delta_p80: emP80,
+      project_type: formValues.upgradeChoice,
+      // Echo the inputs so a result is unambiguous when a user re-runs the
+      // calculator with different values (the join to _submit on screener_uid
+      // alone can't tell two runs apart).
+      household_type: formValues.householdType,
+      heating_fuel: formValues.heatingFuel,
+      water_heating: formValues.waterHeatingFuel,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="calculate-impact-results-outer-card">
@@ -280,10 +308,12 @@ export default function CalculateImpactResults({
           />
         </h2>
         <div className="calculate-impact-upgrade-value">
-          <FormattedMessage
-            id={upgradeLabel.messageId}
-            defaultMessage={upgradeLabel.defaultMessage}
-          />
+          <strong>
+            <FormattedMessage
+              id={upgradeLabel.messageId}
+              defaultMessage={upgradeLabel.defaultMessage}
+            />
+          </strong>
         </div>
       </section>
 
@@ -301,7 +331,7 @@ export default function CalculateImpactResults({
         <p className="calculate-impact-section-description">
           <FormattedMessage
             id="energyCalculator.calculateImpact.results.description"
-            defaultMessage="We calculated the impact estimates below based on your selected upgrade, the household info you shared, and other characteristics we found for this home."
+            defaultMessage="The estimates below are based on your selected upgrade, and data such as home age, size, number of bedrooms, and construction material that match property records for your home address."
           />
         </p>
 
@@ -319,21 +349,25 @@ export default function CalculateImpactResults({
               {billMedian <= 0 ? (
                 <FormattedMessage
                   id="energyCalculator.calculateImpact.results.billImpact.description.save"
-                  defaultMessage="Our modeling shows that homes like yours will tend to save between {low} and {high} a year on their energy bills, with most homes saving at least {mostLikely}."
+                  defaultMessage="The modeling shows that homes like yours typically save between {low} and {high} annually on energy bills, with most homes saving {mostLikely}."
                   values={{ low: billRangeLow, high: billRangeHigh, mostLikely: billMostLikely }}
                 />
               ) : (
                 <FormattedMessage
                   id="energyCalculator.calculateImpact.results.billImpact.description.increase"
-                  defaultMessage="Our modeling shows that homes like yours will tend to see energy bills increase between {low} and {high} a year, with most homes seeing increases of at least {mostLikely}."
+                  defaultMessage="The modeling shows that homes like yours will tend to see energy bills increase between {low} and {high} a year, with most homes seeing increases of at least {mostLikely}."
                   values={{ low: billRangeLow, high: billRangeHigh, mostLikely: billMostLikely }}
                 />
               )}
-              {' '}
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.results.billImpact.however"
-                defaultMessage="However, your utility bill could increase if you are adding air conditioning to a home that did not have it before."
-              />
+              {showAcDisclaimer && (
+                <>
+                  {' '}
+                  <FormattedMessage
+                    id="energyCalculator.calculateImpact.results.billImpact.however"
+                    defaultMessage="Your utility bill could decrease with weatherization upgrades, but it may increase if you add air conditioning to a home that did not have it before."
+                  />
+                </>
+              )}
             </p>
             <ImpactRangeBar
               p20={billP20}
@@ -356,13 +390,13 @@ export default function CalculateImpactResults({
               {emMedian <= 0 ? (
                 <FormattedMessage
                   id="energyCalculator.calculateImpact.results.emissionsImpact.description.reduction"
-                  defaultMessage="Our modeling shows that homes like yours will tend to have annual emissions reductions between {low} and {high} lb CO₂e, with most homes reducing emissions by at least {mostLikely} lb."
+                  defaultMessage="The modeling shows that homes like yours will tend to have annual emissions reductions between {low} and {high} lb CO₂e, with most homes reducing emissions by at least {mostLikely} lb."
                   values={{ low: emRangeLow, high: emRangeHigh, mostLikely: emMostLikely }}
                 />
               ) : (
                 <FormattedMessage
                   id="energyCalculator.calculateImpact.results.emissionsImpact.description.increase"
-                  defaultMessage="Our modeling shows that homes like yours will tend to see annual emissions increases between {low} and {high} lb CO₂e, with most homes seeing increases of at least {mostLikely} lb."
+                  defaultMessage="The modeling shows that homes like yours will tend to see annual emissions increases between {low} and {high} lb CO₂e, with most homes seeing increases of at least {mostLikely} lb."
                   values={{ low: emRangeLow, high: emRangeHigh, mostLikely: emMostLikely }}
                 />
               )}
@@ -409,6 +443,16 @@ export default function CalculateImpactResults({
               </p>
             </div>
           </div>
+
+          {/* Weatherization note — weatherization is intentionally not modeled here
+              (its bill impact depends on the home's current condition), so we surface
+              its potential impact as a note instead. */}
+          <p className="calculate-impact-weatherization-note">
+            <FormattedMessage
+              id="energyCalculator.calculateImpact.results.weatherizationNote"
+              defaultMessage="Weatherization — like insulation and air sealing — can also lower your energy bills and improve comfort. Because the savings depend heavily on your home's current condition, they aren't included in this estimate."
+            />
+          </p>
         </div>
       </section>
     </div>

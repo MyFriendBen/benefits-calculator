@@ -109,16 +109,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 3rem;
-  width: 3rem;
+  height: 2.55rem;
+  width: 2.55rem;
   margin-right: 0.75rem;
   flex-shrink: 0;
 }
 
 .tile-flat .option-card-icon svg,
 .tile-flat .option-card-icon .option-card-lucide-icon {
-  height: 3rem;
-  width: 3rem;
+  height: 2.55rem;
+  width: 2.55rem;
 }
 
 /* ============================================
@@ -146,7 +146,7 @@
 }
 
 .option-card-lucide-icon * {
-  fill: white !important;
+  fill: none !important;
   stroke: var(--icon-color) !important;
 }
 
@@ -185,7 +185,7 @@
 }
 
 .option-card--selected .option-card-lucide-icon * {
-  fill: var(--primary-color) !important;
+  fill: none !important;
   stroke: white !important;
 }
 

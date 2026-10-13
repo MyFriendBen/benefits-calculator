@@ -8,6 +8,7 @@ import BackToScreen from '../BackToScreen/BackToScreen';
 import { useResultsContext } from '../Results/Results';
 import NoProgramEligibleMessage from '../Results/NoProgramEligibleMessage';
 import NcLink211Message from '../Results/NcLink211Message';
+import Chicago211LinkMessage from '../Results/Chicago211LinkMessage';
 import CcigResultsMessage from '../CcigComponents/CcigResultsMessage';
 import TwoOneOneHeaderNC from '../TwoOneOneNCComponents/TwoOneOneHeaderNC/TwoOneOneHeaderNC';
 import TwoOneOneFooterNC from '../TwoOneOneNCComponents/TwoOneOneFooterNC/TwoOneOneFooterNC';
@@ -18,6 +19,8 @@ import { useIsEnergyCalculator } from '../EnergyCalculator/hooks';
 import LancHeader from '../LancComponents/LancHeader/LancHeader';
 import LancFooter from '../LancComponents/LancFooter/LancFooter';
 import NCHispanicFederationFooter from '../NCHispanicFederation/NCHispanicFederationFooter/NCHispanicFederationFooter';
+import CclaHeader from '../CclaComponents/CclaHeader/CclaHeader';
+import CclaFooter from '../CclaComponents/CclaFooter/CclaFooter';
 
 export const BrandedHeader = () => {
   const { getReferrer } = useContext(Context);
@@ -45,6 +48,10 @@ export const BrandedHeader = () => {
     return <LancHeader />;
   }
 
+  if (uiOptions.includes('ccla')) {
+    return <CclaHeader />;
+  }
+
   return <Header />;
 };
 
@@ -61,6 +68,7 @@ export const BrandedFooter = () => {
     { flag: '211co', component: TwoOneOneFooterCO },
     { flag: '211nc', component: TwoOneOneFooterNC },
     { flag: 'lanc', component: LancFooter },
+    { flag: 'ccla', component: CclaFooter },
     { flag: 'hfed', component: NCHispanicFederationFooter },
     { flag: 'powered_by_mfb_footer', component: PoweredByFooter },
   ];
@@ -80,6 +88,9 @@ export const ResultsMessageForNeeds = () => {
 
   if (uiOptions.includes('nc_show_211_link')) {
     return <NcLink211Message />;
+  }
+  if (uiOptions.includes('il_show_211_link')) {
+    return <Chicago211LinkMessage />;
   }
   return null;
 };

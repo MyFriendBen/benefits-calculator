@@ -5,7 +5,7 @@ import { useTranslateNumber } from '../../../../Assets/languageOptions';
 import { HouseholdData } from '../../../../Types/FormData';
 import { FormattedMessageType, QuestionName } from '../../../../Types/Questions';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { Context } from '../../../Wrapper/Wrapper';
 import useScreenApi from '../../../../Assets/updateScreen';
@@ -17,6 +17,8 @@ import { hasSubmittedMemberForm } from '../utils/defaultValues';
 import DeleteConfirmationPopover from './DeleteConfirmationPopover';
 import MemberCard from './MemberCard';
 import type { DeletePopoverState } from '../utils/types';
+import { useTrackEvent } from '../../../../Assets/analytics';
+import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
 
 type HHMSummariesProps = {
   questionName: QuestionName;
@@ -59,10 +61,25 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   // The delete confirmation popover is anchored to the trash button that opened it.
   const [deletePopover, setDeletePopover] = useState<DeletePopoverState>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  // Navigation away can unmount this component before an in-flight delete settles; the ref
+  // lets the `finally` block skip state updates on an unmounted component.
+  const isMountedRef = useRef(true);
+  const track = useTrackEvent();
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Navigate straight to the member's page without re-validating — validation runs when
   // they submit that member's form. `returnToPage` lets the form send the user back here.
   const goToMember = (memberIndex: number) => {
+    track('screener_household_member', {
+      screener_step_name: getStepAnalyticsId(questionName),
+      screener_step_number: currentStepId,
+      action: 'edit_from_summary',
+    });
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, {
       state: { isEditing: true, returnToPage: pageNumber },
     });
@@ -83,6 +100,13 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
         householdSize: updatedHouseholdData.length,
         householdData: updatedHouseholdData,
       });
+      // Distinct from the basics-roster 'delete': this removes an already-detailed
+      // member from the summary cards, which is a different user behavior.
+      track('screener_household_member', {
+        screener_step_name: getStepAnalyticsId(questionName),
+        screener_step_number: currentStepId,
+        action: 'delete_from_summary',
+      });
 
       const deletedPage = deletedIndex + 1;
       if (deletedPage === pageNumber) {
@@ -91,13 +115,17 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
         navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/0`);
       } else if (deletedPage < pageNumber) {
         // A member before us was removed, so our member now lives one page earlier.
-        navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${pageNumber - 1}`);
+        navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${pageNumber - 1}`, {
+          state: { basicInfoCollected: true },
+        });
       }
       // If the deleted member was after the current page, our page number is unchanged and the
       // updated context re-renders the roster in place — no navigation needed.
     } finally {
-      setIsDeleting(false);
-      setDeletePopover(null);
+      if (isMountedRef.current) {
+        setIsDeleting(false);
+        setDeletePopover(null);
+      }
     }
   };
 

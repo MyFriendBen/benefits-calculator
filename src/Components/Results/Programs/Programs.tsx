@@ -1,5 +1,5 @@
 import { ProgramCategory } from '../../../Types/Results';
-import { findValidationForProgram, useResultsContext } from '../Results';
+import { useResultsContext } from '../Results';
 import Filter from '../Filter/Filter';
 import ProgramCard from './ProgramCard';
 import CategoryHeading from '../CategoryHeading/CategoryHeading';
@@ -17,6 +17,12 @@ function sortProgramsIntoCategories(categories: ProgramCategory[]): ProgramCateg
   const sortedCategories = categories
     .filter((category) => category.programs.length > 0)
     .sort((a, b) => {
+      // Temporary fix (MFB-1185): always push tax credit categories to the bottom,
+      // regardless of their priority or estimated value.
+      if (a.tax_category !== b.tax_category) {
+        return a.tax_category ? 1 : -1;
+      }
+
       const aPriority = a.priority === null ? Infinity : a.priority;
       const bPriority = b.priority === null ? Infinity : b.priority;
 
@@ -35,41 +41,6 @@ function sortProgramsIntoCategories(categories: ProgramCategory[]): ProgramCateg
   return sortedCategories;
 }
 
-const ValidationCategory = () => {
-  const { programs, isAdminView, validations } = useResultsContext();
-
-  const validationPrograms = useMemo(
-    () => programs.filter((program) => findValidationForProgram(validations, program) !== undefined),
-    [validations, programs],
-  );
-
-  const validationCategory = useMemo<ProgramCategory>(() => {
-    return {
-      external_name: 'validation_category',
-      icon: '',
-      name: { label: 'programs.categories.validation.header', default_message: 'Validations' },
-      description: { label: '', default_message: '' },
-      caps: [],
-      programs: validationPrograms,
-      priority: null,
-      tax_category: false,
-    };
-  }, [validationPrograms]);
-
-  if (!isAdminView || validationPrograms.length === 0) {
-    return null;
-  }
-
-  return (
-    <>
-      <CategoryHeading category={validationCategory} />
-      {validationPrograms.map((program, index) => {
-        return <ProgramCard program={program} key={index} />;
-      })}
-    </>
-  );
-};
-
 const Programs = () => {
   const { programs, programCategories } = useResultsContext();
 
@@ -83,14 +54,13 @@ const Programs = () => {
       <ResultsMessage />
       {!isEnergyCalculator && <Filter />}
       {isEnergyCalculator && <DocumentSummary programs={programs} />}
-      <ValidationCategory />
       {isEnergyCalculator && needsRebates && <EnergyCalculatorRebateCategoryList />}
       {categories.map((category) => {
         return (
           <div key={category.name.default_message}>
             <CategoryHeading category={category} />
-            {category.programs.map((program, index) => {
-              return <ProgramCard program={program} key={index} />;
+            {category.programs.map((program) => {
+              return <ProgramCard program={program} key={program.program_id} />;
             })}
           </div>
         );

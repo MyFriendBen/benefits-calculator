@@ -1,4 +1,4 @@
-import { zodResolver } from '@hookform/resolvers/zod';
+import { mfbZodResolver } from '../../../Assets/analytics/mfbZodResolver';
 import { Checkbox, FormControlLabel, TextField } from '@mui/material';
 import PhoneNumberInput from '../../Common/PhoneNumberInput';
 import { useContext, useEffect, useState } from 'react';
@@ -7,6 +7,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { z } from 'zod';
 import useScreenApi from '../../../Assets/updateScreen';
+import { useTrackEvent } from '../../../Assets/analytics';
 import { FormData } from '../../../Types/FormData';
 import { FormattedMessageType } from '../../../Types/Questions';
 import { useConfig, useLocalizedLink } from '../../Config/configHook';
@@ -100,6 +101,7 @@ export const buildContactInfoSchema = (formatMessage: any) => {
             id: 'validation-helperText.phoneNumber',
             defaultMessage: 'Please enter a 10 digit phone number',
           }),
+          params: { code: 'phone_format' },
         }),
       emailConsent: z.boolean(),
       tcpa: z.boolean(),
@@ -107,10 +109,12 @@ export const buildContactInfoSchema = (formatMessage: any) => {
     .refine(({ emailConsent, email }) => email === '' || emailConsent, {
       path: ['emailConsent'],
       message: formatMessage({ id: 'signUp.checkbox.error', defaultMessage: 'Please check the box to continue.' }),
+      params: { code: 'consent_required' },
     })
     .refine(({ tcpa, cell }) => cell === '' || tcpa, {
       path: ['tcpa'],
       message: formatMessage({ id: 'signUp.checkbox.error', defaultMessage: 'Please check the box to continue.' }),
+      params: { code: 'consent_required' },
     })
     .superRefine(({ email, cell, emailConsent, tcpa }, ctx) => {
       const noEmail = email.length === 0;
@@ -126,6 +130,7 @@ export const buildContactInfoSchema = (formatMessage: any) => {
               defaultMessage: 'Please enter an email',
             }),
             path: ['email'],
+            params: { code: 'required' },
           });
         }
         if (noCell) {
@@ -136,6 +141,7 @@ export const buildContactInfoSchema = (formatMessage: any) => {
               defaultMessage: 'Please enter a phone number',
             }),
             path: ['cell'],
+            params: { code: 'required' },
           });
         }
       }
@@ -149,6 +155,7 @@ export const buildContactInfoSchema = (formatMessage: any) => {
               defaultMessage: 'Please enter an email',
             }),
             path: ['email'],
+            params: { code: 'required' },
           });
         }
       }
@@ -162,6 +169,7 @@ export const buildContactInfoSchema = (formatMessage: any) => {
               defaultMessage: 'Please enter a phone number',
             }),
             path: ['cell'],
+            params: { code: 'required' },
           });
         }
       }
@@ -175,11 +183,13 @@ export const buildContactInfoSchema = (formatMessage: any) => {
               defaultMessage: 'Please enter an email or phone number',
             }),
             path: ['email'],
+            params: { code: 'required' },
           });
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: '', // Empty message to just highlight the field
             path: ['cell'],
+            params: { code: 'required' },
           });
         }
       }
@@ -198,6 +208,8 @@ function SignUp() {
   const signUpOptions = useConfig<{ [key: string]: FormattedMessageType }>('sign_up_options');
   const privacyPolicyLink = useLocalizedLink('privacy_policy');
   const consentToContactLink = useLocalizedLink('consent_to_contact');
+
+  const track = useTrackEvent();
 
   const contactInfoSchema = buildContactInfoSchema(formatMessage);
 
@@ -236,7 +248,7 @@ function SignUp() {
     trigger,
     watch,
   } = useStepForm<FormSchema>({
-    resolver: zodResolver(formSchema),
+    resolver: mfbZodResolver(formSchema),
     defaultValues: {
       contactType: {
         sendOffers: formData.signUpInfo.sendOffers,
@@ -296,6 +308,12 @@ function SignUp() {
       await updateUser(newFormData);
       newFormData.signUpInfo.hasUser = true;
       setFormData(newFormData);
+      if (updatedSignUpInfo !== undefined) {
+        track('screener_signup_completed', {
+          email_consent: updatedSignUpInfo.emailConsent,
+          sms_consent: updatedSignUpInfo.tcpa,
+        });
+      }
     } catch (e) {
       setHasServerError(true);
       throw e;

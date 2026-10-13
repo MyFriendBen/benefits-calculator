@@ -1,11 +1,11 @@
-import { useContext, useState, useMemo } from 'react';
+import { useContext, useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useFieldArray, SubmitHandler } from 'react-hook-form';
 import { Box, Typography, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { mfbZodResolver } from '../../../../Assets/analytics/mfbZodResolver';
 import { Context } from '../../../Wrapper/Wrapper';
 import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
 import QuestionDescription from '../../../QuestionComponents/QuestionDescription';
@@ -15,7 +15,7 @@ import useStepForm from '../../stepForm';
 import { FormattedMessageType } from '../../../../Types/Questions';
 import { useConfig } from '../../../Config/configHook';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
-import { ReactComponent as PersonIcon } from '../../../../Assets/icons/General/head.svg';
+import { Icon } from '../../../Icon/Icon';
 import { BASIC_INFO_GRID_STYLES } from '../utils/constants';
 import { createBasicInfoPageSchema, BasicInfoPageSchema } from '../utils/schema';
 import { UNSET_BIRTH_YEAR, createDefaultMember } from '../utils/defaultValues';
@@ -24,6 +24,8 @@ import BasicInfoFields from '../sections/BasicInfoFields';
 import DeleteConfirmationPopover from './DeleteConfirmationPopover';
 import '../styles/HouseholdMemberBasicInfoPage.css';
 import type { DeletePopoverState, LocationState } from '../utils/types';
+import { useTrackEvent } from '../../../../Assets/analytics';
+import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
 
 const MAX_HOUSEHOLD_SIZE = 8;
 
@@ -34,6 +36,22 @@ const HouseholdMemberBasicInfoPage = () => {
   const { updateScreen } = useScreenApi();
   const currentStepId = useStepNumber('householdData');
   const [deletePopover, setDeletePopover] = useState<DeletePopoverState>(null);
+  const track = useTrackEvent();
+
+  // Roster page (page 0), rendered outside QuestionComponentContainer, so it
+  // tracks its own view. Emits the 'member-basics' sub-slug; complete/back use the
+  // same slug. The screener_household_member action events below keep the parent
+  // 'household-members' slug.
+  useEffect(() => {
+    track('screener_form_step', {
+      screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberBasics,
+      screener_step_number: currentStepId,
+      step_action: 'view',
+    });
+    // Fire once on mount (one view event per page visit); `track`/`currentStepId`
+    // are intentionally excluded so re-renders don't re-fire the view.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const relationshipOptions = useConfig<Record<string, FormattedMessageType>>('relationship_options');
   const deleteHHMemberAriaLabel = intl.formatMessage({
@@ -78,9 +96,10 @@ const HouseholdMemberBasicInfoPage = () => {
     formState: { errors },
     handleSubmit,
   } = useStepForm<BasicInfoPageSchema>({
-    resolver: zodResolver(formSchema),
+    resolver: mfbZodResolver(formSchema),
     defaultValues: { members: defaultMembers },
     questionName: 'householdData',
+    stepNameOverride: HOUSEHOLD_SUBSTEP_IDS.memberBasics,
     onSubmitSuccessfulOverride: () => {},
   });
 
@@ -104,6 +123,14 @@ const HouseholdMemberBasicInfoPage = () => {
       householdData: updatedHouseholdData,
     });
 
+    // This page navigates manually (onSubmitSuccessfulOverride) instead of through
+    // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
+    track('screener_form_step', {
+      screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberBasics,
+      screener_step_number: currentStepId,
+      step_action: 'complete',
+    });
+
     // If the user came here from a member page, return them to it. Clamp to the current member
     // count in case they removed members and the original page no longer exists.
     const targetPage = returnToPage !== undefined ? Math.min(Math.max(returnToPage, 1), members.length) : 1;
@@ -117,6 +144,11 @@ const HouseholdMemberBasicInfoPage = () => {
     if (deletePopover === null) return;
     remove(deletePopover.index);
     setDeletePopover(null);
+    track('screener_household_member', {
+      screener_step_name: getStepAnalyticsId('householdData'),
+      screener_step_number: currentStepId,
+      action: 'delete',
+    });
   };
 
   const handleAddMember = () => {
@@ -125,7 +157,15 @@ const HouseholdMemberBasicInfoPage = () => {
       birthYear: UNSET_BIRTH_YEAR,
       relationshipToHH: '',
     });
+    track('screener_household_member', {
+      screener_step_name: getStepAnalyticsId('householdData'),
+      screener_step_number: currentStepId,
+      action: 'add',
+    });
   };
+
+  // Note: screener_form_error is tracked centrally in useStepForm (stepForm.tsx),
+  // which every screener step's form goes through — no need to duplicate it here.
 
   return (
     <main className="benefits-form" data-step-id="household-basics">
@@ -150,7 +190,7 @@ const HouseholdMemberBasicInfoPage = () => {
             return (
               <div key={field.id} className="household-basic-info-page__person-card">
                 <div className="household-basic-info-page__person-header">
-                  <PersonIcon className="household-basic-info-page__person-icon" />
+                  <Icon name="user-round" className="household-basic-info-page__person-icon" />
                   <Typography className="household-basic-info-page__person-title">
                     {isFirstMember ? (
                       <FormattedMessage id="householdDataBlock.basicInfo.you" defaultMessage="You" />
@@ -201,7 +241,7 @@ const HouseholdMemberBasicInfoPage = () => {
           </Box>
         )}
 
-        <PrevAndContinueButtons backNavigationFunction={navigateBack} />
+        <PrevAndContinueButtons backNavigationFunction={navigateBack} stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberBasics} />
       </form>
 
       <DeleteConfirmationPopover

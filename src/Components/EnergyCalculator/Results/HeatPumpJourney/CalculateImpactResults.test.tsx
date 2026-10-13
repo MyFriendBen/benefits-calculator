@@ -1,7 +1,15 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
 import CalculateImpactResults from './CalculateImpactResults';
 import type { RemImpactApiResponse, CalculateImpactFormValues } from './remCalculateImpactTypes';
+
+const mockTrack = jest.fn();
+jest.mock('../../../../Assets/analytics', () => ({
+  __esModule: true,
+  default: jest.fn(),
+  useTrackEvent: () => mockTrack,
+}));
 
 // ─── Shared test data ──────────────────────────────────────────────────────────
 
@@ -78,13 +86,34 @@ const renderResults = (
 ) =>
   render(
     <IntlProvider locale="en" defaultLocale="en">
-      <CalculateImpactResults result={result} formValues={formValues} onEdit={onEdit} />
+      <MemoryRouter>
+        <CalculateImpactResults result={result} formValues={formValues} onEdit={onEdit} />
+      </MemoryRouter>
     </IntlProvider>,
   );
 
 // ─── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('CalculateImpactResults', () => {
+  describe('analytics', () => {
+    it('fires heat_pump_calculator_result with the full bill and emissions range on mount', () => {
+      mockTrack.mockClear();
+      renderResults(ALL_NEGATIVE_RESULT);
+      expect(mockTrack).toHaveBeenCalledWith('heat_pump_calculator_result', {
+        annual_bill_delta_median: -200,
+        annual_bill_delta_p20: -300,
+        annual_bill_delta_p80: -100,
+        annual_emissions_delta_median: -200,
+        annual_emissions_delta_p20: -300,
+        annual_emissions_delta_p80: -100,
+        project_type: 'heat_pump_water_heater',
+        household_type: 'single_family_detached',
+        heating_fuel: 'electricity',
+        water_heating: 'natural_gas',
+      });
+    });
+  });
+
   describe('household info summary', () => {
     it('renders submitted address, household type, and fuels', () => {
       renderResults(ALL_NEGATIVE_RESULT);
@@ -164,6 +193,42 @@ describe('CalculateImpactResults', () => {
       // Should render without errors; bar still displays
       const { container } = renderResults(clampResult);
       expect(container.querySelector('.impact-range-bar__median-float')).toBeInTheDocument();
+    });
+  });
+
+  describe('AC disclaimer', () => {
+    const acDisclaimer = /add air conditioning to a home/i;
+
+    it('shows the AC disclaimer for the whole-home heat pump upgrade', () => {
+      renderResults(ALL_NEGATIVE_RESULT, {
+        formValues: { ...FORM_VALUES, upgradeChoice: 'heat_pump' },
+      });
+      expect(screen.getByText(acDisclaimer)).toBeInTheDocument();
+    });
+
+    it('hides the AC disclaimer for the heat pump water heater upgrade', () => {
+      renderResults(ALL_NEGATIVE_RESULT, {
+        formValues: { ...FORM_VALUES, upgradeChoice: 'heat_pump_water_heater' },
+      });
+      expect(screen.queryByText(acDisclaimer)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('weatherization note', () => {
+    const weatherizationNote = /weatherization — like insulation and air sealing/i;
+
+    it('shows the weatherization note for the heat pump upgrade', () => {
+      renderResults(ALL_NEGATIVE_RESULT, {
+        formValues: { ...FORM_VALUES, upgradeChoice: 'heat_pump' },
+      });
+      expect(screen.getByText(weatherizationNote)).toBeInTheDocument();
+    });
+
+    it('shows the weatherization note for the heat pump water heater upgrade', () => {
+      renderResults(ALL_NEGATIVE_RESULT, {
+        formValues: { ...FORM_VALUES, upgradeChoice: 'heat_pump_water_heater' },
+      });
+      expect(screen.getByText(weatherizationNote)).toBeInTheDocument();
     });
   });
 });

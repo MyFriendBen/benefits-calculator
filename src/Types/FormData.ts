@@ -40,7 +40,8 @@ export type EnergyCalculatorMember = {
 };
 
 export type HouseholdData = {
-  id: number;
+  /** backend DB pk, set by the API only — absent for members created client-side */
+  id?: number;
   frontendId: string;
   /** deprecated: used for historical screens only */
   age?: number;
@@ -89,7 +90,6 @@ export type AcuteHHConditions = { [key: string]: boolean };
 export type FormData = {
   isTest: boolean;
   isTestData?: boolean;
-  frozen: boolean;
   externalID?: string;
   agreeToTermsOfService: boolean;
   is13OrOlder: boolean;
@@ -119,6 +119,7 @@ export type Conditions = {
   blindOrVisuallyImpaired: boolean;
   disabled: boolean;
   longTermDisability: boolean;
+  fosterCare: boolean;
 };
 
 export type StudentEligibility = {

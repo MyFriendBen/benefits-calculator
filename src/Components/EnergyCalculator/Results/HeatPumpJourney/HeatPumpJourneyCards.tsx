@@ -1,8 +1,9 @@
+import { useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import { useResultsLink } from '../../../Results/Results';
+import { useTrackEvent } from '../../../../Assets/analytics';
 import './HeatPumpJourneyCards.css';
 
 // CESN-specific feature (Colorado Energy Savings Network). Caller is responsible
@@ -12,8 +13,18 @@ const POWER_AHEAD_LEARN_MORE_URL = 'https://poweraheadcolorado.org/why-heat-pump
 
 export default function HeatPumpJourneyCards() {
   const intl = useIntl();
+  const track = useTrackEvent();
   const billsImpactLink = useResultsLink('results/energy-rebates/waterHeater/calculate-impact');
   const contractorsLink = useResultsLink('results/energy-rebates/waterHeater/connect-now');
+
+  // The three cards render together, so each is seen when this mounts. These are
+  // the denominators for the learn-more click and the two CTA clicks below.
+  useEffect(() => {
+    track('heat_pump_section_view', { section: 'why_heat_pump' });
+    track('heat_pump_section_view', { section: 'bills_impact' });
+    track('heat_pump_section_view', { section: 'find_contractor_card' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const sectionAriaLabel = intl.formatMessage({
     id: 'energyCalculator.heatPumpJourney.sectionAriaLabel',
@@ -40,16 +51,16 @@ export default function HeatPumpJourneyCards() {
             defaultMessage="Many customers see cost savings from switching to a heat pump. They reduce your carbon footprint and can improve air quality."
           />
         </p>
-        <TrackedOutboundLink
+        <a
           href={POWER_AHEAD_LEARN_MORE_URL}
-          action="heat_pump_journey_learn_more_click"
-          label="Power Ahead Colorado - Why Heat Pumps"
-          category="heat_pump_journey"
+          target="_blank"
+          rel="noopener noreferrer"
           className="heat-pump-journey-card-cta"
+          onClick={() => track('heat_pump_journey_learn_more_click', { url: POWER_AHEAD_LEARN_MORE_URL })}
         >
           <FormattedMessage id="energyCalculator.heatPumpJourney.card1.cta" defaultMessage="Learn more" />
           <OpenInNewIcon className="heat-pump-journey-card-cta-icon" aria-hidden="true" />
-        </TrackedOutboundLink>
+        </a>
       </article>
 
       <article className="heat-pump-journey-card">
@@ -70,7 +81,11 @@ export default function HeatPumpJourneyCards() {
             defaultMessage="Learn how your household may see potential energy bill changes and emissions reductions."
           />
         </p>
-        <Link to={billsImpactLink} className="heat-pump-journey-card-cta">
+        <Link
+          to={billsImpactLink}
+          className="heat-pump-journey-card-cta"
+          onClick={() => track('heat_pump_cta_click', { cta: 'calculate_impact' })}
+        >
           <FormattedMessage id="energyCalculator.heatPumpJourney.card2.cta" defaultMessage="Calculate impact" />
         </Link>
       </article>
@@ -93,7 +108,11 @@ export default function HeatPumpJourneyCards() {
             defaultMessage="Heat pumps are an upgrade to your HVAC system. Consult with a registered contractor to help you plan your heat pump installation."
           />
         </p>
-        <Link to={contractorsLink} className="heat-pump-journey-card-cta">
+        <Link
+          to={contractorsLink}
+          className="heat-pump-journey-card-cta"
+          onClick={() => track('heat_pump_cta_click', { cta: 'connect_now' })}
+        >
           <FormattedMessage id="energyCalculator.heatPumpJourney.card3.cta" defaultMessage="Connect now" />
         </Link>
       </article>

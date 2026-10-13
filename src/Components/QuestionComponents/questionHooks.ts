@@ -4,6 +4,8 @@ import { STARTING_QUESTION_NUMBER, useStepDirectory, useStepName, useStepNumber 
 import { isCustomTypedLocationState } from '../../Types/FormData';
 import { QuestionName } from '../../Types/Questions';
 import { Context } from '../Wrapper/Wrapper';
+import { useTrackEvent } from '../../Assets/analytics';
+import { getStepAnalyticsId } from '../../Assets/analytics/stepIds';
 
 export function useShouldRedirectToConfirmation() {
   const location = useLocation();
@@ -24,8 +26,19 @@ export function useGoToNextStep(questionName: QuestionName, routeEnding: string 
   const redirectToConfirmationPage = useShouldRedirectToConfirmation();
   const redirectToResults = useShouldRedirectToResults();
   const navigate = useNavigate();
+  const track = useTrackEvent();
 
   return () => {
+    // Every step-form's successful submit routes through this hook (via
+    // `useStepForm`), so this is the single shared place to mark a step
+    // "complete" for the drop-off funnel — regardless of where the user is
+    // routed to next (next step, confirmation, or results).
+    track('screener_form_step', {
+      screener_step_name: getStepAnalyticsId(questionName),
+      screener_step_number: stepNumber,
+      step_action: 'complete',
+    });
+
     if (redirectToConfirmationPage) {
       navigate(`/${whiteLabel}/${uuid}/confirm-information`);
       return;

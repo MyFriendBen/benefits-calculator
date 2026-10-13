@@ -1,20 +1,19 @@
-import { AppBar, MenuItem, Select } from '@mui/material';
-import { useContext, useMemo, useState } from 'react';
+import { AppBar } from '@mui/material';
+import { useContext, useMemo } from 'react';
 import { Context } from '../Wrapper/Wrapper';
 import LanguageIcon from '@mui/icons-material/Language';
-import { useConfig } from '../Config/configHook';
+import LanguageSelect from '../LanguageSelect/LanguageSelect';
 import Paper from '@mui/material/Paper';
 import { useIntl } from 'react-intl';
-import { FormattedMessage } from 'react-intl';
 import './Header.css';
 import { useLogo } from '../Referrer/useLogo';
 import { DEFAULT_WHITE_LABEL } from '../Wrapper/Wrapper';
 import { useQueryString } from '../QuestionComponents/questionHooks';
+import { useTrackEvent } from '../../Assets/analytics';
 
 const Header = () => {
   const context = useContext(Context);
-  const { formData, getReferrer, whiteLabel } = context;
-  const languageOptions = useConfig<{ [key: string]: string }>('language_options');
+  const { getReferrer, whiteLabel } = context;
   const queryString = useQueryString();
   const landingPageQueryString = useQueryString({ path: null });
   const intl = useIntl();
@@ -38,53 +37,29 @@ const Header = () => {
     defaultMessage: 'select a language',
   };
 
-  const [isLanguageSelectOpen, setIsLanguageSelectOpen] = useState(false);
+  const track = useTrackEvent();
 
-  const handleCloseLanguage = () => {
-    setIsLanguageSelectOpen(false);
-  };
-
-  const handleOpenLanguage = () => {
-    setIsLanguageSelectOpen(true);
-  };
-
-  const createMenuItems = (optionList: { [key: string]: string }) => {
-    const menuItemKeyLabelPairArr = Object.entries(optionList);
-
-    const dropdownMenuItems = menuItemKeyLabelPairArr.map((key) => {
-      return (
-        <MenuItem value={key[0]} key={key[0]}>
-          {key[1]}
-        </MenuItem>
-      );
-    });
-
-    return dropdownMenuItems;
-  };
+  const uiOptions = getReferrer('uiOptions');
 
   const containerClass = useMemo(() => {
     let className = 'header-full-width-container';
 
-    if (formData.frozen) {
-      className += ' frozen';
-    }
-
-    if (getReferrer('uiOptions').includes('white_header')) {
+    if (uiOptions.includes('white_header')) {
       className += ' white-header';
     }
 
-    if (getReferrer('uiOptions').includes('small_header_language_dropdown')) {
+    if (uiOptions.includes('small_header_language_dropdown')) {
       className += ' small-header-language-dropdown';
     }
 
     return className;
-  }, [formData.frozen]);
+  }, [uiOptions]);
 
   return (
     <nav>
       <Paper className={containerClass} square={true} elevation={0}>
         <AppBar id="nav-container" position="sticky" elevation={0}>
-          <a href={homeUrl} className="home-link">
+          <a href={homeUrl} className="home-link" onClick={() => track('screener_logo_click', { location: 'header' })}>
             <div className="logo-container">
               {useLogo('logoSource', 'logoAlt', logoClass)}
               {stateName && <div className="state-name">{stateName}</div>}
@@ -92,33 +67,17 @@ const Header = () => {
           </a>
           <div className="icon-wrapper">
             <LanguageIcon />
-            <Select
-              labelId="select-language-label"
+            <LanguageSelect
               id="select-language"
-              placeholder="Change Language"
-              value={context.locale}
-              label="Language"
-              onChange={(event) => context.selectLanguage(event.target.value)}
-              aria-label={intl.formatMessage(selectLangAriaLabelProps)}
-              variant="standard"
-              disableUnderline={true}
-              open={isLanguageSelectOpen}
-              onOpen={handleOpenLanguage}
-              onClose={handleCloseLanguage}
-              sx={{ '& .MuiSvgIcon-root': { color: '#FFFFFF' } }}
-            >
-              {createMenuItems(languageOptions)}
-            </Select>
-          </div>
-        </AppBar>
-        {formData.frozen && (
-          <div className="header-frozen-message-container">
-            <FormattedMessage
-              id="header.frozen.message"
-              defaultMessage="This screen is frozen. Changes you make will not be saved."
+              onChange={(languageCode, languageLabel) => {
+                track('screener_language_changed', { language_name: languageLabel });
+                context.selectLanguage(languageCode);
+              }}
+              ariaLabel={intl.formatMessage(selectLangAriaLabelProps)}
+              iconColor="#FFFFFF"
             />
           </div>
-        )}
+        </AppBar>
       </Paper>
     </nav>
   );

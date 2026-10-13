@@ -1,5 +1,10 @@
-import { createHouseholdMemberSchema, createEnergyCalculatorHouseholdMemberSchema } from './schema';
+import { createHouseholdMemberSchema, createEnergyCalculatorHouseholdMemberSchema, STUDENT_QUESTIONS } from './schema';
 import { getCurrentMonthYear, MAX_AGE } from '../../../../Assets/age.tsx';
+import type { FormattedMessageType } from '../../../../Types/Questions';
+
+// The schema only reads the keys of relationshipOptions, so tests pass plain
+// strings instead of building FormattedMessage elements; cast to the real type.
+const asMessages = (m: Record<string, string>) => m as unknown as Record<string, FormattedMessageType>;
 
 // Mock intl with inline formatMessage for all validation messages
 const mockFormatMessage = jest.fn((params: { id: string; defaultMessage?: string }) => params.defaultMessage ?? params.id);
@@ -14,6 +19,11 @@ const validMainData = {
   healthInsurance: { none: true, employer: false, private: false, medicaid: false, medicare: false, chp: false, emergency_medicaid: false, family_planning: false, va: false, mass_health: false },
   conditions: { student: false, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false },
   studentEligibility: { studentFullTime: undefined, studentJobTrainingProgram: undefined, studentHasWorkStudy: undefined, studentWorks20PlusHrs: undefined },
+  // The three income questions are required; all answered "No" here (with no
+  // streams) so the fixture is valid with the minimum income data.
+  incomeEmployed: false,
+  incomeGig: false,
+  incomeOther: false,
   incomeStreams: [],
 };
 
@@ -23,8 +33,16 @@ const validEcData = {
   conditions: { survivingSpouse: false, disabled: false, medicalEquipment: false },
   receivesSsi: 'false' as const,
   relationshipToHH: 'spouse',
+  incomeEmployed: false,
+  incomeGig: false,
+  incomeOther: false,
   incomeStreams: [],
 };
+
+// Fully valid income stream fixtures for the "Yes requires >=1 source" rule.
+const validEmploymentStream = { incomeCategory: 'employment', incomeStreamName: 'wages', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '1000' };
+const validSelfEmploymentStream = { incomeCategory: 'employment', incomeStreamName: 'selfEmployment', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '800' };
+const validOtherStream = { incomeCategory: 'government', incomeStreamName: 'sSI', incomeFrequency: 'monthly', hoursPerWeek: '', incomeAmount: '500' };
 
 // ============================================================================
 // createHouseholdMemberSchema — main workflow
@@ -46,6 +64,43 @@ describe('createHouseholdMemberSchema (main)', () => {
     it('accepts multiple health insurance selections', () => {
       const data = { ...validMainData, healthInsurance: { ...validMainData.healthInsurance, none: false, employer: true, medicaid: true } };
       expect(schema.safeParse(data).success).toBe(true);
+    });
+  });
+
+  // The income-amount field emits a distinct rule code per failure so the
+  // Validation Errors card can tell blank from malformed from zero. Assert the
+  // code the REAL schema produces (not a copy), keyed off the incomeAmount path.
+  describe('incomeAmount validation codes', () => {
+    // A stream valid except for the amount, so only incomeAmount fails.
+    const streamWithAmount = (incomeAmount: string) => ({
+      incomeCategory: 'wages',
+      incomeStreamName: 'wages',
+      incomeFrequency: 'monthly',
+      hoursPerWeek: '',
+      incomeAmount,
+    });
+    const amountIssue = (incomeAmount: string) => {
+      const result = schema.safeParse({ ...validMainData, incomeStreams: [streamWithAmount(incomeAmount)] });
+      return result.error?.issues.find((i) => i.path.includes('incomeAmount'));
+    };
+
+    it('blank → required (too_small)', () => {
+      expect(amountIssue('')?.code).toBe('too_small');
+    });
+
+    it('malformed → invalid_format', () => {
+      for (const bad of ['abc', '$100', '10.123', '12345678']) {
+        expect((amountIssue(bad) as any)?.params?.code).toBe('invalid_format');
+      }
+    });
+
+    it('zero → must_be_positive', () => {
+      expect((amountIssue('0') as any)?.params?.code).toBe('must_be_positive');
+    });
+
+    it('valid amount → no incomeAmount issue', () => {
+      expect(amountIssue('100')).toBeUndefined();
+      expect(amountIssue('100.50')).toBeUndefined();
     });
   });
 
@@ -133,6 +188,19 @@ describe('createHouseholdMemberSchema (main)', () => {
       const data = { ...validMainData, conditions: { student: false, pregnant: true, blindOrVisuallyImpaired: true, disabled: false, longTermDisability: false } };
       expect(schema.safeParse(data).success).toBe(true);
     });
+
+    it('defaults fosterCare to false when the tile is absent', () => {
+      const result = schema.safeParse(validMainData);
+      expect(result.success).toBe(true);
+      expect(result.success && result.data.conditions.fosterCare).toBe(false);
+    });
+
+    it('accepts fosterCare on its own', () => {
+      const data = { ...validMainData, conditions: { ...validMainData.conditions, fosterCare: true } };
+      const result = schema.safeParse(data);
+      expect(result.success).toBe(true);
+      expect(result.success && result.data.conditions.fosterCare).toBe(true);
+    });
   });
 
   describe('student eligibility validation', () => {
@@ -176,6 +244,71 @@ describe('createHouseholdMemberSchema (main)', () => {
       expect(paths).toContain('studentWorks20PlusHrs');
       expect(paths).not.toContain('studentFullTime');
       expect(paths).not.toContain('studentHasWorkStudy');
+    });
+  });
+
+  describe('income question validation', () => {
+    it('accepts the "currently unemployed" path: all three answered No, no income streams', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: false, incomeGig: false, incomeOther: false, incomeStreams: [] });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects when incomeEmployed is unanswered (null)', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: null });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeEmployed')).toBe(true);
+    });
+
+    it('rejects when incomeOther is unanswered (null)', () => {
+      const result = schema.safeParse({ ...validMainData, incomeOther: null });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeOther')).toBe(true);
+    });
+
+    it('requires incomeGig regardless of incomeEmployed (independent questions)', () => {
+      // gig unanswered → invalid even when employed is true
+      const missingGig = schema.safeParse({ ...validMainData, incomeEmployed: true, incomeGig: null, incomeStreams: [validEmploymentStream] });
+      expect(missingGig.success).toBe(false);
+      expect(missingGig.error?.issues.some(i => i.path.at(-1) === 'incomeGig')).toBe(true);
+    });
+
+    it('rejects "employed = Yes" with no wages income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: true, incomeStreams: [] });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeEmployed')).toBe(true);
+    });
+
+    it('accepts "employed = Yes" with a wages income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: true, incomeStreams: [validEmploymentStream] });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects "gig = Yes" with no self-employment income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeGig: true, incomeStreams: [] });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeGig')).toBe(true);
+    });
+
+    it('accepts "gig = Yes" with a self-employment income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeGig: true, incomeStreams: [validSelfEmploymentStream] });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects "employed = Yes" backed only by a self-employment stream (wrong source)', () => {
+      const result = schema.safeParse({ ...validMainData, incomeEmployed: true, incomeStreams: [validSelfEmploymentStream] });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeEmployed')).toBe(true);
+    });
+
+    it('rejects "other = Yes" with no non-employment income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeOther: true, incomeStreams: [] });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.some(i => i.path.at(-1) === 'incomeOther')).toBe(true);
+    });
+
+    it('accepts "other = Yes" with a non-employment income source', () => {
+      const result = schema.safeParse({ ...validMainData, incomeOther: true, incomeStreams: [validOtherStream] });
+      expect(result.success).toBe(true);
     });
   });
 
@@ -253,7 +386,7 @@ describe('createHouseholdMemberSchema (main)', () => {
 // ============================================================================
 
 describe('createEnergyCalculatorHouseholdMemberSchema', () => {
-  const relationshipOptions = { spouse: 'Spouse', child: 'Child', parent: 'Parent' };
+  const relationshipOptions = asMessages({ spouse: 'Spouse', child: 'Child', parent: 'Parent' });
   const schema = createEnergyCalculatorHouseholdMemberSchema(mockIntl, 2, relationshipOptions);
 
   describe('valid data', () => {
@@ -334,6 +467,19 @@ describe('createEnergyCalculatorHouseholdMemberSchema', () => {
       const result = schema.safeParse({ ...validEcData, healthInsurance: { none: true } });
       // Should pass — EC schema doesn't have healthInsurance field so it's stripped
       expect(result.success).toBe(true);
+    });
+  });
+});
+
+describe('STUDENT_QUESTIONS', () => {
+  it('has a distinct "they" string for every question, with no {subject} placeholder', () => {
+    const ids = STUDENT_QUESTIONS.flatMap((q) => [q.messageId, q.theyMessageId]);
+    expect(new Set(ids).size).toBe(STUDENT_QUESTIONS.length * 2);
+    STUDENT_QUESTIONS.forEach((q) => {
+      expect(q.theyMessageId).toBe(`${q.messageId}-they`);
+      expect(q.defaultMessage).not.toContain('{subject}');
+      expect(q.theyDefaultMessage).not.toContain('{subject}');
+      expect(q.theyDefaultMessage).not.toBe(q.defaultMessage);
     });
   });
 });

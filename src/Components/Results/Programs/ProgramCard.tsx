@@ -6,12 +6,13 @@ import ResultsTranslate from '../Translate/Translate';
 import { useContext, useMemo } from 'react';
 import { useMediaQuery } from '@mui/material';
 import './ProgramCard.css';
-import { findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
+import { useResultsLink } from '../Results';
 import { FormattedMessageType } from '../../../Types/Questions';
 import { BREAKPOINTS } from '../../../utils/breakpoints';
 import { Context } from '../../Wrapper/Wrapper';
 import { useConfig, useFeatureFlag } from '../../Config/configHook';
 import { calcAge } from '../../../Assets/age';
+import { useTrackEvent } from '../../../Assets/analytics';
 
 type ResultsCardDetail = {
   title: FormattedMessageType;
@@ -47,6 +48,8 @@ type ResultsCardProps = {
   flags?: ResultsCardFlag[];
   containerClassNames?: string[];
   eligibleMembers?: EligibleMemberTag[];
+  // Fired when the user clicks into the card's detail page (name link or "More Info").
+  onMoreInfoClick?: () => void;
 };
 
 function EligibleMemberTags({ members }: { members: EligibleMemberTag[] }) {
@@ -79,6 +82,7 @@ export function ResultsCard({
   flags = [],
   containerClassNames = [],
   eligibleMembers = [],
+  onMoreInfoClick,
 }: ResultsCardProps) {
   // Mobile is below desktop breakpoint (0-767px)
   const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.desktop - 1}px)`);
@@ -103,10 +107,12 @@ export function ResultsCard({
         <div className="result-program-mobile-header">
           <div className="result-program-more-info-wrapper">
             <div className="result-program-more-info">
-              <Link to={link}>{name}</Link>
+              <Link to={link} onClick={onMoreInfoClick}>
+                {name}
+              </Link>
             </div>
             <div className="result-program-more-info-button">
-              <Link to={link} data-testid="more-info-link" aria-label={moreInfoLabel}>
+              <Link to={link} data-testid="more-info-link" aria-label={moreInfoLabel} onClick={onMoreInfoClick}>
                 <FormattedMessage id="more-info" defaultMessage="More Info" />
               </Link>
             </div>
@@ -115,7 +121,9 @@ export function ResultsCard({
         </div>
       ) : (
         <div className="result-program-more-info">
-          <Link to={link}>{name}</Link>
+          <Link to={link} onClick={onMoreInfoClick}>
+            {name}
+          </Link>
           <EligibleMemberTags members={eligibleMembers} />
         </div>
       )}
@@ -126,7 +134,7 @@ export function ResultsCard({
       </div>
       {!isMobile && (
         <div className="result-program-more-info-button">
-          <Link to={link} data-testid="more-info-link" aria-label={moreInfoLabel}>
+          <Link to={link} data-testid="more-info-link" aria-label={moreInfoLabel} onClick={onMoreInfoClick}>
             <FormattedMessage id="more-info" defaultMessage="More Info" />
           </Link>
         </div>
@@ -144,29 +152,10 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
   const estimatedAppTime = program.estimated_application_time;
   const programName = program.name;
   const programId = program.program_id;
-  const { validations, isAdminView } = useResultsContext();
   const { formData } = useContext(Context);
   const relationshipOptions = useConfig<{ [key: string]: FormattedMessageType }>('relationship_options');
   const showEligibilityTags = useFeatureFlag('eligibility_tags');
-
-  const containerClass = useMemo(() => {
-    const classNames = [];
-    const validation = findValidationForProgram(validations, program);
-
-    if (validation === undefined || !isAdminView) {
-      return [];
-    }
-
-    const passed = Number(validation.value) === program.estimated_value && validation.eligible === program.eligible;
-
-    if (passed) {
-      classNames.push('passed');
-    } else {
-      classNames.push('failed');
-    }
-
-    return classNames;
-  }, [isAdminView, validations, program]);
+  const track = useTrackEvent();
 
   const flags = useMemo(() => {
     const flags: ResultsCardFlag[] = [];
@@ -258,6 +247,12 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
 
   const nameString = intl.formatMessage({ id: programName.label, defaultMessage: programName.default_message });
 
+  const handleMoreInfoClick = () => {
+    track('screener_program_more_info', {
+      program_id: String(programId),
+    });
+  };
+
   return (
     <ResultsCard
       name={<ResultsTranslate translation={programName} />}
@@ -272,8 +267,8 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
       }}
       flags={flags}
       link={programPageLink}
-      containerClassNames={containerClass}
       eligibleMembers={eligibleMembers}
+      onMoreInfoClick={handleMoreInfoClick}
     />
   );
 };

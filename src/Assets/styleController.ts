@@ -1,6 +1,15 @@
 import { useLayoutEffect, useMemo, useState } from 'react';
 
-export type ThemeName = 'default' | 'twoOneOne' | 'twoOneOneNC' | 'co_energy' | 'nc_lanc';
+export type ThemeName =
+  | 'default'
+  | 'twoOneOne'
+  | 'twoOneOneNC'
+  | 'co_energy'
+  | 'nc_lanc'
+  | 'nc_ccla'
+  | 'cu_denver'
+  | 'uwgkc'
+  | 'twoOneOneChicago';
 
 export interface ITheme {
   primaryColor: string;
@@ -35,11 +44,6 @@ export interface ITheme {
     '--warning-background-color'?: string;
     '--warning-text-color'?: string;
 
-    // Typography
-    '--font-heading': string;
-    '--font-body': string;
-    'font-size': string;
-
     // Layout
     '--main-max-width': string;
     '--content-max-width': string;
@@ -48,7 +52,7 @@ export interface ITheme {
 
 export type Themes = Record<ThemeName, ITheme>;
 
-const themes: Themes = {
+export const themes: Themes = {
   default: {
     primaryColor: '#293457',
     secondaryColor: '#B85A27',
@@ -71,17 +75,12 @@ const themes: Themes = {
       '--hover-color': '#ECDEED',
 
       // Colors - Icons
-      '--icon-color': '#D6743F',
-      '--secondary-icon-color': '#D6743F',
+      '--icon-color': '#B85A27',
+      '--secondary-icon-color': '#B85A27',
 
       // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#B85A27',
-
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
 
       // Layout
       '--main-max-width': '1310px',
@@ -117,11 +116,6 @@ const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#005191',
 
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
-
       // Layout
       '--main-max-width': '1310px',
       '--content-max-width': '900px',
@@ -156,11 +150,6 @@ const themes: Themes = {
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#21296B',
 
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
-
       // Layout
       '--main-max-width': '1310px',
       '--content-max-width': '900px',
@@ -194,11 +183,6 @@ const themes: Themes = {
       // Colors - Interactive States
       '--option-card-hover-font-color': '#1D1C1E',
       '--active-border-color': '#8CCCF2',
-
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
 
       // Layout
       '--main-max-width': '1310px',
@@ -238,10 +222,157 @@ const themes: Themes = {
       '--warning-background-color': '#F5E6C8',
       '--warning-text-color': '#6b5d00',
 
-      // Typography
-      '--font-heading': "'Roboto Slab', serif",
-      '--font-body': "'Open Sans', sans-serif",
-      'font-size': '18px',
+      // Layout
+      '--main-max-width': '1310px',
+      '--content-max-width': '900px',
+    },
+  },
+  nc_ccla: {
+    primaryColor: '#0F2B5B',
+    secondaryColor: '#E87511',
+    midBlueColor: '#0F2B5B',
+    footerColor: '#41528C',
+    secondaryBackgroundColor: '#F7F7F7',
+    hoverColor: '#FFFFFF',
+    outlineHoverBackgroundColor: '#0F2B5B',
+    outlineHoverColor: '#FFFFFF',
+    progressBarColor: '#E87511',
+    cssVariables: {
+      // Colors - Primary & Secondary
+      '--primary-color': '#0F2B5B',
+      '--secondary-color': '#E87511',
+      '--midBlue-color': '#0F2B5B',
+      '--footer-color': '#41528C',
+
+      // Colors - Background
+      '--secondary-background-color': '#F7F7F7',
+      '--hover-color': '#FFFFFF',
+
+      // Colors - Icons
+      '--icon-color': '#E87511',
+      '--secondary-icon-color': '#000000',
+
+      // Colors - Interactive States
+      '--option-card-hover-font-color': '#1D1C1E',
+      '--active-border-color': '#E87511',
+
+      // Layout
+      '--main-max-width': '1310px',
+      '--content-max-width': '900px',
+    },
+  },
+  cu_denver: {
+    primaryColor: '#000000', // black — header bg, headings, primary buttons
+    secondaryColor: '#000000', // black — keep text/buttons high-contrast
+    midBlueColor: '#000000',
+    footerColor: '#000000',
+    secondaryBackgroundColor: '#FBFBFB',
+    hoverColor: '#F2ECD9', // light CU-gold tint
+    outlineHoverBackgroundColor: '#F2ECD9',
+    outlineHoverColor: '#000000',
+    progressBarColor: '#CFB87C', // CU gold accent
+    cssVariables: {
+      // Colors - Primary & Secondary
+      '--primary-color': '#000000',
+      '--secondary-color': '#000000',
+      '--midBlue-color': '#000000',
+      '--footer-color': '#000000',
+
+      // Colors - Background
+      '--secondary-background-color': '#FBFBFB',
+      '--hover-color': '#F2ECD9',
+
+      // Colors - Icons
+      '--icon-color': '#A2884E', // accessible dark gold on white
+      '--secondary-icon-color': '#000000',
+
+      // Colors - Interactive States
+      '--option-card-hover-font-color': '#1D1C1E',
+      '--active-border-color': '#CFB87C', // CU gold selection accent
+
+      // Layout
+      '--main-max-width': '1310px',
+      '--content-max-width': '900px',
+    },
+  },
+  // United Way of Greater Kansas City, whose 2-1-1 serves both sides of the KS/MO line, so this
+  // theme is shared by the ks and mo white labels. Colors come from United Way Brand
+  // Guidelines 2024 v1.3: primary blue leads (p.18 reserves the purple/green tertiaries for
+  // supporting roles), and every text pairing below is an approved combination from p.19.
+  uwgkc: {
+    primaryColor: '#21296B', // UW dark blue (Pantone 3581 C)
+    secondaryColor: '#0044B5', // UW blue (Pantone 2728 C)
+    midBlueColor: '#0044B5',
+    footerColor: '#21296B',
+    secondaryBackgroundColor: '#F7F7F7',
+    hoverColor: '#A7D2FF', // UW light blue tone (Pantone 2717 C)
+    outlineHoverBackgroundColor: '#A7D2FF',
+    outlineHoverColor: '#21296B',
+    progressBarColor: '#5082F0', // UW blue tone (Pantone 2718 C)
+    cssVariables: {
+      // Colors - Primary & Secondary
+      '--primary-color': '#21296B',
+      '--secondary-color': '#0044B5',
+      '--midBlue-color': '#0044B5',
+      '--footer-color': '#21296B',
+
+      // Colors - Background
+      '--secondary-background-color': '#F7F7F7',
+      '--hover-color': '#A7D2FF',
+
+      // Colors - Icons
+      // The guide's dark red rather than its primary #FD372C, which is only 3.7:1 on white.
+      '--icon-color': '#D12626',
+      '--secondary-icon-color': '#21296B',
+
+      // Colors - Interactive States
+      '--option-card-hover-font-color': '#1D1C1E',
+      '--active-border-color': '#0044B5',
+
+      // Layout
+      '--main-max-width': '1310px',
+      '--content-max-width': '900px',
+    },
+  },
+  // 211 Metro Chicago. Palette straight from their logo guidelines (Aug 2022):
+  // Blue Pantone 7685 #3E61A1, Red Pantone 179 #F04941.
+  //
+  // Blue carries text (6.1:1 on white, passes WCAG AA). Red is 3.7:1 — below
+  // the 4.5:1 text threshold but above the 3:1 non-text one, so it is confined
+  // to icons and accents and must never be used for body copy. That split
+  // mirrors the CO 211 theme, which also uses a red for --icon-color only, and
+  // it matches how the brand itself uses red: the Chicago stars, not the words.
+  twoOneOneChicago: {
+    primaryColor: '#3E61A1',
+    secondaryColor: '#3E61A1',
+    midBlueColor: '#3E61A1',
+    footerColor: '#3E61A1',
+    secondaryBackgroundColor: '#F7F7F7',
+    hoverColor: '#EFEFEF',
+    outlineHoverColor: '#FFFFFF',
+    outlineHoverBackgroundColor: '#3E61A1',
+    // 30% tint of the brand blue — the lightest step that still clears the
+    // 3:1 non-text contrast floor on white (3.2:1).
+    progressBarColor: '#7890BD',
+    cssVariables: {
+      // Colors - Primary & Secondary
+      '--primary-color': '#3E61A1',
+      '--secondary-color': '#3E61A1',
+      '--midBlue-color': '#3E61A1',
+      '--footer-color': '#3E61A1',
+
+      // Colors - Background
+      '--secondary-background-color': '#F7F7F7',
+      '--hover-color': '#EFEFEF',
+
+      // Colors - Icons
+      // Brand red, non-text use only (3.7:1 on white).
+      '--icon-color': '#F04941',
+      '--secondary-icon-color': '#3E61A1',
+
+      // Colors - Interactive States
+      '--option-card-hover-font-color': '#1D1C1E',
+      '--active-border-color': '#3E61A1',
 
       // Layout
       '--main-max-width': '1310px',

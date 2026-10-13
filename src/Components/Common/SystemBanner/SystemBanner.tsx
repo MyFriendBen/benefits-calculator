@@ -106,7 +106,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
               <Typography
                 variant="body1"
                 sx={{
-                  fontFamily: '"Open Sans", sans-serif',
+                  fontFamily: 'var(--font-body)',
                   lineHeight: 1.5,
                   fontWeight: 600,
                   fontSize: { xs: '0.875rem', sm: '1rem' },
@@ -122,7 +122,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
                 sx={{
                   fontSize: '0.9rem',
                   textDecoration: 'underline',
-                  fontFamily: '"Open Sans", sans-serif',
+                  fontFamily: 'var(--font-body)',
                   fontWeight: 600,
                   alignSelf: 'flex-start',
                   minWidth: 'auto',
@@ -144,7 +144,7 @@ const SystemBanner = ({ banners }: SystemBannerProps) => {
                 variant="body1"
                 component="div"
                 sx={{
-                  fontFamily: '"Open Sans", sans-serif',
+                  fontFamily: 'var(--font-body)',
                   lineHeight: 1.5,
                   fontSize: { xs: '0.875rem', sm: '1rem' },
                 }}

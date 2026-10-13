@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Controller } from 'react-hook-form';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { mfbZodResolver } from '../../Assets/analytics/mfbZodResolver';
 import { FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { PatternFormat } from 'react-number-format';
 import { FormattedMessageType } from '../../Types/Questions';
@@ -20,10 +20,13 @@ import { OverrideableTranslation } from '../../Assets/languageOptions';
 import QuestionDescription from '../QuestionComponents/QuestionDescription';
 import useStepForm from './stepForm';
 import { helperText } from '../HelperText/HelperText';
+import { useTrackEvent } from '../../Assets/analytics';
+import { getStepAnalyticsId } from '../../Assets/analytics/stepIds';
 
 export const Zipcode = () => {
   const { formData, getReferrer } = useContext(Context);
   const { uuid } = useParams();
+  const track = useTrackEvent();
   const backNavigationFunction = useDefaultBackNavigationFunction('zipcode');
   const { updateScreen } = useScreenApi();
 
@@ -33,14 +36,6 @@ export const Zipcode = () => {
   const countiesByZipcode = useConfig<{ [key: string]: { [key: string]: string } }>('counties_by_zipcode');
   const state = useConfig<{ name: string }>('state');
   const { formatMessage } = useIntl();
-  const checkCountyIsValid = ({ zipcode, county }: { zipcode: string; county: string }) => {
-    const validCounties = countiesByZipcode[zipcode];
-
-    if (validCounties && county in validCounties) {
-      return true;
-    }
-    return false;
-  };
 
   const numberMustBeFiveDigitsLongRegex = /^\d{5}$/;
   const errorMessage =
@@ -59,14 +54,20 @@ export const Zipcode = () => {
     )
     .trim()
     .regex(numberMustBeFiveDigitsLongRegex)
-    .refine((data) => data in countiesByZipcode, { message: errorMessage }); // refine does not use the error map
+    .refine((data) => data in countiesByZipcode, { message: errorMessage, params: { code: 'out_of_area' } }); // refine does not use the error map
 
   const formSchema = z
     .object({
       zipcode: zipcodeSchema,
       county: z.string(),
     })
-    .refine((data) => checkCountyIsValid(data), { message: 'Invalid county', path: ['county'] });
+    // County is a dropdown populated only with valid counties for the zip, so the
+    // only failure is not having picked one (still the disabled placeholder).
+    .refine((data) => data.county !== '' && data.county !== 'disabled-select', {
+      message: 'Please select a county',
+      path: ['county'],
+      params: { code: 'required' },
+    });
 
   type FormSchema = z.infer<typeof formSchema>;
 
@@ -78,7 +79,7 @@ export const Zipcode = () => {
     setValue,
     getValues,
   } = useStepForm<FormSchema>({
-    resolver: zodResolver(formSchema),
+    resolver: mfbZodResolver(formSchema),
     defaultValues: {
       zipcode: formData.zipcode ?? '',
       county: formData.county ?? 'disabled-select',
@@ -179,7 +180,18 @@ export const Zipcode = () => {
           />
           {state.name}
           <FormattedMessage id="questions.zipcode.description.2" defaultMessage=", please click " />
-          <a href="/select-state" className="link-color">
+          <a
+            href="/select-state"
+            className="link-color"
+            onClick={() =>
+              track('screener_link_click', {
+                link_name: 'Other State Options',
+                url: '/select-state',
+                screener_step_name: getStepAnalyticsId('zipcode'),
+                link_location: 'zip_code_inline',
+              })
+            }
+          >
             <FormattedMessage id="questions.zipcode.description.link" defaultMessage="here" />
           </a>
           <FormattedMessage id="questions.zipcode.description.3" defaultMessage=" for other state options." />

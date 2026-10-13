@@ -1,7 +1,7 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { HouseholdData } from '../../../../Types/FormData';
 import { Box, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -9,8 +9,7 @@ import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
 import HouseholdMemberSummaryCards from './HouseholdMemberSummaryCards';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { SubmitHandler, useFieldArray, useWatch } from 'react-hook-form';
-import { useAgeCalculation } from '../../../AgeCalculation/useAgeCalculation';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { mfbZodResolver } from '../../../../Assets/analytics/mfbZodResolver';
 import PrevAndContinueButtons from '../../../PrevAndContinueButtons/PrevAndContinueButtons';
 import useScreenApi from '../../../../Assets/updateScreen';
 import '../styles/IncomeSection.css';
@@ -29,6 +28,8 @@ import SpecialConditionsSection from '../sections/SpecialConditionsSection';
 import StudentEligibilitySection from '../sections/StudentEligibilitySection';
 import IncomeSection from '../sections/IncomeSection';
 import BasicInfoSection from '../sections/BasicInfoSection';
+import { useTrackEvent } from '../../../../Assets/analytics';
+import { HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
 
 const HouseholdMemberForm = () => {
   const isEnergyCalculator = useIsEnergyCalculator();
@@ -67,6 +68,21 @@ const HouseholdMemberForm = () => {
 
   const redirectToConfirmationPage = useShouldRedirectToConfirmation();
   const currentStepId = useStepNumber(questionName);
+  const track = useTrackEvent();
+
+  // Per-member detail page (pages 1..N): emits the 'member-details' sub-slug,
+  // re-firing per member as pageNumber changes. complete/back use the same slug.
+  useEffect(() => {
+    track('screener_form_step', {
+      screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberDetails,
+      screener_step_number: currentStepId,
+      step_action: 'view',
+      // 0-based member ordinal, shared with the income actions fired on this
+      // same member-detail page (see screener_income_source).
+      member_index: currentMemberIndex,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageNumber]);
 
   // NAVIGATION
   const { navigateBack, navigateNext } = useHouseholdMembersNavigation({
@@ -99,9 +115,10 @@ const HouseholdMemberForm = () => {
     clearErrors,
     reset,
   } = useStepForm<any>({
-    resolver: zodResolver(formSchema),
+    resolver: mfbZodResolver(formSchema),
     defaultValues,
     questionName,
+    stepNameOverride: HOUSEHOLD_SUBSTEP_IDS.memberDetails,
     // Provide empty override to prevent automatic navigation - we'll navigate manually in formSubmitHandler
     onSubmitSuccessfulOverride: () => {},
   });
@@ -111,11 +128,6 @@ const HouseholdMemberForm = () => {
     name: 'incomeStreams',
   });
 
-  // AGE CALCULATION
-  const { calculateCurrentAgeStatus } = useAgeCalculation(watch);
-
-  const watchBirthMonth = useWatch({ control, name: 'birthMonth' });
-  const watchBirthYear = useWatch({ control, name: 'birthYear' });
   const watchIsStudent = useWatch({ control, name: 'conditions.student' });
   const watchIsDisabled = useWatch({ control, name: 'conditions.disabled' });
 
@@ -128,10 +140,6 @@ const HouseholdMemberForm = () => {
     setValue,
     getValues,
     reset,
-    append,
-    calculateCurrentAgeStatus,
-    watchBirthMonth,
-    watchBirthYear,
     watchIsStudent,
     watchIsDisabled,
   });
@@ -161,10 +169,20 @@ const HouseholdMemberForm = () => {
     // Wait for the API call to complete and context to update before navigating
     await updateScreen(updatedFormData);
 
+    // This page navigates manually (onSubmitSuccessfulOverride) instead of through
+    // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
+    track('screener_form_step', {
+      screener_step_name: HOUSEHOLD_SUBSTEP_IDS.memberDetails,
+      screener_step_number: currentStepId,
+      step_action: 'complete',
+    });
+
     // Now navigate after data is saved
     navigateNext();
   };
 
+  // Note: screener_form_error is tracked centrally in useStepForm (stepForm.tsx),
+  // which every screener step's form goes through — no need to duplicate it here.
   const handleFormError = (formErrors: typeof errors) => {
     scrollToFirstError(formErrors, workflowType);
   };
@@ -290,6 +308,7 @@ const HouseholdMemberForm = () => {
         append={append}
         remove={remove}
         setValue={setValue}
+        clearErrors={clearErrors}
         incomeCategories={incomeCategories}
         incomeOptions={incomeOptions}
         frequencyMenuItems={frequencyMenuItems}
@@ -310,7 +329,12 @@ const HouseholdMemberForm = () => {
 
       <form onSubmit={handleSubmit(formSubmitHandler, handleFormError)}>
         {renderFormSections()}
-        <PrevAndContinueButtons backNavigationFunction={navigateBack} />
+        {/* Promote Continue to the primary action on the income step. */}
+        <PrevAndContinueButtons
+          backNavigationFunction={navigateBack}
+          continueVariant="contained"
+          stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberDetails}
+        />
       </form>
     </main>
   );

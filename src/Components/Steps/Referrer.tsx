@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Controller, SubmitHandler } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { mfbZodResolver } from '../../Assets/analytics/mfbZodResolver';
 import {
   CircularProgress,
   Divider,
@@ -51,6 +51,7 @@ export default function ReferralSourceStep() {
         defaultMessage: 'Please type in your referral source',
       }),
       path: ['otherReferrer'],
+      params: { code: 'required' },
     })
     .transform((val) => {
       if (val.referralSource === 'other') {
@@ -75,7 +76,7 @@ export default function ReferralSourceStep() {
     handleSubmit,
     watch,
   } = useStepForm<FormSchema>({
-    resolver: zodResolver(formSchema),
+    resolver: mfbZodResolver(formSchema),
     defaultValues: {
       referralSource: isOtherSource ? 'other' : formData.referralSource ?? '',
       otherReferrer: isOtherSource ? formData.referralSource ?? '' : '',

@@ -21,6 +21,7 @@ jest.mock('../../../../Assets/updateScreen', () => ({
 
 jest.mock('../../../../Assets/stepDirectory', () => ({
   useStepNumber: () => 5,
+  useStepName: (_stepNumber: number) => undefined,
 }));
 
 jest.mock('../../../QuestionComponents/questionHooks', () => ({
@@ -51,12 +52,6 @@ jest.mock('../hooks/useHouseholdMemberConfig', () => ({
 
 jest.mock('../hooks/useHouseholdMemberFormEffects', () => ({
   useHouseholdMemberFormEffects: () => {},
-}));
-
-jest.mock('../../../AgeCalculation/useAgeCalculation', () => ({
-  useAgeCalculation: () => ({
-    calculateCurrentAgeStatus: () => ({ isUnder16: false }),
-  }),
 }));
 
 // Mock heavy section components — we only care about whether BasicInfoSection renders

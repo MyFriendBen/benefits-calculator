@@ -2,6 +2,14 @@
   padding: 1rem;
 }
 
+/* `.results-card-body` already adds side padding, so drop it here to avoid doubling.
+   No top padding either: the header's rule below supplies the gap, so the divider
+   lands at the same height as the other tabs'. Scoped to that ancestor so CESN's
+   standalone page (no such wrapper) keeps its original padding. */
+.results-card-body .more-help-container {
+  padding: 0 0 1rem;
+}
+
 .back-button {
   padding: 0.25rem 0.75rem;
   margin-bottom: 1rem;
@@ -16,6 +24,28 @@
 
 .more-help-header {
   color: var(--primary-color);
+  /* Tag varies: <h2> in the tab, <h1> standalone (see isStandalonePage). Pinned to the
+     old always-<h1> metrics so neither case shows a visual diff. */
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+
+/* Inside the results tabs, this section matches the other tabs' treatment: a light
+   rule above the heading rather than a heavy one below it, at the same heading size
+   as the Long-Term Benefits and Additional Resources tabs. Scoped to the tab
+   ancestor so CESN's standalone page keeps its larger <h1> and underline. */
+.results-card-body .underline-header-container {
+  border-bottom: none;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  /* Separates the section title from the resource list beneath it. */
+  margin-bottom: 1.25rem;
+}
+
+.results-card-body .more-help-header {
+  font-size: var(--results-font-heading);
+  margin: 0;
 }
 
 .resource-card-article {
@@ -29,8 +59,29 @@
   white-space: pre-line;
 }
 
+/* Was an <h1>; demoted to <h3>. font-size is already pinned above, so only the default
+   margin needed restoring to keep the rendering identical. */
+.resource-header {
+  margin: 0.67em 0;
+}
+
 .resource-desc {
   font-style: italic;
+}
+
+/* In the results tab, the resource name sits tight to its description; the shared
+   0.67em margins above stack into a large gap otherwise. Bold at the body step
+   rather than a larger size, so the section title above still outranks it.
+   Scoped to the tab so CESN's standalone page keeps its original spacing. */
+.results-card-body .resource-header {
+  font-size: var(--results-font-body);
+  font-weight: 700;
+  margin: 0 0 0.125rem;
+}
+
+.results-card-body .resource-desc {
+  font-size: var(--results-font-body);
+  margin: 0;
 }
 
 .resource-link-container {
@@ -41,4 +92,13 @@
   text-decoration: none;
   color: var(--icon-color);
   display: block;
+}
+
+/* Supporting detail beside the description, not a heading — it inherits the 1rem
+   default otherwise, which puts it above the body copy it belongs to. The orange
+   already carries the emphasis, so it needs no extra weight. Scoped to the tab so
+   CESN's standalone page keeps its original sizing. */
+.results-card-body .resource-phone {
+  font-size: var(--results-font-body);
+  margin: 0.25rem 0 0;
 }

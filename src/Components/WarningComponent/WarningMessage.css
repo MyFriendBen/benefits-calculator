@@ -9,13 +9,12 @@
   width: 100%;
 }
 
-.warning-icon,
-.warning-icon path {
+.warning-icon {
   min-width: 2rem;
   min-height: 2rem;
   width: 2rem;
   height: 2rem;
-  fill: #ff0000;
+  color: #ff0000;
 }
 
 .warning-message-link {

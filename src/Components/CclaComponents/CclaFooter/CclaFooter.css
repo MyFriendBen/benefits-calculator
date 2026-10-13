@@ -1,0 +1,59 @@
+.ccla-font {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 550;
+  line-height: 1.1em;
+  word-spacing: 1px;
+}
+
+.flex-row {
+  max-width: var(--main-max-width);
+  margin: 0 auto;
+  justify-content: center;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-row-links {
+  display: flex;
+  flex-direction: row;
+}
+
+.ccla-footer-paragraph {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.ccla-footer-paragraph .MuiTypography-root {
+  font-size: 0.625rem;
+}
+
+.first-paragraph {
+  font-style: italic;
+  padding-top: 1rem;
+}
+
+.second-paragraph {
+  padding-bottom: 1rem;
+}
+
+.copyright-container {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.MuiTypography-root.privacy-policy-links {
+  color: #6b6b6b;
+  font-weight: 500;
+  font-size: 0.68rem;
+  font-family: var(--font-body);
+}
+
+@media (max-width: 870px) {
+  .flex-row,
+  .flex-row-links {
+    flex-direction: column;
+    align-items: center;
+  }
+}

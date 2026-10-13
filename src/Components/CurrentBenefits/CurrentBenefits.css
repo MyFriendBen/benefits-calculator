@@ -10,12 +10,12 @@
   font-size: 1.5rem;
   font-weight: 700;
   line-height: normal;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
 }
 
 .program-name {
   padding: 0;
-  font-family: 'Roboto Slab', serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.25rem;
 }
@@ -38,16 +38,16 @@ a.program-name:hover {
   margin: 3rem 0;
 }
 
-/* Lucide icons - use currentColor to inherit the icon color */
-.category-heading-icon.category-lucide-icon svg {
+/* Every category-heading icon is a Lucide <svg>; color it directly. */
+.category-heading-icon svg {
   height: 2rem;
-  color: var(--icon-color) !important;
+  color: var(--icon-color);
 }
 
-.category-heading-icon.category-lucide-icon svg,
-.category-heading-icon.category-lucide-icon svg * {
-  fill: none !important;
-  stroke: currentColor !important;
+.category-heading-icon svg,
+.category-heading-icon svg * {
+  fill: none;
+  stroke: currentColor;
 }
 
 /**

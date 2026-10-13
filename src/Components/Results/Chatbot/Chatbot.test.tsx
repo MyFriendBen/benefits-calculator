@@ -1,0 +1,1578 @@
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { ReactNode } from 'react';
+import { IntlProvider } from 'react-intl';
+import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
+import { ChatbotProvider } from './Chatbot';
+import { Context } from '../../Wrapper/Wrapper';
+import type { WrapperContext } from '../../../Types/WrapperContext';
+import {
+  startAssistantConversation,
+  getAssistantHistory,
+  sendAssistantMessage,
+  rateAssistantMessage,
+  AssistantVisibleProgram,
+} from '../../../apiCalls';
+
+// requireActual so a future import of a third export from apiCalls doesn't silently
+// become undefined at runtime.
+jest.mock('../../../apiCalls', () => ({
+  ...jest.requireActual('../../../apiCalls'),
+  startAssistantConversation: jest.fn(),
+  getAssistantHistory: jest.fn(),
+  sendAssistantMessage: jest.fn(),
+  rateAssistantMessage: jest.fn(),
+}));
+
+const mockTrack = jest.fn();
+jest.mock('../../../Assets/analytics', () => ({
+  useTrackEvent: () => mockTrack,
+}));
+
+// Lets the crash-containment tests (MFB-2222) make one render path throw on demand.
+// Both are off by default, so every other test renders the real thing.
+const mockCrash = { parseMarkdown: false, chatIcon: false, thumbUpIcon: false, thumbDownFilledIcon: false };
+jest.mock('../../../utils/parseMarkdown', () => {
+  const actual = jest.requireActual('../../../utils/parseMarkdown');
+  return {
+    ...actual,
+    parseMarkdown: (content: string, primaryColor: string) => {
+      if (mockCrash.parseMarkdown && content.includes('BOOM')) throw new Error('parse failed');
+      return actual.parseMarkdown(content, primaryColor);
+    },
+  };
+});
+jest.mock('@mui/icons-material/ThumbUpOffAlt', () => {
+  const actual = jest.requireActual('@mui/icons-material/ThumbUpOffAlt');
+  const { createElement } = jest.requireActual('react');
+  return {
+    __esModule: true,
+    default: (props: object) => {
+      if (mockCrash.thumbUpIcon) throw new Error('rating icon failed');
+      return createElement(actual.default, props);
+    },
+  };
+});
+// The filled thumbs-down only renders once a reply is rated down, so this one throws
+// in response to a click rather than on first render.
+jest.mock('@mui/icons-material/ThumbDownAlt', () => {
+  const actual = jest.requireActual('@mui/icons-material/ThumbDownAlt');
+  const { createElement } = jest.requireActual('react');
+  return {
+    __esModule: true,
+    default: (props: object) => {
+      if (mockCrash.thumbDownFilledIcon) throw new Error('rating icon failed');
+      return createElement(actual.default, props);
+    },
+  };
+});
+jest.mock('@mui/icons-material/Chat', () => {
+  const actual = jest.requireActual('@mui/icons-material/Chat');
+  const { createElement } = jest.requireActual('react');
+  return {
+    __esModule: true,
+    default: (props: object) => {
+      if (mockCrash.chatIcon) throw new Error('icon failed');
+      return createElement(actual.default, props);
+    },
+  };
+});
+
+const mockStart = startAssistantConversation as jest.MockedFunction<typeof startAssistantConversation>;
+const mockHistory = getAssistantHistory as jest.MockedFunction<typeof getAssistantHistory>;
+const mockSend = sendAssistantMessage as jest.MockedFunction<typeof sendAssistantMessage>;
+const mockRate = rateAssistantMessage as jest.MockedFunction<typeof rateAssistantMessage>;
+
+const SCREEN_UUID = 'c0ffee00-0000-4000-8000-000000000001';
+
+const SNAP = { name_abbreviated: 'co_snap', value: 6636 };
+const MEDICAID = { name_abbreviated: 'co_medicaid', value: 5280 };
+const WIC = { name_abbreviated: 'co_wic', value: 1224 };
+
+// The widget reads only `locale` and the white label's `language_options` from the app
+// context (via useSupportedLocale). The codes are the config's, e.g. 'zh-hans', which is
+// why `locale` is a plain string here rather than the stale `Language` union.
+const LANGUAGE_OPTIONS = { 'en-us': 'English', es: 'Español', 'pt-br': 'Português Brasileiro', 'zh-hans': '中文' };
+
+// Results.tsx computes the greeting total separately (calculateGreetingTotal); with no
+// lump sums or overrides in play, that equals the sum of the visible values.
+const sumValues = (visiblePrograms?: AssistantVisibleProgram[]) =>
+  (visiblePrograms ?? []).reduce((sum, program) => sum + program.value, 0);
+
+const chatbotUi = (
+  visiblePrograms?: AssistantVisibleProgram[],
+  locale = 'en-us',
+  greetingTotal = sumValues(visiblePrograms),
+  children?: ReactNode,
+) => (
+  <Context.Provider value={{ locale, config: { language_options: LANGUAGE_OPTIONS } } as unknown as WrapperContext}>
+    <IntlProvider locale="en" defaultLocale="en">
+      <MemoryRouter initialEntries={[`/co/${SCREEN_UUID}/results/benefits`]}>
+        <Routes>
+          <Route
+            path="/:whiteLabel/:uuid/results/benefits"
+            element={
+              <ChatbotProvider visiblePrograms={visiblePrograms} greetingTotal={greetingTotal}>
+                {children}
+              </ChatbotProvider>
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    </IntlProvider>
+  </Context.Provider>
+);
+
+const renderChatbot = (visiblePrograms?: AssistantVisibleProgram[], locale?: string, greetingTotal?: number) =>
+  render(chatbotUi(visiblePrograms, locale, greetingTotal));
+
+/** Open the widget and send a message — the only thing that starts a conversation. */
+const openAndSend = async (text = 'hello') => {
+  await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+  const input = screen.getByRole('textbox');
+  await userEvent.type(input, text);
+  await userEvent.keyboard('{Enter}');
+};
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  // Auto-open dismissal is remembered per screen in sessionStorage (MFB-1737);
+  // clear it so tests don't leak state into each other.
+  sessionStorage.clear();
+  // jsdom doesn't implement scrollIntoView; the widget calls it on every message.
+  window.HTMLElement.prototype.scrollIntoView = jest.fn();
+  mockStart.mockResolvedValue({
+    conversation_id: 'conv-1',
+    screen_uuid: SCREEN_UUID,
+    status: 'active',
+    mode: 'live',
+    prompt_version: 'v3',
+    messages: [],
+  });
+  // No prior conversation is the default; the restore tests below override it.
+  mockHistory.mockResolvedValue(null);
+  mockSend.mockResolvedValue({
+    user_message: { message_id: 'u1', role: 'user', text: 'hello', created_at: '' },
+    assistant_message: { message_id: 'a1', role: 'assistant', text: 'hi there', created_at: '' },
+  });
+  mockRate.mockResolvedValue(undefined);
+});
+
+describe('ChatbotProvider visiblePrograms (MFB-1427)', () => {
+  it('sends the rendered program list, with displayed values, when starting a conversation', async () => {
+    // BenBot may only recommend from the list it's given and quotes the values in it,
+    // so both have to be what the user is actually looking at. Several results-page
+    // filters (citizenship, mutual exclusions, per-member insurance) run client-side
+    // and can't be reproduced from the server's eligibility snapshot — and the
+    // snapshot's value sums all members, including ones already covered.
+    renderChatbot([SNAP, MEDICAID, WIC]);
+
+    await openAndSend();
+
+    await waitFor(() => expect(mockStart).toHaveBeenCalled());
+    expect(mockStart).toHaveBeenCalledWith(SCREEN_UUID, 'en-us', [SNAP, MEDICAID, WIC]);
+  });
+
+  it('sends an empty list when the results page is showing nothing', async () => {
+    // Distinct from omitting the field: an empty results page is the case where the
+    // assistant must recommend nothing at all, so it has to be reported explicitly.
+    renderChatbot([]);
+
+    await openAndSend();
+
+    await waitFor(() => expect(mockStart).toHaveBeenCalled());
+    expect(mockStart).toHaveBeenCalledWith(SCREEN_UUID, 'en-us', []);
+  });
+
+  it('sends undefined — not an empty list — when no programs are passed', async () => {
+    // The two are NOT interchangeable to benefits-api: [] asserts "the page is
+    // showing nothing" (BenBot recommends nothing), while undefined means "no list
+    // available" and selects the server-side fallback filters. Defaulting to []
+    // would silently blank the assistant for any caller that omits the prop.
+    renderChatbot();
+
+    await openAndSend();
+
+    await waitFor(() => expect(mockStart).toHaveBeenCalled());
+    expect(mockStart).toHaveBeenCalledWith(SCREEN_UUID, 'en-us', undefined);
+  });
+
+  it('starts only one conversation across repeated messages', async () => {
+    // Threading visiblePrograms into ensureConversation's dependency list must not
+    // break the existing dedup (conversationIdRef / startPromiseRef), or every
+    // message would open a fresh conversation. Needs two sends — with one, the
+    // short-circuit is never exercised.
+    renderChatbot([SNAP]);
+
+    await openAndSend('first');
+    await waitFor(() => expect(mockSend).toHaveBeenCalledTimes(1));
+
+    await userEvent.type(screen.getByRole('textbox'), 'second');
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => expect(mockSend).toHaveBeenCalledTimes(2));
+
+    expect(mockStart).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-posts the list when it changes after the conversation exists (MFB-1737)', async () => {
+    // The results subtree no longer remounts on filter changes (Results.tsx), so an
+    // open conversation outlives them. The widget re-POSTs the idempotent start
+    // endpoint on a list change so ai-service's stored snapshot tracks the screen.
+    // A non-default locale, so a refresh that dropped back to 'en-us' would show.
+    const { rerender } = render(chatbotUi([SNAP, MEDICAID], 'pt-br'));
+
+    await openAndSend();
+    // mockSend being dispatched proves ensureConversation resolved, i.e. the
+    // conversation id is set — the precondition for a refresh.
+    await waitFor(() => expect(mockSend).toHaveBeenCalledTimes(1));
+    expect(mockStart).toHaveBeenCalledWith(SCREEN_UUID, 'pt-br', [SNAP, MEDICAID]);
+
+    rerender(chatbotUi([SNAP], 'pt-br'));
+
+    await waitFor(() => expect(mockStart).toHaveBeenCalledTimes(2));
+    expect(mockStart).toHaveBeenLastCalledWith(SCREEN_UUID, 'pt-br', [SNAP]);
+    // A refresh is not a new conversation: no messages were sent.
+    expect(mockSend).toHaveBeenCalledTimes(1);
+  });
+
+  it('defers a refresh that lands mid-send until the send completes', async () => {
+    // A refresh must not interleave with a message round-trip, but it must not be
+    // dropped either — that would leave ai-service's snapshot stale until the next
+    // page load.
+    let resolveSend!: (value: Awaited<ReturnType<typeof sendAssistantMessage>>) => void;
+    mockSend.mockImplementationOnce(() => new Promise((resolve) => (resolveSend = resolve)));
+
+    const { rerender } = render(chatbotUi([SNAP, MEDICAID]));
+
+    await openAndSend();
+    await waitFor(() => expect(mockSend).toHaveBeenCalledTimes(1));
+
+    // The send is still in flight; the list change must be queued, not posted.
+    rerender(chatbotUi([SNAP]));
+    expect(mockStart).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveSend({
+        user_message: { message_id: 'u1', role: 'user', text: 'hello', created_at: '' },
+        assistant_message: { message_id: 'a1', role: 'assistant', text: 'hi there', created_at: '' },
+      });
+    });
+
+    await waitFor(() => expect(mockStart).toHaveBeenCalledTimes(2));
+    expect(mockStart).toHaveBeenLastCalledWith(SCREEN_UUID, 'en-us', [SNAP]);
+  });
+});
+
+describe('ChatbotProvider locale', () => {
+  it("puts the household's chosen language in the start request body", async () => {
+    // Runs the real start call against a stubbed fetch, because the bug this guards was
+    // in what reached the wire: the widget passed `undefined`, JSON.stringify dropped
+    // the key, and benefits-api defaulted every conversation to en-US.
+    const { startAssistantConversation: realStart } = jest.requireActual('../../../apiCalls');
+    mockStart.mockImplementation(realStart);
+    const fetchSpy = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        conversation_id: 'conv-1',
+        screen_uuid: SCREEN_UUID,
+        status: 'active',
+        mode: 'live',
+        prompt_version: 'v3',
+        messages: [],
+      }),
+    });
+    const originalFetch = global.fetch;
+    global.fetch = fetchSpy;
+    try {
+      renderChatbot([SNAP], 'es');
+
+      await openAndSend();
+
+      const startCall = await waitFor(() => {
+        const call = fetchSpy.mock.calls.find(
+          ([url, init]) =>
+            String(url).endsWith(`/api/screens/${SCREEN_UUID}/assistant/conversations/`) && init?.method === 'POST',
+        );
+        expect(call).toBeDefined();
+        return call;
+      });
+      // The app's own code, not a BCP-47 tag: it matches screener_screen.request_language_code.
+      expect(JSON.parse(startCall[1].body)).toMatchObject({ locale: 'es', visible_programs: [SNAP] });
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
+
+  it('falls back to en-us for a stored code this white label does not offer', async () => {
+    // Wrapper returns a localStorage language as-is, so a code from an older config
+    // ('zh', now 'zh-hans') can still be the app locale. The screen's own language code
+    // has already fallen back by the time this runs, so sending the raw value would
+    // break the "compare without a mapping" goal.
+    renderChatbot([SNAP], 'zh');
+
+    await openAndSend();
+
+    await waitFor(() => expect(mockStart).toHaveBeenCalled());
+    expect(mockStart).toHaveBeenCalledWith(SCREEN_UUID, 'en-us', [SNAP]);
+  });
+
+  it('does not refresh when only the language changes, but sends the new one next time', async () => {
+    // ai-service stores the locale only when it creates a conversation, so a refresh
+    // triggered by a language switch would rebuild and re-post the whole context for
+    // nothing. The next real refresh should still carry the current language.
+    // One array instance, so the rerender changes the language and nothing else.
+    const programs = [SNAP, MEDICAID];
+    const { rerender } = render(chatbotUi(programs, 'en-us'));
+
+    await openAndSend();
+    await waitFor(() => expect(mockSend).toHaveBeenCalledTimes(1));
+    expect(mockStart).toHaveBeenCalledTimes(1);
+
+    rerender(chatbotUi(programs, 'es'));
+    // Flush effects; a refresh would have been dispatched synchronously from one.
+    await act(async () => {});
+    expect(mockStart).toHaveBeenCalledTimes(1);
+
+    rerender(chatbotUi([SNAP], 'es'));
+
+    await waitFor(() => expect(mockStart).toHaveBeenCalledTimes(2));
+    expect(mockStart).toHaveBeenLastCalledWith(SCREEN_UUID, 'es', [SNAP]);
+  });
+});
+
+describe('auto-open (MFB-1737)', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    delete (window as unknown as { matchMedia?: unknown }).matchMedia;
+  });
+
+  const mockSmallScreen = () => {
+    (window as unknown as { matchMedia: unknown }).matchMedia = jest.fn().mockReturnValue({
+      matches: true,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    });
+  };
+
+  it('opens itself after the delay, without an API call and without stealing focus', () => {
+    renderChatbot([SNAP, MEDICAID, WIC]);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    // The greeting is templated client-side; the conversation (and any model
+    // call) starts only when the user replies.
+    expect(mockStart).not.toHaveBeenCalled();
+    // Auto-open must never steal focus: it would pop the mobile keyboard over
+    // the results and yank screen-reader users into the dialog.
+    expect(screen.getByRole('textbox')).not.toHaveFocus();
+  });
+
+  it('shows a greeting templated from the visible programs', () => {
+    renderChatbot([SNAP, MEDICAID, WIC]);
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveTextContent('3 programs');
+    expect(dialog).toHaveTextContent('$13,140'); // 6636 + 5280 + 1224, annual
+  });
+
+  it('quotes the greeting total it is given, not the sum of the visible values (MFB-2202)', () => {
+    // e.g. a $7,475 one-time lump sum on the page: counted as a program, left out of
+    // the "per year" figure.
+    renderChatbot([SNAP, { name_abbreviated: 'ks_wap', value: 7475 }], undefined, 6636);
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveTextContent('2 programs');
+    expect(dialog).toHaveTextContent('$6,636');
+    expect(dialog).not.toHaveTextContent('$14,111');
+  });
+
+  it('falls back to the generic welcome when nothing counts toward the greeting total', () => {
+    // Every visible program is a lump sum or an override: "worth about $0 per year"
+    // would be wrong, not just unhelpful.
+    renderChatbot([{ name_abbreviated: 'wa_wap', value: 7669 }], undefined, 0);
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveTextContent(/ask me anything/i);
+    expect(dialog).not.toHaveTextContent('$0');
+  });
+
+  it('does not auto-open when the results page is showing zero programs', () => {
+    // [] means "the page is showing nothing" — a bot with nothing to recommend
+    // shouldn't announce itself. undefined ("no list available") still opens.
+    renderChatbot([]);
+
+    act(() => {
+      jest.advanceTimersByTime(10000);
+    });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('still auto-opens, with the generic welcome, when no list is available', () => {
+    renderChatbot(undefined);
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(screen.getByRole('dialog')).toHaveTextContent(/best place to start/i);
+  });
+
+  it('stays closed once dismissed, including across remounts of the same screen', () => {
+    const { unmount } = renderChatbot([SNAP]);
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+    fireEvent.click(screen.getByRole('button', { name: /close chat/i }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    act(() => {
+      jest.advanceTimersByTime(10000);
+    });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    // Remount (e.g. navigating to a program page and back) must respect the
+    // dismissal — this is what sessionStorage is for.
+    unmount();
+    renderChatbot([SNAP]);
+    act(() => {
+      jest.advanceTimersByTime(10000);
+    });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('auto-opens to the peek state on small screens and expands on input focus', () => {
+    mockSmallScreen();
+    renderChatbot([SNAP]);
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(screen.getByRole('dialog').className).toContain('chatbot-panel--peek');
+    expect(screen.getByRole('button', { name: /expand chat/i })).toBeInTheDocument();
+
+    fireEvent.focus(screen.getByRole('textbox'));
+
+    expect(screen.getByRole('dialog').className).not.toContain('chatbot-panel--peek');
+    expect(screen.queryByRole('button', { name: /expand chat/i })).not.toBeInTheDocument();
+  });
+});
+
+describe('ChatbotProvider history restore', () => {
+  const priorConversation = {
+    conversation_id: 'conv-prior',
+    screen_uuid: SCREEN_UUID,
+    status: 'active',
+    mode: 'live',
+    prompt_version: 'v3',
+    messages: [
+      { message_id: 'm1', role: 'user' as const, text: 'what about WIC?', created_at: '' },
+      { message_id: 'm2', role: 'assistant' as const, text: 'here is how WIC works', created_at: '' },
+    ],
+  };
+
+  const open = () => userEvent.click(screen.getByRole('button', { name: /chat/i }));
+
+  it('shows a returning household their transcript when the widget opens', async () => {
+    // The emailed results link brings them back to the same screen_uuid, so their
+    // conversation is still on the server. Before this, nothing fetched it until they
+    // sent another message, so they landed on the generic welcome.
+    mockHistory.mockResolvedValue(priorConversation);
+    renderChatbot([SNAP]);
+
+    await open();
+
+    expect(await screen.findByText('what about WIC?')).toBeInTheDocument();
+    expect(screen.getByText('here is how WIC works')).toBeInTheDocument();
+  });
+
+  it('reads history without starting a conversation', async () => {
+    // The whole point of the separate read endpoint: the widget opens on nearly every
+    // results page, and the start call would mint an empty conversation for every
+    // visitor who never types.
+    mockHistory.mockResolvedValue(priorConversation);
+    renderChatbot([SNAP]);
+
+    await open();
+    await screen.findByText('what about WIC?');
+
+    expect(mockStart).not.toHaveBeenCalled();
+  });
+
+  it('still calls the start endpoint on the first message, so context is refreshed', async () => {
+    // The regression guard for the tempting optimization: caching the restored
+    // conversation_id would make ensureConversation return early and skip the start
+    // call — which is what refreshes ai-service's stored context snapshot. A returning
+    // household's assistant would then reason from the program list as it was on their
+    // last visit, which is the MFB-1427 failure via the back door.
+    mockHistory.mockResolvedValue(priorConversation);
+    renderChatbot([SNAP, WIC]);
+
+    await open();
+    await screen.findByText('what about WIC?');
+    await userEvent.type(screen.getByRole('textbox'), 'and SNAP?');
+    await userEvent.keyboard('{Enter}');
+
+    await waitFor(() => expect(mockStart).toHaveBeenCalledWith(SCREEN_UUID, 'en-us', [SNAP, WIC]));
+  });
+
+  it('leaves the welcome in place when there is no history', async () => {
+    mockHistory.mockResolvedValue(null);
+    renderChatbot([SNAP]);
+
+    await open();
+
+    await waitFor(() => expect(mockHistory).toHaveBeenCalled());
+    expect(screen.queryByText('what about WIC?')).not.toBeInTheDocument();
+  });
+
+  it('survives a failed history read without surfacing an error', async () => {
+    // Best-effort: a failed restore should look exactly like having no history, not
+    // like a broken assistant.
+    mockHistory.mockRejectedValue(new Error('500 Server Error'));
+    renderChatbot([SNAP]);
+
+    await open();
+
+    await waitFor(() => expect(mockHistory).toHaveBeenCalled());
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    expect(screen.queryByText(/something went wrong/i)).not.toBeInTheDocument();
+  });
+
+  it('does not drop a message the user sent before history arrived', async () => {
+    // A fast first send can land before the read resolves; overwriting state at that
+    // point would discard what they just typed.
+    let resolveHistory: (value: typeof priorConversation) => void = () => {};
+    mockHistory.mockReturnValue(
+      new Promise((resolve) => {
+        resolveHistory = resolve;
+      }),
+    );
+    renderChatbot([SNAP]);
+
+    await open();
+    await userEvent.type(screen.getByRole('textbox'), 'urgent question');
+    await userEvent.keyboard('{Enter}');
+    await screen.findByText('urgent question');
+
+    resolveHistory(priorConversation);
+
+    await waitFor(() => expect(screen.getByText('urgent question')).toBeInTheDocument());
+    expect(screen.queryByText('what about WIC?')).not.toBeInTheDocument();
+  });
+
+  it('reads history once per mount, not on every open', async () => {
+    mockHistory.mockResolvedValue(priorConversation);
+    renderChatbot([SNAP]);
+
+    await open();
+    await screen.findByText('what about WIC?');
+    await userEvent.click(screen.getByRole('button', { name: /close/i }));
+    await open();
+
+    expect(mockHistory).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('greeting bubble and privacy notice', () => {
+  const open = () => userEvent.click(screen.getByRole('button', { name: /chat/i }));
+
+  it('renders the greeting as a bot message bubble, not a banner', async () => {
+    renderChatbot(undefined);
+
+    await open();
+
+    const greeting = screen.getByText(/best place to start/i);
+    expect(greeting).toHaveClass('chatbot-message', 'chatbot-message-bot');
+  });
+
+  it('withholds the notice in peek, where typing is impossible, and shows it on expand', async () => {
+    // Peek is a teaser: focusing the input expands to full, so no character can be
+    // entered while it is on screen and the notice has no job to do there. It costs
+    // the greeting ~39px of a panel capped at min(21rem, 45vh), which pushed the
+    // last lines below the fold.
+    jest.useFakeTimers();
+    (window as unknown as { matchMedia: unknown }).matchMedia = jest.fn().mockReturnValue({
+      matches: true,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    });
+    try {
+      renderChatbot([SNAP]);
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+
+      expect(screen.getByRole('dialog').className).toContain('chatbot-panel--peek');
+      expect(screen.queryByRole('note')).not.toBeInTheDocument();
+
+      fireEvent.focus(screen.getByRole('textbox'));
+
+      expect(screen.getByRole('dialog').className).not.toContain('chatbot-panel--peek');
+      expect(screen.getByRole('note')).toHaveTextContent(/do not include your SSN/i);
+    } finally {
+      jest.useRealTimers();
+      delete (window as unknown as { matchMedia?: unknown }).matchMedia;
+    }
+  });
+
+  it('shows the privacy notice as soon as the widget opens', async () => {
+    renderChatbot([SNAP]);
+
+    await open();
+
+    expect(screen.getByRole('note')).toHaveTextContent(/do not include your SSN/i);
+  });
+
+  it('discloses that Benji is an AI before the warning about what not to type', async () => {
+    // Two separate jobs in one note, and the order is the point. The AI disclosure is
+    // about who the user is talking to, so it has to land before they read anything
+    // else in the panel — someone who skims only the first clause should still know.
+    // The PII warning then says what that means for what they type.
+    renderChatbot([SNAP]);
+
+    await open();
+
+    expect(screen.getByRole('note')).toHaveTextContent(
+      /^Benji is an AI assistant\.\s+Please do not include your SSN, account numbers, or medical details in this chat\.$/i,
+    );
+  });
+
+  it('keeps the greeting and the privacy notice once the conversation has started', async () => {
+    // The greeting is a message and behaves like one — which means it STAYS. It used
+    // to be rendered only while `messages` was empty, so the start call's transcript
+    // swap deleted it the moment the user replied: Benji retracting its own opening
+    // line at exactly the point someone had just answered it.
+    //
+    // The notice stays for a different reason: it warns about what the user is about
+    // to type, so it has to outlive every exchange, not just the first.
+    renderChatbot(undefined);
+
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    expect(screen.getByText(/best place to start/i)).toBeInTheDocument();
+    expect(screen.getByRole('note')).toHaveTextContent(/do not include your SSN/i);
+  });
+
+  it('bolds both options, so the greeting makes the offer the way the assistant would', async () => {
+    // The system prompt has required each option in a choice to be bold since v5, and
+    // the greeting is now the message that makes that offer — the model is told so, and
+    // told not to repeat it. `**asterisks**` would render literally here: unlike model
+    // output, the greeting never passes through renderFormattedMessage. Hence <b> chunks.
+    renderChatbot([SNAP]);
+
+    await open();
+
+    const dialog = screen.getByRole('dialog');
+    expect(Array.from(dialog.querySelectorAll('strong')).map((el) => el.textContent)).toEqual([
+      "Tell me what's going on right now",
+      'walk you through your top result',
+    ]);
+    expect(dialog.textContent).not.toContain('**');
+  });
+
+  it('offers the situation door in the generic welcome too', async () => {
+    renderChatbot(undefined);
+
+    await open();
+
+    const dialog = screen.getByRole('dialog');
+    expect(Array.from(dialog.querySelectorAll('strong')).map((el) => el.textContent)).toEqual([
+      "Tell me what's going on for you right now",
+      'ask me anything',
+    ]);
+  });
+
+  it('re-counts while the greeting is still unanswered, so it matches the page', async () => {
+    // Before the user replies, tracking the filters is correct rather than merely
+    // harmless: the greeting quotes what the results page is showing, so a greeting
+    // that held a stale count would contradict the list behind it. This is the same
+    // mechanism that lets a widget auto-opened before the list resolved upgrade from
+    // the generic welcome to the personalized one.
+    const { rerender } = renderChatbot([SNAP, MEDICAID, WIC]);
+
+    await open();
+    expect(screen.getByRole('dialog')).toHaveTextContent('3 programs');
+
+    rerender(chatbotUi([SNAP]));
+
+    expect(screen.getByRole('dialog')).toHaveTextContent('1 program');
+  });
+
+  it('stops re-counting once the user has answered it', async () => {
+    // After the first send it is a sent message, and sent messages don't change.
+    const { rerender } = renderChatbot([SNAP, MEDICAID, WIC]);
+
+    await openAndSend('my rent is late');
+    await screen.findByText('hi there');
+    expect(screen.getByRole('dialog')).toHaveTextContent('3 programs');
+
+    rerender(chatbotUi([SNAP]));
+
+    expect(screen.getByRole('dialog')).toHaveTextContent('3 programs');
+  });
+
+  it('latches the generic welcome too, so a late program list cannot rewrite it', async () => {
+    // The zero-program path: auto-open is skipped when the page is showing nothing, but
+    // a manual open is not, so someone who filtered down to zero can still open Benji
+    // and start talking. Latching only on the first NON-EMPTY list would leave the ref
+    // null through that whole exchange and then personalize the greeting retroactively
+    // when they cleared the filter.
+    const { rerender } = renderChatbot([]);
+
+    await openAndSend('my rent is late');
+    await screen.findByText('hi there');
+    const greeting = screen.getByText(/best place to start/i).textContent;
+
+    rerender(chatbotUi([SNAP, MEDICAID, WIC]));
+
+    expect(screen.getByText(/best place to start/i).textContent).toBe(greeting);
+    expect(screen.getByRole('dialog')).not.toHaveTextContent('3 programs');
+  });
+});
+
+describe('greeting stability across navigation', () => {
+  const NavigateToProgram = () => {
+    const navigate = useNavigate();
+    return <button onClick={() => navigate(`/co/${SCREEN_UUID}/results/benefits/42`)}>go to program</button>;
+  };
+
+  // Mirrors src/routes/results.tsx: the results list and a program's own page are two
+  // routes rendering the same element type, so React keeps ChatbotProvider mounted and
+  // `programId` flips underneath a live conversation. That is deliberate (MFB-1872 —
+  // Benji follows the user into the page where their questions get specific), which is
+  // exactly why the greeting has to stop reading the route once it has been answered.
+  const routedUi = (visiblePrograms?: AssistantVisibleProgram[]) => {
+    const panel = (
+      <ChatbotProvider visiblePrograms={visiblePrograms} greetingTotal={sumValues(visiblePrograms)}>
+        <NavigateToProgram />
+      </ChatbotProvider>
+    );
+    return (
+      <IntlProvider locale="en" defaultLocale="en">
+        <MemoryRouter initialEntries={[`/co/${SCREEN_UUID}/results/benefits`]}>
+          <Routes>
+            <Route path="/:whiteLabel/:uuid/results/benefits" element={panel} />
+            <Route path="/:whiteLabel/:uuid/results/benefits/:programId" element={panel} />
+          </Routes>
+        </MemoryRouter>
+      </IntlProvider>
+    );
+  };
+
+  const openSendAndNavigate = async () => {
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    const greeting = screen.getByText(/best place to start/i).textContent;
+    await userEvent.type(screen.getByRole('textbox'), 'my rent is late');
+    await userEvent.keyboard('{Enter}');
+    await screen.findByText('hi there');
+    await userEvent.click(screen.getByRole('button', { name: 'go to program' }));
+    return greeting;
+  };
+
+  it('carries the conversation into the program page', async () => {
+    // Guards the premise of the next test. If the provider ever starts remounting on
+    // this navigation, the greeting assertion below would pass for the wrong reason.
+    render(routedUi([SNAP, WIC]));
+
+    await openSendAndNavigate();
+
+    expect(screen.getByText('my rent is late')).toBeInTheDocument();
+    expect(screen.getByText('hi there')).toBeInTheDocument();
+  });
+
+  it('does not swap the greeting variant under a conversation that moved past it', async () => {
+    // `programId` is live, so the branch choosing which greeting to render used to flip
+    // on this navigation: the personalized bubble sitting above the user's own words
+    // silently became the generic one.
+    render(routedUi([SNAP, WIC]));
+
+    const greeting = await openSendAndNavigate();
+
+    expect(screen.getByText(/best place to start/i).textContent).toBe(greeting);
+    expect(screen.getByRole('dialog')).toHaveTextContent('2 programs');
+  });
+
+  it('still suppresses the personalized greeting when the program page is reached first', async () => {
+    // The pre-existing intent survives: before the user answers, the greeting tracks the
+    // route, because the personalized copy counts the whole list and offers to walk them
+    // through a top result — a screen they are not on.
+    render(routedUi([SNAP, WIC]));
+
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    expect(screen.getByRole('dialog')).toHaveTextContent('2 programs');
+
+    await userEvent.click(screen.getByRole('button', { name: 'go to program' }));
+
+    expect(screen.getByRole('dialog')).not.toHaveTextContent('2 programs');
+    expect(screen.getByRole('dialog')).toHaveTextContent(/ask me anything/i);
+  });
+});
+
+describe('message rating (MFB-1915)', () => {
+  const thumbUp = () => screen.getAllByRole('button', { name: /this reply was helpful/i });
+  const thumbDown = () => screen.getAllByRole('button', { name: /this reply was not helpful/i });
+
+  it('rates a reply with a thumbs up', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a1', 1, null);
+    await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true'));
+  });
+
+  it('clicking the same thumb again clears the rating', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+    await userEvent.click(thumbUp()[0]);
+
+    // Writes are serialized per message, so the second goes out once the first returns.
+    await waitFor(() => expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', null, null));
+    await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false'));
+  });
+
+  it('clicking the other thumb switches rather than adding a second rating', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+    await userEvent.click(thumbDown()[0]);
+
+    await waitFor(() => expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, null));
+    await waitFor(() => expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'true'));
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('shows the rating immediately, without waiting for the round trip', async () => {
+    let resolveRate: () => void = () => {};
+    mockRate.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveRate = resolve;
+      }),
+    );
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+
+    // Still in flight: the button reflects the click regardless.
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true');
+    await act(async () => {
+      resolveRate();
+    });
+  });
+
+  it('rolls the button back when the request fails', async () => {
+    mockRate.mockRejectedValue(new Error('500'));
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+
+    await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false'));
+  });
+
+  it('does not put an error bubble in the transcript when a rating fails', async () => {
+    mockRate.mockRejectedValue(new Error('500'));
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+
+    await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false'));
+    expect(screen.queryByText(/something went wrong/i)).not.toBeInTheDocument();
+  });
+
+  it('does not offer a rating on the user’s own message', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    // One assistant reply on screen, so one pair of buttons — the user's message and
+    // the greeting must not have their own.
+    expect(thumbUp()).toHaveLength(1);
+  });
+
+  it('restores a rating the household already gave, on a page reload', async () => {
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [
+        { message_id: 'u9', role: 'user', text: 'what should I apply for?', created_at: '' },
+        { message_id: 'a9', role: 'assistant', text: 'start with SNAP', created_at: '', rating: -1 },
+      ],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('start with SNAP');
+
+    await waitFor(() => expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'true'));
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('can rate a restored reply, using the conversation id from the history read', async () => {
+    // The history-restore effect deliberately leaves `conversationIdRef` null so the
+    // next send still refreshes ai-service's context snapshot. Rating needs the id
+    // anyway, and a restored transcript nobody can rate would defeat the point.
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [{ message_id: 'a9', role: 'assistant', text: 'start with SNAP', created_at: '' }],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('start with SNAP');
+
+    await userEvent.click(thumbUp()[0]);
+
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-restored', 'a9', 1, null);
+  });
+
+  it('treats a reply with no rating key as unrated', async () => {
+    // A cached bundle can outlive a backend release in either direction, so a response
+    // that predates MFB-1915 has to render as unrated rather than as undefined state.
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false');
+    expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('rates the reply that was clicked, not the one at that position', async () => {
+    // The transcript grows underneath the buttons; an index captured at click time
+    // would move a rating onto whichever message later occupied that slot.
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-1',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [
+        { message_id: 'a-first', role: 'assistant', text: 'first answer', created_at: '' },
+        { message_id: 'a-second', role: 'assistant', text: 'second answer', created_at: '' },
+      ],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('second answer');
+
+    await userEvent.click(thumbDown()[1]);
+
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a-second', -1, null);
+  });
+
+  it('groups the two buttons so their pairing is announced', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    expect(screen.getByRole('group', { name: /rate this reply/i })).toBeInTheDocument();
+  });
+
+  it('is reachable and operable from the keyboard', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    thumbUp()[0].focus();
+    expect(thumbUp()[0]).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a1', 1, null);
+  });
+});
+
+describe('thumbs-down reason chips (MFB-1915)', () => {
+  const thumbUp = () => screen.getAllByRole('button', { name: /this reply was helpful/i });
+  const thumbDown = () => screen.getAllByRole('button', { name: /this reply was not helpful/i });
+  const chip = (name: RegExp) => screen.getAllByRole('button', { name });
+
+  const rateDown = async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+    await userEvent.click(thumbDown()[0]);
+    await waitFor(() => expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'true'));
+  };
+
+  it('offers no chips until a reply is rated down', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument();
+  });
+
+  it('shows the chips once a reply is rated down', async () => {
+    await rateDown();
+
+    expect(screen.getByRole('group', { name: /what went wrong/i })).toBeInTheDocument();
+  });
+
+  it('never shows chips on a thumbs-up', async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(thumbUp()[0]);
+
+    await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true'));
+    expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument();
+  });
+
+  it('records the thumbs-down before any chip is touched', async () => {
+    // The whole reason the chips can be skippable: the rating is already saved.
+    await rateDown();
+
+    expect(mockRate).toHaveBeenCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, null);
+  });
+
+  it('sends the picked reason', async () => {
+    await rateDown();
+
+    await userEvent.click(chip(/not about my results/i)[0]);
+
+    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, 'not_my_results');
+    await waitFor(() => expect(chip(/not about my results/i)[0]).toHaveAttribute('aria-pressed', 'true'));
+  });
+
+  it('picking a second chip replaces the first', async () => {
+    await rateDown();
+
+    await userEvent.click(chip(/not accurate/i)[0]);
+    await userEvent.click(chip(/confusing or too long/i)[0]);
+
+    await waitFor(() => expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, 'hard_to_follow'));
+    await waitFor(() => expect(chip(/confusing or too long/i)[0]).toHaveAttribute('aria-pressed', 'true'));
+    expect(chip(/not accurate/i)[0]).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('clicking the selected chip clears it', async () => {
+    await rateDown();
+
+    await userEvent.click(chip(/something else/i)[0]);
+    await userEvent.click(chip(/something else/i)[0]);
+
+    await waitFor(() => expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, null));
+    await waitFor(() => expect(chip(/something else/i)[0]).toHaveAttribute('aria-pressed', 'false'));
+  });
+
+  it('switching to a thumbs-up drops the reason and hides the chips', async () => {
+    await rateDown();
+    await userEvent.click(chip(/not accurate/i)[0]);
+
+    await userEvent.click(thumbUp()[0]);
+
+    await waitFor(() => expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', 1, null));
+    await waitFor(() => expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument());
+  });
+
+  it('clearing the thumbs-down hides the chips', async () => {
+    await rateDown();
+
+    await userEvent.click(thumbDown()[0]);
+
+    await waitFor(() => expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument());
+  });
+
+  it('restores a reason the household already picked', async () => {
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [
+        {
+          message_id: 'a9',
+          role: 'assistant',
+          text: 'start with SNAP',
+          created_at: '',
+          rating: -1,
+          rating_reason: 'unanswered',
+        },
+      ],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('start with SNAP');
+
+    await waitFor(() => expect(chip(/didn.t answer me/i)[0]).toHaveAttribute('aria-pressed', 'true'));
+  });
+
+  it('rolls the chip back when the request fails', async () => {
+    await rateDown();
+    mockRate.mockRejectedValueOnce(new Error('500'));
+
+    await userEvent.click(chip(/didn.t answer me/i)[0]);
+
+    await waitFor(() => expect(chip(/didn.t answer me/i)[0]).toHaveAttribute('aria-pressed', 'false'));
+    expect(screen.queryByText(/something went wrong/i)).not.toBeInTheDocument();
+  });
+
+  it('offers every code the API accepts', async () => {
+    // A chip the API would refuse is a dead control; a code with no chip is unreachable.
+    await rateDown();
+
+    const group = screen.getByRole('group', { name: /what went wrong/i });
+    expect(group.querySelectorAll('button')).toHaveLength(5);
+  });
+});
+
+describe('rating confirmation line (MFB-1915)', () => {
+  const thumbUp = () => screen.getAllByRole('button', { name: /this reply was helpful/i });
+  const thumbDown = () => screen.getAllByRole('button', { name: /this reply was not helpful/i });
+
+  const open = async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+  };
+
+  it('says nothing until a reply is rated', async () => {
+    await open();
+
+    expect(screen.queryByText(/that's helpful/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/what went wrong/i)).not.toBeInTheDocument();
+  });
+
+  it('thanks the household for a thumbs-up', async () => {
+    await open();
+
+    await userEvent.click(thumbUp()[0]);
+
+    expect(await screen.findByText(/thanks — that's helpful/i)).toBeInTheDocument();
+  });
+
+  it('asks what went wrong on a thumbs-down instead of thanking and stopping', async () => {
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+
+    expect(await screen.findByText(/thanks\. what went wrong\?/i)).toBeInTheDocument();
+    expect(screen.queryByText(/that's helpful/i)).not.toBeInTheDocument();
+  });
+
+  it('never promises that anyone will follow up', async () => {
+    // "recorded" reads as a promise to someone who just reported a bad answer, and
+    // nothing routes a thumbs-down anywhere today.
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+
+    await screen.findByText(/what went wrong/i);
+    expect(screen.queryByText(/recorded/i)).not.toBeInTheDocument();
+  });
+
+  it('uses the visible line as the chips’ accessible name, not a hidden duplicate', async () => {
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+
+    const group = await screen.findByRole('group', { name: /thanks\. what went wrong\?/i });
+    const heading = screen.getByText(/thanks\. what went wrong\?/i);
+    expect(group).toHaveAttribute('aria-labelledby', heading.id);
+  });
+
+  it('swaps the line when the household switches thumbs', async () => {
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+    await screen.findByText(/what went wrong/i);
+    await userEvent.click(thumbUp()[0]);
+
+    expect(await screen.findByText(/that's helpful/i)).toBeInTheDocument();
+    expect(screen.queryByText(/what went wrong/i)).not.toBeInTheDocument();
+  });
+
+  it('disappears when the rating is cleared', async () => {
+    await open();
+
+    await userEvent.click(thumbUp()[0]);
+    await screen.findByText(/that's helpful/i);
+    await userEvent.click(thumbUp()[0]);
+
+    await waitFor(() => expect(screen.queryByText(/that's helpful/i)).not.toBeInTheDocument());
+  });
+
+  it('comes back with a restored rating', async () => {
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [{ message_id: 'a9', role: 'assistant', text: 'start with SNAP', created_at: '', rating: 1 }],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('start with SNAP');
+
+    expect(await screen.findByText(/that's helpful/i)).toBeInTheDocument();
+  });
+});
+
+describe('concurrent rating writes (MFB-1915 review)', () => {
+  const thumbUp = () => screen.getAllByRole('button', { name: /this reply was helpful/i });
+  const thumbDown = () => screen.getAllByRole('button', { name: /this reply was not helpful/i });
+  const chip = (name: RegExp) => screen.getAllByRole('button', { name });
+
+  /** A rate call whose promise you resolve by hand, so two can be in flight at once. */
+  const deferred = () => {
+    let settle: (ok: boolean) => void = () => {};
+    const promise = new Promise<void>((resolve, reject) => {
+      settle = (ok: boolean) => (ok ? resolve() : reject(new Error('500')));
+    });
+    return { promise, settle };
+  };
+
+  const open = async () => {
+    renderChatbot([SNAP]);
+    await openAndSend();
+    await screen.findByText('hi there');
+  };
+
+  it('never sends two writes for one message at the same time', async () => {
+    // Two PUTs for one row can reach different workers and be applied in either order,
+    // leaving the database holding the value chosen FIRST while the buttons show the
+    // second. Nothing fails, so nothing rolls back, and it only shows after a reload.
+    const first = deferred();
+    mockRate.mockReturnValueOnce(first.promise);
+    await open();
+
+    await userEvent.click(thumbUp()[0]);
+    await userEvent.click(thumbDown()[0]);
+
+    // The second click must NOT have gone out while the first is unresolved.
+    expect(mockRate).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      first.settle(true);
+    });
+
+    await waitFor(() => expect(mockRate).toHaveBeenCalledTimes(2));
+    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', -1, null);
+  });
+
+  it('sends only the newest value when several pile up behind one request', async () => {
+    const first = deferred();
+    mockRate.mockReturnValueOnce(first.promise);
+    await open();
+
+    await userEvent.click(thumbUp()[0]); // in flight
+    await userEvent.click(thumbDown()[0]); // queued
+    await userEvent.click(thumbDown()[0]); // supersedes it (clears)
+
+    await act(async () => {
+      first.settle(true);
+    });
+
+    // Two calls total: the one in flight, then the latest intent — not one per click.
+    await waitFor(() => expect(mockRate).toHaveBeenCalledTimes(2));
+    expect(mockRate).toHaveBeenLastCalledWith(SCREEN_UUID, 'conv-1', 'a1', null, null);
+  });
+
+  it('a stale failure does not undo a newer rating that succeeded', async () => {
+    // Thumbs-up, then quickly thumbs-down; the first request then 429s. The old code
+    // restored the value captured at its own click, showing "unrated" over a
+    // thumbs-down the server had already accepted.
+    const first = deferred();
+    mockRate.mockReturnValueOnce(first.promise);
+    await open();
+
+    await userEvent.click(thumbUp()[0]);
+    await userEvent.click(thumbDown()[0]);
+
+    await act(async () => {
+      first.settle(false); // the earlier request fails, with a newer one waiting
+    });
+
+    await waitFor(() => expect(mockRate).toHaveBeenCalledTimes(2));
+    expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'true');
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('rolls back to unrated when every write in the chain failed', async () => {
+    // This is where tracking "what the server last accepted" beats "what was on screen
+    // when this click happened". A (thumbs-down) is in flight and B (a chip) queues
+    // behind it; BOTH fail. Nothing was ever saved, so the reply must end up unrated.
+    //
+    // Rolling back to each write's own click state gets this wrong in the worst
+    // direction: B's click state is A's optimistic thumbs-down, so the UI settles on a
+    // thumbs-down the server never accepted — a rating the household would believe they
+    // had given.
+    const first = deferred();
+    mockRate.mockReturnValueOnce(first.promise); // A
+    mockRate.mockRejectedValueOnce(new Error('500')); // B
+    await open();
+
+    await userEvent.click(thumbDown()[0]); // A, in flight
+    await waitFor(() => expect(screen.getByRole('group', { name: /what went wrong/i })).toBeInTheDocument());
+    await userEvent.click(chip(/not accurate/i)[0]); // B, queued behind A
+
+    await act(async () => {
+      first.settle(false); // A fails; B then goes out and fails too
+    });
+
+    await waitFor(() => expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'false'));
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.queryByRole('group', { name: /what went wrong/i })).not.toBeInTheDocument();
+  });
+
+  it('does not report a second thumbs-down when a reason chip is picked', async () => {
+    // Both used to fire `screener_benbot_rated`, so one unhappy reply could report
+    // three thumbs-downs — worst for the households whose reasons matter most.
+    await open();
+
+    await userEvent.click(thumbDown()[0]);
+    await waitFor(() => expect(thumbDown()[0]).toHaveAttribute('aria-pressed', 'true'));
+    await userEvent.click(chip(/not accurate/i)[0]);
+    await userEvent.click(chip(/didn.t answer me/i)[0]);
+
+    const rated = mockTrack.mock.calls.filter(([name]) => name === 'screener_benbot_rated');
+    const reasons = mockTrack.mock.calls.filter(([name]) => name === 'screener_benbot_rating_reason');
+    expect(rated).toHaveLength(1);
+    expect(rated[0][1]).toEqual({ rating: 'down' });
+    expect(reasons).toHaveLength(2);
+  });
+
+  it('keeps a rating the start response does not know about yet', async () => {
+    // After a history restore `conversationIdRef` is deliberately null, so the first
+    // send calls the start endpoint. A rating PUT racing that POST means ai-service can
+    // read the rows before the rating commits, and the response carries rating: null.
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [{ message_id: 'a9', role: 'assistant', text: 'start with SNAP', created_at: '' }],
+    });
+    mockStart.mockResolvedValue({
+      conversation_id: 'conv-restored',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      // Stale: the rating below has not been committed when ai-service read this.
+      messages: [{ message_id: 'a9', role: 'assistant', text: 'start with SNAP', created_at: '', rating: null }],
+    });
+    renderChatbot([SNAP]);
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    await screen.findByText('start with SNAP');
+
+    await userEvent.click(thumbUp()[0]);
+    await waitFor(() => expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true'));
+
+    // Now send, which hits the start endpoint and replaces the transcript.
+    const input = screen.getByRole('textbox');
+    await userEvent.type(input, 'and rent?');
+    await userEvent.keyboard('{Enter}');
+
+    // Wait for the reply, which only arrives after the start response has been applied
+    // — asserting on `mockStart` being CALLED races the `.then` that replaces the list.
+    await screen.findByText('hi there');
+    expect(screen.getByText('start with SNAP')).toBeInTheDocument();
+    expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true');
+  });
+});
+
+describe('render crash containment (MFB-2222)', () => {
+  let consoleError: jest.SpyInstance;
+
+  beforeEach(() => {
+    // React logs every caught render error; keep the expected ones out of the output.
+    consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    mockCrash.parseMarkdown = false;
+    mockCrash.chatIcon = false;
+    mockCrash.thumbUpIcon = false;
+    mockCrash.thumbDownFilledIcon = false;
+    consoleError.mockRestore();
+  });
+
+  it('shows a reply that fails to format as its raw text, and keeps the rest of the chat', async () => {
+    mockCrash.parseMarkdown = true;
+    mockSend.mockResolvedValue({
+      user_message: { message_id: 'u1', role: 'user', text: 'hello', created_at: '' },
+      assistant_message: { message_id: 'a1', role: 'assistant', text: 'BOOM **not bolded**', created_at: '' },
+    });
+    renderChatbot();
+
+    await openAndSend();
+
+    expect(await screen.findByText('BOOM **not bolded**')).toBeInTheDocument();
+    // Its rating buttons survive, so the reply that broke can still be rated down.
+    expect(screen.getByRole('button', { name: /this reply was not helpful/i })).toBeInTheDocument();
+    // The other bubble and the input are untouched: one bad reply doesn't take the widget.
+    expect(screen.getByText('hello')).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    expect(mockTrack).toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'message' });
+    expect(mockTrack).not.toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'widget' });
+  });
+
+  it('hides the widget, not the results page, when the widget itself throws', () => {
+    mockCrash.chatIcon = true;
+    render(chatbotUi(undefined, undefined, undefined, <p>results page</p>));
+
+    expect(screen.getByText('results page')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /chat/i })).not.toBeInTheDocument();
+    expect(mockTrack).toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'widget' });
+  });
+
+  it('stops auto-opening and fetching once the widget has crashed', () => {
+    // The boundary only hides the markup; the provider must not keep acting for a
+    // widget nobody can see (reporting an open, reading history).
+    jest.useFakeTimers();
+    try {
+      mockCrash.chatIcon = true;
+      renderChatbot([SNAP, MEDICAID, WIC]);
+
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+
+      expect(mockTrack).not.toHaveBeenCalledWith('screener_benbot_opened', expect.anything());
+      expect(mockHistory).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('reports a message that fails to format once, not on every reopen', async () => {
+    mockCrash.parseMarkdown = true;
+    mockSend.mockResolvedValue({
+      user_message: { message_id: 'u1', role: 'user', text: 'hello', created_at: '' },
+      assistant_message: { message_id: 'a1', role: 'assistant', text: 'BOOM reply', created_at: '' },
+    });
+    renderChatbot();
+    await openAndSend();
+    await screen.findByText('BOOM reply');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Close chat' }));
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+
+    expect(screen.getByText('BOOM reply')).toBeInTheDocument();
+    const crashes = mockTrack.mock.calls.filter(([name]) => name === 'screener_benbot_crashed');
+    expect(crashes).toHaveLength(1);
+  });
+
+  it('does not carry a caught error over to a different message at the same position', async () => {
+    // The first send fails to start a conversation, so the user's "BOOM" bubble is
+    // id-less and keyed by its index (0). The second send's start returns an empty
+    // transcript, which replaces the list, so the next id-less bubble lands on index 0.
+    mockCrash.parseMarkdown = true;
+    mockStart.mockRejectedValueOnce(new Error('down'));
+    renderChatbot();
+    await openAndSend('BOOM');
+    await screen.findByText('BOOM');
+
+    await userEvent.type(screen.getByRole('textbox'), '**fine**');
+    await userEvent.keyboard('{Enter}');
+
+    expect(await screen.findByText('fine', { selector: 'strong' })).toBeInTheDocument();
+  });
+
+  it('drops only the rating buttons when they throw, and keeps the reply formatted', async () => {
+    mockCrash.thumbUpIcon = true;
+    mockSend.mockResolvedValue({
+      user_message: { message_id: 'u1', role: 'user', text: 'hello', created_at: '' },
+      assistant_message: { message_id: 'a1', role: 'assistant', text: '**hi** there', created_at: '' },
+    });
+    renderChatbot();
+
+    await openAndSend();
+
+    expect(await screen.findByText('hi', { selector: 'strong' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /this reply was helpful/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    expect(mockTrack).toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'rating' });
+    expect(mockTrack).not.toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'message' });
+    expect(mockTrack).not.toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'widget' });
+  });
+
+  it('keeps keyboard focus in the chat when a crash removes the focused rating button', async () => {
+    mockCrash.thumbDownFilledIcon = true;
+    renderChatbot();
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(screen.getByRole('button', { name: /this reply was not helpful/i }));
+
+    expect(screen.queryByRole('button', { name: /this reply was not helpful/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toHaveFocus();
+  });
+
+  it('reports a text that fails to format once, even when two replies show it', async () => {
+    // Both bubbles catch in the same render, before any state update lands, so this is
+    // what the reported-parts ref is for.
+    mockCrash.parseMarkdown = true;
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-prior',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [
+        { message_id: 'm1', role: 'assistant', text: 'BOOM same', created_at: '' },
+        { message_id: 'm2', role: 'assistant', text: 'BOOM same', created_at: '' },
+      ],
+    });
+    renderChatbot();
+
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    expect(await screen.findAllByText('BOOM same')).toHaveLength(2);
+    await userEvent.click(screen.getByRole('button', { name: 'Close chat' }));
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+
+    expect(screen.getAllByText('BOOM same')).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /this reply was not helpful/i })).toHaveLength(2);
+    const crashes = mockTrack.mock.calls.filter(([name]) => name === 'screener_benbot_crashed');
+    expect(crashes).toEqual([['screener_benbot_crashed', { scope: 'message' }]]);
+  });
+});

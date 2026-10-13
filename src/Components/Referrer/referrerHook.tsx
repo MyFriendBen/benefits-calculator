@@ -22,29 +22,12 @@ export type ReferrerData = {
   stepDirectory: ReferrerOptions<StepDirectory>;
   noResultMessage: ReferrerOptions<FormattedMessageType>;
   defaultLanguage: ReferrerOptions<string>;
+  // White label codes offered in the state dropdown; empty means "use the public list"
+  stateOptions: ReferrerOptions<string[]>;
   stateName: ReferrerOptions<string>;
 };
 
-export type ReferrerDataValue<T extends keyof ReferrerData> = T extends
-  | 'theme'
-  | 'logoSource'
-  | 'faviconSource'
-  | 'logoFooterSource'
-  | 'footerLogoClass'
-  | 'logoClass'
-  | 'shareLink'
-  | 'defaultLanguage'
-  | 'stateName'
-  ? string
-  : T extends 'logoAlt' | 'logoFooterAlt'
-  ? { id: string; defaultMessage: string }
-  : T extends 'stepDirectory'
-  ? StepDirectory
-  : T extends 'uiOptions'
-  ? string[]
-  : T extends 'noResultMessage'
-  ? FormattedMessageType
-  : never;
+export type ReferrerDataValue<T extends keyof ReferrerData> = ReferrerData[T]['default'];
 
 export default function useReferrer(referrerCode?: string, referrerData?: ReferrerData) {
   const [referrer, setReferrer] = useState<string | undefined>(referrerCode);

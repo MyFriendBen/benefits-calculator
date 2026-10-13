@@ -8,7 +8,6 @@ import {
   TranslationResponse,
   UrgentNeedTypeResponse,
   UserRequestData,
-  ValidationRequestData,
 } from './Types/ApiCalls';
 import { ApiFormData, ApiFormDataReadOnly } from './Types/ApiFormData';
 import { EligibilityResults } from './Types/Results';
@@ -25,9 +24,13 @@ const apiUrgentNeedTypesEndpoint = `${domain}/api/urgent_need_types/`;
 export const configEndpoint = `${domain}/api/configuration/`;
 const screenerOptionsEndpoint = `${domain}/api/screener-options/`;
 const eligibilityEndpoint = `${domain}/api/eligibility/`;
-const validationEndpoint = `${domain}/api/validations/`;
 const authTokenEndpoint = `${domain}/api/auth-token/`;
 const getNpsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/nps/`;
+const assistantConversationsEndpoint = (uuid: string) => `${domain}/api/screens/${uuid}/assistant/conversations/`;
+const assistantMessagesEndpoint = (uuid: string, conversationId: string) =>
+  `${domain}/api/screens/${uuid}/assistant/conversations/${conversationId}/messages/`;
+const assistantMessageRatingEndpoint = (uuid: string, conversationId: string, messageId: string) =>
+  `${domain}/api/screens/${uuid}/assistant/conversations/${conversationId}/messages/${messageId}/rating/`;
 
 export type ScreenApiResponse = ApiFormDataReadOnly & ApiFormData;
 
@@ -189,42 +192,6 @@ const getAllNearTermPrograms = async (whiteLabel: string) => {
   return types;
 };
 
-const postValidation = async (validationBody: ValidationRequestData, key: string) => {
-  const staffHeader = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: 'Token ' + key,
-  };
-
-  return await fetch(validationEndpoint, {
-    method: 'POST',
-    headers: staffHeader,
-    body: JSON.stringify(validationBody),
-  }).then((response) => {
-    if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}`);
-    }
-    return response.json();
-  });
-};
-
-const deleteValidation = async (validationid: number, key: string) => {
-  const staffHeader = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: 'Token ' + key,
-  };
-
-  return await fetch(validationEndpoint + validationid, {
-    method: 'DELETE',
-    headers: staffHeader,
-  }).then((response) => {
-    if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}`);
-    }
-  });
-};
-
 type NPSScoreData = {
   uuid: string;
   score: number;
@@ -300,6 +267,7 @@ const getHasBenefitsPrograms = (whiteLabel: string): Promise<HasBenefitsProgram[
 export interface ReferralOptionsResponse {
   generic: Record<string, string>;
   partners: Record<string, string>;
+  hidden?: Record<string, string>;
 }
 
 const getReferralOptions = async (whiteLabel: string, signal?: AbortSignal): Promise<ReferralOptionsResponse> => {
@@ -314,7 +282,198 @@ const getReferralOptions = async (whiteLabel: string, signal?: AbortSignal): Pro
   return response.json() as Promise<ReferralOptionsResponse>;
 };
 
+export interface AssistantSuggestedAction {
+  type: string;
+  label: string;
+  url?: string;
+}
+
+// +1 thumbs up, -1 thumbs down, null unrated. A union rather than `number` so the
+// two thumbs can't be confused with each other or with an arbitrary score anywhere
+// between the button and the request body.
+export type AssistantRating = 1 | -1 | null;
+
+// Why a reply was rated down. These are STORED CODES, not display text — the label
+// for each is a translated string (`chatbot.reason.*`), so the wording can change
+// without splitting a code's history in the warehouse. The list is owned by
+// benefits-api (`AssistantMessage.RATING_REASON_CHOICES`) and must match it: a code
+// the API refuses would render as a dead chip.
+export const ASSISTANT_RATING_REASONS = [
+  'inaccurate',
+  'not_my_results',
+  'unanswered',
+  'hard_to_follow',
+  'other',
+] as const;
+
+export type AssistantRatingReason = (typeof ASSISTANT_RATING_REASONS)[number];
+
+export interface AssistantApiMessage {
+  message_id: string;
+  role: 'user' | 'assistant';
+  text: string;
+  created_at: string;
+  suggested_actions?: AssistantSuggestedAction[];
+  // Optional because it is absent from any response produced before MFB-1915
+  // deployed, and a cached bundle can outlive a backend release in either direction.
+  // Absent and null both mean unrated.
+  rating?: AssistantRating;
+  // Null whenever the reply was not rated down, and also when it was rated down and
+  // the household skipped the chips — which is the common case, not an error.
+  rating_reason?: AssistantRatingReason | null;
+}
+
+export interface AssistantConversationResponse {
+  conversation_id: string;
+  screen_uuid: string;
+  status: string;
+  mode: string;
+  prompt_version: string;
+  messages: AssistantApiMessage[];
+}
+
+export interface AssistantMessageResponse {
+  user_message: AssistantApiMessage;
+  assistant_message: AssistantApiMessage;
+}
+
+// A program the results page is currently showing the user. BenBot recommends and
+// quotes from these, so both fields have to reflect what's on screen.
+export interface AssistantVisibleProgram {
+  name_abbreviated: string;
+  /**
+   * `programValue()` — the ANNUAL value in whole USD, which nets out members who
+   * already hold the program's insurance.
+   *
+   * Not literally the string on the card: for the default `value_format` the card
+   * renders this divided by 12 with "/month", and when `estimated_value_override` is
+   * set it renders prose ("Varies") with no number at all. Annual is what the backend
+   * contract expects — ai-service is told these figures are annual totals and converts
+   * when it needs a monthly one.
+   */
+  value: number;
+}
+
+// Open (or resume) a Benbot conversation for a screen.
+//
+// `visiblePrograms` is what the results page is currently rendering. BenBot may only
+// recommend programs from the list it is given, so that list has to match what the
+// user is actually looking at — otherwise it recommends programs they can't see, or
+// quotes a figure they can't find.
+//
+// This has to come from the client because the relevant filtering only exists here:
+// citizenship/legal status, `excludes_programs` mutual exclusions, and per-member
+// insurance all run in the browser, and the server's eligibility snapshot stores no
+// member breakdown to reproduce them from.
+//
+// benefits-api can only ever *narrow* using this list, and it bounds `value` by the
+// snapshot's own figure — so a bad list degrades the assistant rather than misleading
+// the user.
+const startAssistantConversation = async (
+  uuid: string,
+  locale?: string,
+  visiblePrograms?: AssistantVisibleProgram[],
+): Promise<AssistantConversationResponse> => {
+  return fetch(assistantConversationsEndpoint(uuid), {
+    method: 'POST',
+    body: JSON.stringify({ locale, visible_programs: visiblePrograms }),
+    headers: header,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json() as Promise<AssistantConversationResponse>;
+  });
+};
+
+// Read back a household's existing Benbot conversation, or null if they have none.
+//
+// GET on the same path the start call POSTs to. Deliberately a different call from
+// `startAssistantConversation`, which also resumes by screen but is a WRITE: it
+// creates a conversation when there isn't one, and refreshes the stored context
+// snapshot when there is. The widget opens on nearly every results page, so using
+// the start call to restore a transcript would mint an empty conversation for every
+// visitor who never types.
+//
+// A 404 means "no history yet" — the common case for a first-time visitor — and is
+// resolved to `null` HERE, once, so callers can't confuse it with a real failure and
+// silently show a blank transcript when the read actually broke.
+const getAssistantHistory = async (uuid: string): Promise<AssistantConversationResponse | null> => {
+  return fetch(assistantConversationsEndpoint(uuid), {
+    method: 'GET',
+    headers: header,
+  }).then((response) => {
+    if (response.status === 404) {
+      return null;
+    }
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json() as Promise<AssistantConversationResponse>;
+  });
+};
+
+// Send a user message to an existing Benbot conversation.
+const sendAssistantMessage = async (
+  uuid: string,
+  conversationId: string,
+  text: string,
+  clientMessageId?: string,
+): Promise<AssistantMessageResponse> => {
+  return fetch(assistantMessagesEndpoint(uuid, conversationId), {
+    method: 'POST',
+    body: JSON.stringify({ text, client_message_id: clientMessageId }),
+    headers: header,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json() as Promise<AssistantMessageResponse>;
+  });
+};
+
+// Set, change, or clear the thumbs up/down on one assistant reply (MFB-1915).
+//
+// Unlike every other assistant call here, this one does NOT reach ai-service:
+// benefits-api owns the column and writes it directly. That is invisible from the
+// browser except in one way worth knowing — a rating still works while ai-service is
+// down, so a failure here is a real failure and not the assistant being unavailable.
+//
+// PUT with the value rather than a toggle, so the request says what the rating should
+// BE. A toggle would depend on the server's current value, and the widget lets a user
+// click faster than the round trip: two toggles racing can land in either order and
+// leave the row disagreeing with the buttons on screen.
+//
+// `null` clears. It is sent explicitly rather than omitted — benefits-api rejects a
+// body with no `rating` key, deliberately, so that a serialization bug that drops the
+// field can't read as "un-rate this".
+const rateAssistantMessage = async (
+  uuid: string,
+  conversationId: string,
+  messageId: string,
+  rating: AssistantRating,
+  reason: AssistantRatingReason | null = null,
+): Promise<void> => {
+  // `reason` is sent on every call, including as null, because the PUT replaces BOTH
+  // fields: the body states the whole feedback. That is what makes picking a chip,
+  // switching chips, switching thumbs and un-rating one operation instead of four —
+  // and it means the widget never depends on the server remembering a reason it did
+  // not just send. benefits-api rejects a reason on anything but a thumbs-down.
+  const response = await fetch(assistantMessageRatingEndpoint(uuid, conversationId, messageId), {
+    method: 'PUT',
+    body: JSON.stringify({ rating, reason: rating === -1 ? reason : null }),
+    headers: header,
+  });
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`);
+  }
+};
+
 export {
+  startAssistantConversation,
+  getAssistantHistory,
+  sendAssistantMessage,
+  rateAssistantMessage,
   getTranslations,
   postScreen,
   getScreen,
@@ -324,8 +483,6 @@ export {
   getEligibility,
   getAllLongTermPrograms,
   getAllNearTermPrograms,
-  postValidation,
-  deleteValidation,
   getAuthToken,
   postNPSScore,
   patchNPSReason,

@@ -18,16 +18,19 @@ export default function EnergyCalculatorFooter() {
       defaultMessage: 'Colorado Department of Regulatory Agencies logo',
     }),
     'cesn-footer-dora-logo',
+    intl.locale,
   );
   const mfbLogo = renderLogoSource(
     'PoweredByLogo',
     intl.formatMessage({ id: 'poweredByFooter.logo.alt', defaultMessage: 'Powered by MyFriendBen' }),
     'logo powered-by-footer-logo',
+    intl.locale,
   );
   const raLogo = renderLogoSource(
     'RewiringAmericaLogo',
     intl.formatMessage({ id: 'cesnFooter.raLogo.alt', defaultMessage: 'Rewiring America logo' }),
     'logo powered-by-footer-logo',
+    intl.locale,
   );
   const mfbUrl =
     'https://screener.myfriendben.org/co/step-1?referrer=energy_calculator&utm_source=cesn&utm_medium=web&utm_campaign=cesn&utm_id=cesn';

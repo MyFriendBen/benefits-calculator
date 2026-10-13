@@ -1,46 +1,54 @@
-import { useConfig } from '../Config/configHook';
-import { FormControl, Select, InputLabel, MenuItem, SelectChangeEvent } from '@mui/material';
+import LanguageSelect from '../LanguageSelect/LanguageSelect';
 import { FormattedMessage } from 'react-intl';
 import { Context } from '../Wrapper/Wrapper';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import QuestionHeader from '../QuestionComponents/QuestionHeader';
 import { useQueryString } from '../QuestionComponents/questionHooks';
 import FormContinueButton from '../ContinueButton/FormContinueButton';
 import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
-import { STATES } from './SelectStatePage';
+import { useStateOptions } from '../../Assets/stateOptions';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { useUpdateWhiteLabelAndNavigate } from '../RouterUtil/RedirectToWhiteLabel';
 import { usePageTitle } from '../Common/usePageTitle';
+import { useTrackEvent } from '../../Assets/analytics';
+import { PRE_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
+
+const STEP_1_ANALYTICS_ID = PRE_DIRECTORY_STEP_IDS.language;
 
 const SelectLanguagePage = () => {
-  const { locale, selectLanguage, configLoading } = useContext(Context);
-  const languageOptions = useConfig<{ [key: string]: string }>('language_options');
+  const { selectLanguage } = useContext(Context);
   const { whiteLabel, uuid } = useParams();
+  const states = useStateOptions();
 
   const queryString = useQueryString();
   const navigate = useNavigate();
+  const track = useTrackEvent();
 
   usePageTitle(OTHER_PAGE_TITLES.language);
 
-  const createMenuItems = (optionList: Record<string, string>, disabledFMId: string, disabledFMDefault: string) => {
-    const disabledSelectMenuItem = (
-      <MenuItem value="disabled-select" key="disabled-select" disabled>
-        <FormattedMessage id={disabledFMId} defaultMessage={disabledFMDefault} />
-      </MenuItem>
-    );
-    const menuItemKeyLabelPairArr = Object.entries(optionList);
-
-    const dropdownMenuItems = menuItemKeyLabelPairArr.map((key) => {
-      return (
-        <MenuItem value={key[0]} key={key[0]}>
-          {key[1]}
-        </MenuItem>
-      );
-    });
-
-    return [disabledSelectMenuItem, dropdownMenuItems];
+  // form_start marks that the user actually began the screener, so it fires on the
+  // first real interaction (language change or Continue), not on page load. Fired
+  // at most once per mount: a screening has no uuid yet on step-1 (it's created at
+  // the disclaimer step), so there's no per-screening key to dedupe on here — and
+  // the funnel mart dedupes form_start by screening downstream, so a re-fire on
+  // back-navigation to step-1 is harmless.
+  const hasMarkedFormStarted = useRef(false);
+  const markFormStarted = () => {
+    if (hasMarkedFormStarted.current) return;
+    hasMarkedFormStarted.current = true;
+    track('screener_form_start', { screener_step_name: STEP_1_ANALYTICS_ID, screener_step_number: 1 });
   };
+
+  // The step VIEW is intentionally NOT guarded — every view should count toward drop-off.
+  useEffect(() => {
+    track('screener_form_step', {
+      screener_step_name: STEP_1_ANALYTICS_ID,
+      screener_step_number: 1,
+      step_action: 'view',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const continueOnEnter = (event: KeyboardEvent) => {
@@ -59,6 +67,15 @@ const SelectLanguagePage = () => {
   const handleSubmit = (event: { preventDefault: () => void }) => {
     event.preventDefault();
 
+    // Continuing counts as starting even if the user kept the default language.
+    markFormStarted();
+
+    track('screener_form_step', {
+      screener_step_name: STEP_1_ANALYTICS_ID,
+      screener_step_number: 1,
+      step_action: 'complete',
+    });
+
     if (uuid !== undefined) {
       navigate(`/${whiteLabel}/${uuid}/step-2${queryString}`);
       return;
@@ -69,21 +86,18 @@ const SelectLanguagePage = () => {
       return;
     }
 
-    const stateCodes = Object.keys(STATES);
-
-    if (stateCodes.length > 1) {
+    // Only skip the state page when there is exactly one state to skip it for.
+    if (states.length !== 1) {
       navigate(`/select-state${queryString}`);
       return;
     }
 
-    updateWhiteLabelAndNavigate(stateCodes[0], `/${stateCodes[0]}/step-2${queryString}`);
-    // wait for the new config to be loaded
-    const interval = setInterval(() => {
-      if (!configLoading) {
-        navigate(`/${stateCodes[0]}/step-2${queryString}`);
-        clearInterval(interval);
-      }
-    }, 1);
+    const stateCode = states[0].code;
+
+    // Let updateWhiteLabelAndNavigate own the navigation, as it already does on the state page.
+    // There is nothing to wait for: App gates rendering on pageIsLoading, so step 2 does not
+    // render until the new config resolves.
+    updateWhiteLabelAndNavigate(stateCode, `/${stateCode}/step-2${queryString}`);
   };
 
   return (
@@ -95,20 +109,19 @@ const SelectLanguagePage = () => {
         <FormattedMessage id="selectLanguage.subHeader" defaultMessage="What is your preferred language?" />
       </QuestionQuestion>
       <form onSubmit={handleSubmit}>
-        <FormControl sx={{ mt: 1, mb: 2, minWidth: 210, maxWidth: '100%' }}>
-          <InputLabel id="language-select-label">
-            <FormattedMessage id="selectLang.text" defaultMessage="Language" />
-          </InputLabel>
-          <Select
-            labelId="language-select-label"
-            id="language-select"
-            value={locale}
-            label={<FormattedMessage id="selectLang.text" defaultMessage="Language" />}
-            onChange={(event) => selectLanguage(event.target.value)}
-          >
-            {createMenuItems(languageOptions, 'selectLang.disabledSelectMenuItemText', 'Select a language')}
-          </Select>
-        </FormControl>
+        <LanguageSelect
+          id="language-select"
+          variant="outlined"
+          label={<FormattedMessage id="selectLang.text" defaultMessage="Language" />}
+          placeholder={
+            <FormattedMessage id="selectLang.disabledSelectMenuItemText" defaultMessage="Select a language" />
+          }
+          formControlSx={{ mt: 1, mb: 2, minWidth: 210, maxWidth: '100%' }}
+          onChange={(languageCode) => {
+            markFormStarted();
+            selectLanguage(languageCode);
+          }}
+        />
         <div style={{ marginTop: '1rem' }}>
           <FormContinueButton>
             <FormattedMessage id="continueButton-getStarted" defaultMessage="Get Started" />

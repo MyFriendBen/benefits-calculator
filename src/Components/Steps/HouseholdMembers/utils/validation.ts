@@ -41,13 +41,6 @@ export const validateHourlyIncome = (incomeFrequency: string, hoursPerWeek: stri
   return true;
 };
 
-/**
- * Validates income amount format and > 0
- */
-export const validateIncomeAmount = (value: string): boolean => {
-  return INCOME_AMOUNT_REGEX.test(value) && Number(value) > 0;
-};
-
 // ============================================================================
 // INTERNATIONALIZED ERROR MESSAGES
 // ============================================================================
@@ -108,6 +101,20 @@ export const renderRelationshipToHHHelperText = (intlHook: IntlShape) => {
   });
 };
 
+export const renderIncomeQuestionHelperText = (intlHook: IntlShape) => {
+  return intlHook.formatMessage({
+    id: 'errorMessage-incomeQuestion',
+    defaultMessage: 'Please select an answer.',
+  });
+};
+
+export const renderIncomeSourceRequiredHelperText = (intlHook: IntlShape) => {
+  return intlHook.formatMessage({
+    id: 'errorMessage-incomeSourceRequired',
+    defaultMessage: 'Please add at least one income source or select "No".',
+  });
+};
+
 export const renderIncomeStreamNameHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
     id: 'errorMessage-incomeStreamName',
@@ -136,6 +143,20 @@ export const renderIncomeAmountHelperText = (intlHook: IntlShape) => {
   return intlHook.formatMessage({
     id: 'errorMessage-greaterThanZero',
     defaultMessage: 'Please enter a number greater than 0.',
+  });
+};
+
+export const renderIncomeAmountRequiredHelperText = (intlHook: IntlShape) => {
+  return intlHook.formatMessage({
+    id: 'errorMessage-incomeAmountRequired',
+    defaultMessage: 'Please enter an income amount.',
+  });
+};
+
+export const renderIncomeAmountFormatHelperText = (intlHook: IntlShape) => {
+  return intlHook.formatMessage({
+    id: 'errorMessage-incomeAmountFormat',
+    defaultMessage: 'Please enter a valid dollar amount.',
   });
 };
 

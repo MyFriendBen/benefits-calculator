@@ -12,6 +12,7 @@ import './Filter.css';
 import '../../QuestionComponentContainer/QuestionComponentContainer.css';
 import { Context } from '../../Wrapper/Wrapper';
 import { BREAKPOINTS } from '../../../utils/breakpoints';
+import { useTrackEvent } from '../../../Assets/analytics';
 
 // Define the order of citizenship options
 const CITIZENSHIP_OPTIONS: CitizenLabelOptions[] = [
@@ -31,6 +32,7 @@ export const Filter = () => {
   // break determined based on when description wraps to 4+ lines - update as needed
   const collapseDescription = useMediaQuery('(max-width: 730px)');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const track = useTrackEvent();
 
   // Get selected citizenship from filter state
   const selectedCitizenship = filterState.selectedCitizenship;
@@ -44,7 +46,11 @@ export const Filter = () => {
       selectedCitizenship: newStatus,
       calculatedFilters,
     });
-  }, [formData.householdData, setFilterState]);
+
+    // Privacy: record only the filter TYPE, never the selected citizenship
+    // value (that would be PII). `filter_type` is the category touched.
+    track('screener_filter_engaged', { filter_type: 'citizenship' });
+  }, [formData.householdData, setFilterState, track]);
 
   const renderDesktopButtons = () => {
     return (

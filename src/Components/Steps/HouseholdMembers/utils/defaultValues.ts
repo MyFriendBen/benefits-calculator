@@ -1,9 +1,12 @@
 import { HouseholdData } from '../../../../Types/FormData';
-import { calculateAgeStatus } from '../../../AgeCalculation/AgeCalculation';
-import { EMPTY_INCOME_STREAM } from './constants';
-import { getDefaultFormItems } from './helpers';
+import { deriveIncomeAnswers } from './helpers';
 
-export const UNSET_BIRTH_YEAR: number | '' = '';
+/**
+ * Sentinel for "birth year not yet entered", matching the `0` convention already used
+ * for birthMonth and by createDefaultValues. The schema's `.min(1)` check reports it as
+ * a missing value, and inputs render it as empty via `field.value || ''`.
+ */
+export const UNSET_BIRTH_YEAR = 0;
 
 /**
  * Default health insurance object
@@ -30,6 +33,7 @@ export const DEFAULT_SPECIAL_CONDITIONS = {
   blindOrVisuallyImpaired: false,
   disabled: false,
   longTermDisability: false,
+  fosterCare: false,
   none: false,
 };
 
@@ -53,33 +57,12 @@ export const hasSubmittedMemberForm = (data?: HouseholdData): boolean => {
 };
 
 /**
- * Helper to check if member is working age (16-70)
- */
-const isWorkingAge = (birthYear?: number, birthMonth?: number): boolean => {
-  if (!birthYear || !birthMonth) return false;
-  const { age } = calculateAgeStatus(birthMonth, birthYear);
-  return age !== null && age >= 16 && age <= 70;
-};
-
-/**
- * Determines default income streams - auto-adds for working-age members on first visit
+ * Loads the member's saved income streams for editing. Returns them as-is (no
+ * blank row is seeded): the three Yes/No questions gate income entry, and an
+ * empty-category stream would belong to no question bucket.
  */
 const getDefaultIncomeStreams = (data?: HouseholdData): any[] => {
-  const progressed = hasSubmittedMemberForm(data);
-  // Normalize [] to undefined when not yet progressed — the API always returns [] for
-  // brand-new members, but getDefaultFormItems needs undefined to distinguish
-  // "never visited" from "visited and intentionally cleared".
-  const existingStreams =
-    Array.isArray(data?.incomeStreams) && data!.incomeStreams.length === 0 && !progressed
-      ? undefined
-      : data?.incomeStreams;
-
-  const streams = getDefaultFormItems(
-    existingStreams,
-    progressed,
-    isWorkingAge(data?.birthYear, data?.birthMonth),
-    EMPTY_INCOME_STREAM as any,
-  );
+  const streams = Array.isArray(data?.incomeStreams) ? data!.incomeStreams : [];
   return streams.map((stream: any) => ({
     ...stream,
     incomeAmount: stream.incomeAmount == null || stream.incomeAmount === 0 ? '' : String(stream.incomeAmount),
@@ -123,6 +106,29 @@ export const DEFAULT_STUDENT_ELIGIBILITY = {
 };
 
 /**
+ * Resolves the three income-question answers for form seeding, derived from the
+ * income streams (each keyed to its source: wages -> employed, self-employment ->
+ * gig, non-employment -> other):
+ * - Yes when a stream of that kind exists.
+ * - No when the member has completed the form (progressed) but has no such
+ *   stream — because the questions are required, "completed + empty" means the
+ *   user explicitly answered No, not that they skipped it.
+ * - null (unanswered) for a brand-new member who hasn't reached the form yet.
+ */
+export const getDefaultIncomeAnswers = (data?: HouseholdData) => {
+  const derived = deriveIncomeAnswers(data?.incomeStreams as any);
+  const progressed = hasSubmittedMemberForm(data);
+  // For a completed member, an empty bucket is an explicit "No"; otherwise unanswered.
+  const answer = (hasStream: boolean) => (hasStream ? true : progressed ? false : null);
+
+  return {
+    incomeEmployed: answer(derived.employed),
+    incomeGig: answer(derived.gig),
+    incomeOther: answer(derived.other),
+  };
+};
+
+/**
  * Creates default form values for household member
  */
 export const createDefaultValues = (
@@ -132,6 +138,7 @@ export const createDefaultValues = (
   const incomeStreams = getDefaultIncomeStreams(householdMemberFormData);
 
   return {
+    ...getDefaultIncomeAnswers(householdMemberFormData),
     birthMonth:
       householdMemberFormData?.birthMonth && householdMemberFormData.birthMonth > 0
         ? householdMemberFormData.birthMonth
@@ -168,7 +175,7 @@ export const DEFAULT_ENERGY_CALCULATOR_CONDITIONS = {
  */
 export const createDefaultMember = (index: number, existingMember?: HouseholdData): HouseholdData => ({
   ...existingMember,
-  id: existingMember?.id ?? crypto.randomUUID(),
+  id: existingMember?.id,
   frontendId: existingMember?.frontendId ?? crypto.randomUUID(),
   birthMonth: existingMember?.birthMonth ?? 0,
   birthYear: existingMember?.birthYear ?? 0,
@@ -201,6 +208,7 @@ export const createEnergyCalculatorDefaultValues = (
     },
     receivesSsi: householdMemberFormData?.energyCalculator?.receivesSsi ? 'true' : 'false',
     relationshipToHH: householdMemberFormData?.relationshipToHH ?? (pageNumber === 1 ? 'headOfHousehold' : ''),
+    ...getDefaultIncomeAnswers(householdMemberFormData),
     incomeStreams,
   };
 };

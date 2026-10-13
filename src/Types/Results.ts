@@ -50,7 +50,6 @@ export type Program = {
   estimated_application_time: Translation;
   description_short: Translation;
   description: Translation;
-  value_type: string;
   learn_more_link: Translation;
   apply_button_link: Translation;
   apply_button_description: Translation;
@@ -99,14 +98,6 @@ export type UrgentNeed = {
   notification_message: Translation | null;
 };
 
-export type Validation = {
-  id: number;
-  screen_uuid: string;
-  program_name: string;
-  eligible: boolean;
-  value: string;
-};
-
 export type EligibilityResults = {
   programs: Program[];
   program_categories: ProgramCategory[];
@@ -114,9 +105,11 @@ export type EligibilityResults = {
   screen_id: number;
   default_language: string;
   missing_programs: boolean;
-  validations: Validation[];
   created_date: string;
   pe_data: PolicyEngineData;
+  // Ids of external APIs (e.g. "policy_engine") that failed while the backend computed
+  // these results; when non-empty the results page shows an "incomplete results" banner.
+  external_api_failures?: string[];
 };
 
 export interface PolicyEngineData {

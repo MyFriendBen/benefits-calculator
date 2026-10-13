@@ -1,0 +1,44 @@
+.ccla-cobranded-logo {
+  max-width: 20rem;
+  display: block;
+}
+
+.ccla-globe-icon {
+  color: #000000;
+}
+
+.ccla-header-container {
+  height: 5rem;
+  width: 100%;
+}
+
+#ccla-select-language {
+  padding: 0;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  margin-right: 1.5rem;
+  text-transform: uppercase;
+}
+
+#ccla-nav-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  max-width: var(--main-max-width);
+  margin: auto;
+  height: 100%;
+  padding: 0 1rem;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+#ccla-select-language:focus-visible {
+  outline: -webkit-focus-ring-color auto 1px;
+}
+
+@media (max-width: 650px) {
+  .ccla-cobranded-logo {
+    width: 90%;
+  }
+}

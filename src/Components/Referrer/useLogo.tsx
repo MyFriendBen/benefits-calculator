@@ -13,5 +13,5 @@ export const useLogo = (src: keyof ReferrerData, alt: keyof ReferrerData, classN
   // Use meaningful default alt text for accessibility during loading
   const logoAlt = getReferrer(alt, { id: 'logo.alt.default', defaultMessage: 'Organization Logo' }) as MessageDescriptor;
 
-  return renderLogoSource(logoSourceValue.trim(), intl.formatMessage(logoAlt), className);
+  return renderLogoSource(logoSourceValue.trim(), intl.formatMessage(logoAlt), className, intl.locale);
 };

@@ -11,9 +11,11 @@ import './SaveMyResultsModal.css';
 
 type SaveViaSMSFormProps = {
   onSuccess: () => void;
+  /** The language the API should compose the text in. */
+  language: string;
 };
 
-const SaveViaSMSForm = ({ onSuccess }: SaveViaSMSFormProps) => {
+const SaveViaSMSForm = ({ onSuccess, language }: SaveViaSMSFormProps) => {
   const { formData } = useContext(Context);
   const { formatMessage } = useIntl();
 
@@ -40,7 +42,7 @@ const SaveViaSMSForm = ({ onSuccess }: SaveViaSMSFormProps) => {
   });
 
   const { apiError, isSubmitting, clearApiError, onSubmit } = useSaveResultsSubmit<z.infer<typeof schema>>({
-    buildPayload: (data) => ({ phone: '+1' + data.phone, type: 'textScreen' }),
+    buildPayload: (data) => ({ phone: '+1' + data.phone, type: 'textScreen', language }),
     onSuccess,
   });
 

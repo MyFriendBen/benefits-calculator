@@ -1,6 +1,6 @@
 import { useWatch } from 'react-hook-form';
 import { Alert, CircularProgress, Typography } from '@mui/material';
-import { useContext, useMemo } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import type { HasBenefitsProgram } from '../../Types/ApiCalls';
@@ -14,6 +14,9 @@ import QuestionQuestion from '../QuestionComponents/QuestionQuestion';
 import { Context } from '../Wrapper/Wrapper';
 import useStepForm from './stepForm';
 import ResultsTranslate from '../Results/Translate/Translate';
+import { useStepNumber } from '../../Assets/stepDirectory';
+import { useTrackEvent } from '../../Assets/analytics';
+import { getStepAnalyticsId } from '../../Assets/analytics/stepIds';
 import './AlreadyHasBenefits.css';
 
 type FormSchema = {
@@ -83,6 +86,20 @@ function AlreadyHasBenefits() {
   const { uuid } = useParams();
   const backNavigationFunction = useDefaultBackNavigationFunction('hasBenefits');
   const { updateScreen } = useScreenApi();
+  const track = useTrackEvent();
+  const hasBenefitsStepNumber = useStepNumber('hasBenefits', false);
+
+  useEffect(() => {
+    if (hasBenefitsProgramsError) {
+      track('screener_has_benefits_load_error', {
+        screener_step_name: getStepAnalyticsId('hasBenefits'),
+        screener_step_number: hasBenefitsStepNumber >= 0 ? hasBenefitsStepNumber : undefined,
+      });
+    }
+    // Fire once per error transition: depends only on the error flag so the
+    // event doesn't re-fire on unrelated re-renders (`track`/step number excluded).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasBenefitsProgramsError]);
 
   const { control, handleSubmit, setValue } = useStepForm<FormSchema>({
     defaultValues: {

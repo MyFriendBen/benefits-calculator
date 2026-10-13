@@ -6,6 +6,12 @@
   border-radius: 4px;
 }
 
+/* 0.75rem matches the gap above the summary box on the Long-Term Benefits tab, so
+   the intro box sits at the same height on both. */
+.results-card-body .informational-text {
+  margin-top: 0.75rem;
+}
+
 .informational-text a {
   color: var(--primary-color);
   text-decoration: underline;

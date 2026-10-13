@@ -60,7 +60,7 @@ export const calculatedCitizenshipFilters: Record<CalculatedCitizenLabel, Calcul
   },
   notPregnantOrUnder19ForEmergencyMedicaid: {
     func: notPregnantOrUnder19,
-    linkedFilters: ['gc_5less', 'non_citizen', 'otherWithWorkPermission'],
+    linkedFilters: ['gc_5less', 'non_citizen', 'otherWithWorkPermission', 'refugee'],
   },
   gc_18plus_no5: {
     func: (member) => {
@@ -87,13 +87,13 @@ export const calculatedCitizenshipFilters: Record<CalculatedCitizenLabel, Calcul
       const under21 = age < 21;
       return !pregnant && !under21;
     },
-    linkedFilters: ['gc_5less', 'otherWithWorkPermission'],
+    linkedFilters: ['gc_5less', 'otherWithWorkPermission', 'refugee'],
   },
   otherHealthCareUnder21: {
     func: (member) => {
       return calcAge(member) < 21;
     },
-    linkedFilters: ['gc_5less', 'otherWithWorkPermission'],
+    linkedFilters: ['gc_5less', 'otherWithWorkPermission', 'refugee'],
   },
 };
 

@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
+import { ComponentType, createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import ResultsError from './ResultsError/ResultsError';
 import Loading from './Loading/Loading';
 import {
@@ -8,24 +8,25 @@ import {
   Program,
   ProgramCategory,
   UrgentNeed,
-  Validation,
 } from '../../Types/Results';
-import { getEligibility } from '../../apiCalls';
+import { getEligibility, AssistantVisibleProgram } from '../../apiCalls';
 import { Context } from '../Wrapper/Wrapper';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { Grid } from '@mui/material';
-import ResultsHeader from './ResultsHeader/ResultsHeader';
+import ResultsHeader, { ResultsSummary } from './ResultsHeader/ResultsHeader';
 import Needs from './Needs/Needs';
 import Programs from './Programs/Programs';
 import ProgramPage from './ProgramPage/ProgramPage';
 import ResultsTabs from './Tabs/Tabs';
+import { ResultsTabId } from './Tabs/buildTabs';
+import BackAndSaveButtons from './BackAndSaveButtons/BackAndSaveButtons';
+import { FormattedMessage } from 'react-intl';
 import { FilterState, createInitialFilterState } from './Filter/citizenshipFilterConfig';
 import dataLayerPush from '../../Assets/analytics';
-import HelpButton from './211Button/211Button';
-import MoreHelp from '../MoreHelp/MoreHelp';
-import BackAndSaveButtons from './BackAndSaveButtons/BackAndSaveButtons';
+import MoreHelpButton from './211Button/211Button';
+import MoreHelp, { Resource } from '../MoreHelp/MoreHelp';
 import UrgentNeedBanner from './UrgentNeedBanner/UrgentNeedBanner';
-import { FormattedMessage } from 'react-intl';
+import ExternalApiFailureBanner from './ExternalApiFailureBanner/ExternalApiFailureBanner';
 import './Results.css';
 import { OTHER_PAGE_TITLES } from '../../Assets/pageTitleTags';
 import { addAdminToLink } from '../../Assets/adminLink';
@@ -37,6 +38,45 @@ import EnergyCalculatorRebatePage from '../EnergyCalculator/Results/RebatePage';
 import { usePageTitle } from '../Common/usePageTitle';
 import { NPSWidget } from '../NPS';
 import ShareModalAutoPopup from '../Share/ShareModalAutoPopup';
+import { useConfig, useFeatureFlag } from '../Config/configHook';
+import { ChatbotProvider } from './Chatbot/Chatbot';
+import { useTrackEvent, useTrackItemList } from '../../Assets/analytics';
+import { POST_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
+import { deriveVisiblePrograms } from './visiblePrograms';
+import { calculateGreetingTotal, calculateTotalValue, programValue } from './FormattedValue';
+
+// Mounts the Benbot chat widget only when the flag is on; otherwise renders children unchanged.
+// Defined at module scope so its identity is stable across renders (no subtree remount).
+//
+// `visiblePrograms` is the filtered program list this page is rendering, with each
+// value as displayed. BenBot may only recommend from the list it's handed, and several
+// results-page filters run client-side (legal status, mutual exclusions, per-member
+// insurance) so the server can't reproduce them from the eligibility snapshot.
+// Passing what's on screen is what keeps BenBot's recommendations — and the dollar
+// figures it quotes — to what the user can actually see.
+//
+// IF YOU CHANGE THE RESULTS PAGE, CHANGE BENJI'S DESCRIPTION OF IT (MFB-1872).
+// Benji is told, in the same closed-world terms as the program list, that it knows
+// every control this page has — so a tab, filter, button or modal that is added,
+// renamed or removed here makes Benji wrong in the one way its guardrails can't
+// catch: it will send people to hunt for something that isn't there. The description
+// is `_RESULTS_PAGE_GUIDE` in ai-service (`app/prompts.py`), and it is a hand-written
+// string in a different repo, so nothing enforces this automatically. The nearest
+// thing to enforcement is `resultsPageGuideLabels.test.ts` next door, which fails if
+// a control the guide names stops existing here.
+const BenbotWrapper = ({
+  enabled,
+  visiblePrograms,
+  greetingTotal,
+  children,
+}: PropsWithChildren<{ enabled: boolean; visiblePrograms: AssistantVisibleProgram[]; greetingTotal: number }>) =>
+  enabled ? (
+    <ChatbotProvider visiblePrograms={visiblePrograms} greetingTotal={greetingTotal}>
+      {children}
+    </ChatbotProvider>
+  ) : (
+    <>{children}</>
+  );
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -46,10 +86,9 @@ type WrapperResultsContext = {
   setFilterState: (newFilterState: FilterState) => void;
   missingPrograms: boolean;
   isAdminView: boolean;
-  validations: Validation[];
-  setValidations: (validations: Validation[]) => void;
   energyCalculatorRebateCategories: EnergyCalculatorRebateCategory[];
   policyEngineData: PolicyEngineData | undefined;
+  externalApiFailures: string[];
 };
 
 type ResultsProps = {
@@ -82,10 +121,6 @@ export function findProgramById(programs: Program[], id: number) {
   return programs.find((program) => program.program_id === id);
 }
 
-export function findValidationForProgram(validations: Validation[], program: Program) {
-  return validations.find((validation) => validation.program_name === program.external_name);
-}
-
 export function useResultsLink(link: string) {
   const { isAdminView } = useResultsContext();
   const { whiteLabel, uuid } = useParams();
@@ -93,10 +128,39 @@ export function useResultsLink(link: string) {
   return addAdminToLink(`/${whiteLabel}/${uuid}/${link}`, isAdminView);
 }
 
+// Referrer opt-out for Immediate Help. Flag is still named `no_results_more_help`
+// (predates the tab; policy unchanged). Centralizes the `[] as string[]` default
+// getReferrer needs to avoid throwing when referrerData is undefined.
+export function useImmediateHelpSuppressed() {
+  const { getReferrer } = useContext(Context);
+
+  return getReferrer('uiOptions', [] as string[]).includes('no_results_more_help');
+}
+
+// Shared by every place that needs to know whether there's anything to show on
+// the Immediate Help page (the tab list, the direct-URL redirect, and scroll
+// tracking) — one source of truth so those checks can't drift apart again.
+export function useImmediateHelpEmpty() {
+  const { moreHelpOptions } = useConfig<{ moreHelpOptions: Resource[] }>('more_help_options', {
+    moreHelpOptions: [],
+  });
+
+  return (moreHelpOptions ?? []).length === 0;
+}
+
+// GA4 tab_name per browsable tab. Types absent here (program detail, energy rebates)
+// are not tabs and are excluded from scroll-depth tracking.
+const SCROLL_DEPTH_TAB_NAMES: Partial<Record<ResultsProps['type'], string>> = {
+  program: 'long_term_benefits',
+  need: 'additional_resources',
+  help: 'immediate_help',
+};
+
 const Results = ({ type }: ResultsProps) => {
-  const { formData, getReferrer, locale } = useContext(Context);
+  const { formData, locale } = useContext(Context);
   const { whiteLabel, uuid, programId, energyCalculatorRebateType } = useParams();
-  const noHelpButton = getReferrer('uiOptions').includes('no_results_more_help');
+  const immediateHelpSuppressed = useImmediateHelpSuppressed();
+  const immediateHelpEmpty = useImmediateHelpEmpty();
 
   const [searchParams] = useSearchParams();
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams.get('admin')]);
@@ -104,6 +168,9 @@ const Results = ({ type }: ResultsProps) => {
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
   const [apiResults, setApiResults] = useState<EligibilityResults | undefined>();
+  const track = useTrackEvent();
+  const trackItemList = useTrackItemList();
+  const hasTrackedResultsLoaded = useRef(false);
 
   useEffect(() => {
     dataLayerPush({ event: 'config', user_id: uuid });
@@ -149,15 +216,130 @@ const Results = ({ type }: ResultsProps) => {
   const [programCategories, setProgramCategories] = useState<ProgramCategory[]>([]);
   const [needs, setNeeds] = useState<UrgentNeed[]>([]);
   const [missingPrograms, setMissingPrograms] = useState(false);
-  const [validations, setValidations] = useState<Validation[]>([]);
+  const [externalApiFailures, setExternalApiFailures] = useState<string[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
+
+  // The programs shown on load — run through the same filterPrograms pipeline the
+  // UI uses (legal status, calculated member eligibility, value/already-held,
+  // program exclusions), but with the INITIAL filter state, so it reflects the
+  // page as first rendered and doesn't shift when the user changes the
+  // interactive citizenship filter. Analytics for the count, impression, and
+  // none-eligible guard all read this one set.
+  const shownPrograms = useMemo(
+    () =>
+      apiResults === undefined
+        ? []
+        : filterProgramsGenerator(formData, createInitialFilterState(), isAdminView)(apiResults.programs),
+    [apiResults, formData, isAdminView],
+  );
+
+  // Fire screener_results_loaded once, as soon as the API result resolves —
+  // independent of rebate loading (not on later filter re-renders).
+  useEffect(() => {
+    if (apiResults === undefined || hasTrackedResultsLoaded.current) {
+      return;
+    }
+
+    hasTrackedResultsLoaded.current = true;
+    const totalEstimatedValue = apiResults.program_categories.reduce(
+      (sum, category) => sum + calculateTotalValue(category),
+      0,
+    );
+
+    track('screener_results_loaded', {
+      program_count: shownPrograms.length,
+      total_estimated_value: totalEstimatedValue,
+    });
+
+    // Emit results as a step view (terminal — view only) so it's tracked on the
+    // same event as every other step.
+    track('screener_form_step', {
+      screener_step_name: POST_DIRECTORY_STEP_IDS.results,
+      step_action: 'view',
+    });
+
+    // Programs shown, as one view_item_list impression — the on-load set from
+    // shownPrograms. Ref-guarded above, so once per screening.
+    trackItemList(
+      'results_programs',
+      shownPrograms.map((program, index) => ({
+        item_id: String(program.program_id),
+        item_name: program.name.default_message,
+        item_list_index: index,
+      })),
+    );
+  }, [apiResults, shownPrograms, track, trackItemList]);
+
+  // Results-page scroll depth, browsable tabs only. Each threshold fires once per tab per screening.
+  const firedScrollDepths = useRef<Set<number>>(new Set());
+  useEffect(() => {
+    // CESN has no tab bar for `help` (standalone page, see `isEnergyCalculator` below),
+    // and a suppressed or empty-resources referrer redirects away from `help` before
+    // ever seeing it (see the Navigate below) — all three excluded here even though
+    // `help` is otherwise in the lookup.
+    const tabName =
+      type === 'help' && (whiteLabel === 'cesn' || immediateHelpSuppressed || immediateHelpEmpty)
+        ? null
+        : SCROLL_DEPTH_TAB_NAMES[type] ?? null;
+    if (tabName === null) {
+      return; // program detail / rebates / CESN's standalone help page aren't browsable tabs
+    }
+    firedScrollDepths.current = new Set(); // new tab → reset the once-per-tab guard
+
+    const thresholds: (25 | 50 | 75 | 100)[] = [25, 50, 75, 100];
+    const onScroll = () => {
+      const doc = document.documentElement;
+      const scrollable = doc.scrollHeight - doc.clientHeight;
+      if (scrollable <= 0) {
+        return;
+      }
+      const pct = (doc.scrollTop / scrollable) * 100;
+      for (const depth of thresholds) {
+        if (pct >= depth && !firedScrollDepths.current.has(depth)) {
+          firedScrollDepths.current.add(depth);
+          track('screener_results_scroll_depth', { depth, tab_name: tabName });
+        }
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [type, track, whiteLabel, immediateHelpSuppressed, immediateHelpEmpty]);
+
+  // "None eligible" needs BOTH result sets resolved, or we'd fire a false
+  // negative while rebates are still loading (and the once-guard would prevent
+  // correction). On the energy calculator, rebates load async and are undefined
+  // until resolved. Reads shownPrograms (the on-load visible set), so a screening
+  // with nothing shown and no rebates is a true none-eligible. Separate guard so
+  // it stays independent of screener_results_loaded above.
+  const hasTrackedNoneEligible = useRef(false);
+  useEffect(() => {
+    const rebatesLoading = whiteLabel === 'cesn' && energyCalculatorRebateCategories === undefined;
+    if (apiResults === undefined || rebatesLoading || hasTrackedNoneEligible.current) {
+      return;
+    }
+
+    hasTrackedNoneEligible.current = true;
+    const noRebates = (energyCalculatorRebateCategories ?? []).length === 0;
+    if (shownPrograms.length === 0 && noRebates) {
+      track('screener_results_none_eligible', {});
+    }
+  }, [apiResults, shownPrograms, energyCalculatorRebateCategories, whiteLabel, track]);
+
+  // Benbot AI assistant — gated behind the 'benbot' feature flag (off by default).
+  const isBenbotEnabled = useFeatureFlag('benbot');
   const [policyEngineData, setPolicyEngineData] = useState<PolicyEngineData>();
   const isEnergyCalculator = whiteLabel === 'cesn';
 
   const filterPrograms = useMemo(
     () => filterProgramsGenerator(formData, filterState, isAdminView),
-    [formData, filterState, isAdminView]
+    [formData, filterState, isAdminView],
   );
+
+  // What BenBot is allowed to recommend from — see BenbotWrapper and
+  // ./visiblePrograms, which documents why this comes from programCategories.
+  const visiblePrograms = useMemo(() => deriveVisiblePrograms(programCategories), [programCategories]);
+  const greetingTotal = useMemo(() => calculateGreetingTotal(programCategories), [programCategories]);
 
   useEffect(() => {
     if (apiResults === undefined) {
@@ -165,7 +347,7 @@ const Results = ({ type }: ResultsProps) => {
       setPrograms([]);
       setProgramCategories([]);
       setMissingPrograms(false);
-      setValidations([]);
+      setExternalApiFailures([]);
       setPolicyEngineData(undefined);
       return;
     }
@@ -187,32 +369,42 @@ const Results = ({ type }: ResultsProps) => {
       }),
     );
     setMissingPrograms(apiResults.missing_programs);
-    setValidations(apiResults.validations);
+    setExternalApiFailures(apiResults.external_api_failures ?? []);
     setLoading(false);
     setPolicyEngineData(apiResults.pe_data);
   }, [filterPrograms, apiResults, isEnergyCalculator, energyCalculatorRebateCategories]);
 
-  const ResultsContextProvider = ({ children }: PropsWithChildren) => {
-    return (
-      <ResultsContext.Provider
-        value={{
-          programs,
-          programCategories,
-          needs,
-          filterState,
-          setFilterState,
-          missingPrograms,
-          isAdminView,
-          validations,
-          setValidations,
-          energyCalculatorRebateCategories: energyCalculatorRebateCategories ?? [],
-          policyEngineData,
-        }}
-      >
-        {children}
-      </ResultsContext.Provider>
-    );
-  };
+  // MFB-1737: this used to be a `ResultsContextProvider` component defined here in
+  // the render body. A component defined inside another component gets a new
+  // identity on every render, so React unmounted and remounted the entire results
+  // subtree on any state change (e.g. a filter change) — silently destroying all
+  // subtree state, including an open Benbot conversation. A memoized value passed
+  // to <ResultsContext.Provider> directly keeps the tree stable.
+  const resultsContextValue = useMemo<WrapperResultsContext>(
+    () => ({
+      programs,
+      programCategories,
+      needs,
+      filterState,
+      setFilterState,
+      missingPrograms,
+      isAdminView,
+      energyCalculatorRebateCategories: energyCalculatorRebateCategories ?? [],
+      policyEngineData,
+      externalApiFailures,
+    }),
+    [
+      programs,
+      programCategories,
+      needs,
+      filterState,
+      missingPrograms,
+      isAdminView,
+      energyCalculatorRebateCategories,
+      policyEngineData,
+      externalApiFailures,
+    ],
+  );
 
   if (loading) {
     return (
@@ -224,7 +416,16 @@ const Results = ({ type }: ResultsProps) => {
     );
   } else if (apiError) {
     return <ResultsError />;
-  } else if (programId === undefined && type === 'help') {
+  } else if (programId === undefined && type === 'help' && (immediateHelpSuppressed || immediateHelpEmpty)) {
+    // Suppressed or empty-resources referrers must not reach More Help by URL
+    // either — otherwise the tab-bar fix (hiding the tab) doesn't help someone
+    // who gets here via a bookmark or the back button instead. Must run before
+    // the CESN branch below, so this redirects CESN too.
+    return <Navigate to={addAdminToLink(`/${whiteLabel}/${uuid}/results/benefits`, isAdminView)} replace />;
+  } else if (programId === undefined && type === 'help' && isEnergyCalculator) {
+    // CESN has no tab bar (Tabs.tsx), so Immediate Help stays this standalone page,
+    // keeping its "BACK TO RESULTS" affordance. Folding it into the tabbed layout would
+    // leave "BACK TO SCREENER" with no tab bar to get back to results.
     return (
       <main className="benefits-form">
         <Grid container>
@@ -235,32 +436,65 @@ const Results = ({ type }: ResultsProps) => {
                 <FormattedMessage id="results.back-to-results-btn" defaultMessage="BACK TO RESULTS" />
               }
             />
-            <MoreHelp />
+            <MoreHelp isStandalonePage />
           </Grid>
         </Grid>
       </main>
     );
-  } else if (programId === undefined && (type === 'program' || type === 'need')) {
+  } else if (programId === undefined && (type === 'program' || type === 'need' || type === 'help')) {
+    // Built inside render, not at module scope: Results.tsx has an import cycle
+    // (Results -> Tabs -> Results), and a module-scope lookup could read
+    // Programs/Needs/MoreHelp before they finish initializing, baking in `undefined`
+    // with no ErrorBoundary to catch it. Render only starts after the whole module
+    // graph loads, so this is safe. A Record (not nested ternaries) makes a missing
+    // type a compile error instead of a silent fallback to Long-Term Benefits.
+    const panels: Record<ResultsTabId, { tabId: string; Content: ComponentType }> = {
+      program: { tabId: 'long-term-benefits-tab', Content: Programs },
+      need: { tabId: 'near-term-benefits-tab', Content: Needs },
+      help: { tabId: 'immediate-help-tab', Content: MoreHelp },
+    };
+    const panel = panels[type];
+
     return (
-      <ResultsContextProvider>
-        <main>
-          <ResultsHeader type={type} />
-          <div className="results-card-wrapper">
-            <ResultsTabs />
-            <div id="results-tabpanel" role="tabpanel" aria-labelledby={type === 'program' ? 'long-term-benefits-tab' : 'near-term-benefits-tab'} className="benefits-form results-card-body">
-              {type === 'program' && <UrgentNeedBanner />}
-              <Grid container sx={{ pt: '1rem' }}>
-                <Grid item xs={12}>
-                  {type === 'need' ? <Needs /> : <Programs />}
+      <ResultsContext.Provider value={resultsContextValue}>
+        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms} greetingTotal={greetingTotal}>
+          <main>
+            <ResultsHeader />
+            <div className="results-card-wrapper">
+              <ResultsTabs activeTab={type} />
+              {/* `has-tabs` only when a tab row renders above: it squares off the top of
+                  the card so the active tab merges into it. CESN has no tab bar, so it
+                  keeps the standalone card's rounded corners and top margin. */}
+              <div
+                id="results-tabpanel"
+                role="tabpanel"
+                aria-labelledby={panel.tabId}
+                className={`benefits-form results-card-body${isEnergyCalculator ? '' : ' has-tabs'}`}
+              >
+                {/* Inside the panel, not above it — per-tab content should be reachable
+                    when a screen reader enters the active panel. */}
+                <ResultsSummary type={type} />
+                {type === 'program' && <ExternalApiFailureBanner />}
+                {type === 'program' && <UrgentNeedBanner />}
+                {/* In the tabbed layout each tab's first section owns the gap above its
+                    own divider. CESN has no such section, so it keeps the padding. */}
+                <Grid container sx={{ pt: isEnergyCalculator ? '1rem' : 0 }}>
+                  <Grid item xs={12}>
+                    <panel.Content />
+                  </Grid>
                 </Grid>
-              </Grid>
-              {!noHelpButton && <HelpButton />}
-              <NPSWidget uuid={uuid} />
-              <ShareModalAutoPopup />
+                {/* CESN renders no tab bar (see Tabs.tsx), so this button remains its only
+                    entry point to the Immediate Help resources. */}
+                {isEnergyCalculator && !immediateHelpSuppressed && <MoreHelpButton />}
+                <NPSWidget uuid={uuid} />
+                {/* Kept off the help tab: it fires screener_share_popup_shown on a 5s
+                    timer, which would count an impression per tab visit. */}
+                {type !== 'help' && <ShareModalAutoPopup />}
+              </div>
             </div>
-          </div>
-        </main>
-      </ResultsContextProvider>
+          </main>
+        </BenbotWrapper>
+      </ResultsContext.Provider>
     );
   }
 
@@ -276,9 +510,26 @@ const Results = ({ type }: ResultsProps) => {
     }
 
     return (
-      <ResultsContextProvider>
-        <ProgramPage program={program} />
-      </ResultsContextProvider>
+      <ResultsContext.Provider value={resultsContextValue}>
+        {/*
+          MFB-1872: Benji follows the user into a program's own page, which is exactly
+          where the questions get specific — "what does this Apply Online button do",
+          "do I really need all these documents", "what's a navigator". Before this it
+          unmounted on "more info" and they lost the assistant at the moment they had a
+          concrete question.
+
+          Auto-open is deliberately left ON here, identical to the list page. Closing
+          the panel writes the dismissal key, which is per screen uuid rather than per
+          path — so a user who closed Benji anywhere stays free of it everywhere, and a
+          user who did not gets the same offer on the page where their question is most
+          specific. Those two cases are the whole intended behaviour, and the existing
+          effect already produces both; a route-aware exception would only break the
+          second one.
+        */}
+        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms} greetingTotal={greetingTotal}>
+          <ProgramPage program={program} />
+        </BenbotWrapper>
+      </ResultsContext.Provider>
     );
   } else if (energyCalculatorRebateType !== undefined) {
     const rebateCategory = energyCalculatorRebateCategories?.find(
@@ -290,9 +541,9 @@ const Results = ({ type }: ResultsProps) => {
     }
 
     return (
-      <ResultsContextProvider>
+      <ResultsContext.Provider value={resultsContextValue}>
         <EnergyCalculatorRebatePage rebateCategory={rebateCategory} />
-      </ResultsContextProvider>
+      </ResultsContext.Provider>
     );
   } else {
     return <NavigateToMainResultsPage />;

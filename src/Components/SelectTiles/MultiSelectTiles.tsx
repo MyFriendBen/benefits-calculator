@@ -1,12 +1,14 @@
 import { Card, CardActionArea } from '@mui/material';
 import { ReactNode, useCallback } from 'react';
 import { FormattedMessageType } from '../../Types/Questions';
+import { Icon } from '../Icon/Icon';
 import './SelectTiles.css';
 
 export type MultiSelectTileOption<T extends string | number> = {
   value: T;
   text: FormattedMessageType;
-  icon: ReactNode;
+  /** Lucide icon name (kebab-case) or a ReactNode for legacy/EnergyCalculator icons */
+  icon: string | ReactNode;
 };
 
 type TileProps<T extends string | number> = {
@@ -29,7 +31,13 @@ function Tile<T extends string | number>({ option, selected, onClick, variant }:
     <CardActionArea className="card-action-area" onClick={onClick} aria-pressed={selected}>
       <Card className={containerClass}>
         <div className="option-card-content">
-          <div className="option-card-icon">{option.icon}</div>
+          <div className="option-card-icon">
+            {typeof option.icon === 'string' ? (
+              <Icon name={option.icon} className="option-card-lucide-icon" />
+            ) : (
+              option.icon
+            )}
+          </div>
           <span className={['option-card-label', selected && 'option-card-selected-text'].filter(Boolean).join(' ')}>
             {option.text}
           </span>
@@ -39,21 +47,25 @@ function Tile<T extends string | number>({ option, selected, onClick, variant }:
   );
 }
 
-type MultiSelectTilesProps<T extends string | number> = {
+// `V` mirrors the caller's value shape: a click spreads the existing object and sets one
+// key, never removing any, so the emitted object has the same keys it came in with. Typing
+// onChange as `Partial<...>` would flatten that guarantee and break callers whose form
+// schema requires every key to be present.
+type MultiSelectTilesProps<T extends string | number, V extends Partial<Record<T, boolean>>> = {
   options: MultiSelectTileOption<T>[];
-  values: Partial<Record<T, boolean>>;
-  onChange: (value: Partial<Record<T, boolean>>) => void;
+  values: V;
+  onChange: (value: V) => void;
   variant?: 'square' | 'flat';
   exclusiveValues?: T[];
 };
 
-function MultiSelectTiles<T extends string | number>({
+function MultiSelectTiles<T extends string | number, V extends Partial<Record<T, boolean>>>({
   options,
   values,
   onChange,
   variant = 'flat',
   exclusiveValues = [],
-}: MultiSelectTilesProps<T>) {
+}: MultiSelectTilesProps<T, V>) {
   const handleTileClick = useCallback(
     (clickedValue: T) => {
       const newValues = { ...values } as Record<T, boolean>;
@@ -69,7 +81,7 @@ function MultiSelectTiles<T extends string | number>({
       }
 
       newValues[clickedValue] = selecting;
-      onChange(newValues);
+      onChange(newValues as V);
     },
     [values, exclusiveValues, onChange],
   );

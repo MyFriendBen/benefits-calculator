@@ -82,6 +82,7 @@ export type ApiHouseholdMember = {
   medicaid?: boolean | null;
   disability_medicaid?: boolean | null;
   long_term_disability: boolean | null;
+  was_in_foster_care: boolean | null;
   has_income: boolean | null;
   energy_calculator: ApiEnergyCalculatorMember | null;
   income_streams: ApiIncome[];
@@ -122,7 +123,6 @@ export type ApiUser = {
 
 export type ApiFormDataReadOnly = {
   id: number;
-  frozen: boolean;
   uuid: string;
   submision_date: string | null;
   last_email_request_date: string | null;
@@ -177,6 +177,10 @@ export type ApiFormData = {
   needs_veteran_services: boolean | null;
   needs_disability_resources: boolean | null;
   needs_aging_resources: boolean | null;
+  needs_homeless_services: boolean | null;
+  needs_free_low_cost_medical_care: boolean | null;
+  needs_transportation: boolean | null;
+  needs_medical_expenses_and_debt: boolean | null;
   utm_id: string | null;
   utm_source: string | null;
   utm_medium: string | null;

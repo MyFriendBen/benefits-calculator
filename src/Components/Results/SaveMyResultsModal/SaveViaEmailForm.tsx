@@ -11,9 +11,11 @@ import './SaveMyResultsModal.css';
 
 type SaveViaEmailFormProps = {
   onSuccess: () => void;
+  /** The language the API should compose the email in. */
+  language: string;
 };
 
-const SaveViaEmailForm = ({ onSuccess }: SaveViaEmailFormProps) => {
+const SaveViaEmailForm = ({ onSuccess, language }: SaveViaEmailFormProps) => {
   const { formData } = useContext(Context);
   const { formatMessage } = useIntl();
 
@@ -41,7 +43,7 @@ const SaveViaEmailForm = ({ onSuccess }: SaveViaEmailFormProps) => {
   });
 
   const { apiError, isSubmitting, clearApiError, onSubmit } = useSaveResultsSubmit<z.infer<typeof schema>>({
-    buildPayload: (data) => ({ email: data.email, type: 'emailScreen' }),
+    buildPayload: (data) => ({ email: data.email, type: 'emailScreen', language }),
     onSuccess,
   });
 

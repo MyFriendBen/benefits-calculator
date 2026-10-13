@@ -18,6 +18,7 @@ const CesnBanner = () => {
       defaultMessage: 'State of Colorado logo',
     }),
     'cesn-header-logo',
+    intl.locale,
   );
 
   return (

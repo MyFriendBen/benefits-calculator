@@ -14,6 +14,9 @@ export type SendMessageRequestData = {
   phone?: string;
   screen: string;
   type: string;
+  // The message copy is composed server-side, so the language it should be
+  // written in travels with the request. Omitted means the screener's language.
+  language?: string;
 };
 
 export type ProgramCategoryResponse = {
@@ -48,13 +51,6 @@ export type UrgentNeedTypeResponse = {
     link?: Translation;
   }[];
 }[];
-
-export type ValidationRequestData = {
-  screen_uuid: string;
-  program_name: string;
-  eligible: boolean;
-  value: number;
-};
 
 export type AdminTokenResponse = {
   token: string;

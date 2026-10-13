@@ -1,36 +1,66 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import LeftArrowIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { Typography } from '@mui/material';
-import { TrackedOutboundLink } from '../../../Common/TrackedOutboundLink';
 import PagedDocumentViewer from '../../../Common/PagedDocumentViewer';
 import { usePageTitle } from '../../../Common/usePageTitle';
 import { OTHER_PAGE_TITLES } from '../../../../Assets/pageTitleTags';
 import { addAdminToLink } from '../../../../Assets/adminLink';
-import { ReactComponent as Wrench } from '../../Icons/Wrench.svg';
+import { useTrackEvent } from '../../../../Assets/analytics';
+import { Icon } from '../../../Icon/Icon';
 import './ConnectNowPage.css';
 
 const CONTRACTOR_FINDER_URL = 'https://contractors.poweraheadcolorado.org/contractor-finder?utm_source=cesn' as const;
 
 const EXPAND_SEARCH_URL = 'https://app.hvacree.net/LoveElectric' as const;
 
-/**
- * "How to find a good HVAC contractor" guide (Electrify Now), served as a static
- * asset from `public/documents/`. See `public/documents/README.md`.
- *
- * The PagedDocumentViewer displays pre-rendered page images (so the toolbar/pager
- * can match the design); Print/Download opens this PDF so users get a real PDF.
- * Regenerate the page images if this PDF changes — see the README.
- */
-export const CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL =
-  `${process.env.PUBLIC_URL}/documents/heat-pump-journey/how-to-find-hvac-contractor.pdf` as const;
+const CONTRACTOR_GUIDE_BASE_URL = `${process.env.PUBLIC_URL}/documents/heat-pump-journey` as const;
 
-export const CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES = [
-  `${process.env.PUBLIC_URL}/documents/heat-pump-journey/page-1.png`,
-  `${process.env.PUBLIC_URL}/documents/heat-pump-journey/page-2.png`,
-] as const;
+/**
+ * Translated editions of the "How to find a good HVAC contractor" guide (Electrify
+ * Now), keyed by language subtag. cesn offers a dozen languages but only these
+ * editions exist, so every other locale falls back to English.
+ *
+ * Each key is also a directory under `public/documents/heat-pump-journey/` holding
+ * the PDF plus one pre-rendered page image per page — see
+ * `public/documents/README.md`, and update `pageCount` if a PDF's page count
+ * changes.
+ */
+const CONTRACTOR_GUIDE_EDITIONS = {
+  en: { pageCount: 3 },
+  es: { pageCount: 3 },
+} as const;
+
+type ContractorGuideLanguage = keyof typeof CONTRACTOR_GUIDE_EDITIONS;
+
+const CONTRACTOR_GUIDE_LANGUAGES = Object.keys(CONTRACTOR_GUIDE_EDITIONS) as ContractorGuideLanguage[];
+
+const CONTRACTOR_GUIDE_FALLBACK_LANGUAGE: ContractorGuideLanguage = 'en';
+
+/**
+ * Guide assets for `locale`, matched on its language subtag ('es-mx' → 'es',
+ * 'en-us' → 'en').
+ *
+ * The PagedDocumentViewer displays the pre-rendered page images (so the
+ * toolbar/pager can match the design); Print/Download opens the PDF so users get
+ * a real PDF.
+ */
+export function getContractorGuideAssets(locale: string) {
+  const subtag = locale.toLowerCase().split('-')[0];
+  const language =
+    CONTRACTOR_GUIDE_LANGUAGES.find((edition) => edition === subtag) ?? CONTRACTOR_GUIDE_FALLBACK_LANGUAGE;
+  const { pageCount } = CONTRACTOR_GUIDE_EDITIONS[language];
+
+  return {
+    pdfUrl: `${CONTRACTOR_GUIDE_BASE_URL}/${language}/contractor-checklist.pdf`,
+    pageImages: Array.from(
+      { length: pageCount },
+      (_, i) => `${CONTRACTOR_GUIDE_BASE_URL}/${language}/page-${i + 1}.png`,
+    ),
+  };
+}
 
 export default function ConnectNowPage() {
   const intl = useIntl();
@@ -38,6 +68,7 @@ export default function ConnectNowPage() {
   const { whiteLabel, uuid } = useParams();
   const [searchParams] = useSearchParams();
   const isAdminView = useMemo(() => searchParams.get('admin') === 'true', [searchParams]);
+  const track = useTrackEvent();
 
   const backLink = addAdminToLink(`/${whiteLabel}/${uuid}/results/energy-rebates/hvac`, isAdminView);
 
@@ -50,13 +81,26 @@ export default function ConnectNowPage() {
 
   const pdfSectionHeadingId = 'connect-now-pdf-heading';
 
+  const contractorGuide = useMemo(() => getContractorGuideAssets(intl.locale), [intl.locale]);
+
+  // Reaching this page is the denominator for the two contractor-search clicks;
+  // the guide viewer renders here too, so it's also the denominator for the PDF.
+  useEffect(() => {
+    track('heat_pump_section_view', { section: 'connect_now_page' });
+    track('heat_pump_section_view', { section: 'contractor_pdf' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <main className="benefits-form connect-now-page">
       <div className="connect-now-back-row results-back-save-btn-container">
         <button
           data-testid="back-to-results-button"
           className="results-back-save-buttons"
-          onClick={() => navigate(backLink)}
+          onClick={() => {
+            track('heat_pump_back_click', { from: 'connect_now' });
+            navigate(backLink);
+          }}
           aria-label={intl.formatMessage({
             id: 'energyCalculator.connectNow.backToResults',
             defaultMessage: 'BACK TO RESULTS',
@@ -70,7 +114,7 @@ export default function ConnectNowPage() {
       </div>
 
       <header className="connect-now-header">
-        <Wrench aria-hidden="true" className="connect-now-icon" />
+        <Icon name="wrench" aria-hidden="true" className="connect-now-icon" />
         <div className="connect-now-header-text">
           <span className="connect-now-title-text">
             <FormattedMessage id="energyCalculator.connectNow.eyebrow" defaultMessage="Find a Contractor" />
@@ -96,46 +140,50 @@ export default function ConnectNowPage() {
           defaultMessage: 'Contractor search links',
         })}
       >
-        <TrackedOutboundLink
+        <a
           href={CONTRACTOR_FINDER_URL}
-          action="heat_pump_connect_now_find_installer"
-          label="Power Ahead Colorado Contractor Finder"
-          category="heat_pump_journey"
+          target="_blank"
+          rel="noopener noreferrer"
           className="connect-now-cta"
+          onClick={() => track('heat_pump_connect_now_find_installer', { url: CONTRACTOR_FINDER_URL })}
         >
           <FormattedMessage id="energyCalculator.connectNow.cta.findInstaller" defaultMessage="Find an installer" />
           <OpenInNewIcon className="connect-now-cta-icon" aria-hidden="true" />
-        </TrackedOutboundLink>
+        </a>
         <Typography variant="body1" className="connect-now-cta-interstitial">
           <FormattedMessage
             id="energyCalculator.connectNow.cta.interstitial"
             defaultMessage="If you are unable to find someone in your area, try an expanded search."
           />
         </Typography>
-        <TrackedOutboundLink
+        <a
           href={EXPAND_SEARCH_URL}
-          action="heat_pump_connect_now_expand_search"
-          label="Love Electric HVACREE expand search"
-          category="heat_pump_journey"
+          target="_blank"
+          rel="noopener noreferrer"
           className="connect-now-cta"
+          onClick={() => track('heat_pump_connect_now_expand_search', { url: EXPAND_SEARCH_URL })}
         >
           <FormattedMessage id="energyCalculator.connectNow.cta.expandSearch" defaultMessage="Expand search" />
           <OpenInNewIcon className="connect-now-cta-icon" aria-hidden="true" />
-        </TrackedOutboundLink>
+        </a>
       </section>
 
       <section className="connect-now-pdf-section" aria-labelledby={pdfSectionHeadingId}>
         <Typography id={pdfSectionHeadingId} variant="h2" component="h2" className="connect-now-pdf-heading">
           <FormattedMessage
             id="energyCalculator.connectNow.pdfSectionHeading"
-            defaultMessage="How to find a good HVAC contractor, from our friends at Electrify Now."
+            defaultMessage="How to find a good HVAC contractor, from Electrify Now."
           />
         </Typography>
         <PagedDocumentViewer
-          pageImages={CONNECT_NOW_CONTRACTOR_GUIDE_PAGE_IMAGES}
-          pdfUrl={CONNECT_NOW_CONTRACTOR_GUIDE_PDF_URL}
+          pageImages={contractorGuide.pageImages}
+          pdfUrl={contractorGuide.pdfUrl}
           title={pdfDocumentTitle}
           className="connect-now-pdf-frame"
+          // Fires page 1 on mount (PDF-opened denominator) and each page turn.
+          onPageView={(n) => track('heat_pump_pdf_page', { page_number: n })}
+          onFullscreen={() => track('heat_pump_pdf_fullscreen', {})}
+          onPrint={() => track('heat_pump_pdf_print', {})}
         />
       </section>
     </main>

@@ -2,6 +2,7 @@ import { Alert, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { FormattedMessage } from 'react-intl';
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useTrackEvent } from '../../../Assets/analytics';
 import './NotificationPopup.css';
 
 // Default messages to avoid creating new elements on every render
@@ -57,22 +58,34 @@ const NotificationPopup = ({
   startMinimized = false,
 }: NotificationPopupProps) => {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const track = useTrackEvent();
 
   const [isMinimized, setIsMinimized] = useState(startMinimized);
   const [isDismissed, setIsDismissed] = useState(false);
 
   const handleMinimize = useCallback(() => {
     setIsMinimized(true);
-  }, []);
+    track('screener_notification_popup', { action: 'minimize' });
+  }, [track]);
 
   const handleRestore = useCallback(() => {
     setIsMinimized(false);
-  }, []);
+    track('screener_notification_popup', { action: 'restore' });
+  }, [track]);
 
-  const handleDismiss = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent restore from triggering
-    setIsDismissed(true);
-  }, []);
+  const handleDismiss = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation(); // Prevent restore from triggering
+      setIsDismissed(true);
+      track('screener_notification_popup', { action: 'dismiss' });
+    },
+    [track],
+  );
+
+  const handleCtaClick = useCallback(() => {
+    track('screener_notification_popup', { action: 'cta_click' });
+    handleMinimize();
+  }, [track, handleMinimize]);
 
   // Focus management for accessibility
   useEffect(() => {
@@ -81,6 +94,20 @@ const NotificationPopup = ({
       dialogRef.current?.focus();
     }
   }, [isMinimized, isDismissed, shouldShow]);
+
+  // Fire the impression event once, when the popup first becomes visible.
+  // Guarded by a ref (fires at most once) and keyed on the visibility boolean
+  // so it still fires if the popup becomes eligible after mount, not only on
+  // the initial render.
+  const isVisible = shouldShow();
+  const hasTrackedShown = useRef(false);
+  useEffect(() => {
+    if (isVisible && !hasTrackedShown.current) {
+      hasTrackedShown.current = true;
+      track('screener_notification_popup', { action: 'shown' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isVisible]);
 
   // Don't render if condition not met or completely dismissed
   if (!shouldShow() || isDismissed) {
@@ -170,7 +197,7 @@ const NotificationPopup = ({
               target="_blank"
               rel="noopener noreferrer"
               className="notification-popup-button"
-              onClick={handleMinimize}
+              onClick={handleCtaClick}
             >
               {linkText}
             </a>

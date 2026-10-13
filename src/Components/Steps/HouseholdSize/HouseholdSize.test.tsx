@@ -23,6 +23,7 @@ jest.mock('../../../Assets/updateScreen', () => ({
 // householdData step is step 5 in tests
 jest.mock('../../../Assets/stepDirectory', () => ({
   useStepNumber: (_name: string, _required?: boolean) => 5,
+  useStepName: (_stepNumber: number) => undefined,
 }));
 
 jest.mock('../../QuestionComponents/questionHooks', () => ({
