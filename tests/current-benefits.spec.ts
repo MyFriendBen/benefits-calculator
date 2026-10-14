@@ -17,7 +17,9 @@ const TEST_CONFIG: Record<WhiteLabel, { name: string; skip?: boolean; skipReason
   tx: { name: 'Texas' },
   wa: { name: 'Washington' },
   mo: { name: 'Missouri' },
-  nj: { name: 'New Jersey' },
+  // Skipped for now so the suite passes: NJ is a new white label with no programs on staging yet,
+  // so its current-benefits page renders empty. Remove the skip once NJ programs are imported.
+  nj: { name: 'New Jersey', skip: true, skipReason: 'NJ has no programs on staging yet' },
 };
 
 // Validate that TEST_CONFIG is in sync with ALL_VALID_WHITE_LABELS
