@@ -12,6 +12,10 @@ import Chicago211LinkMessage from '../Results/Chicago211LinkMessage';
 import CcigResultsMessage from '../CcigComponents/CcigResultsMessage';
 import TwoOneOneHeaderNC from '../TwoOneOneNCComponents/TwoOneOneHeaderNC/TwoOneOneHeaderNC';
 import TwoOneOneFooterNC from '../TwoOneOneNCComponents/TwoOneOneFooterNC/TwoOneOneFooterNC';
+import {
+  TwoOneOneFooterKS,
+  TwoOneOneFooterMO,
+} from '../TwoOneOneKSMOComponents/TwoOneOneFooterKSMO/TwoOneOneFooterKSMO';
 import PoweredByFooter from '../Footer/PoweredByFooter';
 import EnergyCalculatorFooter from '../EnergyCalculator/Footer/Footer';
 import CesnBanner from '../EnergyCalculator/Banner/Banner';
@@ -67,6 +71,8 @@ export const BrandedFooter = () => {
   const footerMap = [
     { flag: '211co', component: TwoOneOneFooterCO },
     { flag: '211nc', component: TwoOneOneFooterNC },
+    { flag: '211ks', component: TwoOneOneFooterKS },
+    { flag: '211mo', component: TwoOneOneFooterMO },
     { flag: 'lanc', component: LancFooter },
     { flag: 'ccla', component: CclaFooter },
     { flag: 'hfed', component: NCHispanicFederationFooter },
