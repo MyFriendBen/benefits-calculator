@@ -4,10 +4,15 @@ import dialIcon from '../../../Assets/States/CO/WhiteLabels/TwoOneOneAssets/dial
 import { FormattedMessage, useIntl } from 'react-intl';
 import './TwoOneOneFooterNC.css';
 import { useLocalizedLink } from '../../Config/configHook';
+import { useContext } from 'react';
+import { Context } from '../../Wrapper/Wrapper';
+import { telHref } from '../../Referrer/footerPhone';
 
 const TwoOneOneFooterNC = () => {
   const intl = useIntl();
   const privacyPolicyLink = useLocalizedLink('privacy_policy');
+  const { getReferrer } = useContext(Context);
+  const footerPhone = getReferrer('footerPhone', '');
 
   const twoOneOneDialALProps = {
     id: 'twoOneOneFooter.dialAL',
@@ -37,24 +42,28 @@ const TwoOneOneFooterNC = () => {
             <FormattedMessage id="footer-dial-text-nc" defaultMessage="Dial " />
             2-1-1
           </Link>
-          &nbsp;
-          <Typography className="font-color" sx={{ display: 'inline-block' }}>
-            <FormattedMessage id="footer-or-text-nc" defaultMessage=" or" />
-            &nbsp;
-          </Typography>
-          <Link
-            href="tel:888-892-1162"
-            underline="none"
-            target="_blank"
-            aria-label={intl.formatMessage(twoOneOneDialALProps)}
-            color="primary"
-            sx={{ display: 'inline-block' }}
-          >
-            1-(888)-892-1162
-          </Link>
-          <Typography className="font-color">
-            <FormattedMessage id="footer-tollFree-text-nc" defaultMessage="toll free" />
-          </Typography>
+          {footerPhone && (
+            <>
+              &nbsp;
+              <Typography className="font-color" sx={{ display: 'inline-block' }}>
+                <FormattedMessage id="footer-or-text-nc" defaultMessage=" or" />
+                &nbsp;
+              </Typography>
+              <Link
+                href={telHref(footerPhone)}
+                underline="none"
+                target="_blank"
+                aria-label={intl.formatMessage(twoOneOneDialALProps)}
+                color="primary"
+                sx={{ display: 'inline-block' }}
+              >
+                {footerPhone}
+              </Link>
+              <Typography className="font-color">
+                <FormattedMessage id="footer-tollFree-text-nc" defaultMessage="toll free" />
+              </Typography>
+            </>
+          )}
         </Box>
       </Stack>
     );

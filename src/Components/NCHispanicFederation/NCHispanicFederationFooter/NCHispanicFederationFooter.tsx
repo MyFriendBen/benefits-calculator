@@ -3,11 +3,16 @@ import Box from '@mui/material/Box';
 import dialIcon from '../../../Assets/States/CO/WhiteLabels/TwoOneOneAssets/dialIcon.png';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useLocalizedLink } from '../../Config/configHook';
+import { useContext } from 'react';
+import { Context } from '../../Wrapper/Wrapper';
+import { telHref } from '../../Referrer/footerPhone';
 import './NCHispanicFederationFooter.css';
 
 const NCHispanicFederationFooter = () => {
   const intl = useIntl();
   const privacyPolicyLink = useLocalizedLink('privacy_policy');
+  const { getReferrer } = useContext(Context);
+  const footerPhone = getReferrer('footerPhone', '');
 
   const hfedDialALProps = {
     id: 'hfedFooter.dialAL',
@@ -31,22 +36,26 @@ const NCHispanicFederationFooter = () => {
           alt="talk to a HFED navigator via phone or get referral online"
         />
         <Box sx={{ textAlign: 'center' }}>
-          <Typography>
-            <FormattedMessage id="footer-dial-text-hfed" defaultMessage="Call the Helpline at " />
-          </Typography>
-          <Link
-            href="tel:844-438-6827"
-            underline="none"
-            target="_blank"
-            aria-label={intl.formatMessage(hfedDialALProps)}
-            color="primary"
-          >
-            1-844-438-6827
-          </Link>
-          <Typography>
-            <FormattedMessage id="footer-or-text-nc" defaultMessage=" or" />
-            &nbsp;
-          </Typography>
+          {footerPhone && (
+            <>
+              <Typography>
+                <FormattedMessage id="footer-dial-text-hfed" defaultMessage="Call the Helpline at " />
+              </Typography>
+              <Link
+                href={telHref(footerPhone)}
+                underline="none"
+                target="_blank"
+                aria-label={intl.formatMessage(hfedDialALProps)}
+                color="primary"
+              >
+                {footerPhone}
+              </Link>
+              <Typography>
+                <FormattedMessage id="footer-or-text-nc" defaultMessage=" or" />
+                &nbsp;
+              </Typography>
+            </>
+          )}
           <Typography>
             <FormattedMessage id="footer-apply-text-hfed" defaultMessage="Fill out the " />
           </Typography>
