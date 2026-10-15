@@ -95,9 +95,17 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
     setIsDeleting(true);
     try {
       const updatedHouseholdData = formData.householdData.filter((_, i) => i !== deletedIndex);
+      // Decrement the declared household size rather than setting it to the number of entered
+      // members: the roster shows a deletable card for every slot, including ones not filled in
+      // yet, so `updatedHouseholdData.length` would silently discard those remaining slots.
+      const previousSize = Number(formData.householdSize);
+      const updatedHouseholdSize = Number.isFinite(previousSize)
+        ? Math.max(updatedHouseholdData.length, previousSize - 1)
+        : updatedHouseholdData.length;
+
       await updateScreen({
         ...formData,
-        householdSize: updatedHouseholdData.length,
+        householdSize: updatedHouseholdSize,
         householdData: updatedHouseholdData,
       });
       // Distinct from the basics-roster 'delete': this removes an already-detailed

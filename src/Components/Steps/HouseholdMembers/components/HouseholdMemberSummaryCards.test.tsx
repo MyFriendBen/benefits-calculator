@@ -380,6 +380,24 @@ describe('HouseholdMemberSummaryCards', () => {
       expect(payload.householdData.map((m: any) => m.relationshipToHH)).toEqual(['spouse', 'child']);
     });
 
+    it('preserves not-yet-entered slots when deleting an entered member', async () => {
+      // A 5-person household where only 3 have been entered. Deleting one must leave size 4
+      // (one fewer person), not collapse to the 2 entered rows and destroy the empty slots.
+      const members = [
+        completedMember(),
+        completedMember({ relationshipToHH: 'child' }),
+        completedMember({ relationshipToHH: 'parent' }),
+      ];
+      renderCards(members, 5);
+      fireEvent.click(trashButtons()[1]);
+      fireEvent.click(screen.getByText('Remove'));
+
+      await waitFor(() => expect(mockUpdateScreen).toHaveBeenCalledTimes(1));
+      const payload = mockUpdateScreen.mock.calls[0][0];
+      expect(payload.householdSize).toBe(4);
+      expect(payload.householdData).toHaveLength(2);
+    });
+
     it('navigates to the basic-info page when deleting the current member', async () => {
       // page is '2' → index 1 is current. Deleting it invalidates the current page.
       renderCards([completedMember(), completedMember({ relationshipToHH: 'child' })], 2);

@@ -31,6 +31,12 @@ export type LocationState = {
   routedFromConfirmationPg?: boolean;
   basicInfoCollected?: boolean;
   returnToPage?: number;
+  /**
+   * Set when the roster (page 0) was reached from a member page that was itself in edit mode.
+   * Page 0 hands it back on Continue so the member page restores edit mode rather than dropping
+   * the user into a view with the basic-info fields hidden.
+   */
+  returnToEditing?: boolean;
 };
 
 export type DeletePopoverState = { index: number; anchorEl: HTMLElement } | null;

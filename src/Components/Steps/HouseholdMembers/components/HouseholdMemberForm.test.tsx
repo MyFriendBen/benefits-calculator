@@ -222,5 +222,15 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
         state: { returnToPage: 2 },
       });
     });
+
+    it('carries edit mode to the roster so the round trip can restore it', () => {
+      // Without this the user returns with isEditing lost: the basic-info fields they came to
+      // edit are hidden and Continue no longer follows their original return path.
+      renderForm(3, 2, { basicInfoCollected: true, isEditing: true });
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+      expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
+        state: { returnToPage: 2, returnToEditing: true },
+      });
+    });
   });
 });

@@ -253,6 +253,91 @@ describe('HouseholdMemberBasicInfoPage', () => {
       );
     });
 
+    it('keeps each surviving member’s own data when a middle member is deleted', async () => {
+      // Deleting Person 2 shifts Person 3 into index 1. Saved member data must follow the member
+      // (by frontendId), not the array slot, or Person 3 inherits Person 2's id/insurance/income
+      // and loses their own.
+      const householdData = [
+        {
+          id: 'id-0',
+          frontendId: 'fid-0',
+          birthMonth: 3,
+          birthYear: 1990,
+          relationshipToHH: 'headOfHousehold',
+          healthInsurance: { none: true },
+        },
+        {
+          id: 'id-1',
+          frontendId: 'fid-1',
+          birthMonth: 5,
+          birthYear: 1992,
+          relationshipToHH: 'spouse',
+          healthInsurance: { employer: true },
+          incomeStreams: [{ incomeStreamName: 'wages', incomeAmount: '1000' }],
+        },
+        {
+          id: 'id-2',
+          frontendId: 'fid-2',
+          birthMonth: 7,
+          birthYear: 2015,
+          relationshipToHH: 'child',
+          healthInsurance: { medicaid: true },
+        },
+      ];
+      renderPage(makeFormData(3, householdData));
+
+      // Delete Person 2 (the middle member); delete buttons exist only for non-first members.
+      const deleteButtons = screen.getAllByRole('button', { name: /delete household member/i });
+      fireEvent.click(deleteButtons[0]);
+      fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
+      await waitFor(() => expect(screen.queryByText('Person 3')).not.toBeInTheDocument());
+
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() => expect(mockUpdateScreen).toHaveBeenCalledTimes(1));
+
+      const saved = mockUpdateScreen.mock.calls[0][0].householdData;
+      expect(saved).toHaveLength(2);
+      expect(saved[0]).toMatchObject({ id: 'id-0', frontendId: 'fid-0', relationshipToHH: 'headOfHousehold' });
+      // The surviving child keeps their own identity and data rather than the deleted spouse's.
+      expect(saved[1]).toMatchObject({
+        id: 'id-2',
+        frontendId: 'fid-2',
+        relationshipToHH: 'child',
+        healthInsurance: { medicaid: true },
+      });
+      expect(saved[1].incomeStreams).toEqual([]);
+    });
+
+    it('restores edit mode when the user came here mid-edit', async () => {
+      // Pencil → roster → Continue. Without isEditing the member page hides the basic-info
+      // fields the user came to edit and Continue loses its return path.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+      ];
+      renderPage(makeFormData(2, householdData), { returnToPage: 2, returnToEditing: true });
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', {
+          state: { basicInfoCollected: true, isEditing: true },
+        }),
+      );
+    });
+
+    it('does not set isEditing when the user was not editing', async () => {
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+      ];
+      renderPage(makeFormData(2, householdData), { returnToPage: 2 });
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', {
+          state: { basicInfoCollected: true },
+        }),
+      );
+    });
+
     it('clamps returnToPage to the new member count when members were removed', async () => {
       // returnToPage was 3, but the household is now only 2 members — clamp to page 2 so we
       // don't navigate to a member page that no longer exists.

@@ -199,7 +199,11 @@ const HouseholdMemberForm = () => {
   // Send the user to the basic-info roster (page 0) to add/edit/remove members in bulk, and
   // remember the member page they came from so page 0's Continue returns them here.
   const goToManageMembers = () => {
-    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/0`, { state: { returnToPage: pageNumber } });
+    // Carry edit mode across the round trip so returning here restores the basic-info fields the
+    // user came to edit, instead of landing them on a view with those fields hidden.
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/0`, {
+      state: { returnToPage: pageNumber, ...(isEditing ? { returnToEditing: true } : {}) },
+    });
   };
 
   const manageMembersAriaLabel = intl.formatMessage({

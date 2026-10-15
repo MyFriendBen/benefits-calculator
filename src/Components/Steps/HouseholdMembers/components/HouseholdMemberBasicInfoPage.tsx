@@ -62,8 +62,11 @@ const HouseholdMemberBasicInfoPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   // When the user reached page 0 from a member page (via the "manage members" pencil), we
-  // remember which page they came from so Continue can return them there.
-  const returnToPage = (location.state as LocationState | null)?.returnToPage;
+  // remember which page they came from so Continue can return them there, along with whether
+  // that page was in edit mode so we can restore it.
+  const locationState = location.state as LocationState | null;
+  const returnToPage = locationState?.returnToPage;
+  const returnToEditing = locationState?.returnToEditing;
 
   const { navigateBack } = useHouseholdMembersNavigation({
     uuid,
@@ -81,6 +84,7 @@ const HouseholdMemberBasicInfoPage = () => {
       Array.from({ length: formData.householdSize }, (_, index) => {
         const existing = formData.householdData[index];
         return {
+          frontendId: existing?.frontendId,
           birthMonth: existing?.birthMonth || 0,
           birthYear: existing?.birthYear || UNSET_BIRTH_YEAR,
           relationshipToHH: existing?.relationshipToHH || (index === 0 ? 'headOfHousehold' : ''),
@@ -108,14 +112,21 @@ const HouseholdMemberBasicInfoPage = () => {
   const formSubmitHandler: SubmitHandler<BasicInfoPageSchema> = async ({ members }) => {
     if (!uuid) return;
 
-    const updatedHouseholdData = members.map((member, index) =>
-      createDefaultMember(index, {
-        ...formData.householdData[index],
+    // Match each row to its saved member by frontendId, not by array position: removing a member
+    // shifts every later row down, so an index lookup would graft the deleted member's id,
+    // insurance, conditions and income onto the row that took its place.
+    const updatedHouseholdData = members.map((member, index) => {
+      const existing = member.frontendId
+        ? formData.householdData.find((saved) => saved.frontendId === member.frontendId)
+        : undefined;
+
+      return createDefaultMember(index, {
+        ...existing,
         birthMonth: member.birthMonth,
         birthYear: member.birthYear,
         relationshipToHH: member.relationshipToHH,
-      }),
-    );
+      });
+    });
 
     await updateScreen({
       ...formData,
@@ -136,7 +147,9 @@ const HouseholdMemberBasicInfoPage = () => {
     const targetPage = returnToPage !== undefined ? Math.min(Math.max(returnToPage, 1), members.length) : 1;
 
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${targetPage}`, {
-      state: { basicInfoCollected: true },
+      // Restore edit mode if the user came here mid-edit, so the basic-info fields they were
+      // editing are still shown and Continue still returns them along their original path.
+      state: { basicInfoCollected: true, ...(returnToEditing ? { isEditing: true } : {}) },
     });
   };
 
@@ -153,6 +166,8 @@ const HouseholdMemberBasicInfoPage = () => {
 
   const handleAddMember = () => {
     append({
+      // New row: no saved member to match, so createDefaultMember mints an id on submit.
+      frontendId: undefined,
       birthMonth: 0,
       birthYear: UNSET_BIRTH_YEAR,
       relationshipToHH: '',
