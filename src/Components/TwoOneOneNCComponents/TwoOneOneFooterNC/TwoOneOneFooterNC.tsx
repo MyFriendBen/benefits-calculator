@@ -87,11 +87,9 @@ const TwoOneOneFooterNC = () => {
     return (
       <Typography>
         <FormattedMessage
-          id="footer-second-paragraph-nc"
-          defaultMessage="NC 211 is an information and referral service provided by United Way of North Carolina 
-          and powered by local United Ways of North Carolina. Families and individuals can call 2-1-1 or 1-888-892-1162 to receive free 
-          and confidential information on health and human services within their community. 
-          Offered in multiple languages and available 24 hours a day, 7 days a week, and 365 days a year."
+          id="footer-second-paragraph-nc-phone"
+          defaultMessage="NC 211 is an information and referral service provided by United Way of North Carolina and powered by local United Ways of North Carolina. Families and individuals can call 2-1-1 or {phone} to receive free and confidential information on health and human services within their community. Offered in multiple languages and available 24 hours a day, 7 days a week, and 365 days a year."
+          values={{ phone: footerPhone }}
         />
       </Typography>
     );

@@ -26,6 +26,12 @@ describe('TwoOneOneFooterNC', () => {
     expect(screen.getByText('1-(888)-892-1162').closest('a')).toHaveAttribute('href', 'tel:18888921162');
   });
 
+  it('shows the configured number in the paragraph text', () => {
+    renderWithFooterPhone('1-555-010-0199');
+
+    expect(screen.getByText(/can call 2-1-1 or 1-555-010-0199 to receive/)).toBeInTheDocument();
+  });
+
   it('hides the toll-free link when no number is configured, keeping Dial 2-1-1', () => {
     const { container } = renderWithFooterPhone('');
 

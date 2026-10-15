@@ -88,8 +88,9 @@ const NCHispanicFederationFooter = () => {
     return (
       <Typography>
         <FormattedMessage
-          id="footer-second-paragraph-nc-hfed"
-          defaultMessage="Salud NC is a project of the Hispanic Federation, a nonprofit organization dedicated to the well-being of the Latino community. The free and confidential Salud NC Health Line connects individuals and families in North Carolina with assistance in Spanish and English for a wide range of health-related needs. Support is available for navigating Medicaid and Marketplace insurance, locating free or low-cost clinics, accessing prescription assistance, and finding community resources such as food banks or legal aid for health issues. Call 1-844-438-6827 to get connected."
+          id="footer-second-paragraph-nc-hfed-phone"
+          defaultMessage="Salud NC is a project of the Hispanic Federation, a nonprofit organization dedicated to the well-being of the Latino community. The free and confidential Salud NC Health Line connects individuals and families in North Carolina with assistance in Spanish and English for a wide range of health-related needs. Support is available for navigating Medicaid and Marketplace insurance, locating free or low-cost clinics, accessing prescription assistance, and finding community resources such as food banks or legal aid for health issues. Call {phone} to get connected."
+          values={{ phone: footerPhone }}
         />
       </Typography>
     );
