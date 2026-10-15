@@ -26,7 +26,7 @@ const REFERRER_REDIRECT: { [key: string]: string | undefined } = {
   denverhealth: 'co',
   dhs: 'co',
   DPSCommunityHubs: 'co',
-  dps: 'co',
+  co_dps: 'co',
   fircsummitresourcecenter: 'co',
   salud: 'co',
   theactioncenter: 'co',
