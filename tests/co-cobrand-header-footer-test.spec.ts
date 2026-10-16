@@ -89,9 +89,9 @@ test.describe('CO cobrand, header and footer links Test', () => {
         await expect(telLink).toBeVisible();
         await expect(telLink).toHaveAttribute('href', 'tel:211');
         
-        const telLink2 = page.locator('a[href="tel:866-760-6489"]');
+        const telLink2 = page.locator('a[href="tel:8667606489"]');
         await expect(telLink2).toBeVisible();
-        await expect(telLink2).toHaveAttribute('href', 'tel:866-760-6489');
+        await expect(telLink2).toHaveAttribute('href', 'tel:8667606489');
         
         const smsLink = page.locator('a[href="sms:898211"]');
         await expect(smsLink).toBeVisible();
