@@ -37,6 +37,13 @@ export type LocationState = {
    * the user into a view with the basic-info fields hidden.
    */
   returnToEditing?: boolean;
+  /**
+   * The member page that originally opened the edit, carried across the roster round trip.
+   * Distinct from `returnToPage`, which the roster overwrites with the page the user left —
+   * without this the edit's own destination would be lost and Continue would resume normal
+   * next-member navigation.
+   */
+  editReturnToPage?: number;
 };
 
 export type DeletePopoverState = { index: number; anchorEl: HTMLElement } | null;

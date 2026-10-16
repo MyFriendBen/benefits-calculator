@@ -148,7 +148,9 @@ const HouseholdMemberForm = () => {
   // FORM SUBMISSION
   // ============================================================================
 
-  const formSubmitHandler: SubmitHandler<any> = async (memberData) => {
+  // Persists this member's form values. Shared by Continue and by the "manage members" pencil,
+  // which must save before leaving or the roster would overwrite the member from stale formData.
+  const saveMember = async (memberData: any) => {
     if (!uuid) {
       throw new Error('uuid is undefined');
     }
@@ -164,10 +166,12 @@ const HouseholdMemberForm = () => {
       workflowType,
     });
 
-    const updatedFormData = { ...formData, householdData: updatedHouseholdData };
-
     // Wait for the API call to complete and context to update before navigating
-    await updateScreen(updatedFormData);
+    await updateScreen({ ...formData, householdData: updatedHouseholdData });
+  };
+
+  const formSubmitHandler: SubmitHandler<any> = async (memberData) => {
+    await saveMember(memberData);
 
     // This page navigates manually (onSubmitSuccessfulOverride) instead of through
     // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
@@ -198,11 +202,31 @@ const HouseholdMemberForm = () => {
 
   // Send the user to the basic-info roster (page 0) to add/edit/remove members in bulk, and
   // remember the member page they came from so page 0's Continue returns them here.
-  const goToManageMembers = () => {
+  const goToManageMembers = async () => {
+    // Persist what's on screen before leaving. The roster rebuilds each member from the saved
+    // formData, so without this any income or condition edits made here would be overwritten
+    // when the roster submits. Saved unvalidated on purpose — the pencil is a navigation
+    // affordance, not a submit, and blocking it on a half-filled form would trap the user.
+    try {
+      await saveMember(getValues());
+    } catch (error) {
+      // Leave navigation to the user's next action rather than stranding them on a dead button.
+      console.error('Failed to save member before opening the roster', error);
+      return;
+    }
+
     // Carry edit mode across the round trip so returning here restores the basic-info fields the
-    // user came to edit, instead of landing them on a view with those fields hidden.
+    // user came to edit. `returnToPage` is reused by the roster for "the page to come back to",
+    // so this edit's own destination travels separately as editReturnToPage.
+    const editState = isEditing
+      ? {
+          returnToEditing: true,
+          ...(locationState?.returnToPage !== undefined && { editReturnToPage: locationState.returnToPage }),
+        }
+      : {};
+
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/0`, {
-      state: { returnToPage: pageNumber, ...(isEditing ? { returnToEditing: true } : {}) },
+      state: { returnToPage: pageNumber, ...editState },
     });
   };
 

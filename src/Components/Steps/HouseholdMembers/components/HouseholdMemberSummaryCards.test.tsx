@@ -45,10 +45,14 @@ const mockUseScreenApi = useScreenApi as jest.MockedFunction<typeof useScreenApi
 const mockUpdateScreen = jest.fn();
 
 const mockNavigate = jest.fn();
+// Most tests run on member page 2; renderCards' `currentPage` argument overrides this for the
+// cases that need an earlier member to be deletable.
+let mockPage = '2';
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
-  useParams: () => ({ uuid: 'test-uuid', page: '2' }),
+  useParams: () => ({ uuid: 'test-uuid', page: mockPage }),
 }));
 
 // A "completed" member needs basic info AND an answered health insurance question.
@@ -64,7 +68,13 @@ const completedMember = (overrides = {}) => ({
   ...overrides,
 });
 
-const renderCards = (householdData: any[] = [], householdSize?: number) => {
+const renderCards = (
+  householdData: any[] = [],
+  householdSize?: number,
+  locationState: Record<string, unknown> | undefined = undefined,
+  currentPage = 2,
+) => {
+  mockPage = String(currentPage);
   const contextValue = {
     formData: {
       householdData,
@@ -88,7 +98,7 @@ const renderCards = (householdData: any[] = [], householdSize?: number) => {
   return render(
     <IntlProvider locale="en" messages={messages}>
       <Context.Provider value={contextValue}>
-        <MemoryRouter initialEntries={[`/default/test-uuid/step-3/2`]}>
+        <MemoryRouter initialEntries={[{ pathname: `/default/test-uuid/step-3/${currentPage}`, state: locationState }]}>
           <Routes>
             <Route
               path="/:whiteLabel/:uuid/step-:stepId/:page"
@@ -112,6 +122,7 @@ const editButtons = () => screen.queryAllByRole('button', { name: 'edit househol
 describe('HouseholdMemberSummaryCards', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPage = '2';
     mockUseStepNumber.mockReturnValue(3);
     mockUseConfig.mockReturnValue({ spouse: 'Spouse', child: 'Child' } as any);
     mockCalcAge.mockReturnValue(35);
@@ -396,6 +407,49 @@ describe('HouseholdMemberSummaryCards', () => {
       const payload = mockUpdateScreen.mock.calls[0][0];
       expect(payload.householdSize).toBe(4);
       expect(payload.householdData).toHaveLength(2);
+    });
+
+    it('preserves edit state and shifts the return target when an earlier member is deleted', async () => {
+      // On page 3 while editing, opened from member 4's card. Deleting member 2 (page 2) moves
+      // us to page 2 and the return target from page 4 to page 3. Dropping this state would make
+      // Continue resume normal next-member navigation instead of returning to the opener.
+      const members = [
+        completedMember(),
+        completedMember({ relationshipToHH: 'child' }),
+        completedMember({ relationshipToHH: 'parent' }),
+        completedMember({ relationshipToHH: 'sibling' }),
+      ];
+      renderCards(members, 4, { isEditing: true, returnToPage: 4 }, 3);
+
+      // Trash buttons map to member indices 1..3; [0] is index 1 → page 2, before the current page.
+      fireEvent.click(trashButtons()[0]);
+      fireEvent.click(screen.getByText('Remove'));
+
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/2', {
+          state: { basicInfoCollected: true, isEditing: true, returnToPage: 3 },
+        }),
+      );
+    });
+
+    it('leaves the return target alone when it sits before the deleted member', async () => {
+      // Return target is page 1, the deletion is page 2 — the target member hasn't moved.
+      const members = [
+        completedMember(),
+        completedMember({ relationshipToHH: 'child' }),
+        completedMember({ relationshipToHH: 'parent' }),
+        completedMember({ relationshipToHH: 'sibling' }),
+      ];
+      renderCards(members, 4, { isEditing: true, returnToPage: 1 }, 3);
+
+      fireEvent.click(trashButtons()[0]);
+      fireEvent.click(screen.getByText('Remove'));
+
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/2', {
+          state: { basicInfoCollected: true, isEditing: true, returnToPage: 1 },
+        }),
+      );
     });
 
     it('navigates to the basic-info page when deleting the current member', async () => {

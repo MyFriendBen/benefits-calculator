@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
@@ -215,22 +215,48 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
   });
 
   describe('manage members button', () => {
-    it('navigates to the basic-info page and remembers the page to return to', () => {
+    it('navigates to the basic-info page and remembers the page to return to', async () => {
       renderForm(3, 2, { basicInfoCollected: true });
       fireEvent.click(screen.getByLabelText('add or edit household members'));
-      expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
-        state: { returnToPage: 2 },
-      });
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
+          state: { returnToPage: 2 },
+        }),
+      );
     });
 
-    it('carries edit mode to the roster so the round trip can restore it', () => {
+    it('carries edit mode to the roster so the round trip can restore it', async () => {
       // Without this the user returns with isEditing lost: the basic-info fields they came to
       // edit are hidden and Continue no longer follows their original return path.
       renderForm(3, 2, { basicInfoCollected: true, isEditing: true });
       fireEvent.click(screen.getByLabelText('add or edit household members'));
-      expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
-        state: { returnToPage: 2, returnToEditing: true },
-      });
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
+          state: { returnToPage: 2, returnToEditing: true },
+        }),
+      );
+    });
+
+    it('saves the member before opening the roster', async () => {
+      // The roster rebuilds members from saved formData, so pending edits must be persisted
+      // first or they are silently overwritten when the roster submits.
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+      await waitFor(() => expect(mockUpdateScreen).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
+    });
+
+    it("preserves the edit's original destination separately from the roster return", async () => {
+      // Editing member 2, opened from member 4's card. The roster reuses returnToPage for "come
+      // back to page 2", so the edit's own destination must travel as editReturnToPage or
+      // Continue would later resume normal next-member navigation instead of returning to 4.
+      renderForm(4, 2, { basicInfoCollected: true, isEditing: true, returnToPage: 4 });
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
+          state: { returnToPage: 2, returnToEditing: true, editReturnToPage: 4 },
+        }),
+      );
     });
   });
 });

@@ -4,7 +4,7 @@ import { useConfig } from '../../../Config/configHook';
 import { useTranslateNumber } from '../../../../Assets/languageOptions';
 import { HouseholdData } from '../../../../Types/FormData';
 import { FormattedMessageType, QuestionName } from '../../../../Types/Questions';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { Context } from '../../../Wrapper/Wrapper';
@@ -16,7 +16,7 @@ import { calculateAge } from '../utils/helpers';
 import { hasSubmittedMemberForm } from '../utils/defaultValues';
 import DeleteConfirmationPopover from './DeleteConfirmationPopover';
 import MemberCard from './MemberCard';
-import type { DeletePopoverState } from '../utils/types';
+import type { DeletePopoverState, LocationState } from '../utils/types';
 import { useTrackEvent } from '../../../../Assets/analytics';
 import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
 
@@ -39,6 +39,9 @@ const isMemberCompleted = (member: HouseholdData | undefined): member is Househo
 const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   const { formData, whiteLabel } = useContext(Context);
   const { uuid, page } = useParams();
+  const location = useLocation();
+  // Edit context from the card that opened this member, preserved across deletions below.
+  const locationState = location.state as LocationState | null;
   const pageNumber = Number(page);
   const currentStepId = useStepNumber(questionName);
   const relationshipOptions = useConfig<{ [key: string]: FormattedMessageType }>('relationship_options');
@@ -122,9 +125,23 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
         // user back to the basic-info roster (page 0), the safe page that lists everyone.
         navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/0`);
       } else if (deletedPage < pageNumber) {
-        // A member before us was removed, so our member now lives one page earlier.
+        // A member before us was removed, so our member now lives one page earlier. Carry the
+        // edit state forward or Continue abandons the card that opened this edit and resumes
+        // normal next-member navigation. The return target shifts only if it sat after the
+        // deleted page; a target before it is unaffected.
+        const editState =
+          locationState?.isEditing && locationState?.returnToPage !== undefined
+            ? {
+                isEditing: true,
+                returnToPage:
+                  deletedPage < locationState.returnToPage
+                    ? locationState.returnToPage - 1
+                    : locationState.returnToPage,
+              }
+            : {};
+
         navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${pageNumber - 1}`, {
-          state: { basicInfoCollected: true },
+          state: { basicInfoCollected: true, ...editState },
         });
       }
       // If the deleted member was after the current page, our page number is unchanged and the

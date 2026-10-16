@@ -67,6 +67,9 @@ const HouseholdMemberBasicInfoPage = () => {
   const locationState = location.state as LocationState | null;
   const returnToPage = locationState?.returnToPage;
   const returnToEditing = locationState?.returnToEditing;
+  // Where the edit should ultimately return to — the card that opened it, not the page the user
+  // left to come here. Handed back below so Continue resumes the edit's original path.
+  const editReturnToPage = locationState?.editReturnToPage;
 
   const { navigateBack } = useHouseholdMembersNavigation({
     uuid,
@@ -78,6 +81,18 @@ const HouseholdMemberBasicInfoPage = () => {
 
   // Schema is intl-dependent — memoize so it isn't rebuilt on every render.
   const formSchema = useMemo(() => createBasicInfoPageSchema(intl), [intl]);
+
+  // Identify the members these page numbers point at, so Continue can return to the same people
+  // even if deletions here shifted their positions. Captured on mount, before any edits.
+  const [returnToMemberId, editReturnToMemberId] = useMemo(
+    () => [
+      returnToPage !== undefined ? formData.householdData[returnToPage - 1]?.frontendId : undefined,
+      editReturnToPage !== undefined ? formData.householdData[editReturnToPage - 1]?.frontendId : undefined,
+    ],
+    // Mount-only: formData shifts as members are removed, which would move the targets.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   const defaultMembers = useMemo(
     () =>
@@ -142,14 +157,30 @@ const HouseholdMemberBasicInfoPage = () => {
       step_action: 'complete',
     });
 
-    // If the user came here from a member page, return them to it. Clamp to the current member
-    // count in case they removed members and the original page no longer exists.
-    const targetPage = returnToPage !== undefined ? Math.min(Math.max(returnToPage, 1), members.length) : 1;
+    // Resolve a page number captured before edits to where that same member sits now. Deleting an
+    // earlier member shifts everyone after it down a page, so match by identity and fall back to
+    // the clamped original when the member was deleted or predates frontendId.
+    const resolvePage = (originalPage: number, memberId: string | undefined) => {
+      const movedToIndex = memberId ? members.findIndex((member) => member.frontendId === memberId) : -1;
+      return movedToIndex >= 0 ? movedToIndex + 1 : Math.min(Math.max(originalPage, 1), members.length);
+    };
+
+    const targetPage = returnToPage !== undefined ? resolvePage(returnToPage, returnToMemberId) : 1;
+
+    // Restore edit mode if the user came here mid-edit, so the basic-info fields they were
+    // editing are still shown, and hand back the edit's own destination so Continue resumes the
+    // path it was on rather than falling through to normal next-member navigation.
+    const editState = returnToEditing
+      ? {
+          isEditing: true,
+          ...(editReturnToPage !== undefined && {
+            returnToPage: resolvePage(editReturnToPage, editReturnToMemberId),
+          }),
+        }
+      : {};
 
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${targetPage}`, {
-      // Restore edit mode if the user came here mid-edit, so the basic-info fields they were
-      // editing are still shown and Continue still returns them along their original path.
-      state: { basicInfoCollected: true, ...(returnToEditing ? { isEditing: true } : {}) },
+      state: { basicInfoCollected: true, ...editState },
     });
   };
 

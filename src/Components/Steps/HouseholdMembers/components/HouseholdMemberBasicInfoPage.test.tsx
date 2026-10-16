@@ -338,6 +338,70 @@ describe('HouseholdMemberBasicInfoPage', () => {
       );
     });
 
+    it("hands back the edit's original destination so Continue resumes that path", async () => {
+      // Arrived from member 2 (returnToPage 2) during an edit that was opened from member 4
+      // (editReturnToPage 4). Continue goes to page 2 and restores returnToPage 4 for later.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+        { id: 'id-2', frontendId: 'fid-2', birthMonth: 7, birthYear: 2015, relationshipToHH: 'child' },
+        { id: 'id-3', frontendId: 'fid-3', birthMonth: 9, birthYear: 1960, relationshipToHH: 'parent' },
+      ];
+      renderPage(makeFormData(4, householdData), { returnToPage: 2, returnToEditing: true, editReturnToPage: 4 });
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', {
+          state: { basicInfoCollected: true, isEditing: true, returnToPage: 4 },
+        }),
+      );
+    });
+
+    it("shifts the edit's destination when an earlier member is deleted", async () => {
+      // Same round trip, but member 2 is deleted here — the opener (member 4) moves to page 3.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+        { id: 'id-2', frontendId: 'fid-2', birthMonth: 7, birthYear: 2015, relationshipToHH: 'child' },
+        { id: 'id-3', frontendId: 'fid-3', birthMonth: 9, birthYear: 1960, relationshipToHH: 'parent' },
+      ];
+      renderPage(makeFormData(4, householdData), { returnToPage: 3, returnToEditing: true, editReturnToPage: 4 });
+
+      const deleteButtons = screen.getAllByRole('button', { name: /delete household member/i });
+      fireEvent.click(deleteButtons[0]); // delete member index 1
+      fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
+      await waitFor(() => expect(screen.queryByText('Person 4')).not.toBeInTheDocument());
+
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', {
+          state: { basicInfoCollected: true, isEditing: true, returnToPage: 3 },
+        }),
+      );
+    });
+
+    it('follows the return-target member when an earlier member is deleted', async () => {
+      // Opened the roster from member 3 of 4, then deleted member 2. The original member 3 is
+      // now on page 2, so Continue must land there — not on page 3, which is a different person.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+        { id: 'id-2', frontendId: 'fid-2', birthMonth: 7, birthYear: 2015, relationshipToHH: 'child' },
+        { id: 'id-3', frontendId: 'fid-3', birthMonth: 9, birthYear: 1960, relationshipToHH: 'parent' },
+      ];
+      renderPage(makeFormData(4, householdData), { returnToPage: 3 });
+
+      // Delete member 2 (first trash button belongs to member index 1).
+      const deleteButtons = screen.getAllByRole('button', { name: /delete household member/i });
+      fireEvent.click(deleteButtons[0]);
+      fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
+      await waitFor(() => expect(screen.queryByText('Person 4')).not.toBeInTheDocument());
+
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', { state: { basicInfoCollected: true } }),
+      );
+    });
+
     it('clamps returnToPage to the new member count when members were removed', async () => {
       // returnToPage was 3, but the household is now only 2 members — clamp to page 2 so we
       // don't navigate to a member page that no longer exists.
