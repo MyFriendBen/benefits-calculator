@@ -17,10 +17,10 @@ export interface RemImpactRange {
   percentile_80: RemImpactStat;
 }
 
-/** Response shape from GET /api/screener-options/<white_label>/rem-impact/ */
+/** Response shape from POST /api/screener-options/<white_label>/rem-impact/ */
 export interface RemImpactApiResponse {
-  bill_delta: RemImpactRange;       // annual cost delta in $; negative = savings
-  emissions_delta: RemImpactRange;  // annual CO₂e delta in lbCO2e; negative = reduction
+  bill_delta: RemImpactRange; // annual cost delta in $; negative = savings
+  emissions_delta: RemImpactRange; // annual CO₂e delta in lbCO2e; negative = reduction
 }
 
 const RANGE_KEYS: ReadonlyArray<keyof RemImpactRange> = ['mean', 'median', 'percentile_20', 'percentile_80'];
@@ -59,11 +59,26 @@ export interface CalculateImpactFormValues {
 
 // ─── Display label lookup maps (used by CalculateImpactResults summary card) ─
 
-export const HOUSEHOLD_TYPE_LABEL_MAP: Record<CalculateImpactHouseholdType, { messageId: string; defaultMessage: string }> = {
-  single_family_detached: { messageId: 'energyCalculator.calculateImpact.householdType.singleFamilyDetached', defaultMessage: 'House' },
-  apartment_condo: { messageId: 'energyCalculator.calculateImpact.householdType.apartmentCondo', defaultMessage: 'Apartment' },
-  mobile_home: { messageId: 'energyCalculator.calculateImpact.householdType.mobileHome', defaultMessage: 'Mobile home' },
-  single_family_attached: { messageId: 'energyCalculator.calculateImpact.householdType.singleFamilyAttached', defaultMessage: 'Townhome' },
+export const HOUSEHOLD_TYPE_LABEL_MAP: Record<
+  CalculateImpactHouseholdType,
+  { messageId: string; defaultMessage: string }
+> = {
+  single_family_detached: {
+    messageId: 'energyCalculator.calculateImpact.householdType.singleFamilyDetached',
+    defaultMessage: 'House',
+  },
+  apartment_condo: {
+    messageId: 'energyCalculator.calculateImpact.householdType.apartmentCondo',
+    defaultMessage: 'Apartment',
+  },
+  mobile_home: {
+    messageId: 'energyCalculator.calculateImpact.householdType.mobileHome',
+    defaultMessage: 'Mobile home',
+  },
+  single_family_attached: {
+    messageId: 'energyCalculator.calculateImpact.householdType.singleFamilyAttached',
+    defaultMessage: 'Townhome',
+  },
 };
 
 export const FUEL_TYPE_LABEL_MAP: Record<RemFuelType, { messageId: string; defaultMessage: string }> = {
@@ -75,7 +90,10 @@ export const FUEL_TYPE_LABEL_MAP: Record<RemFuelType, { messageId: string; defau
 
 export const UPGRADE_LABEL_MAP: Record<CalculateImpactUpgradeChoice, { messageId: string; defaultMessage: string }> = {
   heat_pump: { messageId: 'energyCalculator.calculateImpact.upgrade.heatPump', defaultMessage: 'Heat pump' },
-  heat_pump_water_heater: { messageId: 'energyCalculator.calculateImpact.upgrade.heatPumpWaterHeater', defaultMessage: 'Heat pump water heater' },
+  heat_pump_water_heater: {
+    messageId: 'energyCalculator.calculateImpact.upgrade.heatPumpWaterHeater',
+    defaultMessage: 'Heat pump water heater',
+  },
 };
 
 /**

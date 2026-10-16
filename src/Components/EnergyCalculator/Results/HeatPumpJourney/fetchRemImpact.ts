@@ -20,16 +20,22 @@ export async function fetchRemImpact(
   whiteLabel: string,
   query: CalculateImpactRemAddressQuery,
 ): Promise<RemImpactApiResponse> {
-  const params = new URLSearchParams({
+  const body: Record<string, string> = {
     upgrade: query.upgrade,
     address: query.address,
     heating_fuel: query.heating_fuel,
-  });
+  };
   if (query.water_heater_fuel) {
-    params.append('water_heater_fuel', query.water_heater_fuel);
+    body.water_heater_fuel = query.water_heater_fuel;
   }
 
-  const res = await fetch(`${domain}/api/screener-options/${whiteLabel}/rem-impact/?${params.toString()}`);
+  // POST, not a query string: request URLs are logged (Heroku router, Sentry), and our
+  // privacy policy says we don't save addresses.
+  const res = await fetch(`${domain}/api/screener-options/${whiteLabel}/rem-impact/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
 
   if (res.status === 422) {
     throw new RemAddressNotSupportedError();

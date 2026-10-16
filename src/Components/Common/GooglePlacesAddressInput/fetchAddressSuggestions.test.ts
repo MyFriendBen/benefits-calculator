@@ -17,7 +17,7 @@ describe('fetchAddressSuggestions', () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('calls the autocomplete proxy with the URL-encoded input', async () => {
+  it('POSTs the input to the autocomplete proxy in a JSON body, not the URL', async () => {
     const mockFetch = jest.fn().mockResolvedValue({
       ok: true,
       json: async () => [{ description: '123 Main St', place_id: 'abc' }],
@@ -27,10 +27,10 @@ describe('fetchAddressSuggestions', () => {
     const result = await fetchAddressSuggestions('123 Main St & 1st Ave');
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    const calledUrl = mockFetch.mock.calls[0][0] as string;
-    expect(calledUrl).toContain('/api/places/autocomplete/?input=');
-    // Special characters (space, ampersand) must be percent-encoded in the query string.
-    expect(calledUrl).toContain('input=123+Main+St+%26+1st+Ave');
+    const [calledUrl, init] = mockFetch.mock.calls[0] as [string, RequestInit];
+    expect(calledUrl).toMatch(/\/api\/places\/autocomplete\/$/);
+    expect(init.method).toBe('POST');
+    expect(JSON.parse(init.body as string)).toEqual({ input: '123 Main St & 1st Ave' });
     expect(result).toEqual([{ description: '123 Main St', place_id: 'abc' }]);
   });
 
