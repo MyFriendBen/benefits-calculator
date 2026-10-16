@@ -1,9 +1,10 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
 import { useContext, useEffect } from 'react';
 import { HouseholdData } from '../../../../Types/FormData';
-import { Box } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
 import HouseholdMemberSummaryCards from './HouseholdMemberSummaryCards';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
@@ -38,6 +39,7 @@ const HouseholdMemberForm = () => {
   const { formData } = useContext(Context);
   const { uuid, page, whiteLabel } = useParams<{ uuid: string; page: string; whiteLabel: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
   const { updateScreen } = useScreenApi();
   const intl = useIntl();
   const pageNumber = Number(page);
@@ -146,7 +148,9 @@ const HouseholdMemberForm = () => {
   // FORM SUBMISSION
   // ============================================================================
 
-  const formSubmitHandler: SubmitHandler<any> = async (memberData) => {
+  // Persists this member's form values. Shared by Continue and by the "manage members" pencil,
+  // which must save before leaving or the roster would overwrite the member from stale formData.
+  const saveMember = async (memberData: any) => {
     if (!uuid) {
       throw new Error('uuid is undefined');
     }
@@ -162,10 +166,12 @@ const HouseholdMemberForm = () => {
       workflowType,
     });
 
-    const updatedFormData = { ...formData, householdData: updatedHouseholdData };
-
     // Wait for the API call to complete and context to update before navigating
-    await updateScreen(updatedFormData);
+    await updateScreen({ ...formData, householdData: updatedHouseholdData });
+  };
+
+  const formSubmitHandler: SubmitHandler<any> = async (memberData) => {
+    await saveMember(memberData);
 
     // This page navigates manually (onSubmitSuccessfulOverride) instead of through
     // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
@@ -194,13 +200,58 @@ const HouseholdMemberForm = () => {
   // RENDER
   // ============================================================================
 
+  // Send the user to the basic-info roster (page 0) to add/edit/remove members in bulk, and
+  // remember the member page they came from so page 0's Continue returns them here.
+  const goToManageMembers = async () => {
+    // Persist what's on screen before leaving. The roster rebuilds each member from the saved
+    // formData, so without this any income or condition edits made here would be overwritten
+    // when the roster submits. Saved unvalidated on purpose — the pencil is a navigation
+    // affordance, not a submit, and blocking it on a half-filled form would trap the user.
+    try {
+      await saveMember(getValues());
+    } catch (error) {
+      // Leave navigation to the user's next action rather than stranding them on a dead button.
+      console.error('Failed to save member before opening the roster', error);
+      return;
+    }
+
+    // Carry edit mode across the round trip so returning here restores the basic-info fields the
+    // user came to edit. `returnToPage` is reused by the roster for "the page to come back to",
+    // so this edit's own destination travels separately as editReturnToPage.
+    const editState = isEditing
+      ? {
+          returnToEditing: true,
+          ...(locationState?.returnToPage !== undefined && { editReturnToPage: locationState.returnToPage }),
+        }
+      : {};
+
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/0`, {
+      state: { returnToPage: pageNumber, ...editState },
+    });
+  };
+
+  const manageMembersAriaLabel = intl.formatMessage({
+    id: 'manageHHMembers.ariaText',
+    defaultMessage: 'add or edit household members',
+  });
+
   const renderSummaryCards = () => (
     <section aria-label="Your household members" className="previous-members-section">
-      <h2 className="question-label">
-        <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
-      </h2>
+      <div className="previous-members-section__heading">
+        <h2 className="question-label">
+          <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
+        </h2>
+        <IconButton
+          className="manage-household-members-button"
+          size="small"
+          aria-label={manageMembersAriaLabel}
+          onClick={goToManageMembers}
+        >
+          <EditIcon fontSize="small" />
+        </IconButton>
+      </div>
       <p className="question-sub-label">
-        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="You may edit or delete completed members below." />
+        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="Select a completed member to edit." />
       </p>
       <Box className="summary-cards-container">
         <HouseholdMemberSummaryCards questionName={questionName} />
@@ -211,21 +262,24 @@ const HouseholdMemberForm = () => {
   const renderHeader = () => {
     let headerContent;
     if (pageNumber === 1) {
-      headerContent = <FormattedMessage id="householdDataBlock.questionHeader" defaultMessage="Tell us about yourself." />;
-    } else if (relationshipText) {
-      headerContent = age !== null ? (
-        <FormattedMessage
-          id="householdDataBlock.questionHeader-relationship-age"
-          defaultMessage="Tell us about your {relationship}, age {age}"
-          values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span>, age }}
-        />
-      ) : (
-        <FormattedMessage
-          id="householdDataBlock.questionHeader-relationship"
-          defaultMessage="Tell us about your {relationship}"
-          values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span> }}
-        />
+      headerContent = (
+        <FormattedMessage id="householdDataBlock.questionHeader" defaultMessage="Tell us about yourself." />
       );
+    } else if (relationshipText) {
+      headerContent =
+        age !== null ? (
+          <FormattedMessage
+            id="householdDataBlock.questionHeader-relationship-age"
+            defaultMessage="Tell us about your {relationship}, age {age}"
+            values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span>, age }}
+          />
+        ) : (
+          <FormattedMessage
+            id="householdDataBlock.questionHeader-relationship"
+            defaultMessage="Tell us about your {relationship}"
+            values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span> }}
+          />
+        );
     } else {
       headerContent = (
         <FormattedMessage
@@ -272,11 +326,7 @@ const HouseholdMemberForm = () => {
       />
 
       {!isEnergyCalculator && watchIsStudent && (
-        <StudentEligibilitySection
-          control={control as any}
-          errors={errors}
-          pageNumber={pageNumber}
-        />
+        <StudentEligibilitySection control={control as any} errors={errors} pageNumber={pageNumber} />
       )}
 
       <IncomeSection
@@ -295,8 +345,9 @@ const HouseholdMemberForm = () => {
     </>
   );
 
-  // Show summary cards only when on member 2+
-  const showSummaryCards = pageNumber > 1;
+  // Show the Household Members summary cards whenever the household has more than one member,
+  // including on member 1's page, so the user always sees the full household roster.
+  const showSummaryCards = Number(formData.householdSize) > 1;
 
   return (
     <main className="benefits-form" data-step-id="member-details" data-member-number={pageNumber}>

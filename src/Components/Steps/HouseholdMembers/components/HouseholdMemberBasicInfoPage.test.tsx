@@ -57,15 +57,15 @@ jest.mock('../sections/BasicInfoFields', () => ({
 
 const messages = {
   'householdDataBlock.basicInfo.header': 'Tell us about each household member',
-  'householdDataBlock.basicInfo.subheader': 'Enter each member\'s birth date.',
+  'householdDataBlock.basicInfo.subheader': "Enter each member's birth date.",
   'householdDataBlock.basicInfo.you': 'You',
   'householdDataBlock.basicInfo.person': 'Person {number}',
   'householdDataBlock.basicInfo.addMember': 'Add a Household Member',
   'householdDataBlock.basicInfo.deleteConfirm': 'Remove this member?',
   'householdDataBlock.basicInfo.deleteCancel': 'Cancel',
   'householdDataBlock.basicInfo.deleteConfirmButton': 'Remove',
-  'previousButton': 'Back',
-  'continueButton': 'Continue',
+  previousButton: 'Back',
+  continueButton: 'Continue',
 };
 
 const makeFormData = (householdSize: number, householdData: any[] = []) => ({
@@ -73,7 +73,7 @@ const makeFormData = (householdSize: number, householdData: any[] = []) => ({
   householdData,
 });
 
-const renderPage = (formData: any) => {
+const renderPage = (formData: any, locationState: Record<string, unknown> = {}) => {
   const contextValue = {
     formData,
     setFormData: jest.fn(),
@@ -83,13 +83,13 @@ const renderPage = (formData: any) => {
   return render(
     <IntlProvider locale="en" messages={messages}>
       <Context.Provider value={contextValue}>
-        <MemoryRouter initialEntries={['/co/test-uuid/step-5/0']}>
+        <MemoryRouter initialEntries={[{ pathname: '/co/test-uuid/step-5/0', state: locationState }]}>
           <Routes>
             <Route path="/:whiteLabel/:uuid/step-:stepId/:page" element={<HouseholdMemberBasicInfoPage />} />
           </Routes>
         </MemoryRouter>
       </Context.Provider>
-    </IntlProvider>
+    </IntlProvider>,
   );
 };
 
@@ -237,6 +237,183 @@ describe('HouseholdMemberBasicInfoPage', () => {
         expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/1', { state: { basicInfoCollected: true } }),
       );
       expect(mockUpdateScreen).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns to the page the user came from when returnToPage is set', async () => {
+      // Reached via the "manage members" pencil from member 3 → Continue returns to page 3.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+        { id: 'id-2', frontendId: 'fid-2', birthMonth: 7, birthYear: 2015, relationshipToHH: 'child' },
+      ];
+      renderPage(makeFormData(3, householdData), { returnToPage: 3 });
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/3', { state: { basicInfoCollected: true } }),
+      );
+    });
+
+    it('keeps each surviving member’s own data when a middle member is deleted', async () => {
+      // Deleting Person 2 shifts Person 3 into index 1. Saved member data must follow the member
+      // (by frontendId), not the array slot, or Person 3 inherits Person 2's id/insurance/income
+      // and loses their own.
+      const householdData = [
+        {
+          id: 'id-0',
+          frontendId: 'fid-0',
+          birthMonth: 3,
+          birthYear: 1990,
+          relationshipToHH: 'headOfHousehold',
+          healthInsurance: { none: true },
+        },
+        {
+          id: 'id-1',
+          frontendId: 'fid-1',
+          birthMonth: 5,
+          birthYear: 1992,
+          relationshipToHH: 'spouse',
+          healthInsurance: { employer: true },
+          incomeStreams: [{ incomeStreamName: 'wages', incomeAmount: '1000' }],
+        },
+        {
+          id: 'id-2',
+          frontendId: 'fid-2',
+          birthMonth: 7,
+          birthYear: 2015,
+          relationshipToHH: 'child',
+          healthInsurance: { medicaid: true },
+        },
+      ];
+      renderPage(makeFormData(3, householdData));
+
+      // Delete Person 2 (the middle member); delete buttons exist only for non-first members.
+      const deleteButtons = screen.getAllByRole('button', { name: /delete household member/i });
+      fireEvent.click(deleteButtons[0]);
+      fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
+      await waitFor(() => expect(screen.queryByText('Person 3')).not.toBeInTheDocument());
+
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() => expect(mockUpdateScreen).toHaveBeenCalledTimes(1));
+
+      const saved = mockUpdateScreen.mock.calls[0][0].householdData;
+      expect(saved).toHaveLength(2);
+      expect(saved[0]).toMatchObject({ id: 'id-0', frontendId: 'fid-0', relationshipToHH: 'headOfHousehold' });
+      // The surviving child keeps their own identity and data rather than the deleted spouse's.
+      expect(saved[1]).toMatchObject({
+        id: 'id-2',
+        frontendId: 'fid-2',
+        relationshipToHH: 'child',
+        healthInsurance: { medicaid: true },
+      });
+      expect(saved[1].incomeStreams).toEqual([]);
+    });
+
+    it('restores edit mode when the user came here mid-edit', async () => {
+      // Pencil → roster → Continue. Without isEditing the member page hides the basic-info
+      // fields the user came to edit and Continue loses its return path.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+      ];
+      renderPage(makeFormData(2, householdData), { returnToPage: 2, returnToEditing: true });
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', {
+          state: { basicInfoCollected: true, isEditing: true },
+        }),
+      );
+    });
+
+    it('does not set isEditing when the user was not editing', async () => {
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+      ];
+      renderPage(makeFormData(2, householdData), { returnToPage: 2 });
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', {
+          state: { basicInfoCollected: true },
+        }),
+      );
+    });
+
+    it("hands back the edit's original destination so Continue resumes that path", async () => {
+      // Arrived from member 2 (returnToPage 2) during an edit that was opened from member 4
+      // (editReturnToPage 4). Continue goes to page 2 and restores returnToPage 4 for later.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+        { id: 'id-2', frontendId: 'fid-2', birthMonth: 7, birthYear: 2015, relationshipToHH: 'child' },
+        { id: 'id-3', frontendId: 'fid-3', birthMonth: 9, birthYear: 1960, relationshipToHH: 'parent' },
+      ];
+      renderPage(makeFormData(4, householdData), { returnToPage: 2, returnToEditing: true, editReturnToPage: 4 });
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', {
+          state: { basicInfoCollected: true, isEditing: true, returnToPage: 4 },
+        }),
+      );
+    });
+
+    it("shifts the edit's destination when an earlier member is deleted", async () => {
+      // Same round trip, but member 2 is deleted here — the opener (member 4) moves to page 3.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+        { id: 'id-2', frontendId: 'fid-2', birthMonth: 7, birthYear: 2015, relationshipToHH: 'child' },
+        { id: 'id-3', frontendId: 'fid-3', birthMonth: 9, birthYear: 1960, relationshipToHH: 'parent' },
+      ];
+      renderPage(makeFormData(4, householdData), { returnToPage: 3, returnToEditing: true, editReturnToPage: 4 });
+
+      const deleteButtons = screen.getAllByRole('button', { name: /delete household member/i });
+      fireEvent.click(deleteButtons[0]); // delete member index 1
+      fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
+      await waitFor(() => expect(screen.queryByText('Person 4')).not.toBeInTheDocument());
+
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', {
+          state: { basicInfoCollected: true, isEditing: true, returnToPage: 3 },
+        }),
+      );
+    });
+
+    it('follows the return-target member when an earlier member is deleted', async () => {
+      // Opened the roster from member 3 of 4, then deleted member 2. The original member 3 is
+      // now on page 2, so Continue must land there — not on page 3, which is a different person.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+        { id: 'id-2', frontendId: 'fid-2', birthMonth: 7, birthYear: 2015, relationshipToHH: 'child' },
+        { id: 'id-3', frontendId: 'fid-3', birthMonth: 9, birthYear: 1960, relationshipToHH: 'parent' },
+      ];
+      renderPage(makeFormData(4, householdData), { returnToPage: 3 });
+
+      // Delete member 2 (first trash button belongs to member index 1).
+      const deleteButtons = screen.getAllByRole('button', { name: /delete household member/i });
+      fireEvent.click(deleteButtons[0]);
+      fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
+      await waitFor(() => expect(screen.queryByText('Person 4')).not.toBeInTheDocument());
+
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', { state: { basicInfoCollected: true } }),
+      );
+    });
+
+    it('clamps returnToPage to the new member count when members were removed', async () => {
+      // returnToPage was 3, but the household is now only 2 members — clamp to page 2 so we
+      // don't navigate to a member page that no longer exists.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+      ];
+      renderPage(makeFormData(2, householdData), { returnToPage: 3 });
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', { state: { basicInfoCollected: true } }),
+      );
     });
   });
 
