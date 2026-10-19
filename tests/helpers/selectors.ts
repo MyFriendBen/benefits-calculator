@@ -127,7 +127,7 @@ export const NC_211 = {
     ],
     DIAL_LINKS: ['a[href="tel:211"]', 'a:has-text("Dial 2-1-1")', 'text="Dial 2-1-1"', 'a[aria-label="211 dial link"]'],
     TOLL_FREE_LINKS: [
-      'a[href="tel:866-760-6489"]',
+      'a[href="tel:18888921162"]',
       'a:has-text("1-(888)-892-1162")',
       'text="1-(888)-892-1162"',
       'a[aria-label="211 dial link"]:has-text("888")',
