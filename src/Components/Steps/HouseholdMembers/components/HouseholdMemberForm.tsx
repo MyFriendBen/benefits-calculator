@@ -1,12 +1,13 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { HouseholdData } from '../../../../Types/FormData';
 import { Box, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
 import HouseholdMemberSummaryCards from './HouseholdMemberSummaryCards';
+import LeaveMemberConfirmationDialog from './LeaveMemberConfirmationDialog';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { SubmitHandler, useFieldArray, useWatch } from 'react-hook-form';
 import { mfbZodResolver } from '../../../../Assets/analytics/mfbZodResolver';
@@ -49,6 +50,9 @@ const HouseholdMemberForm = () => {
   // Show BasicInfoSection when householdSize === 1 and they came directly from step 4 (skipping page 0),
   // or when editing a member. basicInfoCollected means they went through page 0 already.
   const showBasicInfoSection = (formData.householdSize === 1 && !basicInfoCollected) || isEditing;
+
+  // Guards the trip to the roster when this page has unsaved answers on it.
+  const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
 
   // CURRENT MEMBER DATA
   const currentMemberIndex = pageNumber - 1;
@@ -107,7 +111,7 @@ const HouseholdMemberForm = () => {
 
   const {
     control,
-    formState: { errors },
+    formState: { errors, isDirty },
     handleSubmit,
     watch,
     setValue,
@@ -148,9 +152,7 @@ const HouseholdMemberForm = () => {
   // FORM SUBMISSION
   // ============================================================================
 
-  // Persists this member's form values. Shared by Continue and by the "manage members" pencil,
-  // which must save before leaving or the roster would overwrite the member from stale formData.
-  const saveMember = async (memberData: any) => {
+  const formSubmitHandler: SubmitHandler<any> = async (memberData) => {
     if (!uuid) {
       throw new Error('uuid is undefined');
     }
@@ -168,10 +170,6 @@ const HouseholdMemberForm = () => {
 
     // Wait for the API call to complete and context to update before navigating
     await updateScreen({ ...formData, householdData: updatedHouseholdData });
-  };
-
-  const formSubmitHandler: SubmitHandler<any> = async (memberData) => {
-    await saveMember(memberData);
 
     // This page navigates manually (onSubmitSuccessfulOverride) instead of through
     // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
@@ -202,19 +200,7 @@ const HouseholdMemberForm = () => {
 
   // Send the user to the basic-info roster (page 0) to add/edit/remove members in bulk, and
   // remember the member page they came from so page 0's Continue returns them here.
-  const goToManageMembers = async () => {
-    // Persist what's on screen before leaving. The roster rebuilds each member from the saved
-    // formData, so without this any income or condition edits made here would be overwritten
-    // when the roster submits. Saved unvalidated on purpose — the pencil is a navigation
-    // affordance, not a submit, and blocking it on a half-filled form would trap the user.
-    try {
-      await saveMember(getValues());
-    } catch (error) {
-      // Leave navigation to the user's next action rather than stranding them on a dead button.
-      console.error('Failed to save member before opening the roster', error);
-      return;
-    }
-
+  const navigateToManageMembers = () => {
     // Carry edit mode across the round trip so returning here restores the basic-info fields the
     // user came to edit. `returnToPage` is reused by the roster for "the page to come back to",
     // so this edit's own destination travels separately as editReturnToPage.
@@ -228,6 +214,17 @@ const HouseholdMemberForm = () => {
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/0`, {
       state: { returnToPage: pageNumber, ...editState },
     });
+  };
+
+  // Leaving for the roster discards whatever is on this page — the member is only persisted by
+  // Continue, and the roster rewrites each member from the last saved data. Confirm first when
+  // there is unsaved work to lose; go straight there when the form is untouched.
+  const goToManageMembers = () => {
+    if (isDirty) {
+      setShowLeaveConfirmation(true);
+      return;
+    }
+    navigateToManageMembers();
   };
 
   const manageMembersAriaLabel = intl.formatMessage({
@@ -364,6 +361,15 @@ const HouseholdMemberForm = () => {
           stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberDetails}
         />
       </form>
+
+      <LeaveMemberConfirmationDialog
+        open={showLeaveConfirmation}
+        onCancel={() => setShowLeaveConfirmation(false)}
+        onConfirm={() => {
+          setShowLeaveConfirmation(false);
+          navigateToManageMembers();
+        }}
+      />
     </main>
   );
 };

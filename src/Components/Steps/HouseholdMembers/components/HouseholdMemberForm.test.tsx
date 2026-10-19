@@ -59,9 +59,19 @@ jest.mock('../sections/BasicInfoSection', () => ({
   __esModule: true,
   default: () => <div data-testid="basic-info-section" />,
 }));
+// Exposes a control that writes through the real setValue, so tests can dirty the form the same
+// way the user does. The other sections stay inert divs.
 jest.mock('../sections/HealthInsuranceSection', () => ({
   __esModule: true,
-  default: () => <div data-testid="health-insurance-section" />,
+  default: ({ setValue, healthInsurance }: any) => (
+    <div data-testid="health-insurance-section">
+      <button
+        type="button"
+        aria-label="employer insurance"
+        onClick={() => setValue('healthInsurance.employer', !healthInsurance?.employer, { shouldDirty: true })}
+      />
+    </div>
+  ),
 }));
 jest.mock('../sections/SpecialConditionsSection', () => ({
   __esModule: true,
@@ -237,13 +247,50 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
       );
     });
 
-    it('saves the member before opening the roster', async () => {
-      // The roster rebuilds members from saved formData, so pending edits must be persisted
-      // first or they are silently overwritten when the roster submits.
+    it('never persists the member on the way to the roster', async () => {
+      // The member is saved only by Continue. A partial save here would mark an unfinished
+      // member as completed (the completion heuristic reads any ticked health-insurance box),
+      // which also pre-answers the required income questions as "No".
       renderForm(3, 2, { basicInfoCollected: true });
       fireEvent.click(screen.getByLabelText('add or edit household members'));
-      await waitFor(() => expect(mockUpdateScreen).toHaveBeenCalledTimes(1));
       await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
+      expect(mockUpdateScreen).not.toHaveBeenCalled();
+    });
+
+    it('warns before leaving when the page has unsaved answers', async () => {
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('employer insurance'));
+
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+      expect(await screen.findByText('Leave without saving?')).toBeInTheDocument();
+      // Still on the page until the user decides.
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('stays put when the user cancels the warning', async () => {
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('employer insurance'));
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+
+      fireEvent.click(await screen.findByText('Stay on this page'));
+      await waitFor(() => expect(screen.queryByText('Leave without saving?')).not.toBeInTheDocument());
+      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(mockUpdateScreen).not.toHaveBeenCalled();
+    });
+
+    it('discards the edits and navigates when the user confirms', async () => {
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('employer insurance'));
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+
+      fireEvent.click(await screen.findByText('Leave anyway'));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
+          state: { returnToPage: 2 },
+        }),
+      );
+      // "Discard" means discard — nothing is written on the way out.
+      expect(mockUpdateScreen).not.toHaveBeenCalled();
     });
 
     it("preserves the edit's original destination separately from the roster return", async () => {
