@@ -15,23 +15,30 @@ type LeaveMemberConfirmationDialogProps = {
 const LeaveMemberConfirmationDialog = ({ open, onCancel, onConfirm }: LeaveMemberConfirmationDialogProps) => (
   <Dialog open={open} onClose={onCancel} disableScrollLock maxWidth="xs">
     <DialogTitle>
-      <FormattedMessage id="householdDataBlock.leaveMember.title" defaultMessage="Leave without saving?" />
+      <FormattedMessage
+        id="householdDataBlock.leaveMember.title"
+        defaultMessage="Your answers will be cleared"
+      />
     </DialogTitle>
     <DialogContent>
       <Typography variant="body2">
+        {/*
+          Points at Continue, the only thing on this page that keeps the answers. Saying
+          "without saving" would imply a Save action this page doesn't have.
+        */}
         <FormattedMessage
           id="householdDataBlock.leaveMember.body"
-          defaultMessage="Your answers on this page haven't been saved yet. If you go to your household list now, you'll lose them."
+          defaultMessage="Going to your household list will clear what you've entered for this person. Select 'Continue' first to keep it."
         />
       </Typography>
     </DialogContent>
     <DialogActions>
-      {/* Staying is the safe default, so it gets the emphasis. */}
+      {/* Going back is the safe default, so it gets the emphasis. */}
       <Button onClick={onConfirm} variant="outlined" size="small">
-        <FormattedMessage id="householdDataBlock.leaveMember.confirm" defaultMessage="Leave anyway" />
+        <FormattedMessage id="householdDataBlock.leaveMember.confirm" defaultMessage="Clear and go to list" />
       </Button>
       <Button onClick={onCancel} variant="contained" size="small" autoFocus>
-        <FormattedMessage id="householdDataBlock.leaveMember.cancel" defaultMessage="Stay on this page" />
+        <FormattedMessage id="householdDataBlock.leaveMember.cancel" defaultMessage="Go back" />
       </Button>
     </DialogActions>
   </Dialog>

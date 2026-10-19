@@ -262,7 +262,7 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
       fireEvent.click(screen.getByLabelText('employer insurance'));
 
       fireEvent.click(screen.getByLabelText('add or edit household members'));
-      expect(await screen.findByText('Leave without saving?')).toBeInTheDocument();
+      expect(await screen.findByText('Your answers will be cleared')).toBeInTheDocument();
       // Still on the page until the user decides.
       expect(mockNavigate).not.toHaveBeenCalled();
     });
@@ -272,8 +272,8 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
       fireEvent.click(screen.getByLabelText('employer insurance'));
       fireEvent.click(screen.getByLabelText('add or edit household members'));
 
-      fireEvent.click(await screen.findByText('Stay on this page'));
-      await waitFor(() => expect(screen.queryByText('Leave without saving?')).not.toBeInTheDocument());
+      fireEvent.click(await screen.findByText('Go back'));
+      await waitFor(() => expect(screen.queryByText('Your answers will be cleared')).not.toBeInTheDocument());
       expect(mockNavigate).not.toHaveBeenCalled();
       expect(mockUpdateScreen).not.toHaveBeenCalled();
     });
@@ -283,7 +283,7 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
       fireEvent.click(screen.getByLabelText('employer insurance'));
       fireEvent.click(screen.getByLabelText('add or edit household members'));
 
-      fireEvent.click(await screen.findByText('Leave anyway'));
+      fireEvent.click(await screen.findByText('Clear and go to list'));
       await waitFor(() =>
         expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
           state: { returnToPage: 2 },
