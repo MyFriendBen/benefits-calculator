@@ -51,8 +51,8 @@ const HouseholdMemberForm = () => {
   // or when editing a member. basicInfoCollected means they went through page 0 already.
   const showBasicInfoSection = (formData.householdSize === 1 && !basicInfoCollected) || isEditing;
 
-  // Guards the trip to the roster when this page has unsaved answers on it.
-  const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
+  // The navigation held back by the unsaved-changes warning, run if the user confirms.
+  const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null);
 
   // CURRENT MEMBER DATA
   const currentMemberIndex = pageNumber - 1;
@@ -216,15 +216,21 @@ const HouseholdMemberForm = () => {
     });
   };
 
-  // Leaving for the roster discards whatever is on this page — the member is only persisted by
-  // Continue, and the roster rewrites each member from the last saved data. Confirm first when
-  // there is unsaved work to lose; go straight there when the form is untouched.
-  const goToManageMembers = () => {
-    if (isDirty) {
-      setShowLeaveConfirmation(true);
-      return;
+  // Any exit from this page discards whatever is on it — the member is only persisted by
+  // Continue. Confirm first when there is unsaved work to lose; leave straight away when the
+  // form is untouched. Returns false when the navigation was intercepted.
+  const confirmBeforeLeaving = (leave: () => void) => {
+    if (!isDirty) {
+      return true;
     }
-    navigateToManageMembers();
+    setPendingNavigation(() => leave);
+    return false;
+  };
+
+  const goToManageMembers = () => {
+    if (confirmBeforeLeaving(navigateToManageMembers)) {
+      navigateToManageMembers();
+    }
   };
 
   const manageMembersAriaLabel = intl.formatMessage({
@@ -251,7 +257,7 @@ const HouseholdMemberForm = () => {
         <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="Select a completed member to edit." />
       </p>
       <Box className="summary-cards-container">
-        <HouseholdMemberSummaryCards questionName={questionName} />
+        <HouseholdMemberSummaryCards questionName={questionName} onBeforeLeave={confirmBeforeLeaving} />
       </Box>
     </section>
   );
@@ -363,11 +369,11 @@ const HouseholdMemberForm = () => {
       </form>
 
       <LeaveMemberConfirmationDialog
-        open={showLeaveConfirmation}
-        onCancel={() => setShowLeaveConfirmation(false)}
+        open={pendingNavigation !== null}
+        onCancel={() => setPendingNavigation(null)}
         onConfirm={() => {
-          setShowLeaveConfirmation(false);
-          navigateToManageMembers();
+          pendingNavigation?.();
+          setPendingNavigation(null);
         }}
       />
     </main>

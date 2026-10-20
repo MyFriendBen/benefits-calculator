@@ -22,6 +22,12 @@ import { getStepAnalyticsId } from '../../../../Assets/analytics/stepIds';
 
 type HHMSummariesProps = {
   questionName: QuestionName;
+  /**
+   * Lets the host page intercept navigation to another member — it owns the form state and so is
+   * the only one that knows whether leaving would discard unsaved answers. Return false to cancel
+   * the navigation (the host takes over, e.g. by confirming first). Defaults to navigating.
+   */
+  onBeforeLeave?: (resume: () => void) => boolean;
 };
 
 // A member's card is "completed" once they have basic info (birth date + relationship) and have
@@ -36,7 +42,7 @@ const isMemberCompleted = (member: HouseholdData | undefined): member is Househo
   return hasBasicInfo && hasSubmittedMemberForm(member);
 };
 
-const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
+const HouseholdMemberSummaryCards = ({ questionName, onBeforeLeave }: HHMSummariesProps) => {
   const { formData, whiteLabel } = useContext(Context);
   const { uuid, page } = useParams();
   const location = useLocation();
@@ -78,14 +84,22 @@ const HouseholdMemberSummaryCards = ({ questionName }: HHMSummariesProps) => {
   // Navigate straight to the member's page without re-validating — validation runs when
   // they submit that member's form. `returnToPage` lets the form send the user back here.
   const goToMember = (memberIndex: number) => {
-    track('screener_household_member', {
-      screener_step_name: getStepAnalyticsId(questionName),
-      screener_step_number: currentStepId,
-      action: 'edit_from_summary',
-    });
-    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, {
-      state: { isEditing: true, returnToPage: pageNumber },
-    });
+    const navigateToMember = () => {
+      track('screener_household_member', {
+        screener_step_name: getStepAnalyticsId(questionName),
+        screener_step_number: currentStepId,
+        action: 'edit_from_summary',
+      });
+      navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, {
+        state: { isEditing: true, returnToPage: pageNumber },
+      });
+    };
+
+    // The host page may hold unsaved answers; let it confirm before we leave them behind.
+    if (onBeforeLeave && !onBeforeLeave(navigateToMember)) {
+      return;
+    }
+    navigateToMember();
   };
 
   // Persist the deletion, then keep the user on a valid page. Deleting a member shifts every

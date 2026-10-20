@@ -85,9 +85,22 @@ jest.mock('../sections/IncomeSection', () => ({
   __esModule: true,
   default: () => <div data-testid="income-section" />,
 }));
+// Exposes the onBeforeLeave guard so tests can exercise the "click another member's card"
+// exit, which must warn about unsaved changes exactly like the manage-members pencil does.
 jest.mock('./HouseholdMemberSummaryCards', () => ({
   __esModule: true,
-  default: () => <div data-testid="summary-cards" />,
+  default: ({ onBeforeLeave }: any) => (
+    <div data-testid="summary-cards">
+      <button
+        type="button"
+        aria-label="go to another member"
+        onClick={() => {
+          const resume = () => mockNavigate('/co/test-uuid/step-5/3', { state: { isEditing: true } });
+          if (!onBeforeLeave || onBeforeLeave(resume)) resume();
+        }}
+      />
+    </div>
+  ),
 }));
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -262,7 +275,7 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
       fireEvent.click(screen.getByLabelText('employer insurance'));
 
       fireEvent.click(screen.getByLabelText('add or edit household members'));
-      expect(await screen.findByText('Your answers will be cleared')).toBeInTheDocument();
+      expect(await screen.findByText('Changes on this page will be lost.')).toBeInTheDocument();
       // Still on the page until the user decides.
       expect(mockNavigate).not.toHaveBeenCalled();
     });
@@ -272,8 +285,8 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
       fireEvent.click(screen.getByLabelText('employer insurance'));
       fireEvent.click(screen.getByLabelText('add or edit household members'));
 
-      fireEvent.click(await screen.findByText('Go back'));
-      await waitFor(() => expect(screen.queryByText('Your answers will be cleared')).not.toBeInTheDocument());
+      fireEvent.click(await screen.findByText('Cancel'));
+      await waitFor(() => expect(screen.queryByText('Changes on this page will be lost.')).not.toBeInTheDocument());
       expect(mockNavigate).not.toHaveBeenCalled();
       expect(mockUpdateScreen).not.toHaveBeenCalled();
     });
@@ -283,13 +296,44 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
       fireEvent.click(screen.getByLabelText('employer insurance'));
       fireEvent.click(screen.getByLabelText('add or edit household members'));
 
-      fireEvent.click(await screen.findByText('Clear and go to list'));
+      fireEvent.click(await screen.findByText('Leave'));
       await waitFor(() =>
         expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
           state: { returnToPage: 2 },
         }),
       );
       // "Discard" means discard — nothing is written on the way out.
+      expect(mockUpdateScreen).not.toHaveBeenCalled();
+    });
+
+    it('warns before switching to another member when the page has unsaved answers', async () => {
+      // Clicking another member's card is the same data loss as the pencil, so it warns too.
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('employer insurance'));
+
+      fireEvent.click(screen.getByLabelText('go to another member'));
+      expect(await screen.findByText('Changes on this page will be lost.')).toBeInTheDocument();
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('switches to another member without warning when nothing was entered', async () => {
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('go to another member'));
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
+      expect(screen.queryByText('Changes on this page will be lost.')).not.toBeInTheDocument();
+    });
+
+    it('goes to the chosen member — not the roster — when the warning is confirmed', async () => {
+      // The dialog runs whichever navigation was intercepted, so confirming here must land on
+      // the member that was clicked rather than the pencil's destination.
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('employer insurance'));
+      fireEvent.click(screen.getByLabelText('go to another member'));
+
+      fireEvent.click(await screen.findByText('Leave'));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/3', { state: { isEditing: true } }),
+      );
       expect(mockUpdateScreen).not.toHaveBeenCalled();
     });
 
