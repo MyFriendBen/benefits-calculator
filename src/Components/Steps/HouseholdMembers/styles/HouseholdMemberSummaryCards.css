@@ -69,6 +69,8 @@
   position: absolute;
   top: -0.5rem;
   left: -0.5rem;
+  /* Above the stretched edit button so the badge isn't painted over. */
+  z-index: 1;
   background-color: white;
   border: 2px solid white;
   border-radius: 50%;
@@ -161,9 +163,9 @@
 }
 
 /*
-  The relationship label of an editable card is a real <button> (the clickable edit surface).
-  Strip its native chrome so it reads as the card's heading, and let it size to the card width
-  so the whole label area is the click target.
+  The edit surface of an editable card: an empty <button> stretched over the whole card so every
+  part of it (name, age, income, blank space) is one click target. It carries no content — the
+  card's text renders above it — so hovering anywhere inside the card shows the pointer.
 */
 .member-added-edit-button {
   appearance: none;
@@ -171,11 +173,26 @@
   border: none;
   padding: 0;
   margin: 0;
-  font: inherit;
-  color: inherit;
-  text-align: left;
+  position: absolute;
+  inset: 0;
   width: 100%;
+  height: 100%;
+  border-radius: inherit;
   cursor: pointer;
+}
+
+/*
+  Let hovers and clicks on the card's text fall through to the stretched edit button beneath it,
+  so the pointer shows everywhere rather than only over the gaps between the text.
+*/
+.member-added-container.editable-household-member .household-member-header,
+.member-added-container.editable-household-member .member-added-income {
+  pointer-events: none;
+}
+
+/* ...except the trash button, which is its own action and must stay clickable. */
+.member-added-container .household-member-delete-button {
+  pointer-events: auto;
 }
 
 /*

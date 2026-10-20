@@ -88,24 +88,22 @@ const MemberCard = ({
   return (
     <article className={containerClassName}>
       {statusIcon !== null && <div className="household-member-status-icon">{statusIcon}</div>}
+      {/*
+        The clickable surface is a real <button> stretched over the whole card rather than an
+        <article role="button">, so the trash IconButton isn't an interactive element nested
+        inside another one (invalid ARIA). It sits behind the content so the card's text, not
+        just the heading, acts as one click target. Non-editable cards render no button at all.
+      */}
+      {isEditable && (
+        <button
+          type="button"
+          className="member-added-edit-button"
+          onClick={() => onEdit(memberIndex)}
+          aria-label={editAriaLabel}
+        />
+      )}
       <div className="household-member-header">
-        {/*
-          The clickable surface is a real <button> rather than an <article role="button"> so the
-          trash IconButton isn't an interactive element nested inside another interactive element
-          (invalid ARIA). Non-editable cards render the label as plain text with no button.
-        */}
-        {isEditable ? (
-          <button
-            type="button"
-            className="member-added-edit-button"
-            onClick={() => onEdit(memberIndex)}
-            aria-label={editAriaLabel}
-          >
-            {relationshipLabel}
-          </button>
-        ) : (
-          relationshipLabel
-        )}
+        {relationshipLabel}
         {canDelete && (
           <IconButton
             className="household-member-delete-button"

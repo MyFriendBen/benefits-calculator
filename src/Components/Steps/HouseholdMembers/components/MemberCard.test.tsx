@@ -97,6 +97,17 @@ describe('MemberCard', () => {
     expect(container.querySelectorAll('.household-member-status-icon')).toHaveLength(0);
   });
 
+  it('makes the whole card the click target, not just the relationship heading', () => {
+    // The edit button is an empty sibling stretched over the card rather than a wrapper around
+    // the heading — otherwise hovering the income row shows no pointer and clicking it does
+    // nothing, even though the card lifts on hover as if it were all clickable.
+    const { container } = renderCard();
+    const button = container.querySelector('.member-added-edit-button');
+    expect(button).toBeInTheDocument();
+    expect(button).toBeEmptyDOMElement();
+    expect(button?.parentElement).toHaveClass('member-added-container');
+  });
+
   it('marks an editable card with the clickable-affordance class', () => {
     const { container } = renderCard({ isEditable: true });
     expect(container.querySelector('.member-added-container')).toHaveClass('editable-household-member');
