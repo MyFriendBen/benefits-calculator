@@ -1,17 +1,22 @@
 /* =====================
    Minimized chip
    ===================== */
-@keyframes share-modal-slide-in-bottom-right {
+@keyframes share-modal-slide-in-bottom-left {
   from { opacity: 0; transform: translateY(100px) scale(0.5); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* Bottom-left, because the Benji chat button and panel own the bottom-right. The
+   max-width stops the chip short of that button on narrow phones (at 320px it ran
+   16px under it, hiding the close button): 1rem left inset + 0.5rem gap + the
+   3.5rem button + its 1.25rem right inset (.chatbot-fab in Chatbot.css). */
 .share-modal-chip-container {
   position: fixed;
   bottom: 1rem;
-  right: 1rem;
+  left: 1rem;
+  max-width: calc(100vw - 6.25rem);
   z-index: 1299;
-  animation: share-modal-slide-in-bottom-right 0.3s ease-out;
+  animation: share-modal-slide-in-bottom-left 0.3s ease-out;
 }
 
 .share-modal-chip {
