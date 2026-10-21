@@ -157,29 +157,36 @@ const HouseholdMemberBasicInfoPage = () => {
       step_action: 'complete',
     });
 
-    // Resolve a page number captured before edits to where that same member sits now. Deleting an
-    // earlier member shifts everyone after it down a page, so match by identity and fall back to
-    // the clamped original when the member was deleted or predates frontendId.
-    const resolvePage = (originalPage: number, memberId: string | undefined) => {
-      const movedToIndex = memberId ? members.findIndex((member) => member.frontendId === memberId) : -1;
-      return movedToIndex >= 0 ? movedToIndex + 1 : Math.min(Math.max(originalPage, 1), members.length);
+    // Where a member captured before edits sits now, matched by identity so deletions that shift
+    // everyone down a page still land on the right person. Null means that member is gone.
+    const findMemberPage = (memberId: string | undefined) => {
+      const index = memberId ? members.findIndex((member) => member.frontendId === memberId) : -1;
+      return index >= 0 ? index + 1 : null;
     };
 
-    const targetPage = returnToPage !== undefined ? resolvePage(returnToPage, returnToMemberId) : 1;
+    // Navigation still needs somewhere valid to go when the original member was deleted, so it
+    // falls back to the clamped page number — a different member, but a page that exists.
+    const clamp = (page: number) => Math.min(Math.max(page, 1), members.length);
+    const targetPage = returnToPage !== undefined ? findMemberPage(returnToMemberId) ?? clamp(returnToPage) : 1;
 
-    // Restore edit mode if the user came here mid-edit, so the basic-info fields they were
-    // editing are still shown, and hand back the edit's own destination so Continue resumes the
-    // path it was on rather than falling through to normal next-member navigation.
-    const editState = returnToEditing
-      ? {
-          isEditing: true,
-          ...(editReturnToPage !== undefined && {
-            returnToPage: resolvePage(editReturnToPage, editReturnToMemberId),
-          }),
-          // Restore the Confirmation origin so Continue returns there, not to the next member.
-          ...(locationState?.returnToConfirmation && { routedFromConfirmationPg: true }),
-        }
-      : {};
+    // Edit state gets no such fallback. Restoring `isEditing` for a member the user never chose
+    // would open a stranger's basic-info fields and let them save changes onto the wrong person,
+    // so when the member being edited is gone, the edit simply ends.
+    const editedMemberPage = returnToEditing ? findMemberPage(returnToMemberId) : null;
+    const editTargetStillExists = returnToPage === undefined || editedMemberPage !== null;
+
+    const editState =
+      returnToEditing && editTargetStillExists
+        ? {
+            isEditing: true,
+            ...(editReturnToPage !== undefined &&
+              findMemberPage(editReturnToMemberId) !== null && {
+                returnToPage: findMemberPage(editReturnToMemberId) as number,
+              }),
+            // Restore the Confirmation origin so Continue returns there, not to the next member.
+            ...(locationState?.returnToConfirmation && { routedFromConfirmationPg: true }),
+          }
+        : {};
 
     navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${targetPage}`, {
       state: { basicInfoCollected: true, ...editState },

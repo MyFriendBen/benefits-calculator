@@ -338,6 +338,31 @@ describe('HouseholdMemberBasicInfoPage', () => {
       );
     });
 
+    it('ends the edit when the member being edited is deleted', async () => {
+      // Editing member 2 of 3, then deleting member 2 on the roster. Page 2 now holds the former
+      // member 3 — a person the user never chose to edit — so edit mode must not be restored
+      // onto them, or they could save changes to the wrong member.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+        { id: 'id-2', frontendId: 'fid-2', birthMonth: 7, birthYear: 2015, relationshipToHH: 'child' },
+      ];
+      renderPage(makeFormData(3, householdData), { returnToPage: 2, returnToEditing: true });
+
+      // Delete member 2 (first trash button belongs to member index 1).
+      const deleteButtons = screen.getAllByRole('button', { name: /delete household member/i });
+      fireEvent.click(deleteButtons[0]);
+      fireEvent.click(screen.getByRole('button', { name: /^remove$/i }));
+      await waitFor(() => expect(screen.queryByText('Person 3')).not.toBeInTheDocument());
+
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', {
+          state: { basicInfoCollected: true },
+        }),
+      );
+    });
+
     it('restores the Confirmation origin so Continue returns there', async () => {
       // Edit a member from Confirmation, tap the pencil, come back: without the flag,
       // useShouldRedirectToConfirmation goes false and Continue walks to the next member.
