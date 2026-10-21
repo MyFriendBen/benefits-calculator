@@ -338,6 +338,26 @@ describe('HouseholdMemberBasicInfoPage', () => {
       );
     });
 
+    it('restores the Confirmation origin so Continue returns there', async () => {
+      // Edit a member from Confirmation, tap the pencil, come back: without the flag,
+      // useShouldRedirectToConfirmation goes false and Continue walks to the next member.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+      ];
+      renderPage(makeFormData(2, householdData), {
+        returnToPage: 2,
+        returnToEditing: true,
+        returnToConfirmation: true,
+      });
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/2', {
+          state: { basicInfoCollected: true, isEditing: true, routedFromConfirmationPg: true },
+        }),
+      );
+    });
+
     it("hands back the edit's original destination so Continue resumes that path", async () => {
       // Arrived from member 2 (returnToPage 2) during an edit that was opened from member 4
       // (editReturnToPage 4). Continue goes to page 2 and restores returnToPage 4 for later.

@@ -176,6 +176,8 @@ const HouseholdMemberBasicInfoPage = () => {
           ...(editReturnToPage !== undefined && {
             returnToPage: resolvePage(editReturnToPage, editReturnToMemberId),
           }),
+          // Restore the Confirmation origin so Continue returns there, not to the next member.
+          ...(locationState?.returnToConfirmation && { routedFromConfirmationPg: true }),
         }
       : {};
 

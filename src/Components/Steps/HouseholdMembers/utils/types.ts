@@ -44,6 +44,12 @@ export type LocationState = {
    * next-member navigation.
    */
   editReturnToPage?: number;
+  /**
+   * Set when the roster was reached from a member page that itself came from the Confirmation
+   * page. Handed back as `routedFromConfirmationPg` so Continue still returns to Confirmation
+   * rather than resuming next-member navigation.
+   */
+  returnToConfirmation?: boolean;
 };
 
 export type DeletePopoverState = { index: number; anchorEl: HTMLElement } | null;

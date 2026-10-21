@@ -173,7 +173,7 @@ export const DEFAULT_ENERGY_CALCULATOR_CONDITIONS = {
  * Creates a default HouseholdData object for a brand-new member on the basic info page.
  * Uses the existing DEFAULT_* constants so any future field additions propagate automatically.
  */
-export const createDefaultMember = (index: number, existingMember?: HouseholdData): HouseholdData => ({
+export const createDefaultMember = (index: number, existingMember?: Partial<HouseholdData>): HouseholdData => ({
   ...existingMember,
   id: existingMember?.id,
   frontendId: existingMember?.frontendId ?? crypto.randomUUID(),

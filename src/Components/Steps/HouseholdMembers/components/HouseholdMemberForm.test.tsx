@@ -337,6 +337,16 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
       expect(mockUpdateScreen).not.toHaveBeenCalled();
     });
 
+    it('carries the Confirmation origin to the roster', async () => {
+      renderForm(3, 2, { basicInfoCollected: true, routedFromConfirmationPg: true });
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
+          state: { returnToPage: 2, returnToEditing: true, returnToConfirmation: true },
+        }),
+      );
+    });
+
     it("preserves the edit's original destination separately from the roster return", async () => {
       // Editing member 2, opened from member 4's card. The roster reuses returnToPage for "come
       // back to page 2", so the edit's own destination must travel as editReturnToPage or

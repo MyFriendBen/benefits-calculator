@@ -208,6 +208,8 @@ const HouseholdMemberForm = () => {
       ? {
           returnToEditing: true,
           ...(locationState?.returnToPage !== undefined && { editReturnToPage: locationState.returnToPage }),
+          // Preserve the Confirmation origin, or Continue abandons the trip back there.
+          ...(locationState?.routedFromConfirmationPg && { returnToConfirmation: true }),
         }
       : {};
 

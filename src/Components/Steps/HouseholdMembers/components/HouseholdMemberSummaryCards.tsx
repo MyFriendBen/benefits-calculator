@@ -91,7 +91,13 @@ const HouseholdMemberSummaryCards = ({ questionName, onBeforeLeave }: HHMSummari
         action: 'edit_from_summary',
       });
       navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${memberIndex + 1}`, {
-        state: { isEditing: true, returnToPage: pageNumber },
+        state: {
+          isEditing: true,
+          returnToPage: pageNumber,
+          // Switching members inside a Confirmation-originated edit keeps that origin, so
+          // Continue still returns to Confirmation.
+          ...(locationState?.routedFromConfirmationPg && { routedFromConfirmationPg: true }),
+        },
       });
     };
 
@@ -169,7 +175,15 @@ const HouseholdMemberSummaryCards = ({ questionName, onBeforeLeave }: HHMSummari
   };
 
   const handleDelete = (memberIndex: number, anchorEl: HTMLElement) => {
-    setDeletePopover({ index: memberIndex, anchorEl });
+    // Deleting persists the saved formData and can renumber pages, remounting this member's
+    // form — the same loss as clicking a card, so it goes through the same guard. The host
+    // confirms first, then reopens the popover so the user still gets the delete confirmation.
+    const openPopover = () => setDeletePopover({ index: memberIndex, anchorEl });
+
+    if (onBeforeLeave && !onBeforeLeave(openPopover)) {
+      return;
+    }
+    openPopover();
   };
 
   const createMemberCard = (memberIndex: number, member: HouseholdData | undefined) => {

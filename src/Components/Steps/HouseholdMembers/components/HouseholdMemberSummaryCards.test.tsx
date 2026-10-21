@@ -73,6 +73,7 @@ const renderCards = (
   householdSize?: number,
   locationState: Record<string, unknown> | undefined = undefined,
   currentPage = 2,
+  onBeforeLeave?: (resume: () => void) => boolean,
 ) => {
   mockPage = String(currentPage);
   const contextValue = {
@@ -102,7 +103,7 @@ const renderCards = (
           <Routes>
             <Route
               path="/:whiteLabel/:uuid/step-:stepId/:page"
-              element={<HouseholdMemberSummaryCards questionName="householdData" />}
+              element={<HouseholdMemberSummaryCards questionName="householdData" onBeforeLeave={onBeforeLeave} />}
             />
           </Routes>
         </MemoryRouter>
@@ -294,6 +295,16 @@ describe('HouseholdMemberSummaryCards', () => {
       });
     });
 
+    it('keeps the Confirmation origin when switching members mid-edit', () => {
+      // Editing a member from the Confirmation page then switching to another member must stay
+      // on the path back to Confirmation — dropping the flag resumes next-member navigation.
+      renderCards([completedMember(), completedMember()], 2, { routedFromConfirmationPg: true, isEditing: true });
+      fireEvent.click(editButtons()[0]);
+      expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/1', {
+        state: { isEditing: true, returnToPage: 2, routedFromConfirmationPg: true },
+      });
+    });
+
     it.each([
       ['Enter', '{Enter}'],
       ['Space', '[Space]'],
@@ -450,6 +461,27 @@ describe('HouseholdMemberSummaryCards', () => {
           state: { basicInfoCollected: true, isEditing: true, returnToPage: 1 },
         }),
       );
+    });
+
+    it('routes the trash button through the unsaved-changes guard', async () => {
+      // Deleting renumbers pages and remounts the form, so it loses unsaved answers exactly
+      // like clicking a card does — both exits must consult the host's guard.
+      const onBeforeLeave = jest.fn().mockReturnValue(false);
+      renderCards([completedMember(), completedMember({ relationshipToHH: 'child' })], 2, undefined, 2, onBeforeLeave);
+
+      fireEvent.click(trashButtons()[0]);
+      expect(onBeforeLeave).toHaveBeenCalledTimes(1);
+      // Guard declined, so the delete confirmation stays closed.
+      expect(screen.queryByText('Remove this member?')).not.toBeInTheDocument();
+      expect(mockUpdateScreen).not.toHaveBeenCalled();
+    });
+
+    it('opens the delete confirmation once the guard allows it', async () => {
+      const onBeforeLeave = jest.fn().mockReturnValue(true);
+      renderCards([completedMember(), completedMember({ relationshipToHH: 'child' })], 2, undefined, 2, onBeforeLeave);
+
+      fireEvent.click(trashButtons()[0]);
+      expect(await screen.findByText('Remove this member?')).toBeInTheDocument();
     });
 
     it('navigates to the basic-info page when deleting the current member', async () => {
