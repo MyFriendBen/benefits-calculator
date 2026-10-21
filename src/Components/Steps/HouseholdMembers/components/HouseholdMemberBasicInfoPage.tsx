@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useFieldArray, SubmitHandler } from 'react-hook-form';
 import { Box, Typography, IconButton } from '@mui/material';
@@ -23,7 +23,7 @@ import { useHouseholdMembersNavigation } from '../hooks/useHouseholdMembersNavig
 import BasicInfoFields from '../sections/BasicInfoFields';
 import DeleteConfirmationPopover from './DeleteConfirmationPopover';
 import '../styles/HouseholdMemberBasicInfoPage.css';
-import type { DeletePopoverState } from '../utils/types';
+import type { DeletePopoverState, LocationState } from '../utils/types';
 import { useTrackEvent } from '../../../../Assets/analytics';
 import { getStepAnalyticsId, HOUSEHOLD_SUBSTEP_IDS } from '../../../../Assets/analytics/stepIds';
 
@@ -60,6 +60,16 @@ const HouseholdMemberBasicInfoPage = () => {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
+  // When the user reached page 0 from a member page (via the "manage members" pencil), we
+  // remember which page they came from so Continue can return them there, along with whether
+  // that page was in edit mode so we can restore it.
+  const locationState = location.state as LocationState | null;
+  const returnToPage = locationState?.returnToPage;
+  const returnToEditing = locationState?.returnToEditing;
+  // Where the edit should ultimately return to — the card that opened it, not the page the user
+  // left to come here. Handed back below so Continue resumes the edit's original path.
+  const editReturnToPage = locationState?.editReturnToPage;
 
   const { navigateBack } = useHouseholdMembersNavigation({
     uuid,
@@ -72,11 +82,24 @@ const HouseholdMemberBasicInfoPage = () => {
   // Schema is intl-dependent — memoize so it isn't rebuilt on every render.
   const formSchema = useMemo(() => createBasicInfoPageSchema(intl), [intl]);
 
+  // Identify the members these page numbers point at, so Continue can return to the same people
+  // even if deletions here shifted their positions. Captured on mount, before any edits.
+  const [returnToMemberId, editReturnToMemberId] = useMemo(
+    () => [
+      returnToPage !== undefined ? formData.householdData[returnToPage - 1]?.frontendId : undefined,
+      editReturnToPage !== undefined ? formData.householdData[editReturnToPage - 1]?.frontendId : undefined,
+    ],
+    // Mount-only: formData shifts as members are removed, which would move the targets.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
   const defaultMembers = useMemo(
     () =>
       Array.from({ length: formData.householdSize }, (_, index) => {
         const existing = formData.householdData[index];
         return {
+          frontendId: existing?.frontendId,
           birthMonth: existing?.birthMonth || 0,
           birthYear: existing?.birthYear || UNSET_BIRTH_YEAR,
           relationshipToHH: existing?.relationshipToHH || (index === 0 ? 'headOfHousehold' : ''),
@@ -104,14 +127,21 @@ const HouseholdMemberBasicInfoPage = () => {
   const formSubmitHandler: SubmitHandler<BasicInfoPageSchema> = async ({ members }) => {
     if (!uuid) return;
 
-    const updatedHouseholdData = members.map((member, index) =>
-      createDefaultMember(index, {
-        ...formData.householdData[index],
+    // Match each row to its saved member by frontendId, not by array position: removing a member
+    // shifts every later row down, so an index lookup would graft the deleted member's id,
+    // insurance, conditions and income onto the row that took its place.
+    const updatedHouseholdData = members.map((member, index) => {
+      const existing = member.frontendId
+        ? formData.householdData.find((saved) => saved.frontendId === member.frontendId)
+        : undefined;
+
+      return createDefaultMember(index, {
+        ...existing,
         birthMonth: member.birthMonth,
         birthYear: member.birthYear,
         relationshipToHH: member.relationshipToHH,
-      }),
-    );
+      });
+    });
 
     await updateScreen({
       ...formData,
@@ -127,7 +157,40 @@ const HouseholdMemberBasicInfoPage = () => {
       step_action: 'complete',
     });
 
-    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/1`, { state: { basicInfoCollected: true } });
+    // Where a member captured before edits sits now, matched by identity so deletions that shift
+    // everyone down a page still land on the right person. Null means that member is gone.
+    const findMemberPage = (memberId: string | undefined) => {
+      const index = memberId ? members.findIndex((member) => member.frontendId === memberId) : -1;
+      return index >= 0 ? index + 1 : null;
+    };
+
+    // Navigation still needs somewhere valid to go when the original member was deleted, so it
+    // falls back to the clamped page number — a different member, but a page that exists.
+    const clamp = (page: number) => Math.min(Math.max(page, 1), members.length);
+    const targetPage = returnToPage !== undefined ? findMemberPage(returnToMemberId) ?? clamp(returnToPage) : 1;
+
+    // Edit state gets no such fallback. Restoring `isEditing` for a member the user never chose
+    // would open a stranger's basic-info fields and let them save changes onto the wrong person,
+    // so when the member being edited is gone, the edit simply ends.
+    const editedMemberPage = returnToEditing ? findMemberPage(returnToMemberId) : null;
+    const editTargetStillExists = returnToPage === undefined || editedMemberPage !== null;
+
+    const editState =
+      returnToEditing && editTargetStillExists
+        ? {
+            isEditing: true,
+            ...(editReturnToPage !== undefined &&
+              findMemberPage(editReturnToMemberId) !== null && {
+                returnToPage: findMemberPage(editReturnToMemberId) as number,
+              }),
+            // Restore the Confirmation origin so Continue returns there, not to the next member.
+            ...(locationState?.returnToConfirmation && { routedFromConfirmationPg: true }),
+          }
+        : {};
+
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${targetPage}`, {
+      state: { basicInfoCollected: true, ...editState },
+    });
   };
 
   const handleDeleteConfirm = () => {
@@ -143,6 +206,8 @@ const HouseholdMemberBasicInfoPage = () => {
 
   const handleAddMember = () => {
     append({
+      // New row: no saved member to match, so createDefaultMember mints an id on submit.
+      frontendId: undefined,
       birthMonth: 0,
       birthYear: UNSET_BIRTH_YEAR,
       relationshipToHH: '',
@@ -178,10 +243,7 @@ const HouseholdMemberBasicInfoPage = () => {
             const memberErrors = errors.members?.[index];
             const isFirstMember = index === 0;
             return (
-              <div
-                key={field.id}
-                className="household-basic-info-page__person-card"
-              >
+              <div key={field.id} className="household-basic-info-page__person-card">
                 <div className="household-basic-info-page__person-header">
                   <Icon name="user-round" className="household-basic-info-page__person-icon" />
                   <Typography className="household-basic-info-page__person-title">
@@ -228,10 +290,7 @@ const HouseholdMemberBasicInfoPage = () => {
             <button type="button" onClick={handleAddMember} className="household-basic-info-page__add-button">
               <AddIcon fontSize="small" />
               <strong>
-                <FormattedMessage
-                  id="householdDataBlock.basicInfo.addMember"
-                  defaultMessage="Add a Household Member"
-                />
+                <FormattedMessage id="householdDataBlock.basicInfo.addMember" defaultMessage="Add a Household Member" />
               </strong>
             </button>
           </Box>
