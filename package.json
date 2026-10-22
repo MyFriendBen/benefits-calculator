@@ -35,7 +35,7 @@
     "react-international-phone": "^4.8.0",
     "react-intl": "^6.0.8",
     "react-number-format": "^5.4.4",
-    "react-router-dom": "^6.3.0",
+    "react-router-dom": "6.3.0",
     "react-scripts": "5.0.1",
     "react-share": "^5.1.2",
     "serve": "^14.2.3",
@@ -86,5 +86,10 @@
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0"
+  },
+  "overrides": {
+    "serialize-javascript": "7.0.5",
+    "resolve-url-loader": "^5.0.0",
+    "nth-check": "^2.0.1"
   }
 }
