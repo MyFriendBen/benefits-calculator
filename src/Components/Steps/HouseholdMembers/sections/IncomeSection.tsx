@@ -568,17 +568,20 @@ const IncomeSection = ({
   // (e.g. the "add at least one income source" error shown after a failed submit).
   // The schema re-checks on the next submit, so a still-invalid state is re-flagged
   // then rather than lingering while the user is mid-correction.
+  // shouldDirty marks the form as having unsaved work. Without it, answering only these
+  // questions — the whole form for a dependent with no income — leaves formState.isDirty false,
+  // so the unsaved-changes warning never fires and the answers are discarded on navigation.
   const setEmployed = (v: boolean | null) => {
     clearErrors('incomeEmployed');
-    setValue('incomeEmployed', v, { shouldValidate: false });
+    setValue('incomeEmployed', v, { shouldValidate: false, shouldDirty: true });
   };
   const setGig = (v: boolean | null) => {
     clearErrors('incomeGig');
-    setValue('incomeGig', v, { shouldValidate: false });
+    setValue('incomeGig', v, { shouldValidate: false, shouldDirty: true });
   };
   const setOther = (v: boolean | null) => {
     clearErrors('incomeOther');
-    setValue('incomeOther', v, { shouldValidate: false });
+    setValue('incomeOther', v, { shouldValidate: false, shouldDirty: true });
   };
 
   const employedError = errors.incomeEmployed;

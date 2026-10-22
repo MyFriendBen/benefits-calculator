@@ -317,6 +317,10 @@ export const createBasicInfoPageSchema = (intl: IntlShape) => {
 
   const memberSchema = z
     .object({
+      // Stable identity for the row, carried through add/remove so saved member data is matched
+      // by identity rather than array position. Empty for a row added on this page, which has no
+      // saved data to match yet.
+      frontendId: z.string().optional(),
       birthMonth: z
         .number()
         .min(1, { message: renderMissingBirthMonthHelperText(intl) })

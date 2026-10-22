@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
@@ -59,9 +59,19 @@ jest.mock('../sections/BasicInfoSection', () => ({
   __esModule: true,
   default: () => <div data-testid="basic-info-section" />,
 }));
+// Exposes a control that writes through the real setValue, so tests can dirty the form the same
+// way the user does. The other sections stay inert divs.
 jest.mock('../sections/HealthInsuranceSection', () => ({
   __esModule: true,
-  default: () => <div data-testid="health-insurance-section" />,
+  default: ({ setValue, healthInsurance }: any) => (
+    <div data-testid="health-insurance-section">
+      <button
+        type="button"
+        aria-label="employer insurance"
+        onClick={() => setValue('healthInsurance.employer', !healthInsurance?.employer, { shouldDirty: true })}
+      />
+    </div>
+  ),
 }));
 jest.mock('../sections/SpecialConditionsSection', () => ({
   __esModule: true,
@@ -75,9 +85,22 @@ jest.mock('../sections/IncomeSection', () => ({
   __esModule: true,
   default: () => <div data-testid="income-section" />,
 }));
+// Exposes the onBeforeLeave guard so tests can exercise the "click another member's card"
+// exit, which must warn about unsaved changes exactly like the manage-members pencil does.
 jest.mock('./HouseholdMemberSummaryCards', () => ({
   __esModule: true,
-  default: () => <div data-testid="summary-cards" />,
+  default: ({ onBeforeLeave }: any) => (
+    <div data-testid="summary-cards">
+      <button
+        type="button"
+        aria-label="go to another member"
+        onClick={() => {
+          const resume = () => mockNavigate('/co/test-uuid/step-5/3', { state: { isEditing: true } });
+          if (!onBeforeLeave || onBeforeLeave(resume)) resume();
+        }}
+      />
+    </div>
+  ),
 }));
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -130,15 +153,13 @@ const renderForm = (householdSize: number, page: number, locationState: Record<s
   return render(
     <IntlProvider locale="en" messages={{}}>
       <Context.Provider value={contextValue}>
-        <MemoryRouter
-          initialEntries={[{ pathname: `/co/test-uuid/step-5/${page}`, state: locationState }]}
-        >
+        <MemoryRouter initialEntries={[{ pathname: `/co/test-uuid/step-5/${page}`, state: locationState }]}>
           <Routes>
             <Route path="/:whiteLabel/:uuid/step-:stepId/:page" element={<HouseholdMemberForm />} />
           </Routes>
         </MemoryRouter>
       </Context.Provider>
-    </IntlProvider>
+    </IntlProvider>,
   );
 };
 
@@ -192,8 +213,16 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
   });
 
   describe('summary cards visibility', () => {
-    it('does not show summary cards on page 1', () => {
+    it('shows summary cards on page 1 when the household has more than one member', () => {
+      // The roster should be visible on member 1's page too, so the user always sees the
+      // full household when the household size is greater than one.
       renderForm(3, 1, {});
+      expect(screen.getByTestId('summary-cards')).toBeInTheDocument();
+    });
+
+    it('does not show summary cards for a single-member household', () => {
+      // With only one member there's no roster to show on their page.
+      renderForm(1, 1, {});
       expect(screen.queryByTestId('summary-cards')).not.toBeInTheDocument();
     });
 
@@ -205,6 +234,130 @@ describe('HouseholdMemberForm - showBasicInfoSection', () => {
     it('shows summary cards on page 3', () => {
       renderForm(3, 3, { basicInfoCollected: true });
       expect(screen.getByTestId('summary-cards')).toBeInTheDocument();
+    });
+  });
+
+  describe('manage members button', () => {
+    it('navigates to the basic-info page and remembers the page to return to', async () => {
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
+          state: { returnToPage: 2 },
+        }),
+      );
+    });
+
+    it('carries edit mode to the roster so the round trip can restore it', async () => {
+      // Without this the user returns with isEditing lost: the basic-info fields they came to
+      // edit are hidden and Continue no longer follows their original return path.
+      renderForm(3, 2, { basicInfoCollected: true, isEditing: true });
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
+          state: { returnToPage: 2, returnToEditing: true },
+        }),
+      );
+    });
+
+    it('never persists the member on the way to the roster', async () => {
+      // The member is saved only by Continue. A partial save here would mark an unfinished
+      // member as completed (the completion heuristic reads any ticked health-insurance box),
+      // which also pre-answers the required income questions as "No".
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
+      expect(mockUpdateScreen).not.toHaveBeenCalled();
+    });
+
+    it('warns before leaving when the page has unsaved answers', async () => {
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('employer insurance'));
+
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+      expect(await screen.findByText('Changes on this page will be lost.')).toBeInTheDocument();
+      // Still on the page until the user decides.
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('stays put when the user cancels the warning', async () => {
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('employer insurance'));
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+
+      fireEvent.click(await screen.findByText('Cancel'));
+      await waitFor(() => expect(screen.queryByText('Changes on this page will be lost.')).not.toBeInTheDocument());
+      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(mockUpdateScreen).not.toHaveBeenCalled();
+    });
+
+    it('discards the edits and navigates when the user confirms', async () => {
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('employer insurance'));
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+
+      fireEvent.click(await screen.findByText('Leave'));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
+          state: { returnToPage: 2 },
+        }),
+      );
+      // "Discard" means discard — nothing is written on the way out.
+      expect(mockUpdateScreen).not.toHaveBeenCalled();
+    });
+
+    it('warns before switching to another member when the page has unsaved answers', async () => {
+      // Clicking another member's card is the same data loss as the pencil, so it warns too.
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('employer insurance'));
+
+      fireEvent.click(screen.getByLabelText('go to another member'));
+      expect(await screen.findByText('Changes on this page will be lost.')).toBeInTheDocument();
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('switches to another member without warning when nothing was entered', async () => {
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('go to another member'));
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
+      expect(screen.queryByText('Changes on this page will be lost.')).not.toBeInTheDocument();
+    });
+
+    it('goes to the chosen member — not the roster — when the warning is confirmed', async () => {
+      // The dialog runs whichever navigation was intercepted, so confirming here must land on
+      // the member that was clicked rather than the pencil's destination.
+      renderForm(3, 2, { basicInfoCollected: true });
+      fireEvent.click(screen.getByLabelText('employer insurance'));
+      fireEvent.click(screen.getByLabelText('go to another member'));
+
+      fireEvent.click(await screen.findByText('Leave'));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/3', { state: { isEditing: true } }),
+      );
+      expect(mockUpdateScreen).not.toHaveBeenCalled();
+    });
+
+    it('carries the Confirmation origin to the roster', async () => {
+      renderForm(3, 2, { basicInfoCollected: true, routedFromConfirmationPg: true });
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
+          state: { returnToPage: 2, returnToEditing: true, returnToConfirmation: true },
+        }),
+      );
+    });
+
+    it("preserves the edit's original destination separately from the roster return", async () => {
+      // Editing member 2, opened from member 4's card. The roster reuses returnToPage for "come
+      // back to page 2", so the edit's own destination must travel as editReturnToPage or
+      // Continue would later resume normal next-member navigation instead of returning to 4.
+      renderForm(4, 2, { basicInfoCollected: true, isEditing: true, returnToPage: 4 });
+      fireEvent.click(screen.getByLabelText('add or edit household members'));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/0', {
+          state: { returnToPage: 2, returnToEditing: true, editReturnToPage: 4 },
+        }),
+      );
     });
   });
 });
