@@ -177,6 +177,67 @@ describe('ProgramCard - Eligibility Tags', () => {
       expect(screen.getByText('Eligible:')).toBeInTheDocument();
       expect(screen.getByText('Household')).toBeInTheDocument();
     });
+
+    it('should show "Household" when the program is paid to the household, even with members marked', () => {
+      const twoMemberFormData = createFormData({
+        householdSize: 2,
+        householdData: [
+          createMember({ id: 1, frontendId: 'hoh' }),
+          createMember({ id: 2, frontendId: 'child-1', relationshipToHH: 'child', birthYear: 2015, birthMonth: 6 }),
+        ],
+      });
+
+      // A tax credit: the child qualifies the household for it, but the filer claims it.
+      const taxCredit = createProgram({
+        eligible: true,
+        payment_unit: 'household',
+        members: [createMemberEligibility('hoh', false, 0), createMemberEligibility('child-1', true, 0)],
+      });
+
+      renderProgramCard(taxCredit, configWithFlag(true), twoMemberFormData);
+      expect(screen.getByText('Household')).toBeInTheDocument();
+      expect(screen.queryByText(/Child/)).not.toBeInTheDocument();
+      expect(screen.queryByText('You')).not.toBeInTheDocument();
+    });
+
+    it('should not show "Household" for an ineligible household-paid program', () => {
+      const twoMemberFormData = createFormData({
+        householdSize: 2,
+        householdData: [
+          createMember({ id: 1, frontendId: 'hoh' }),
+          createMember({ id: 2, frontendId: 'child-1', relationshipToHH: 'child' }),
+        ],
+      });
+
+      const taxCredit = createProgram({
+        eligible: false,
+        payment_unit: 'household',
+        members: [createMemberEligibility('hoh', false, 0), createMemberEligibility('child-1', true, 0)],
+      });
+
+      renderProgramCard(taxCredit, configWithFlag(true), twoMemberFormData);
+      expect(screen.queryByText('Household')).not.toBeInTheDocument();
+    });
+
+    it('should show member tags when the program is paid per member', () => {
+      const twoMemberFormData = createFormData({
+        householdSize: 2,
+        householdData: [
+          createMember({ id: 1, frontendId: 'hoh' }),
+          createMember({ id: 2, frontendId: 'child-1', relationshipToHH: 'child', birthYear: 2015, birthMonth: 6 }),
+        ],
+      });
+
+      const perMember = createProgram({
+        eligible: true,
+        payment_unit: 'member',
+        members: [createMemberEligibility('hoh', false, 0), createMemberEligibility('child-1', true, 50)],
+      });
+
+      renderProgramCard(perMember, configWithFlag(true), twoMemberFormData);
+      expect(screen.getByText(/Child/)).toBeInTheDocument();
+      expect(screen.queryByText('Household')).not.toBeInTheDocument();
+    });
   });
 
   describe('individual member tags', () => {
