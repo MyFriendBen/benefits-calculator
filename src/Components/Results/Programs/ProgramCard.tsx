@@ -191,9 +191,12 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
 
     const eligibleMembersList = program.members.filter((m) => m.eligible);
 
-    // If program is eligible but no individual members are marked eligible,
-    // it's a household-level program (e.g. SNAP)
-    if (program.eligible && eligibleMembersList.length === 0) {
+    // A household-paid program (a tax credit, SNAP) names the household as the eligible
+    // party, even when its rules marked particular members. The API says which it is;
+    // an eligible program with no marked members is read the same way for responses
+    // that predate the field.
+    const paidToHousehold = program.payment_unit === 'household' || eligibleMembersList.length === 0;
+    if (program.eligible && paidToHousehold) {
       return [
         {
           label: <FormattedMessage id="programCard.household" defaultMessage="Household" />,
@@ -240,7 +243,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
         ),
       };
     });
-  }, [program.members, program.eligible, formData, relationshipOptions, showEligibilityTags]);
+  }, [program.members, program.eligible, program.payment_unit, formData, relationshipOptions, showEligibilityTags]);
 
   const programPageLink = useResultsLink(`results/benefits/${programId}`);
   const value = useFormatDisplayValue(program);
