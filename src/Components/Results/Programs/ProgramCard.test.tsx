@@ -217,6 +217,8 @@ describe('ProgramCard - Eligibility Tags', () => {
 
       renderProgramCard(taxCredit, configWithFlag(true), twoMemberFormData);
       expect(screen.queryByText('Household')).not.toBeInTheDocument();
+      expect(screen.queryByText(/Child/)).not.toBeInTheDocument();
+      expect(screen.queryByText('Eligible:')).not.toBeInTheDocument();
     });
 
     it('should show member tags when the program is paid per member', () => {
