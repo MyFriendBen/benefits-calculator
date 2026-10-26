@@ -376,7 +376,8 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
                               })
                             }
                           >
-                            <ResultsTranslate translation={navigator.email} />
+                            {/* An address isn't translated: show the same English text the href uses. */}
+                            {navigator.email.default_message}
                           </a>
                         </div>
                       )}
