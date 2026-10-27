@@ -115,10 +115,10 @@ export function useUpdateFormData() {
       let studentEligibility: StudentEligibility | undefined = undefined;
       if (member.student) {
         studentEligibility = {
-          studentFullTime: member.student_full_time ?? false,
-          studentJobTrainingProgram: member.student_job_training_program ?? false,
-          studentHasWorkStudy: member.student_has_work_study ?? false,
-          studentWorks20PlusHrs: member.student_works_20_plus_hrs ?? false,
+          studentFullTime: member.student_full_time ?? undefined,
+          studentJobTrainingProgram: member.student_job_training_program ?? undefined,
+          studentHasWorkStudy: member.student_has_work_study ?? undefined,
+          studentWorks20PlusHrs: member.student_works_20_plus_hrs ?? undefined,
         };
       }
 
