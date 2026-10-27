@@ -28,9 +28,3 @@ Both mechanisms preserve the path, query params, and hash.
    - Forwarding URL (301): `https://example-domain.gov/your_white_label/$1`
 
 3. **Configure DNS** to point the domain to the app.
-
-## Legacy White Label Redirects
-
-Legacy white label paths (e.g., `/co_energy_calculator/*`) are redirected to their new paths (e.g., `/cesn/*`) in `ValidateWhiteLabel.tsx`. These use `window.location.replace()` to force a full page reload so the app initializes with the correct white label config.
-
-See `LEGACY_WHITE_LABEL_REDIRECTS` in `../Components/RouterUtil/ValidateWhiteLabel.tsx`.
