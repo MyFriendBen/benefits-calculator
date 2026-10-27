@@ -135,7 +135,7 @@ const DefaultConfirmationHHData = () => {
         {activeConditions.map(({ id, defaultMessage, kind }) => (
           <li key={id}>
             {formatMessage({ id, defaultMessage })}
-            {member.conditions.student && answeredStudentItems.length > 0 && (
+            {kind === 'student' && member.conditions.student && answeredStudentItems.length > 0 && (
               <ul className="confirmation-student-eligibility-list">
                 {answeredStudentItems.map(({ field, labelId, labelDefault, value }) => (
                   <li key={field}>
