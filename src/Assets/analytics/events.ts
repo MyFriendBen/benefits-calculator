@@ -25,6 +25,12 @@ export interface ScreenerContext {
   screener_uid?: string;
   /** CESN energy path. CESN-only; absent elsewhere and when the path is unknown. */
   screener_path?: 'homeowner' | 'renter';
+  /**
+   * The partner referrer code the screener was entered with (`?referrer=`), the
+   * same value saved as the screen's referrer_code. Lets referrer dashboards scope
+   * GA4 events, including steps before a screener_uid exists. Absent without one.
+   */
+  screener_referrer?: string;
 }
 
 // Params common to interactions that happen on a known screener step.

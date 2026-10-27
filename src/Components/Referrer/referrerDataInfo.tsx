@@ -38,6 +38,9 @@ import MO211_MFBLogo from '../../Assets/States/MO/WhiteLabels/TwoOneOneAssets/mo
 // ink to white and keeping the gold shield, so it reads on the black cu_denver header.
 import CUDenverLogo from '../../Assets/States/CO/WhiteLabels/CUDenver/CUDenver_Logo_White.png';
 import DPS_MFBLogo from '../../Assets/States/CO/WhiteLabels/DenverPublicSchools/DPS_MFBLogo.png';
+// DPP mark reversed for the dark CO header (navy ink recolored to white, yellow kept) beside the
+// shared partnership block. Derived from DPP's color logo; swap for their official reversed logo.
+import DPP_MFBLogo from '../../Assets/States/CO/WhiteLabels/DenverPreschoolProgram/DPP_MFBLogo.png';
 
 const logoMap: { [key: string]: string | undefined } = {
   MFB_COLogo: MFBCOLogo,
@@ -76,6 +79,7 @@ const logoMap: { [key: string]: string | undefined } = {
   HispanicFederation_MFBLogo: HispanicFederation_MFBLogo,
   CUDenver_Logo: CUDenverLogo,
   DPS_MFBLogo: DPS_MFBLogo,
+  DPP_MFBLogo: DPP_MFBLogo,
   // The uwgkc referrer spans both states, so it picks the lockup for whichever screener it entered.
   KS211_MFBLogo: KS211_MFBLogo,
   MO211_MFBLogo: MO211_MFBLogo,
