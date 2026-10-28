@@ -16,7 +16,11 @@ import type { ItemListItem, ItemListName, ScreenerContext, ScreenerEventMap, Scr
 // homeowner, so the dashboard can tell a real homeowner from an unknown. CESN-only.
 //
 // screener_referrer is formData.immutableReferrer, set from the entry URL before
-// any step renders, so it rides on the pre-uid steps too. Empty means none.
+// any step renders, so it rides on the pre-uid steps too. Empty means none. The
+// URL accepts any text, so only code-shaped values reach GA4: anything else
+// (an email, a name, a phone number) is dropped rather than sent.
+const REFERRER_CODE_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+
 function resolveScreenerContext(
   whiteLabel?: string,
   uuid?: string,
@@ -34,7 +38,7 @@ function resolveScreenerContext(
     screener_state: screenerState,
     screener_uid: uuid ?? getUuidFromUrl(),
     screener_path: screenerState === 'cesn' ? screenerPath : undefined,
-    screener_referrer: referrer || undefined,
+    screener_referrer: referrer && REFERRER_CODE_PATTERN.test(referrer) ? referrer : undefined,
   };
 }
 

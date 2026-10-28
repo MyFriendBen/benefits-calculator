@@ -117,11 +117,22 @@ describe('useTrackEvent screener_referrer', () => {
     expect(lastPayload().screener_referrer).toBe('partner_code');
   });
 
-  it.each([undefined, ''])('omits screener_referrer when the referrer is %p', (referrer) => {
+  it.each(['211_metro_chicago', 'denver-public-schools', 'DPP'])('attaches code-shaped referrer %p', (referrer) => {
     mockParams = { whiteLabel: 'co', uuid: 'abc' };
     mockReferrer = referrer;
     const { result } = renderHook(() => useTrackEvent());
     result.current('screener_form_start', {});
-    expect(lastPayload()).not.toHaveProperty('screener_referrer');
+    expect(lastPayload().screener_referrer).toBe(referrer);
   });
+
+  it.each([undefined, '', 'jane@example.com', 'Jane Doe', '720.555.0123', 'a'.repeat(65)])(
+    'omits screener_referrer when the referrer is %p',
+    (referrer) => {
+      mockParams = { whiteLabel: 'co', uuid: 'abc' };
+      mockReferrer = referrer;
+      const { result } = renderHook(() => useTrackEvent());
+      result.current('screener_form_start', {});
+      expect(lastPayload()).not.toHaveProperty('screener_referrer');
+    },
+  );
 });
