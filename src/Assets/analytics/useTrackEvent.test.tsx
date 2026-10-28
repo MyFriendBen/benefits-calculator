@@ -15,6 +15,7 @@ jest.mock('./index', () => ({
 // Drive screener_state / formData.path per test via these mutable values.
 let mockParams: { whiteLabel?: string; uuid?: string } = {};
 let mockFormPath: string | undefined;
+let mockReferrer: string | undefined;
 
 jest.mock('react-router-dom', () => ({
   useParams: () => mockParams,
@@ -33,7 +34,10 @@ jest.mock('react', () => {
   const actual = jest.requireActual('react');
   return {
     ...actual,
-    useContext: () => ({ whiteLabel: undefined, formData: { path: mockFormPath } }),
+    useContext: () => ({
+      whiteLabel: undefined,
+      formData: { path: mockFormPath, immutableReferrer: mockReferrer },
+    }),
   };
 });
 
@@ -44,9 +48,11 @@ describe('useTrackEvent screener_path', () => {
     trackEventMock.mockClear();
     mockParams = {};
     mockFormPath = undefined;
+    mockReferrer = undefined;
   });
 
-  const lastPayload = () => trackEventMock.mock.calls[trackEventMock.mock.calls.length - 1][1] as Record<string, unknown>;
+  const lastPayload = () =>
+    trackEventMock.mock.calls[trackEventMock.mock.calls.length - 1][1] as Record<string, unknown>;
 
   it('marks a CESN renter screening as "renter"', () => {
     mockParams = { whiteLabel: 'cesn', uuid: 'abc' };
@@ -79,4 +85,54 @@ describe('useTrackEvent screener_path', () => {
     result.current('screener_form_start', {});
     expect(lastPayload()).not.toHaveProperty('screener_path');
   });
+});
+
+// screener_referrer is how referrer dashboards scope GA4 events, so it must ride
+// on every event of a referred screener, including the pre-uid steps.
+describe('useTrackEvent screener_referrer', () => {
+  beforeEach(() => {
+    trackEventMock.mockClear();
+    mockParams = {};
+    mockFormPath = undefined;
+    mockReferrer = undefined;
+  });
+
+  const lastPayload = () =>
+    trackEventMock.mock.calls[trackEventMock.mock.calls.length - 1][1] as Record<string, unknown>;
+
+  it('attaches the referrer the screener was entered with', () => {
+    mockParams = { whiteLabel: 'co', uuid: 'abc' };
+    mockReferrer = 'partner_code';
+    const { result } = renderHook(() => useTrackEvent());
+    result.current('screener_form_start', {});
+    expect(lastPayload().screener_referrer).toBe('partner_code');
+  });
+
+  it('attaches the referrer before a screener_uid exists', () => {
+    mockParams = { whiteLabel: 'co' };
+    mockReferrer = 'partner_code';
+    const { result } = renderHook(() => useTrackEvent());
+    result.current('screener_form_start', {});
+    expect(lastPayload().screener_uid).toBeUndefined();
+    expect(lastPayload().screener_referrer).toBe('partner_code');
+  });
+
+  it.each(['211_metro_chicago', 'denver-public-schools', 'DPP'])('attaches code-shaped referrer %p', (referrer) => {
+    mockParams = { whiteLabel: 'co', uuid: 'abc' };
+    mockReferrer = referrer;
+    const { result } = renderHook(() => useTrackEvent());
+    result.current('screener_form_start', {});
+    expect(lastPayload().screener_referrer).toBe(referrer);
+  });
+
+  it.each([undefined, '', 'jane@example.com', 'Jane Doe', '720.555.0123', 'a'.repeat(65)])(
+    'omits screener_referrer when the referrer is %p',
+    (referrer) => {
+      mockParams = { whiteLabel: 'co', uuid: 'abc' };
+      mockReferrer = referrer;
+      const { result } = renderHook(() => useTrackEvent());
+      result.current('screener_form_start', {});
+      expect(lastPayload()).not.toHaveProperty('screener_referrer');
+    },
+  );
 });
