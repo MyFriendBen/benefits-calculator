@@ -21,6 +21,7 @@ jest.mock('../Config/configHook', () => ({
     housing: { text: 'Housing Resources', icon: null },
     homelessServices: { text: 'Shelter Resources', icon: null },
     freeLowCostMedicalCare: { text: 'Health Care Resources', icon: null },
+    drugAlcoholUse: { text: 'Drug/Alcohol Resources', icon: null },
   }),
 }));
 
@@ -66,5 +67,15 @@ describe('NcLink211Message', () => {
         'subtopic=Health%20Screening%2FDiagnostic%20Services%2CSpecialized%20Treatment%20and%20Prevention',
       ),
     );
+  });
+
+  it('links "Help with drug or alcohol use" to NC211 Drug and Alcohol Use > Treatment Services', () => {
+    const formData = createFormData();
+    formData.acuteHHConditions = { drugAlcoholUse: true };
+    renderWithProviders(formData);
+
+    const link = screen.getByText(/Drug\/Alcohol Resources/i).closest('a');
+    expect(link).toHaveAttribute('href', expect.stringContaining('topic=Drug+and+Alcohol+Use'));
+    expect(link).toHaveAttribute('href', expect.stringContaining('subtopic=Drug+and+Alcohol+Treatment+Services'));
   });
 });
