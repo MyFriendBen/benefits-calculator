@@ -659,7 +659,7 @@ describe('greeting bubble and privacy notice', () => {
     await open();
 
     expect(screen.getByRole('note')).toHaveTextContent(
-      /^Benji is an AI assistant\.\s+Please do not include your SSN, account numbers, or medical details in this chat\.$/i,
+      /^Benji is an AI assistant\.\s+Please do not include your SSN, immigration status, account numbers, or medical details in this chat\.$/i,
     );
   });
 

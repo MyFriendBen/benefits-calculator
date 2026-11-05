@@ -927,7 +927,7 @@ export function ChatbotProvider({ visiblePrograms, greetingTotal, children }: Pr
               <div className="chatbot-disclaimer" role="note">
                 <FormattedMessage
                   id="chatbot.privacyNotice"
-                  defaultMessage="Benji is an AI assistant. Please do not include your SSN, account numbers, or medical details in this chat."
+                  defaultMessage="Benji is an AI assistant. Please do not include your SSN, immigration status, account numbers, or medical details in this chat."
                 />
               </div>
             )}
