@@ -7,6 +7,9 @@ on:
     branches:
       - '**'  # Run on pushes to all branches
 
+permissions:
+  contents: read
+
 jobs:
   test-and-upload-coverage:
     runs-on: ubuntu-latest
