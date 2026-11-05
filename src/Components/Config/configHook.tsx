@@ -44,6 +44,7 @@ export const OPTION_CARD_ICON_MAP: Record<string, string> = {
   Savings: 'piggy-bank',
   Transportation: 'bus-front',
   Medical_expenses_and_debt: 'heart-plus',
+  Drug_alcohol_use: 'life-buoy',
   Military: 'shield',
   Aging: 'tree-deciduous',
   Youth_development: 'shapes',
