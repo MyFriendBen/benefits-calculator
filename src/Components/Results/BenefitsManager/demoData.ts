@@ -44,7 +44,8 @@ export function buildDemoBoardState(programs: Program[], taxCreditIds: Set<numbe
     .sort((a, b) => programValue(b) - programValue(a))
     .slice(1);
 
-  const plan: ColumnId[] = snap !== undefined ? ['applied', 'receiving', 'applied'] : ['applied', 'receiving', 'applied', 'receiving'];
+  const plan: ColumnId[] =
+    snap !== undefined ? ['applied', 'receiving', 'applied'] : ['applied', 'receiving', 'applied', 'receiving'];
   plan.forEach((column, i) => {
     if (rest[i] !== undefined) {
       state[rest[i].program_id] = column;
@@ -183,7 +184,10 @@ export const DEMO_UNLOCKED_BENEFITS: NewBenefit[] = [
 
 /** A Program-shaped stand-in for an unlocked benefit, so the detail view can open it. */
 export function newBenefitAsProgram(benefit: NewBenefit): Program {
-  const text = (key: string, message: string) => ({ label: `benefitsManagerDemo.${benefit.id}.${key}`, default_message: message });
+  const text = (key: string, message: string) => ({
+    label: `benefitsManagerDemo.${benefit.id}.${key}`,
+    default_message: message,
+  });
 
   return {
     program_id: benefit.id,
@@ -214,4 +218,75 @@ export function newBenefitAsProgram(benefit: NewBenefit): Program {
     required_programs: [],
     value_format: null,
   };
+}
+
+/**
+ * Canned answers for the manager's "Ask a question" bar. Nothing is sent anywhere: the bar
+ * picks an answer by keyword and fills it with this household's numbers so it reads as if
+ * it knows them. A real build would route the question to an assistant instead.
+ */
+export type DemoAnswerContext = {
+  monthlyIncome: number;
+  savingsTotal: number;
+  receivingMonthly: number;
+  remainingMonthly: number;
+  topNeedLabel: string | null;
+  nextApplication: Program | null;
+  snap: Program | undefined;
+};
+
+const dollars = (amount: number) => '$' + Math.round(amount).toLocaleString('en-US');
+
+export function answerDemoQuestion(question: string, ctx: DemoAnswerContext): string {
+  const q = question.toLowerCase();
+  const has = (...words: string[]) => words.some((word) => q.includes(word));
+  const nextName = ctx.nextApplication?.name.default_message;
+
+  if (has('snap', 'food', 'hours', 'raise', 'earn', 'paycheck', 'more money', 'income', 'job')) {
+    const snapLine = ctx.snap
+      ? `Right now your SNAP estimate is ${dollars(programValue(ctx.snap) / 12)} a month on ${dollars(
+          ctx.monthlyIncome,
+        )} of household income. `
+      : `Your household income is ${dollars(ctx.monthlyIncome)} a month. `;
+    return (
+      snapLine +
+      'When income goes up, SNAP usually goes down by about 30 cents for each extra dollar, so more hours almost always leaves you ahead overall. ' +
+      'Change the number in "Your Income" to see exactly how each of your benefits would move.'
+    );
+  }
+
+  if (has('saving', 'asset', 'bank', 'account', 'checking', 'money saved')) {
+    return (
+      `You have ${dollars(ctx.savingsTotal)} in savings on file. Most of your programs don't count savings at all, ` +
+      'but a few do. SSI, for example, has a $2,000 limit for one person. ' +
+      'Add or edit an account in "Savings Accounts" and your benefits will be rechecked against those limits.'
+    );
+  }
+
+  if (has('renew', 'recert', 'deadline', 'keep', 'lose', 'upkeep', 'report')) {
+    return (
+      'The Upkeep list below shows what each benefit you receive needs from you and when. ' +
+      'Keeping up with renewals and change reports is the easiest way not to lose a benefit. Mark each one done as you go.'
+    );
+  }
+
+  if (has('next', 'apply', 'first', 'start', 'should i', 'which')) {
+    if (nextName === undefined) {
+      return "You've already started on everything you're eligible for. Keep the board up to date as you hear back.";
+    }
+    const needLine = ctx.topNeedLabel ? ` and covers your top need, ${ctx.topNeedLabel.toLowerCase()}` : '';
+    return (
+      `Start with ${nextName}. It's worth about ${dollars(
+        programValue(ctx.nextApplication as Program) / 12,
+      )} a month${needLine}. ` + 'Tap "Find out how to apply" to see the documents you\'ll need and how long it takes.'
+    );
+  }
+
+  return (
+    `You're getting about ${dollars(ctx.receivingMonthly)} a month in benefits and could get ${dollars(
+      ctx.remainingMonthly,
+    )} more. ` +
+    (nextName ? `The biggest step you can take next is applying for ${nextName}. ` : '') +
+    'Try asking about your income, your savings, or what to apply for next.'
+  );
 }

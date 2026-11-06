@@ -17,7 +17,21 @@ import BenefitsBoard from './BenefitsBoard';
 import BenefitsCodeModal from './BenefitsCodeModal';
 import BenefitDetailView from './BenefitDetailView';
 import NewBenefitsModal from './NewBenefitsModal';
-import { DEMO_UNLOCKED_BENEFITS, NewBenefit, UpkeepTask, buildUpkeepTasks, newBenefitAsProgram } from './demoData';
+import {
+  DEMO_UNLOCKED_BENEFITS,
+  NewBenefit,
+  UpkeepTask,
+  answerDemoQuestion,
+  buildUpkeepTasks,
+  isSnap,
+  newBenefitAsProgram,
+} from './demoData';
+import { useHouseholdFinances } from './useHouseholdFinances';
+import { NEEDS, accountsTotal, diffPrograms, pickNextApplication, programCategoryIndex } from './householdFinances';
+import AskBar from './AskBar';
+import IncomeCard from './IncomeCard';
+import NeedsCard from './NeedsCard';
+import SavingsCard from './SavingsCard';
 import './BenefitsManager.css';
 
 const upkeepStorageKey = (uuid: string) => `benefits-manager-demo-upkeep-${uuid}`;
@@ -46,6 +60,23 @@ function useCompletedUpkeep(uuid: string) {
 
 const formatDollars = (amount: number) => '$' + Math.round(amount).toLocaleString('en-US');
 
+// Re-render every 30s so "updated 2 minutes ago" stays true while the page sits open.
+function useNow(intervalMs = 30_000) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), intervalMs);
+    return () => window.clearInterval(id);
+  }, [intervalMs]);
+  return now;
+}
+
+function relativeTime(iso: string, now: number, formatDate: ReturnType<typeof useIntl>['formatDate']) {
+  const minutes = Math.floor((now - new Date(iso).getTime()) / 60_000);
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+  return formatDate(iso, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
 const BenefitsManager = () => {
   const { programs, programCategories } = useResultsContext();
   const { uuid = '' } = useParams();
@@ -62,12 +93,13 @@ const BenefitsManager = () => {
     [programCategories],
   );
 
-  const { columns, moveProgram, columnOf, benefitsCode, restoreFromCode, resetDemo, allColumns } = useBenefitsBoard(
-    programs,
-    uuid,
-    taxCreditIds,
-  );
+  const { columns, moveProgram, columnOf, benefitsCode, restoreFromCode, resetDemo, freezeBoard, allColumns } =
+    useBenefitsBoard(programs, uuid, taxCreditIds);
   const [completedUpkeep, setCompletedUpkeep] = useCompletedUpkeep(uuid);
+  const finances = useHouseholdFinances(uuid);
+  const { resetFinances } = finances;
+  const now = useNow();
+  const categoryOf = useMemo(() => programCategoryIndex(programCategories), [programCategories]);
 
   const [modalMode, setModalMode] = useState<'save' | 'restore' | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
@@ -120,13 +152,34 @@ const BenefitsManager = () => {
     };
   }, [columns]);
 
-  // Highest-value program still in Eligible, preferring anything that isn't a tax credit.
-  const nextApplication = useMemo(() => {
+  // The most valuable Eligible program that meets the household's highest-ranked need,
+  // preferring anything that isn't a tax credit.
+  const nextPick = useMemo(() => {
     const candidates = columns.eligible.filter((p) => !taxCreditIds.has(p.program_id));
     const pool = candidates.length > 0 ? candidates : columns.eligible;
-    if (pool.length === 0) return null;
-    return pool.reduce((best, p) => (programValue(p) > programValue(best) ? p : best));
-  }, [columns.eligible, taxCreditIds]);
+    return pickNextApplication(pool, finances.rankedNeeds, categoryOf);
+  }, [columns.eligible, taxCreditIds, finances.rankedNeeds, categoryOf]);
+  const nextApplication = nextPick?.program ?? null;
+
+  // What the last income or savings update changed, against the programs before it.
+  const recalcDiff = useMemo(
+    () => (finances.baseline === null ? null : diffPrograms(finances.baseline, programs)),
+    [finances.baseline, programs],
+  );
+
+  const answerQuestion = useCallback(
+    (question: string) =>
+      answerDemoQuestion(question, {
+        monthlyIncome: finances.monthlyIncome,
+        savingsTotal: accountsTotal(finances.accounts),
+        receivingMonthly: totals.receivingMonthly,
+        remainingMonthly: totals.remainingMonthly,
+        topNeedLabel: finances.rankedNeeds.length > 0 ? NEEDS[finances.rankedNeeds[0]].label : null,
+        nextApplication,
+        snap: programs.find(isSnap),
+      }),
+    [finances.monthlyIncome, finances.accounts, finances.rankedNeeds, totals, nextApplication, programs],
+  );
 
   const upkeepTasks = useMemo(() => buildUpkeepTasks(columns.receiving), [columns.receiving]);
   const openUpkeepTasks = upkeepTasks.filter((task) => !completedUpkeep.includes(task.programId));
@@ -157,7 +210,8 @@ const BenefitsManager = () => {
   const handleResetDemo = useCallback(() => {
     resetDemo();
     setCompletedUpkeep([]);
-  }, [resetDemo, setCompletedUpkeep]);
+    resetFinances();
+  }, [resetDemo, setCompletedUpkeep, resetFinances]);
 
   // Auto-restore from a ?code= query param, e.g. a link a presenter prepared in advance.
   const initialCode = searchParams.get('code');
@@ -203,6 +257,8 @@ const BenefitsManager = () => {
         </div>
       </div>
 
+      <AskBar answer={answerQuestion} />
+
       <div className="benefits-tracker">
         <div className="benefits-tracker-item benefits-tracker-receiving">
           <span className="benefits-tracker-label">
@@ -225,6 +281,75 @@ const BenefitsManager = () => {
             <FormattedMessage id="benefitsManager.tracker.more" defaultMessage="more per month" />
           </span>
         </div>
+        <p className={`bm-live bm-live-${finances.status}`} aria-live="polite">
+          <span className="bm-live-dot" aria-hidden="true" />
+          {finances.status === 'saving'
+            ? 'Recalculating from your income and savings…'
+            : finances.status === 'error'
+            ? "Couldn't recalculate just now. Your last numbers are still shown. Try again."
+            : finances.lastUpdate
+            ? `Live — recalculated from your income and savings · updated ${relativeTime(
+                finances.lastUpdate.at,
+                now,
+                formatDate,
+              )}`
+            : 'Live — calculated from your screening'}
+        </p>
+        {recalcDiff && finances.status !== 'saving' && (
+          <div className="bm-diff">
+            {recalcDiff.changed.length + recalcDiff.added.length + recalcDiff.removed.length === 0 ? (
+              <span>That change did not move any of your benefits.</span>
+            ) : (
+              <ul>
+                {recalcDiff.changed.map(({ program, beforeMonthly, afterMonthly }) => (
+                  <li key={program.program_id}>
+                    <ResultsTranslate translation={program.name} />: {formatDollars(beforeMonthly)} →{' '}
+                    <strong>{formatDollars(afterMonthly)}</strong>/mo
+                  </li>
+                ))}
+                {recalcDiff.added.map((program) => (
+                  <li key={program.program_id} className="bm-diff-added">
+                    New: <ResultsTranslate translation={program.name} /> (added to Eligible)
+                  </li>
+                ))}
+                {recalcDiff.removed.map((program) => (
+                  <li key={program.program_id} className="bm-diff-removed">
+                    No longer eligible: <ResultsTranslate translation={program.name} />
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button
+              type="button"
+              className="bm-icon-btn"
+              aria-label="Dismiss changes"
+              onClick={finances.dismissBaseline}
+            >
+              <CloseIcon fontSize="small" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="bm-household-row">
+        <IncomeCard
+          monthlyIncome={finances.monthlyIncome}
+          lastUpdate={finances.lastUpdate}
+          status={finances.status}
+          onSave={(monthly) => {
+            freezeBoard();
+            return finances.saveIncome(monthly);
+          }}
+        />
+        <NeedsCard rankedNeeds={finances.rankedNeeds} onChange={finances.setRankedNeeds} />
+        <SavingsCard
+          accounts={finances.accounts}
+          status={finances.status}
+          onSave={(accounts) => {
+            freezeBoard();
+            return finances.saveAccounts(accounts);
+          }}
+        />
       </div>
 
       {nextApplication && (
@@ -254,6 +379,12 @@ const BenefitsManager = () => {
                   }}
                 />
               </p>
+              {nextPick?.need && (
+                <p className="bm-next-reason">
+                  Picked because it covers your #{finances.rankedNeeds.indexOf(nextPick.need) + 1} need:{' '}
+                  {NEEDS[nextPick.need].label}
+                </p>
+              )}
               <button type="button" className="next-application-apply-btn" onClick={handleFindOutHowToApply}>
                 <FormattedMessage id="benefitsManager.nextApplication.findOut" defaultMessage="Find out how to apply" />
                 <ArrowForwardIcon fontSize="small" />

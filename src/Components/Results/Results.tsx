@@ -1,4 +1,14 @@
-import { ComponentType, createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ComponentType,
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import ResultsError from './ResultsError/ResultsError';
 import Loading from './Loading/Loading';
 import {
@@ -90,6 +100,8 @@ type WrapperResultsContext = {
   energyCalculatorRebateCategories: EnergyCalculatorRebateCategory[];
   policyEngineData: PolicyEngineData | undefined;
   externalApiFailures: string[];
+  /** Re-run eligibility for this screen (Benefits Manager demo: after an income or savings edit). */
+  refetchResults: () => Promise<void>;
 };
 
 type ResultsProps = {
@@ -211,6 +223,27 @@ const Results = ({ type }: ResultsProps) => {
   useEffect(() => {
     fetchResults();
   }, []);
+
+  // Benefits Manager demo: re-run eligibility after the manager writes income or savings back
+  // to the screen. Unlike the first load, a failure here throws to the caller instead of
+  // replacing the page with the results error state.
+  const refetchResults = useCallback(async () => {
+    if (uuid === undefined) {
+      throw new Error('can not find uuid');
+    }
+    const rawEligibilityResponse = await getEligibility(uuid, isAdminView);
+    for (const category of rawEligibilityResponse.program_categories) {
+      const programIds: number[] = category.programs as unknown[] as number[];
+      category.programs = programIds.map((programId: number) => {
+        const program = findProgramById(rawEligibilityResponse.programs, programId);
+        if (program === undefined) {
+          throw new Error(`program with id of "${programId}" does not exist`);
+        }
+        return program;
+      });
+    }
+    setApiResults(rawEligibilityResponse);
+  }, [uuid, isAdminView]);
 
   const [filterState, setFilterState] = useState<FilterState>(createInitialFilterState());
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -393,6 +426,7 @@ const Results = ({ type }: ResultsProps) => {
       energyCalculatorRebateCategories: energyCalculatorRebateCategories ?? [],
       policyEngineData,
       externalApiFailures,
+      refetchResults,
     }),
     [
       programs,
@@ -404,6 +438,7 @@ const Results = ({ type }: ResultsProps) => {
       energyCalculatorRebateCategories,
       policyEngineData,
       externalApiFailures,
+      refetchResults,
     ],
   );
 

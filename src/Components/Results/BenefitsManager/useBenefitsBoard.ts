@@ -13,7 +13,12 @@ const storageKey = (uuid: string) => `benefits-manager-demo-${uuid}`;
 function loadSavedState(uuid: string, programs: Program[]): BoardState | null {
   try {
     const code = localStorage.getItem(storageKey(uuid));
-    return code === null ? null : decodeBoardState(code, programs.map((p) => p.program_id));
+    return code === null
+      ? null
+      : decodeBoardState(
+          code,
+          programs.map((p) => p.program_id),
+        );
   } catch {
     return null;
   }
@@ -27,21 +32,25 @@ function deriveColumns(programs: Program[], boardState: BoardState): ColumnMap {
     rejected: [],
   };
 
-  const programMap = new Map(programs.map((p) => [p.program_id, p]));
-
-  for (const [idStr, column] of Object.entries(boardState)) {
-    const program = programMap.get(Number(idStr));
-    if (program) {
-      columns[column].push(program);
-    }
+  // Walk the current programs, not the saved state: after an income or savings edit
+  // re-runs eligibility, a program the household newly qualifies for has no saved column
+  // yet and lands in Eligible, and one it no longer qualifies for simply drops off.
+  for (const program of programs) {
+    columns[boardState[program.program_id] ?? 'eligible'].push(program);
   }
 
   return columns;
 }
 
 export function useBenefitsBoard(programs: Program[], uuid: string, taxCreditIds: Set<number>) {
-  const [boardState, setBoardState] = useState<BoardState>(
-    () => loadSavedState(uuid, programs) ?? buildDemoBoardState(programs, taxCreditIds),
+  // null means the untouched starting board. It is derived from the programs the household
+  // qualifies for right now, so after an income or savings change (or a reset that restores
+  // them) it follows the new results. The first card move freezes it into a saved state.
+  const [savedState, setSavedState] = useState<BoardState | null>(() => loadSavedState(uuid, programs));
+
+  const boardState = useMemo(
+    () => savedState ?? buildDemoBoardState(programs, taxCreditIds),
+    [savedState, programs, taxCreditIds],
   );
 
   const columns = useMemo(() => deriveColumns(programs, boardState), [programs, boardState]);
@@ -50,15 +59,22 @@ export function useBenefitsBoard(programs: Program[], uuid: string, taxCreditIds
 
   useEffect(() => {
     try {
-      localStorage.setItem(storageKey(uuid), benefitsCode);
+      if (savedState === null) {
+        localStorage.removeItem(storageKey(uuid));
+      } else {
+        localStorage.setItem(storageKey(uuid), encodeBoardState(savedState));
+      }
     } catch {
       // best-effort
     }
-  }, [uuid, benefitsCode]);
+  }, [uuid, savedState]);
 
-  const moveProgram = useCallback((programId: number, toColumn: ColumnId) => {
-    setBoardState((prev) => ({ ...prev, [programId]: toColumn }));
-  }, []);
+  const moveProgram = useCallback(
+    (programId: number, toColumn: ColumnId) => {
+      setSavedState((prev) => ({ ...(prev ?? boardState), [programId]: toColumn }));
+    },
+    [boardState],
+  );
 
   const columnOf = useCallback((programId: number): ColumnId | undefined => boardState[programId], [boardState]);
 
@@ -67,15 +83,26 @@ export function useBenefitsBoard(programs: Program[], uuid: string, taxCreditIds
       const validIds = programs.map((p) => p.program_id);
       const restored = decodeBoardState(code, validIds);
       if (restored === null) return false;
-      setBoardState(restored);
+      setSavedState(restored);
       return true;
     },
     [programs],
   );
 
-  const resetDemo = useCallback(() => {
-    setBoardState(buildDemoBoardState(programs, taxCreditIds));
-  }, [programs, taxCreditIds]);
+  const resetDemo = useCallback(() => setSavedState(null), []);
 
-  return { columns, moveProgram, columnOf, benefitsCode, restoreFromCode, resetDemo, allColumns: ALL_COLUMNS };
+  // Pin the board as it is now, so a recalculation only adds or drops programs instead of
+  // re-deriving the whole starting board from the new results.
+  const freezeBoard = useCallback(() => setSavedState((prev) => prev ?? boardState), [boardState]);
+
+  return {
+    columns,
+    moveProgram,
+    columnOf,
+    benefitsCode,
+    restoreFromCode,
+    resetDemo,
+    freezeBoard,
+    allColumns: ALL_COLUMNS,
+  };
 }
