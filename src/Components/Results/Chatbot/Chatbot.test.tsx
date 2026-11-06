@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactNode } from 'react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { ChatbotProvider } from './Chatbot';
@@ -28,6 +29,55 @@ jest.mock('../../../Assets/analytics', () => ({
   useTrackEvent: () => mockTrack,
 }));
 
+// Lets the crash-containment tests (MFB-2222) make one render path throw on demand.
+// Both are off by default, so every other test renders the real thing.
+const mockCrash = { parseMarkdown: false, chatIcon: false, thumbUpIcon: false, thumbDownFilledIcon: false };
+jest.mock('../../../utils/parseMarkdown', () => {
+  const actual = jest.requireActual('../../../utils/parseMarkdown');
+  return {
+    ...actual,
+    parseMarkdown: (content: string, primaryColor: string) => {
+      if (mockCrash.parseMarkdown && content.includes('BOOM')) throw new Error('parse failed');
+      return actual.parseMarkdown(content, primaryColor);
+    },
+  };
+});
+jest.mock('@mui/icons-material/ThumbUpOffAlt', () => {
+  const actual = jest.requireActual('@mui/icons-material/ThumbUpOffAlt');
+  const { createElement } = jest.requireActual('react');
+  return {
+    __esModule: true,
+    default: (props: object) => {
+      if (mockCrash.thumbUpIcon) throw new Error('rating icon failed');
+      return createElement(actual.default, props);
+    },
+  };
+});
+// The filled thumbs-down only renders once a reply is rated down, so this one throws
+// in response to a click rather than on first render.
+jest.mock('@mui/icons-material/ThumbDownAlt', () => {
+  const actual = jest.requireActual('@mui/icons-material/ThumbDownAlt');
+  const { createElement } = jest.requireActual('react');
+  return {
+    __esModule: true,
+    default: (props: object) => {
+      if (mockCrash.thumbDownFilledIcon) throw new Error('rating icon failed');
+      return createElement(actual.default, props);
+    },
+  };
+});
+jest.mock('@mui/icons-material/Chat', () => {
+  const actual = jest.requireActual('@mui/icons-material/Chat');
+  const { createElement } = jest.requireActual('react');
+  return {
+    __esModule: true,
+    default: (props: object) => {
+      if (mockCrash.chatIcon) throw new Error('icon failed');
+      return createElement(actual.default, props);
+    },
+  };
+});
+
 const mockStart = startAssistantConversation as jest.MockedFunction<typeof startAssistantConversation>;
 const mockHistory = getAssistantHistory as jest.MockedFunction<typeof getAssistantHistory>;
 const mockSend = sendAssistantMessage as jest.MockedFunction<typeof sendAssistantMessage>;
@@ -44,14 +94,28 @@ const WIC = { name_abbreviated: 'co_wic', value: 1224 };
 // why `locale` is a plain string here rather than the stale `Language` union.
 const LANGUAGE_OPTIONS = { 'en-us': 'English', es: 'Español', 'pt-br': 'Português Brasileiro', 'zh-hans': '中文' };
 
-const chatbotUi = (visiblePrograms?: AssistantVisibleProgram[], locale = 'en-us') => (
+// Results.tsx computes the greeting total separately (calculateGreetingTotal); with no
+// lump sums or overrides in play, that equals the sum of the visible values.
+const sumValues = (visiblePrograms?: AssistantVisibleProgram[]) =>
+  (visiblePrograms ?? []).reduce((sum, program) => sum + program.value, 0);
+
+const chatbotUi = (
+  visiblePrograms?: AssistantVisibleProgram[],
+  locale = 'en-us',
+  greetingTotal = sumValues(visiblePrograms),
+  children?: ReactNode,
+) => (
   <Context.Provider value={{ locale, config: { language_options: LANGUAGE_OPTIONS } } as unknown as WrapperContext}>
     <IntlProvider locale="en" defaultLocale="en">
       <MemoryRouter initialEntries={[`/co/${SCREEN_UUID}/results/benefits`]}>
         <Routes>
           <Route
             path="/:whiteLabel/:uuid/results/benefits"
-            element={<ChatbotProvider visiblePrograms={visiblePrograms} />}
+            element={
+              <ChatbotProvider visiblePrograms={visiblePrograms} greetingTotal={greetingTotal}>
+                {children}
+              </ChatbotProvider>
+            }
           />
         </Routes>
       </MemoryRouter>
@@ -59,8 +123,8 @@ const chatbotUi = (visiblePrograms?: AssistantVisibleProgram[], locale = 'en-us'
   </Context.Provider>
 );
 
-const renderChatbot = (visiblePrograms?: AssistantVisibleProgram[], locale?: string) =>
-  render(chatbotUi(visiblePrograms, locale));
+const renderChatbot = (visiblePrograms?: AssistantVisibleProgram[], locale?: string, greetingTotal?: number) =>
+  render(chatbotUi(visiblePrograms, locale, greetingTotal));
 
 /** Open the widget and send a message — the only thing that starts a conversation. */
 const openAndSend = async (text = 'hello') => {
@@ -325,6 +389,35 @@ describe('auto-open (MFB-1737)', () => {
     expect(dialog).toHaveTextContent('$13,140'); // 6636 + 5280 + 1224, annual
   });
 
+  it('quotes the greeting total it is given, not the sum of the visible values (MFB-2202)', () => {
+    // e.g. a $7,475 one-time lump sum on the page: counted as a program, left out of
+    // the "per year" figure.
+    renderChatbot([SNAP, { name_abbreviated: 'ks_wap', value: 7475 }], undefined, 6636);
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveTextContent('2 programs');
+    expect(dialog).toHaveTextContent('$6,636');
+    expect(dialog).not.toHaveTextContent('$14,111');
+  });
+
+  it('falls back to the generic welcome when nothing counts toward the greeting total', () => {
+    // Every visible program is a lump sum or an override: "worth about $0 per year"
+    // would be wrong, not just unhelpful.
+    renderChatbot([{ name_abbreviated: 'wa_wap', value: 7669 }], undefined, 0);
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveTextContent(/ask me anything/i);
+    expect(dialog).not.toHaveTextContent('$0');
+  });
+
   it('does not auto-open when the results page is showing zero programs', () => {
     // [] means "the page is showing nothing" — a bot with nothing to recommend
     // shouldn't announce itself. undefined ("no list available") still opens.
@@ -566,7 +659,7 @@ describe('greeting bubble and privacy notice', () => {
     await open();
 
     expect(screen.getByRole('note')).toHaveTextContent(
-      /^Benji is an AI assistant\.\s+Please do not include your SSN, account numbers, or medical details in this chat\.$/i,
+      /^Benji is an AI assistant\.\s+Please do not include your SSN, immigration status, account numbers, or medical details in this chat\.$/i,
     );
   });
 
@@ -677,7 +770,7 @@ describe('greeting stability across navigation', () => {
   // exactly why the greeting has to stop reading the route once it has been answered.
   const routedUi = (visiblePrograms?: AssistantVisibleProgram[]) => {
     const panel = (
-      <ChatbotProvider visiblePrograms={visiblePrograms}>
+      <ChatbotProvider visiblePrograms={visiblePrograms} greetingTotal={sumValues(visiblePrograms)}>
         <NavigateToProgram />
       </ChatbotProvider>
     );
@@ -1324,5 +1417,162 @@ describe('concurrent rating writes (MFB-1915 review)', () => {
     await screen.findByText('hi there');
     expect(screen.getByText('start with SNAP')).toBeInTheDocument();
     expect(thumbUp()[0]).toHaveAttribute('aria-pressed', 'true');
+  });
+});
+
+describe('render crash containment (MFB-2222)', () => {
+  let consoleError: jest.SpyInstance;
+
+  beforeEach(() => {
+    // React logs every caught render error; keep the expected ones out of the output.
+    consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    mockCrash.parseMarkdown = false;
+    mockCrash.chatIcon = false;
+    mockCrash.thumbUpIcon = false;
+    mockCrash.thumbDownFilledIcon = false;
+    consoleError.mockRestore();
+  });
+
+  it('shows a reply that fails to format as its raw text, and keeps the rest of the chat', async () => {
+    mockCrash.parseMarkdown = true;
+    mockSend.mockResolvedValue({
+      user_message: { message_id: 'u1', role: 'user', text: 'hello', created_at: '' },
+      assistant_message: { message_id: 'a1', role: 'assistant', text: 'BOOM **not bolded**', created_at: '' },
+    });
+    renderChatbot();
+
+    await openAndSend();
+
+    expect(await screen.findByText('BOOM **not bolded**')).toBeInTheDocument();
+    // Its rating buttons survive, so the reply that broke can still be rated down.
+    expect(screen.getByRole('button', { name: /this reply was not helpful/i })).toBeInTheDocument();
+    // The other bubble and the input are untouched: one bad reply doesn't take the widget.
+    expect(screen.getByText('hello')).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    expect(mockTrack).toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'message' });
+    expect(mockTrack).not.toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'widget' });
+  });
+
+  it('hides the widget, not the results page, when the widget itself throws', () => {
+    mockCrash.chatIcon = true;
+    render(chatbotUi(undefined, undefined, undefined, <p>results page</p>));
+
+    expect(screen.getByText('results page')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /chat/i })).not.toBeInTheDocument();
+    expect(mockTrack).toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'widget' });
+  });
+
+  it('stops auto-opening and fetching once the widget has crashed', () => {
+    // The boundary only hides the markup; the provider must not keep acting for a
+    // widget nobody can see (reporting an open, reading history).
+    jest.useFakeTimers();
+    try {
+      mockCrash.chatIcon = true;
+      renderChatbot([SNAP, MEDICAID, WIC]);
+
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+
+      expect(mockTrack).not.toHaveBeenCalledWith('screener_benbot_opened', expect.anything());
+      expect(mockHistory).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('reports a message that fails to format once, not on every reopen', async () => {
+    mockCrash.parseMarkdown = true;
+    mockSend.mockResolvedValue({
+      user_message: { message_id: 'u1', role: 'user', text: 'hello', created_at: '' },
+      assistant_message: { message_id: 'a1', role: 'assistant', text: 'BOOM reply', created_at: '' },
+    });
+    renderChatbot();
+    await openAndSend();
+    await screen.findByText('BOOM reply');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Close chat' }));
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+
+    expect(screen.getByText('BOOM reply')).toBeInTheDocument();
+    const crashes = mockTrack.mock.calls.filter(([name]) => name === 'screener_benbot_crashed');
+    expect(crashes).toHaveLength(1);
+  });
+
+  it('does not carry a caught error over to a different message at the same position', async () => {
+    // The first send fails to start a conversation, so the user's "BOOM" bubble is
+    // id-less and keyed by its index (0). The second send's start returns an empty
+    // transcript, which replaces the list, so the next id-less bubble lands on index 0.
+    mockCrash.parseMarkdown = true;
+    mockStart.mockRejectedValueOnce(new Error('down'));
+    renderChatbot();
+    await openAndSend('BOOM');
+    await screen.findByText('BOOM');
+
+    await userEvent.type(screen.getByRole('textbox'), '**fine**');
+    await userEvent.keyboard('{Enter}');
+
+    expect(await screen.findByText('fine', { selector: 'strong' })).toBeInTheDocument();
+  });
+
+  it('drops only the rating buttons when they throw, and keeps the reply formatted', async () => {
+    mockCrash.thumbUpIcon = true;
+    mockSend.mockResolvedValue({
+      user_message: { message_id: 'u1', role: 'user', text: 'hello', created_at: '' },
+      assistant_message: { message_id: 'a1', role: 'assistant', text: '**hi** there', created_at: '' },
+    });
+    renderChatbot();
+
+    await openAndSend();
+
+    expect(await screen.findByText('hi', { selector: 'strong' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /this reply was helpful/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    expect(mockTrack).toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'rating' });
+    expect(mockTrack).not.toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'message' });
+    expect(mockTrack).not.toHaveBeenCalledWith('screener_benbot_crashed', { scope: 'widget' });
+  });
+
+  it('keeps keyboard focus in the chat when a crash removes the focused rating button', async () => {
+    mockCrash.thumbDownFilledIcon = true;
+    renderChatbot();
+    await openAndSend();
+    await screen.findByText('hi there');
+
+    await userEvent.click(screen.getByRole('button', { name: /this reply was not helpful/i }));
+
+    expect(screen.queryByRole('button', { name: /this reply was not helpful/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toHaveFocus();
+  });
+
+  it('reports a text that fails to format once, even when two replies show it', async () => {
+    // Both bubbles catch in the same render, before any state update lands, so this is
+    // what the reported-parts ref is for.
+    mockCrash.parseMarkdown = true;
+    mockHistory.mockResolvedValue({
+      conversation_id: 'conv-prior',
+      screen_uuid: SCREEN_UUID,
+      status: 'active',
+      mode: 'live',
+      prompt_version: 'v3',
+      messages: [
+        { message_id: 'm1', role: 'assistant', text: 'BOOM same', created_at: '' },
+        { message_id: 'm2', role: 'assistant', text: 'BOOM same', created_at: '' },
+      ],
+    });
+    renderChatbot();
+
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+    expect(await screen.findAllByText('BOOM same')).toHaveLength(2);
+    await userEvent.click(screen.getByRole('button', { name: 'Close chat' }));
+    await userEvent.click(screen.getByRole('button', { name: /chat/i }));
+
+    expect(screen.getAllByText('BOOM same')).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /this reply was not helpful/i })).toHaveLength(2);
+    const crashes = mockTrack.mock.calls.filter(([name]) => name === 'screener_benbot_crashed');
+    expect(crashes).toEqual([['screener_benbot_crashed', { scope: 'message' }]]);
   });
 });

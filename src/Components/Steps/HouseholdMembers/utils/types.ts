@@ -31,6 +31,25 @@ export type LocationState = {
   routedFromConfirmationPg?: boolean;
   basicInfoCollected?: boolean;
   returnToPage?: number;
+  /**
+   * Set when the roster (page 0) was reached from a member page that was itself in edit mode.
+   * Page 0 hands it back on Continue so the member page restores edit mode rather than dropping
+   * the user into a view with the basic-info fields hidden.
+   */
+  returnToEditing?: boolean;
+  /**
+   * The member page that originally opened the edit, carried across the roster round trip.
+   * Distinct from `returnToPage`, which the roster overwrites with the page the user left —
+   * without this the edit's own destination would be lost and Continue would resume normal
+   * next-member navigation.
+   */
+  editReturnToPage?: number;
+  /**
+   * Set when the roster was reached from a member page that itself came from the Confirmation
+   * page. Handed back as `routedFromConfirmationPg` so Continue still returns to Confirmation
+   * rather than resuming next-member navigation.
+   */
+  returnToConfirmation?: boolean;
 };
 
 export type DeletePopoverState = { index: number; anchorEl: HTMLElement } | null;

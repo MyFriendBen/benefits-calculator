@@ -6,6 +6,9 @@ export type ReferralOptionGroup = Record<string, string>;
 export interface ReferralOptions {
   generic: ReferralOptionGroup;
   partners: ReferralOptionGroup;
+  // Referrers left out of the dropdown (show_in_dropdown=False) but still recognized as
+  // ?referrer= codes. Optional because older API deploys don't send it.
+  hidden?: ReferralOptionGroup;
 }
 
 /** Reads referral option payloads fetched once in `Wrapper` (see `getReferralOptions`). */

@@ -47,7 +47,12 @@ const Wrapper = ({
   // Mirror how defaultValues seeds the three answer fields from persisted streams,
   // so rehydration behavior can be exercised by passing defaultStreams alone.
   const derived = deriveIncomeAnswers(defaultStreams);
-  const { control, setValue, clearErrors } = useForm({
+  const {
+    control,
+    setValue,
+    clearErrors,
+    formState: { isDirty },
+  } = useForm({
     defaultValues: {
       incomeEmployed: derived.employed ? true : null,
       incomeGig: derived.gig ? true : null,
@@ -59,6 +64,8 @@ const Wrapper = ({
 
   return (
     <IntlProvider locale="en" messages={{}}>
+      {/* Surfaced so tests can assert the form registers unsaved work. */}
+      <span data-testid="is-dirty">{String(isDirty)}</span>
       <IncomeSection
         control={control as any}
         errors={errors as any}
@@ -107,6 +114,21 @@ const clickNo = (namePattern: RegExp) =>
   fireEvent.click(within(yesNoGroup(namePattern)).getByRole('radio', { name: /^no$/i }));
 
 describe('IncomeSection (three-question design)', () => {
+  describe('unsaved-changes tracking', () => {
+    it.each([
+      ['employed', /are you currently employed/i],
+      ['gig', /freelance, gig, or occasional work/i],
+      ['other', /government benefits, child support, alimony/i],
+    ])('marks the form dirty when the %s question is answered', (_label, pattern) => {
+      // These answers are the entire form for a dependent with no income. Without shouldDirty
+      // the host sees a pristine form and discards them on navigation with no warning.
+      render(<Wrapper />);
+      expect(screen.getByTestId('is-dirty')).toHaveTextContent('false');
+      clickNo(pattern);
+      expect(screen.getByTestId('is-dirty')).toHaveTextContent('true');
+    });
+  });
+
   describe('question visibility', () => {
     it('renders all three questions up front (gig is not gated on employed)', () => {
       render(<Wrapper />);

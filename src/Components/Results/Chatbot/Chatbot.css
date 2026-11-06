@@ -294,6 +294,11 @@
   color: inherit;
 }
 
+/* Fallback for a reply that failed to format (MFB-2222): keep its line breaks. */
+.chatbot-paragraph--plain {
+  white-space: pre-line;
+}
+
 .chatbot-paragraph:last-child {
   margin-bottom: 0;
 }

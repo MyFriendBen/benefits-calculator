@@ -7,7 +7,7 @@
 }
 
 .save-my-results-field-label {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--primary-color);
@@ -90,7 +90,7 @@
   border: none !important;
   border-radius: 0 !important;
   padding: 0 14px;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 1rem !important;
   min-width: 0;
   box-shadow: none !important;
@@ -106,7 +106,7 @@
 }
 
 .save-my-results-intl-phone-helper {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.75rem;
   color: #666;
   margin: 0;
@@ -119,7 +119,7 @@
 }
 
 .save-my-results-privacy-note {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.78rem;
   color: #888;
   text-align: center;

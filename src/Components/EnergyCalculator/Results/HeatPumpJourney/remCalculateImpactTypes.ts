@@ -17,7 +17,7 @@ export interface RemImpactRange {
   percentile_80: RemImpactStat;
 }
 
-/** Response shape from GET /api/screener-options/<white_label>/rem-impact/ */
+/** Response shape from POST /api/screener-options/<white_label>/rem-impact/ */
 export interface RemImpactApiResponse {
   bill_delta: RemImpactRange;       // annual cost delta in $; negative = savings
   emissions_delta: RemImpactRange;  // annual CO₂e delta in lbCO2e; negative = reduction

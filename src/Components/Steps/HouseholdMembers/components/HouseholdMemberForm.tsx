@@ -1,11 +1,13 @@
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Context } from '../../../Wrapper/Wrapper';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { HouseholdData } from '../../../../Types/FormData';
-import { Box } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import QuestionHeader from '../../../QuestionComponents/QuestionHeader';
 import HouseholdMemberSummaryCards from './HouseholdMemberSummaryCards';
+import LeaveMemberConfirmationDialog from './LeaveMemberConfirmationDialog';
 import { useStepNumber } from '../../../../Assets/stepDirectory';
 import { SubmitHandler, useFieldArray, useWatch } from 'react-hook-form';
 import { mfbZodResolver } from '../../../../Assets/analytics/mfbZodResolver';
@@ -38,6 +40,7 @@ const HouseholdMemberForm = () => {
   const { formData } = useContext(Context);
   const { uuid, page, whiteLabel } = useParams<{ uuid: string; page: string; whiteLabel: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
   const { updateScreen } = useScreenApi();
   const intl = useIntl();
   const pageNumber = Number(page);
@@ -47,6 +50,9 @@ const HouseholdMemberForm = () => {
   // Show BasicInfoSection when householdSize === 1 and they came directly from step 4 (skipping page 0),
   // or when editing a member. basicInfoCollected means they went through page 0 already.
   const showBasicInfoSection = (formData.householdSize === 1 && !basicInfoCollected) || isEditing;
+
+  // The navigation held back by the unsaved-changes warning, run if the user confirms.
+  const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null);
 
   // CURRENT MEMBER DATA
   const currentMemberIndex = pageNumber - 1;
@@ -105,7 +111,7 @@ const HouseholdMemberForm = () => {
 
   const {
     control,
-    formState: { errors },
+    formState: { errors, isDirty },
     handleSubmit,
     watch,
     setValue,
@@ -162,10 +168,8 @@ const HouseholdMemberForm = () => {
       workflowType,
     });
 
-    const updatedFormData = { ...formData, householdData: updatedHouseholdData };
-
     // Wait for the API call to complete and context to update before navigating
-    await updateScreen(updatedFormData);
+    await updateScreen({ ...formData, householdData: updatedHouseholdData });
 
     // This page navigates manually (onSubmitSuccessfulOverride) instead of through
     // the shared useGoToNextStep hook, so it must fire its own 'complete' event.
@@ -194,16 +198,68 @@ const HouseholdMemberForm = () => {
   // RENDER
   // ============================================================================
 
+  // Send the user to the basic-info roster (page 0) to add/edit/remove members in bulk, and
+  // remember the member page they came from so page 0's Continue returns them here.
+  const navigateToManageMembers = () => {
+    // Carry edit mode across the round trip so returning here restores the basic-info fields the
+    // user came to edit. `returnToPage` is reused by the roster for "the page to come back to",
+    // so this edit's own destination travels separately as editReturnToPage.
+    const editState = isEditing
+      ? {
+          returnToEditing: true,
+          ...(locationState?.returnToPage !== undefined && { editReturnToPage: locationState.returnToPage }),
+          // Preserve the Confirmation origin, or Continue abandons the trip back there.
+          ...(locationState?.routedFromConfirmationPg && { returnToConfirmation: true }),
+        }
+      : {};
+
+    navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/0`, {
+      state: { returnToPage: pageNumber, ...editState },
+    });
+  };
+
+  // Any exit from this page discards whatever is on it — the member is only persisted by
+  // Continue. Confirm first when there is unsaved work to lose; leave straight away when the
+  // form is untouched. Returns false when the navigation was intercepted.
+  const confirmBeforeLeaving = (leave: () => void) => {
+    if (!isDirty) {
+      return true;
+    }
+    setPendingNavigation(() => leave);
+    return false;
+  };
+
+  const goToManageMembers = () => {
+    if (confirmBeforeLeaving(navigateToManageMembers)) {
+      navigateToManageMembers();
+    }
+  };
+
+  const manageMembersAriaLabel = intl.formatMessage({
+    id: 'manageHHMembers.ariaText',
+    defaultMessage: 'add or edit household members',
+  });
+
   const renderSummaryCards = () => (
     <section aria-label="Your household members" className="previous-members-section">
-      <h2 className="question-label">
-        <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
-      </h2>
+      <div className="previous-members-section__heading">
+        <h2 className="question-label">
+          <FormattedMessage id="householdDataBlock.yourHousehold" defaultMessage="Household Members" />
+        </h2>
+        <IconButton
+          className="manage-household-members-button"
+          size="small"
+          aria-label={manageMembersAriaLabel}
+          onClick={goToManageMembers}
+        >
+          <EditIcon fontSize="small" />
+        </IconButton>
+      </div>
       <p className="question-sub-label">
-        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="You may edit or delete completed members below." />
+        <FormattedMessage id="householdDataBlock.clickToEdit" defaultMessage="Select a completed member to edit." />
       </p>
       <Box className="summary-cards-container">
-        <HouseholdMemberSummaryCards questionName={questionName} />
+        <HouseholdMemberSummaryCards questionName={questionName} onBeforeLeave={confirmBeforeLeaving} />
       </Box>
     </section>
   );
@@ -211,21 +267,24 @@ const HouseholdMemberForm = () => {
   const renderHeader = () => {
     let headerContent;
     if (pageNumber === 1) {
-      headerContent = <FormattedMessage id="householdDataBlock.questionHeader" defaultMessage="Tell us about yourself." />;
-    } else if (relationshipText) {
-      headerContent = age !== null ? (
-        <FormattedMessage
-          id="householdDataBlock.questionHeader-relationship-age"
-          defaultMessage="Tell us about your {relationship}, age {age}"
-          values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span>, age }}
-        />
-      ) : (
-        <FormattedMessage
-          id="householdDataBlock.questionHeader-relationship"
-          defaultMessage="Tell us about your {relationship}"
-          values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span> }}
-        />
+      headerContent = (
+        <FormattedMessage id="householdDataBlock.questionHeader" defaultMessage="Tell us about yourself." />
       );
+    } else if (relationshipText) {
+      headerContent =
+        age !== null ? (
+          <FormattedMessage
+            id="householdDataBlock.questionHeader-relationship-age"
+            defaultMessage="Tell us about your {relationship}, age {age}"
+            values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span>, age }}
+          />
+        ) : (
+          <FormattedMessage
+            id="householdDataBlock.questionHeader-relationship"
+            defaultMessage="Tell us about your {relationship}"
+            values={{ relationship: <span style={{ textTransform: 'lowercase' }}>{relationshipText}</span> }}
+          />
+        );
     } else {
       headerContent = (
         <FormattedMessage
@@ -272,11 +331,7 @@ const HouseholdMemberForm = () => {
       />
 
       {!isEnergyCalculator && watchIsStudent && (
-        <StudentEligibilitySection
-          control={control as any}
-          errors={errors}
-          pageNumber={pageNumber}
-        />
+        <StudentEligibilitySection control={control as any} errors={errors} pageNumber={pageNumber} />
       )}
 
       <IncomeSection
@@ -295,8 +350,9 @@ const HouseholdMemberForm = () => {
     </>
   );
 
-  // Show summary cards only when on member 2+
-  const showSummaryCards = pageNumber > 1;
+  // Show the Household Members summary cards whenever the household has more than one member,
+  // including on member 1's page, so the user always sees the full household roster.
+  const showSummaryCards = Number(formData.householdSize) > 1;
 
   return (
     <main className="benefits-form" data-step-id="member-details" data-member-number={pageNumber}>
@@ -313,6 +369,15 @@ const HouseholdMemberForm = () => {
           stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberDetails}
         />
       </form>
+
+      <LeaveMemberConfirmationDialog
+        open={pendingNavigation !== null}
+        onCancel={() => setPendingNavigation(null)}
+        onConfirm={() => {
+          pendingNavigation?.();
+          setPendingNavigation(null);
+        }}
+      />
     </main>
   );
 };

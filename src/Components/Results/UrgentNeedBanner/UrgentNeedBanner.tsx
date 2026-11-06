@@ -57,7 +57,7 @@ const UrgentNeedBanner = () => {
             variant="body1"
             sx={{
               mb: 2,
-              fontFamily: '"Open Sans", sans-serif',
+              fontFamily: 'var(--font-body)',
               lineHeight: 1.5,
               fontSize: { xs: '0.875rem', sm: '1rem' },
             }}

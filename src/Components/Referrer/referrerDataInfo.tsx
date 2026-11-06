@@ -2,6 +2,7 @@ import MFBDEFAULT from '../../Assets/Logos/mfb_default_logo_header.png';
 import MFBCOLogo from '../../Assets/States/CO/Logos/mfb_co_logo.png';
 import MFBNCLogo from '../../Assets/States/NC/Logos/mfb_nc_logo.png';
 import MFBILLogo from '../../Assets/States/IL/Logos/mfb_il_logo.png';
+import Chicago211_MFBLogo from '../../Assets/States/IL/WhiteLabels/TwoOneOneAssets/chicago211_mfb_logo.png';
 import MFBMALogo from '../../Assets/States/MA/Logos/mfb_massachusetts_logo.png';
 import MFBCOEnergyLogo from '../../Assets/States/CO/Logos/mfb_co_energy_logo.png';
 import MFB_NCFooterLogo from '../../Assets/States/NC/Logos/MFB_NCFooterLogo.png';
@@ -36,10 +37,15 @@ import MO211_MFBLogo from '../../Assets/States/MO/WhiteLabels/TwoOneOneAssets/mo
 // CU Denver reversed/white logo — derived from CU Denver's color PNG by recoloring the dark
 // ink to white and keeping the gold shield, so it reads on the black cu_denver header.
 import CUDenverLogo from '../../Assets/States/CO/WhiteLabels/CUDenver/CUDenver_Logo_White.png';
+import DPS_MFBLogo from '../../Assets/States/CO/WhiteLabels/DenverPublicSchools/DPS_MFBLogo.png';
+// DPP mark reversed for the dark CO header (navy ink recolored to white, yellow kept) beside the
+// shared partnership block. Derived from DPP's color logo; swap for their official reversed logo.
+import DPP_MFBLogo from '../../Assets/States/CO/WhiteLabels/DenverPreschoolProgram/DPP_MFBLogo.png';
 
 const logoMap: { [key: string]: string | undefined } = {
   MFB_COLogo: MFBCOLogo,
   MFB_ILLogo: MFBILLogo,
+  Chicago211_MFBLogo: Chicago211_MFBLogo,
   MFB_NCLogo: MFBNCLogo,
   MFB_MALogo: MFBMALogo,
   MFB_COEnergyLogo: MFBCOEnergyLogo,
@@ -72,6 +78,8 @@ const logoMap: { [key: string]: string | undefined } = {
   CESN_Colorado_White: CESN_Colorado_White,
   HispanicFederation_MFBLogo: HispanicFederation_MFBLogo,
   CUDenver_Logo: CUDenverLogo,
+  DPS_MFBLogo: DPS_MFBLogo,
+  DPP_MFBLogo: DPP_MFBLogo,
   // The uwgkc referrer spans both states, so it picks the lockup for whichever screener it entered.
   KS211_MFBLogo: KS211_MFBLogo,
   MO211_MFBLogo: MO211_MFBLogo,

@@ -25,6 +25,8 @@ export type ReferrerData = {
   // White label codes offered in the state dropdown; empty means "use the public list"
   stateOptions: ReferrerOptions<string[]>;
   stateName: ReferrerOptions<string>;
+  // Partner phone number for a branded footer, formatted for display; empty hides the phone link
+  footerPhone: ReferrerOptions<string>;
 };
 
 export type ReferrerDataValue<T extends keyof ReferrerData> = ReferrerData[T]['default'];

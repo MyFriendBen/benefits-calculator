@@ -161,8 +161,8 @@ describe('ValidateWhiteLabel', () => {
     expect(screen.getByTestId('landing')).toBeInTheDocument();
   });
 
-  describe('legacy white label redirects', () => {
-    it('should redirect /co_energy_calculator/* to /cesn/* via client-side navigation', () => {
+  describe('removed legacy white labels', () => {
+    it('should treat /co_energy_calculator/* as an invalid white label and redirect to /step-1', () => {
       const LocationCapture = () => {
         const location = useLocation();
         return <div data-testid="pathname">{location.pathname}</div>;
@@ -173,56 +173,12 @@ describe('ValidateWhiteLabel', () => {
           <Route path=":whiteLabel" element={<ValidateWhiteLabel />}>
             <Route path="step-1" element={<div>Step 1</div>} />
           </Route>
-          <Route path="/cesn/step-1" element={<LocationCapture />} />
+          <Route path="/step-1" element={<LocationCapture />} />
         </Routes>,
         { initialRoute: '/co_energy_calculator/step-1' }
       );
 
-      expect(screen.getByTestId('pathname')).toHaveTextContent('/cesn/step-1');
-    });
-
-    it('should preserve query params in legacy redirect', () => {
-      const LocationCapture = () => {
-        const location = useLocation();
-        return (
-          <>
-            <div data-testid="pathname">{location.pathname}</div>
-            <div data-testid="search">{location.search}</div>
-          </>
-        );
-      };
-
-      renderWithRouter(
-        <Routes>
-          <Route path=":whiteLabel" element={<ValidateWhiteLabel />}>
-            <Route path="step-2" element={<div>Step 2</div>} />
-          </Route>
-          <Route path="/cesn/step-2" element={<LocationCapture />} />
-        </Routes>,
-        { initialRoute: '/co_energy_calculator/step-2?lang=es' }
-      );
-
-      expect(screen.getByTestId('pathname')).toHaveTextContent('/cesn/step-2');
-      expect(screen.getByTestId('search')).toHaveTextContent('?lang=es');
-    });
-
-    it('should redirect legacy white label root path', () => {
-      const LocationCapture = () => {
-        const location = useLocation();
-        return <div data-testid="pathname">{location.pathname}</div>;
-      };
-
-      renderWithRouter(
-        <Routes>
-          <Route path=":whiteLabel" element={<ValidateWhiteLabel />}>
-            <Route index element={<div>Index</div>} />
-          </Route>
-          <Route path="/cesn" element={<LocationCapture />} />
-        </Routes>,
-        { initialRoute: '/co_energy_calculator' }
-      );
-
-      expect(screen.getByTestId('pathname')).toHaveTextContent('/cesn');
+      expect(screen.getByTestId('pathname')).toHaveTextContent('/step-1');
     });
 
     it('should not redirect valid white labels', () => {

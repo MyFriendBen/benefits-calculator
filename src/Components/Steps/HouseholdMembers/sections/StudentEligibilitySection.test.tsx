@@ -63,14 +63,15 @@ describe('StudentEligibilitySection', () => {
 
     it('uses "you" subject for page 1', () => {
       render(<Wrapper pageNumber={1} />);
-      // The first question references "you" (enrolled half-time...)
-      expect(screen.getByText(/enrolled half-time or more/i)).toBeInTheDocument();
+      expect(screen.getByText(/are you enrolled half-time or more/i)).toBeInTheDocument();
+      expect(screen.queryByText(/are they enrolled/i)).not.toBeInTheDocument();
     });
 
     it('uses "they" subject for page > 1', () => {
       render(<Wrapper pageNumber={2} />);
-      // Subject is injected into question text — verify the section still renders
       expect(screen.getAllByRole('radiogroup')).toHaveLength(STUDENT_QUESTIONS.length);
+      expect(screen.getByText(/are they enrolled half-time or more/i)).toBeInTheDocument();
+      expect(screen.queryByText(/are you enrolled/i)).not.toBeInTheDocument();
     });
   });
 

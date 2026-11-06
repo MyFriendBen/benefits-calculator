@@ -11,7 +11,6 @@ export function useUpdateFormData() {
       ...formData,
       isTest: response.is_test ?? false,
       isTestData: response.is_test_data ?? false,
-      frozen: response.frozen,
       externalID: response.external_id ?? undefined,
       agreeToTermsOfService: response.agree_to_tos ?? false,
       is13OrOlder: response.is_13_or_older ?? false,
@@ -116,10 +115,10 @@ export function useUpdateFormData() {
       let studentEligibility: StudentEligibility | undefined = undefined;
       if (member.student) {
         studentEligibility = {
-          studentFullTime: member.student_full_time ?? false,
-          studentJobTrainingProgram: member.student_job_training_program ?? false,
-          studentHasWorkStudy: member.student_has_work_study ?? false,
-          studentWorks20PlusHrs: member.student_works_20_plus_hrs ?? false,
+          studentFullTime: member.student_full_time ?? undefined,
+          studentJobTrainingProgram: member.student_job_training_program ?? undefined,
+          studentHasWorkStudy: member.student_has_work_study ?? undefined,
+          studentWorks20PlusHrs: member.student_works_20_plus_hrs ?? undefined,
         };
       }
 

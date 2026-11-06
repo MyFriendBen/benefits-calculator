@@ -6,7 +6,7 @@ import ResultsTranslate from '../Translate/Translate';
 import { useContext, useMemo } from 'react';
 import { useMediaQuery } from '@mui/material';
 import './ProgramCard.css';
-import { findValidationForProgram, useResultsContext, useResultsLink } from '../Results';
+import { useResultsLink } from '../Results';
 import { FormattedMessageType } from '../../../Types/Questions';
 import { BREAKPOINTS } from '../../../utils/breakpoints';
 import { Context } from '../../Wrapper/Wrapper';
@@ -152,30 +152,10 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
   const estimatedAppTime = program.estimated_application_time;
   const programName = program.name;
   const programId = program.program_id;
-  const { validations, isAdminView } = useResultsContext();
   const { formData } = useContext(Context);
   const relationshipOptions = useConfig<{ [key: string]: FormattedMessageType }>('relationship_options');
   const showEligibilityTags = useFeatureFlag('eligibility_tags');
   const track = useTrackEvent();
-
-  const containerClass = useMemo(() => {
-    const classNames = [];
-    const validation = findValidationForProgram(validations, program);
-
-    if (validation === undefined || !isAdminView) {
-      return [];
-    }
-
-    const passed = Number(validation.value) === program.estimated_value && validation.eligible === program.eligible;
-
-    if (passed) {
-      classNames.push('passed');
-    } else {
-      classNames.push('failed');
-    }
-
-    return classNames;
-  }, [isAdminView, validations, program]);
 
   const flags = useMemo(() => {
     const flags: ResultsCardFlag[] = [];
@@ -287,7 +267,6 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
       }}
       flags={flags}
       link={programPageLink}
-      containerClassNames={containerClass}
       eligibleMembers={eligibleMembers}
       onMoreInfoClick={handleMoreInfoClick}
     />

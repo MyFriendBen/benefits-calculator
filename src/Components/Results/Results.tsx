@@ -8,7 +8,6 @@ import {
   Program,
   ProgramCategory,
   UrgentNeed,
-  Validation,
 } from '../../Types/Results';
 import { getEligibility, AssistantVisibleProgram } from '../../apiCalls';
 import { Context } from '../Wrapper/Wrapper';
@@ -44,7 +43,7 @@ import { ChatbotProvider } from './Chatbot/Chatbot';
 import { useTrackEvent, useTrackItemList } from '../../Assets/analytics';
 import { POST_DIRECTORY_STEP_IDS } from '../../Assets/analytics/stepIds';
 import { deriveVisiblePrograms } from './visiblePrograms';
-import { calculateTotalValue, programValue } from './FormattedValue';
+import { calculateGreetingTotal, calculateTotalValue, programValue } from './FormattedValue';
 import BenefitsManager from './BenefitsManager/BenefitsManager';
 
 // Mounts the Benbot chat widget only when the flag is on; otherwise renders children unchanged.
@@ -69,9 +68,16 @@ import BenefitsManager from './BenefitsManager/BenefitsManager';
 const BenbotWrapper = ({
   enabled,
   visiblePrograms,
+  greetingTotal,
   children,
-}: PropsWithChildren<{ enabled: boolean; visiblePrograms: AssistantVisibleProgram[] }>) =>
-  enabled ? <ChatbotProvider visiblePrograms={visiblePrograms}>{children}</ChatbotProvider> : <>{children}</>;
+}: PropsWithChildren<{ enabled: boolean; visiblePrograms: AssistantVisibleProgram[]; greetingTotal: number }>) =>
+  enabled ? (
+    <ChatbotProvider visiblePrograms={visiblePrograms} greetingTotal={greetingTotal}>
+      {children}
+    </ChatbotProvider>
+  ) : (
+    <>{children}</>
+  );
 
 type WrapperResultsContext = {
   programs: Program[];
@@ -81,8 +87,6 @@ type WrapperResultsContext = {
   setFilterState: (newFilterState: FilterState) => void;
   missingPrograms: boolean;
   isAdminView: boolean;
-  validations: Validation[];
-  setValidations: (validations: Validation[]) => void;
   energyCalculatorRebateCategories: EnergyCalculatorRebateCategory[];
   policyEngineData: PolicyEngineData | undefined;
   externalApiFailures: string[];
@@ -116,10 +120,6 @@ export function findMemberEligibilityMember(formData: FormData, memberEligibilit
 
 export function findProgramById(programs: Program[], id: number) {
   return programs.find((program) => program.program_id === id);
-}
-
-export function findValidationForProgram(validations: Validation[], program: Program) {
-  return validations.find((validation) => validation.program_name === program.external_name);
 }
 
 export function useResultsLink(link: string) {
@@ -218,7 +218,6 @@ const Results = ({ type }: ResultsProps) => {
   const [needs, setNeeds] = useState<UrgentNeed[]>([]);
   const [missingPrograms, setMissingPrograms] = useState(false);
   const [externalApiFailures, setExternalApiFailures] = useState<string[]>([]);
-  const [validations, setValidations] = useState<Validation[]>([]);
   const energyCalculatorRebateCategories = useFetchEnergyCalculatorRebates();
 
   // The programs shown on load — run through the same filterPrograms pipeline the
@@ -335,12 +334,13 @@ const Results = ({ type }: ResultsProps) => {
 
   const filterPrograms = useMemo(
     () => filterProgramsGenerator(formData, filterState, isAdminView),
-    [formData, filterState, isAdminView]
+    [formData, filterState, isAdminView],
   );
 
   // What BenBot is allowed to recommend from — see BenbotWrapper and
   // ./visiblePrograms, which documents why this comes from programCategories.
   const visiblePrograms = useMemo(() => deriveVisiblePrograms(programCategories), [programCategories]);
+  const greetingTotal = useMemo(() => calculateGreetingTotal(programCategories), [programCategories]);
 
   useEffect(() => {
     if (apiResults === undefined) {
@@ -349,7 +349,6 @@ const Results = ({ type }: ResultsProps) => {
       setProgramCategories([]);
       setMissingPrograms(false);
       setExternalApiFailures([]);
-      setValidations([]);
       setPolicyEngineData(undefined);
       return;
     }
@@ -372,7 +371,6 @@ const Results = ({ type }: ResultsProps) => {
     );
     setMissingPrograms(apiResults.missing_programs);
     setExternalApiFailures(apiResults.external_api_failures ?? []);
-    setValidations(apiResults.validations);
     setLoading(false);
     setPolicyEngineData(apiResults.pe_data);
   }, [filterPrograms, apiResults, isEnergyCalculator, energyCalculatorRebateCategories]);
@@ -392,8 +390,6 @@ const Results = ({ type }: ResultsProps) => {
       setFilterState,
       missingPrograms,
       isAdminView,
-      validations,
-      setValidations,
       energyCalculatorRebateCategories: energyCalculatorRebateCategories ?? [],
       policyEngineData,
       externalApiFailures,
@@ -405,7 +401,6 @@ const Results = ({ type }: ResultsProps) => {
       filterState,
       missingPrograms,
       isAdminView,
-      validations,
       energyCalculatorRebateCategories,
       policyEngineData,
       externalApiFailures,
@@ -471,7 +466,7 @@ const Results = ({ type }: ResultsProps) => {
 
     return (
       <ResultsContext.Provider value={resultsContextValue}>
-        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms}>
+        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms} greetingTotal={greetingTotal}>
           <main>
             <ResultsHeader />
             <div className="results-card-wrapper">
@@ -540,7 +535,7 @@ const Results = ({ type }: ResultsProps) => {
           effect already produces both; a route-aware exception would only break the
           second one.
         */}
-        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms}>
+        <BenbotWrapper enabled={isBenbotEnabled} visiblePrograms={visiblePrograms} greetingTotal={greetingTotal}>
           <ProgramPage program={program} />
         </BenbotWrapper>
       </ResultsContext.Provider>

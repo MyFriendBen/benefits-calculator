@@ -6,10 +6,15 @@ import textIcon from '../../../Assets/States/CO/WhiteLabels/TwoOneOneAssets/text
 import { FormattedMessage, useIntl } from 'react-intl';
 import './TwoOneOneFooterCO.css';
 import { useLocalizedLink } from '../../Config/configHook';
+import { useContext } from 'react';
+import { Context } from '../../Wrapper/Wrapper';
+import { telHref } from '../../Referrer/footerPhone';
 
 const TwoOneOneFooterCO = () => {
   const intl = useIntl();
   const privacyPolicyLink = useLocalizedLink('privacy_policy');
+  const { getReferrer } = useContext(Context);
+  const footerPhone = getReferrer('footerPhone', '');
 
   const twoOneOneChatALProps = {
     id: 'twoOneOneFooter.chatAL',
@@ -65,24 +70,28 @@ const TwoOneOneFooterCO = () => {
             <FormattedMessage id="footer-dial-text" defaultMessage="Dial " />
             2-1-1
           </Link>
-          &nbsp;
-          <Typography className="font-color" sx={{ display: 'inline-block' }}>
-            <FormattedMessage id="footer-or-text" defaultMessage=" or" />
-            &nbsp;
-          </Typography>
-          <Link
-            href="tel:866-760-6489"
-            underline="none"
-            target="_blank"
-            aria-label={intl.formatMessage(twoOneOneDialALProps)}
-            color="primary"
-            sx={{ display: 'inline-block' }}
-          >
-            (866) 760-6489
-          </Link>
-          <Typography className="font-color">
-            <FormattedMessage id="footer-tollFree-text" defaultMessage="toll free" />
-          </Typography>
+          {footerPhone && (
+            <>
+              &nbsp;
+              <Typography className="font-color" sx={{ display: 'inline-block' }}>
+                <FormattedMessage id="footer-or-text" defaultMessage=" or" />
+                &nbsp;
+              </Typography>
+              <Link
+                href={telHref(footerPhone)}
+                underline="none"
+                target="_blank"
+                aria-label={intl.formatMessage(twoOneOneDialALProps)}
+                color="primary"
+                sx={{ display: 'inline-block' }}
+              >
+                {footerPhone}
+              </Link>
+              <Typography className="font-color">
+                <FormattedMessage id="footer-tollFree-text" defaultMessage="toll free" />
+              </Typography>
+            </>
+          )}
         </Box>
       </Stack>
     );

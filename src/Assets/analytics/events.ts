@@ -25,6 +25,12 @@ export interface ScreenerContext {
   screener_uid?: string;
   /** CESN energy path. CESN-only; absent elsewhere and when the path is unknown. */
   screener_path?: 'homeowner' | 'renter';
+  /**
+   * The partner referrer code the screener was entered with (`?referrer=`), the
+   * same value saved as the screen's referrer_code. Lets referrer dashboards scope
+   * GA4 events, including steps before a screener_uid exists. Absent without one.
+   */
+  screener_referrer?: string;
 }
 
 // Params common to interactions that happen on a known screener step.
@@ -217,6 +223,11 @@ export interface ScreenerEventMap {
   screener_benbot_closed: {};
   screener_benbot_message_sent: {};
   screener_benbot_error: {};
+  // A render crash caught by ChatbotErrorBoundary (MFB-2222), not a failed send — that
+  // is `screener_benbot_error`. 'message' = a message's text failed to format and fell
+  // back to raw text (once per distinct text); 'rating' = one reply's rating buttons
+  // were dropped; 'widget' = the whole widget was hidden for the rest of the page view.
+  screener_benbot_crashed: { scope: 'widget' | 'message' | 'rating' };
   // Thumbs up / down on one reply (MFB-1915). 'cleared' is the user taking a rating
   // BACK, which is its own signal and must not be folded into "never rated" — that is
   // also why the column behind it records the clearing rather than just blanking.

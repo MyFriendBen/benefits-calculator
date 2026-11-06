@@ -1,0 +1,10 @@
+/* The partner's copy puts the about text before the disclaimer, the reverse of the Colorado and
+   North Carolina footers, so the paragraph spacing is set here rather than by position. */
+.twoOneOneKSMO-about {
+  padding-top: 1rem;
+}
+
+.twoOneOneKSMO-disclaimer {
+  font-style: italic;
+  padding-bottom: 1rem;
+}
