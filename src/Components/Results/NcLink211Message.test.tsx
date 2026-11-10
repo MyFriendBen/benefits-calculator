@@ -11,7 +11,7 @@ const renderWithProviders = (formData: FormData) => {
       <Context.Provider value={{ formData } as any}>
         <NcLink211Message />
       </Context.Provider>
-    </IntlProvider>
+    </IntlProvider>,
   );
 };
 
@@ -69,13 +69,17 @@ describe('NcLink211Message', () => {
     );
   });
 
-  it('links "Help with drug or alcohol use" to NC211 Drug and Alcohol Use > Treatment Services', () => {
+  it('links "Help with drug or alcohol use" to NC211 Mental Health and Substance Use Disorder Services > Substance Use Disorder Services', () => {
     const formData = createFormData();
     formData.acuteHHConditions = { drugAlcoholUse: true };
     renderWithProviders(formData);
 
     const link = screen.getByText(/Drug\/Alcohol Resources/i).closest('a');
-    expect(link).toHaveAttribute('href', expect.stringContaining('topic=Drug+and+Alcohol+Use'));
-    expect(link).toHaveAttribute('href', expect.stringContaining('subtopic=Drug+and+Alcohol+Treatment+Services'));
+    expect(link).toHaveAttribute(
+      'href',
+      expect.stringContaining('topic=Mental+Health+and+Substance+Use+Disorder+Services'),
+    );
+    expect(link).toHaveAttribute('href', expect.stringContaining('subtopic=Substance+Use+Disorder+Services'));
+    expect(link).toHaveAttribute('href', expect.stringContaining('keyword=substance use treatment'));
   });
 });

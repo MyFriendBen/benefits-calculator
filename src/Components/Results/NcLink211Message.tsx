@@ -73,14 +73,10 @@ const NEEDS_MAPPING: Record<string, Topics> = {
     subtopic: 'Health%20Screening%2FDiagnostic%20Services%2CSpecialized%20Treatment%20and%20Prevention',
     keyword: 'free health care clinic',
   },
-  // NC211 topic/subtopic mapping for the "Help with drug or alcohol use" step-9
-  // button, added for the new drug/alcohol use urgent need category. Unlike the other
-  // entries above, this topic/subtopic wording is not confirmed against NC211's live
-  // taxonomy -- verify on nc211.org before relying on it to return the right results.
   drugAlcoholUse: {
-    topic: 'Drug+and+Alcohol+Use',
-    subtopic: 'Drug+and+Alcohol+Treatment+Services',
-    keyword: 'drug alcohol treatment recovery',
+    topic: 'Mental+Health+and+Substance+Use+Disorder+Services',
+    subtopic: 'Substance+Use+Disorder+Services',
+    keyword: 'substance use treatment',
   },
 };
 
