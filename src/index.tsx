@@ -1,3 +1,5 @@
+import './instrument';
+import * as Sentry from '@sentry/react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -14,11 +16,13 @@ handleCustomDomainRedirect();
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
-  <Wrapper>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </Wrapper>,
+  <Sentry.ErrorBoundary>
+    <Wrapper>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </Wrapper>
+  </Sentry.ErrorBoundary>,
 );
 
 type FplYear = 2024 | 2025;
