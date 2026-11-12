@@ -5,10 +5,16 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   run-linters:
     name: Run linters
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
 
     steps:
       - name: Check out Git repository
