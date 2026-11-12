@@ -217,8 +217,8 @@
 
 /* 2-1-1 New Jersey co-brand lockup (2053x375, ~5.5:1): their mark, then "IN PARTNERSHIP WITH" over
    the MyFriendBen mark. Blue and navy on transparent, so it pairs with the white_header uiOption.
-   It carries its own "New Jersey" label, so the referrer clears stateName (as 211ks/211mo do) and
-   the lockup can take most of the header height. A class name can't start with a digit, hence
+   It carries its own "New Jersey" label, so the referrer clears stateName and the lockup can take
+   most of the header height. A class name can't start with a digit, hence
    nj211. Width is capped on small screens because height alone would overflow the bar. */
 .nj211-logo-size {
   display: block;
