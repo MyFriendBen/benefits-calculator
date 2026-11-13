@@ -11,7 +11,12 @@ jest.mock('react-router-dom', () => ({
 }));
 
 // Default context: householdSize=3
-const mockFormData = { householdSize: 3 };
+const submittedMember = { healthInsurance: { none: true } };
+const unsubmittedMember = { healthInsurance: { none: false } };
+const mockFormData: { householdSize: number; householdData: Record<string, unknown>[] } = {
+  householdSize: 3,
+  householdData: [submittedMember, submittedMember, submittedMember],
+};
 jest.mock('react', () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const mockContext = require('../../../Wrapper/Wrapper').Context;
@@ -40,6 +45,7 @@ describe('useHouseholdMembersNavigation', () => {
     (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
     (useLocation as jest.Mock).mockReturnValue({ state: mockLocationState });
     mockFormData.householdSize = 3;
+    mockFormData.householdData = [submittedMember, submittedMember, submittedMember];
     Object.keys(mockLocationState).forEach((k) => delete mockLocationState[k]);
   });
 
@@ -161,6 +167,74 @@ describe('useHouseholdMembersNavigation', () => {
       act(() => result.current.navigateNext());
       // householdSize=3, pageNumber=1 → navigates to page 2
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/2');
+    });
+
+    describe('members added mid-edit who have not submitted their detail form', () => {
+      beforeEach(() => {
+        // Page 3 was added from the roster: basics only, no detail form yet.
+        mockFormData.householdData = [submittedMember, submittedMember, unsubmittedMember];
+      });
+
+      it('visits the new member before returning to Confirmation', () => {
+        const { result } = renderHook(() =>
+          useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1, redirectToConfirmationPage: true }),
+        );
+        act(() => result.current.navigateNext());
+        expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/3', {
+          state: { isEditing: true, routedFromConfirmationPg: true },
+        });
+        expect(mockNavigate).not.toHaveBeenCalledWith('/default/test-uuid/confirm-information');
+      });
+
+      it('visits the new member before returning to the card that opened the edit', () => {
+        mockLocationState.isEditing = true;
+        mockLocationState.returnToPage = 1;
+        const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 2 }));
+        act(() => result.current.navigateNext());
+        expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/3', {
+          state: { isEditing: true, returnToPage: 1 },
+        });
+      });
+
+      it('goes on to Confirmation once the new member has submitted', () => {
+        const { result } = renderHook(() =>
+          useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 3, redirectToConfirmationPage: true }),
+        );
+        act(() => result.current.navigateNext());
+        expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/confirm-information');
+      });
+
+      it('does not count the member being submitted as incomplete', () => {
+        const { result } = renderHook(() =>
+          useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 3, redirectToConfirmationPage: true }),
+        );
+        act(() => result.current.navigateNext());
+        expect(mockNavigate).toHaveBeenCalledTimes(1);
+        expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/confirm-information');
+      });
+
+      it('returns to the edited card once the new member has submitted', () => {
+        mockLocationState.isEditing = true;
+        mockLocationState.returnToPage = 1;
+        const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 3 }));
+        act(() => result.current.navigateNext());
+        expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/1');
+      });
+
+      it('visits the earliest incomplete member first when several were added', () => {
+        mockFormData.householdData = [submittedMember, unsubmittedMember, unsubmittedMember];
+        const { result } = renderHook(() =>
+          useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1, redirectToConfirmationPage: true }),
+        );
+        act(() => result.current.navigateNext());
+        expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/2', expect.anything());
+      });
+
+      it('leaves the first-time flow in page order', () => {
+        const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1 }));
+        act(() => result.current.navigateNext());
+        expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-3/2');
+      });
     });
   });
 
