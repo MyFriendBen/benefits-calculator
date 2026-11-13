@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useContext } from 'react';
 import { Context } from '../../../Wrapper/Wrapper';
 import { LocationState } from '../utils/types';
+import { hasSubmittedMemberForm } from '../utils/defaultValues';
 
 interface UseHouseholdMembersNavigationParams {
   uuid: string | undefined;
@@ -17,6 +18,7 @@ interface UseHouseholdMembersNavigationParams {
  * - Basic info page (page 0) and individual member pages
  * - Previous/next member pages
  * - Return to edited member after editing
+ * - Detail forms for members added mid-edit, before leaving the edit
  * - Confirmation page when complete
  */
 export const useHouseholdMembersNavigation = ({
@@ -58,6 +60,7 @@ export const useHouseholdMembersNavigation = ({
   /**
    * Navigate to the next page
    * Handles:
+   * - Detail form of a member added during an edit, before leaving it
    * - Redirect to confirmation if needed
    * - Return to original page if editing
    * - Next member page or next step
@@ -68,6 +71,28 @@ export const useHouseholdMembersNavigation = ({
       return;
     }
 
+    const locationState = location.state as LocationState | null;
+    const returningToEditedPage = !!locationState?.isEditing && locationState?.returnToPage !== undefined;
+
+    // A member added from the roster mid-edit is saved with basic info only. The two exits below
+    // skip the normal page-by-page order, so visit every such member first, carrying the edit's
+    // origin along so finishing them still ends up at Confirmation or the card that opened it.
+    // The first-time flow reaches them in order and must not be redirected here.
+    if (redirectToConfirmationPage || returningToEditedPage) {
+      const incompleteIndex = formData.householdData.findIndex(
+        (member, index) => index + 1 !== pageNumber && !hasSubmittedMemberForm(member),
+      );
+      if (incompleteIndex !== -1) {
+        const state: LocationState = {
+          isEditing: true,
+          ...(redirectToConfirmationPage && { routedFromConfirmationPg: true }),
+          ...(returningToEditedPage && { returnToPage: locationState?.returnToPage }),
+        };
+        navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${incompleteIndex + 1}`, { state });
+        return;
+      }
+    }
+
     // Redirect to confirmation page if flow is complete
     if (redirectToConfirmationPage) {
       navigate(`/${whiteLabel}/${uuid}/confirm-information`);
@@ -75,9 +100,8 @@ export const useHouseholdMembersNavigation = ({
     }
 
     // If user is editing from a summary card, return them to the page they came from
-    const locationState = location.state as LocationState | null;
-    if (locationState?.isEditing && locationState?.returnToPage !== undefined) {
-      navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${locationState.returnToPage}`);
+    if (returningToEditedPage) {
+      navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${locationState?.returnToPage}`);
       return;
     }
 
