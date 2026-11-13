@@ -25,6 +25,8 @@ const ADULT = member('adult', 35);
 const PREGNANT_ADULT = member('pregnant', 28, true);
 const CHILD = member('child', 15);
 const YOUNG_ADULT = member('young_adult', 20);
+const EIGHTEEN = member('eighteen', 18);
+const NINETEEN = member('nineteen', 19);
 
 const filterStateFor = (selectedCitizenship: CitizenLabelOptions, householdData: HouseholdData[]): FilterState => ({
   selectedCitizenship,
@@ -53,7 +55,8 @@ const memberValues = (program: Program | undefined) =>
 // Legal statuses as configured on the programs these labels serve.
 const MASS_HEALTH = ['citizen', 'gc_5plus', 'otherHealthCarePregnant', 'otherHealthCareUnder21'];
 const MASS_HEALTH_LIMITED = ['notPregnantForMassHealthLimited', 'notPregnantOrChildForMassHealthLimited'];
-const NC_MEDICAID = ['citizen', 'gc_5plus', 'otherHealthCareUnder21'];
+const NC_MEDICAID = ['citizen', 'gc_5plus', 'gc_under18_no5', 'lawfulHealthCarePregnant', 'lawfulHealthCareUnder19'];
+const NC_EMERGENCY_MEDICAID = ['non_citizen'];
 const CO_EMERGENCY_MEDICAID = ['notPregnantOrUnder19ForEmergencyMedicaid'];
 const CO_MEDICAID = ['citizen', 'gc_5plus', 'gc_under18_no5', 'otherHealthCarePregnant', 'otherHealthCareUnder19'];
 
@@ -111,7 +114,60 @@ describe('refugee households after the Oct 1, 2026 Medicaid change', () => {
   });
 });
 
+describe('NC Medicaid for lawfully present pregnant people and children under 19', () => {
+  const LAWFULLY_PRESENT: CitizenLabelOptions[] = ['gc_5less', 'otherWithWorkPermission', 'refugee'];
+
+  it('does not activate the lawful-only labels for an undocumented household', () => {
+    const filters = calculateDerivedFilters('non_citizen', [PREGNANT_ADULT, CHILD]);
+    expect(filters.has('lawfulHealthCarePregnant')).toBe(false);
+    expect(filters.has('lawfulHealthCareUnder19')).toBe(false);
+  });
+
+  it('hides NC Medicaid from an undocumented household with a pregnant member and a child', () => {
+    const household = [PREGNANT_ADULT, CHILD];
+    expect(filterFor('non_citizen', household, programFor(NC_MEDICAID, household))).toBeUndefined();
+  });
+
+  it('shows NC Emergency Medicaid to the same undocumented household', () => {
+    const household = [PREGNANT_ADULT, CHILD];
+    const result = filterFor('non_citizen', household, programFor(NC_EMERGENCY_MEDICAID, household));
+    expect(memberValues(result)).toEqual({ pregnant: 100, child: 100 });
+  });
+
+  it.each(LAWFULLY_PRESENT)(
+    '%s: NC Medicaid goes to pregnant members and children, not other adults',
+    (status: CitizenLabelOptions) => {
+      const household = [ADULT, PREGNANT_ADULT, CHILD];
+      const result = filterFor(status, household, programFor(NC_MEDICAID, household));
+      expect(memberValues(result)).toEqual({ adult: 0, pregnant: 100, child: 100 });
+    },
+  );
+
+  it.each(LAWFULLY_PRESENT)('%s: the child age limit is 19', (status: CitizenLabelOptions) => {
+    const household = [EIGHTEEN, NINETEEN];
+    const result = filterFor(status, household, programFor(NC_MEDICAID, household));
+    expect(memberValues(result)).toEqual({ eighteen: 100, nineteen: 0 });
+  });
+
+  it.each(LAWFULLY_PRESENT)('%s: NC Emergency Medicaid stays hidden', (status: CitizenLabelOptions) => {
+    const household = [PREGNANT_ADULT, CHILD];
+    expect(filterFor(status, household, programFor(NC_EMERGENCY_MEDICAID, household))).toBeUndefined();
+  });
+});
+
 describe('unchanged behavior for other statuses', () => {
+  it('CO Medicaid still shows undocumented pregnant members and children', () => {
+    const household = [ADULT, PREGNANT_ADULT, CHILD];
+    const result = filterFor('non_citizen', household, programFor(CO_MEDICAID, household));
+    expect(memberValues(result)).toEqual({ adult: 0, pregnant: 100, child: 100 });
+  });
+
+  it('NC Medicaid still shows every member of a citizen household', () => {
+    const household = [ADULT, PREGNANT_ADULT, CHILD];
+    const result = filterFor('citizen', household, programFor(NC_MEDICAID, household));
+    expect(memberValues(result)).toEqual({ adult: 100, pregnant: 100, child: 100 });
+  });
+
   it('MassHealth still hides from undocumented households with a child', () => {
     const household = [ADULT, CHILD];
     expect(filterFor('non_citizen', household, programFor(MASS_HEALTH, household))).toBeUndefined();
