@@ -15,6 +15,7 @@ export const ICON_NAME_MAP: Record<string, string> = {
   coin: 'coins',
   dental_care: 'smile',
   disability: 'accessibility',
+  drug_alcohol_use: 'life-buoy',
   education: 'graduation-cap',
   family_planning: 'heart-handshake',
   food: 'apple',

@@ -181,6 +181,7 @@ export type ApiFormData = {
   needs_free_low_cost_medical_care: boolean | null;
   needs_transportation: boolean | null;
   needs_medical_expenses_and_debt: boolean | null;
+  needs_drug_alcohol_use: boolean | null;
   utm_id: string | null;
   utm_source: string | null;
   utm_medium: string | null;
