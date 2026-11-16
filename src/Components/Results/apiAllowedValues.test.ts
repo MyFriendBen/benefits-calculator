@@ -4,9 +4,11 @@
  * The API's lists live in benefits-api `programs/allowed_values.py` (`LegalStatusLabel`,
  * `USER_SELECTED_LEGAL_STATUSES`, `NavigatorLanguageCode`), and its database refuses anything else.
  *
- * These tests pin the screener's lists to the API's. A value added on one side only fails here:
- * a label the API stores with no screener logic matches no household, and a language code the
- * screener knows but the API refuses can never be set. Change both lists together.
+ * These tests pin the screener's lists to copies of the API's, and benefits-api's
+ * `ScreenerParityTests` (programs/test_allowed_values.py) pins its lists to copies of these, so a
+ * value added in one repo only fails CI in one or the other: a label the API stores with no
+ * screener logic matches no household, and a language code the screener knows but the API refuses
+ * can never be set. Change both repos together.
  */
 import { calculatedCitizenshipFilters, citizenshipFilterConfig } from './Filter/citizenshipFilterConfig';
 import { allNavigatorLanguages } from './ProgramPage/NavigatorLanguages';
