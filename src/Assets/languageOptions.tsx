@@ -6,27 +6,32 @@ import { useConfig } from '../Components/Config/configHook';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { FormattedMessageType } from '../Types/Questions';
 
-export type Language = 'en-us' | 'es' | 'vi' | 'fr' | 'am' | 'so' | 'ru' | 'ne' | 'my' | 'zh' | 'ar' | 'sw' | 'pl' | 'tl' | 'ko' | 'ur' | 'pt-br' | 'ht';
-export const LANGUAGE_OPTIONS: Record<Language, string> = {
-  'en-us': 'English',
-  es: 'Español',
-  vi: 'Tiếng Việt',
-  fr: 'Français',
-  am: 'አማርኛ',
-  so: 'Soomaali',
-  ru: 'Русский',
-  ne: 'नेपाली',
-  my: 'မြန်မာဘာသာစကား',
-  zh: '中文',
-  ar: 'عربي',
-  sw: 'Kiswahili',
-  pl: 'Polski',
-  tl: 'Tagalog',
-  ko: '한국어',
-  ur: 'اردو',
-  'pt-br': 'Português Brasileiro',
-  ht: 'Kreyòl',
-};
+/**
+ * Every language the site can be shown in. benefits-api's `settings.LANGUAGES` is the source, and
+ * each white label serves the ones it offers as `language_options`; this list exists for the type,
+ * and `Components/Config/apiServedLists.test.ts` pins it to the API's.
+ */
+export const LANGUAGES = [
+  'en-us',
+  'es',
+  'vi',
+  'fr',
+  'am',
+  'so',
+  'ru',
+  'ne',
+  'my',
+  'zh-hans',
+  'ar',
+  'sw',
+  'pl',
+  'tl',
+  'ko',
+  'ur',
+  'pt-br',
+  'ht',
+] as const;
+export type Language = (typeof LANGUAGES)[number];
 
 export const rightToLeftLanguages = ['ar', 'ur'];
 
@@ -60,5 +65,3 @@ export function OverrideableTranslation({ id, defaultMessage }: OverrideableTran
 
   return <FormattedMessage id={id} defaultMessage={defaultMessage} />;
 }
-
-export default LANGUAGE_OPTIONS;

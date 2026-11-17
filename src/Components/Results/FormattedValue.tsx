@@ -128,10 +128,19 @@ function useOverrideValue(program: Program, value: string) {
   return value;
 }
 
-type DefaultMap<T> = {
-  default: T;
-  [key: string]: T | undefined;
-};
+/**
+ * The ways a program's value can be shown, besides the default monthly figure. benefits-api's
+ * `Program.VALUE_FORMAT_CHOICES` is the source; each map below must handle every format, and
+ * `Components/Config/apiServedLists.test.ts` pins this list to the API's.
+ */
+export const VALUE_FORMATS = ['lump_sum', 'estimated_annual'] as const;
+type ValueFormat = (typeof VALUE_FORMATS)[number];
+
+type DefaultMap<T> = Record<'default' | ValueFormat, T>;
+
+function formatFor<T>(formats: DefaultMap<T>, program: Program): T {
+  return formats[(program.value_format ?? 'default') as keyof DefaultMap<T>] ?? formats.default;
+}
 
 function useValueFormats(): DefaultMap<(program: Program) => string> {
   const translateNumber = useTranslateNumber();
@@ -154,7 +163,7 @@ function useValueFormats(): DefaultMap<(program: Program) => string> {
 
 export function useFormatDisplayValue(program: Program) {
   const formats = useValueFormats();
-  const calculator = formats[program.value_format ?? 'default'] ?? formats.default;
+  const calculator = formatFor(formats, program);
   const value = calculator(program);
   return useOverrideValue(program, value);
 }
@@ -176,7 +185,7 @@ export function YearlyValueLabel({ program }: { program: Program }) {
     ),
   };
 
-  return formats[program.value_format ?? 'default'] ?? formats.default;
+  return formatFor(formats, program);
 }
 
 export function useFormatYearlyValue(program: Program) {

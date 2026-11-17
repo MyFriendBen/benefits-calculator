@@ -16,6 +16,7 @@ import { Context } from '../Components/Wrapper/Wrapper';
 import { useParams } from 'react-router-dom';
 import { useUpdateFormData } from './updateFormData';
 import { getCampaign } from '../Components/CampaignAnalytics/campaign';
+import { acuteConditionsToApi } from './acuteConditionFields';
 
 const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: string) => {
   const householdMembers = getHouseholdMembersBodies(formData);
@@ -43,24 +44,7 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     referral_source: formData.referralSource ?? null,
     referrer_code: formData.immutableReferrer ?? null,
     path: formData.path ?? null,
-    needs_food: formData.acuteHHConditions.food ?? null,
-    needs_baby_supplies: formData.acuteHHConditions.babySupplies ?? null,
-    needs_housing_help: formData.acuteHHConditions.housing ?? null,
-    needs_mental_health_help: formData.acuteHHConditions.support ?? null,
-    needs_child_dev_help: formData.acuteHHConditions.childDevelopment ?? null,
-    needs_family_planning_help: formData.acuteHHConditions.familyPlanning ?? null,
-    needs_job_resources: formData.acuteHHConditions.jobResources ?? null,
-    needs_dental_care: formData.acuteHHConditions.dentalCare ?? null,
-    needs_legal_services: formData.acuteHHConditions.legalServices ?? null,
-    needs_college_savings: formData.acuteHHConditions.savings ?? null,
-    needs_veteran_services: formData.acuteHHConditions.veteranServices ?? null,
-    needs_disability_resources: formData.acuteHHConditions.disabilityResources ?? null,
-    needs_aging_resources: formData.acuteHHConditions.agingResources ?? null,
-    needs_homeless_services: formData.acuteHHConditions.homelessServices ?? null,
-    needs_free_low_cost_medical_care: formData.acuteHHConditions.freeLowCostMedicalCare ?? null,
-    needs_transportation: formData.acuteHHConditions.transportation ?? null,
-    needs_medical_expenses_and_debt: formData.acuteHHConditions.medicalExpensesAndDebt ?? null,
-    needs_drug_alcohol_use: formData.acuteHHConditions.drugAlcoholUse ?? null,
+    ...acuteConditionsToApi(formData.acuteHHConditions),
     utm_id: formData.utm?.id ?? null,
     utm_source: formData.utm?.source ?? null,
     utm_medium: formData.utm?.medium ?? null,

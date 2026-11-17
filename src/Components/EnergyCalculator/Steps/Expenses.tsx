@@ -17,7 +17,7 @@ import QuestionDescription from '../../QuestionComponents/QuestionDescription';
 import { FormattedMessageType } from '../../../Types/Questions';
 import useStepForm from '../../Steps/stepForm';
 
-const EXPENSE_TYPES = ['heating', 'cooling', 'electricity'] as const;
+export const EXPENSE_TYPES = ['heating', 'cooling', 'electricity'] as const;
 export type EnergyCalculatorExpenseType = (typeof EXPENSE_TYPES)[number];
 
 export const ENERGY_CALCULATOR_EXPENSE_NAME_MAP: Record<EnergyCalculatorExpenseType, FormattedMessageType> = {

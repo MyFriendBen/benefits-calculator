@@ -1,13 +1,13 @@
 /**
- * Guards the icon-name maps against typos: every value in OPTION_CARD_ICON_MAP and
- * ICON_NAME_MAP must resolve to a real Lucide icon. A bad name renders nothing and
+ * Guards the icon-name maps against typos: every value in OPTION_CARD_ICON_MAP,
+ * ENERGY_CALCULATOR_ICON_MAP and ICON_NAME_MAP must resolve to a real Lucide icon. A bad name renders nothing and
  * only console.warns at runtime (see Icon.tsx), so this catches it at test time.
  * This is the same class of bug that the `house-roof` correction fixed during development.
  */
 import { render } from '@testing-library/react';
 import { Icon } from './Icon';
 import { ICON_NAME_MAP } from '../Results/helpers';
-import { OPTION_CARD_ICON_MAP } from '../Config/configHook';
+import { ENERGY_CALCULATOR_ICON_MAP, OPTION_CARD_ICON_MAP } from '../Config/configHook';
 
 type Entry = [map: string, key: string, name: string];
 
@@ -16,6 +16,7 @@ const entriesFor = (map: string, record: Record<string, string>): Entry[] =>
 
 const cases: Entry[] = [
   ...entriesFor('OPTION_CARD_ICON_MAP', OPTION_CARD_ICON_MAP),
+  ...entriesFor('ENERGY_CALCULATOR_ICON_MAP', ENERGY_CALCULATOR_ICON_MAP),
   ...entriesFor('ICON_NAME_MAP', ICON_NAME_MAP),
 ];
 

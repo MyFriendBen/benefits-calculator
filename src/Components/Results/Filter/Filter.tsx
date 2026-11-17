@@ -2,27 +2,13 @@ import { useContext, useState, useCallback } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useResultsContext } from '../Results';
 import { Button, Typography, Select, MenuItem, FormControl, useMediaQuery, Tooltip } from '@mui/material';
-import {
-  CitizenLabelOptions,
-  citizenshipFilterConfig,
-  calculateDerivedFilters,
-} from './citizenshipFilterConfig';
+import { CitizenLabelOptions, calculateDerivedFilters, useLegalStatusOptions } from './citizenshipFilterConfig';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import './Filter.css';
 import '../../QuestionComponentContainer/QuestionComponentContainer.css';
 import { Context } from '../../Wrapper/Wrapper';
 import { BREAKPOINTS } from '../../../utils/breakpoints';
 import { useTrackEvent } from '../../../Assets/analytics';
-
-// Define the order of citizenship options
-const CITIZENSHIP_OPTIONS: CitizenLabelOptions[] = [
-  'citizen',
-  'gc_5plus',
-  'gc_5less',
-  'refugee',
-  'otherWithWorkPermission',
-  'non_citizen',
-];
 
 export const Filter = () => {
   const { filterState, setFilterState } = useResultsContext();
@@ -33,36 +19,41 @@ export const Filter = () => {
   const collapseDescription = useMediaQuery('(max-width: 730px)');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const track = useTrackEvent();
+  const legalStatusOptions = useLegalStatusOptions();
 
   // Get selected citizenship from filter state
   const selectedCitizenship = filterState.selectedCitizenship;
+  const selectedOption = legalStatusOptions.find(([status]) => status === selectedCitizenship)?.[1];
 
-  const handleCitizenshipChange = useCallback((newStatus: CitizenLabelOptions) => {
-    // Calculate derived filters based on household data
-    const calculatedFilters = calculateDerivedFilters(newStatus, formData.householdData);
+  const handleCitizenshipChange = useCallback(
+    (newStatus: CitizenLabelOptions) => {
+      // Calculate derived filters based on household data
+      const calculatedFilters = calculateDerivedFilters(newStatus, formData.householdData);
 
-    // Create and set new filter state
-    setFilterState({
-      selectedCitizenship: newStatus,
-      calculatedFilters,
-    });
+      // Create and set new filter state
+      setFilterState({
+        selectedCitizenship: newStatus,
+        calculatedFilters,
+      });
 
-    // Privacy: record only the filter TYPE, never the selected citizenship
-    // value (that would be PII). `filter_type` is the category touched.
-    track('screener_filter_engaged', { filter_type: 'citizenship' });
-  }, [formData.householdData, setFilterState, track]);
+      // Privacy: record only the filter TYPE, never the selected citizenship
+      // value (that would be PII). `filter_type` is the category touched.
+      track('screener_filter_engaged', { filter_type: 'citizenship' });
+    },
+    [formData.householdData, setFilterState, track],
+  );
 
   const renderDesktopButtons = () => {
     return (
       <div className="citizenship-buttons-container">
-        {CITIZENSHIP_OPTIONS.map((option) => {
+        {legalStatusOptions.map(([option, text]) => {
           const isSelected = selectedCitizenship === option;
           return (
             <Tooltip
               key={option}
               title={
                 <Typography variant="body2" className="citizenship-tooltip-text">
-                  {citizenshipFilterConfig[option].tooltip}
+                  {text.tooltip}
                 </Typography>
               }
               placement="top"
@@ -82,7 +73,7 @@ export const Filter = () => {
                   defaultMessage: `Select ${option} citizenship status`,
                 })}
               >
-                {citizenshipFilterConfig[option].label}
+                {text.label}
                 <InfoOutlinedIcon className="info-icon" fontSize="small" />
               </Button>
             </Tooltip>
@@ -104,14 +95,14 @@ export const Filter = () => {
             defaultMessage: 'Select citizenship status',
           })}
         >
-          {CITIZENSHIP_OPTIONS.map((option) => (
+          {legalStatusOptions.map(([option, text]) => (
             <MenuItem key={option} value={option} selected={selectedCitizenship === option}>
               <div className="dropdown-menu-item">
                 <Typography variant="body1" className="dropdown-label">
-                  {citizenshipFilterConfig[option].label}
+                  {text.label}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" className="dropdown-description">
-                  {citizenshipFilterConfig[option].tooltip}
+                  {text.tooltip}
                 </Typography>
               </div>
             </MenuItem>
@@ -127,10 +118,7 @@ export const Filter = () => {
         <FormattedMessage id="filterSection.header" defaultMessage="Filter Results by Citizenship" />
       </h2>
       <div className="filter-description">
-        <div
-          className={collapseDescription && !isDescriptionExpanded ? 'collapsed' : ''}
-          aria-live="polite"
-        >
+        <div className={collapseDescription && !isDescriptionExpanded ? 'collapsed' : ''} aria-live="polite">
           <Typography variant="body2" color="text.secondary" className="help-text">
             <FormattedMessage
               id="filterSection.citizenHelpText"
@@ -151,13 +139,11 @@ export const Filter = () => {
           </Button>
         )}
       </div>
-      <div className="filter-controls">
-        {isMobile ? renderMobileDropdown() : renderDesktopButtons()}
-      </div>
+      <div className="filter-controls">{isMobile ? renderMobileDropdown() : renderDesktopButtons()}</div>
       <div className="current-selection">
         <Typography variant="body2" color="text.secondary">
           <FormattedMessage id="filterSection.currentSelection" defaultMessage="Current selection:" />{' '}
-          <strong>{citizenshipFilterConfig[selectedCitizenship].label}</strong>
+          <strong>{selectedOption?.label}</strong>
         </Typography>
       </div>
     </div>
