@@ -39,6 +39,11 @@ export type MemberEligibility = {
   already_has: boolean;
 };
 
+// Who a program pays: each eligible member, or one amount for the household. A household
+// program still reports member verdicts, since its rules may check members; the unit says
+// the household is the eligible party regardless.
+export type PaymentUnit = 'member' | 'household';
+
 export type Program = {
   program_id: number;
   name: Translation;
@@ -56,6 +61,7 @@ export type Program = {
   legal_status_required: string[];
   estimated_value_override: Translation;
   eligible: boolean;
+  payment_unit?: PaymentUnit;
   members: MemberEligibility[];
   failed_tests: TestMessage[];
   passed_tests: TestMessage[];
