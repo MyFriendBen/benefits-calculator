@@ -202,8 +202,9 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
 
     const eligibleMembersList = program.members.filter((m) => m.eligible);
 
-    // Responses that predate `payment_unit`: an eligible program with no marked members
-    // is a household-level one.
+    // An eligible program with no marked members shows the household. This covers
+    // member-paid programs whose calculator doesn't mark members yet (school lunch), not
+    // only responses that predate `payment_unit`.
     if (program.eligible && eligibleMembersList.length === 0) {
       return [householdTag];
     }
