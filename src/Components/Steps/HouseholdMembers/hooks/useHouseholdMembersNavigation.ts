@@ -74,19 +74,28 @@ export const useHouseholdMembersNavigation = ({
     const locationState = location.state as LocationState | null;
     const returningToEditedPage = !!locationState?.isEditing && locationState?.returnToPage !== undefined;
 
-    // A member added from the roster mid-edit is saved with basic info only. The two exits below
-    // skip the normal page-by-page order, so visit every such member first, carrying the edit's
-    // origin along so finishing them still ends up at Confirmation or the card that opened it.
-    // The first-time flow reaches them in order and must not be redirected here.
+    // A member added from the roster mid-edit is saved with basic info only, and the two exits
+    // below skip the normal page-by-page order, so visit those members first. The origin travels
+    // along so finishing them still ends up at Confirmation or the card that opened the edit.
+    //
+    // Which members count depends on the origin. From Confirmation every member has been through
+    // the flow, so any unsubmitted one was added mid-edit. From a card edit the user may be
+    // mid-way through the first-time flow, where unsubmitted members are just not reached yet
+    // (and the return page itself may be one) — only the members the roster named are detoured to.
     if (redirectToConfirmationPage || returningToEditedPage) {
+      const addedMemberIds = locationState?.addedMemberIds ?? [];
       const incompleteIndex = formData.householdData.findIndex(
-        (member, index) => index + 1 !== pageNumber && !hasSubmittedMemberForm(member),
+        (member, index) =>
+          index + 1 !== pageNumber &&
+          !hasSubmittedMemberForm(member) &&
+          (redirectToConfirmationPage || (!!member.frontendId && addedMemberIds.includes(member.frontendId))),
       );
       if (incompleteIndex !== -1) {
         const state: LocationState = {
           isEditing: true,
           ...(redirectToConfirmationPage && { routedFromConfirmationPg: true }),
           ...(returningToEditedPage && { returnToPage: locationState?.returnToPage }),
+          ...(addedMemberIds.length > 0 && { addedMemberIds }),
         };
         navigate(`/${whiteLabel}/${uuid}/step-${currentStepId}/${incompleteIndex + 1}`, { state });
         return;

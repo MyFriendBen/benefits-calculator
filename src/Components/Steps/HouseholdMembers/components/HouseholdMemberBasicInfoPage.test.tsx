@@ -324,6 +324,43 @@ describe('HouseholdMemberBasicInfoPage', () => {
       );
     });
 
+    it('names the members added during an edit so the edit can visit their detail forms', async () => {
+      // Row 3 has no frontendId yet, which is how the roster tells a new member from a saved one.
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+        { birthMonth: 7, birthYear: 2015, relationshipToHH: 'child' },
+      ];
+      renderPage(makeFormData(3, householdData), { returnToPage: 1, returnToEditing: true, editReturnToPage: 1 });
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() => expect(mockUpdateScreen).toHaveBeenCalledTimes(1));
+      const addedId = mockUpdateScreen.mock.calls[0][0].householdData[2].frontendId;
+      expect(addedId).toBeTruthy();
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/1', {
+          state: { basicInfoCollected: true, isEditing: true, returnToPage: 1, addedMemberIds: [addedId] },
+        }),
+      );
+    });
+
+    it('carries members added on an earlier roster visit and drops ones since deleted', async () => {
+      const householdData = [
+        { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },
+        { id: 'id-1', frontendId: 'fid-1', birthMonth: 5, birthYear: 1992, relationshipToHH: 'spouse' },
+      ];
+      renderPage(makeFormData(2, householdData), {
+        returnToPage: 1,
+        returnToEditing: true,
+        addedMemberIds: ['fid-1', 'gone'],
+      });
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      await waitFor(() =>
+        expect(mockNavigate).toHaveBeenCalledWith('/co/test-uuid/step-5/1', {
+          state: { basicInfoCollected: true, isEditing: true, addedMemberIds: ['fid-1'] },
+        }),
+      );
+    });
+
     it('does not set isEditing when the user was not editing', async () => {
       const householdData = [
         { id: 'id-0', frontendId: 'fid-0', birthMonth: 3, birthYear: 1990, relationshipToHH: 'headOfHousehold' },

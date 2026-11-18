@@ -50,6 +50,12 @@ export type LocationState = {
    * rather than resuming next-member navigation.
    */
   returnToConfirmation?: boolean;
+  /**
+   * `frontendId`s of members the roster added during an edit. They hold basics only, and page
+   * order alone can't tell them from members the first-time flow simply hasn't reached yet, so
+   * the roster names them. `navigateNext` visits these before leaving a card-edit return.
+   */
+  addedMemberIds?: string[];
 };
 
 export type DeletePopoverState = { index: number; anchorEl: HTMLElement } | null;

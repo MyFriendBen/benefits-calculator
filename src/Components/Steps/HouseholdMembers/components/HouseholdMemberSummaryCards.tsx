@@ -97,6 +97,8 @@ const HouseholdMemberSummaryCards = ({ questionName, onBeforeLeave }: HHMSummari
           // Switching members inside a Confirmation-originated edit keeps that origin, so
           // Continue still returns to Confirmation.
           ...(locationState?.routedFromConfirmationPg && { routedFromConfirmationPg: true }),
+          // Members the roster added still owe a detail form; keep them on the list.
+          ...(locationState?.addedMemberIds && { addedMemberIds: locationState.addedMemberIds }),
         },
       });
     };
