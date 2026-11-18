@@ -47,6 +47,10 @@ export const OPTION_CARD_ICON_MAP: Record<string, string> = {
   Military: 'shield',
   Aging: 'tree-deciduous',
   Youth_development: 'shapes',
+  // Energy calculator utility bills
+  Heating: 'flame',
+  Cooling: 'air-vent',
+  Electricity: 'lightbulb',
 };
 
 type Item = {

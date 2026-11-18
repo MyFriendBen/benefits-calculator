@@ -1,8 +1,8 @@
 import { useContext } from 'react';
+import { HEAD_OF_HOUSEHOLD } from './relationships';
 import { EnergyCalculatorMember, FormData, StudentEligibility } from '../Types/FormData';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { ScreenApiResponse } from '../apiCalls';
-import { acuteConditionsFromApi } from './acuteConditionFields';
 
 // Hook to update the context's form data from an api response
 export function useUpdateFormData() {
@@ -28,7 +28,7 @@ export function useUpdateFormData() {
       referralSource: response.referral_source ?? undefined,
       immutableReferrer: response.referrer_code ?? undefined,
       path: response.path ?? undefined,
-      acuteHHConditions: acuteConditionsFromApi(response),
+      acuteHHConditions: Object.fromEntries((response.acute_needs ?? []).map((need) => [need, true])),
       signUpInfo: {
         email: '',
         phone: '',
@@ -59,7 +59,7 @@ export function useUpdateFormData() {
       };
     }
 
-    let defaultRelationship = 'headOfHousehold';
+    let defaultRelationship = HEAD_OF_HOUSEHOLD;
     const initialHHMHealthInsurance = {
       none: false,
       employer: false,

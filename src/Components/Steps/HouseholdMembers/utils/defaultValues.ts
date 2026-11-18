@@ -1,4 +1,5 @@
 import { HouseholdData } from '../../../../Types/FormData';
+import { HEAD_OF_HOUSEHOLD } from '../../../../Assets/relationships';
 import { deriveIncomeAnswers } from './helpers';
 
 /**
@@ -147,7 +148,7 @@ export const createDefaultValues = (
       householdMemberFormData?.birthYear && householdMemberFormData.birthYear > 0
         ? householdMemberFormData.birthYear
         : 0,
-    relationshipToHH: householdMemberFormData?.relationshipToHH ?? (isFirstMember ? 'headOfHousehold' : ''),
+    relationshipToHH: householdMemberFormData?.relationshipToHH ?? (isFirstMember ? HEAD_OF_HOUSEHOLD : ''),
     healthInsurance: householdMemberFormData?.healthInsurance
       ? { ...DEFAULT_HEALTH_INSURANCE, ...householdMemberFormData.healthInsurance }
       : DEFAULT_HEALTH_INSURANCE,
@@ -179,7 +180,7 @@ export const createDefaultMember = (index: number, existingMember?: Partial<Hous
   frontendId: existingMember?.frontendId ?? crypto.randomUUID(),
   birthMonth: existingMember?.birthMonth ?? 0,
   birthYear: existingMember?.birthYear ?? 0,
-  relationshipToHH: existingMember?.relationshipToHH ?? (index === 0 ? 'headOfHousehold' : ''),
+  relationshipToHH: existingMember?.relationshipToHH ?? (index === 0 ? HEAD_OF_HOUSEHOLD : ''),
   conditions: existingMember?.conditions ?? { ...DEFAULT_SPECIAL_CONDITIONS },
   hasIncome: existingMember?.hasIncome ?? false,
   incomeStreams: existingMember?.incomeStreams ?? [],
@@ -207,7 +208,7 @@ export const createEnergyCalculatorDefaultValues = (
       medicalEquipment: householdMemberFormData?.energyCalculator?.medicalEquipment ?? false,
     },
     receivesSsi: householdMemberFormData?.energyCalculator?.receivesSsi ? 'true' : 'false',
-    relationshipToHH: householdMemberFormData?.relationshipToHH ?? (pageNumber === 1 ? 'headOfHousehold' : ''),
+    relationshipToHH: householdMemberFormData?.relationshipToHH ?? (pageNumber === 1 ? HEAD_OF_HOUSEHOLD : ''),
     ...getDefaultIncomeAnswers(householdMemberFormData),
     incomeStreams,
   };

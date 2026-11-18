@@ -8,7 +8,13 @@ import {
   ApiUser,
   ApiUserWriteOnly,
 } from '../Types/ApiFormData.js';
-import { EnergyCalculatorFormData, EnergyCalculatorMember, FormData, HouseholdData } from '../Types/FormData';
+import {
+  AcuteHHConditions,
+  EnergyCalculatorFormData,
+  EnergyCalculatorMember,
+  FormData,
+  HouseholdData,
+} from '../Types/FormData';
 import { putScreen, postScreen, putUser, getScreen } from '../apiCalls';
 import { Language } from './languageOptions';
 import { useContext } from 'react';
@@ -16,7 +22,6 @@ import { Context } from '../Components/Wrapper/Wrapper';
 import { useParams } from 'react-router-dom';
 import { useUpdateFormData } from './updateFormData';
 import { getCampaign } from '../Components/CampaignAnalytics/campaign';
-import { acuteConditionsToApi } from './acuteConditionFields';
 
 const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: string) => {
   const householdMembers = getHouseholdMembersBodies(formData);
@@ -44,7 +49,7 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     referral_source: formData.referralSource ?? null,
     referrer_code: formData.immutableReferrer ?? null,
     path: formData.path ?? null,
-    ...acuteConditionsToApi(formData.acuteHHConditions),
+    acute_needs: getAcuteNeeds(formData.acuteHHConditions),
     utm_id: formData.utm?.id ?? null,
     utm_source: formData.utm?.source ?? null,
     utm_medium: formData.utm?.medium ?? null,
@@ -54,6 +59,18 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
   };
 
   return screenBody;
+};
+
+// The household's needs as the option keys benefits-api takes (`acute_needs`); it saves each to its
+// own column. Null until the needs step has been answered, so earlier saves leave them alone.
+export const getAcuteNeeds = (conditions: AcuteHHConditions): string[] | null => {
+  if (Object.keys(conditions).length === 0) {
+    return null;
+  }
+
+  return Object.entries(conditions)
+    .filter(([, needed]) => needed)
+    .map(([need]) => need);
 };
 
 const getHouseholdMembersBodies = (formData: FormData): ApiHouseholdMember[] => {

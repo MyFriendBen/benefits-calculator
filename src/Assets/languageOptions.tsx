@@ -7,31 +7,10 @@ import { Context } from '../Components/Wrapper/Wrapper';
 import { FormattedMessageType } from '../Types/Questions';
 
 /**
- * Every language the site can be shown in. benefits-api's `settings.LANGUAGES` is the source, and
- * each white label serves the ones it offers as `language_options`; this list exists for the type,
- * and `Components/Config/apiServedLists.test.ts` pins it to the API's.
+ * A site locale code. The ones a white label offers come from benefits-api (`language_options`, from
+ * `settings.LANGUAGES`), so the screener keeps no list of its own.
  */
-export const LANGUAGES = [
-  'en-us',
-  'es',
-  'vi',
-  'fr',
-  'am',
-  'so',
-  'ru',
-  'ne',
-  'my',
-  'zh-hans',
-  'ar',
-  'sw',
-  'pl',
-  'tl',
-  'ko',
-  'ur',
-  'pt-br',
-  'ht',
-] as const;
-export type Language = (typeof LANGUAGES)[number];
+export type Language = string;
 
 export const rightToLeftLanguages = ['ar', 'ur'];
 

@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import { HEAD_OF_HOUSEHOLD } from '../../../Assets/relationships';
 import { calcTotalIncome } from '../../../Assets/income';
 import { Language } from '../../../Assets/languageOptions';
 import { FormData } from '../../../Types/FormData';
@@ -12,7 +13,7 @@ import {
   ENERGY_CALCULATOR_CATEGORY_MAP,
   ENERGY_CALCULATOR_CATEGORY_TITLE_MAP,
   ENERGY_CALCULATOR_ITEMS,
-  EnergyCalculatorRebate
+  EnergyCalculatorRebate,
 } from './rebateTypes';
 import { sortRebateCategories } from './sortRebates';
 
@@ -23,7 +24,7 @@ function calcFilingStatus(formData: FormData) {
   let filingStatus = 'single';
 
   for (const member of formData.householdData) {
-    if (member.relationshipToHH === 'headOfHousehold') {
+    if (member.relationshipToHH === HEAD_OF_HOUSEHOLD) {
       continue;
     }
 
@@ -144,7 +145,7 @@ async function getRebates(formData: FormData, lang: Language) {
 
       if (category === undefined) {
         // skip if uncategorized
-        continue
+        continue;
       }
 
       categories.add(category);
@@ -167,10 +168,10 @@ async function getRebates(formData: FormData, lang: Language) {
       category.rebates.push(rebate);
     }
   }
-    
+
   // Sort rebates within all categories using the sorting function
-  sortRebateCategories(rebateCategories);  
-  
+  sortRebateCategories(rebateCategories);
+
   return rebateCategories;
 }
 
