@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useContext } from 'react';
+import { ReactNode, useContext } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -11,38 +11,21 @@ import PrevAndContinueButtons from '../../PrevAndContinueButtons/PrevAndContinue
 import QuestionHeader from '../../QuestionComponents/QuestionHeader';
 import { useDefaultBackNavigationFunction } from '../../QuestionComponents/questionHooks';
 import QuestionQuestion from '../../QuestionComponents/QuestionQuestion';
-import { Icon } from '../../Icon/Icon';
 import { Context } from '../../Wrapper/Wrapper';
 import QuestionDescription from '../../QuestionComponents/QuestionDescription';
 import { FormattedMessageType } from '../../../Types/Questions';
 import useStepForm from '../../Steps/stepForm';
+import { useConfig } from '../../Config/configHook';
 
-const EXPENSE_TYPES = ['heating', 'cooling', 'electricity'] as const;
-export type EnergyCalculatorExpenseType = (typeof EXPENSE_TYPES)[number];
+type EnergyCalculatorExpenseOption = { icon: ReactNode; text: FormattedMessageType };
 
-export const ENERGY_CALCULATOR_EXPENSE_NAME_MAP: Record<EnergyCalculatorExpenseType, FormattedMessageType> = {
-  heating: <FormattedMessage id="energyCalculator.expenses.heating" defaultMessage="Heating" />,
-  cooling: <FormattedMessage id="energyCalculator.expenses.cooling" defaultMessage="Cooling" />,
-  electricity: <FormattedMessage id="energyCalculator.expenses.electricity" defaultMessage="Electricity" />,
-};
-
-const EXPENSE_OPTIONS: MultiSelectTileOption<EnergyCalculatorExpenseType>[] = [
-  {
-    value: 'heating',
-    text: ENERGY_CALCULATOR_EXPENSE_NAME_MAP.heating,
-    icon: <Icon name="flame" className="option-card-lucide-icon" />,
-  },
-  {
-    value: 'cooling',
-    text: ENERGY_CALCULATOR_EXPENSE_NAME_MAP.cooling,
-    icon: <Icon name="air-vent" className="option-card-lucide-icon" />,
-  },
-  {
-    value: 'electricity',
-    text: ENERGY_CALCULATOR_EXPENSE_NAME_MAP.electricity,
-    icon: <Icon name="lightbulb" className="option-card-lucide-icon" />,
-  },
-];
+/**
+ * The utility expenses the energy calculator asks about, as option cards, in the order benefits-api
+ * serves them (`energy_calculator_expense_options` in configuration/white_labels/cesn.py).
+ */
+export function useEnergyCalculatorExpenseOptions(): Record<string, EnergyCalculatorExpenseOption> {
+  return useConfig<Record<string, EnergyCalculatorExpenseOption>>('energy_calculator_expense_options', {});
+}
 
 export default function EnergyCalculatorExpenses() {
   const { formData } = useContext(Context);
@@ -51,11 +34,11 @@ export default function EnergyCalculatorExpenses() {
   const { updateScreen } = useScreenApi();
   const navigate = useNavigate();
   const { whiteLabel, setStepLoading } = useContext(Context);
+  const expenseOptions = useEnergyCalculatorExpenseOptions();
+  const expenseTypes = Object.keys(expenseOptions);
 
   const formSchema = z.object({
-    expenses: z
-      .record(z.enum(EXPENSE_TYPES), z.boolean())
-      .refine((obj): obj is Required<typeof obj> => EXPENSE_TYPES.every((key) => obj[key] !== undefined)),
+    expenses: z.record(z.string(), z.boolean()).refine((obj) => expenseTypes.every((key) => obj[key] !== undefined)),
   });
 
   const hasExpense = (expenseName: string) => {
@@ -73,11 +56,7 @@ export default function EnergyCalculatorExpenses() {
   const { handleSubmit, watch, setValue } = useStepForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      expenses: {
-        heating: hasExpense('heating'),
-        cooling: hasExpense('cooling'),
-        electricity: hasExpense('electricity'),
-      },
+      expenses: Object.fromEntries(expenseTypes.map((type) => [type, hasExpense(type)])),
     },
     questionName: 'energyCalculatorExpenses',
   });
@@ -131,7 +110,13 @@ export default function EnergyCalculatorExpenses() {
           onChange={(values) => {
             setValue('expenses', values);
           }}
-          options={EXPENSE_OPTIONS}
+          options={expenseTypes.map(
+            (type): MultiSelectTileOption<string> => ({
+              value: type,
+              text: expenseOptions[type].text,
+              icon: expenseOptions[type].icon,
+            }),
+          )}
         />
         <PrevAndContinueButtons backNavigationFunction={backNavigationFunction} />
       </form>

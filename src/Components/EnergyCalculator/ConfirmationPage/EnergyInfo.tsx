@@ -8,7 +8,7 @@ import { FormattedMessageType, QuestionName } from '../../../Types/Questions';
 import { EnergyCalculatorFormData } from '../../../Types/FormData';
 import { OTHER_ELECTRIC_PROVIDERS, OTHER_GAS_PROVIDERS } from '../providers';
 import { applianceStatusOptions } from '../Steps/Appliances';
-import { EnergyCalculatorExpenseType, ENERGY_CALCULATOR_EXPENSE_NAME_MAP } from '../Steps/Expenses';
+import { useEnergyCalculatorExpenseOptions } from '../Steps/Expenses';
 
 /**
  * Gathers the energy screener's utility questions under one confirmation
@@ -24,6 +24,7 @@ export default function EnergyCalculatorEnergyInfo() {
   const { energyCalculator } = formData;
   const { formatMessage } = useIntl();
   const stepDirectory = useStepDirectory();
+  const expenseOptions = useEnergyCalculatorExpenseOptions();
   const asks = (step: QuestionName) => stepDirectory.includes(step);
 
   const electricProvider = energyCalculator?.electricProvider ?? 'other';
@@ -122,7 +123,7 @@ export default function EnergyCalculatorEnergyInfo() {
 
     const bills = formData.expenses
       .map((expense, index) => {
-        const text = ENERGY_CALCULATOR_EXPENSE_NAME_MAP[expense.expenseSourceName as EnergyCalculatorExpenseType];
+        const text = expenseOptions[expense.expenseSourceName]?.text;
 
         if (text === undefined) {
           return null;

@@ -7,6 +7,30 @@ import { createFilterState, createFormData } from '../testHelpers';
 import { calculateDerivedFilters } from './citizenshipFilterConfig';
 import { useMediaQuery } from '@mui/material';
 import { Language } from '../../../Assets/languageOptions';
+import { FormattedMessage } from 'react-intl';
+
+// `legal_status_options` as benefits-api serves it, after the config hook turns each label into a message.
+const LEGAL_STATUS_TEXT: [string, string, string][] = [
+  ['citizen', 'U.S. Citizen', 'U.S. citizens by birth or naturalization.'],
+  ['gc_5plus', 'Green Card 5+', 'Lawful permanent residents who have had their green card for 5 or more years.'],
+  ['gc_5less', 'Green Card <5', 'Lawful permanent residents who have had their green card for less than 5 years.'],
+  ['refugee', 'Refugee/Asylee', 'Individuals granted refugee or asylee status by the U.S. government.'],
+  [
+    'otherWithWorkPermission',
+    'Other Lawful',
+    'Other lawfully present noncitizens with authorization to live or work in the U.S.',
+  ],
+  ['non_citizen', 'Undocumented', 'Individuals without lawful immigration status (includes DACA recipients).'],
+];
+const LEGAL_STATUS_OPTIONS = Object.fromEntries(
+  LEGAL_STATUS_TEXT.map(([status, label, tooltip]) => [
+    status,
+    {
+      label: <FormattedMessage id={`citizenshipButton-${status}`} defaultMessage={label} />,
+      tooltip: <FormattedMessage id={`citizenshipTooltip-${status}`} defaultMessage={tooltip} />,
+    },
+  ]),
+);
 
 // Mock dependencies
 jest.mock('../Results', () => ({
@@ -37,7 +61,7 @@ describe('Filter Component', () => {
     locale: 'en-us' as Language,
     selectLanguage: jest.fn(),
     getReferrer: jest.fn((_key, defaultValue) => defaultValue ?? '') as any,
-    config: undefined,
+    config: { legal_status_options: LEGAL_STATUS_OPTIONS } as any,
     configLoading: false,
     theme: {} as any,
     setTheme: jest.fn(),
@@ -62,7 +86,7 @@ describe('Filter Component', () => {
     filterState = defaultFilterState,
     formData = defaultFormData,
     isMobile = false,
-    collapseDescription = false
+    collapseDescription = false,
   ) => {
     (useResultsContext as jest.Mock).mockReturnValue({
       filterState,
@@ -70,9 +94,7 @@ describe('Filter Component', () => {
     });
 
     // First call is for isMobile, second is for collapseDescription
-    mockUseMediaQuery
-      .mockReturnValueOnce(isMobile)
-      .mockReturnValueOnce(collapseDescription);
+    mockUseMediaQuery.mockReturnValueOnce(isMobile).mockReturnValueOnce(collapseDescription);
 
     mockCalculateDerivedFilters.mockReturnValue(new Set());
 
@@ -81,7 +103,7 @@ describe('Filter Component', () => {
         <Context.Provider value={createContextValue(formData)}>
           <Filter />
         </Context.Provider>
-      </IntlProvider>
+      </IntlProvider>,
     );
   };
 
@@ -115,7 +137,9 @@ describe('Filter Component', () => {
       expect(screen.getByRole('button', { name: /Select gc_5plus citizenship status/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Select gc_5less citizenship status/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Select refugee citizenship status/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Select otherWithWorkPermission citizenship status/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /Select otherWithWorkPermission citizenship status/i }),
+      ).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Select non_citizen citizenship status/i })).toBeInTheDocument();
     });
 
@@ -168,9 +192,9 @@ describe('Filter Component', () => {
     it('should render all 6 citizenship options in correct order', () => {
       renderFilter(defaultFilterState, defaultFormData, false);
 
-      const buttons = screen.getAllByRole('button').filter(btn =>
-        btn.getAttribute('aria-label')?.includes('citizenship status')
-      );
+      const buttons = screen
+        .getAllByRole('button')
+        .filter((btn) => btn.getAttribute('aria-label')?.includes('citizenship status'));
 
       expect(buttons).toHaveLength(6);
       expect(buttons[0]).toHaveAccessibleName(/citizen/i);
@@ -184,11 +208,11 @@ describe('Filter Component', () => {
     it('should render InfoOutlinedIcon for each button', () => {
       renderFilter(defaultFilterState, defaultFormData, false);
 
-      const buttons = screen.getAllByRole('button').filter(btn =>
-        btn.getAttribute('aria-label')?.includes('citizenship status')
-      );
+      const buttons = screen
+        .getAllByRole('button')
+        .filter((btn) => btn.getAttribute('aria-label')?.includes('citizenship status'));
 
-      buttons.forEach(button => {
+      buttons.forEach((button) => {
         const icon = within(button).getByTestId('InfoOutlinedIcon');
         expect(icon).toBeInTheDocument();
       });
@@ -215,7 +239,7 @@ describe('Filter Component', () => {
 
       // Select option - need to find by text content in the menu item
       const options = screen.getAllByRole('option');
-      const gc5lessOption = options.find(opt => opt.textContent?.includes('Green Card <5'));
+      const gc5lessOption = options.find((opt) => opt.textContent?.includes('Green Card <5'));
       fireEvent.click(gc5lessOption!);
 
       expect(mockCalculateDerivedFilters).toHaveBeenCalledWith('gc_5less', defaultFormData.householdData);
@@ -235,13 +259,13 @@ describe('Filter Component', () => {
       expect(options).toHaveLength(6);
 
       // Check that all options are present by text content
-      const optionTexts = options.map(opt => opt.textContent);
-      expect(optionTexts.some(text => text?.includes('U.S. Citizen'))).toBe(true);
-      expect(optionTexts.some(text => text?.includes('Green Card 5+'))).toBe(true);
-      expect(optionTexts.some(text => text?.includes('Green Card <5'))).toBe(true);
-      expect(optionTexts.some(text => text?.includes('Refugee/Asylee'))).toBe(true);
-      expect(optionTexts.some(text => text?.includes('Other Lawful'))).toBe(true);
-      expect(optionTexts.some(text => text?.includes('Undocumented'))).toBe(true);
+      const optionTexts = options.map((opt) => opt.textContent);
+      expect(optionTexts.some((text) => text?.includes('U.S. Citizen'))).toBe(true);
+      expect(optionTexts.some((text) => text?.includes('Green Card 5+'))).toBe(true);
+      expect(optionTexts.some((text) => text?.includes('Green Card <5'))).toBe(true);
+      expect(optionTexts.some((text) => text?.includes('Refugee/Asylee'))).toBe(true);
+      expect(optionTexts.some((text) => text?.includes('Other Lawful'))).toBe(true);
+      expect(optionTexts.some((text) => text?.includes('Undocumented'))).toBe(true);
     });
   });
 
@@ -252,7 +276,13 @@ describe('Filter Component', () => {
           {
             frontendId: 'member1',
             age: 25,
-            conditions: { student: false, pregnant: true, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false },
+            conditions: {
+              student: false,
+              pregnant: true,
+              blindOrVisuallyImpaired: false,
+              disabled: false,
+              longTermDisability: false,
+            },
           } as any,
         ],
       });
@@ -393,7 +423,7 @@ describe('Filter Component', () => {
           <Context.Provider value={createContextValue(defaultFormData)}>
             <Filter />
           </Context.Provider>
-        </IntlProvider>
+        </IntlProvider>,
       );
 
       // Mobile view - dropdown should exist
@@ -442,7 +472,7 @@ describe('Filter Component', () => {
           <Context.Provider value={createContextValue(defaultFormData)}>
             <Filter />
           </Context.Provider>
-        </IntlProvider>
+        </IntlProvider>,
       );
 
       const currentSelection2 = screen.getByText(/Current selection:/i).parentElement;
@@ -455,9 +485,9 @@ describe('Filter Component', () => {
       renderFilter(defaultFilterState, defaultFormData, false);
 
       // Verify all 6 options are rendered
-      const citizenshipButtons = screen.getAllByRole('button').filter(btn =>
-        btn.getAttribute('aria-label')?.includes('citizenship status')
-      );
+      const citizenshipButtons = screen
+        .getAllByRole('button')
+        .filter((btn) => btn.getAttribute('aria-label')?.includes('citizenship status'));
 
       expect(citizenshipButtons).toHaveLength(6);
     });

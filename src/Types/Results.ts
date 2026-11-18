@@ -1,5 +1,4 @@
 import { CitizenLabels } from '../Components/Results/Filter/citizenshipFilterConfig';
-import { Language } from '../Assets/languageOptions';
 
 export type Translation = {
   default_message: string;
@@ -16,7 +15,7 @@ export type ProgramNavigator = {
   email: Translation;
   assistance_link: Translation;
   description: Translation;
-  languages: Language[];
+  languages: string[];
 };
 
 export type ProgramCategoryCap = {

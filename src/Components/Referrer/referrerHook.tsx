@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FormattedMessageType, QuestionName } from '../../Types/Questions';
+import { UiOption } from './uiOptions';
 
 type ReferrerOptions<T> = {
   default: T;
@@ -18,7 +19,7 @@ export type ReferrerData = {
   logoClass: ReferrerOptions<string>;
   footerLogoClass: ReferrerOptions<string>;
   shareLink: ReferrerOptions<string>;
-  uiOptions: ReferrerOptions<string[]>;
+  uiOptions: ReferrerOptions<UiOption[]>;
   stepDirectory: ReferrerOptions<StepDirectory>;
   noResultMessage: ReferrerOptions<FormattedMessageType>;
   defaultLanguage: ReferrerOptions<string>;

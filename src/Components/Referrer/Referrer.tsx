@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+import { UiOption } from './uiOptions';
 import { Context } from '../Wrapper/Wrapper';
 import Header from '../Header/Header';
 import TwoOneOneFooterCO from '../TwoOneOneCOComponents/TwoOneOneFooterCO/TwoOneOneFooterCO';
@@ -28,7 +29,7 @@ import CclaFooter from '../CclaComponents/CclaFooter/CclaFooter';
 
 export const BrandedHeader = () => {
   const { getReferrer } = useContext(Context);
-  const uiOptions = getReferrer('uiOptions', [] as string[]);
+  const uiOptions = getReferrer('uiOptions', [] as UiOption[]);
   const isEnergyCalculator = useIsEnergyCalculator();
 
   if (isEnergyCalculator) {
@@ -61,14 +62,14 @@ export const BrandedHeader = () => {
 
 export const BrandedFooter = () => {
   const { getReferrer } = useContext(Context);
-  const uiOptions = getReferrer('uiOptions', [] as string[]);
+  const uiOptions = getReferrer('uiOptions', [] as UiOption[]);
   const isEnergyCalculator = useIsEnergyCalculator();
 
   if (isEnergyCalculator) {
     return <EnergyCalculatorFooter />;
   }
 
-  const footerMap = [
+  const footerMap: { flag: UiOption; component: () => JSX.Element }[] = [
     { flag: '211co', component: TwoOneOneFooterCO },
     { flag: '211nc', component: TwoOneOneFooterNC },
     { flag: '211ks', component: TwoOneOneFooterKS },
@@ -90,7 +91,7 @@ export const BrandedFooter = () => {
 
 export const ResultsMessageForNeeds = () => {
   const { getReferrer } = useContext(Context);
-  const uiOptions = getReferrer('uiOptions', [] as string[]);
+  const uiOptions = getReferrer('uiOptions', [] as UiOption[]);
 
   if (uiOptions.includes('nc_show_211_link')) {
     return <NcLink211Message />;

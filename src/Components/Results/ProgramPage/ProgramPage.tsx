@@ -9,8 +9,7 @@ import WarningMessage from '../../WarningComponent/WarningMessage';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Context } from '../../Wrapper/Wrapper';
 import { findProgramById, useResultsContext, useResultsLink } from '../Results';
-import { Language } from '../../../Assets/languageOptions';
-import { allNavigatorLanguages } from './NavigatorLanguages';
+import { useNavigatorLanguageBadges } from './NavigatorLanguages';
 import { formatPhoneNumber, ICON_NAME_MAP } from '../helpers';
 import { Icon } from '../../Icon/Icon';
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
@@ -32,6 +31,7 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   const intl = useIntl();
   const track = useTrackEvent();
   const trackItemList = useTrackItemList();
+  const navigatorLanguageBadges = useNavigatorLanguageBadges();
   const [openPEmodal, setOpenPEModal] = useState(false);
   const { policyEngineData } = useResultsContext();
 
@@ -173,10 +173,10 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
   };
 
   const backLink = useResultsLink(`results/benefits`);
-  const displayLanguageFlags = (navigatorLanguages: Language[]) => {
+  const displayLanguageFlags = (navigatorLanguages: string[]) => {
     // Only render flags for languages we have a label for; unknown codes
     // (e.g. "uk", "ja", "de") would otherwise render as empty boxes.
-    const knownLanguages = navigatorLanguages.filter((lang) => allNavigatorLanguages[lang] !== undefined);
+    const knownLanguages = navigatorLanguages.filter((lang) => navigatorLanguageBadges[lang] !== undefined);
 
     if (knownLanguages.length === 0) {
       return null;
@@ -187,7 +187,7 @@ const ProgramPage = ({ program }: ProgramPageProps) => {
         {knownLanguages.map((lang) => {
           return (
             <p className="navigator-lang-flag" key={lang}>
-              {allNavigatorLanguages[lang]}
+              {navigatorLanguageBadges[lang]}
             </p>
           );
         })}

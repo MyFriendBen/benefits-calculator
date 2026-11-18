@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+import { HEAD_OF_HOUSEHOLD } from './relationships';
 import { EnergyCalculatorMember, FormData, StudentEligibility } from '../Types/FormData';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { ScreenApiResponse } from '../apiCalls';
@@ -27,26 +28,7 @@ export function useUpdateFormData() {
       referralSource: response.referral_source ?? undefined,
       immutableReferrer: response.referrer_code ?? undefined,
       path: response.path ?? undefined,
-      acuteHHConditions: {
-        food: response.needs_food ?? false,
-        babySupplies: response.needs_baby_supplies ?? false,
-        housing: response.needs_housing_help ?? false,
-        support: response.needs_mental_health_help ?? false,
-        childDevelopment: response.needs_child_dev_help ?? false,
-        familyPlanning: response.needs_family_planning_help ?? false,
-        jobResources: response.needs_job_resources ?? false,
-        dentalCare: response.needs_dental_care ?? false,
-        legalServices: response.needs_legal_services ?? false,
-        savings: response.needs_college_savings ?? false,
-        veteranServices: response.needs_veteran_services ?? false,
-        disabilityResources: response.needs_disability_resources ?? false,
-        agingResources: response.needs_aging_resources ?? false,
-        homelessServices: response.needs_homeless_services ?? false,
-        freeLowCostMedicalCare: response.needs_free_low_cost_medical_care ?? false,
-        drugAlcoholUse: response.needs_drug_alcohol_use ?? false,
-        transportation: response.needs_transportation ?? false,
-        medicalExpensesAndDebt: response.needs_medical_expenses_and_debt ?? false,
-      },
+      acuteHHConditions: Object.fromEntries((response.acute_needs ?? []).map((need) => [need, true])),
       signUpInfo: {
         email: '',
         phone: '',
@@ -77,7 +59,7 @@ export function useUpdateFormData() {
       };
     }
 
-    let defaultRelationship = 'headOfHousehold';
+    let defaultRelationship = HEAD_OF_HOUSEHOLD;
     const initialHHMHealthInsurance = {
       none: false,
       employer: false,
