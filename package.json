@@ -27,6 +27,7 @@
     "libphonenumber-js": "^1.12.31",
     "lucide-react": "^1.22.0",
     "nepali-number": "^1.0.3",
+    "patch-package": "^8.0.1",
     "prettier": "^2.8.8",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
@@ -51,6 +52,7 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "heroku-postbuild": "npm run build",
+    "postinstall": "patch-package",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "format": "prettier --write . --config .prettierrc.json",
@@ -105,6 +107,7 @@
     "http-proxy-agent": {
       "@tootallnate/once": "^2.0.1"
     },
-    "typescript": "$typescript"
+    "typescript": "$typescript",
+    "webpack-dev-server": "^5.2.6"
   }
 }
