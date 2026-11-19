@@ -73,6 +73,11 @@ const NEEDS_MAPPING: Record<string, Topics> = {
     subtopic: 'Health%20Screening%2FDiagnostic%20Services%2CSpecialized%20Treatment%20and%20Prevention',
     keyword: 'free health care clinic',
   },
+  drugAlcoholUse: {
+    topic: 'Mental+Health+and+Substance+Use+Disorder+Services',
+    subtopic: 'Substance+Use+Disorder+Services',
+    keyword: 'substance use treatment',
+  },
 };
 
 const BASE_URL = 'https://nc211.org/search/?';

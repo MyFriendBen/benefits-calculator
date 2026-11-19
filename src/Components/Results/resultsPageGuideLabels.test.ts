@@ -47,14 +47,10 @@ const REQUIRED: ReadonlyArray<[label: string, file: string]> = [
   ['Long-Term Benefits', 'Tabs/buildTabs.ts'],
   ['Additional Resources', 'Tabs/buildTabs.ts'],
 
-  // Citizenship filter: the header and all six options the guide enumerates.
+  // Citizenship filter: the header. benefits-api serves the six options' labels
+  // (`legal_status_options`), so its `programs/test_allowed_values.py` guards the
+  // words the guide enumerates.
   ['Filter Results by Citizenship', 'Filter/Filter.tsx'],
-  ['U.S. Citizen', 'Filter/citizenshipFilterConfig.tsx'],
-  ['Green Card 5+', 'Filter/citizenshipFilterConfig.tsx'],
-  ['Green Card <5', 'Filter/citizenshipFilterConfig.tsx'],
-  ['Refugee/Asylee', 'Filter/citizenshipFilterConfig.tsx'],
-  ['Other Lawful', 'Filter/citizenshipFilterConfig.tsx'],
-  ['Undocumented', 'Filter/citizenshipFilterConfig.tsx'],
 
   // Program card: the three things the guide says a card shows, plus the way in.
   ['Application Time: ', 'Programs/ProgramCard.tsx'],

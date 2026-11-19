@@ -6,27 +6,11 @@ import { useConfig } from '../Components/Config/configHook';
 import { Context } from '../Components/Wrapper/Wrapper';
 import { FormattedMessageType } from '../Types/Questions';
 
-export type Language = 'en-us' | 'es' | 'vi' | 'fr' | 'am' | 'so' | 'ru' | 'ne' | 'my' | 'zh' | 'ar' | 'sw' | 'pl' | 'tl' | 'ko' | 'ur' | 'pt-br' | 'ht';
-export const LANGUAGE_OPTIONS: Record<Language, string> = {
-  'en-us': 'English',
-  es: 'Español',
-  vi: 'Tiếng Việt',
-  fr: 'Français',
-  am: 'አማርኛ',
-  so: 'Soomaali',
-  ru: 'Русский',
-  ne: 'नेपाली',
-  my: 'မြန်မာဘာသာစကား',
-  zh: '中文',
-  ar: 'عربي',
-  sw: 'Kiswahili',
-  pl: 'Polski',
-  tl: 'Tagalog',
-  ko: '한국어',
-  ur: 'اردو',
-  'pt-br': 'Português Brasileiro',
-  ht: 'Kreyòl',
-};
+/**
+ * A site locale code. The ones a white label offers come from benefits-api (`language_options`, from
+ * `settings.LANGUAGES`), so the screener keeps no list of its own.
+ */
+export type Language = string;
 
 export const rightToLeftLanguages = ['ar', 'ur'];
 
@@ -60,5 +44,3 @@ export function OverrideableTranslation({ id, defaultMessage }: OverrideableTran
 
   return <FormattedMessage id={id} defaultMessage={defaultMessage} />;
 }
-
-export default LANGUAGE_OPTIONS;

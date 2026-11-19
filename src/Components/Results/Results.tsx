@@ -1,4 +1,14 @@
-import { ComponentType, createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ComponentType,
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { UiOption } from '../Referrer/uiOptions';
 import ResultsError from './ResultsError/ResultsError';
 import Loading from './Loading/Loading';
 import {
@@ -134,7 +144,7 @@ export function useResultsLink(link: string) {
 export function useImmediateHelpSuppressed() {
   const { getReferrer } = useContext(Context);
 
-  return getReferrer('uiOptions', [] as string[]).includes('no_results_more_help');
+  return getReferrer('uiOptions', [] as UiOption[]).includes('no_results_more_help');
 }
 
 // Shared by every place that needs to know whether there's anything to show on

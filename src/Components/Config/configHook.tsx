@@ -20,7 +20,6 @@ export const OPTION_CARD_ICON_MAP: Record<string, string> = {
   Medicaid: 'heart-pulse',
   Medicare: 'stethoscope',
   Chp: 'baby',
-  Emergency_medicaid: 'ambulance',
   Family_planning: 'heart-handshake',
   VA: 'shield-plus',
   // Conditions
@@ -44,9 +43,14 @@ export const OPTION_CARD_ICON_MAP: Record<string, string> = {
   Savings: 'piggy-bank',
   Transportation: 'bus-front',
   Medical_expenses_and_debt: 'heart-plus',
+  Drug_alcohol_use: 'life-buoy',
   Military: 'shield',
   Aging: 'tree-deciduous',
   Youth_development: 'shapes',
+  // Energy calculator utility bills
+  Heating: 'flame',
+  Cooling: 'air-vent',
+  Electricity: 'lightbulb',
 };
 
 type Item = {
@@ -59,24 +63,25 @@ type IconItem = {
   _icon: string;
 };
 
-// Transforms objects with icon key to return a Lucide Icon component.
-// The EnergyCalculator-specific icons (SurvivingSpouse, Wheelchair, HeartRate) preserve
-// their config-driven _classname; all other icons use the shared option-card class.
+// The energy calculator's icons keep their config-driven _classname.
+export const ENERGY_CALCULATOR_ICON_MAP: Record<string, string> = {
+  SurvivingSpouse: 'user-round',
+  Wheelchair: 'accessibility',
+  HeartRate: 'square-activity',
+};
+
+// Transforms objects with icon key to return a Lucide Icon component. Every `_icon` name a white
+// label config uses must be in one of the two maps: apiServedLists.test.ts pins them to the API's.
 function transformItemIcon(item: unknown): any {
   const icon = item as IconItem;
 
-  switch (icon._icon) {
-    case 'SurvivingSpouse':
-      return <Icon name="user-round" className={icon._classname} />;
-    case 'Wheelchair':
-      return <Icon name="accessibility" className={icon._classname} />;
-    case 'HeartRate':
-      return <Icon name="square-activity" className={icon._classname} />;
-    default: {
-      const lucideName = OPTION_CARD_ICON_MAP[icon._icon] ?? 'circle-dot';
-      return <Icon name={lucideName} className="option-card-lucide-icon" />;
-    }
+  const energyCalculatorIcon = ENERGY_CALCULATOR_ICON_MAP[icon._icon];
+  if (energyCalculatorIcon !== undefined) {
+    return <Icon name={energyCalculatorIcon} className={icon._classname} />;
   }
+
+  const lucideName = OPTION_CARD_ICON_MAP[icon._icon] ?? 'circle-dot';
+  return <Icon name={lucideName} className="option-card-lucide-icon" />;
 }
 
 // Recursively transform any object that has _label && _default_message as keys into a FormattedMessage

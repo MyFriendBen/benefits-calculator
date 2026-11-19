@@ -8,7 +8,13 @@ import {
   ApiUser,
   ApiUserWriteOnly,
 } from '../Types/ApiFormData.js';
-import { EnergyCalculatorFormData, EnergyCalculatorMember, FormData, HouseholdData } from '../Types/FormData';
+import {
+  AcuteHHConditions,
+  EnergyCalculatorFormData,
+  EnergyCalculatorMember,
+  FormData,
+  HouseholdData,
+} from '../Types/FormData';
 import { putScreen, postScreen, putUser, getScreen } from '../apiCalls';
 import { Language } from './languageOptions';
 import { useContext } from 'react';
@@ -43,23 +49,7 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
     referral_source: formData.referralSource ?? null,
     referrer_code: formData.immutableReferrer ?? null,
     path: formData.path ?? null,
-    needs_food: formData.acuteHHConditions.food ?? null,
-    needs_baby_supplies: formData.acuteHHConditions.babySupplies ?? null,
-    needs_housing_help: formData.acuteHHConditions.housing ?? null,
-    needs_mental_health_help: formData.acuteHHConditions.support ?? null,
-    needs_child_dev_help: formData.acuteHHConditions.childDevelopment ?? null,
-    needs_family_planning_help: formData.acuteHHConditions.familyPlanning ?? null,
-    needs_job_resources: formData.acuteHHConditions.jobResources ?? null,
-    needs_dental_care: formData.acuteHHConditions.dentalCare ?? null,
-    needs_legal_services: formData.acuteHHConditions.legalServices ?? null,
-    needs_college_savings: formData.acuteHHConditions.savings ?? null,
-    needs_veteran_services: formData.acuteHHConditions.veteranServices ?? null,
-    needs_disability_resources: formData.acuteHHConditions.disabilityResources ?? null,
-    needs_aging_resources: formData.acuteHHConditions.agingResources ?? null,
-    needs_homeless_services: formData.acuteHHConditions.homelessServices ?? null,
-    needs_free_low_cost_medical_care: formData.acuteHHConditions.freeLowCostMedicalCare ?? null,
-    needs_transportation: formData.acuteHHConditions.transportation ?? null,
-    needs_medical_expenses_and_debt: formData.acuteHHConditions.medicalExpensesAndDebt ?? null,
+    acute_needs: getAcuteNeeds(formData.acuteHHConditions),
     utm_id: formData.utm?.id ?? null,
     utm_source: formData.utm?.source ?? null,
     utm_medium: formData.utm?.medium ?? null,
@@ -69,6 +59,18 @@ const getScreensBody = (formData: FormData, languageCode: Language, whiteLabel: 
   };
 
   return screenBody;
+};
+
+// The household's needs as the option keys benefits-api takes (`acute_needs`); it saves each to its
+// own column. Null until the needs step has been answered, so earlier saves leave them alone.
+export const getAcuteNeeds = (conditions: AcuteHHConditions): string[] | null => {
+  if (Object.keys(conditions).length === 0) {
+    return null;
+  }
+
+  return Object.entries(conditions)
+    .filter(([, needed]) => needed)
+    .map(([need]) => need);
 };
 
 const getHouseholdMembersBodies = (formData: FormData): ApiHouseholdMember[] => {

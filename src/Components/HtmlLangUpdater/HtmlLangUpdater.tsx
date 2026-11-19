@@ -1,21 +1,22 @@
 import { useContext, useEffect } from 'react';
 import { Context } from '../Wrapper/Wrapper';
-import LANGUAGE_OPTIONS, { Language } from '../../Assets/languageOptions';
+import { useConfig } from '../Config/configHook';
 
 /**
  * This component updates the 'lang' attribute on the HTML
  * element to prevent Google Translate from overriding our
- * translations, but only for languages from LANGUAGE_OPTIONS.
+ * translations, but only for languages the white label offers.
  */
 export const HtmlLangUpdater = () => {
   const { locale } = useContext(Context);
+  const languageOptions = useConfig<Record<string, string>>('language_options', {});
 
   useEffect(() => {
     const htmlLang = locale.slice(0, 2);
     document.documentElement.setAttribute('lang', htmlLang);
 
     if (htmlLang !== 'en') {
-      const supportedLanguageCodes = Object.keys(LANGUAGE_OPTIONS).map((langKey) => (langKey as Language).slice(0, 2));
+      const supportedLanguageCodes = Object.keys(languageOptions).map((code) => code.slice(0, 2));
 
       if (supportedLanguageCodes.includes(htmlLang)) {
         document.documentElement.setAttribute('translate', 'no');
@@ -25,7 +26,7 @@ export const HtmlLangUpdater = () => {
     } else {
       document.documentElement.removeAttribute('translate');
     }
-  }, [locale]);
+  }, [locale, languageOptions]);
 
   return null;
 };

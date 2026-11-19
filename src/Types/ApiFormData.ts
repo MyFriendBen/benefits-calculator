@@ -163,24 +163,8 @@ export type ApiFormData = {
   has_medicare_hi?: boolean | null;
   has_chp_hi?: boolean | null;
   has_no_hi?: boolean | null;
-  needs_food: boolean | null;
-  needs_baby_supplies: boolean | null;
-  needs_housing_help: boolean | null;
-  needs_mental_health_help: boolean | null;
-  needs_child_dev_help: boolean | null;
-  needs_funeral_help?: boolean | null;
-  needs_family_planning_help: boolean | null;
-  needs_job_resources: boolean | null;
-  needs_dental_care: boolean | null;
-  needs_legal_services: boolean | null;
-  needs_college_savings: boolean | null;
-  needs_veteran_services: boolean | null;
-  needs_disability_resources: boolean | null;
-  needs_aging_resources: boolean | null;
-  needs_homeless_services: boolean | null;
-  needs_free_low_cost_medical_care: boolean | null;
-  needs_transportation: boolean | null;
-  needs_medical_expenses_and_debt: boolean | null;
+  // The household's needs as option keys; benefits-api saves each to its own column.
+  acute_needs: string[] | null;
   utm_id: string | null;
   utm_source: string | null;
   utm_medium: string | null;

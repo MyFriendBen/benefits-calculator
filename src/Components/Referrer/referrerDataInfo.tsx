@@ -34,6 +34,7 @@ import CESN_Colorado_White from '../../Assets/States/CO/WhiteLabels/cesn/colorad
 import HispanicFederation_MFBLogo from '../../Assets/States/NC/WhiteLabels/HispanicFederation/HispanicFederation_MFBLogo.png';
 import KS211_MFBLogo from '../../Assets/States/KS/WhiteLabels/TwoOneOneAssets/ks211_mfb_logo.png';
 import MO211_MFBLogo from '../../Assets/States/MO/WhiteLabels/TwoOneOneAssets/mo211_mfb_logo.png';
+import NJ211_MFBLogo from '../../Assets/States/NJ/WhiteLabels/TwoOneOneAssets/nj211_mfb_logo.png';
 // CU Denver reversed/white logo — derived from CU Denver's color PNG by recoloring the dark
 // ink to white and keeping the gold shield, so it reads on the black cu_denver header.
 import CUDenverLogo from '../../Assets/States/CO/WhiteLabels/CUDenver/CUDenver_Logo_White.png';
@@ -83,6 +84,7 @@ const logoMap: { [key: string]: string | undefined } = {
   // The uwgkc referrer spans both states, so it picks the lockup for whichever screener it entered.
   KS211_MFBLogo: KS211_MFBLogo,
   MO211_MFBLogo: MO211_MFBLogo,
+  NJ211_MFBLogo: NJ211_MFBLogo,
 };
 
 // Plain render helper — NOT a hook/component, so it must not call hooks itself

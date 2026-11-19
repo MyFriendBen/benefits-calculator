@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState, useMemo } from 'react';
+import { HEAD_OF_HOUSEHOLD } from '../../../../Assets/relationships';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useFieldArray, SubmitHandler } from 'react-hook-form';
@@ -102,7 +103,7 @@ const HouseholdMemberBasicInfoPage = () => {
           frontendId: existing?.frontendId,
           birthMonth: existing?.birthMonth || 0,
           birthYear: existing?.birthYear || UNSET_BIRTH_YEAR,
-          relationshipToHH: existing?.relationshipToHH || (index === 0 ? 'headOfHousehold' : ''),
+          relationshipToHH: existing?.relationshipToHH || (index === 0 ? HEAD_OF_HOUSEHOLD : ''),
         };
       }),
     // Intentionally only on mount — we don't want formData changes mid-flow to reset fields.
@@ -296,7 +297,10 @@ const HouseholdMemberBasicInfoPage = () => {
           </Box>
         )}
 
-        <PrevAndContinueButtons backNavigationFunction={navigateBack} stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberBasics} />
+        <PrevAndContinueButtons
+          backNavigationFunction={navigateBack}
+          stepNameOverride={HOUSEHOLD_SUBSTEP_IDS.memberBasics}
+        />
       </form>
 
       <DeleteConfirmationPopover

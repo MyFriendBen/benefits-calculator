@@ -11,7 +11,7 @@ const renderWithProviders = (formData: FormData) => {
       <Context.Provider value={{ formData } as any}>
         <NcLink211Message />
       </Context.Provider>
-    </IntlProvider>
+    </IntlProvider>,
   );
 };
 
@@ -21,6 +21,7 @@ jest.mock('../Config/configHook', () => ({
     housing: { text: 'Housing Resources', icon: null },
     homelessServices: { text: 'Shelter Resources', icon: null },
     freeLowCostMedicalCare: { text: 'Health Care Resources', icon: null },
+    drugAlcoholUse: { text: 'Drug/Alcohol Resources', icon: null },
   }),
 }));
 
@@ -66,5 +67,19 @@ describe('NcLink211Message', () => {
         'subtopic=Health%20Screening%2FDiagnostic%20Services%2CSpecialized%20Treatment%20and%20Prevention',
       ),
     );
+  });
+
+  it('links "Help with drug or alcohol use" to NC211 Mental Health and Substance Use Disorder Services > Substance Use Disorder Services', () => {
+    const formData = createFormData();
+    formData.acuteHHConditions = { drugAlcoholUse: true };
+    renderWithProviders(formData);
+
+    const link = screen.getByText(/Drug\/Alcohol Resources/i).closest('a');
+    expect(link).toHaveAttribute(
+      'href',
+      expect.stringContaining('topic=Mental+Health+and+Substance+Use+Disorder+Services'),
+    );
+    expect(link).toHaveAttribute('href', expect.stringContaining('subtopic=Substance+Use+Disorder+Services'));
+    expect(link).toHaveAttribute('href', expect.stringContaining('keyword=substance use treatment'));
   });
 });

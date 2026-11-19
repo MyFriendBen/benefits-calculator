@@ -1,15 +1,22 @@
-import { FormattedMessage } from 'react-intl';
+import { useConfig } from '../../Config/configHook';
 import { HouseholdData } from '../../../Types/FormData';
 import { FormattedMessageType } from '../../../Types/Questions';
 import { calcAge } from '../../../Assets/age';
 
-export type CitizenLabelOptions =
-  | 'citizen'
-  | 'non_citizen'
-  | 'gc_5plus'
-  | 'gc_5less'
-  | 'refugee'
-  | 'otherWithWorkPermission';
+/**
+ * The legal statuses a household picks. benefits-api serves their order, labels and tooltips
+ * (`legal_status_options`); this list exists because the calculated statuses below follow them,
+ * and `apiAllowedValues.test.ts` pins it to the API's.
+ */
+export const CITIZEN_LABEL_OPTIONS = [
+  'citizen',
+  'non_citizen',
+  'gc_5plus',
+  'gc_5less',
+  'refugee',
+  'otherWithWorkPermission',
+] as const;
+export type CitizenLabelOptions = (typeof CITIZEN_LABEL_OPTIONS)[number];
 
 export type CalculatedCitizenLabel =
   | 'gc_18plus_no5'
@@ -107,75 +114,23 @@ export const calculatedCitizenshipFilters: Record<CalculatedCitizenLabel, Calcul
   },
 };
 
-// Button labels and tooltip text for citizenship filters
-type CitizenshipFilterConfig = {
+export type LegalStatusOption = {
   label: FormattedMessageType;
   tooltip: FormattedMessageType;
 };
 
-export const citizenshipFilterConfig: Record<CitizenLabelOptions, CitizenshipFilterConfig> = {
-  citizen: {
-    label: <FormattedMessage id="citizenshipButton-citizen" defaultMessage="U.S. Citizen" />,
-    tooltip: (
-      <FormattedMessage
-        id="citizenshipTooltip-citizen"
-        defaultMessage="U.S. citizens by birth or naturalization."
-      />
-    ),
-  },
-  gc_5plus: {
-    label: <FormattedMessage id="citizenshipButton-gc_5plus" defaultMessage="Green Card 5+" />,
-    tooltip: (
-      <FormattedMessage
-        id="citizenshipTooltip-gc_5plus"
-        defaultMessage="Lawful permanent residents who have had their green card for 5 or more years."
-      />
-    ),
-  },
-  gc_5less: {
-    label: <FormattedMessage id="citizenshipButton-gc_5less" defaultMessage="Green Card <5" />,
-    tooltip: (
-      <FormattedMessage
-        id="citizenshipTooltip-gc_5less"
-        defaultMessage="Lawful permanent residents who have had their green card for less than 5 years."
-      />
-    ),
-  },
-  refugee: {
-    label: <FormattedMessage id="citizenshipButton-refugee" defaultMessage="Refugee/Asylee" />,
-    tooltip: (
-      <FormattedMessage
-        id="citizenshipTooltip-refugee"
-        defaultMessage="Individuals granted refugee or asylee status by the U.S. government."
-      />
-    ),
-  },
-  otherWithWorkPermission: {
-    label: <FormattedMessage id="citizenshipButton-otherLawful" defaultMessage="Other Lawful" />,
-    tooltip: (
-      <FormattedMessage
-        id="citizenshipTooltip-otherLawful"
-        defaultMessage="Other lawfully present noncitizens with authorization to live or work in the U.S."
-      />
-    ),
-  },
-  non_citizen: {
-    label: <FormattedMessage id="citizenshipButton-undocumented" defaultMessage="Undocumented" />,
-    tooltip: (
-      <FormattedMessage
-        id="citizenshipTooltip-undocumented"
-        defaultMessage="Individuals without lawful immigration status (includes DACA recipients)."
-      />
-    ),
-  },
-};
+/** The legal statuses a household picks, in button order, as benefits-api serves them. */
+export function useLegalStatusOptions(): [CitizenLabelOptions, LegalStatusOption][] {
+  const options = useConfig<Record<string, LegalStatusOption>>('legal_status_options', {});
+  return Object.entries(options) as [CitizenLabelOptions, LegalStatusOption][];
+}
 
 /**
  * Calculate which derived filters should be active based on citizenship selection and household data
  */
 export function calculateDerivedFilters(
   selectedCitizenship: CitizenLabelOptions,
-  householdData: HouseholdData[]
+  householdData: HouseholdData[],
 ): Set<CalculatedCitizenLabel> {
   const activeFilters = new Set<CalculatedCitizenLabel>();
 
