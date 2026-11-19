@@ -108,6 +108,15 @@ function extractFrontendIds() {
     let defaultMessage;
     let idNode;
     let hasDefaultMessage = false;
+    // Some descriptors keep their message id in `labelId` (with the English in
+    // `defaultMessage` or `labelDefault`) because their own `id` is something else,
+    // e.g. the results tabs: { id: 'program', labelId: 'resultsOptions.longTermBenefits',
+    // defaultMessage: 'Long-Term Benefits' }, which Tabs.tsx renders as
+    // <FormattedMessage id={tab.labelId} ... />. There `id` is a tab id, not a message id.
+    let labelId;
+    let labelIdNode;
+    let labelDefault;
+    let hasLabelDefault = false;
     for (const prop of obj.properties) {
       if (!ts.isPropertyAssignment(prop) || !prop.name) continue;
       const key = ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name) ? prop.name.text : undefined;
@@ -119,6 +128,20 @@ function extractFrontendIds() {
         hasDefaultMessage = true;
         defaultMessage = staticString(prop.initializer);
       }
+      if (key === 'labelId') {
+        labelId = staticString(prop.initializer);
+        labelIdNode = prop.initializer;
+      }
+      if (key === 'labelDefault') {
+        hasLabelDefault = true;
+        labelDefault = staticString(prop.initializer);
+      }
+    }
+    // `labelId` + an English default is the descriptor; the plain `id` is not a message id.
+    if (labelIdNode && (hasDefaultMessage || hasLabelDefault)) {
+      if (labelId) record(labelId, defaultMessage ?? labelDefault, file);
+      else dynamicIds.push({ file, text: labelIdNode.getText() });
+      return;
     }
     // BOTH keys are required. `id` alone is far too common to be a useful signal -
     // plenty of unrelated objects carry one - whereas `id` + `defaultMessage`
