@@ -17,9 +17,7 @@ interface WLScopedRoutesOptions {
  * Routes scoped to white label (requires :whiteLabel parameter).
  * Includes both custom partner landing pages and generic white label routes.
  */
-export const buildWLScopedRoutes = ({
-  householdMemberStepNumber,
-}: WLScopedRoutesOptions): RouteObject[] => {
+export const buildWLScopedRoutes = ({ householdMemberStepNumber }: WLScopedRoutesOptions): RouteObject[] => {
   // Custom landing pages - checked first before generic :whiteLabel pattern
   const customLandingPages: RouteObject[] = CUSTOM_LANDING_PAGES.map(
     ({ path, whiteLabel, component: Component, props }) => ({

@@ -33,11 +33,7 @@ jest.mock('../RouterUtil/ProgressBarManager', () => {
 
 // Mock stepDirectory - must be called before importing AppLayout
 jest.mock('../../Assets/stepDirectory', () => ({
-  useStepDirectory: jest.fn(() => [
-    { id: 'step1' },
-    { id: 'step2' },
-    { id: 'step3' },
-  ]),
+  useStepDirectory: jest.fn(() => [{ id: 'step1' }, { id: 'step2' }, { id: 'step3' }]),
   STARTING_QUESTION_NUMBER: 2,
 }));
 
@@ -48,9 +44,7 @@ describe('AppLayout', () => {
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <MemoryRouter>
-      <Context.Provider value={mockContext as any}>
-        {children}
-      </Context.Provider>
+      <Context.Provider value={mockContext as any}>{children}</Context.Provider>
     </MemoryRouter>
   );
 
@@ -59,7 +53,7 @@ describe('AppLayout', () => {
       <AppLayout>
         <div>Test Content</div>
       </AppLayout>,
-      { wrapper }
+      { wrapper },
     );
 
     expect(screen.getByTestId('favicon-manager')).toBeInTheDocument();
@@ -73,7 +67,7 @@ describe('AppLayout', () => {
       <AppLayout>
         <div>Content</div>
       </AppLayout>,
-      { wrapper }
+      { wrapper },
     );
 
     // When stepDirectory mock returns an array, it should be 3 + 2 = 5 steps
@@ -93,9 +87,7 @@ describe('AppLayout', () => {
 
     const wrapperWithBanner = ({ children }: { children: React.ReactNode }) => (
       <MemoryRouter>
-        <Context.Provider value={contextWithBanner as any}>
-          {children}
-        </Context.Provider>
+        <Context.Provider value={contextWithBanner as any}>{children}</Context.Provider>
       </MemoryRouter>
     );
 
@@ -103,7 +95,7 @@ describe('AppLayout', () => {
       <AppLayout>
         <div>Content</div>
       </AppLayout>,
-      { wrapper: wrapperWithBanner }
+      { wrapper: wrapperWithBanner },
     );
 
     expect(screen.getByTestId('system-banner')).toBeInTheDocument();
@@ -115,7 +107,7 @@ describe('AppLayout', () => {
       <AppLayout>
         <div>Content</div>
       </AppLayout>,
-      { wrapper }
+      { wrapper },
     );
 
     expect(screen.queryByTestId('system-banner')).not.toBeInTheDocument();
@@ -130,9 +122,7 @@ describe('AppLayout', () => {
 
     const wrapperWithEmptyBanner = ({ children }: { children: React.ReactNode }) => (
       <MemoryRouter>
-        <Context.Provider value={contextWithEmptyBanner as any}>
-          {children}
-        </Context.Provider>
+        <Context.Provider value={contextWithEmptyBanner as any}>{children}</Context.Provider>
       </MemoryRouter>
     );
 
@@ -140,7 +130,7 @@ describe('AppLayout', () => {
       <AppLayout>
         <div>Content</div>
       </AppLayout>,
-      { wrapper: wrapperWithEmptyBanner }
+      { wrapper: wrapperWithEmptyBanner },
     );
 
     expect(screen.queryByTestId('system-banner')).not.toBeInTheDocument();
@@ -151,7 +141,7 @@ describe('AppLayout', () => {
       <AppLayout>
         <div data-testid="test-child">Test Child Content</div>
       </AppLayout>,
-      { wrapper }
+      { wrapper },
     );
 
     const mainMaxWidth = container.querySelector('.main-max-width');
@@ -164,7 +154,7 @@ describe('AppLayout', () => {
       <AppLayout>
         <div>Content</div>
       </AppLayout>,
-      { wrapper }
+      { wrapper },
     );
 
     const appDiv = container.querySelector('.app');
@@ -176,7 +166,7 @@ describe('AppLayout', () => {
       <AppLayout>
         <div>Test Content</div>
       </AppLayout>,
-      { wrapper }
+      { wrapper },
     );
 
     expect(screen.getByTestId('favicon-manager')).toBeInTheDocument();

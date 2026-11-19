@@ -29,8 +29,12 @@ const incomeOptions = {
   support: { childSupport: 'Child Support' as any },
 };
 const frequencyMenuItems = [
-  <option key="monthly" value="monthly">Monthly</option>,
-  <option key="hourly" value="hourly">Hourly</option>,
+  <option key="monthly" value="monthly">
+    Monthly
+  </option>,
+  <option key="hourly" value="hourly">
+    Hourly
+  </option>,
 ];
 
 const Wrapper = ({
@@ -103,8 +107,7 @@ const filledEmploymentStream = (source = 'wages'): IncomeStreamFormData => ({
 });
 
 // MUI Select renders as role="button" with aria-haspopup="listbox" in JSDOM
-const getSelectDivs = () =>
-  document.querySelectorAll('[aria-haspopup="listbox"]') as NodeListOf<HTMLElement>;
+const getSelectDivs = () => document.querySelectorAll('[aria-haspopup="listbox"]') as NodeListOf<HTMLElement>;
 
 // Grabs the Yes/No radiogroup for a question by its accessible name.
 const yesNoGroup = (namePattern: RegExp) => screen.getByRole('radiogroup', { name: namePattern });
@@ -198,9 +201,7 @@ describe('IncomeSection (three-question design)', () => {
 
     it('excludes the employment category from the Q3 category dropdown', async () => {
       render(<Wrapper defaultStreams={[otherStream()]} />);
-      const categorySelect = Array.from(getSelectDivs()).find(
-        (el) => el.getAttribute('aria-label') === 'Category',
-      )!;
+      const categorySelect = Array.from(getSelectDivs()).find((el) => el.getAttribute('aria-label') === 'Category')!;
       fireEvent.mouseDown(categorySelect);
       await waitFor(() => {
         expect(screen.getByRole('option', { name: /government benefits/i })).toBeInTheDocument();
@@ -216,12 +217,17 @@ describe('IncomeSection (three-question design)', () => {
       expect(document.getElementById('income-amount-label-0')).toBeInTheDocument();
       expect(document.getElementById('income-source-label-0')).not.toBeInTheDocument();
       // Employed Yes doesn't hide the gig question.
-      expect(within(yesNoGroup(/are you currently employed/i)).getByRole('radio', { name: /^yes$/i })).toHaveAttribute('aria-checked', 'true');
+      expect(within(yesNoGroup(/are you currently employed/i)).getByRole('radio', { name: /^yes$/i })).toHaveAttribute(
+        'aria-checked',
+        'true',
+      );
     });
 
     it('auto-answers gig=Yes for a saved self-employment stream', () => {
       render(<Wrapper defaultStreams={[employmentStream('selfEmployment')]} />);
-      expect(within(yesNoGroup(/freelance, gig, or occasional work/i)).getByRole('radio', { name: /^yes$/i })).toHaveAttribute('aria-checked', 'true');
+      expect(
+        within(yesNoGroup(/freelance, gig, or occasional work/i)).getByRole('radio', { name: /^yes$/i }),
+      ).toHaveAttribute('aria-checked', 'true');
     });
 
     it('auto-answers other=Yes for a saved non-employment stream', () => {
@@ -273,7 +279,10 @@ describe('IncomeSection (three-question design)', () => {
         expect(screen.queryByText(/this will remove the income you entered/i)).not.toBeInTheDocument();
       });
       expect(screen.getByRole('button', { name: /delete income source/i })).toBeInTheDocument();
-      expect(within(yesNoGroup(/are you currently employed/i)).getByRole('radio', { name: /^yes$/i })).toHaveAttribute('aria-checked', 'true');
+      expect(within(yesNoGroup(/are you currently employed/i)).getByRole('radio', { name: /^yes$/i })).toHaveAttribute(
+        'aria-checked',
+        'true',
+      );
     });
 
     it('does not prompt when the employment rows are empty', () => {

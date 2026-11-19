@@ -87,7 +87,6 @@ describe('useHouseholdMembersNavigation', () => {
       expect(mockNavigate).not.toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
-
   });
 
   // ============================================================================
@@ -109,14 +108,16 @@ describe('useHouseholdMembersNavigation', () => {
     });
 
     it('navigates to confirm-information when redirectToConfirmationPage is true', () => {
-      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, redirectToConfirmationPage: true }));
+      const { result } = renderHook(() =>
+        useHouseholdMembersNavigation({ ...defaultParams, redirectToConfirmationPage: true }),
+      );
       act(() => result.current.navigateNext());
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/confirm-information');
     });
 
     it('confirmation redirect takes priority over page navigation', () => {
       const { result } = renderHook(() =>
-        useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1, redirectToConfirmationPage: true })
+        useHouseholdMembersNavigation({ ...defaultParams, pageNumber: 1, redirectToConfirmationPage: true }),
       );
       act(() => result.current.navigateNext());
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/confirm-information');
@@ -171,7 +172,9 @@ describe('useHouseholdMembersNavigation', () => {
   describe('edge cases', () => {
     it('handles step 1 back navigation correctly (goes to step 0) for single member', () => {
       mockFormData.householdSize = 1;
-      const { result } = renderHook(() => useHouseholdMembersNavigation({ ...defaultParams, currentStepId: 1, pageNumber: 1 }));
+      const { result } = renderHook(() =>
+        useHouseholdMembersNavigation({ ...defaultParams, currentStepId: 1, pageNumber: 1 }),
+      );
       act(() => result.current.navigateBack());
       expect(mockNavigate).toHaveBeenCalledWith('/default/test-uuid/step-0');
     });

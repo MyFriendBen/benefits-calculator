@@ -1,7 +1,7 @@
 /* Column widths shared between the header and every expense row */
 .expenses-list {
-  --expense-amount-col: 10.5rem;   /* $ input (9rem) + 0.75rem padding each side */
-  --expense-frequency-col: 11rem;  /* two freq buttons + 0.75rem padding each side */
+  --expense-amount-col: 10.5rem; /* $ input (9rem) + 0.75rem padding each side */
+  --expense-frequency-col: 11rem; /* two freq buttons + 0.75rem padding each side */
   margin-top: 0;
 }
 
@@ -18,7 +18,6 @@
   border: 0;
 }
 
-
 /* Category header: label | amount header | frequency header */
 .expense-category-header {
   display: grid;
@@ -27,7 +26,7 @@
   border-bottom: 2px solid var(--secondary-color);
   padding-bottom: 0.25rem;
   margin-bottom: 0.5rem;
-  padding-top: .5rem;
+  padding-top: 0.5rem;
 }
 
 .expense-category:first-child .expense-category-header {
@@ -63,7 +62,7 @@
 }
 
 .expense-row--active {
-  background-color: #E6E7E8;
+  background-color: #e6e7e8;
   border-color: var(--primary-color);
 }
 

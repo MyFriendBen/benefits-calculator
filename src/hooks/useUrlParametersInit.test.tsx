@@ -17,9 +17,7 @@ describe('useUrlParametersInit', () => {
   const createWrapper = (initialPath: string, formData = defaultFormData) => {
     return ({ children }: { children: React.ReactNode }) => (
       <MemoryRouter initialEntries={[initialPath]}>
-        <Context.Provider value={{ formData, setFormData: mockSetFormData } as any}>
-          {children}
-        </Context.Provider>
+        <Context.Provider value={{ formData, setFormData: mockSetFormData } as any}>{children}</Context.Provider>
       </MemoryRouter>
     );
   };

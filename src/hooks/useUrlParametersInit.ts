@@ -47,6 +47,6 @@ export const useUrlParametersInit = () => {
         urlSearchParams: urlSearchParams,
       };
     });
-  // eslint-disable-next-line
+    // eslint-disable-next-line
   }, []); // Intentionally empty - this should only run once on mount
 };

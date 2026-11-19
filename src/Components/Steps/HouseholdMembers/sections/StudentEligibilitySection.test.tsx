@@ -28,11 +28,7 @@ const Wrapper = ({
 
   return (
     <IntlProvider locale="en" messages={{}}>
-      <StudentEligibilitySection
-        control={control as any}
-        errors={errors as any}
-        pageNumber={pageNumber}
-      />
+      <StudentEligibilitySection control={control as any} errors={errors as any} pageNumber={pageNumber} />
     </IntlProvider>
   );
 };

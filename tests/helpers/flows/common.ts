@@ -7,13 +7,7 @@
 
 import { Page, expect } from '@playwright/test';
 import { clickContinue, verifyCurrentUrl } from '../navigation';
-import {
-  selectDropdownOption,
-  fillTextField,
-  checkCheckbox,
-  selectDate,
-  selectFrequency,
-} from '../form';
+import { selectDropdownOption, fillTextField, checkCheckbox, selectDate, selectFrequency } from '../form';
 import { answerIncomeQuestion } from '../steps';
 import { FORM_INPUTS, BUTTONS, DROPDOWN, BASIC_INFO_PAGE } from '../selectors';
 import { URL_PATTERNS } from '../utils/constants';
@@ -400,7 +394,10 @@ export async function completeReferralSource(page: Page, referralSource: string)
  * @param page - Playwright page instance
  * @returns Promise with flow result
  */
-export async function completeAdditionalInfo(page: Page, urlPattern: RegExp = URL_PATTERNS.ADDITIONAL_INFO): Promise<FlowResult> {
+export async function completeAdditionalInfo(
+  page: Page,
+  urlPattern: RegExp = URL_PATTERNS.ADDITIONAL_INFO,
+): Promise<FlowResult> {
   try {
     await verifyCurrentUrl(page, urlPattern);
     await clickContinue(page);

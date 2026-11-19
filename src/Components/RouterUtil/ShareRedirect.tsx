@@ -10,8 +10,7 @@ const SHARE_URLS: Record<string, string> = {
 
 const ShareRedirect = () => {
   const { medium } = useParams<{ medium: string }>();
-  const url =
-    medium && Object.prototype.hasOwnProperty.call(SHARE_URLS, medium) ? SHARE_URLS[medium] : SHARE_BASE;
+  const url = medium && Object.prototype.hasOwnProperty.call(SHARE_URLS, medium) ? SHARE_URLS[medium] : SHARE_BASE;
 
   useEffect(() => {
     window.location.replace(url);

@@ -110,7 +110,9 @@ export async function selectDate(page: Page, month: string, year: string): Promi
       } catch (error) {
         if (attempt === maxRetries) {
           throw new Error(
-            `Failed to select ${optionText} from ${buttonName} after ${maxRetries} attempts: ${(error as Error).message}`,
+            `Failed to select ${optionText} from ${buttonName} after ${maxRetries} attempts: ${
+              (error as Error).message
+            }`,
           );
         }
 

@@ -217,9 +217,7 @@ const Disclaimer = () => {
                   }
                   className="top-margin"
                 />
-                {errors.is13OrOlder && (
-                  <ErrorMessageWrapper>{errors.is13OrOlder.message}</ErrorMessageWrapper>
-                )}
+                {errors.is13OrOlder && <ErrorMessageWrapper>{errors.is13OrOlder.message}</ErrorMessageWrapper>}
               </>
             )}
           />

@@ -493,11 +493,17 @@ export function EnergyCalculatorRebateCardTitle({ rebate }: RebateComponentProps
 
     return (
       <>
-        {hasMax && <FormattedMessage id="energyCalculator.rebatePage.title.dollarAmount.max.1" defaultMessage="Up to $" />}
+        {hasMax && (
+          <FormattedMessage id="energyCalculator.rebatePage.title.dollarAmount.max.1" defaultMessage="Up to $" />
+        )}
         {!hasMax && '$'}
         {(hasMax ? amount.maximum! : amount.number).toLocaleString()}
         <FormattedMessage
-          id={hasMax ? 'energyCalculator.rebatePage.title.dollarAmount.max.2' : 'energyCalculator.rebatePage.title.dollarAmount.noMax.1'}
+          id={
+            hasMax
+              ? 'energyCalculator.rebatePage.title.dollarAmount.max.2'
+              : 'energyCalculator.rebatePage.title.dollarAmount.noMax.1'
+          }
           defaultMessage=" off "
         />
         {itemName}
@@ -514,7 +520,11 @@ export function EnergyCalculatorRebateCardTitle({ rebate }: RebateComponentProps
       <>
         {percentStr}
         <FormattedMessage
-          id={hasMax ? 'energyCalculator.rebatePage.title.percent.max.1' : 'energyCalculator.rebatePage.title.percent.noMax.1'}
+          id={
+            hasMax
+              ? 'energyCalculator.rebatePage.title.percent.max.1'
+              : 'energyCalculator.rebatePage.title.percent.noMax.1'
+          }
           defaultMessage=" of cost of "
         />
         {itemName}
@@ -540,7 +550,11 @@ export function EnergyCalculatorRebateCardTitle({ rebate }: RebateComponentProps
       <>
         ${amount.number.toLocaleString()}/<FormatUnit unit={amount.unit} />
         <FormattedMessage
-          id={hasMax ? 'energyCalculator.rebatePage.title.perUnit.max.1' : 'energyCalculator.rebatePage.title.perUnit.noMax.1'}
+          id={
+            hasMax
+              ? 'energyCalculator.rebatePage.title.perUnit.max.1'
+              : 'energyCalculator.rebatePage.title.perUnit.noMax.1'
+          }
           defaultMessage=" off "
         />
         {itemName}

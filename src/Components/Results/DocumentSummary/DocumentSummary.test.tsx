@@ -31,9 +31,7 @@ describe('DocumentSummary', () => {
     it('renders the header text', () => {
       const programs = [createProgram({ documents: [createDocument('Proof of income')] })];
       renderDocumentSummary(programs);
-      expect(
-        screen.getByText(/in order to apply for the programs you might be eligible for/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/in order to apply for the programs you might be eligible for/i)).toBeInTheDocument();
     });
 
     it('renders document items', () => {
@@ -53,9 +51,7 @@ describe('DocumentSummary', () => {
     });
 
     it('uses "required to apply for" wording for the first (most common) document', () => {
-      const programs = [
-        createProgram({ documents: [createDocument('Doc A'), createDocument('Doc B')] }),
-      ];
+      const programs = [createProgram({ documents: [createDocument('Doc A'), createDocument('Doc B')] })];
       renderDocumentSummary(programs);
       expect(screen.getByText(/required to apply for/i)).toBeInTheDocument();
     });
@@ -70,10 +66,7 @@ describe('DocumentSummary', () => {
     it('sorts documents by program count descending', () => {
       const docA = createDocument('Rare doc');
       const docB = createDocument('Common doc');
-      const programs = [
-        createProgram({ documents: [docA, docB] }),
-        createProgram({ documents: [docB] }),
-      ];
+      const programs = [createProgram({ documents: [docA, docB] }), createProgram({ documents: [docB] })];
       renderDocumentSummary(programs);
       const items = screen.getAllByRole('listitem');
       expect(items[0]).toHaveTextContent('Common doc');

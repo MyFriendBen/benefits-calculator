@@ -6,7 +6,10 @@ interface IconProps extends Omit<LucideProps, 'ref'> {
 }
 
 const toPascalCase = (name: string) =>
-  name.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+  name
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
 
 export function Icon({ name, ...props }: IconProps) {
   const LucideIcon = icons[toPascalCase(name) as keyof typeof icons];

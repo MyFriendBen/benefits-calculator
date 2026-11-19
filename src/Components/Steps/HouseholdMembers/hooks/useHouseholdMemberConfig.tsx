@@ -13,14 +13,20 @@ export const useHouseholdMemberConfig = () => {
   const healthInsuranceOptions = useConfig<HealthInsuranceOptions>('health_insurance_options');
   const conditionOptions = useConfig<ConditionOptions>('condition_options');
   const incomeCategories = useConfig<Record<string, FormattedMessageType>>('income_categories', {});
-  const incomeOptions = useConfig<Record<string, Record<string, FormattedMessageType>>>('income_options_by_category', {});
+  const incomeOptions = useConfig<Record<string, Record<string, FormattedMessageType>>>(
+    'income_options_by_category',
+    {},
+  );
   const frequencyOptions = useConfig<Record<string, FormattedMessageType>>('frequency_options');
   const relationshipOptions = useConfig<Record<string, FormattedMessageType>>('relationship_options');
 
   const sortedFrequencyOptions = sortFrequencyOptions(frequencyOptions);
   const frequencyMenuItems = createMenuItems(
     sortedFrequencyOptions,
-    <FormattedMessage id="personIncomeBlock.createFrequencyMenuItems-disabledSelectMenuItem" defaultMessage="Select..." />,
+    <FormattedMessage
+      id="personIncomeBlock.createFrequencyMenuItems-disabledSelectMenuItem"
+      defaultMessage="Select..."
+    />,
   ).flat();
 
   return {

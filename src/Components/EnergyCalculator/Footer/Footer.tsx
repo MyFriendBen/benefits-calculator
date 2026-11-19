@@ -63,8 +63,7 @@ export default function EnergyCalculatorFooter() {
             </a>
           </div>
           <p className="cesn-footer-copyright">
-            &copy; {currentYear}{' '}
-            <FormattedMessage id="cesnFooter.copyright" defaultMessage="State of Colorado" />
+            &copy; {currentYear} <FormattedMessage id="cesnFooter.copyright" defaultMessage="State of Colorado" />
           </p>
         </div>
       </Paper>

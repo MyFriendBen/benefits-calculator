@@ -11,18 +11,14 @@ import {
   EPA_DATA_SOURCE_DEFAULT_MESSAGE,
 } from '../../../../utils/epaEquivalencies';
 import type { RemImpactApiResponse, CalculateImpactFormValues } from './remCalculateImpactTypes';
-import {
-  HOUSEHOLD_TYPE_LABEL_MAP,
-  FUEL_TYPE_LABEL_MAP,
-  UPGRADE_LABEL_MAP,
-} from './remCalculateImpactTypes';
+import { HOUSEHOLD_TYPE_LABEL_MAP, FUEL_TYPE_LABEL_MAP, UPGRADE_LABEL_MAP } from './remCalculateImpactTypes';
 
 // ─── Range bar ────────────────────────────────────────────────────────────────
 
 interface ImpactRangeBarProps {
-  p20: number;   // percentile_20 — most favorable (right end)
+  p20: number; // percentile_20 — most favorable (right end)
   median: number;
-  p80: number;   // percentile_80 — least favorable (left end)
+  p80: number; // percentile_80 — least favorable (left end)
   formatValue: (absValue: number) => string;
   unitSuffix: string;
 }
@@ -42,9 +38,7 @@ function ArrowNumber({
   suffix?: string;
 }) {
   const arrow = isSavings(value) ? '▼' : '▲';
-  const colorClass = isSavings(value)
-    ? 'impact-range-bar__arrow--savings'
-    : 'impact-range-bar__arrow--increase';
+  const colorClass = isSavings(value) ? 'impact-range-bar__arrow--savings' : 'impact-range-bar__arrow--increase';
   return (
     <>
       <span className={`impact-range-bar__arrow ${colorClass}`}>{arrow}</span>
@@ -65,8 +59,7 @@ function ImpactRangeBar({ p20, median, p80, formatValue, unitSuffix }: ImpactRan
   if (totalRange === 0) return null;
 
   // Percent from left edge for a given value
-  const pctFromLeft = (v: number): number =>
-    Math.max(0, Math.min(100, ((leftVal - v) / totalRange) * 100));
+  const pctFromLeft = (v: number): number => Math.max(0, Math.min(100, ((leftVal - v) / totalRange) * 100));
 
   const medianPct = pctFromLeft(median);
   const crossesZero = leftVal > 0 && rightVal < 0;
@@ -77,11 +70,7 @@ function ImpactRangeBar({ p20, median, p80, formatValue, unitSuffix }: ImpactRan
     <div className="impact-range-bar">
       {/* Median label + caret, floats above the bar */}
       <div className="impact-range-bar__median-wrapper">
-        <div
-          className="impact-range-bar__median-float"
-          style={{ left: `${medianPct}%` }}
-          aria-hidden="true"
-        >
+        <div className="impact-range-bar__median-float" style={{ left: `${medianPct}%` }} aria-hidden="true">
           <span className="impact-range-bar__median-value">
             <ArrowNumber value={median} formatFn={formatValue} suffix={unitSuffix} />
           </span>
@@ -104,22 +93,17 @@ function ImpactRangeBar({ p20, median, p80, formatValue, unitSuffix }: ImpactRan
           </>
         ) : (
           <div
-            className={`impact-range-bar__fill ${allNegative ? 'impact-range-bar__fill--savings' : 'impact-range-bar__fill--increase'}`}
+            className={`impact-range-bar__fill ${
+              allNegative ? 'impact-range-bar__fill--savings' : 'impact-range-bar__fill--increase'
+            }`}
             style={{ left: 0, width: '100%' }}
           />
         )}
         {/* Circle indicator at median position */}
-        <div
-          className="impact-range-bar__median-circle"
-          style={{ left: `${medianPct}%` }}
-        />
+        <div className="impact-range-bar__median-circle" style={{ left: `${medianPct}%` }} />
         {/* Grey oval marker at zero crossing — text label is in the end-labels row below */}
         {crossesZero && zeroPct !== null && (
-          <div
-            className="impact-range-bar__zero-pill"
-            style={{ left: `${zeroPct}%` }}
-            aria-hidden="true"
-          />
+          <div className="impact-range-bar__zero-pill" style={{ left: `${zeroPct}%` }} aria-hidden="true" />
         )}
       </div>
 
@@ -129,11 +113,7 @@ function ImpactRangeBar({ p20, median, p80, formatValue, unitSuffix }: ImpactRan
           <ArrowNumber value={leftVal} formatFn={formatValue} />
         </span>
         {crossesZero && zeroPct !== null && (
-          <span
-            className="impact-range-bar__zero-label"
-            style={{ left: `${zeroPct}%` }}
-            aria-hidden="true"
-          >
+          <span className="impact-range-bar__zero-label" style={{ left: `${zeroPct}%` }} aria-hidden="true">
             {formatValue(0)}
           </span>
         )}
@@ -157,18 +137,12 @@ function formatEmissionsLbs(n: number): string {
   return `${Math.round(n).toLocaleString()}lb`;
 }
 
-export default function CalculateImpactResults({
-  result,
-  formValues,
-  onEdit,
-}: CalculateImpactResultsProps) {
+export default function CalculateImpactResults({ result, formValues, onEdit }: CalculateImpactResultsProps) {
   const intl = useIntl();
 
   const householdLabel = HOUSEHOLD_TYPE_LABEL_MAP[formValues.householdType];
   const heatingFuelLabel = FUEL_TYPE_LABEL_MAP[formValues.heatingFuel];
-  const waterHeatingFuelLabel = formValues.waterHeatingFuel
-    ? FUEL_TYPE_LABEL_MAP[formValues.waterHeatingFuel]
-    : null;
+  const waterHeatingFuelLabel = formValues.waterHeatingFuel ? FUEL_TYPE_LABEL_MAP[formValues.waterHeatingFuel] : null;
   const upgradeLabel = UPGRADE_LABEL_MAP[formValues.upgradeChoice];
 
   // The AC disclaimer only applies to the whole-home heat pump upgrade, which adds
@@ -218,10 +192,7 @@ export default function CalculateImpactResults({
   return (
     <div className="calculate-impact-results-outer-card">
       {/* ── Household info summary card ── */}
-      <section
-        className="calculate-impact-summary-card"
-        aria-labelledby="ci-summary-heading"
-      >
+      <section className="calculate-impact-summary-card" aria-labelledby="ci-summary-heading">
         <div className="calculate-impact-summary-header">
           <h2 id="ci-summary-heading" className="calculate-impact-section-title">
             <FormattedMessage
@@ -251,33 +222,21 @@ export default function CalculateImpactResults({
               />
             </dt>
             <dd>
-              <FormattedMessage
-                id={householdLabel.messageId}
-                defaultMessage={householdLabel.defaultMessage}
-              />
+              <FormattedMessage id={householdLabel.messageId} defaultMessage={householdLabel.defaultMessage} />
             </dd>
           </div>
           <div className="calculate-impact-summary-field">
             <dt>
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.field.address"
-                defaultMessage="Address"
-              />
+              <FormattedMessage id="energyCalculator.calculateImpact.field.address" defaultMessage="Address" />
             </dt>
             <dd>{formValues.address}</dd>
           </div>
           <div className="calculate-impact-summary-field">
             <dt>
-              <FormattedMessage
-                id="energyCalculator.calculateImpact.field.heatingFuel"
-                defaultMessage="Heating Fuel"
-              />
+              <FormattedMessage id="energyCalculator.calculateImpact.field.heatingFuel" defaultMessage="Heating Fuel" />
             </dt>
             <dd>
-              <FormattedMessage
-                id={heatingFuelLabel.messageId}
-                defaultMessage={heatingFuelLabel.defaultMessage}
-              />
+              <FormattedMessage id={heatingFuelLabel.messageId} defaultMessage={heatingFuelLabel.defaultMessage} />
             </dd>
           </div>
           {waterHeatingFuelLabel && (
@@ -309,19 +268,13 @@ export default function CalculateImpactResults({
         </h2>
         <div className="calculate-impact-upgrade-value">
           <strong>
-            <FormattedMessage
-              id={upgradeLabel.messageId}
-              defaultMessage={upgradeLabel.defaultMessage}
-            />
+            <FormattedMessage id={upgradeLabel.messageId} defaultMessage={upgradeLabel.defaultMessage} />
           </strong>
         </div>
       </section>
 
       {/* ── Bill and emissions impact ── */}
-      <section
-        className="calculate-impact-bill-emissions-section"
-        aria-labelledby="ci-impact-heading"
-      >
+      <section className="calculate-impact-bill-emissions-section" aria-labelledby="ci-impact-heading">
         <h2 id="ci-impact-heading" className="calculate-impact-section-title">
           <FormattedMessage
             id="energyCalculator.calculateImpact.results.title"

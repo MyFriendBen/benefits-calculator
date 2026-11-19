@@ -25,13 +25,7 @@ describe('MultiSelectTiles', () => {
     });
 
     it('applies selected style to currently selected values', () => {
-      render(
-        <MultiSelectTiles
-          options={options}
-          values={{ ...emptyValues, employer: true }}
-          onChange={jest.fn()}
-        />,
-      );
+      render(<MultiSelectTiles options={options} values={{ ...emptyValues, employer: true }} onChange={jest.fn()} />);
       expect(screen.getByText('Employer').closest('.option-card')).toHaveClass('option-card--selected');
       expect(screen.getByText('Medicaid').closest('.option-card')).not.toHaveClass('option-card--selected');
     });
@@ -49,13 +43,7 @@ describe('MultiSelectTiles', () => {
 
     it('calls onChange with the clicked value toggled off when already selected', () => {
       const onChange = jest.fn();
-      render(
-        <MultiSelectTiles
-          options={options}
-          values={{ ...emptyValues, employer: true }}
-          onChange={onChange}
-        />,
-      );
+      render(<MultiSelectTiles options={options} values={{ ...emptyValues, employer: true }} onChange={onChange} />);
 
       fireEvent.click(screen.getByText('Employer'));
 

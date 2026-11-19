@@ -19,7 +19,7 @@ test('renders mocked app component', () => {
           <App />
         </Wrapper>
       </IntlProvider>
-    </BrowserRouter>
+    </BrowserRouter>,
   );
   const appElement = screen.getByText(/mocked app component/i);
   expect(appElement).toBeInTheDocument();

@@ -37,29 +37,28 @@ const HealthInsuranceSection = ({
   return (
     <Box id="health-insurance-section" className="section">
       <QuestionQuestion>
-          <FormattedMessage
-            id="questions.healthInsurance"
-            defaultMessage="Health Insurance"
-          />
-        </QuestionQuestion>
-        <QuestionDescription>
-          <FormattedMessage id="insurance.selectAllThatApply" defaultMessage="Select all that apply." />
-        </QuestionDescription>
-        {errors.healthInsurance && (
-          <FormHelperText sx={{ ml: 0, mb: 1 }}>
-            <ErrorMessageWrapper fontSize="var(--error-message-font-size)">{errors.healthInsurance.message as string}</ErrorMessageWrapper>
-          </FormHelperText>
-        )}
-        <MultiSelectTiles
-          variant="square"
-          exclusiveValues={['none']}
-          options={insuranceTileOptions}
-          values={healthInsurance}
-          onChange={(values) => {
-            setValue('healthInsurance', values as HealthInsurance, { shouldValidate: false, shouldDirty: true });
-            clearErrors('healthInsurance');
-          }}
-        />
+        <FormattedMessage id="questions.healthInsurance" defaultMessage="Health Insurance" />
+      </QuestionQuestion>
+      <QuestionDescription>
+        <FormattedMessage id="insurance.selectAllThatApply" defaultMessage="Select all that apply." />
+      </QuestionDescription>
+      {errors.healthInsurance && (
+        <FormHelperText sx={{ ml: 0, mb: 1 }}>
+          <ErrorMessageWrapper fontSize="var(--error-message-font-size)">
+            {errors.healthInsurance.message as string}
+          </ErrorMessageWrapper>
+        </FormHelperText>
+      )}
+      <MultiSelectTiles
+        variant="square"
+        exclusiveValues={['none']}
+        options={insuranceTileOptions}
+        values={healthInsurance}
+        onChange={(values) => {
+          setValue('healthInsurance', values as HealthInsurance, { shouldValidate: false, shouldDirty: true });
+          clearErrors('healthInsurance');
+        }}
+      />
     </Box>
   );
 };

@@ -78,14 +78,11 @@ export const deriveIncomeAnswers = (
  * Sorts frequency options from least frequent to most frequent
  */
 export const sortFrequencyOptions = (
-  frequencyOptions: Record<string, FormattedMessageType>
+  frequencyOptions: Record<string, FormattedMessageType>,
 ): Record<string, FormattedMessageType> => {
   return Object.fromEntries([
-    ...FREQUENCY_ORDER
-      .filter(key => frequencyOptions[key])
-      .map(key => [key, frequencyOptions[key]]),
-    ...Object.entries(frequencyOptions)
-      .filter(([key]) => !FREQUENCY_ORDER.includes(key))
+    ...FREQUENCY_ORDER.filter((key) => frequencyOptions[key]).map((key) => [key, frequencyOptions[key]]),
+    ...Object.entries(frequencyOptions).filter(([key]) => !FREQUENCY_ORDER.includes(key)),
   ]);
 };
 
@@ -136,12 +133,16 @@ export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParam
   // The three income-question answers are form-only fields — the answers are
   // re-derived from the streams on load, so strip them from the spread rather
   // than persist them on the member object.
-  const { incomeEmployed: _e, incomeGig: _g, incomeOther: _o, ...restMemberData } =
-    memberData as typeof memberData & {
-      incomeEmployed?: boolean | null;
-      incomeGig?: boolean | null;
-      incomeOther?: boolean | null;
-    };
+  const {
+    incomeEmployed: _e,
+    incomeGig: _g,
+    incomeOther: _o,
+    ...restMemberData
+  } = memberData as typeof memberData & {
+    incomeEmployed?: boolean | null;
+    incomeGig?: boolean | null;
+    incomeOther?: boolean | null;
+  };
 
   const base = {
     ...restMemberData,
@@ -163,8 +164,8 @@ export const createHouseholdMemberData = (params: CreateHouseholdMemberDataParam
         receivesSsi: ecData.receivesSsi === 'true',
         medicalEquipment: ecData.conditions.medicalEquipment,
       },
-    // EC adds `energyCalculator` which is not on the shared HouseholdData base type;
-    // the double cast avoids TS requiring every EC-only field to be on HouseholdData.
+      // EC adds `energyCalculator` which is not on the shared HouseholdData base type;
+      // the double cast avoids TS requiring every EC-only field to be on HouseholdData.
     } as unknown as HouseholdData;
   }
 

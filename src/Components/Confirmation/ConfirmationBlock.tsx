@@ -51,9 +51,7 @@ export default function ConfirmationBlock({
           </Link>
         )}
       </div>
-      <div className="confirmation-section-content">
-        {children}
-      </div>
+      <div className="confirmation-section-content">{children}</div>
     </div>
   );
 }

@@ -1,4 +1,11 @@
-import { createDefaultValues, createEnergyCalculatorDefaultValues, getDefaultIncomeAnswers, DEFAULT_HEALTH_INSURANCE, DEFAULT_SPECIAL_CONDITIONS, DEFAULT_STUDENT_ELIGIBILITY } from './defaultValues';
+import {
+  createDefaultValues,
+  createEnergyCalculatorDefaultValues,
+  getDefaultIncomeAnswers,
+  DEFAULT_HEALTH_INSURANCE,
+  DEFAULT_SPECIAL_CONDITIONS,
+  DEFAULT_STUDENT_ELIGIBILITY,
+} from './defaultValues';
 import { HouseholdData } from '../../../../Types/FormData';
 import { calculateAgeStatus } from '../../../AgeCalculation/AgeCalculation';
 
@@ -9,18 +16,36 @@ jest.mock('../../../AgeCalculation/AgeCalculation', () => ({
 const mockCalculateAgeStatus = calculateAgeStatus as jest.MockedFunction<typeof calculateAgeStatus>;
 
 // Helper to make a member that "has progressed" (has a health insurance selection)
-const memberWithHealthIns = (overrides: Partial<HouseholdData> = {}): HouseholdData => ({
-  id: '1',
-  frontendId: 'f1',
-  birthYear: 1990,
-  birthMonth: 6,
-  relationshipToHH: 'spouse',
-  hasIncome: false,
-  incomeStreams: [],
-  healthInsurance: { none: true, employer: false, private: false, medicaid: false, medicare: false, chp: false, emergency_medicaid: false, family_planning: false, va: false, mass_health: false },
-  conditions: { student: false, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false },
-  ...overrides,
-} as unknown as HouseholdData);
+const memberWithHealthIns = (overrides: Partial<HouseholdData> = {}): HouseholdData =>
+  ({
+    id: '1',
+    frontendId: 'f1',
+    birthYear: 1990,
+    birthMonth: 6,
+    relationshipToHH: 'spouse',
+    hasIncome: false,
+    incomeStreams: [],
+    healthInsurance: {
+      none: true,
+      employer: false,
+      private: false,
+      medicaid: false,
+      medicare: false,
+      chp: false,
+      emergency_medicaid: false,
+      family_planning: false,
+      va: false,
+      mass_health: false,
+    },
+    conditions: {
+      student: false,
+      pregnant: false,
+      blindOrVisuallyImpaired: false,
+      disabled: false,
+      longTermDisability: false,
+    },
+    ...overrides,
+  } as unknown as HouseholdData);
 
 // Helper for working-age status
 const workingAgeStatus = () => ({ age: 30, is16OrOlder: true, isUnder16: false });
@@ -73,9 +98,13 @@ describe('createDefaultValues', () => {
     // would be orphaned from every question bucket).
     it('does not seed an income stream for a working-age member on first visit', () => {
       const workingAgeMember: HouseholdData = {
-        id: '1', frontendId: 'f1',
-        birthYear: 1990, birthMonth: 6,
-        relationshipToHH: '', hasIncome: false, incomeStreams: [],
+        id: '1',
+        frontendId: 'f1',
+        birthYear: 1990,
+        birthMonth: 6,
+        relationshipToHH: '',
+        hasIncome: false,
+        incomeStreams: [],
       } as unknown as HouseholdData;
       const result = createDefaultValues(workingAgeMember);
       expect(result.incomeStreams).toHaveLength(0);
@@ -88,9 +117,13 @@ describe('createDefaultValues', () => {
 
     it('seeds no income stream for under-16 member', () => {
       const youngMember: HouseholdData = {
-        id: '1', frontendId: 'f1',
-        birthYear: 2018, birthMonth: 6,
-        relationshipToHH: '', hasIncome: false, incomeStreams: [],
+        id: '1',
+        frontendId: 'f1',
+        birthYear: 2018,
+        birthMonth: 6,
+        relationshipToHH: '',
+        hasIncome: false,
+        incomeStreams: [],
       } as unknown as HouseholdData;
       const result = createDefaultValues(youngMember);
       expect(result.incomeStreams).toHaveLength(0);
@@ -117,14 +150,33 @@ describe('createDefaultValues', () => {
     });
 
     it('merges existing health insurance with defaults', () => {
-      const member = memberWithHealthIns({ healthInsurance: { none: false, employer: true, private: false, medicaid: false, medicare: false, chp: false, emergency_medicaid: false, family_planning: false, va: false, mass_health: false } });
+      const member = memberWithHealthIns({
+        healthInsurance: {
+          none: false,
+          employer: true,
+          private: false,
+          medicaid: false,
+          medicare: false,
+          chp: false,
+          emergency_medicaid: false,
+          family_planning: false,
+          va: false,
+          mass_health: false,
+        },
+      });
       const result = createDefaultValues(member);
       expect(result.healthInsurance.employer).toBe(true);
       expect(result.healthInsurance.none).toBe(false);
     });
 
     it('returns existing income streams', () => {
-      const stream = { incomeCategory: 'employment', incomeStreamName: 'wages', incomeAmount: '1000', incomeFrequency: 'monthly', hoursPerWeek: '' };
+      const stream = {
+        incomeCategory: 'employment',
+        incomeStreamName: 'wages',
+        incomeAmount: '1000',
+        incomeFrequency: 'monthly',
+        hoursPerWeek: '',
+      };
       const member = memberWithHealthIns({ incomeStreams: [stream] as any });
       const result = createDefaultValues(member);
       expect(result.incomeStreams).toHaveLength(1);
@@ -133,7 +185,13 @@ describe('createDefaultValues', () => {
 
     it('infers conditions.none=true when member has progressed but no conditions set', () => {
       const member = memberWithHealthIns({
-        conditions: { student: false, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false } as any,
+        conditions: {
+          student: false,
+          pregnant: false,
+          blindOrVisuallyImpaired: false,
+          disabled: false,
+          longTermDisability: false,
+        } as any,
       });
       const result = createDefaultValues(member);
       expect(result.conditions.none).toBe(true);
@@ -141,7 +199,13 @@ describe('createDefaultValues', () => {
 
     it('does not infer none=true when member has a condition set', () => {
       const member = memberWithHealthIns({
-        conditions: { student: true, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false } as any,
+        conditions: {
+          student: true,
+          pregnant: false,
+          blindOrVisuallyImpaired: false,
+          disabled: false,
+          longTermDisability: false,
+        } as any,
       });
       const result = createDefaultValues(member);
       expect(result.conditions.none).toBe(false);
@@ -150,7 +214,14 @@ describe('createDefaultValues', () => {
 
     it('does not infer none=true when fosterCare is the only condition set', () => {
       const member = memberWithHealthIns({
-        conditions: { student: false, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false, fosterCare: true } as any,
+        conditions: {
+          student: false,
+          pregnant: false,
+          blindOrVisuallyImpaired: false,
+          disabled: false,
+          longTermDisability: false,
+          fosterCare: true,
+        } as any,
       });
       const result = createDefaultValues(member);
       expect(result.conditions.none).toBe(false);
@@ -159,7 +230,13 @@ describe('createDefaultValues', () => {
 
     it('backfills fosterCare=false for a member saved before the tile existed', () => {
       const member = memberWithHealthIns({
-        conditions: { student: true, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false } as any,
+        conditions: {
+          student: true,
+          pregnant: false,
+          blindOrVisuallyImpaired: false,
+          disabled: false,
+          longTermDisability: false,
+        } as any,
       });
       const result = createDefaultValues(member);
       expect(result.conditions.fosterCare).toBe(false);
@@ -175,7 +252,13 @@ describe('createDefaultValues', () => {
         relationshipToHH: 'spouse',
         hasIncome: false,
         incomeStreams: [],
-        conditions: { student: false, pregnant: false, blindOrVisuallyImpaired: false, disabled: false, longTermDisability: false },
+        conditions: {
+          student: false,
+          pregnant: false,
+          blindOrVisuallyImpaired: false,
+          disabled: false,
+          longTermDisability: false,
+        },
       } as unknown as HouseholdData;
       const result = createDefaultValues(member);
       expect(result.conditions.none).toBe(false);
@@ -207,8 +290,7 @@ describe('createDefaultValues', () => {
 });
 
 describe('getDefaultIncomeAnswers', () => {
-  const progressed = (overrides: Partial<HouseholdData> = {}): HouseholdData =>
-    memberWithHealthIns(overrides); // health insurance set => completed the form
+  const progressed = (overrides: Partial<HouseholdData> = {}): HouseholdData => memberWithHealthIns(overrides); // health insurance set => completed the form
 
   it('returns all null for a brand-new (not progressed) member', () => {
     const result = getDefaultIncomeAnswers({ incomeStreams: [] } as unknown as HouseholdData);
@@ -329,7 +411,13 @@ describe('createEnergyCalculatorDefaultValues', () => {
   });
 
   it('uses existing incomeStreams', () => {
-    const stream = { incomeCategory: 'employment', incomeStreamName: 'wages', incomeAmount: '500', incomeFrequency: 'monthly', hoursPerWeek: '' };
+    const stream = {
+      incomeCategory: 'employment',
+      incomeStreamName: 'wages',
+      incomeAmount: '500',
+      incomeFrequency: 'monthly',
+      hoursPerWeek: '',
+    };
     const member = { incomeStreams: [stream] } as any;
     const result = createEnergyCalculatorDefaultValues(member, 1);
     expect(result.incomeStreams).toEqual([stream]);

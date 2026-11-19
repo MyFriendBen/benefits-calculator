@@ -45,7 +45,7 @@ describe('ValidateUuid', () => {
           <Route path="step-1" element={<ChildComponent />} />
         </Route>
       </Routes>,
-      { initialRoute: '/co/550e8400-e29b-41d4-a716-446655440000/step-1' }
+      { initialRoute: '/co/550e8400-e29b-41d4-a716-446655440000/step-1' },
     );
 
     expect(screen.getByText('Child Content')).toBeInTheDocument();
@@ -61,7 +61,7 @@ describe('ValidateUuid', () => {
         </Route>
         <Route path="/step-1" element={<TestComponent />} />
       </Routes>,
-      { initialRoute: '/invalid-uuid/child' }
+      { initialRoute: '/invalid-uuid/child' },
     );
 
     expect(screen.getByTestId('step-1-page')).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe('ValidateUuid', () => {
         </Route>
         <Route path="/:whiteLabel/step-1" element={<TestComponent />} />
       </Routes>,
-      { initialRoute: '/co/invalid-uuid' }
+      { initialRoute: '/co/invalid-uuid' },
     );
 
     expect(screen.getByTestId('step-1-page')).toBeInTheDocument();
@@ -94,7 +94,7 @@ describe('ValidateUuid', () => {
         </Route>
         <Route path="/step-1" element={<TestComponent />} />
       </Routes>,
-      { initialRoute: '/' }
+      { initialRoute: '/' },
     );
 
     expect(screen.getByTestId('step-1-page')).toBeInTheDocument();
@@ -107,8 +107,7 @@ describe('ValidateUuid', () => {
       const location = useLocation();
       return (
         <div data-testid="step-1-page">
-          Step 1
-          <span data-testid="pathname">{location.pathname}</span>
+          Step 1<span data-testid="pathname">{location.pathname}</span>
           <span data-testid="search">{location.search}</span>
         </div>
       );
@@ -121,7 +120,7 @@ describe('ValidateUuid', () => {
         </Route>
         <Route path="/step-1" element={<LocationCapture />} />
       </Routes>,
-      { initialRoute: '/invalid-uuid' }
+      { initialRoute: '/invalid-uuid' },
     );
 
     expect(screen.getByTestId('step-1-page')).toBeInTheDocument();
@@ -137,8 +136,7 @@ describe('ValidateUuid', () => {
       const location = useLocation();
       return (
         <div data-testid="step-1-page">
-          Step 1
-          <span data-testid="pathname">{location.pathname}</span>
+          Step 1<span data-testid="pathname">{location.pathname}</span>
           <span data-testid="search">{location.search}</span>
         </div>
       );
@@ -151,7 +149,7 @@ describe('ValidateUuid', () => {
         </Route>
         <Route path="/:whiteLabel/step-1" element={<LocationCapture />} />
       </Routes>,
-      { initialRoute: '/nc/invalid-uuid' }
+      { initialRoute: '/nc/invalid-uuid' },
     );
 
     expect(screen.getByTestId('step-1-page')).toBeInTheDocument();
@@ -168,7 +166,7 @@ describe('ValidateUuid', () => {
           <Route path="results" element={<div>Results</div>} />
         </Route>
       </Routes>,
-      { initialRoute: '/ma/550e8400-e29b-41d4-a716-446655440000/confirm' }
+      { initialRoute: '/ma/550e8400-e29b-41d4-a716-446655440000/confirm' },
     );
 
     expect(screen.getByTestId('confirm-page')).toBeInTheDocument();
