@@ -19,18 +19,17 @@ const SaveViaEmailForm = ({ onSuccess, language }: SaveViaEmailFormProps) => {
   const { formData } = useContext(Context);
   const { formatMessage } = useIntl();
 
+  const emailErrorMessage = formatMessage({
+    id: 'validation-helperText.email',
+    defaultMessage: 'Please enter a valid email address',
+  });
+
+  // The message goes on the check as well as the type: zod 4 does not carry it from the schema to chained checks.
   const schema = z.object({
     email: z
-      .string({
-        errorMap: () => ({
-          message: formatMessage({
-            id: 'validation-helperText.email',
-            defaultMessage: 'Please enter a valid email address',
-          }),
-        }),
-      })
+      .string({ error: () => emailErrorMessage })
       .trim()
-      .email(),
+      .email(emailErrorMessage),
   });
 
   const {

@@ -119,10 +119,15 @@ const UPGRADE_CHOICE_VALUES: [CalculateImpactUpgradeChoice, ...CalculateImpactUp
   'heat_pump_water_heater',
 ];
 
+// zod 3's `required_error`: the message applies only when no value was chosen, and any other failure
+// keeps zod's default message.
+const requiredOnly = (message: string) => (issue: { input?: unknown }) =>
+  issue.input === undefined ? message : undefined;
+
 const calculateImpactSchema = z
   .object({
     householdType: z.enum(HOUSEHOLD_TYPE_VALUES, {
-      required_error: 'Please select a household type.',
+      error: requiredOnly('Please select a household type.'),
     }),
     address: z
       .string()
@@ -130,17 +135,17 @@ const calculateImpactSchema = z
       .transform((val) => val.trim())
       .refine((val) => val.length > 0, { message: 'Please enter a valid street address.' }),
     heatingFuel: z.enum(FUEL_TYPE_VALUES, {
-      required_error: 'Please select a heating fuel.',
+      error: requiredOnly('Please select a heating fuel.'),
     }),
     waterHeatingFuel: z.preprocess((val) => (val === '' ? undefined : val), z.enum(FUEL_TYPE_VALUES).optional()),
     upgradeChoice: z.enum(UPGRADE_CHOICE_VALUES, {
-      required_error: 'Please select one upgrade option.',
+      error: requiredOnly('Please select one upgrade option.'),
     }),
   })
   .superRefine((data, ctx) => {
     if (data.upgradeChoice === 'heat_pump_water_heater' && !data.waterHeatingFuel) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['waterHeatingFuel'],
         message: 'Please select a water heating fuel for this upgrade.',
       });

@@ -85,7 +85,7 @@ const renderPage = (formData: any, locationState: Record<string, unknown> = {}) 
       <Context.Provider value={contextValue}>
         <MemoryRouter initialEntries={[{ pathname: '/co/test-uuid/step-5/0', state: locationState }]}>
           <Routes>
-            <Route path="/:whiteLabel/:uuid/step-:stepId/:page" element={<HouseholdMemberBasicInfoPage />} />
+            <Route path="/:whiteLabel/:uuid/:stepSegment/:page" element={<HouseholdMemberBasicInfoPage />} />
           </Routes>
         </MemoryRouter>
       </Context.Provider>

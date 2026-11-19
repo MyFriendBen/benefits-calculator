@@ -2,6 +2,7 @@ import { Button } from '@mui/material';
 import { useContext } from 'react';
 import { Context } from '../Wrapper/Wrapper';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useStepId } from '../RouterUtil/useStepId';
 import { FormattedMessage } from 'react-intl';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import { useStepName, useStepNumber } from '../../Assets/stepDirectory';
@@ -18,7 +19,8 @@ type Props = {
 
 const PreviousButton = ({ navFunction, stepNameOverride }: Props) => {
   const { formData } = useContext(Context);
-  const { whiteLabel, id, uuid } = useParams();
+  const { whiteLabel, uuid } = useParams();
+  const id = useStepId();
   let stepNumberId = Number(id);
   if (!stepNumberId) stepNumberId = 1;
   const navigate = useNavigate();

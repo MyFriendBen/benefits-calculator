@@ -26,7 +26,7 @@ const SaveViaSMSForm = ({ onSuccess, language }: SaveViaSMSFormProps) => {
 
   const schema = z.object({
     phone: z
-      .string({ errorMap: () => ({ message: phoneErrorMsg }) })
+      .string({ error: () => phoneErrorMsg })
       .trim()
       .transform((value) => value.replace(/\D/g, ''))
       .refine((value) => value.length === 10, { message: phoneErrorMsg }),

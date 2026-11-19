@@ -1,4 +1,5 @@
 import { useParams, useLocation } from 'react-router';
+import { useStepId } from '../RouterUtil/useStepId';
 import { FormattedMessage, useIntl } from 'react-intl';
 import LinearProgress from '@mui/material/LinearProgress';
 import { STARTING_QUESTION_NUMBER, useStepDirectory } from '../../Assets/stepDirectory';
@@ -16,7 +17,8 @@ const ProgressBar = ({ step }: ProgressBarProps) => {
   const { theme } = useContext(Context);
   const stepDirectory = useStepDirectory();
   const totalSteps = stepDirectory.length + STARTING_QUESTION_NUMBER;
-  const { id, uuid } = useParams();
+  const { uuid } = useParams();
+  const id = useStepId();
   const location = useLocation();
   const intl = useIntl();
   const translateNumber = useTranslateNumber();

@@ -25,10 +25,10 @@ import type { ZodType } from 'zod';
 // — first-wins, matching zodResolver, which keeps the FIRST issue per path. If a
 // path ever gets two coded refines, this keeps our code aligned with the type/
 // message zodResolver kept, instead of letting the last issue in the loop win.
-const setByPath = (obj: Record<string, any>, path: (string | number)[], code: string) => {
+const setByPath = (obj: Record<string, any>, path: PropertyKey[], code: string) => {
   let node = obj;
   for (let i = 0; i < path.length; i++) {
-    const key = path[i];
+    const key = path[i] as string | number;
     if (node == null || typeof node !== 'object') return;
     if (i === path.length - 1) {
       if (node[key] && typeof node[key] === 'object' && node[key].errorCode === undefined) {

@@ -213,7 +213,7 @@ describe('SignUp Form Validation', () => {
       // Should have error on cell field but with empty message
       const cellErrors = result.error?.issues.filter((issue) => issue.path.includes('cell'));
       expect(cellErrors).toHaveLength(1);
-      expect(cellErrors[0].message).toBe('');
+      expect(cellErrors[0].message.trim()).toBe('');
     });
   });
 
@@ -351,7 +351,7 @@ describe('SignUp Form Validation', () => {
 
         const cellErrors = result.error?.issues.filter((issue) => issue.path.includes('cell'));
         expect(cellErrors).toHaveLength(1);
-        expect(cellErrors[0].message).toBe('');
+        expect(cellErrors[0].message.trim()).toBe('');
       });
 
       it('should fail when email provided with neither consent', () => {

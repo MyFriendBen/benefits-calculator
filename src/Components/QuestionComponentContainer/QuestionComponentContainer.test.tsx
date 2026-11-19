@@ -46,7 +46,7 @@ const renderWithRouter = (
           <Route path="/co/:uuid">
             {/* Specific routes must come before parameterized routes */}
             <Route path="step-1" element={<div>Redirected to Step 1</div>} />
-            <Route path="step-:id" element={<QuestionComponentContainer />} />
+            <Route path=":stepSegment" element={<QuestionComponentContainer />} />
           </Route>
         </Routes>
       </MemoryRouter>

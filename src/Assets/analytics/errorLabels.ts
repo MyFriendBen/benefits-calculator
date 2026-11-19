@@ -16,6 +16,7 @@ export const RULE_LABELS: Record<string, string> = {
   too_big: 'Too long',
   invalid_string: 'Invalid format',
   invalid_enum_value: 'Invalid selection',
+  invalid_value: 'Invalid selection', // zod 4's name for invalid_enum_value
   custom: 'Invalid',
   // custom rule codes
   required: 'Required',

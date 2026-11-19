@@ -23,34 +23,35 @@ import './SignUp.css';
 
 // Pure schema builder function for testability
 export const buildContactInfoSchema = (formatMessage: any) => {
+  // zod 4 applies a schema's `error` only to its own type check, not to chained checks like
+  // .min() and .email(), so each message is passed to both.
+  const firstNameMessage = formatMessage({
+    id: 'validation-helperText.firstName',
+    defaultMessage: 'Please enter your first name',
+  });
+  const lastNameMessage = formatMessage({
+    id: 'validation-helperText.lastName',
+    defaultMessage: 'Please enter your last name',
+  });
+  const emailMessage = formatMessage({
+    id: 'validation-helperText.email',
+    defaultMessage: 'Please enter a valid email address',
+  });
+  const phoneMessage = formatMessage({
+    id: 'validation-helperText.phoneNumber',
+    defaultMessage: 'Please enter a 10 digit phone number',
+  });
+
   return z
     .object({
       firstName: z
-        .string({
-          errorMap: () => {
-            return {
-              message: formatMessage({
-                id: 'validation-helperText.firstName',
-                defaultMessage: 'Please enter your first name',
-              }),
-            };
-          },
-        })
+        .string({ error: () => firstNameMessage })
         .trim()
-        .min(1),
+        .min(1, firstNameMessage),
       lastName: z
-        .string({
-          errorMap: () => {
-            return {
-              message: formatMessage({
-                id: 'validation-helperText.lastName',
-                defaultMessage: 'Please enter your last name',
-              }),
-            };
-          },
-        })
+        .string({ error: () => lastNameMessage })
         .trim()
-        .min(1),
+        .min(1, lastNameMessage),
       email: z.preprocess(
         (val) => {
           if (typeof val === 'string') {
@@ -59,31 +60,15 @@ export const buildContactInfoSchema = (formatMessage: any) => {
           }
           return val;
         },
-        z
-          .string({
-            errorMap: () => {
-              return {
-                message: formatMessage({
-                  id: 'validation-helperText.email',
-                  defaultMessage: 'Please enter a valid email address',
-                }),
-              };
-            },
-          })
-          .email()
-          .or(z.literal('')),
+        // Blank or a valid address. Written as one string rule rather than `.email().or(z.literal(''))`
+        // because zod 4 reports a failed union as a generic "Invalid input", not the email message.
+        z.string({ error: () => emailMessage }).refine((value) => value === '' || z.email().safeParse(value).success, {
+          message: emailMessage,
+          params: { code: 'invalid_format' },
+        }),
       ),
       cell: z
-        .string({
-          errorMap: () => {
-            return {
-              message: formatMessage({
-                id: 'validation-helperText.phoneNumber',
-                defaultMessage: 'Please enter a 10 digit phone number',
-              }),
-            };
-          },
-        })
+        .string({ error: () => phoneMessage })
         .trim()
         .transform((value) => {
           let newString = '';
@@ -124,7 +109,7 @@ export const buildContactInfoSchema = (formatMessage: any) => {
       if (emailConsent && tcpa) {
         if (noEmail) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: formatMessage({
               id: 'validation-helperText.email-required',
               defaultMessage: 'Please enter an email',
@@ -135,7 +120,7 @@ export const buildContactInfoSchema = (formatMessage: any) => {
         }
         if (noCell) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: formatMessage({
               id: 'validation-helperText.phone-required',
               defaultMessage: 'Please enter a phone number',
@@ -149,7 +134,7 @@ export const buildContactInfoSchema = (formatMessage: any) => {
       else if (emailConsent && !tcpa) {
         if (noEmail) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: formatMessage({
               id: 'validation-helperText.email-required',
               defaultMessage: 'Please enter an email',
@@ -163,7 +148,7 @@ export const buildContactInfoSchema = (formatMessage: any) => {
       else if (!emailConsent && tcpa) {
         if (noCell) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: formatMessage({
               id: 'validation-helperText.phone-required',
               defaultMessage: 'Please enter a phone number',
@@ -177,7 +162,7 @@ export const buildContactInfoSchema = (formatMessage: any) => {
       else if (!emailConsent && !tcpa) {
         if (noEmail && noCell) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: formatMessage({
               id: 'validation-helperText.noEmailOrPhoneNumber',
               defaultMessage: 'Please enter an email or phone number',
@@ -186,15 +171,13 @@ export const buildContactInfoSchema = (formatMessage: any) => {
             params: { code: 'required' },
           });
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: '', // Empty message to just highlight the field
+            code: 'custom',
+            message: ' ', // Blank message to just highlight the field (zod 4 swaps an empty string for "Invalid input")
             path: ['cell'],
             params: { code: 'required' },
           });
         }
       }
-
-      return true;
     });
 };
 
@@ -374,9 +357,7 @@ function SignUp() {
                     error={errors.contactInfo?.firstName !== undefined}
                     helperText={
                       errors.contactInfo?.firstName !== undefined && (
-                        <ErrorMessageWrapper>
-                          {errors.contactInfo.firstName.message}
-                        </ErrorMessageWrapper>
+                        <ErrorMessageWrapper>{errors.contactInfo.firstName.message}</ErrorMessageWrapper>
                       )
                     }
                   />
@@ -429,7 +410,7 @@ function SignUp() {
                 control={control}
                 render={({ field }) => (
                   <PhoneNumberInput
-                    value={field.value}
+                    value={field.value ?? ''}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
                     inputRef={field.ref}
@@ -491,9 +472,7 @@ function SignUp() {
                       }
                     />
                     {errors.contactInfo?.emailConsent && (
-                      <ErrorMessageWrapper>
-                        {errors.contactInfo.emailConsent.message}
-                      </ErrorMessageWrapper>
+                      <ErrorMessageWrapper>{errors.contactInfo.emailConsent.message}</ErrorMessageWrapper>
                     )}
                   </>
                 )}

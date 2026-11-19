@@ -22,20 +22,17 @@ const HouseholdAssets = () => {
   const intl = useIntl();
   const { updateScreen } = useScreenApi();
 
+  const assetsErrorMessage = intl.formatMessage({
+    id: 'validation-helperText.assets',
+    defaultMessage: 'Please enter 0 or a positive number.',
+  });
+
+  // The message goes on each check as well as the type: zod 4 does not carry it from the schema to chained checks.
   const formSchema = z.object({
     householdAssets: z
-      .number({
-        errorMap: () => {
-          return {
-            message: intl.formatMessage({
-              id: 'validation-helperText.assets',
-              defaultMessage: 'Please enter 0 or a positive number.',
-            }),
-          };
-        },
-      })
-      .int()
-      .min(0),
+      .number({ error: () => assetsErrorMessage })
+      .int(assetsErrorMessage)
+      .min(0, assetsErrorMessage),
   });
 
   type FormSchema = z.infer<typeof formSchema>;

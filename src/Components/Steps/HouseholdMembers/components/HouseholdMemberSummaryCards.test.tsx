@@ -102,7 +102,7 @@ const renderCards = (
         <MemoryRouter initialEntries={[{ pathname: `/default/test-uuid/step-3/${currentPage}`, state: locationState }]}>
           <Routes>
             <Route
-              path="/:whiteLabel/:uuid/step-:stepId/:page"
+              path="/:whiteLabel/:uuid/:stepSegment/:page"
               element={<HouseholdMemberSummaryCards questionName="householdData" onBeforeLeave={onBeforeLeave} />}
             />
           </Routes>
