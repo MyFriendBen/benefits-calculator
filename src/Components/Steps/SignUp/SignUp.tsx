@@ -417,9 +417,11 @@ function SignUp() {
                     name={field.name}
                     label={<FormattedMessage id="signUp.createPhoneTextfield-label" defaultMessage="Cell Phone" />}
                     error={errors.contactInfo?.cell !== undefined}
+                    // The message is trimmed because a blank one only highlights the field (see the schema),
+                    // so the rendered text stays empty.
                     helperText={
                       errors.contactInfo?.cell !== undefined && (
-                        <ErrorMessageWrapper>{errors.contactInfo.cell.message}</ErrorMessageWrapper>
+                        <ErrorMessageWrapper>{errors.contactInfo.cell.message?.trim()}</ErrorMessageWrapper>
                       )
                     }
                     onAfterChange={() => {
