@@ -145,9 +145,7 @@ const NotificationPopup = ({
             </IconButton>
           }
         >
-          <Typography variant="body2">
-            {minimizedText}
-          </Typography>
+          <Typography variant="body2">{minimizedText}</Typography>
         </Alert>
       </div>
     );
@@ -157,11 +155,7 @@ const NotificationPopup = ({
   return (
     <>
       {/* Backdrop overlay */}
-      <div
-        className="notification-popup-backdrop"
-        onClick={handleMinimize}
-        aria-hidden="true"
-      />
+      <div className="notification-popup-backdrop" onClick={handleMinimize} aria-hidden="true" />
 
       {/* Popup content */}
       <div

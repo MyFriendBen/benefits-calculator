@@ -48,10 +48,7 @@ const SpecialConditionsSection = ({
   return (
     <Box id="conditions-section" className="section">
       <QuestionQuestion>
-        <FormattedMessage
-          id="householdDataBlock.specialConditionsQuestion"
-          defaultMessage="Special Circumstances"
-        />
+        <FormattedMessage id="householdDataBlock.specialConditionsQuestion" defaultMessage="Special Circumstances" />
       </QuestionQuestion>
       <QuestionDescription>
         <FormattedMessage

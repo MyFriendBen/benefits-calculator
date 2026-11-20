@@ -2,13 +2,23 @@
    Animations
    ===================== */
 @keyframes modal-shell-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes modal-shell-slide-in {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 /* =====================
@@ -84,8 +94,8 @@
   height: 2.75rem;
   border-radius: 50%;
   background-color: transparent;
-  border: 2px solid var(--secondary-color, #B85A27);
-  color: var(--secondary-color, #B85A27);
+  border: 2px solid var(--secondary-color, #b85a27);
+  color: var(--secondary-color, #b85a27);
   margin-bottom: 0.25rem;
   flex-shrink: 0;
 }
@@ -149,11 +159,11 @@
 
 .modal-option:hover {
   background-color: var(--secondary-background-color);
-  border-color: var(--midBlue-color, #41528C);
+  border-color: var(--midBlue-color, #41528c);
 }
 
 .modal-option:focus-visible {
-  outline: 2px solid var(--midBlue-color, #41528C);
+  outline: 2px solid var(--midBlue-color, #41528c);
   outline-offset: 2px;
 }
 
@@ -244,7 +254,7 @@
 }
 
 .modal-primary-btn:hover:not(:disabled) {
-  background-color: var(--midBlue-color, #41528C);
+  background-color: var(--midBlue-color, #41528c);
 }
 
 .modal-primary-btn:disabled {

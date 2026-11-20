@@ -12,9 +12,7 @@ describe('usePageTracking', () => {
   });
 
   const wrapper = ({ children, path = '/test-path' }: { children: React.ReactNode; path?: string }) => (
-    <MemoryRouter initialEntries={[path]}>
-      {children}
-    </MemoryRouter>
+    <MemoryRouter initialEntries={[path]}>{children}</MemoryRouter>
   );
 
   it('should track page change on mount', () => {
@@ -27,7 +25,9 @@ describe('usePageTracking', () => {
   });
 
   it('should include search params in tracked URL', () => {
-    renderHook(() => usePageTracking(), { wrapper: (props) => wrapper({ ...props, path: '/another-path?foo=bar&baz=qux' }) });
+    renderHook(() => usePageTracking(), {
+      wrapper: (props) => wrapper({ ...props, path: '/another-path?foo=bar&baz=qux' }),
+    });
 
     expect(dataLayerPush).toHaveBeenCalledWith({
       event: 'Page Change',

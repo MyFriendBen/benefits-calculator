@@ -141,7 +141,10 @@ describe('parseMarkdown', () => {
   });
 
   it('excludes trailing punctuation from URLs', () => {
-    const result = parseMarkdown('Visit https://example.com. More info at https://test.org, or https://other.com!', primaryColor);
+    const result = parseMarkdown(
+      'Visit https://example.com. More info at https://test.org, or https://other.com!',
+      primaryColor,
+    );
     render(<>{result}</>);
 
     // All three URLs should be links without trailing punctuation
@@ -241,10 +244,7 @@ describe('parseMarkdown', () => {
     const result = parseMarkdown('See https://example.com[SNAP](https://snap.gov)', primaryColor);
     render(<>{result}</>);
 
-    expect(screen.getByRole('link', { name: 'https://example.com' })).toHaveAttribute(
-      'href',
-      'https://example.com',
-    );
+    expect(screen.getByRole('link', { name: 'https://example.com' })).toHaveAttribute('href', 'https://example.com');
     expect(screen.getByRole('link', { name: 'SNAP' })).toHaveAttribute('href', 'https://snap.gov');
   });
 
@@ -312,7 +312,7 @@ describe('parseMarkdown', () => {
 
     const snapLink = screen.getByRole('link', { name: 'SNAP' });
     const pebtLink = screen.getByRole('link', { name: 'PEBT' });
-    
+
     expect(snapLink).toHaveAttribute('href', 'https://snap.gov');
     expect(pebtLink).toHaveAttribute('href', 'https://pebt.gov');
     expect(screen.getByText(/Check/)).toBeInTheDocument();

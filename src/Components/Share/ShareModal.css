@@ -2,8 +2,14 @@
    Minimized chip
    ===================== */
 @keyframes share-modal-slide-in-bottom-left {
-  from { opacity: 0; transform: translateY(100px) scale(0.5); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(100px) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Bottom-left, because the Benji chat button and panel own the bottom-right. The
@@ -66,9 +72,9 @@
   height: 1.75rem;
   border-radius: 50%;
   flex-shrink: 0;
-  background-color: var(--secondary-background-color, #FBF9FC);
-  color: var(--secondary-color, #B85A27);
-  border: 1.5px solid var(--secondary-color, #B85A27);
+  background-color: var(--secondary-background-color, #fbf9fc);
+  color: var(--secondary-color, #b85a27);
+  border: 1.5px solid var(--secondary-color, #b85a27);
 }
 
 .share-modal-chip-text {

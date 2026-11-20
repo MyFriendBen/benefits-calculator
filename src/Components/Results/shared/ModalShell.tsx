@@ -18,34 +18,15 @@ const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: 
   const titleId = useId();
 
   return (
-    <Modal
-      open
-      onClose={onClose}
-      BackdropProps={{ className: 'modal-shell-backdrop' }}
-    >
-      <div
-        className="modal-shell-card"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-      >
+    <Modal open onClose={onClose} BackdropProps={{ className: 'modal-shell-backdrop' }}>
+      <div className="modal-shell-card" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         {onBack && (
-          <IconButton
-            aria-label="Back"
-            size="small"
-            className="modal-shell-back-btn"
-            onClick={onBack}
-          >
+          <IconButton aria-label="Back" size="small" className="modal-shell-back-btn" onClick={onBack}>
             <ArrowBackIcon fontSize="small" />
           </IconButton>
         )}
 
-        <IconButton
-          aria-label="Close dialog"
-          size="small"
-          className="modal-shell-close-btn"
-          onClick={onClose}
-        >
+        <IconButton aria-label="Close dialog" size="small" className="modal-shell-close-btn" onClick={onClose}>
           <CloseIcon fontSize="inherit" />
         </IconButton>
 
@@ -57,11 +38,7 @@ const ModalShell = ({ headerIcon, title, subtitle, onClose, onBack, children }: 
           {title}
         </Typography>
 
-        {subtitle && (
-          <Typography className="modal-shell-subtitle">
-            {subtitle}
-          </Typography>
-        )}
+        {subtitle && <Typography className="modal-shell-subtitle">{subtitle}</Typography>}
 
         {children}
       </div>

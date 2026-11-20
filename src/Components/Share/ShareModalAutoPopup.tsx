@@ -40,12 +40,7 @@ const ShareModalAutoPopup = () => {
   if (isMinimized) {
     return (
       <div className="share-modal-chip-container">
-        <button
-          type="button"
-          className="share-modal-chip"
-          onClick={handleRestore}
-          aria-label="Open share options"
-        >
+        <button type="button" className="share-modal-chip" onClick={handleRestore} aria-label="Open share options">
           <span className="share-modal-chip-icon" aria-hidden="true">
             <IosShareIcon style={{ fontSize: '1rem' }} />
           </span>

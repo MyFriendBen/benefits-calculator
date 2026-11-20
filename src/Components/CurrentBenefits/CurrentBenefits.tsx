@@ -13,7 +13,6 @@ import { FormattedMessageType } from '../../Types/Questions';
 import { ICON_NAME_MAP } from '../Results/helpers';
 import { Icon } from '../Icon/Icon';
 
-
 export type Program = {
   name: Translation;
   description: Translation;
@@ -104,9 +103,9 @@ const CurrentBenefits = () => {
   const displayProgramSection = (program: Program, index: number) => {
     const linkURL = program.link
       ? intl.formatMessage({
-        id: program.link.label,
-        defaultMessage: program.link.default_message,
-      })
+          id: program.link.label,
+          defaultMessage: program.link.default_message,
+        })
       : '';
     // If the URL is invalid (e.g. contains "placeholder" from translations) - it is not rendered it as a link.
     const isValidLink = linkURL && !linkURL.toLowerCase().includes('placeholder');
@@ -114,12 +113,7 @@ const CurrentBenefits = () => {
     return (
       <div className="bottom-margin" key={index}>
         {isValidLink ? (
-          <a
-            className="program-name"
-            href={linkURL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a className="program-name" href={linkURL} target="_blank" rel="noopener noreferrer">
             <ResultsTranslate translation={program.name} />
           </a>
         ) : (

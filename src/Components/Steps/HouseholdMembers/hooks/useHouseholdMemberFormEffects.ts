@@ -35,12 +35,16 @@ export const useHouseholdMemberFormEffects = ({
   useEffect(() => {
     if (isEnergyCalculator) return;
     if (prevIsStudentRef.current && !watchIsStudent) {
-      setValue('studentEligibility', {
-        studentFullTime: undefined,
-        studentJobTrainingProgram: undefined,
-        studentHasWorkStudy: undefined,
-        studentWorks20PlusHrs: undefined,
-      }, { shouldValidate: false });
+      setValue(
+        'studentEligibility',
+        {
+          studentFullTime: undefined,
+          studentJobTrainingProgram: undefined,
+          studentHasWorkStudy: undefined,
+          studentWorks20PlusHrs: undefined,
+        },
+        { shouldValidate: false },
+      );
     }
     prevIsStudentRef.current = watchIsStudent;
   }, [watchIsStudent, setValue, isEnergyCalculator]);

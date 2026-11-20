@@ -69,7 +69,7 @@ const MOCK_RESULT = {
     mean: { value: -19.76, unit: '$' },
     median: { value: -21.91, unit: '$' },
     percentile_20: { value: -60.52, unit: '$' },
-    percentile_80: { value: 20.50, unit: '$' },
+    percentile_80: { value: 20.5, unit: '$' },
   },
   emissions_delta: {
     mean: { value: -1758.0, unit: 'lbCO2e' },
@@ -84,7 +84,10 @@ const renderPage = (route = '/cesn/test-uuid/results/energy-rebates/waterHeater/
     <IntlProvider locale="en" defaultLocale="en">
       <MemoryRouter initialEntries={[route]}>
         <Routes>
-          <Route path="/:whiteLabel/:uuid/results/energy-rebates/waterHeater/calculate-impact" element={<CalculateImpactPage />} />
+          <Route
+            path="/:whiteLabel/:uuid/results/energy-rebates/waterHeater/calculate-impact"
+            element={<CalculateImpactPage />}
+          />
         </Routes>
       </MemoryRouter>
     </IntlProvider>,
@@ -185,9 +188,7 @@ describe('CalculateImpactPage', () => {
     it('includes admin=true in back link when admin search param is present', () => {
       renderPage('/cesn/test-uuid/results/energy-rebates/waterHeater/calculate-impact?admin=true');
       fireEvent.click(screen.getByRole('button', { name: /back/i }));
-      expect(mockNavigate).toHaveBeenCalledWith(
-        '/cesn/test-uuid/results/energy-rebates/hvac?admin=true',
-      );
+      expect(mockNavigate).toHaveBeenCalledWith('/cesn/test-uuid/results/energy-rebates/hvac?admin=true');
     });
   });
 
@@ -473,9 +474,7 @@ describe('CalculateImpactPage', () => {
       );
       await fillAndSubmitHeatPumpForm();
       await waitFor(() => {
-        expect(
-          screen.getByText(/unable to calculate the impact for this address at this time/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/unable to calculate the impact for this address at this time/i)).toBeInTheDocument();
       });
       expect(screen.queryByText(/something went wrong calculating your impact/i)).not.toBeInTheDocument();
     });

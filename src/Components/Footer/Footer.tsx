@@ -48,7 +48,11 @@ const Footer = ({ hideServiceLinks }: FooterProps) => {
         <div className="footer-content-container">
           <div onClick={() => track('screener_logo_click', { location: 'footer' })}>{logo}</div>
           <div className="footer-feedback-buttons">
-            <button className="footer-feedback-button" aria-label="Share MyFriendBen" onClick={() => setShareOpen(true)}>
+            <button
+              className="footer-feedback-button"
+              aria-label="Share MyFriendBen"
+              onClick={() => setShareOpen(true)}
+            >
               <FormattedMessage id="shareMfbButton" defaultMessage="SHARE MFB" />
             </button>
             <a

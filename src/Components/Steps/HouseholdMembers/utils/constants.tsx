@@ -22,7 +22,9 @@ export const useMonthMenuItems = () => {
       12: intl.formatMessage({ id: 'ageInput.months.december', defaultMessage: 'December' }),
     };
     return Object.entries(months).map(([key, label]) => (
-      <MenuItem value={Number(key)} key={key}>{label}</MenuItem>
+      <MenuItem value={Number(key)} key={key}>
+        {label}
+      </MenuItem>
     ));
   }, [intl]);
 };

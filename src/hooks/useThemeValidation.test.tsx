@@ -12,9 +12,7 @@ describe('useThemeValidation', () => {
   const mockChangeTheme = jest.fn();
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <Context.Provider value={{ setTheme: mockChangeTheme } as any}>
-      {children}
-    </Context.Provider>
+    <Context.Provider value={{ setTheme: mockChangeTheme } as any}>{children}</Context.Provider>
   );
 
   beforeEach(() => {
@@ -42,10 +40,10 @@ describe('useThemeValidation', () => {
   it('should update theme when themeName changes', () => {
     (styleController.isValidTheme as jest.Mock).mockReturnValue(true);
 
-    const { rerender } = renderHook(
-      ({ themeName }) => useThemeValidation(themeName),
-      { wrapper, initialProps: { themeName: 'default' } }
-    );
+    const { rerender } = renderHook(({ themeName }) => useThemeValidation(themeName), {
+      wrapper,
+      initialProps: { themeName: 'default' },
+    });
 
     expect(mockChangeTheme).toHaveBeenCalledWith('default');
     mockChangeTheme.mockClear();

@@ -44,7 +44,7 @@ const whiteLabels = {
     nearTermNeeds: ['Food or groceries'],
     referralSource: 'Test / Prospective Partner',
     expectedResult: {
-      programsCount: /\d+\s*Programs Found/, 
+      programsCount: /\d+\s*Programs Found/,
       estimatedMonthlySavings: /Estimated Monthly Savings/,
       annualTaxCredit: /Annual Tax Credit/,
     },
@@ -64,7 +64,7 @@ const whiteLabels = {
     nearTermNeeds: ['Food or groceries'],
     referralSource: 'Test / Prospective Partner',
     expectedResult: {
-      programsCount: /\d+\s*Programs Found/, 
+      programsCount: /\d+\s*Programs Found/,
       estimatedMonthlySavings: /Estimated Monthly Savings/,
       annualTaxCredit: /Annual Tax Credit/,
     },
@@ -84,7 +84,7 @@ const whiteLabels = {
     nearTermNeeds: ['Food or groceries'],
     referralSource: 'Test / Prospective Partner',
     expectedResult: {
-      programsCount: /\d+\s*Programs Found/, 
+      programsCount: /\d+\s*Programs Found/,
       estimatedMonthlySavings: /Estimated Monthly Savings/,
       annualTaxCredit: /Annual Tax Credit/,
     },
@@ -109,8 +109,8 @@ const energyCalculators = {
     heatingSource: 'Xcel Energy',
     householdInfo: 'You have a past-due electric',
     noBenefit: true,
-    expectedResult: {     
-      programsCount: /\d+\s*Programs Found[\s\S]*\d+\s*Rebates Found/,      
+    expectedResult: {
+      programsCount: /\d+\s*Programs Found[\s\S]*\d+\s*Rebates Found/,
     },
   },
 };
@@ -177,10 +177,12 @@ test.describe('Basic e2e tests for each white label', () => {
       await waitForResultsPageLoad(page, 60000);
 
       await page.locator('.results-header').waitFor({ state: 'visible' });
-      
+
       await expect(page.locator('.results-header .results-header-programs-count-text')).toContainText('Programs Found');
-      await expect(page.locator('.results-header .results-data-cell').first()).toContainText('Estimated Monthly Savings');
-      await expect(page.locator('.results-header .results-data-cell').last()).toContainText('Annual Tax Credit');     
+      await expect(page.locator('.results-header .results-data-cell').first()).toContainText(
+        'Estimated Monthly Savings',
+      );
+      await expect(page.locator('.results-header .results-data-cell').last()).toContainText('Annual Tax Credit');
     });
   }
 
@@ -207,11 +209,7 @@ test.describe('Basic e2e tests for each white label', () => {
     await clickContinueButton(page);
     await expect(page).toHaveURL(/\/cesn\/.*\/step-6/);
 
-    await fillDateOfBirth(
-      page,
-      energyCalculators.cesn.dobMonth,
-      energyCalculators.cesn.dobYear,
-    );
+    await fillDateOfBirth(page, energyCalculators.cesn.dobMonth, energyCalculators.cesn.dobYear);
     await selectStatus(page, energyCalculators.cesn.status);
     await selectECIncome(
       page,
@@ -243,14 +241,14 @@ test.describe('Basic e2e tests for each white label', () => {
     await expect(page).toHaveURL(/\/cesn\/.*\/results\/benefits/);
 
     await page.waitForLoadState('networkidle');
-    await page.locator('header.energy-calculator-results-header').waitFor({ 
-      state: 'visible', 
-      timeout: 60000 
+    await page.locator('header.energy-calculator-results-header').waitFor({
+      state: 'visible',
+      timeout: 60000,
     });
-    
+
     await expect(page.locator('header.energy-calculator-results-header')).toContainText('Programs Found');
     await expect(page.locator('header.energy-calculator-results-header')).toContainText('Rebates Found');
-    
+
     await expect(page.locator('header.energy-calculator-results-header')).toHaveText(
       energyCalculators.cesn.expectedResult.programsCount,
     );

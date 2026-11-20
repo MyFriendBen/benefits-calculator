@@ -31,9 +31,12 @@ export function GooglePlacesAddressInput({
 
   // Cancel any pending debounced fetch when the component unmounts so it can't
   // call setState (setOptions/setLoading) on an unmounted component.
-  useEffect(() => () => {
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    },
+    [],
+  );
 
   const handleInputChange = (e: React.SyntheticEvent, newValue: string, reason: AutocompleteInputChangeReason) => {
     onChange(newValue);
@@ -49,9 +52,15 @@ export function GooglePlacesAddressInput({
       const currentId = ++requestId.current;
       setLoading(true);
       fetchAddressSuggestions(newValue)
-        .then((results) => { if (requestId.current === currentId) setOptions(results); })
-        .catch(() => { if (requestId.current === currentId) setOptions([]); })
-        .finally(() => { if (requestId.current === currentId) setLoading(false); });
+        .then((results) => {
+          if (requestId.current === currentId) setOptions(results);
+        })
+        .catch(() => {
+          if (requestId.current === currentId) setOptions([]);
+        })
+        .finally(() => {
+          if (requestId.current === currentId) setLoading(false);
+        });
     }, 300);
   };
 

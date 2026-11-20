@@ -25,7 +25,7 @@ describe('ValidateWhiteLabel', () => {
             <Route path="child" element={<ChildComponent />} />
           </Route>
         </Routes>,
-        { initialRoute: `/${validWhiteLabel}/child` }
+        { initialRoute: `/${validWhiteLabel}/child` },
       );
 
       expect(screen.getByText('Child Content')).toBeInTheDocument();
@@ -43,7 +43,7 @@ describe('ValidateWhiteLabel', () => {
         </Route>
         <Route path="/step-1" element={<TestComponent />} />
       </Routes>,
-      { initialRoute: '/invalid-white-label/child' }
+      { initialRoute: '/invalid-white-label/child' },
     );
 
     expect(screen.getByTestId('step-1-page')).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe('ValidateWhiteLabel', () => {
         </Route>
         <Route path="/step-1" element={<TestComponent />} />
       </Routes>,
-      { initialRoute: '/' }
+      { initialRoute: '/' },
     );
 
     expect(screen.getByTestId('step-1-page')).toBeInTheDocument();
@@ -73,8 +73,7 @@ describe('ValidateWhiteLabel', () => {
       const location = useLocation();
       return (
         <div data-testid="step-1-page">
-          Step 1
-          <span data-testid="pathname">{location.pathname}</span>
+          Step 1<span data-testid="pathname">{location.pathname}</span>
           <span data-testid="search">{location.search}</span>
         </div>
       );
@@ -87,7 +86,7 @@ describe('ValidateWhiteLabel', () => {
         </Route>
         <Route path="/step-1" element={<LocationCapture />} />
       </Routes>,
-      { initialRoute: '/invalid-wl/child' }
+      { initialRoute: '/invalid-wl/child' },
     );
 
     expect(screen.getByTestId('step-1-page')).toBeInTheDocument();
@@ -109,7 +108,7 @@ describe('ValidateWhiteLabel', () => {
           </Route>
           <Route path="/step-1" element={<TestComponent />} />
         </Routes>,
-        { initialRoute: `/${invalidWL}/child` }
+        { initialRoute: `/${invalidWL}/child` },
       );
 
       expect(screen.getByTestId('step-1-page')).toBeInTheDocument();
@@ -125,7 +124,7 @@ describe('ValidateWhiteLabel', () => {
           <Route path=":uuid/step-1" element={<div data-testid="nested-route">Nested Step 1</div>} />
         </Route>
       </Routes>,
-      { initialRoute: '/co/550e8400-e29b-41d4-a716-446655440000/step-1' }
+      { initialRoute: '/co/550e8400-e29b-41d4-a716-446655440000/step-1' },
     );
 
     expect(screen.getByTestId('nested-route')).toBeInTheDocument();
@@ -155,7 +154,7 @@ describe('ValidateWhiteLabel', () => {
           <Route path="landing-page" element={<div data-testid="landing">Landing Page</div>} />
         </Route>
       </Routes>,
-      { initialRoute: '/cesn/landing-page' }
+      { initialRoute: '/cesn/landing-page' },
     );
 
     expect(screen.getByTestId('landing')).toBeInTheDocument();
@@ -175,7 +174,7 @@ describe('ValidateWhiteLabel', () => {
           </Route>
           <Route path="/step-1" element={<LocationCapture />} />
         </Routes>,
-        { initialRoute: '/co_energy_calculator/step-1' }
+        { initialRoute: '/co_energy_calculator/step-1' },
       );
 
       expect(screen.getByTestId('pathname')).toHaveTextContent('/step-1');
@@ -188,7 +187,7 @@ describe('ValidateWhiteLabel', () => {
             <Route path="step-1" element={<div data-testid="step">Step 1</div>} />
           </Route>
         </Routes>,
-        { initialRoute: '/cesn/step-1' }
+        { initialRoute: '/cesn/step-1' },
       );
 
       expect(screen.getByTestId('step')).toBeInTheDocument();

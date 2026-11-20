@@ -14,13 +14,13 @@ export interface AgeCalculationResult {
  */
 export function calculateAgeStatus(
   birthMonth: number | string | undefined,
-  birthYear: number | string | undefined
+  birthYear: number | string | undefined,
 ): AgeCalculationResult {
   if (!birthMonth || !birthYear) {
     return {
       is16OrOlder: false,
       isUnder16: true,
-      age: null
+      age: null,
     };
   }
 
@@ -31,12 +31,12 @@ export function calculateAgeStatus(
     return {
       is16OrOlder: false,
       isUnder16: true,
-      age: null
+      age: null,
     };
   }
 
   try {
-    const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();    
+    const { CURRENT_MONTH, CURRENT_YEAR } = getCurrentMonthYear();
     if (year > CURRENT_YEAR) {
       return { is16OrOlder: false, isUnder16: true, age: null };
     }
@@ -49,13 +49,13 @@ export function calculateAgeStatus(
     return {
       is16OrOlder,
       isUnder16: !is16OrOlder,
-      age
+      age,
     };
   } catch (error) {
     return {
       is16OrOlder: false,
       isUnder16: true,
-      age: null
+      age: null,
     };
   }
 }
@@ -66,11 +66,13 @@ export function calculateAgeStatus(
  * @returns 'true' if should default to having income, 'false' otherwise
  */
 export function determineDefaultIncomeByAge(
-  householdMemberFormData: { 
-    incomeStreams?: Array<any>; 
-    birthYear?: number; 
-    birthMonth?: number 
-  } | undefined
+  householdMemberFormData:
+    | {
+        incomeStreams?: Array<any>;
+        birthYear?: number;
+        birthMonth?: number;
+      }
+    | undefined,
 ): 'true' | 'false' {
   if (householdMemberFormData === undefined) {
     return 'false';
@@ -80,10 +82,7 @@ export function determineDefaultIncomeByAge(
     return 'true';
   }
 
-  const { is16OrOlder } = calculateAgeStatus(
-    householdMemberFormData.birthMonth,
-    householdMemberFormData.birthYear
-  );
+  const { is16OrOlder } = calculateAgeStatus(householdMemberFormData.birthMonth, householdMemberFormData.birthYear);
 
   return is16OrOlder ? 'true' : 'false';
 }

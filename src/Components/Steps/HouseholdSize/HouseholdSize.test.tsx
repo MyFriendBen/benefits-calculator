@@ -65,7 +65,7 @@ const renderHouseholdSize = (householdSize = 1) => {
           </Routes>
         </MemoryRouter>
       </Context.Provider>
-    </IntlProvider>
+    </IntlProvider>,
   );
 };
 

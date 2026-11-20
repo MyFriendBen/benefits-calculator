@@ -77,12 +77,17 @@ export async function setupNC211Session(page: Page): Promise<FlowResult> {
 export async function completeNC211FullApplication(page: Page, data: ApplicationData): Promise<FlowResult> {
   try {
     // Build basic info members array for step-5/0 (multi-member households only)
-    const basicInfoMembers = parseInt(data.householdSize) > 1
-      ? [
-          { birthMonth: data.primaryUser.birthMonth, birthYear: data.primaryUser.birthYear },
-          { birthMonth: data.householdMember.birthMonth, birthYear: data.householdMember.birthYear, relationship: data.householdMember.relationship },
-        ]
-      : [];
+    const basicInfoMembers =
+      parseInt(data.householdSize) > 1
+        ? [
+            { birthMonth: data.primaryUser.birthMonth, birthYear: data.primaryUser.birthYear },
+            {
+              birthMonth: data.householdMember.birthMonth,
+              birthYear: data.householdMember.birthYear,
+              relationship: data.householdMember.relationship,
+            },
+          ]
+        : [];
 
     // Complete all form steps using shared helpers
     const steps = [

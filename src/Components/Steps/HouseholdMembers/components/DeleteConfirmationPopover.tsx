@@ -10,7 +10,12 @@ type DeleteConfirmationPopoverProps = {
   onConfirm: () => void;
 };
 
-const DeleteConfirmationPopover = ({ deletePopover, isDeleting, onClose, onConfirm }: DeleteConfirmationPopoverProps) => (
+const DeleteConfirmationPopover = ({
+  deletePopover,
+  isDeleting,
+  onClose,
+  onConfirm,
+}: DeleteConfirmationPopoverProps) => (
   <Popover
     open={deletePopover !== null}
     anchorEl={deletePopover?.anchorEl}

@@ -374,9 +374,7 @@ function SignUp() {
                     error={errors.contactInfo?.firstName !== undefined}
                     helperText={
                       errors.contactInfo?.firstName !== undefined && (
-                        <ErrorMessageWrapper>
-                          {errors.contactInfo.firstName.message}
-                        </ErrorMessageWrapper>
+                        <ErrorMessageWrapper>{errors.contactInfo.firstName.message}</ErrorMessageWrapper>
                       )
                     }
                   />
@@ -491,9 +489,7 @@ function SignUp() {
                       }
                     />
                     {errors.contactInfo?.emailConsent && (
-                      <ErrorMessageWrapper>
-                        {errors.contactInfo.emailConsent.message}
-                      </ErrorMessageWrapper>
+                      <ErrorMessageWrapper>{errors.contactInfo.emailConsent.message}</ErrorMessageWrapper>
                     )}
                   </>
                 )}

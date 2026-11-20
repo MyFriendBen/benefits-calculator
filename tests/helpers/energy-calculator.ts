@@ -35,7 +35,13 @@ export async function selectNoBenefit(page: Page) {
   await expect(page.locator('.hb-loading')).toBeHidden();
 }
 
-export async function selectECIncome(page: Page, _incomeCategory: string, _incomeType: string, frequency: string, amount: number) {
+export async function selectECIncome(
+  page: Page,
+  _incomeCategory: string,
+  _incomeType: string,
+  frequency: string,
+  amount: number,
+) {
   // The EC household member form shares the three-question IncomeSection. Enter
   // wage income the same way as the main flow: employed = Yes reveals an
   // amount-only row (wages implied, no category/source), then fill frequency +

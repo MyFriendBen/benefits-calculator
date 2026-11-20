@@ -26,8 +26,12 @@ export default function NPSScoreButtons({ selectedScore, onScoreClick }: NPSScor
         ))}
       </div>
       <div className="nps-labels">
-        <span><FormattedMessage id="nps.label.veryUnlikely" defaultMessage="Very Unlikely" /></span>
-        <span><FormattedMessage id="nps.label.veryLikely" defaultMessage="Very likely" /></span>
+        <span>
+          <FormattedMessage id="nps.label.veryUnlikely" defaultMessage="Very Unlikely" />
+        </span>
+        <span>
+          <FormattedMessage id="nps.label.veryLikely" defaultMessage="Very likely" />
+        </span>
       </div>
     </>
   );

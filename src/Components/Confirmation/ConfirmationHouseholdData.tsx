@@ -33,18 +33,48 @@ type ConditionEntry = {
 };
 
 const MAIN_CONDITIONS: ConditionEntry[] = [
-  { isActive: (m) => m.conditions.student, id: 'confirmation.headOfHouseholdDataBlock-studentText', defaultMessage: 'Student', kind: 'student' },
-  { isActive: (m) => m.conditions.pregnant, id: 'confirmation.headOfHouseholdDataBlock-pregnantText', defaultMessage: 'Pregnant' },
-  { isActive: (m) => m.conditions.blindOrVisuallyImpaired, id: 'confirmation.headOfHouseholdDataBlock-blindOrVisuallyImpairedText', defaultMessage: 'Blind or visually impaired' },
-  { isActive: (m) => m.conditions.disabled, id: 'confirmation.headOfHouseholdDataBlock-disabledText', defaultMessage: 'Disabled' },
-  { isActive: (m) => m.conditions.longTermDisability, id: 'confirmation.longTermDisability', defaultMessage: 'Has a medical or developmental condition that has lasted, or is expected to last, more than 12 months' },
+  {
+    isActive: (m) => m.conditions.student,
+    id: 'confirmation.headOfHouseholdDataBlock-studentText',
+    defaultMessage: 'Student',
+    kind: 'student',
+  },
+  {
+    isActive: (m) => m.conditions.pregnant,
+    id: 'confirmation.headOfHouseholdDataBlock-pregnantText',
+    defaultMessage: 'Pregnant',
+  },
+  {
+    isActive: (m) => m.conditions.blindOrVisuallyImpaired,
+    id: 'confirmation.headOfHouseholdDataBlock-blindOrVisuallyImpairedText',
+    defaultMessage: 'Blind or visually impaired',
+  },
+  {
+    isActive: (m) => m.conditions.disabled,
+    id: 'confirmation.headOfHouseholdDataBlock-disabledText',
+    defaultMessage: 'Disabled',
+  },
+  {
+    isActive: (m) => m.conditions.longTermDisability,
+    id: 'confirmation.longTermDisability',
+    defaultMessage:
+      'Has a medical or developmental condition that has lasted, or is expected to last, more than 12 months',
+  },
   { isActive: (m) => m.conditions.fosterCare, id: 'confirmation.fosterCare', defaultMessage: 'Ever in foster care' },
 ];
 
 const EC_CONDITIONS: ConditionEntry[] = [
-  { isActive: (m) => m.energyCalculator?.survivingSpouse ?? false, id: 'eCConditionOptions.survivingSpouse', defaultMessage: 'Surviving Spouse' },
+  {
+    isActive: (m) => m.energyCalculator?.survivingSpouse ?? false,
+    id: 'eCConditionOptions.survivingSpouse',
+    defaultMessage: 'Surviving Spouse',
+  },
   { isActive: (m) => m.conditions.disabled, id: 'confirmationHHData.disability', defaultMessage: 'Disability' },
-  { isActive: (m) => m.energyCalculator?.medicalEquipment ?? false, id: 'confirmationHHData.medicalEquipment', defaultMessage: 'In-home medical equipment' },
+  {
+    isActive: (m) => m.energyCalculator?.medicalEquipment ?? false,
+    id: 'confirmationHHData.medicalEquipment',
+    defaultMessage: 'In-home medical equipment',
+  },
 ];
 
 type StudentEligibilityItem = {
@@ -205,8 +235,10 @@ const DefaultConfirmationHHData = () => {
       icon={<Icon name="users" className="confirmation-lucide-icon" aria-hidden={true} />}
       title={
         <>
-          <FormattedMessage id="confirmation.displayAllFormData-yourHouseholdLabel" defaultMessage="Household Members" />
-          {' '}
+          <FormattedMessage
+            id="confirmation.displayAllFormData-yourHouseholdLabel"
+            defaultMessage="Household Members"
+          />{' '}
           <span className="household-member-count">
             <span className="household-member-count-full">({householdSizeText})</span>
             <span className="household-member-count-short">({translateNumber(householdSize)})</span>
@@ -220,10 +252,7 @@ const DefaultConfirmationHHData = () => {
       <div className="household-member-table-wrapper">
         <table className="household-member-table household-member-table-desktop">
           <caption className="confirmation-sr-only">
-            <FormattedMessage
-              id="confirmation.householdTable.caption"
-              defaultMessage="Household member details"
-            />
+            <FormattedMessage id="confirmation.householdTable.caption" defaultMessage="Household member details" />
           </caption>
           <thead>
             <tr>
@@ -234,7 +263,10 @@ const DefaultConfirmationHHData = () => {
                 <FormattedMessage id="confirmation.member.birthYearMonth" defaultMessage="Birth Month/Year:" />
               </th>
               <th scope="col" className="confirmation-conditions-col">
-                <FormattedMessage id="confirmation.headOfHouseholdDataBlock-conditionsText" defaultMessage="Conditions:" />
+                <FormattedMessage
+                  id="confirmation.headOfHouseholdDataBlock-conditionsText"
+                  defaultMessage="Conditions:"
+                />
               </th>
               <th scope="col">
                 <FormattedMessage id="confirmation.annualIncome" defaultMessage="Annual Income" />

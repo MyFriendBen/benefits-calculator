@@ -62,7 +62,10 @@ const SaveViaEmailForm = ({ onSuccess, language }: SaveViaEmailFormProps) => {
               field.onChange(e);
               clearApiError();
             }}
-            placeholder={formatMessage({ id: 'saveMyResults.emailPlaceholder', defaultMessage: 'your.email@example.com' })}
+            placeholder={formatMessage({
+              id: 'saveMyResults.emailPlaceholder',
+              defaultMessage: 'your.email@example.com',
+            })}
             variant="outlined"
             error={errors.email !== undefined || apiError !== null}
             helperText={

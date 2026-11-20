@@ -28,9 +28,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       <FaviconManager />
       <BrandedHeader />
       <Box className="main-max-width">
-        {bannerMessages && bannerMessages.length > 0 && (
-          <SystemBanner banners={bannerMessages} />
-        )}
+        {bannerMessages && bannerMessages.length > 0 && <SystemBanner banners={bannerMessages} />}
         <ProgressBarManager totalSteps={totalSteps} />
         {children}
       </Box>

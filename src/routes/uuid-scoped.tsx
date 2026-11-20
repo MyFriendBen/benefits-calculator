@@ -17,9 +17,7 @@ interface UUIDScopedRoutesOptions {
  *
  * Returns a single RouteObject with nested children routes.
  */
-export const buildUUIDScopedRoute = ({
-  householdMemberStepNumber,
-}: UUIDScopedRoutesOptions): RouteObject => {
+export const buildUUIDScopedRoute = ({ householdMemberStepNumber }: UUIDScopedRoutesOptions): RouteObject => {
   const children: RouteObject[] = [
     { index: true, element: <Navigate to="step-1" replace /> },
     { path: 'step-1', element: <SelectLanguagePage /> },
@@ -42,7 +40,7 @@ export const buildUUIDScopedRoute = ({
     { path: 'step-:id', element: <QuestionComponentContainer key={window.location.href} /> },
     { path: 'confirm-information', element: <Confirmation /> },
     ...resultsRoutes,
-    { path: '*', element: <Navigate to="step-1" replace /> }
+    { path: '*', element: <Navigate to="step-1" replace /> },
   );
 
   return {

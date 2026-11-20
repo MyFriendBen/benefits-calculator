@@ -38,7 +38,7 @@ describe('SessionInitializer', () => {
           <Context.Provider value={defaultContextValue as any}>
             <SessionInitializer whiteLabel="co" />
           </Context.Provider>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(mockSetWhiteLabel).toHaveBeenCalledWith('co');
@@ -51,7 +51,7 @@ describe('SessionInitializer', () => {
           <Context.Provider value={defaultContextValue as any}>
             <SessionInitializer whiteLabel="invalid_label" />
           </Context.Provider>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       // Should not call setWhiteLabel with invalid value
@@ -68,7 +68,7 @@ describe('SessionInitializer', () => {
               <Route path=":whiteLabel/*" element={<SessionInitializer whiteLabel="co" />} />
             </Routes>
           </Context.Provider>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       // Should use 'co' from props, not 'nc' from URL
@@ -86,7 +86,7 @@ describe('SessionInitializer', () => {
               <Route path=":whiteLabel/*" element={<SessionInitializer />} />
             </Routes>
           </Context.Provider>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(mockSetWhiteLabel).toHaveBeenCalledWith('co');
@@ -101,7 +101,7 @@ describe('SessionInitializer', () => {
               <Route path=":whiteLabel/*" element={<SessionInitializer />} />
             </Routes>
           </Context.Provider>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       // Should not call setWhiteLabel with invalid value
@@ -121,7 +121,7 @@ describe('SessionInitializer', () => {
                 <Route path=":whiteLabel/*" element={<SessionInitializer />} />
               </Routes>
             </Context.Provider>
-          </MemoryRouter>
+          </MemoryRouter>,
         );
 
         expect(mockSetWhiteLabel).toHaveBeenCalledWith(label);
@@ -138,7 +138,7 @@ describe('SessionInitializer', () => {
               <Route path=":whiteLabel/*" element={<SessionInitializer />} />
             </Routes>
           </Context.Provider>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(mockSetScreenLoading).toHaveBeenCalledWith(false);
@@ -152,7 +152,7 @@ describe('SessionInitializer', () => {
               <Route path=":whiteLabel/*" element={<SessionInitializer />} />
             </Routes>
           </Context.Provider>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       // Even with invalid white label, should trigger config load
@@ -165,7 +165,7 @@ describe('SessionInitializer', () => {
           <Context.Provider value={defaultContextValue as any}>
             <SessionInitializer />
           </Context.Provider>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       // Should still trigger config loading
@@ -185,7 +185,7 @@ describe('SessionInitializer', () => {
               </Route>
             </Routes>
           </Context.Provider>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       // Should render child routes via Outlet
@@ -202,7 +202,7 @@ describe('SessionInitializer', () => {
           <Context.Provider value={defaultContextValue as any}>
             <SessionInitializer whiteLabel="co" />
           </Context.Provider>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(mockSetWhiteLabel).toHaveBeenCalledTimes(1);
@@ -216,7 +216,7 @@ describe('SessionInitializer', () => {
           <Context.Provider value={defaultContextValue as any}>
             <SessionInitializer whiteLabel="nc" />
           </Context.Provider>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(mockSetWhiteLabel).toHaveBeenCalledTimes(1);

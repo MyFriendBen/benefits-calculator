@@ -317,9 +317,7 @@ export default function CalculateImpactPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="link-color"
-                  onClick={() =>
-                    track('heat_pump_rewiring_america_click', { url: 'https://www.rewiringamerica.org' })
-                  }
+                  onClick={() => track('heat_pump_rewiring_america_click', { url: 'https://www.rewiringamerica.org' })}
                 >
                   <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
                 </a>
@@ -386,9 +384,7 @@ export default function CalculateImpactPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="link-color"
-                onClick={() =>
-                  track('heat_pump_rewiring_america_click', { url: 'https://www.rewiringamerica.org' })
-                }
+                onClick={() => track('heat_pump_rewiring_america_click', { url: 'https://www.rewiringamerica.org' })}
               >
                 <FormattedMessage id="co.energy.rewiring_america_link" defaultMessage="Rewiring America" />
               </a>

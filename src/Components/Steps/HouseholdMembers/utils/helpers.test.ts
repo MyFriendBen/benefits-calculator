@@ -134,7 +134,7 @@ describe('sortFrequencyOptions', () => {
     } as any;
     const result = sortFrequencyOptions(input);
     const keys = Object.keys(result);
-    const orderedKnown = FREQUENCY_ORDER.filter(k => keys.includes(k));
+    const orderedKnown = FREQUENCY_ORDER.filter((k) => keys.includes(k));
     expect(keys.slice(0, orderedKnown.length)).toEqual(orderedKnown);
   });
 
@@ -269,7 +269,15 @@ describe('createHouseholdMemberData', () => {
     const result = createHouseholdMemberData({
       memberData: {
         ...baseMemberData,
-        incomeStreams: [{ incomeCategory: 'employment', incomeStreamName: 'wages', incomeAmount: '1000', incomeFrequency: 'monthly', hoursPerWeek: '' }],
+        incomeStreams: [
+          {
+            incomeCategory: 'employment',
+            incomeStreamName: 'wages',
+            incomeAmount: '1000',
+            incomeFrequency: 'monthly',
+            hoursPerWeek: '',
+          },
+        ],
       },
       currentMemberIndex: 0,
       existingHouseholdData: [],

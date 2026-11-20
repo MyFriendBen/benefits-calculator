@@ -29,7 +29,9 @@ function buildGmailUrl(subject: string, body: string) {
 }
 
 function buildOutlookUrl(subject: string, body: string) {
-  return `https://outlook.live.com/owa/?path=/mail/action/compose&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return `https://outlook.live.com/owa/?path=/mail/action/compose&subject=${encodeURIComponent(
+    subject,
+  )}&body=${encodeURIComponent(body)}`;
 }
 
 function buildYahooUrl(subject: string, body: string) {
@@ -94,7 +96,13 @@ const ShareModal = ({ open, onClose, shareLocation }: ShareModalProps) => {
         url: buildGmailUrl(shareSubject, emailBody),
         icon: (
           <span className="modal-option-provider-icon" aria-hidden="true">
-            <img src="https://www.google.com/favicon.ico" alt="" className="modal-option-provider-favicon" width="28" height="28" />
+            <img
+              src="https://www.google.com/favicon.ico"
+              alt=""
+              className="modal-option-provider-favicon"
+              width="28"
+              height="28"
+            />
           </span>
         ),
       },
@@ -103,7 +111,13 @@ const ShareModal = ({ open, onClose, shareLocation }: ShareModalProps) => {
         url: buildOutlookUrl(shareSubject, emailBody),
         icon: (
           <span className="modal-option-provider-icon" aria-hidden="true">
-            <img src="https://outlook.live.com/favicon.ico" alt="" className="modal-option-provider-favicon" width="28" height="28" />
+            <img
+              src="https://outlook.live.com/favicon.ico"
+              alt=""
+              className="modal-option-provider-favicon"
+              width="28"
+              height="28"
+            />
           </span>
         ),
       },
@@ -112,7 +126,13 @@ const ShareModal = ({ open, onClose, shareLocation }: ShareModalProps) => {
         url: buildYahooUrl(shareSubject, emailBody),
         icon: (
           <span className="modal-option-provider-icon" aria-hidden="true">
-            <img src="https://www.yahoo.com/favicon.ico" alt="" className="modal-option-provider-favicon" width="28" height="28" />
+            <img
+              src="https://www.yahoo.com/favicon.ico"
+              alt=""
+              className="modal-option-provider-favicon"
+              width="28"
+              height="28"
+            />
           </span>
         ),
       },

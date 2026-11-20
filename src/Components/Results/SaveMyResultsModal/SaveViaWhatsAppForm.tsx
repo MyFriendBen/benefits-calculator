@@ -57,7 +57,9 @@ const SaveViaWhatsAppForm = ({ onSuccess }: SaveViaWhatsAppFormProps) => {
       <label className="save-my-results-field-label">
         <FormattedMessage id="saveMyResults.whatsappLabel" defaultMessage="WhatsApp Number" />
       </label>
-      <div className={`save-my-results-intl-phone-wrapper${hasError ? ' save-my-results-intl-phone-wrapper--error' : ''}`}>
+      <div
+        className={`save-my-results-intl-phone-wrapper${hasError ? ' save-my-results-intl-phone-wrapper--error' : ''}`}
+      >
         <PhoneInput
           value={phoneValue}
           onChange={(value) => {
@@ -68,9 +70,7 @@ const SaveViaWhatsAppForm = ({ onSuccess }: SaveViaWhatsAppFormProps) => {
         />
         {hasError && (
           <p className="save-my-results-intl-phone-error">
-            <ErrorMessageWrapper>
-              {errors.phone !== undefined ? errors.phone.message : apiError}
-            </ErrorMessageWrapper>
+            <ErrorMessageWrapper>{errors.phone !== undefined ? errors.phone.message : apiError}</ErrorMessageWrapper>
           </p>
         )}
         {!hasError && (
