@@ -1,5 +1,5 @@
 .progress-bar-container {
-  padding: 1rem .1rem;
+  padding: 1rem 0.1rem;
   max-width: var(--content-max-width);
   width: 100%;
   margin: 0 auto;
@@ -7,7 +7,7 @@
 }
 
 .step-progress-title {
-  padding: 0rem .4rem;
+  padding: 0rem 0.4rem;
 }
 
 @media (max-width: 767px) {

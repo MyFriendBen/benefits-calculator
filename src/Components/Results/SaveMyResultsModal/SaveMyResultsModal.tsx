@@ -100,18 +100,30 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
         <>
           <div className="modal-options-list">
             <ModalOption
-              icon={<span className="modal-option-icon-circle"><EmailIcon /></span>}
+              icon={
+                <span className="modal-option-icon-circle">
+                  <EmailIcon />
+                </span>
+              }
               label={<FormattedMessage id="saveMyResults.email" defaultMessage="Email" />}
-              sublabel={<FormattedMessage id="saveMyResults.emailSublabel" defaultMessage="Email a link to your results" />}
+              sublabel={
+                <FormattedMessage id="saveMyResults.emailSublabel" defaultMessage="Email a link to your results" />
+              }
               onClick={() => {
                 track('screener_results_save', { save_channel: 'email', save_action: 'open' });
                 setView('email');
               }}
             />
             <ModalOption
-              icon={<span className="modal-option-icon-circle"><SmsIcon /></span>}
+              icon={
+                <span className="modal-option-icon-circle">
+                  <SmsIcon />
+                </span>
+              }
               label={<FormattedMessage id="saveMyResults.sms" defaultMessage="SMS" />}
-              sublabel={<FormattedMessage id="saveMyResults.smsSublabel" defaultMessage="Text a link to your results" />}
+              sublabel={
+                <FormattedMessage id="saveMyResults.smsSublabel" defaultMessage="Text a link to your results" />
+              }
               onClick={() => {
                 track('screener_results_save', { save_channel: 'sms', save_action: 'open' });
                 setView('sms');
@@ -120,10 +132,14 @@ const SaveMyResultsModal = ({ onClose }: SaveMyResultsModalProps) => {
             <CopyLinkOption
               url={window.location.href}
               label={<FormattedMessage id="saveMyResults.copyLink" defaultMessage="Copy to Clipboard" />}
-              sublabel={<FormattedMessage id="saveMyResults.copyLinkSublabel" defaultMessage="Copy a link to your results" />}
+              sublabel={
+                <FormattedMessage id="saveMyResults.copyLinkSublabel" defaultMessage="Copy a link to your results" />
+              }
               copiedLabel={<FormattedMessage id="saveMyResults.copied" defaultMessage="Copied!" />}
               errorLabel={<FormattedMessage id="saveMyResults.copyFailed" defaultMessage="Copy failed" />}
-              errorSublabel={<FormattedMessage id="saveMyResults.copyFailedSublabel" defaultMessage="Could not access clipboard" />}
+              errorSublabel={
+                <FormattedMessage id="saveMyResults.copyFailedSublabel" defaultMessage="Could not access clipboard" />
+              }
               onCopy={() => track('screener_results_save', { save_channel: 'copy_link', save_action: 'send' })}
             />
           </div>

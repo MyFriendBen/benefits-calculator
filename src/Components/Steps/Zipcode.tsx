@@ -217,9 +217,7 @@ export const Zipcode = () => {
               inputProps={{ inputMode: 'numeric' }}
               error={errors.zipcode !== undefined}
               helperText={
-                errors.zipcode !== undefined && (
-                  <ErrorMessageWrapper>{errors.zipcode.message}</ErrorMessageWrapper>
-                )
+                errors.zipcode !== undefined && <ErrorMessageWrapper>{errors.zipcode.message}</ErrorMessageWrapper>
               }
             />
           )}

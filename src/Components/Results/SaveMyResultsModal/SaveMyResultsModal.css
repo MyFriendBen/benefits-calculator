@@ -37,14 +37,12 @@
   margin-top: 0.25rem;
 }
 
-
 .save-my-results-success {
   display: flex;
   justify-content: center;
   width: 100%;
   margin-top: 0.5rem;
 }
-
 
 /* International phone input (react-international-phone) */
 .save-my-results-intl-phone-wrapper {

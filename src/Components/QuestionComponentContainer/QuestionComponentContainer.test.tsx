@@ -33,10 +33,7 @@ const createMockContext = (stepDirectory: string[] = []): Partial<WrapperContext
   } as any,
 });
 
-const renderWithRouter = (
-  stepId: string,
-  stepDirectory: string[] = ['zipcode', 'householdSize', 'hasExpenses'],
-) => {
+const renderWithRouter = (stepId: string, stepDirectory: string[] = ['zipcode', 'householdSize', 'hasExpenses']) => {
   const mockContext = createMockContext(stepDirectory);
 
   return render(

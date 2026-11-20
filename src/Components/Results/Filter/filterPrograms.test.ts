@@ -82,7 +82,7 @@ describe('filterProgramsGenerator', () => {
       const filtered = filterPrograms(programs);
 
       expect(filtered).toHaveLength(2);
-      expect(filtered.map(p => p.program_id)).toEqual([1, 3]);
+      expect(filtered.map((p) => p.program_id)).toEqual([1, 3]);
     });
 
     it('should show all programs in admin view', () => {
@@ -153,7 +153,7 @@ describe('filterProgramsGenerator', () => {
       // Program A excludes B, but B's exclusion of C doesn't matter since B is not visible
       // So we should see programs A and C
       expect(filtered).toHaveLength(2);
-      expect(filtered.map(p => p.program_id).sort()).toEqual([1, 3]);
+      expect(filtered.map((p) => p.program_id).sort()).toEqual([1, 3]);
     });
 
     it('should handle complex exclusion chains', () => {
@@ -169,7 +169,7 @@ describe('filterProgramsGenerator', () => {
 
       // Programs 1 and 2 should be visible, 3 and 4 should be excluded
       expect(filtered).toHaveLength(2);
-      expect(filtered.map(p => p.program_id).sort()).toEqual([1, 2]);
+      expect(filtered.map((p) => p.program_id).sort()).toEqual([1, 2]);
     });
 
     it('should handle circular exclusion dependencies', () => {
@@ -241,8 +241,8 @@ describe('filterProgramsGenerator', () => {
 
     it('should handle member-level eligibility with exclusions', () => {
       const programs = [
-        createProgramWithMembers(1, 'Family Program', { 'member1': 50, 'member2': 50 }, ['citizen']),
-        createProgramWithMembers(2, 'Individual Program', { 'member1': 100 }, ['citizen']),
+        createProgramWithMembers(1, 'Family Program', { member1: 50, member2: 50 }, ['citizen']),
+        createProgramWithMembers(2, 'Individual Program', { member1: 100 }, ['citizen']),
       ];
 
       programs[0].excludes_programs = [2];
@@ -258,18 +258,18 @@ describe('filterProgramsGenerator', () => {
   describe('Performance and caching', () => {
     it('should cache visibility results for performance', () => {
       // Create a complex exclusion graph
-      const programs = Array.from({ length: 10 }, (_, i) => 
+      const programs = Array.from({ length: 10 }, (_, i) =>
         createProgramWithExclusions(
           i + 1,
           `Program ${i + 1}`,
           i < 9 ? [i + 2] : [], // Each excludes the next
           true,
-          100
-        )
+          100,
+        ),
       );
 
       const filterPrograms = filterProgramsGenerator(defaultFormData, defaultFilterState, false);
-      
+
       // Run filter twice to test caching
       const filtered1 = filterPrograms(programs);
       const filtered2 = filterPrograms(programs);
@@ -342,7 +342,7 @@ describe('filterProgramsGenerator', () => {
       // Programs 1 and 2 should be visible
       // Program 3 is excluded by 1, Program 4 is excluded by 2
       expect(filtered).toHaveLength(2);
-      expect(filtered.map(p => p.program_id).sort()).toEqual([1, 2]);
+      expect(filtered.map((p) => p.program_id).sort()).toEqual([1, 2]);
     });
 
     it('should maintain member eligibility modifications through filtering', () => {

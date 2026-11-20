@@ -35,9 +35,12 @@ export function useCopyFeedback(onSuccess?: () => void): UseCopyFeedbackReturn {
     );
   }, []);
 
-  useEffect(() => () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    },
+    [],
+  );
 
   return { copied, copyError, handleCopy };
 }

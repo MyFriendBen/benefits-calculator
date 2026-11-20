@@ -39,10 +39,7 @@ export default function HeatPumpJourneyCards() {
             1
           </span>
           <h3 className="heat-pump-journey-card-title">
-            <FormattedMessage
-              id="energyCalculator.heatPumpJourney.card1.title"
-              defaultMessage="Why get a heat pump?"
-            />
+            <FormattedMessage id="energyCalculator.heatPumpJourney.card1.title" defaultMessage="Why get a heat pump?" />
           </h3>
         </div>
         <p className="heat-pump-journey-card-description">
@@ -96,10 +93,7 @@ export default function HeatPumpJourneyCards() {
             3
           </span>
           <h3 className="heat-pump-journey-card-title">
-            <FormattedMessage
-              id="energyCalculator.heatPumpJourney.card3.title"
-              defaultMessage="Whom should I hire?"
-            />
+            <FormattedMessage id="energyCalculator.heatPumpJourney.card3.title" defaultMessage="Whom should I hire?" />
           </h3>
         </div>
         <p className="heat-pump-journey-card-description">

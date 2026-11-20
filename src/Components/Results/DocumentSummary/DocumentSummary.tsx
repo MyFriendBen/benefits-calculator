@@ -46,7 +46,8 @@ const DocumentSummary = ({ programs }: DocumentSummaryProps) => {
   }
 
   const canExpand = documentsWithCounts.length > COLLAPSED_ITEM_COUNT;
-  const visibleDocuments = canExpand && !expanded ? documentsWithCounts.slice(0, COLLAPSED_ITEM_COUNT) : documentsWithCounts;
+  const visibleDocuments =
+    canExpand && !expanded ? documentsWithCounts.slice(0, COLLAPSED_ITEM_COUNT) : documentsWithCounts;
 
   return (
     <div className="document-summary-container">

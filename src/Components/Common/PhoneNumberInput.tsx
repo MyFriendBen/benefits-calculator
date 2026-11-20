@@ -16,7 +16,18 @@ type PhoneNumberInputProps = {
   onAfterChange?: (value: string) => void;
 };
 
-const PhoneNumberInput = ({ value, onChange, onBlur, inputRef, name, label, error, helperText, sx, onAfterChange }: PhoneNumberInputProps) => {
+const PhoneNumberInput = ({
+  value,
+  onChange,
+  onBlur,
+  inputRef,
+  name,
+  label,
+  error,
+  helperText,
+  sx,
+  onAfterChange,
+}: PhoneNumberInputProps) => {
   return (
     <PatternFormat
       value={value}

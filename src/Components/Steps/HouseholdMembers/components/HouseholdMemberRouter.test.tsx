@@ -29,7 +29,7 @@ const renderRouter = (page: string, householdSize = 3) => {
           <Route path="/:whiteLabel/:uuid/:stepSegment/:page" element={<HouseholdMemberRouter />} />
         </Routes>
       </MemoryRouter>
-    </Context.Provider>
+    </Context.Provider>,
   );
 };
 

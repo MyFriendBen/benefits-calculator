@@ -47,7 +47,6 @@ export async function waitForResultsPageLoad(page: Page, timeoutMs: number = 600
  */
 export async function verifyEstimatedSavings(page: Page): Promise<void> {
   try {
-    
     // Look for savings display section - may have different selectors based on implementation
     const savingsSelectors = [
       '[data-testid="estimated-savings"]',
@@ -87,7 +86,7 @@ export async function clickMoreInfoLink(page: Page): Promise<void> {
   try {
     // Wait for page to be fully stable before looking for the link
     await page.waitForLoadState('networkidle');
-    
+
     // Try multiple selectors for robustness in CI environments
     const moreInfoSelectors = [
       '[data-testid="more-info-link"]',
@@ -132,7 +131,7 @@ export async function clickBackToResults(page: Page): Promise<void> {
   try {
     // Wait for page to be fully stable
     await page.waitForLoadState('networkidle');
-    
+
     // Try multiple selectors for robustness in CI environments
     const backButtonSelectors = [
       '[data-testid="back-to-results-button"]',

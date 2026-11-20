@@ -5,12 +5,7 @@ import ModalShell from './ModalShell';
 const renderShell = (props: Partial<React.ComponentProps<typeof ModalShell>> = {}) => {
   return render(
     <IntlProvider locale="en">
-      <ModalShell
-        headerIcon={<span data-testid="header-icon" />}
-        title="Test Title"
-        onClose={jest.fn()}
-        {...props}
-      >
+      <ModalShell headerIcon={<span data-testid="header-icon" />} title="Test Title" onClose={jest.fn()} {...props}>
         <div data-testid="child-content">children</div>
       </ModalShell>
     </IntlProvider>,

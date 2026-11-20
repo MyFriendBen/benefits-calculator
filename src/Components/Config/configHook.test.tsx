@@ -68,12 +68,13 @@ describe('useGetConfig - Error Handling', () => {
       (global.fetch as jest.Mock)
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve([
-            {
-              name: 'test_config',
-              data: 'invalid json string that will break JSON.parse',
-            },
-          ]),
+          json: () =>
+            Promise.resolve([
+              {
+                name: 'test_config',
+                data: 'invalid json string that will break JSON.parse',
+              },
+            ]),
         })
         // Fallback to _default also fails
         .mockRejectedValueOnce(new Error('Default config unavailable'));
@@ -92,10 +93,7 @@ describe('useGetConfig - Error Handling', () => {
       expect(configResponse).toEqual({});
 
       // Verify errors were logged
-      expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to load config'),
-        expect.any(Error)
-      );
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Failed to load config'), expect.any(Error));
     });
 
     it('should set configResponse to empty object when fallback data parsing fails', async () => {
@@ -106,12 +104,13 @@ describe('useGetConfig - Error Handling', () => {
         // This triggers the fallback's .catch() handler
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve([
-            {
-              name: 'malformed_config',
-              data: 'not valid json',
-            },
-          ]),
+          json: () =>
+            Promise.resolve([
+              {
+                name: 'malformed_config',
+                data: 'not valid json',
+              },
+            ]),
         });
 
       const { result } = renderHook(() => useGetConfig(false, 'invalid_label'));
@@ -128,14 +127,8 @@ describe('useGetConfig - Error Handling', () => {
       expect(configResponse).toEqual({});
 
       // Verify both errors were logged
-      expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to load config'),
-        expect.any(Error)
-      );
-      expect(console.error).toHaveBeenCalledWith(
-        'Failed to load default config:',
-        expect.any(Error)
-      );
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Failed to load config'), expect.any(Error));
+      expect(console.error).toHaveBeenCalledWith('Failed to load default config:', expect.any(Error));
     });
 
     it('should set configResponse to empty object when fallback JSON parsing fails', async () => {
@@ -168,23 +161,24 @@ describe('useGetConfig - Error Handling', () => {
       // Mock successful API response with valid config structure
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          {
-            name: 'option_translations',
-            data: JSON.stringify({
-              en: {
-                label: 'Test Option',
-                default_message: 'Test Message',
-              },
-            }),
-          },
-          {
-            name: 'results_page_options',
-            data: JSON.stringify({
-              display_back_to_screener_button: true,
-            }),
-          },
-        ]),
+        json: () =>
+          Promise.resolve([
+            {
+              name: 'option_translations',
+              data: JSON.stringify({
+                en: {
+                  label: 'Test Option',
+                  default_message: 'Test Message',
+                },
+              }),
+            },
+            {
+              name: 'results_page_options',
+              data: JSON.stringify({
+                display_back_to_screener_button: true,
+              }),
+            },
+          ]),
       });
 
       const { result } = renderHook(() => useGetConfig(false, 'co'));
@@ -219,7 +213,7 @@ describe('useGetConfig - Error Handling', () => {
     it('should start with loading true and configResponse undefined', () => {
       // Mock fetch to return a pending promise
       (global.fetch as jest.Mock).mockImplementation(
-        () => new Promise(() => {}) // Never resolves
+        () => new Promise(() => {}), // Never resolves
       );
 
       const { result, unmount } = renderHook(() => useGetConfig(false, 'co'));
@@ -238,13 +232,14 @@ describe('useGetConfig - Error Handling', () => {
     it('should extract feature_flags from the API response into _feature_flags', async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          {
-            name: 'test_config',
-            data: JSON.stringify({ key: 'value' }),
-            feature_flags: { eligibility_tags: true, nps_survey: false },
-          },
-        ]),
+        json: () =>
+          Promise.resolve([
+            {
+              name: 'test_config',
+              data: JSON.stringify({ key: 'value' }),
+              feature_flags: { eligibility_tags: true, nps_survey: false },
+            },
+          ]),
       });
 
       const { result } = renderHook(() => useGetConfig(false, 'co'));
@@ -262,22 +257,23 @@ describe('useGetConfig - Error Handling', () => {
     it('should merge feature_flags from multiple config items', async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          {
-            name: 'config_without_flags',
-            data: JSON.stringify({ key: 'value' }),
-          },
-          {
-            name: 'config_with_flags',
-            data: JSON.stringify({ key2: 'value2' }),
-            feature_flags: { eligibility_tags: true },
-          },
-          {
-            name: 'config_with_more_flags',
-            data: JSON.stringify({ key3: 'value3' }),
-            feature_flags: { nps_survey: true },
-          },
-        ]),
+        json: () =>
+          Promise.resolve([
+            {
+              name: 'config_without_flags',
+              data: JSON.stringify({ key: 'value' }),
+            },
+            {
+              name: 'config_with_flags',
+              data: JSON.stringify({ key2: 'value2' }),
+              feature_flags: { eligibility_tags: true },
+            },
+            {
+              name: 'config_with_more_flags',
+              data: JSON.stringify({ key3: 'value3' }),
+              feature_flags: { nps_survey: true },
+            },
+          ]),
       });
 
       const { result } = renderHook(() => useGetConfig(false, 'co'));
@@ -295,12 +291,13 @@ describe('useGetConfig - Error Handling', () => {
     it('should handle missing feature_flags in API response', async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          {
-            name: 'test_config',
-            data: JSON.stringify({ key: 'value' }),
-          },
-        ]),
+        json: () =>
+          Promise.resolve([
+            {
+              name: 'test_config',
+              data: JSON.stringify({ key: 'value' }),
+            },
+          ]),
       });
 
       const { result } = renderHook(() => useGetConfig(false, 'co'));
@@ -343,9 +340,7 @@ describe('useFeatureFlag', () => {
       hasBenefitsProgramsError: false,
     } as WrapperContext;
 
-    return ({ children }: PropsWithChildren) => (
-      <Context.Provider value={contextValue}>{children}</Context.Provider>
-    );
+    return ({ children }: PropsWithChildren) => <Context.Provider value={contextValue}>{children}</Context.Provider>;
   };
 
   it('should return true when feature flag is enabled', () => {
@@ -411,9 +406,7 @@ describe('useLocalizedLink', () => {
       hasBenefitsProgramsError: false,
     } as WrapperContext;
 
-    return ({ children }: PropsWithChildren) => (
-      <Context.Provider value={contextValue}>{children}</Context.Provider>
-    );
+    return ({ children }: PropsWithChildren) => <Context.Provider value={contextValue}>{children}</Context.Provider>;
   };
 
   it('should return the link for the current locale', () => {

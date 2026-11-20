@@ -34,13 +34,7 @@ const ModalOption = ({ icon, label, sublabel, onClick, href }: ModalOptionProps)
 
   if (href) {
     return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="modal-option"
-        onClick={onClick}
-      >
+      <a href={href} target="_blank" rel="noopener noreferrer" className="modal-option" onClick={onClick}>
         {content}
       </a>
     );

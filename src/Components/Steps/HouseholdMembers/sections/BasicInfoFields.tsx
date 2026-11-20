@@ -59,9 +59,7 @@ const BasicInfoFields = ({
           )}
         />
         {birthMonthError && (
-          <ErrorMessageWrapper fontSize="0.75rem">
-            {birthMonthError.message as string}
-          </ErrorMessageWrapper>
+          <ErrorMessageWrapper fontSize="0.75rem">{birthMonthError.message as string}</ErrorMessageWrapper>
         )}
       </FormControl>
 
@@ -88,9 +86,7 @@ const BasicInfoFields = ({
           )}
         />
         {birthYearError && (
-          <ErrorMessageWrapper fontSize="0.75rem">
-            {birthYearError.message as string}
-          </ErrorMessageWrapper>
+          <ErrorMessageWrapper fontSize="0.75rem">{birthYearError.message as string}</ErrorMessageWrapper>
         )}
       </FormControl>
 
@@ -98,10 +94,7 @@ const BasicInfoFields = ({
       {!isFirstMember && (
         <FormControl fullWidth error={!!relationshipError}>
           <InputLabel id={`relationship-label${labelSuffix}`}>
-            <FormattedMessage
-              id="householdDataBlock.relationshipToYou"
-              defaultMessage="Relationship to you"
-            />
+            <FormattedMessage id="householdDataBlock.relationshipToYou" defaultMessage="Relationship to you" />
           </InputLabel>
           <Controller
             name={`${prefix}relationshipToHH`}
@@ -116,18 +109,13 @@ const BasicInfoFields = ({
               >
                 {createMenuItems(
                   relationshipOptions,
-                  <FormattedMessage
-                    id="householdDataBlock.selectRelationship"
-                    defaultMessage="Select relationship"
-                  />
+                  <FormattedMessage id="householdDataBlock.selectRelationship" defaultMessage="Select relationship" />,
                 )}
               </Select>
             )}
           />
           {relationshipError && (
-            <ErrorMessageWrapper fontSize="0.75rem">
-              {relationshipError.message as string}
-            </ErrorMessageWrapper>
+            <ErrorMessageWrapper fontSize="0.75rem">{relationshipError.message as string}</ErrorMessageWrapper>
           )}
         </FormControl>
       )}

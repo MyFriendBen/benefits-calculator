@@ -165,7 +165,6 @@
   width: 100%;
 }
 
-
 .income-fields-row {
   display: flex;
   gap: 1rem;
@@ -245,8 +244,6 @@
   padding: 2px;
 }
 
-
-
 /* De-emphasized secondary action: an inline text link with a "+" icon in the
    secondary/accent color, kept visually subordinate to the primary Continue. */
 .income-add-button {
@@ -304,7 +301,7 @@
   max-width: min(280px, calc(100vw - 2rem));
   white-space: normal;
   overflow-wrap: break-word;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Classes used by the main branch version — kept for compatibility */
@@ -324,4 +321,3 @@
 .income-textfield-margin-bottom {
   margin: 1rem 0;
 }
-

@@ -75,7 +75,13 @@ export async function answerIncomeQuestion(page: Page, questionText: string | Re
  * employed?" = Yes (which reveals an amount-only row — wages are implied, so
  * there's no category/source dropdown), then fills frequency + pre-tax amount.
  */
-export async function selectIncome(page: Page, _incomeCategory: string, _incomeType: string, frequency: string, amount: number) {
+export async function selectIncome(
+  page: Page,
+  _incomeCategory: string,
+  _incomeType: string,
+  frequency: string,
+  amount: number,
+) {
   await answerIncomeQuestion(page, /are you currently employed/i, 'Yes');
   await selectFrequency(page, frequency);
   await page.locator('#income-amount-input-0').fill(amount.toString());

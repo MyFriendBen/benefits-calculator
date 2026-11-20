@@ -10,7 +10,9 @@ export default function ErrorMessageWrapper({ children, fontSize = '0.75rem' }: 
   return (
     <span className="error-helper-text" style={{ fontSize }}>
       <ErrorIcon sx={{ fontSize: fontSize, mr: '5px', mt: '.2em' }} />
-      <span className="error-message" style={{ fontSize: fontSize }}>{children}</span>
+      <span className="error-message" style={{ fontSize: fontSize }}>
+        {children}
+      </span>
     </span>
   );
 }

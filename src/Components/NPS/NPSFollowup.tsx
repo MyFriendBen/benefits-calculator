@@ -15,7 +15,14 @@ type NPSFollowupProps = {
 /**
  * Followup textarea shown after a user selects an NPS score.
  */
-export default function NPSFollowup({ selectedScore, reason, setReason, onSubmit, onSkip, isSubmitting = false }: NPSFollowupProps) {
+export default function NPSFollowup({
+  selectedScore,
+  reason,
+  setReason,
+  onSubmit,
+  onSkip,
+  isSubmitting = false,
+}: NPSFollowupProps) {
   const intl = useIntl();
 
   const handleReasonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -24,7 +31,7 @@ export default function NPSFollowup({ selectedScore, reason, setReason, onSubmit
 
   const placeholderText = intl.formatMessage({
     id: 'nps.followup-placeholder',
-    defaultMessage: 'Share your thoughts...'
+    defaultMessage: 'Share your thoughts...',
   });
 
   return (
@@ -37,10 +44,7 @@ export default function NPSFollowup({ selectedScore, reason, setReason, onSubmit
         />
       </span>
       <p id="nps-followup-prompt" className="nps-followup-prompt">
-        <FormattedMessage
-          id="nps.followup-prompt"
-          defaultMessage="What's behind your score?"
-        />
+        <FormattedMessage id="nps.followup-prompt" defaultMessage="What's behind your score?" />
       </p>
       <textarea
         className="nps-followup-textarea"
@@ -53,7 +57,9 @@ export default function NPSFollowup({ selectedScore, reason, setReason, onSubmit
         disabled={isSubmitting}
       />
       <div className="nps-followup-meta">
-        <span className="nps-char-count">{reason.length}/{MAX_REASON_LENGTH}</span>
+        <span className="nps-char-count">
+          {reason.length}/{MAX_REASON_LENGTH}
+        </span>
         <span className="nps-optional-label">
           <FormattedMessage id="nps.optional-label" defaultMessage="(optional)" />
         </span>

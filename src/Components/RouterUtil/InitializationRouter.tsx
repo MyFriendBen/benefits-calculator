@@ -20,9 +20,7 @@ const buildInitializationRouteElements = (): ReactElement[] => {
 
   // Legacy CO shorthand paths redirect to full white label URL
   CO_REDIRECT_PATHS.forEach((path) => {
-    routes.push(
-      <Route key={path} path={path} element={<RedirectToWhiteLabel whiteLabel="co" />} />
-    );
+    routes.push(<Route key={path} path={path} element={<RedirectToWhiteLabel whiteLabel="co" />} />);
   });
 
   // step-1: Redirect to white label, then initialize session
@@ -35,13 +33,11 @@ const buildInitializationRouteElements = (): ReactElement[] => {
           <SessionInitializer />
         </RedirectToWhiteLabel>
       }
-    />
+    />,
   );
 
   // White-labeled current-benefits: Set white label from URL
-  routes.push(
-    <Route key="wl-current-benefits" path=":whiteLabel/current-benefits" element={<SessionInitializer />} />
-  );
+  routes.push(<Route key="wl-current-benefits" path=":whiteLabel/current-benefits" element={<SessionInitializer />} />);
 
   // Share redirect: must come before :uuid catch-alls to avoid being swallowed
   routes.push(<Route key="share" path="share/:medium" element={<ShareRedirect />} />);
@@ -51,14 +47,14 @@ const buildInitializationRouteElements = (): ReactElement[] => {
     <Route key="uuid-wl" path=":whiteLabel/:uuid">
       <Route path="" element={<SessionRestoration />} />
       <Route path="*" element={<SessionRestoration />} />
-    </Route>
+    </Route>,
   );
 
   routes.push(
     <Route key="uuid" path=":uuid">
       <Route path="" element={<SessionRestoration />} />
       <Route path="*" element={<SessionRestoration />} />
-    </Route>
+    </Route>,
   );
 
   // Catch-all: Initialize with no specific white label

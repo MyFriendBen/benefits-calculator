@@ -380,6 +380,4 @@ describe('SaveMyResultsModal', () => {
       expect(postMessage).not.toHaveBeenCalled();
     });
   });
-
 });
-

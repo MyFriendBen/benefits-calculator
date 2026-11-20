@@ -88,7 +88,11 @@ export async function completeNcFullApplication(page: Page, data: ApplicationDat
       }
       const basicInfoMembers = [
         { birthMonth: data.primaryUser.birthMonth, birthYear: data.primaryUser.birthYear },
-        { birthMonth: data.householdMember.birthMonth, birthYear: data.householdMember.birthYear, relationship: data.householdMember.relationship },
+        {
+          birthMonth: data.householdMember.birthMonth,
+          birthYear: data.householdMember.birthYear,
+          relationship: data.householdMember.relationship,
+        },
       ];
       const basicInfoResult = await completeBasicInfoPage(page, basicInfoMembers);
       if (!basicInfoResult.success) return basicInfoResult;

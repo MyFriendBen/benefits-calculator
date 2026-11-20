@@ -13,8 +13,17 @@ type NPSInlineProps = {
  * Inline NPS section - full-width section at bottom of results page
  */
 export default function NPSInline({ uuid }: NPSInlineProps) {
-  const { selectedScore, isScoreSubmitted, isFullySubmitted, isSubmitting, reason, setReason, submitScore, submitReason, skipReason } =
-    useNPSState(uuid);
+  const {
+    selectedScore,
+    isScoreSubmitted,
+    isFullySubmitted,
+    isSubmitting,
+    reason,
+    setReason,
+    submitScore,
+    submitReason,
+    skipReason,
+  } = useNPSState(uuid);
 
   if (isFullySubmitted) {
     return (
@@ -29,7 +38,14 @@ export default function NPSInline({ uuid }: NPSInlineProps) {
   if (isScoreSubmitted) {
     return (
       <div className="nps-inline">
-        <NPSFollowup selectedScore={selectedScore!} reason={reason} setReason={setReason} onSubmit={submitReason} onSkip={skipReason} isSubmitting={isSubmitting} />
+        <NPSFollowup
+          selectedScore={selectedScore!}
+          reason={reason}
+          setReason={setReason}
+          onSubmit={submitReason}
+          onSkip={skipReason}
+          isSubmitting={isSubmitting}
+        />
       </div>
     );
   }
@@ -37,7 +53,10 @@ export default function NPSInline({ uuid }: NPSInlineProps) {
   return (
     <div className="nps-inline">
       <h3 className="nps-inline-title">
-        <OverrideableTranslation id="nps.prompt" defaultMessage="How likely are you to recommend MyFriendBen to a friend?" />
+        <OverrideableTranslation
+          id="nps.prompt"
+          defaultMessage="How likely are you to recommend MyFriendBen to a friend?"
+        />
       </h3>
       <NPSScoreButtons selectedScore={selectedScore} onScoreClick={submitScore} />
     </div>

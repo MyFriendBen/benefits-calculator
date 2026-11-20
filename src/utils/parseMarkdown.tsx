@@ -5,8 +5,7 @@ import React from 'react';
 // hrefs. Whitespace/control chars are stripped first so "java\nscript:" can't slip through.
 const SAFE_URL_PROTOCOL = /^(https?:\/\/|mailto:)/i;
 
-const isSafeUrl = (url: string): boolean =>
-  SAFE_URL_PROTOCOL.test(url.replace(/[\s\u0000-\u001f]/g, ''));
+const isSafeUrl = (url: string): boolean => SAFE_URL_PROTOCOL.test(url.replace(/[\s\u0000-\u001f]/g, ''));
 
 /**
  * Parses simple markdown-like syntax and converts to React elements
@@ -84,9 +83,7 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
             // A literal "__MDLINK_n__" in the source text rather than one we emitted
             // above. Render it verbatim: destructuring the missing entry would throw
             // during render, and with no ErrorBoundary in the tree that blanks the page.
-            parts.push(
-              inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{placeholder}</strong> : placeholder,
-            );
+            parts.push(inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{placeholder}</strong> : placeholder);
             remaining = remaining.slice(placeholderIndex + placeholder.length);
             continue;
           }
@@ -101,13 +98,11 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
                 style={{ color: primaryColor, textDecoration: 'underline' }}
               >
                 {linkText}
-              </a>
+              </a>,
             );
           } else {
             // Unsafe protocol (e.g. javascript:) — render the label as plain text, no href.
-            parts.push(
-              inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{linkText}</strong> : linkText,
-            );
+            parts.push(inBold ? <strong key={`${lineIndex}-${keyCounter++}`}>{linkText}</strong> : linkText);
           }
           remaining = remaining.slice(placeholderIndex + placeholder.length);
         }
@@ -126,7 +121,7 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
       plainUrlMatches.forEach((match) => {
         const url = match[0];
         const startIdx = match.index!;
-        
+
         if (startIdx > lastIdx) {
           const textBefore = currentText.substring(lastIdx, startIdx);
           const boldSegments = textBefore.split(/(__BOLD_START__|__BOLD_END__)/);
@@ -134,7 +129,7 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
             pushSegments(seg);
           });
         }
-        
+
         parts.push(
           <a
             key={`${lineIndex}-link-${keyCounter++}`}
@@ -148,7 +143,7 @@ export const parseMarkdown = (content: string, primaryColor: string): React.Reac
         );
         lastIdx = startIdx + url.length;
       });
-      
+
       if (lastIdx < currentText.length) {
         const textAfter = currentText.substring(lastIdx);
         const boldSegments = textAfter.split(/(__BOLD_START__|__BOLD_END__)/);
