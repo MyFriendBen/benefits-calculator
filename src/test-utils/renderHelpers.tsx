@@ -46,13 +46,13 @@ interface RenderWithRouterOptions {
 
 export function renderWithRouter(
   ui: React.ReactElement,
-  { initialRoute = '/', contextValue }: RenderWithRouterOptions = {}
+  { initialRoute = '/', contextValue }: RenderWithRouterOptions = {},
 ) {
   const mockContext = contextValue || createMockContextValue();
 
   return render(
     <Context.Provider value={mockContext}>
       <MemoryRouter initialEntries={[initialRoute]}>{ui}</MemoryRouter>
-    </Context.Provider>
+    </Context.Provider>,
   );
 }

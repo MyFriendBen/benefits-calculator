@@ -164,7 +164,9 @@ describe('GooglePlacesAddressInput', () => {
     render(<Wrapper />);
 
     fireEvent.change(screen.getByPlaceholderText(PLACEHOLDER), { target: { value: '123 Main' } });
-    await act(async () => { jest.runAllTimers(); });
+    await act(async () => {
+      jest.runAllTimers();
+    });
     await waitFor(() => screen.getByText('123 Main St, Denver, CO 80014'));
 
     fireEvent.change(screen.getByPlaceholderText(PLACEHOLDER), { target: { value: '' } });
@@ -175,7 +177,11 @@ describe('GooglePlacesAddressInput', () => {
 
   it('clears the loading state after a successful fetch', async () => {
     let resolveFetch!: (value: { description: string; place_id: string }[]) => void;
-    mockFetch.mockReturnValue(new Promise((res) => { resolveFetch = res; }));
+    mockFetch.mockReturnValue(
+      new Promise((res) => {
+        resolveFetch = res;
+      }),
+    );
 
     function Wrapper() {
       const [value, setValue] = useState('');
@@ -183,7 +189,9 @@ describe('GooglePlacesAddressInput', () => {
     }
     render(<Wrapper />);
     fireEvent.change(screen.getByPlaceholderText(PLACEHOLDER), { target: { value: '123 Main' } });
-    await act(async () => { jest.runAllTimers(); });
+    await act(async () => {
+      jest.runAllTimers();
+    });
 
     // MUI renders "Loading…" text in the dropdown while fetch is in flight
     expect(screen.getByText(/Loading/)).toBeInTheDocument();
@@ -197,7 +205,11 @@ describe('GooglePlacesAddressInput', () => {
 
   it('clears the loading state after a failed fetch', async () => {
     let rejectFetch!: (reason: Error) => void;
-    mockFetch.mockReturnValue(new Promise((_, rej) => { rejectFetch = rej; }));
+    mockFetch.mockReturnValue(
+      new Promise((_, rej) => {
+        rejectFetch = rej;
+      }),
+    );
 
     function Wrapper() {
       const [value, setValue] = useState('');
@@ -205,7 +217,9 @@ describe('GooglePlacesAddressInput', () => {
     }
     render(<Wrapper />);
     fireEvent.change(screen.getByPlaceholderText(PLACEHOLDER), { target: { value: '123 Main' } });
-    await act(async () => { jest.runAllTimers(); });
+    await act(async () => {
+      jest.runAllTimers();
+    });
 
     expect(screen.getByText(/Loading/)).toBeInTheDocument();
 
@@ -234,8 +248,16 @@ describe('GooglePlacesAddressInput', () => {
     let resolveFirst!: (value: AddressSuggestion[]) => void;
     let resolveSecond!: (value: AddressSuggestion[]) => void;
     mockFetch
-      .mockReturnValueOnce(new Promise((res) => { resolveFirst = res; }))
-      .mockReturnValueOnce(new Promise((res) => { resolveSecond = res; }));
+      .mockReturnValueOnce(
+        new Promise((res) => {
+          resolveFirst = res;
+        }),
+      )
+      .mockReturnValueOnce(
+        new Promise((res) => {
+          resolveSecond = res;
+        }),
+      );
 
     function Wrapper() {
       const [value, setValue] = useState('');
@@ -246,15 +268,23 @@ describe('GooglePlacesAddressInput', () => {
 
     // First query fires its debounced fetch (request id 1).
     fireEvent.change(input, { target: { value: '123' } });
-    await act(async () => { jest.runAllTimers(); });
+    await act(async () => {
+      jest.runAllTimers();
+    });
 
     // Second query fires its debounced fetch (request id 2) before the first resolves.
     fireEvent.change(input, { target: { value: '123 Main' } });
-    await act(async () => { jest.runAllTimers(); });
+    await act(async () => {
+      jest.runAllTimers();
+    });
 
     // Newer request resolves first, then the stale one resolves out of order.
-    await act(async () => { resolveSecond([{ description: '123 Main St, Denver, CO 80014', place_id: 'new' }]); });
-    await act(async () => { resolveFirst([{ description: '123 Stale Rd', place_id: 'old' }]); });
+    await act(async () => {
+      resolveSecond([{ description: '123 Main St, Denver, CO 80014', place_id: 'new' }]);
+    });
+    await act(async () => {
+      resolveFirst([{ description: '123 Stale Rd', place_id: 'old' }]);
+    });
 
     // The stale result must not clobber the newer options.
     await waitFor(() => screen.getByText('123 Main St, Denver, CO 80014'));

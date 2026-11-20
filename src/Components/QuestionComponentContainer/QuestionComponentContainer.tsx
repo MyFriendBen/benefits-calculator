@@ -66,7 +66,7 @@ const QuestionComponentContainer = () => {
   const maxStep = stepDirectory.length + STARTING_QUESTION_NUMBER;
   const stepName = useStepName(stepNumber);
   const questionName = !isNaN(stepNumber) ? stepName : undefined;
-  const pageTitle = questionName ? QUESTION_TITLES[questionName] : '' as any;
+  const pageTitle = questionName ? QUESTION_TITLES[questionName] : ('' as any);
 
   // Call usePageTitle hook unconditionally
   usePageTitle(pageTitle);

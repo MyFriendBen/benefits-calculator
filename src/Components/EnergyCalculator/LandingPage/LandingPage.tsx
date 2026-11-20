@@ -10,7 +10,6 @@ import { useQueryString } from '../../QuestionComponents/questionHooks';
 import { usePageTitle } from '../../Common/usePageTitle';
 
 const LandingPage = () => {
-
   usePageTitle(OTHER_PAGE_TITLES.energyCalculatorLandingPage, 'cesn');
 
   const homeownerQueryString = useQueryString({ path: null });
@@ -43,7 +42,10 @@ const LandingPage = () => {
             target="_blank"
             className="link-color"
           >
-            <FormattedMessage id="energyCalculator.bodyText3" defaultMessage="Click here to learn more about this screener." />
+            <FormattedMessage
+              id="energyCalculator.bodyText3"
+              defaultMessage="Click here to learn more about this screener."
+            />
           </a>
         </p>
       </article>

@@ -75,7 +75,7 @@ describe('SessionRestoration - UUID Disambiguation', () => {
             <Route path=":whiteLabel" element={<SessionRestoration />} />
           </Routes>
         </Context.Provider>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Wait for fetchScreen to be called
@@ -104,7 +104,7 @@ describe('SessionRestoration - UUID Disambiguation', () => {
             <Route path=":whiteLabel/:uuid" element={<SessionRestoration />} />
           </Routes>
         </Context.Provider>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Wait for fetchScreen to be called
@@ -125,7 +125,7 @@ describe('SessionRestoration - UUID Disambiguation', () => {
             <Route path=":whiteLabel/:uuid" element={<SessionRestoration />} />
           </Routes>
         </Context.Provider>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Wait a moment to ensure no calls are made
@@ -157,15 +157,12 @@ describe('SessionRestoration - UUID Disambiguation', () => {
             <Route path=":whiteLabel/:uuid" element={<SessionRestoration />} />
           </Routes>
         </Context.Provider>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Wait for error handling
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Session restoration failed:',
-        expect.any(Error)
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Session restoration failed:', expect.any(Error));
     });
 
     // Should set loading to false
@@ -191,7 +188,7 @@ describe('SessionRestoration - UUID Disambiguation', () => {
             <Route path=":whiteLabel/:uuid/*" element={<SessionRestoration />} />
           </Routes>
         </Context.Provider>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Wait for white label to be set
@@ -217,14 +214,12 @@ describe('SessionRestoration - UUID Disambiguation', () => {
             <Route path=":whiteLabel/:uuid" element={<SessionRestoration />} />
           </Routes>
         </Context.Provider>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Wait for error logging
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Invalid white label from API: invalid_label'
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Invalid white label from API: invalid_label');
     });
 
     // Should NOT set the invalid white label
@@ -255,7 +250,7 @@ describe('SessionRestoration - UUID Disambiguation', () => {
             <Route path=":whiteLabel/:uuid/*" element={<SessionRestoration />} />
           </Routes>
         </Context.Provider>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Wait for white label to be set
@@ -272,7 +267,7 @@ describe('SessionRestoration - UUID Disambiguation', () => {
             <Route path=":whiteLabel/:uuid" element={<SessionRestoration />} />
           </Routes>
         </Context.Provider>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Should render SessionInitializer instead of loading
@@ -295,7 +290,7 @@ describe('SessionRestoration - UUID Disambiguation', () => {
             <Route path=":whiteLabel/:uuid" element={<SessionRestoration />} />
           </Routes>
         </Context.Provider>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Should show loading page immediately

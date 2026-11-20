@@ -49,7 +49,9 @@ const Expenses = () => {
   // expenseIndexMap keys are the same keys being iterated in the JSX below,
   // so expenseIndexMap.get(expenseKey) is always defined — the ! assertion is safe.
   const { expenseKeys, expenseIndexMap, categorizedExpenses } = useMemo(() => {
-    const categories = Object.entries(expenseOptionsByCategory).filter(([, options]) => Object.keys(options).length > 0);
+    const categories = Object.entries(expenseOptionsByCategory).filter(
+      ([, options]) => Object.keys(options).length > 0,
+    );
     const keys = categories.flatMap(([, options]) => Object.keys(options));
     return {
       expenseKeys: keys,
@@ -60,13 +62,15 @@ const Expenses = () => {
           expenseKey,
           label,
           // Pre-compute the plain-text name used for the frequency toggle aria-label.
-          plainName: intl.formatMessage(
-            { id: `expenseOptions.${expenseKey}`, defaultMessage: camelCaseToTitleCase(expenseKey) },
-          ),
+          plainName: intl.formatMessage({
+            id: `expenseOptions.${expenseKey}`,
+            defaultMessage: camelCaseToTitleCase(expenseKey),
+          }),
         })),
-        categoryLabel: intl.formatMessage(
-          { id: `expenses.category.${categoryKey}`, defaultMessage: camelCaseToTitleCase(categoryKey) },
-        ),
+        categoryLabel: intl.formatMessage({
+          id: `expenses.category.${categoryKey}`,
+          defaultMessage: camelCaseToTitleCase(categoryKey),
+        }),
       })),
     };
   }, [expenseOptionsByCategory, intl]);
@@ -113,7 +117,10 @@ const Expenses = () => {
         <FormattedMessage id="qcc.about_household" defaultMessage="Tell us about your household" />
       </QuestionHeader>
       <QuestionQuestion>
-        <FormattedMessage id="expenses.header.question" defaultMessage="Which of the following expenses does your household have?" />
+        <FormattedMessage
+          id="expenses.header.question"
+          defaultMessage="Which of the following expenses does your household have?"
+        />
       </QuestionQuestion>
       <QuestionDescription>
         <FormattedMessage
@@ -139,7 +146,9 @@ const Expenses = () => {
                 const amount = watch(`expenses.${index}.expenseAmount`);
                 return (
                   <div key={expenseKey} className={`expense-row${amount > 0 ? ' expense-row--active' : ''}`}>
-                    <label htmlFor={`expense-amount-${expenseKey}`} className="expense-name-cell">{label}</label>
+                    <label htmlFor={`expense-amount-${expenseKey}`} className="expense-name-cell">
+                      {label}
+                    </label>
                     <div className="expense-amount-cell">
                       <Controller
                         name={`expenses.${index}.expenseAmount`}

@@ -47,7 +47,7 @@ const BILL_CROSSES_ZERO_RESULT: RemImpactApiResponse = {
     mean: { value: -19.76, unit: '$' },
     median: { value: -21.91, unit: '$' },
     percentile_20: { value: -60.52, unit: '$' },
-    percentile_80: { value: 20.50, unit: '$' },
+    percentile_80: { value: 20.5, unit: '$' },
   },
   emissions_delta: {
     mean: { value: -1758.0, unit: 'lbCO2e' },
@@ -80,10 +80,7 @@ const SYMMETRIC_RESULT: RemImpactApiResponse = {
 
 // ─── Helper ────────────────────────────────────────────────────────────────────
 
-const renderResults = (
-  result: RemImpactApiResponse,
-  { onEdit = jest.fn(), formValues = FORM_VALUES } = {},
-) =>
+const renderResults = (result: RemImpactApiResponse, { onEdit = jest.fn(), formValues = FORM_VALUES } = {}) =>
   render(
     <IntlProvider locale="en" defaultLocale="en">
       <MemoryRouter>

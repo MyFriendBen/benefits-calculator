@@ -128,7 +128,13 @@ describe('SpecialConditionsSection', () => {
     });
 
     it('hides SSI question when disabled is false even if showReceivesSsi is true', () => {
-      render(<Wrapper showReceivesSsi={true} conditions={{ student: false, pregnant: false, disabled: false }} formValues={{ 'conditions.disabled': false }} />);
+      render(
+        <Wrapper
+          showReceivesSsi={true}
+          conditions={{ student: false, pregnant: false, disabled: false }}
+          formValues={{ 'conditions.disabled': false }}
+        />,
+      );
       expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
     });
 
@@ -138,7 +144,7 @@ describe('SpecialConditionsSection', () => {
           showReceivesSsi={true}
           conditions={{ student: false, pregnant: false, disabled: true }}
           formValues={{ 'conditions.disabled': true }}
-        />
+        />,
       );
       expect(screen.getByRole('radiogroup')).toBeInTheDocument();
       expect(screen.getByRole('radio', { name: /yes/i })).toBeInTheDocument();
@@ -152,7 +158,7 @@ describe('SpecialConditionsSection', () => {
           showReceivesSsi={true}
           conditions={{ student: false, pregnant: false, disabled: true }}
           formValues={{ 'conditions.disabled': true }}
-        />
+        />,
       );
       expect(screen.getByText(/did you receive full benefits/i)).toBeInTheDocument();
     });
@@ -164,7 +170,7 @@ describe('SpecialConditionsSection', () => {
           showReceivesSsi={true}
           conditions={{ student: false, pregnant: false, disabled: true }}
           formValues={{ 'conditions.disabled': true }}
-        />
+        />,
       );
       expect(screen.getByText(/do they receive full benefits/i)).toBeInTheDocument();
     });

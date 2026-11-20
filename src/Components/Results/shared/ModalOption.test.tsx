@@ -3,14 +3,7 @@ import ModalOption from './ModalOption';
 
 describe('ModalOption', () => {
   it('renders label and sublabel', () => {
-    render(
-      <ModalOption
-        icon={<span />}
-        label="Email"
-        sublabel="Send via email"
-        onClick={jest.fn()}
-      />,
-    );
+    render(<ModalOption icon={<span />} label="Email" sublabel="Send via email" onClick={jest.fn()} />);
     expect(screen.getByText('Email')).toBeInTheDocument();
     expect(screen.getByText('Send via email')).toBeInTheDocument();
   });
@@ -28,14 +21,7 @@ describe('ModalOption', () => {
   });
 
   it('renders as a link when href is provided', () => {
-    render(
-      <ModalOption
-        icon={<span />}
-        label="Gmail"
-        href="https://mail.google.com"
-        onClick={jest.fn()}
-      />,
-    );
+    render(<ModalOption icon={<span />} label="Gmail" href="https://mail.google.com" onClick={jest.fn()} />);
     const link = screen.getByRole('link', { name: /gmail/i });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', 'https://mail.google.com');
@@ -45,14 +31,7 @@ describe('ModalOption', () => {
 
   it('calls onClick on link click', () => {
     const onClick = jest.fn();
-    render(
-      <ModalOption
-        icon={<span />}
-        label="Gmail"
-        href="https://mail.google.com"
-        onClick={onClick}
-      />,
-    );
+    render(<ModalOption icon={<span />} label="Gmail" href="https://mail.google.com" onClick={onClick} />);
     fireEvent.click(screen.getByRole('link'));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
@@ -63,13 +42,7 @@ describe('ModalOption', () => {
   });
 
   it('renders icon content', () => {
-    render(
-      <ModalOption
-        icon={<span data-testid="my-icon" />}
-        label="Test"
-        onClick={jest.fn()}
-      />,
-    );
+    render(<ModalOption icon={<span data-testid="my-icon" />} label="Test" onClick={jest.fn()} />);
     expect(screen.getByTestId('my-icon')).toBeInTheDocument();
   });
 });

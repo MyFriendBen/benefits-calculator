@@ -21,7 +21,15 @@ type CopyLinkOptionProps = {
   onCopy?: () => void;
 };
 
-const CopyLinkOption = ({ url, label, sublabel, copiedLabel, errorLabel, errorSublabel, onCopy }: CopyLinkOptionProps) => {
+const CopyLinkOption = ({
+  url,
+  label,
+  sublabel,
+  copiedLabel,
+  errorLabel,
+  errorSublabel,
+  onCopy,
+}: CopyLinkOptionProps) => {
   // Fires in the clipboard-success branch, so every successful copy counts —
   // including repeat copies while the "copied" feedback is still showing.
   const { copied, copyError, handleCopy } = useCopyFeedback(onCopy);

@@ -18,7 +18,7 @@ describe('UrgentNeedBanner', () => {
     render(
       <IntlProvider locale="en" messages={{}}>
         <UrgentNeedBanner />
-      </IntlProvider>
+      </IntlProvider>,
     );
   });
 
@@ -26,7 +26,7 @@ describe('UrgentNeedBanner', () => {
     const { container } = render(
       <IntlProvider locale="en" messages={{}}>
         <UrgentNeedBanner />
-      </IntlProvider>
+      </IntlProvider>,
     );
     expect(container.firstChild).toBeNull();
   });

@@ -65,8 +65,13 @@ describe('useHouseholdMemberFormEffects', () => {
 
       expect(deselectedParams._mocks.setValue).toHaveBeenCalledWith(
         'studentEligibility',
-        { studentFullTime: undefined, studentJobTrainingProgram: undefined, studentHasWorkStudy: undefined, studentWorks20PlusHrs: undefined },
-        { shouldValidate: false }
+        {
+          studentFullTime: undefined,
+          studentJobTrainingProgram: undefined,
+          studentHasWorkStudy: undefined,
+          studentWorks20PlusHrs: undefined,
+        },
+        { shouldValidate: false },
       );
     });
 
@@ -80,7 +85,7 @@ describe('useHouseholdMemberFormEffects', () => {
       expect(selectedParams._mocks.setValue).not.toHaveBeenCalledWith(
         'studentEligibility',
         expect.anything(),
-        expect.anything()
+        expect.anything(),
       );
     });
 
@@ -91,7 +96,11 @@ describe('useHouseholdMemberFormEffects', () => {
       const deselectedParams = makeParams({ watchIsStudent: false, isEnergyCalculator: true });
       act(() => rerender(deselectedParams));
 
-      expect(deselectedParams._mocks.setValue).not.toHaveBeenCalledWith('studentEligibility', expect.anything(), expect.anything());
+      expect(deselectedParams._mocks.setValue).not.toHaveBeenCalledWith(
+        'studentEligibility',
+        expect.anything(),
+        expect.anything(),
+      );
     });
   });
 

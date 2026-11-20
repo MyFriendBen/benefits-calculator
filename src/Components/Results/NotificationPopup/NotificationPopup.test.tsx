@@ -4,7 +4,11 @@ import NotificationPopup from './NotificationPopup';
 import React from 'react';
 
 const renderWithIntl = (component: React.ReactElement) => {
-  return render(<IntlProvider locale="en" defaultLocale="en">{component}</IntlProvider>);
+  return render(
+    <IntlProvider locale="en" defaultLocale="en">
+      {component}
+    </IntlProvider>,
+  );
 };
 
 describe('NotificationPopup', () => {
@@ -15,9 +19,7 @@ describe('NotificationPopup', () => {
 
   describe('Rendering', () => {
     it('renders nothing when shouldShow returns false', () => {
-      const { container } = renderWithIntl(
-        <NotificationPopup shouldShow={() => false} message={mockMessage} />
-      );
+      const { container } = renderWithIntl(<NotificationPopup shouldShow={() => false} message={mockMessage} />);
       expect(container.firstChild).toBeNull();
     });
 
@@ -35,7 +37,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           minimizedText={mockMinimizedText}
           startMinimized={true}
-        />
+        />,
       );
 
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -56,7 +58,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           linkUrl={mockLinkUrl}
           linkText={mockLinkText}
-        />
+        />,
       );
 
       expect(screen.getByText(mockLinkText)).toBeInTheDocument();
@@ -86,7 +88,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           minimizedText={mockMinimizedText}
           startMinimized={true}
-        />
+        />,
       );
 
       const button = screen.getByRole('button', { name: /restore survey popup/i });
@@ -106,7 +108,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           minimizedText={mockMinimizedText}
           startMinimized={true}
-        />
+        />,
       );
 
       expect(screen.getByLabelText('Close popup')).toBeInTheDocument();
@@ -119,7 +121,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           linkUrl={mockLinkUrl}
           linkText={mockLinkText}
-        />
+        />,
       );
 
       const link = screen.getByRole('link', { name: mockLinkText });
@@ -157,7 +159,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           linkUrl={mockLinkUrl}
           linkText={mockLinkText}
-        />
+        />,
       );
 
       const link = screen.getByRole('link', { name: mockLinkText });
@@ -176,7 +178,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           minimizedText={mockMinimizedText}
           startMinimized={true}
-        />
+        />,
       );
 
       const minimizedPopup = screen.getByRole('button', { name: /restore survey popup/i });
@@ -193,7 +195,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           minimizedText={mockMinimizedText}
           startMinimized={true}
-        />
+        />,
       );
 
       const minimizedPopup = screen.getByRole('button', { name: /restore survey popup/i });
@@ -209,7 +211,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           minimizedText={mockMinimizedText}
           startMinimized={true}
-        />
+        />,
       );
 
       const minimizedPopup = screen.getByRole('button', { name: /restore survey popup/i });
@@ -225,7 +227,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           minimizedText={mockMinimizedText}
           startMinimized={true}
-        />
+        />,
       );
 
       const minimizedPopup = screen.getByRole('button', { name: /restore survey popup/i });
@@ -261,7 +263,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           minimizedText={mockMinimizedText}
           startMinimized={true}
-        />
+        />,
       );
 
       const dismissButton = screen.getByLabelText('Close popup');
@@ -273,7 +275,7 @@ describe('NotificationPopup', () => {
 
     it('remains dismissed even if shouldShow changes to true', () => {
       const { rerender, container } = renderWithIntl(
-        <NotificationPopup shouldShow={() => true} message={mockMessage} />
+        <NotificationPopup shouldShow={() => true} message={mockMessage} />,
       );
 
       // Minimize and then dismiss
@@ -289,7 +291,7 @@ describe('NotificationPopup', () => {
       rerender(
         <IntlProvider locale="en" defaultLocale="en">
           <NotificationPopup shouldShow={() => true} message={mockMessage} />
-        </IntlProvider>
+        </IntlProvider>,
       );
 
       // Should still be dismissed
@@ -315,7 +317,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           minimizedText={mockMinimizedText}
           startMinimized={true}
-        />
+        />,
       );
 
       const minimizedPopup = screen.getByRole('button', { name: /restore survey popup/i });
@@ -329,9 +331,7 @@ describe('NotificationPopup', () => {
     });
 
     it('does not focus when popup is minimized', () => {
-      const { rerender } = renderWithIntl(
-        <NotificationPopup shouldShow={() => true} message={mockMessage} />
-      );
+      const { rerender } = renderWithIntl(<NotificationPopup shouldShow={() => true} message={mockMessage} />);
 
       const closeButton = screen.getByLabelText('Minimize popup');
       fireEvent.click(closeButton);
@@ -341,7 +341,7 @@ describe('NotificationPopup', () => {
       rerender(
         <IntlProvider locale="en" defaultLocale="en">
           <NotificationPopup shouldShow={() => true} message={mockMessage} />
-        </IntlProvider>
+        </IntlProvider>,
       );
 
       expect(minimizedPopup).not.toHaveFocus();
@@ -386,7 +386,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           linkUrl={mockLinkUrl}
           linkText={<CustomLinkText />}
-        />
+        />,
       );
 
       expect(screen.getByText('Custom Link')).toBeInTheDocument();
@@ -407,7 +407,7 @@ describe('NotificationPopup', () => {
       rerender(
         <IntlProvider locale="en" defaultLocale="en">
           <NotificationPopup shouldShow={() => true} message={mockMessage} />
-        </IntlProvider>
+        </IntlProvider>,
       );
 
       // Should still be minimized
@@ -416,7 +416,7 @@ describe('NotificationPopup', () => {
 
     it('does not show popup when shouldShow becomes false', () => {
       const { rerender, container } = renderWithIntl(
-        <NotificationPopup shouldShow={() => true} message={mockMessage} />
+        <NotificationPopup shouldShow={() => true} message={mockMessage} />,
       );
 
       expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -425,7 +425,7 @@ describe('NotificationPopup', () => {
       rerender(
         <IntlProvider locale="en" defaultLocale="en">
           <NotificationPopup shouldShow={() => false} message={mockMessage} />
-        </IntlProvider>
+        </IntlProvider>,
       );
 
       expect(container.firstChild).toBeNull();
@@ -457,7 +457,7 @@ describe('NotificationPopup', () => {
 
     it('applies correct CSS classes to minimized popup', () => {
       const { container } = renderWithIntl(
-        <NotificationPopup shouldShow={() => true} message={mockMessage} startMinimized={true} />
+        <NotificationPopup shouldShow={() => true} message={mockMessage} startMinimized={true} />,
       );
 
       const minimizedContainer = container.querySelector('.notification-popup-minimized');
@@ -479,7 +479,7 @@ describe('NotificationPopup', () => {
           message={mockMessage}
           linkUrl={mockLinkUrl}
           linkText={mockLinkText}
-        />
+        />,
       );
 
       const link = screen.getByRole('link', { name: mockLinkText });

@@ -34,7 +34,8 @@ h2.question-label {
   font-size: 0.875rem;
 }
 
-.help-text, .MuiTypography-root.help-text  {
+.help-text,
+.MuiTypography-root.help-text {
   font-family: var(--font-body);
   font-size: 0.875rem;
   font-weight: 200;

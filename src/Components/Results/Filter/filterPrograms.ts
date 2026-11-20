@@ -1,7 +1,4 @@
-import {
-  calculatedCitizenshipFilters,
-  FilterState,
-} from './citizenshipFilterConfig';
+import { calculatedCitizenshipFilters, FilterState } from './citizenshipFilterConfig';
 import { FormData } from '../../../Types/FormData';
 import { Program } from '../../../Types/Results';
 import { programValue } from '../FormattedValue';
@@ -19,7 +16,7 @@ const clone = <T>(obj: T): T =>
  */
 function getActiveFilterNames(filterState: FilterState): string[] {
   const filters: string[] = [filterState.selectedCitizenship];
-  filterState.calculatedFilters.forEach(filter => filters.push(filter));
+  filterState.calculatedFilters.forEach((filter) => filters.push(filter));
   return filters;
 }
 
@@ -27,14 +24,10 @@ function getActiveFilterNames(filterState: FilterState): string[] {
  * Updates member eligibility based on calculated citizenship filters.
  * This modifies members who don't meet calculated filter conditions.
  */
-function updateMemberEligibilities(
-  programs: Program[],
-  formData: FormData,
-  filterState: FilterState
-): Program[] {
+function updateMemberEligibilities(programs: Program[], formData: FormData, filterState: FilterState): Program[] {
   const selectedCitizenship = filterState.selectedCitizenship;
 
-  return clone(programs).map(program => {
+  return clone(programs).map((program) => {
     // If program meets legal status with the selected citizenship, no need to check members
     const meetsBasicLegalStatus = program.legal_status_required.includes(selectedCitizenship);
 
@@ -79,10 +72,7 @@ function updateMemberEligibilities(
 /**
  * Checks if a program meets basic visibility requirements (ignoring exclusions)
  */
-function isProgramBasicallyVisible(
-  program: Program,
-  checkedFilterNames: string[]
-): boolean {
+function isProgramBasicallyVisible(program: Program, checkedFilterNames: string[]): boolean {
   return (
     program.legal_status_required.some((status) => checkedFilterNames.includes(status)) &&
     program.eligible &&
@@ -94,11 +84,7 @@ function isProgramBasicallyVisible(
 /**
  * Applies basic filtering to programs (legal status, eligibility, value, already_has)
  */
-function applyBasicFilters(
-  programs: Program[],
-  filterState: FilterState,
-  isAdminView: boolean
-): Program[] {
+function applyBasicFilters(programs: Program[], filterState: FilterState, isAdminView: boolean): Program[] {
   // Admin view shows all programs regardless of filters
   if (isAdminView) {
     return programs;
@@ -106,9 +92,7 @@ function applyBasicFilters(
 
   const activeFilterNames = getActiveFilterNames(filterState);
 
-  return programs.filter(program =>
-    isProgramBasicallyVisible(program, activeFilterNames)
-  );
+  return programs.filter((program) => isProgramBasicallyVisible(program, activeFilterNames));
 }
 
 /**
@@ -123,13 +107,13 @@ function applyProgramExclusions(programs: Program[], isAdminView: boolean): Prog
 
   // Build set of program IDs that should be excluded
   const excludedProgramIds = new Set<number>();
-  
+
   for (const program of programs) {
     // Skip if this program is already excluded
     if (excludedProgramIds.has(program.program_id)) {
       continue;
     }
-    
+
     // Mark programs excluded by this program for removal
     if (program.excludes_programs) {
       for (const excludedId of program.excludes_programs) {
@@ -137,17 +121,11 @@ function applyProgramExclusions(programs: Program[], isAdminView: boolean): Prog
       }
     }
   }
-  
-  return programs.filter(program => 
-    !excludedProgramIds.has(program.program_id)
-  );
+
+  return programs.filter((program) => !excludedProgramIds.has(program.program_id));
 }
 
-export default function filterProgramsGenerator(
-  formData: FormData,
-  filterState: FilterState,
-  isAdminView: boolean
-) {
+export default function filterProgramsGenerator(formData: FormData, filterState: FilterState, isAdminView: boolean) {
   return (programs: Program[]) => {
     // Step 1: Update member eligibility based on calculated filters
     const updatedPrograms = updateMemberEligibilities(programs, formData, filterState);

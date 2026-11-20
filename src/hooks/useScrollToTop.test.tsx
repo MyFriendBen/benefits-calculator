@@ -11,9 +11,7 @@ describe('useScrollToTop', () => {
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <MemoryRouter initialEntries={['/']}>
-      {children}
-    </MemoryRouter>
+    <MemoryRouter initialEntries={['/']}>{children}</MemoryRouter>
   );
 
   it('should scroll to top on mount', () => {

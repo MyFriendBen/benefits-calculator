@@ -95,7 +95,16 @@ const SessionRestoration = () => {
     } finally {
       setScreenLoading(false);
     }
-  }, [uuid, whiteLabel, location.search, location.hash, fetchScreen, handleSessionResponse, navigate, setScreenLoading]);
+  }, [
+    uuid,
+    whiteLabel,
+    location.search,
+    location.hash,
+    fetchScreen,
+    handleSessionResponse,
+    navigate,
+    setScreenLoading,
+  ]);
 
   useEffect(() => {
     // Reset the ref when UUID changes

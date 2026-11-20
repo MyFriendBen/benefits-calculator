@@ -106,7 +106,7 @@ describe('BasicInfoSection', () => {
     it('renders a select control for relationship', () => {
       render(<Wrapper isFirstMember={false} />);
       // MUI Select renders 2 comboboxes (month + relationship); both have aria-haspopup=listbox
-      const selects = screen.getAllByRole('button').filter(el => el.getAttribute('aria-haspopup') === 'listbox');
+      const selects = screen.getAllByRole('button').filter((el) => el.getAttribute('aria-haspopup') === 'listbox');
       expect(selects).toHaveLength(2);
     });
 

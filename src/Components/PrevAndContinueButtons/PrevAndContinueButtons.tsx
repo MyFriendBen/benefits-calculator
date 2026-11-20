@@ -13,7 +13,12 @@ type PrevAndContinueButtonsProps = {
   stepNameOverride?: string;
 };
 
-const PrevAndContinueButtons = ({ backNavigationFunction, disabled, continueVariant = 'outlined', stepNameOverride }: PrevAndContinueButtonsProps) => {
+const PrevAndContinueButtons = ({
+  backNavigationFunction,
+  disabled,
+  continueVariant = 'outlined',
+  stepNameOverride,
+}: PrevAndContinueButtonsProps) => {
   return (
     <div className="question-buttons">
       <PreviousButton navFunction={backNavigationFunction} stepNameOverride={stepNameOverride} />

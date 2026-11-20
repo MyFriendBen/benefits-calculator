@@ -34,7 +34,7 @@ function validateCustomDomains(): void {
     if (!(ALL_VALID_WHITE_LABELS as readonly string[]).includes(config.whiteLabel)) {
       console.error(
         `[customDomains] Invalid white label "${config.whiteLabel}" for domain "${domain}". ` +
-          `Valid white labels: ${ALL_VALID_WHITE_LABELS.join(', ')}`
+          `Valid white labels: ${ALL_VALID_WHITE_LABELS.join(', ')}`,
       );
     }
   });
