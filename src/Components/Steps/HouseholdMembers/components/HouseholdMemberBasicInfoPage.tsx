@@ -144,6 +144,15 @@ const HouseholdMemberBasicInfoPage = () => {
       });
     });
 
+    // Rows without a frontendId are members added on this visit. Remember them, alongside any
+    // added on an earlier visit and not since deleted, so the edit can route through their forms.
+    const newMemberIds = updatedHouseholdData
+      .filter((_, index) => !members[index].frontendId)
+      .map((member) => member.frontendId as string);
+    const addedMemberIds = [...(locationState?.addedMemberIds ?? []), ...newMemberIds].filter((id) =>
+      updatedHouseholdData.some((member) => member.frontendId === id),
+    );
+
     await updateScreen({
       ...formData,
       householdSize: members.length,
@@ -186,6 +195,7 @@ const HouseholdMemberBasicInfoPage = () => {
               }),
             // Restore the Confirmation origin so Continue returns there, not to the next member.
             ...(locationState?.returnToConfirmation && { routedFromConfirmationPg: true }),
+            ...(addedMemberIds.length > 0 && { addedMemberIds }),
           }
         : {};
 
