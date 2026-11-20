@@ -53,7 +53,8 @@ export const Zipcode = () => {
       ),
     )
     .trim()
-    .regex(numberMustBeFiveDigitsLongRegex)
+    // zod 4 does not apply the schema-level message to chained checks, so the regex carries it too
+    .regex(numberMustBeFiveDigitsLongRegex, errorMessage)
     .refine((data) => data in countiesByZipcode, { message: errorMessage, params: { code: 'out_of_area' } }); // refine does not use the error map
 
   const formSchema = z

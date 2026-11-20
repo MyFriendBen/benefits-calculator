@@ -2,7 +2,7 @@ import { useContext, useEffect, useState, useMemo } from 'react';
 import { HEAD_OF_HOUSEHOLD } from '../../../../Assets/relationships';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useFieldArray, SubmitHandler } from 'react-hook-form';
+import { Control, useFieldArray, SubmitHandler } from 'react-hook-form';
 import { Box, Typography, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
@@ -272,7 +272,8 @@ const HouseholdMemberBasicInfoPage = () => {
 
                 <Box sx={BASIC_INFO_GRID_STYLES}>
                   <BasicInfoFields
-                    control={control}
+                    // BasicInfoFields takes Control<any>; react-hook-form's typed Control is not assignable to it
+                    control={control as unknown as Control<any>}
                     namePrefix={`members.${index}`}
                     birthMonthError={memberErrors?.birthMonth}
                     birthYearError={memberErrors?.birthYear}

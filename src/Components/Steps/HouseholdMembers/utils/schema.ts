@@ -249,10 +249,7 @@ export const createHouseholdMemberSchema = (intl: IntlShape, pageNumber: number)
         .min(1, { message: renderMissingBirthMonthHelperText(intl) })
         .max(12, { message: renderMissingBirthMonthHelperText(intl) }),
       birthYear: z
-        .number({
-          invalid_type_error: renderBirthYearHelperText(intl),
-          required_error: renderBirthYearHelperText(intl),
-        })
+        .number({ error: () => renderBirthYearHelperText(intl) })
         .int()
         .min(1, { message: renderBirthYearHelperText(intl) })
         .min(new Date().getFullYear() - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
@@ -326,10 +323,7 @@ export const createBasicInfoPageSchema = (intl: IntlShape) => {
         .min(1, { message: renderMissingBirthMonthHelperText(intl) })
         .max(12, { message: renderMissingBirthMonthHelperText(intl) }),
       birthYear: z
-        .number({
-          invalid_type_error: renderBirthYearHelperText(intl),
-          required_error: renderBirthYearHelperText(intl),
-        })
+        .number({ error: () => renderBirthYearHelperText(intl) })
         .int()
         .min(1, { message: renderBirthYearHelperText(intl) })
         .min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })
@@ -384,10 +378,7 @@ export const createEnergyCalculatorHouseholdMemberSchema = (
         .min(1, { message: renderMissingBirthMonthHelperText(intl) })
         .max(12, { message: renderMissingBirthMonthHelperText(intl) }),
       birthYear: z
-        .number({
-          invalid_type_error: renderBirthYearHelperText(intl),
-          required_error: renderBirthYearHelperText(intl),
-        })
+        .number({ error: () => renderBirthYearHelperText(intl) })
         .int()
         .min(1, { message: renderBirthYearHelperText(intl) })
         .min(CURRENT_YEAR - MAX_AGE + 1, { message: renderInvalidBirthYearHelperText(intl) })

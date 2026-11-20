@@ -31,21 +31,18 @@ const HouseholdSize = () => {
   const { updateScreen } = useScreenApi();
   const track = useTrackEvent();
 
+  const householdSizeErrorMessage = intl.formatMessage({
+    id: 'errorMessage-numberOfHHMembers',
+    defaultMessage: 'Please enter the number of people in your household (max. 8)',
+  });
+
+  // The message goes on each check as well as the type: zod 4 does not carry it from the schema to chained checks.
   const formSchema = z.object({
     householdSize: z
-      .number({
-        errorMap: () => {
-          return {
-            message: intl.formatMessage({
-              id: 'errorMessage-numberOfHHMembers',
-              defaultMessage: 'Please enter the number of people in your household (max. 8)',
-            }),
-          };
-        },
-      })
-      .int()
-      .positive()
-      .lte(8),
+      .number({ error: () => householdSizeErrorMessage })
+      .int(householdSizeErrorMessage)
+      .positive(householdSizeErrorMessage)
+      .lte(8, householdSizeErrorMessage),
   });
 
   type FormSchema = z.infer<typeof formSchema>;

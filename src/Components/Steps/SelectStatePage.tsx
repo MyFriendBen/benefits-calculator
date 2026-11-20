@@ -42,14 +42,11 @@ const SelectStatePage = () => {
 
   const { formatMessage } = useIntl();
 
+  const stateErrorMessage = formatMessage({ id: 'stateStep.error', defaultMessage: 'Please select a state' });
+
+  // The message goes on the check as well as the type: zod 4 does not carry it from the schema to chained checks.
   const formSchema = z.object({
-    state: z
-      .string({
-        errorMap: () => {
-          return { message: formatMessage({ id: 'stateStep.error', defaultMessage: 'Please select a state' }) };
-        },
-      })
-      .min(1),
+    state: z.string({ error: () => stateErrorMessage }).min(1, stateErrorMessage),
   });
 
   type FormSchema = z.infer<typeof formSchema>;

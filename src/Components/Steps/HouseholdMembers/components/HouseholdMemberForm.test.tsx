@@ -155,7 +155,7 @@ const renderForm = (householdSize: number, page: number, locationState: Record<s
       <Context.Provider value={contextValue}>
         <MemoryRouter initialEntries={[{ pathname: `/co/test-uuid/step-5/${page}`, state: locationState }]}>
           <Routes>
-            <Route path="/:whiteLabel/:uuid/step-:stepId/:page" element={<HouseholdMemberForm />} />
+            <Route path="/:whiteLabel/:uuid/:stepSegment/:page" element={<HouseholdMemberForm />} />
           </Routes>
         </MemoryRouter>
       </Context.Provider>

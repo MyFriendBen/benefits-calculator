@@ -5,7 +5,18 @@ import Disclaimer from '../Components/Steps/Disclaimer/Disclaimer';
 import HouseholdMemberRouter from '../Components/Steps/HouseholdMembers/components/HouseholdMemberRouter';
 import QuestionComponentContainer from '../Components/QuestionComponentContainer/QuestionComponentContainer';
 import Confirmation from '../Components/Confirmation/Confirmation';
+import { useStepId } from '../Components/RouterUtil/useStepId';
 import resultsRoutes from './results';
+
+// Matches any single segment so the questionnaire's `step-<id>` URLs reach the container.
+// A segment that isn't a `step-<id>` falls back to step 1, like the catch-all below.
+const StepRoute = () => {
+  const stepId = useStepId();
+  if (stepId === undefined) {
+    return <Navigate to="../step-1" replace />;
+  }
+  return <QuestionComponentContainer key={window.location.href} />;
+};
 
 interface UUIDScopedRoutesOptions {
   householdMemberStepNumber: number;
@@ -37,7 +48,7 @@ export const buildUUIDScopedRoute = ({ householdMemberStepNumber }: UUIDScopedRo
   // QuestionComponentContainer validates step number internally
   // TODO(MFB-642): Evaluate if key remounting is needed here or if component handles param changes
   children.push(
-    { path: 'step-:id', element: <QuestionComponentContainer key={window.location.href} /> },
+    { path: ':stepSegment', element: <StepRoute /> },
     { path: 'confirm-information', element: <Confirmation /> },
     ...resultsRoutes,
     { path: '*', element: <Navigate to="step-1" replace /> },

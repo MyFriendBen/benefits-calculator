@@ -61,7 +61,7 @@ const renderHouseholdSize = (householdSize = 1) => {
       <Context.Provider value={contextValue}>
         <MemoryRouter initialEntries={['/co/test-uuid/step-4']}>
           <Routes>
-            <Route path="/:whiteLabel/:uuid/step-:id" element={<HouseholdSize />} />
+            <Route path="/:whiteLabel/:uuid/:stepSegment" element={<HouseholdSize />} />
           </Routes>
         </MemoryRouter>
       </Context.Provider>

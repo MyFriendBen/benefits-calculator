@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useParams, Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { Zipcode } from '../Steps/Zipcode';
 import Expenses from '../Steps/Expenses/Expenses';
 import HouseholdSize from '../Steps/HouseholdSize/HouseholdSize';
@@ -17,6 +17,7 @@ import Appliances from '../EnergyCalculator/Steps/Appliances';
 import Utilities from '../EnergyCalculator/Steps/Utilities';
 import './QuestionComponentContainer.css';
 import { usePageTitle } from '../Common/usePageTitle';
+import { useStepId } from '../RouterUtil/useStepId';
 import { useTrackEvent } from '../../Assets/analytics';
 import { STEP_ANALYTICS_ID_BY_QUESTION_NAME } from '../../Assets/analytics/stepIds';
 
@@ -56,7 +57,7 @@ const STEP_ID_BY_QUESTION_NAME: Record<string, { stepId: string; Component: Reac
 
 const QuestionComponentContainer = () => {
   // ALL HOOKS MUST BE CALLED FIRST - before any conditional returns
-  let { id } = useParams();
+  const id = useStepId();
   const location = useLocation();
   const stepDirectory = useStepDirectory();
   const track = useTrackEvent();
