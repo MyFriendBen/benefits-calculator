@@ -58,7 +58,7 @@ const MAIN_CONDITIONS: ConditionEntry[] = [
     isActive: (m) => m.conditions.longTermDisability,
     id: 'confirmation.longTermDisability',
     defaultMessage:
-      'Has a medical or developmental condition that has lasted, or is expected to last, 12 months or more and limits work or daily activities',
+      'Has a medical or developmental condition lasting 12 months or more that limits work or daily activities',
   },
   { isActive: (m) => m.conditions.fosterCare, id: 'confirmation.fosterCare', defaultMessage: 'Ever in foster care' },
 ];
